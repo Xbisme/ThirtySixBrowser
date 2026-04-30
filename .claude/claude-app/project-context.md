@@ -251,7 +251,49 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 
 ## Key Decisions Log
 
-> *Sẽ điền sau khi bắt đầu Spec 001 và phát hiện các quyết định cần ghi nhớ.*
+### 2026-05-01 — Spec 001 hoàn tất
+
+**Versions chốt** (verified `central.sonatype.com` + `developer.android.com` 2026-04-30, refined 2026-05-01):
+
+- **AGP 9.1.1** — pinned vào 9.1.x range vì Android Studio chưa support 9.2.0. Re-evaluate khi IDE update.
+- **Kotlin 2.3.21** — bundle Compose Compiler plugin (matches version).
+- **Gradle wrapper 9.5.0** — `distributionUrl=gradle-9.5.0-bin.zip` (note: lookup phải dùng path `9.5.0` không phải `9.5`).
+- **Compose BOM 2026.04.01** — resolves Compose UI 1.11.0 + Material3 1.4.0; KHÔNG pin individual Compose versions.
+- **Detekt 1.23.8 / ktlint plugin 14.2.0** — Detekt CV-05 risk (built against Kotlin 2.0.21) chưa surface vấn đề thực tế trong template code.
+
+**JDK requirements**:
+
+- Launcher: **JDK 17+** (AGP 9.x daemon requirement).
+- Compile target: JDK 11 via Gradle Toolchain (auto-provision).
+- Local dev: dùng `JAVA_HOME=/Applications/Android Studio.app/Contents/jbr/Contents/Home` (JBR JDK 21) hoặc bất kỳ JDK ≥ 17 nào.
+
+**Signing**:
+
+- Constitution v1.2.0 §XI two-scope rule: distribution = release keystore (chưa có), dev = debug keystore fallback với warning mandatory.
+- Implementation: `app/build.gradle.kts` đọc `KEYSTORE_PATH/PASSWORD/ALIAS/KEY_PASSWORD` từ `local.properties` hoặc env vars; nếu thiếu → fallback `signingConfigs.debug` + `println` warning.
+
+**Static analysis disable list** (documented):
+
+- Lint: `OldTargetApi`, `GradleDependency`, `AndroidGradlePluginVersion` — AGP 9.x DSL false positives.
+- ktlint: `function-naming` (Compose PascalCase) via `@file:Suppress` per file + `.editorconfig` safety net.
+- Detekt baseline: `app/detekt-baseline.xml` accepts 9 template-only violations (3 FunctionNaming + 6 MagicNumber on theme colors). Spec 003 sẽ rewrite những file này, baseline sẽ được clear.
+
+**16KB readiness verified**:
+
+- Compose ships native lib `libandroidx.graphics.path.so` cho 4 ABIs (arm64-v8a, armeabi-v7a, x86, x86_64) — TẤT CẢ aligned 0x4000 (16KB) ✅.
+- Gradle property `android.bundle.enableUncompressedNativeLibs` đã removed (deprecated in AGP 8.1+, default true).
+- CI script `.specify/scripts/bash/verify-16kb-alignment.sh` đã active strict mode (không phải fail-soft skeleton nữa).
+
+**CI structure** (6 jobs):
+
+- build (assembleDebug)
+- unit-test (testDebugUnitTest)
+- lint (lintDebug)
+- static-analysis (detekt + ktlintCheck)
+- verify-16kb (assembleRelease + 16KB script)
+- instrumented-test (`if: false` đến Spec 007/011)
+
+**Source migration**: `app/src/{main,test,androidTest}/java/` → `kotlin/` qua `git mv` (preserve history). Theme name `ThirdtySixBrowserTheme` (typo từ template) tạm giữ — sẽ rename ở Spec 003 khi rewrite theme.
 
 ---
 

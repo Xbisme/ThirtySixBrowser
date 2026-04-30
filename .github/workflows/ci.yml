@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 17 (Gradle launcher; Toolchain auto-provisions JDK 11 for compile)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -46,7 +46,6 @@ jobs:
       - run: chmod +x ./gradlew
 
       - name: Assemble debug
-        # Add `assembleRelease` once a release signing config is set up
         run: ./gradlew assembleDebug --build-cache --stacktrace
 
       - name: Upload APKs
@@ -73,7 +72,6 @@ jobs:
       - run: chmod +x ./gradlew
 
       - name: Run unit tests (debug)
-        # Add `testReleaseUnitTest` once a release signing config is set up
         run: ./gradlew testDebugUnitTest --build-cache --stacktrace
 
       - name: Upload test report
@@ -111,7 +109,6 @@ jobs:
       - run: chmod +x ./gradlew
 
       - name: Run Android Lint (debug)
-        # Switch to `lint` (runs all variants) once a release signing config is set up
         run: ./gradlew lintDebug --build-cache --stacktrace
 
       - name: Upload lint reports
@@ -125,11 +122,62 @@ jobs:
             app/build/reports/lint-results-*.sarif
           if-no-files-found: ignore
 
+  static-analysis:
+    name: Static analysis (Detekt + ktlint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - run: chmod +x ./gradlew
+
+      - name: Detekt
+        run: ./gradlew detekt --build-cache --stacktrace
+
+      - name: ktlintCheck
+        run: ./gradlew ktlintCheck --build-cache --stacktrace
+
+      - name: Upload static-analysis reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-analysis-report
+          path: |
+            app/build/reports/detekt/
+            app/build/reports/ktlint/
+          if-no-files-found: ignore
+
+  verify-16kb:
+    name: Verify 16KB native-lib alignment (fail-soft when no .so)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - run: chmod +x ./gradlew .specify/scripts/bash/verify-16kb-alignment.sh
+
+      - name: Assemble release (debug-signed fallback per Constitution §XI v1.2.0)
+        run: ./gradlew assembleRelease --build-cache --stacktrace
+
+      - name: Verify 16KB alignment (Constitution §IX, FR-016)
+        run: .specify/scripts/bash/verify-16kb-alignment.sh app/build/outputs/apk/release/app-release.apk
+
   instrumented-test:
     name: Instrumented tests (emulator)
-    # Disabled until a real UI test exists (Spec 007 webview-compose-wrapper or 011 tabs-management).
-    # Currently only the default ExampleInstrumentedTest exists — not worth the emulator boot cost.
-    # To re-enable: change `if: false` to `if: true` (or remove the line).
+    # Re-enable at Spec 007 (webview-compose-wrapper) or Spec 011 (tabs-management)
+    # when first real UI test is added (FR-023).
     if: false
     runs-on: ubuntu-latest
     timeout-minutes: 20

@@ -1,7 +1,7 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
-> Cập nhật lần cuối: 2026-04-30
-> v1.0: Android Native Browser — 🚧 Pre-Spec 001
+> Cập nhật lần cuối: 2026-05-01
+> v1.0: Android Native Browser — ✅ Spec 001 done, ready for Spec 002
 
 ## Nguyên tắc Roadmap
 
@@ -59,8 +59,8 @@ Constitution
 
 | # | Tên | User Story chính | Test được gì? | Dependencies | Status |
 |---|-----|-----------------|---------------|-------------|--------|
-| — | Constitution | Nguyên tắc nền tảng | — | — | 🚧 Drafting |
-| 001 | `project-init-build-config` | Setup Gradle Kotlin DSL + version catalog + 16KB-ready | `./gradlew assembleDebug` pass, lint clean, `.so` align 16KB | Constitution | ⬜ |
+| — | Constitution | Nguyên tắc nền tảng v1.2.0 (signing two-scope rule) | — | — | ✅ Done 2026-05-01 |
+| 001 | `project-init-build-config` | Setup Gradle Kotlin DSL + version catalog + 16KB-ready | `./gradlew assembleDebug` pass, lint clean, `.so` align 16KB | Constitution | ✅ Done 2026-05-01 |
 | 002 | `clean-architecture-skeleton-di` | Module structure + Hilt + base classes | App build + Hilt graph valid | 001 | ⬜ |
 | 003 | `theme-typography-darkmode` | Material3 + light/dark/system | Toggle theme → app re-compose đúng | 002 | ⬜ |
 | 004 | `localization-multi-language` | 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR) | Đổi locale → string thay đổi | 002 | ⬜ |
