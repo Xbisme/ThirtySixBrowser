@@ -268,7 +268,14 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 > Section này sẽ được điền khi từng spec phát hiện edge case / quyết định non-obvious cần ghi nhớ. Hiện chưa có entry vì project chưa start spec.
 
+## Pending CI / Tooling Tasks
+
+| Task | Trigger | Action |
+|------|---------|--------|
+| Re-enable `instrumented-test` job in `.github/workflows/ci.yml` | Khi bắt đầu **Spec 007** (`webview-compose-wrapper`) hoặc **Spec 011** (`tabs-management`) — spec đầu tiên có UI test thực sự cần emulator | Set `if: true` (hoặc xóa dòng `if: false`) trong job `instrumented-test`. Disabled 2026-04-30 vì `reactivecircus/android-emulator-runner@v2` hang trên default trivial test. |
+
 ## Recent Changes
 
+- 2026-04-30: CI — disabled `instrumented-test` job until real UI test exists (avoid emulator hang on shutdown). Added explicit `adb emu kill` + `pkill` workaround in workflow for when re-enabled.
 - 2026-04-30: Constitution v1.1.0 ratified — Principle III expanded with No-Hardcode Rule (18-row category table + `core/constants/` layout + Detekt MagicNumber gate)
 - 2026-04-30: Project initialized — Constitution v1.0.0, meeting-note.md, project-context.md, sdd-roadmap.md, dev-workflow.md created

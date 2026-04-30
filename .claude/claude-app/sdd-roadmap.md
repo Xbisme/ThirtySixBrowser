@@ -66,7 +66,7 @@ Constitution
 | 004 | `localization-multi-language` | 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR) | Đổi locale → string thay đổi | 002 | ⬜ |
 | 005 | `room-database-schema` | Bookmark/History/Tab entities + DAOs | Insert/query test pass | 002 | ⬜ |
 | 006 | `datastore-settings` | DataStore Preferences cho settings | Read/write settings persist qua restart | 002 | ⬜ |
-| 007 | `webview-compose-wrapper` | `BrowserWebView` Composable | Load `https://example.com` → render | 005, 006 | ⬜ |
+| 007 | `webview-compose-wrapper` | `BrowserWebView` Composable | Load `https://example.com` → render | 005, 006 | ⬜ ⚠️ Re-enable `instrumented-test` job in `.github/workflows/ci.yml` (set `if: true`) — disabled 2026-04-30 because emulator-runner hung on the trivial default test |
 | 008 | `navigation-controls` | Back/Forward/Reload/Stop/Home + predictive back | Bấm back/forward → URL thay đổi | 007 | ⬜ |
 | 009 | `address-bar-omnibox` | TextField nhập URL/query + suggest | Nhập URL → load; nhập query → search | 008 | ⬜ |
 | 010 | `search-engine-google` | Build Google search URL | Nhập "android" → mở Google search | 009 | ⬜ |
