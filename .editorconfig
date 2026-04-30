@@ -1,0 +1,41 @@
+# EditorConfig — https://editorconfig.org/
+# Used by ktlint to govern Kotlin formatting (and IDEs that read editorconfig).
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+max_line_length = 140
+
+[*.{kt,kts}]
+ktlint_code_style = android_studio
+ktlint_standard_no-wildcard-imports = enabled
+ktlint_standard_filename = enabled
+
+# Allow trailing commas — Kotlin/Compose convention; cleaner diffs when adding params.
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+# function-signature rule: ktlint's default is overly strict for multi-line Compose
+# function signatures. Keep parameters indented 4 spaces (Compose standard) by relaxing.
+ktlint_standard_function-signature = disabled
+
+# function-naming: disabled here only as a safety net — actual Composables use
+# `@file:Suppress("ktlint:standard:function-naming")` because the ktlint version
+# in use (1.6 via plugin 14.2.0) does not honor `ignore_when_annotated_with` reliably.
+ktlint_standard_function-naming = disabled
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+max_line_length = off
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab

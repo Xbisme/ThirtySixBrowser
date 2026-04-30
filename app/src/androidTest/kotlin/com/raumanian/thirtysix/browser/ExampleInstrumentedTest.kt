@@ -1,12 +1,10 @@
 package com.raumanian.thirtysix.browser
 
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -17,8 +15,9 @@ import org.junit.Assert.*
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context of the app under test.
+        // The applicationId for debug build type carries the `.debug` suffix (FR-011);
+        // androidTest runs against the debug variant, so the package name reflects that.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.raumanian.thirtysix.browser", appContext.packageName)
+        assertEquals("com.raumanian.thirtysix.browser.debug", appContext.packageName)
     }
 }

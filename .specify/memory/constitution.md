@@ -5,12 +5,21 @@ SYNC IMPACT REPORT
 Version Change: (none) → 1.0.0 (INITIAL — project constitution created)
                 1.0.0 → 1.1.0 (MINOR — Principle III expanded with explicit
                                 No-Hardcode Rule + categorized constants table)
+                1.1.0 → 1.2.0 (MINOR — Principle XI signing rule scoped to
+                                "distribution" builds; debug-keystore fallback
+                                explicitly permitted for local dev/CI iteration
+                                with mandatory warning string)
 
 Modified Principles:
 - III. Code Quality & Safety — added "No-Hardcode Rule (NON-NEGOTIABLE)" subsection
        with 18-row category table mapping every literal type to its constants file,
        plus the Constants file organization layout under core/constants/ and code
        review enforcement guidance (grep red flags + Detekt MagicNumber rule).
+- XI. Build Configuration & Environment Separation — signing config rule split into
+       two scopes: (1) distribution builds MUST use a release keystore; (2) local
+       dev / CI iteration MAY fall back to the debug keystore when no release
+       keystore is configured, provided a mandatory warning is emitted and the
+       artifact is never uploaded to Play Store. Resolves Spec 001 Q2 clarification.
 
 Added Sections (v1.0.0 initial):
 - I.    Privacy & Security First: on-device only, no analytics, no account
@@ -33,7 +42,9 @@ Templates Requiring Updates:
 - .specify/templates/tasks-template.md ✅ compatible — phase structure unchanged
 
 Follow-up TODOs:
-- TODO(SIGNING): Generate release keystore + configure signing config in Spec 001
+- TODO(SIGNING): Configure signing config in Spec 001 ✅ DONE (FR-013, debug
+                 fallback active per v1.2.0 §XI). Generate real release keystore
+                 — DEFERRED until user supplies; debug-fallback continues until then.
 - TODO(PLAY_LISTING): Prepare Play Store listing assets (icon, screenshots, copy) before v1.0 release
 ================================================================================
 -->
@@ -437,12 +448,25 @@ value MUST be hardcoded.
 - API endpoints, default search engine URLs, and other configurable values MUST be
   defined in `BuildConfig` fields or `core/constants/` `object` — NEVER hardcoded
   in Composable/ViewModel code
-- Signing config: `release` MUST use a release keystore (NOT debug keystore); keystore
-  password MUST be loaded from `local.properties` or environment variable, NEVER
-  committed to git
+- Signing config — two scopes:
+  - **Distribution builds** (Play Store upload, public release, any artifact shipped
+    to end users): `release` build type MUST use a release keystore loaded via
+    `local.properties` or environment variable. The release keystore file and
+    credentials MUST NEVER be committed to git.
+  - **Local dev / CI iteration** (when no release keystore is configured):
+    `assembleRelease` MAY fall back to the debug keystore (`~/.android/debug.keystore`)
+    so developers can verify R8/minify/proguard end-to-end without first generating a
+    release keystore. The fallback MUST:
+    1. emit a build-log warning containing the literal substring
+       `"release built with DEBUG signature — NOT for distribution"`,
+    2. activate ONLY when neither `local.properties` nor environment variables provide
+       release keystore credentials,
+    3. produce artifacts that MUST NOT be uploaded to Play Store under any circumstance.
+  - When release keystore credentials are present (via either source), the build MUST
+    automatically switch to the release keystore — no script changes required.
 - ProGuard / R8 MUST be enabled for `release` (`isMinifyEnabled = true` and
-  `isShrinkResources = true`) — Spec 001 may start with R8 disabled and enable in
-  Spec 016 or earlier
+  `isShrinkResources = true`) — Spec 001 enables R8 from the start (stricter than the
+  earlier "may start disabled" allowance, intentional baseline)
 - Java target: 11 (matches existing scaffold)
 - Kotlin JVM target: 11
 
@@ -578,4 +602,4 @@ All implementation decisions MUST align with these principles.
   red 16KB CI gate
 - Constitution supersedes all other practices; in case of conflict, the constitution wins
 
-**Version**: 1.1.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-04-30
+**Version**: 1.2.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-05-01

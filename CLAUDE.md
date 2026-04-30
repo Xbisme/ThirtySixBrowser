@@ -276,6 +276,23 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Recent Changes
 
+- 2026-05-01: ✅ **Spec 001 done** — version catalog wired (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01); java/→kotlin/ source migrated; Detekt + ktlint + Lint strict (with documented disable list for AGP-9.x lint false-positives); debug-signed release fallback per Constitution v1.2.0; CI 6-job pipeline (build/unit-test/lint/static-analysis/verify-16kb) + 16KB-verify script (already detecting native lib `libandroidx.graphics.path.so` and confirming 16KB alignment). AGP held at 9.1.1 instead of 9.2.0 for Android Studio compat.
+- 2026-05-01: Constitution v1.2.0 amended — Principle XI signing rule split into two scopes (distribution builds MUST use release keystore; local dev/CI MAY fall back to debug keystore with mandatory warning). Triggered by Spec 001 Q2 clarification.
 - 2026-04-30: CI — disabled `instrumented-test` job until real UI test exists (avoid emulator hang on shutdown). Added explicit `adb emu kill` + `pkill` workaround in workflow for when re-enabled.
 - 2026-04-30: Constitution v1.1.0 ratified — Principle III expanded with No-Hardcode Rule (18-row category table + `core/constants/` layout + Detekt MagicNumber gate)
 - 2026-04-30: Project initialized — Constitution v1.0.0, meeting-note.md, project-context.md, sdd-roadmap.md, dev-workflow.md created
+
+<!-- SPECKIT START -->
+
+## Active Spec
+
+**Current**: [Spec 001 — Project Init & Build Config](specs/001-project-init-build-config/plan.md) ✅ Implemented 2026-05-01
+
+- Branch: `001-project-init-build-config`
+- Status: 🟢 Implemented — all 6 acceptance Gradle tasks pass + 16KB script active
+- Key version pins (verified 2026-04-30, revised 2026-05-01 for IDE compat — see [research.md](specs/001-project-init-build-config/research.md)):
+  - AGP 9.1.1 (NOT 9.2.0 — Android Studio doesn't support 9.2 yet) / Gradle 9.5.0 / Kotlin 2.3.21 / Compose BOM 2026.04.01
+  - Detekt 1.23.8 (compat risk with Kotlin 2.3 — track CV-05) / ktlint plugin 14.2.0
+  - Java target 11 via Toolchain; **launcher JDK 17+ required by AGP 9.x**
+
+<!-- SPECKIT END -->
