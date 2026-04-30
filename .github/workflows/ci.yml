@@ -46,6 +46,7 @@ jobs:
       - run: chmod +x ./gradlew
 
       - name: Assemble debug
+        # Add `assembleRelease` once a release signing config is set up
         run: ./gradlew assembleDebug --build-cache --stacktrace
 
       - name: Upload APKs
@@ -72,6 +73,7 @@ jobs:
       - run: chmod +x ./gradlew
 
       - name: Run unit tests (debug)
+        # Add `testReleaseUnitTest` once a release signing config is set up
         run: ./gradlew testDebugUnitTest --build-cache --stacktrace
 
       - name: Upload test report
@@ -109,6 +111,7 @@ jobs:
       - run: chmod +x ./gradlew
 
       - name: Run Android Lint (debug)
+        # Switch to `lint` (runs all variants) once a release signing config is set up
         run: ./gradlew lintDebug --build-cache --stacktrace
 
       - name: Upload lint reports
