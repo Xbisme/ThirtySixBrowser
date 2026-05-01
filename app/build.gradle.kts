@@ -83,6 +83,16 @@ android {
         compose = true
     }
 
+    // Spec 005 — Robolectric requires merged Android resources to be visible to
+    // unit tests so it can resolve manifest + res/ for Application context. The
+    // flag is non-deprecated (Robolectric 4.16.1) and required by every Room
+    // DAO test that calls ApplicationProvider.getApplicationContext().
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     // Constitution §III + Q4 clarification: Lint strict for ALL build types.
     // No `lint-baseline.xml` — fix issues directly. (Different from Detekt baseline policy.)
     lint {
@@ -113,6 +123,14 @@ android {
             "ExtraTranslation",
         )
     }
+}
+
+// --- Room schema export (Spec 005 FR-010) ------------------------------------
+// Schema JSON snapshots written to app/schemas/ on every build; tracked in git
+// (NOT .gitignored) so reviewers can audit schema evolution at PR time and
+// future migrations can diff against the prior version.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 // --- Detekt (Constitution §III No-Hardcode Rule, FR-018) ---------------------
@@ -163,8 +181,18 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
 
+    // Spec 005 — Room persistence layer. Pure Kotlin/Java (no .so); ksp processor
+    // artifact ID is `room-compiler` (works for both kapt and ksp wiring).
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.room.testing)
+    testImplementation(libs.app.cash.turbine)
+    testImplementation(libs.androidx.junit)
+    testImplementation(libs.robolectric)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

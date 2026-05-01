@@ -1,7 +1,7 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
 > Cập nhật lần cuối: 2026-05-01
-> v1.0: Android Native Browser — ✅ Specs 001 + 002 + 003 + 004 done, ready for Specs 005 + 006 (parallel-available, both unblock Phase 2 Spec 007)
+> v1.0: Android Native Browser — ✅ Specs 001–005 done. Spec 006 next (last Phase 1) before Phase 2 Spec 007.
 
 ## Nguyên tắc Roadmap
 
@@ -64,8 +64,8 @@ Constitution
 | 002 | `clean-architecture-skeleton-di` | Module structure + Hilt + base classes | App build + Hilt graph valid | 001 | ✅ Done 2026-05-01 |
 | 003 | `theme-typography-darkmode` | Material3 + light/dark/system | Toggle theme → app re-compose đúng | 002 | ✅ Done 2026-05-01 |
 | 004 | `localization-multi-language` | 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR) | Đổi locale → string thay đổi | 002 | ✅ Done 2026-05-01 |
-| 005 | `room-database-schema` | Bookmark/History/Tab entities + DAOs | Insert/query test pass | 002 | ⬜ Next |
-| 006 | `datastore-settings` | DataStore Preferences cho settings | Read/write settings persist qua restart | 002 | ⬜ |
+| 005 | `room-database-schema` | Bookmark/BookmarkFolder/History/Tab entities + DAOs + WAL + DB excluded from backup | Insert/query/observer + FK orphan-to-root + WAL concurrency tests pass | 002 | ✅ Done 2026-05-01 |
+| 006 | `datastore-settings` | DataStore Preferences cho settings | Read/write settings persist qua restart | 002 | ⬜ Next |
 | 007 | `webview-compose-wrapper` | `BrowserWebView` Composable | Load `https://example.com` → render | 005, 006 | ⬜ ⚠️ Re-enable `instrumented-test` job in `.github/workflows/ci.yml` (set `if: true`) — disabled 2026-04-30 because emulator-runner hung on the trivial default test |
 | 008 | `navigation-controls` | Back/Forward/Reload/Stop/Home + predictive back | Bấm back/forward → URL thay đổi | 007 | ⬜ |
 | 009 | `address-bar-omnibox` | TextField nhập URL/query + suggest | Nhập URL → load; nhập query → search | 008 | ⬜ |
