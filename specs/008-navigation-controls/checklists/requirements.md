@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,7 +31,11 @@
 
 ## Notes
 
-- One open `[NEEDS CLARIFICATION]` marker on FR-018 (bottom-bar placement / layout / persistence). User explicitly requested this be deferred to `/speckit-clarify`. Resolve before `/speckit-plan`.
+- All `[NEEDS CLARIFICATION]` markers resolved 2026-05-01 via `/speckit-clarify` (3 questions; see `## Clarifications` section in [spec.md](../spec.md)).
+  - FR-018 bottom-bar visibility → always visible, fixed at bottom.
+  - FR-016 default home URL value → `https://www.google.com/`.
+  - FR-013 bottom-bar item order → Back · Forward · Reload/Stop · Home.
+- Compose-component selection (`BottomAppBar` vs `NavigationBar` vs custom `Row`) intentionally deferred to `/speckit-plan` — implementation decision, not user-value.
 - Spec assumes single active tab; multi-tab interaction (e.g., back-closes-tab) deferred to Spec 011/012.
 - Hard-reload (cache-bypass) variant deferred — only normal reload in v1.0.
 - Long-press history dropdowns on Back/Forward deferred.

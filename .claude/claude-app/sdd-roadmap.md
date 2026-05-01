@@ -1,7 +1,7 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
 > Cập nhật lần cuối: 2026-05-01
-> v1.0: Android Native Browser — ✅ Specs 001–007 done (T042 user-gate verified). 🔄 Spec 008 specified, awaiting `/speckit-clarify`.
+> v1.0: Android Native Browser — ✅ Specs 001–008 implemented. Phase 1 6/6 + Phase 2 2/6 done.
 
 ## Nguyên tắc Roadmap
 
@@ -67,7 +67,7 @@ Constitution
 | 005 | `room-database-schema` | Bookmark/BookmarkFolder/History/Tab entities + DAOs + WAL + DB excluded from backup | Insert/query/observer + FK orphan-to-root + WAL concurrency tests pass | 002 | ✅ Done 2026-05-01 |
 | 006 | `datastore-settings` | DataStore Preferences cho settings | Read/write settings persist qua restart | 002 | ✅ Done 2026-05-01 |
 | 007 | `webview-compose-wrapper` | `BrowserWebView` Composable + `LinearProgressIndicator` + localized error UI | Load `https://example.com` → render; throttled-load shows top progress bar; airplane-mode shows localized error | 005, 006 | ✅ Done 2026-05-01 — instrumented-test CI job re-enabled; Espresso-Web + Hilt URL injection wired; **T042 manual UX gate verified on device 2026-05-01** |
-| 008 | `navigation-controls` | Back/Forward/Reload/Stop/Home + predictive back | Bấm back/forward → URL thay đổi; system back gesture honor history; predictive preview Android 14+ | 007 | 🔄 Specified 2026-05-01 — 1 open `[NEEDS CLARIFICATION]` (FR-018 bottom-bar UI), awaiting `/speckit-clarify` |
+| 008 | `navigation-controls` | Back/Forward/Reload/Stop/Home + predictive back | Bấm back/forward → URL thay đổi; system back gesture honor history; predictive preview Android 14+ | 007 | ✅ Implemented 2026-05-01 — 41/51 tasks; 102/102 unit tests pass; APK 1.67 MB; 16KB green; 4 instrumented integration tests + 3 manual gates deferred (mirrors Spec 007 T042 pattern) |
 | 009 | `address-bar-omnibox` | TextField nhập URL/query + suggest | Nhập URL → load; nhập query → search | 008 | ⬜ |
 | 010 | `search-engine-google` | Build Google search URL | Nhập "android" → mở Google search | 009 | ⬜ |
 | 011 | `tabs-management` | Multi-tab grid switcher + persist | Tạo/đóng/chuyển 3 tabs, kill app, mở lại còn nguyên | 007 | ⬜ |

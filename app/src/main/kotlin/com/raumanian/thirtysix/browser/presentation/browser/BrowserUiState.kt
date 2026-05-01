@@ -5,8 +5,15 @@ package com.raumanian.thirtysix.browser.presentation.browser
  *
  * Constructed inside [BrowserViewModel] from the Hilt-injected
  * `@Named("default_home_url")` String — production binding lives in
- * [com.raumanian.thirtysix.browser.di.UrlConfigModule]; instrumented tests swap
- * it via `@TestInstallIn` to drive the offline-error scenario (T036a + T036).
+ * [com.raumanian.thirtysix.browser.di.UrlConfigModule]; instrumented tests
+ * construct the ViewModel directly with an explicit URL parameter (mirrors
+ * `BrowserScreenOfflineErrorTest` pattern; see `BrowserScreenInstrumentedTest`).
+ *
+ * Spec 008 adds [canGoBack] / [canGoForward] derived from
+ * `WebView.canGoBack() / canGoForward()` and recomputed inside
+ * `WebViewClient.doUpdateVisitedHistory(...)` callbacks. Both default to
+ * `false` so existing call sites that omit them continue to compile (binary
+ * source compatibility for tests written before Spec 008).
  *
  * No `DEFAULT` companion exists by design: different injected URLs produce
  * different initial states, and a hard-coded const default would obscure that.
@@ -14,4 +21,6 @@ package com.raumanian.thirtysix.browser.presentation.browser
 data class BrowserUiState(
     val currentUrl: String,
     val loadingState: LoadingState,
+    val canGoBack: Boolean = false,
+    val canGoForward: Boolean = false,
 )

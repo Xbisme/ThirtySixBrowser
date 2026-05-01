@@ -29,6 +29,14 @@ import org.junit.runner.RunWith
  * - T021b asserts SC-004: configuration change preserves `currentUrl` in
  *   `BrowserUiState` (no URL revert across activity recreation).
  *
+ * Spec 008 (T023a) — decoupled from the production [UrlConstants.DEFAULT_HOME_URL]
+ * value. Spec 008 changes that constant from `https://example.com` →
+ * `https://www.google.com/`; this test continues to assert against the
+ * `<h1>Example Domain</h1>` DOM element by constructing a [BrowserViewModel]
+ * directly with the literal `https://example.com` URL (mirrors
+ * `BrowserScreenOfflineErrorTest` which uses the same manual-VM-construction
+ * pattern instead of `@TestInstallIn`-based Hilt module replacement).
+ *
  * US2 / US3 extend this class with loading-indicator and offline-error tests
  * (T026, T036).
  */
@@ -42,11 +50,20 @@ class BrowserScreenInstrumentedTest {
     @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<HiltTestActivity>()
 
+    private lateinit var viewModel: BrowserViewModel
+
     @Before
     fun setUp() {
         hiltRule.inject()
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setContent { BrowserScreen() }
+            // Spec 008 (T023a) — manual VM construction with the literal
+            // example.com URL keeps assertions on `<h1>Example Domain</h1>`
+            // stable regardless of UrlConstants.DEFAULT_HOME_URL value
+            // (Spec 008 changed the production constant to Google). VM is
+            // class-scoped so the rotation test can re-attach it after
+            // activity recreate, preserving the same UiState.
+            viewModel = BrowserViewModel(defaultHomeUrl = TEST_PAGE_URL)
+            composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
     }
 
@@ -86,15 +103,16 @@ class BrowserScreenInstrumentedTest {
 
     @Test
     fun rotation_preservesCurrentUrlInUiState() {
-        // T021b — SC-004: simulate configuration change. ViewModelStore survives
-        // recreation, so the URL in BrowserUiState is preserved; the WebView
-        // re-renders the same URL successfully after activity recreation.
+        // T021b — SC-004: simulate configuration change. The same VM instance
+        // is re-attached after recreate (Spec 008 T023a refactor); its
+        // MutableStateFlow holds currentUrl, so the WebView re-renders the
+        // same URL successfully after activity recreation.
         composeRule.waitForIdle()
 
         composeRule.activityRule.scenario.recreate()
 
         composeRule.activity.runOnUiThread {
-            composeRule.activity.setContent { BrowserScreen() }
+            composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
         composeRule.waitForIdle()
 
@@ -104,6 +122,11 @@ class BrowserScreenInstrumentedTest {
     }
 
     private companion object {
+        // Spec 008 (T023a) — pinned to https://example.com for the "Example Domain"
+        // h1 assertion, decoupled from production UrlConstants.DEFAULT_HOME_URL
+        // which Spec 008 redirected to Google homepage.
+        const val TEST_PAGE_URL: String = "https://example.com"
+
         // CI emulator budget — NOT the user-facing SC-002 production target
         // (200 ms). See test method KDoc above.
         const val LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS: Long = 5_000L

@@ -13,4 +13,11 @@
     <string name="browser_error_title">페이지를 불러오지 못했습니다</string>
     <string name="browser_error_offline_hint">인터넷 연결을 확인한 다음 다시 시도해 주세요.</string>
     <string name="browser_error_generic">문제가 발생했습니다. 나중에 다시 시도해 주세요.</string>
+
+    <!-- Spec 008 — Korean (ko) translations for navigation bottom-bar a11y. -->
+    <string name="browser_action_back">뒤로</string>
+    <string name="browser_action_forward">앞으로</string>
+    <string name="browser_action_reload">페이지 새로 고침</string>
+    <string name="browser_action_stop">로드 중지</string>
+    <string name="browser_action_home">홈</string>
 </resources>

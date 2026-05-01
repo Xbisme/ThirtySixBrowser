@@ -5,6 +5,14 @@
 **Status**: Draft
 **Input**: User description: "navigation-controls — Back / Forward / Reload / Stop / Home + predictive back gesture cho BrowserScreen. Build trên BrowserWebView từ Spec 007. Surface canGoBack/goBack/canGoForward/goForward/reload/stopLoading qua BrowserViewModel. Predictive back Android 14+. Home loads default home URL. Bottom bar UI placement TBD trong /clarify. Disable state khi can*=false. Stop visible khi Loading, ngược lại là Reload."
 
+## Clarifications
+
+### Session 2026-05-01
+
+- Q: Bottom-bar visibility behavior (always visible / auto-hide on scroll / gesture-revealed)? → A: Always visible, fixed at bottom of BrowserScreen — no scroll-driven hide/reveal, no gesture trigger.
+- Q: Default home URL value? → A: `https://www.google.com/` — matches the default search engine (Google) chosen in Spec 006; Home loads a ready-to-search page for first-time and returning users.
+- Q: Bottom-bar item ordering (left → right)? → A: **Back · Forward · Reload/Stop · Home** — Back/Forward as a history pair on the left, Reload/Stop in middle (current-page action), Home on the right edge for one-handed thumb reach.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Move backward and forward through visited pages (Priority: P1)
@@ -103,18 +111,18 @@ The user has navigated several pages deep and wants a one-tap escape to a known 
 - **FR-010**: The system back gesture (edge-swipe on Android 10+, hardware/navigation-bar back on older devices) MUST navigate the WebView backward through history when prior history exists.
 - **FR-011**: The system back gesture MUST fall through to the platform default (exit the screen / app) when no prior WebView history exists.
 - **FR-012**: On Android 14 and newer, the system back gesture MUST present a predictive-back preview animation showing the destination state before the gesture commits, and MUST NOT commit navigation if the user cancels the gesture.
-- **FR-013**: All five affordances (Back, Forward, Reload/Stop, Home) MUST be reachable on the BrowserScreen without entering a menu or secondary surface.
+- **FR-013**: All four affordances MUST be reachable on the BrowserScreen without entering a menu or secondary surface, laid out in this fixed left-to-right order on the bottom bar: **Back · Forward · Reload/Stop · Home**.
 - **FR-014**: The disabled / enabled state of each affordance MUST update reactively as the WebView session history changes (after every successful navigation, including those triggered by link taps inside the page).
 - **FR-015**: All affordances MUST expose an accessible content description in the user's active locale (8 locales from Spec 004) so screen readers announce them correctly.
-- **FR-016**: The configured default home URL MUST be the value defined in the project's app defaults; users cannot change this URL in v1.0 (the Settings screen — Spec 016 — will introduce user-overridable home URL in a later release).
+- **FR-016**: The configured default home URL MUST be `https://www.google.com/`, defined as a constant in the project's app defaults. Users cannot change this URL in v1.0 (the Settings screen — Spec 016 — will introduce user-overridable home URL in a later release).
 - **FR-017**: Affordance activation MUST NOT crash, freeze, or leave the UI in an inconsistent state when invoked rapidly or during a configuration change (rotation, locale switch).
-- **FR-018**: The bottom-bar surface that hosts these affordances MUST [NEEDS CLARIFICATION: bar layout / icon set / persistence behavior — see /speckit-clarify; specifically: should the bar always be visible, auto-hide on scroll, or be revealed by gesture? Should it use Material 3 BottomAppBar, NavigationBar, or a custom Row?].
+- **FR-018**: The bottom-bar surface that hosts these affordances MUST be **always visible**, fixed at the bottom of the BrowserScreen. The bar does not auto-hide on scroll, is not revealed by gesture, and is not toggled by any user action — it persists for the lifetime of the BrowserScreen so the navigation affordances are reachable at all times. (Compose-component selection — `BottomAppBar` vs `NavigationBar` vs custom `Row` — is an implementation decision deferred to `/speckit-plan`.)
 
 ### Key Entities *(include if feature involves data)*
 
 - **WebView Session History**: Platform-provided per-tab navigation stack. Each entry is a (URL, page state) pair created when the WebView commits a navigation. v1.0 stores this in WebView memory only; persistence across process death is out of scope.
 - **Loading State** (extended from Spec 007): The existing `LoadingState` already distinguishes Idle / Loading / Loaded / Failed. The Reload/Stop affordance reads this state to decide which semantic to display; no new state is introduced by this spec.
-- **Default Home URL**: Constant value defined in app defaults (Spec 006 introduced the constants location; the URL itself ships with this spec). User-configurable home URL is deferred to Spec 016.
+- **Default Home URL**: Constant value `https://www.google.com/` defined in app defaults (Spec 006 introduced the constants location; the URL value ships with this spec). User-configurable home URL is deferred to Spec 016.
 
 ## Success Criteria *(mandatory)*
 

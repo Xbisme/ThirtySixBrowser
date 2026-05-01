@@ -38,14 +38,27 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  * - `onDispose` calls `loadUrl("about:blank") + removeAllViews() + destroy()`
  *   to avoid the WebView 116+ native-resource race.
  *
- * Phasing — US3 (T031) ADDS:
- * - `onLoadFailed: (ErrorReason) -> Unit` parameter
- * - `WebViewClient` overrides: `onReceivedError`, `onReceivedHttpError`,
- *   `onReceivedSslError`
+ * Spec 008 additions:
+ * - [actions] `WebViewActionsHandle` populated inside the factory closure with
+ *   thin wrappers around `WebView.goBack/goForward/reload/stopLoading/loadUrl`.
+ *   Read by `NavigationBottomBar` click handlers + `PredictiveBackHandler`.
+ * - [homeUrl] separate parameter from [state.currentUrl] so the Home affordance
+ *   reloads a stable home URL even after the user has navigated elsewhere.
+ * - `WebViewClient.doUpdateVisitedHistory` override fires
+ *   [callbacks.onCanGoBackChange] / [callbacks.onCanGoForwardChange] after
+ *   every history-mutating commit, keeping `BrowserUiState.canGoBack` /
+ *   `canGoForward` reactive (FR-014).
+ * - Initial-load conditional: skips `wv.loadUrl(state.currentUrl)` when state
+ *   is seeded to [LoadingState.Failed] before composition (preserves the
+ *   `BrowserScreenOfflineErrorTest` deterministic assertion — without this
+ *   guard, the WebView would auto-load the URL and override the seeded Failed
+ *   state via subsequent `onPageFinished`).
  */
 @Composable
 internal fun BrowserWebView(
     state: BrowserUiState,
+    homeUrl: String,
+    actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     modifier: Modifier = Modifier,
 ) {
@@ -79,9 +92,27 @@ internal fun BrowserWebView(
                     onLoadStarted = callbacks.onLoadStarted,
                     onLoadFinished = callbacks.onLoadFinished,
                     onLoadFailed = callbacks.onLoadFailed,
+                    onCanGoBackChange = callbacks.onCanGoBackChange,
+                    onCanGoForwardChange = callbacks.onCanGoForwardChange,
                 )
                 wv.webChromeClient = BrowserChromeClient(onProgressChanged = callbacks.onProgressChanged)
-                wv.loadUrl(state.currentUrl)
+
+                // Spec 008 — wire imperative handle. Each lambda captures `wv`
+                // via the factory closure; the lambdas persist for the lifetime
+                // of the WebView instance.
+                actions.goBack = { if (wv.canGoBack()) wv.goBack() }
+                actions.goForward = { if (wv.canGoForward()) wv.goForward() }
+                actions.reload = { wv.reload() }
+                actions.stopLoading = { wv.stopLoading() }
+                actions.loadHome = { wv.loadUrl(homeUrl) }
+
+                // Spec 008 — conditional initial load. When state is seeded to
+                // Failed (instrumented test pattern), skip the initial loadUrl
+                // so the test assertion on the error UI is not overridden by a
+                // successful auto-load.
+                if (state.loadingState !is LoadingState.Failed) {
+                    wv.loadUrl(state.currentUrl)
+                }
             }
         },
     )
@@ -144,11 +175,16 @@ private fun applySecuritySettings(webView: WebView) {
  * - HTTP 4xx/5xx on main frame → [ErrorReason.HttpError]
  * - SSL handshake → [ErrorReason.SslError] (`handler.cancel()` ALWAYS — never `proceed()`)
  * - Anything else → [ErrorReason.Generic]
+ *
+ * Spec 008 — adds `doUpdateVisitedHistory` override to surface `canGoBack` /
+ * `canGoForward` flips into [BrowserUiState] via the new callbacks.
  */
 private class BrowserWebViewClient(
     private val onLoadStarted: (String) -> Unit,
     private val onLoadFinished: (String) -> Unit,
     private val onLoadFailed: (ErrorReason) -> Unit,
+    private val onCanGoBackChange: (Boolean) -> Unit,
+    private val onCanGoForwardChange: (Boolean) -> Unit,
 ) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         url?.let(onLoadStarted)
@@ -156,6 +192,18 @@ private class BrowserWebViewClient(
 
     override fun onPageFinished(view: WebView?, url: String?) {
         url?.let(onLoadFinished)
+    }
+
+    /**
+     * Spec 008 — fires AFTER each successful page commit (incl. fragment nav,
+     * History API push, back/forward). Re-reads platform truth and pushes to
+     * the ViewModel. Lighter than `copyBackForwardList()` (which allocates a
+     * full snapshot per call); we only need two booleans.
+     */
+    override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+        val v = view ?: return
+        onCanGoBackChange(v.canGoBack())
+        onCanGoForwardChange(v.canGoForward())
     }
 
     override fun onReceivedError(

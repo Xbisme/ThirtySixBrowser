@@ -13,4 +13,11 @@
     <string name="browser_error_title">Không tải được trang</string>
     <string name="browser_error_offline_hint">Vui lòng kiểm tra kết nối Internet và thử lại.</string>
     <string name="browser_error_generic">Đã xảy ra lỗi. Vui lòng thử mở trang sau.</string>
+
+    <!-- Spec 008 — Vietnamese (vi) translations for navigation bottom-bar a11y. -->
+    <string name="browser_action_back">Lùi</string>
+    <string name="browser_action_forward">Tiến</string>
+    <string name="browser_action_reload">Tải lại trang</string>
+    <string name="browser_action_stop">Dừng tải</string>
+    <string name="browser_action_home">Trang chủ</string>
 </resources>

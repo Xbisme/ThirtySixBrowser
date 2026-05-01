@@ -18,4 +18,11 @@
     <string name="browser_error_title">Page didn\'t load</string>
     <string name="browser_error_offline_hint">Check your internet connection and try again.</string>
     <string name="browser_error_generic">Something went wrong. Try opening the page later.</string>
+
+    <!-- Spec 008 — Navigation Controls. Bottom-bar affordance content descriptions (a11y / TalkBack). -->
+    <string name="browser_action_back">Back</string>
+    <string name="browser_action_forward">Forward</string>
+    <string name="browser_action_reload">Reload page</string>
+    <string name="browser_action_stop">Stop loading</string>
+    <string name="browser_action_home">Home</string>
 </resources>
