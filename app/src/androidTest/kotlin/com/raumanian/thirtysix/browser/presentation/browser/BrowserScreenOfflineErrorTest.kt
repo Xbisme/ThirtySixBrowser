@@ -63,7 +63,7 @@ class BrowserScreenOfflineErrorTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun unresolvableHost_showsLocalizedErrorStateWithin5s() {
+    fun unresolvableHost_showsLocalizedErrorState() {
         composeRule.waitUntilExactlyOneExists(
             matcher = hasTestTag(TEST_TAG_BROWSER_ERROR_STATE),
             timeoutMillis = ERROR_STATE_TIMEOUT_MS,
@@ -71,6 +71,14 @@ class BrowserScreenOfflineErrorTest {
     }
 
     private companion object {
-        const val ERROR_STATE_TIMEOUT_MS: Long = 5_000L
+        // SC-003 budget for the *production* "no internet" path is ≤ 5 s — TCP
+        // connect fails instantly when the network adapter is offline. THIS test
+        // uses an unresolvable `.invalid` host instead (Hilt-deterministic; no
+        // emulator-network-toggle hack), which forces Chromium's DNS NXDOMAIN
+        // path. That path is artificially slower (5–10 s on emulator API 29).
+        // The 15 s budget here covers the slowest observed CI run with margin;
+        // the production SC-003 budget remains 5 s and is verified manually
+        // (Gate 7 step 4 in quickstart.md).
+        const val ERROR_STATE_TIMEOUT_MS: Long = 15_000L
     }
 }
