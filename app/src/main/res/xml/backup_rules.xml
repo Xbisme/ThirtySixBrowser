@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?><!--
    Auto Backup rules for Android < 12 (API 23–30).
-   Spec 005 FR-016 + Q4 clarification: ThirtySixBrowser's Room database is excluded
-   from Auto Backup to enforce the on-device-only privacy stance. WAL sidecar files
-   (-wal, -shm) are also excluded because they may contain transient transaction
-   data that would otherwise produce partial-database backup edge cases.
-   See https://developer.android.com/guide/topics/data/autobackup
+
+   Per-store backup policy (Spec 005 + Spec 006 FR-013, FR-014):
+   - DATABASE (thirtysix_browser.db + WAL sidecars): EXCLUDED — privacy-sensitive
+     (bookmarks, history, tabs may contain URLs the user wishes to keep on-device
+     only). WAL sidecars excluded for partial-state safety. See Spec 005 FR-016.
+   - SETTINGS (datastore/thirtysix_settings.preferences_pb): INCLUDED — no PII;
+     restoring on a new device preserves theme / language / search-engine /
+     onboarding-completed UX. Auto Backup defaults to backing up everything
+     under <files-dir> when allowBackup="true" and no <include> blocks are
+     present; we rely on that default behavior. NO <include> line here because
+     adding any <include> would flip semantics to "exclude-by-default" and
+     would conflict with the database <exclude> entries above. See Spec 006.
+
+   Reference: https://developer.android.com/guide/topics/data/autobackup
 -->
 <full-backup-content>
     <exclude domain="database" path="thirtysix_browser.db"/>

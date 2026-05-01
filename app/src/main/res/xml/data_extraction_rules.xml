@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?><!--
    Backup + device-transfer rules for Android 12+ (API 31+).
-   Spec 005 FR-016 + Q4 clarification: Room database excluded from BOTH cloud
-   backup (Google Drive) AND device-to-device transfer to enforce on-device-only
-   privacy. WAL sidecars excluded for the same partial-state reason.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
+
+   Per-store backup policy (Spec 005 + Spec 006 FR-013, FR-014):
+   - DATABASE (thirtysix_browser.db + WAL sidecars): EXCLUDED from BOTH cloud
+     backup (Google Drive) AND device-to-device transfer — privacy-sensitive
+     (bookmarks, history, tabs). WAL sidecars excluded for partial-state safety.
+     See Spec 005 FR-016.
+   - SETTINGS (datastore/thirtysix_settings.preferences_pb): INCLUDED in BOTH
+     cloud backup AND device-to-device transfer — no PII; restoring on a new
+     device preserves theme / language / search-engine / onboarding-completed
+     UX. Auto Backup defaults to backing up everything under <files-dir> when
+     allowBackup="true" and no <include> blocks are present; we rely on that
+     default. NO <include> line here because adding any <include> would flip
+     semantics to "exclude-by-default" and would conflict with the database
+     <exclude> entries inside each scope. See Spec 006 FR-013, FR-014.
+
+   Reference: https://developer.android.com/about/versions/12/backup-restore#xml-changes
 -->
 <data-extraction-rules>
     <cloud-backup>

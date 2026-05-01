@@ -8,4 +8,9 @@ package com.raumanian.thirtysix.browser.core.constants
  */
 object AppConstants {
     const val APP_NAME = "ThirtySix Browser"
+
+    // Spec 006 — DataStore Preferences file name (extension `.preferences_pb` is
+    // appended automatically by `Context.preferencesDataStoreFile(name)`).
+    // Single source of truth per Constitution §III FR-016.
+    const val SETTINGS_DATASTORE_FILE_NAME = "thirtysix_settings"
 }

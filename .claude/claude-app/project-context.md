@@ -1,10 +1,10 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-05-01 — **✅ Specs 001–005 done. Phase 1 5/6 complete.**
+> Cập nhật lần cuối: 2026-05-01 — **✅ Specs 001–006 done. Phase 1 6/6 complete.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: ✅ Foundation Phase 1 — 5/6 done (Specs 001–005)
+## Trạng thái dự án: ✅ Foundation Phase 1 — 6/6 done (Specs 001–006)
 
 Foundation phase tiến độ:
 - **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)
@@ -12,11 +12,9 @@ Foundation phase tiến độ:
 - **Spec 003** ✅ — Material3 theme + typography + dark mode (Deep Teal seed + Cyan tertiary, Poppins + Inter bundled local, 5-token spacing scale, light/dark/system + dynamic color Android 12+, cold-start window flash fix)
 - **Spec 004** ✅ — Multi-Language Localization Foundation: 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR), Android 13+ system per-app picker via `locales_config.xml` + manifest, lint enforcement at error severity for translation completeness, brand "ThirtySix" preserved in Latin across non-Latin scripts. Zero Kotlin code change.
 - **Spec 005** ✅ — Room database schema (Bookmark/BookmarkFolder/HistoryEntry/Tab) + DAOs + AppDatabase + Hilt DatabaseModule + WAL + strict-no-destructive migration + DB excluded from Auto Backup. Room 2.8.4 + Turbine 1.2.1 + Robolectric 4.16.1 (test-only). 29 new unit tests (51 total). APK release 1.4 MB (down from Spec 004 baseline 1.49 MB after R8 re-shrink). 16KB CI gate green (no new `.so`).
+- **Spec 006** ✅ — DataStore Preferences settings persistence + first complete Clean Architecture data slice. DataStore Preferences 1.2.1, pure Kotlin/Java zero `.so`. 4 settings keys (theme_mode, language_override sealed, search_engine enum, is_onboarding_completed). ThemeMode relocated `presentation/theme/` → `domain/model/`. MainActivity `MutableState<ThemeMode>` replaced with `@Inject ObserveUserSettingsUseCase` + `collectAsStateWithLifecycle(UserSettings.DEFAULT)`. Backup posture asymmetric (settings INCLUDED, DB EXCLUDED) documented inline in both XML files. 2 clarifications applied (Q1 Result<Unit> setters, Q2 LanguageOverride sealed type).
 
-**Next available** (unblocks Phase 2 Spec 007):
-- Spec 006 (`datastore-settings`) — DataStore Preferences (last Phase 1 spec; smaller scope than 005, persists Spec 003 in-memory `ThemeMode` to disk)
-
-After 006: Phase 2 Spec 007 `webview-compose-wrapper` unblocked.
+**Phase 2 unblocked**: Spec 007 (`webview-compose-wrapper`) — first feature-bearing spec. Requires re-enabling `instrumented-test` job in CI.
 
 ### Tổng quan dự án
 

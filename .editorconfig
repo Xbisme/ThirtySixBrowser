@@ -25,6 +25,11 @@ ij_kotlin_allow_trailing_comma_on_call_site = true
 # function signatures. Keep parameters indented 4 spaces (Compose standard) by relaxing.
 ktlint_standard_function-signature = disabled
 
+# class-signature rule (Spec 006): forces single-line constructor params, conflicting with
+# multi-line @Inject constructors that have 2+ params. Disable so the conventional
+# `class X @Inject constructor(\n    param,\n    param,\n) : Y {` form is permitted.
+ktlint_standard_class-signature = disabled
+
 # function-naming: disabled here only as a safety net — actual Composables use
 # `@file:Suppress("ktlint:standard:function-naming")` because the ktlint version
 # in use (1.6 via plugin 14.2.0) does not honor `ignore_when_annotated_with` reliably.
