@@ -1,31 +1,17 @@
 @file:Suppress("ktlint:standard:function-naming") // Composables are PascalCase by Compose convention.
 
-package com.raumanian.thirtysix.browser.ui.theme
+package com.raumanian.thirtysix.browser.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-)
-
 @Composable
-fun ThirdtySixBrowserTheme(
+fun ThirtySixTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
@@ -41,7 +27,8 @@ fun ThirdtySixBrowserTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = ThirtySixTypography,
+        shapes = ThirtySixShapes,
         content = content,
     )
 }

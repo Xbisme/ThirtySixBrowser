@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Color resources are defined per-theme via Material3 ColorScheme in
-  presentation/theme/Color.kt (Spec 003 owns this). Spec 001 leaves this file
-  intentionally minimal — adding `<color>` entries here would be a Constitution
-  §III violation (colors must come from theme tokens, not raw hex literals).
+  Spec 003 — window background colors used by themes.xml + values-night/themes.xml
+  to prevent white-flash during cold start. Values sync with surface light/dark
+  in presentation/theme/Color.kt (acceptable redundancy: XML resolved pre-Compose,
+  Color.kt resolved post-Compose first frame).
+
+  Other color tokens belong to Material3 ColorScheme in presentation/theme/Color.kt
+  per Constitution §III; do NOT add UI colors here.
 -->
 <resources>
+    <color name="window_background_light">#FAFAF9</color>
+    <color name="window_background_dark">#0A0F0E</color>
 </resources>
