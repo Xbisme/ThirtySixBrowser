@@ -103,6 +103,15 @@ android {
             "GradleDependency",
             "AndroidGradlePluginVersion",
         )
+
+        // Spec 004 FR-008 / SC-005 / Q2 clarification — translation-completeness gate at error severity.
+        // Belt-and-suspenders on top of `warningsAsErrors = true`: if a future spec relaxes the global
+        // promotion, these specific checks remain build-blocking. `MissingTranslation` catches keys present
+        // in EN baseline but missing from any non-English locale; `ExtraTranslation` catches the reverse.
+        error += listOf(
+            "MissingTranslation",
+            "ExtraTranslation",
+        )
     }
 }
 

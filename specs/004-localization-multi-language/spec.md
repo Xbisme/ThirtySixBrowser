@@ -5,6 +5,13 @@
 **Status**: Draft
 **Input**: User description: "Spec 004 — localization-multi-language. Mục tiêu: ThirtySixBrowser hỗ trợ 8 locale (EN default, VI, DE, RU, KO, JA, ZH, FR) qua Android resource system + per-app locale config, để app respect device/system locale setting. Trên Android 13+ user có thể đổi ngôn ngữ qua system Settings → Apps → ThirtySixBrowser → Language. Trên < API 33 app theo system locale. Scope chốt chặt — chỉ infra + baseline strings, KHÔNG có UI switcher trong app."
 
+## Clarifications
+
+### Session 2026-05-01
+
+- Q: Canonical value for the application display name (`app_name`) shipped across all 8 locales? → A: `"ThirtySix Browser"` (with a space) — matches the Google Play store listing and the canonical name documented in CLAUDE.md. Fixes the inherited Android Studio template typo `"ThirdtySixBrowser"`. Non-English locales translate or transliterate this canonical English form per locale convention.
+- Q: Build-time enforcement strength of the translation-completeness check (FR-008 / SC-005)? → A: Error severity — the build's lint stage fails on any missing translation, blocking merge in CI. Matches the project's existing strict-analysis posture (Detekt + ktlint already build-blocking). Applies uniformly to local builds and CI; no warning-only fallback for local dev.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - App Speaks the User's Language by Default (Priority: P1)
@@ -75,9 +82,9 @@ A maintainer adds a new user-facing string to the app. Before the change can be 
 - **FR-003**: System MUST fall back to English when the device's active language is not one of the eight supported locales.
 - **FR-004**: System MUST declare its supported-locales list in a manner the operating system can read so that, on Android 13 and newer, the system per-app language picker appears for the app and lists exactly the eight supported locales.
 - **FR-005**: System MUST honor the user's per-app language selection (Android 13+) for all visible strings within the app, while leaving the rest of the device's language unaffected.
-- **FR-006**: System MUST cover, at minimum, the following baseline string keys with translations in all eight locales: the application's display name (used by the launcher) and one screen-title key for each of the seven placeholder destinations currently defined in the navigation graph (Browser, Tabs, Bookmarks, History, Downloads, Settings, Onboarding).
+- **FR-006**: System MUST cover, at minimum, the following baseline string keys with translations in all eight locales: the application's display name (used by the launcher) and one screen-title key for each of the seven placeholder destinations currently defined in the navigation graph (Browser, Tabs, Bookmarks, History, Downloads, Settings, Onboarding). The English value of the application's display name MUST be `"ThirtySix Browser"` (with a space) — matching the canonical Google Play listing — and the seven non-English locale files MUST localize or transliterate this canonical form per locale convention.
 - **FR-007**: All user-facing string resource keys introduced in this feature MUST follow the naming convention `feature_section_purpose` (lowercase, underscore-separated), so future feature specs can extend the catalog without renaming existing keys.
-- **FR-008**: System MUST fail the build's lint stage when any user-facing string is present in the English baseline but missing from any of the seven non-English locale files.
+- **FR-008**: System MUST configure the missing-translation check at error severity (not warning) so that the build's lint stage fails — both locally and in CI — whenever any user-facing string is present in the English baseline but missing from any of the seven non-English locale files. The CI pipeline MUST block merge on this failure.
 - **FR-009**: System MUST NOT include an in-app language switcher in this feature; per-app language control in this milestone is exclusively provided via the operating-system-level picker on Android 13 and newer. (In-app switcher is deferred to the future Settings Screen feature.)
 
 ### Key Entities
@@ -93,7 +100,7 @@ A maintainer adds a new user-facing string to the app. Before the change can be 
 - **SC-002**: On a device running Android 13 or newer, the system per-app language picker for ThirtySixBrowser shows exactly nine entries: the eight supported locales plus the "System default" option — no missing entries, no spurious entries.
 - **SC-003**: Selecting any of the eight locales via the per-app language picker results in the app displaying in that locale on next launch, with the rest of the device's user interface remaining in its original system language.
 - **SC-004**: A first-time user whose device is configured for any of the seven non-English supported locales can launch the app and read every screen's title without performing any setup, configuration, or in-app action.
-- **SC-005**: The project's automated lint stage fails any change set that introduces a user-facing string in the English baseline without matching translations in all seven non-English locales.
+- **SC-005**: The project's automated lint stage fails (at error severity, blocking merge) on any change set that introduces a user-facing string in the English baseline without matching translations in all seven non-English locales.
 - **SC-006**: When a user's device locale is a regional variant of a supported language (e.g., `fr-CA`, `zh-TW`, `de-AT`), the app resolves to the closest supported translation rather than to English.
 
 ## Assumptions

@@ -1,0 +1,11 @@
+<resources>
+    <!-- Spec 004 — French (fr) translation. Brand "ThirtySix" preserved per research.md R6. -->
+    <string name="app_name">Navigateur ThirtySix</string>
+    <string name="browser_screen_placeholder">Navigateur</string>
+    <string name="tabs_screen_placeholder">Onglets</string>
+    <string name="bookmarks_screen_placeholder">Favoris</string>
+    <string name="history_screen_placeholder">Historique</string>
+    <string name="downloads_screen_placeholder">Téléchargements</string>
+    <string name="settings_screen_placeholder">Paramètres</string>
+    <string name="onboarding_screen_placeholder">Présentation</string>
+</resources>

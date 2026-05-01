@@ -1,0 +1,11 @@
+<resources>
+    <!-- Spec 004 — German (de) translation. "Browser" is a German loanword, kept as-is. -->
+    <string name="app_name">ThirtySix Browser</string>
+    <string name="browser_screen_placeholder">Browser</string>
+    <string name="tabs_screen_placeholder">Tabs</string>
+    <string name="bookmarks_screen_placeholder">Lesezeichen</string>
+    <string name="history_screen_placeholder">Verlauf</string>
+    <string name="downloads_screen_placeholder">Downloads</string>
+    <string name="settings_screen_placeholder">Einstellungen</string>
+    <string name="onboarding_screen_placeholder">Einführung</string>
+</resources>

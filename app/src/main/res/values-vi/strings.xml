@@ -1,0 +1,11 @@
+<resources>
+    <!-- Spec 004 — Vietnamese (vi) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <string name="app_name">Trình duyệt ThirtySix</string>
+    <string name="browser_screen_placeholder">Trình duyệt</string>
+    <string name="tabs_screen_placeholder">Thẻ</string>
+    <string name="bookmarks_screen_placeholder">Dấu trang</string>
+    <string name="history_screen_placeholder">Lịch sử</string>
+    <string name="downloads_screen_placeholder">Tải xuống</string>
+    <string name="settings_screen_placeholder">Cài đặt</string>
+    <string name="onboarding_screen_placeholder">Giới thiệu</string>
+</resources>

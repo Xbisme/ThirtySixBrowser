@@ -1,7 +1,11 @@
 <resources>
-    <string name="app_name">ThirdtySixBrowser</string>
+    <string name="app_name">ThirtySix Browser</string>
     <!-- Spec 002 — placeholder labels for the 7 navigation destinations. -->
-    <!-- Localization for VI/DE/RU/KO/JA/ZH/FR comes in Spec 004. -->
+    <!-- Spec 004 — VI/DE/RU/KO/JA/ZH/FR translations live in values-<locale>/. -->
+    <!-- Spec 004 — Q1 clarification: app_name canonical = "ThirtySix Browser" (Play Store name). -->
+    <!-- Per FR-007 naming convention: feature_section_purpose. -->
+    <!-- Future feature specs (e.g., 011 tabs-management) MAY rename *_screen_placeholder → semantic key (*_screen_title) when they implement the real Screen — must update all 8 locale files in same change. -->
+
     <string name="browser_screen_placeholder">Browser</string>
     <string name="tabs_screen_placeholder">Tabs</string>
     <string name="bookmarks_screen_placeholder">Bookmarks</string>

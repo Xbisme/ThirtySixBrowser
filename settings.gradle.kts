@@ -28,5 +28,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ThirdtySixBrowser"
+rootProject.name = "ThirtySixBrowser"
 include(":app")

@@ -1,0 +1,11 @@
+<resources>
+    <!-- Spec 004 — Korean (ko) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <string name="app_name">ThirtySix 브라우저</string>
+    <string name="browser_screen_placeholder">브라우저</string>
+    <string name="tabs_screen_placeholder">탭</string>
+    <string name="bookmarks_screen_placeholder">북마크</string>
+    <string name="history_screen_placeholder">기록</string>
+    <string name="downloads_screen_placeholder">다운로드</string>
+    <string name="settings_screen_placeholder">설정</string>
+    <string name="onboarding_screen_placeholder">소개</string>
+</resources>
