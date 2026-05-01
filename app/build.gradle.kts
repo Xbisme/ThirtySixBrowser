@@ -187,6 +187,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // Spec 006 — DataStore Preferences for user settings (theme, language, search engine,
+    // onboarding flag). Pure Kotlin, zero native libs.
+    implementation(libs.androidx.datastore.preferences)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.room.testing)

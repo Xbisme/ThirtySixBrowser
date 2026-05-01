@@ -1,7 +1,7 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
 > Cập nhật lần cuối: 2026-05-01
-> v1.0: Android Native Browser — ✅ Specs 001–005 done. Spec 006 next (last Phase 1) before Phase 2 Spec 007.
+> v1.0: Android Native Browser — ✅ Specs 001–006 done. Foundation Phase 1 6/6 complete. Phase 2 Spec 007 (`webview-compose-wrapper`) unblocked.
 
 ## Nguyên tắc Roadmap
 
