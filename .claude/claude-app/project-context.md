@@ -251,6 +251,54 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 
 ## Key Decisions Log
 
+### 2026-05-01 — Spec 002 hoàn tất
+
+**Hilt + KSP wiring** (verified `central.sonatype.com` + GitHub releases 2026-05-01):
+
+- **Hilt 2.59.2** (2026-02-20) — first AGP-9-compat release. KSP processor artifact = `com.google.dagger:hilt-compiler` (NOT `hilt-android-compiler` — that's kapt-era; using wrong ID with `ksp(...)` compiles silently but generates zero Hilt code).
+- **KSP 2.3.7** (2026-04-22) — supports Kotlin 2.3.x. KSP versioning decoupled from Kotlin since KSP 2.3.0.
+- **Day-1 metadata smoke test PASSED first-try** — no kapt/Kotlin-downgrade fallback needed. Risk #1 in research.md mitigated naturally.
+
+**Navigation + Lifecycle**:
+
+- `androidx.navigation:navigation-compose:2.9.8` (2026-04-22)
+- `androidx.hilt:hilt-navigation-compose:1.3.0` (2025-09-10)
+- `androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0` (2025-11-19) — NOT BOM-managed; Compose BOM only manages `androidx.compose.{animation,foundation,material,material3,runtime,ui}`. Lifecycle group pinned separately via `lifecycle = "2.10.0"` key.
+
+**Test deps**: `kotlinx-coroutines-test:1.10.2` for `BaseViewModel.launchSafely` testing (`Dispatchers.setMain(StandardTestDispatcher())` pattern).
+
+**Core utility decisions** (from spec.md clarifications Q1-Q4):
+
+- `Result<T>` = 2 terminal states only (`Success<T>`, `Error`). Loading managed by `UiState.isLoading`.
+- `BaseViewModel.launchSafely(onError, block)` — caller-provided `(AppError) -> Unit` callback.
+- Exception → AppError mapping rule: `IOException → Network`, `SQLiteException → Database`, else `→ Unknown`. `CancellationException` re-thrown to preserve coroutine cancellation idiom.
+- Constitution §III "ALL @Module annotations live in `di/` package" interpreted liberally: any folder named `di/` (including `core/di/`, future top-level `app/.../di/`). Spec 002 only creates `core/di/DispatcherModule.kt`.
+
+**Detekt config addition**: `FunctionNaming.ignoreAnnotated: ['Composable']` — Compose PascalCase convention exempted at config level (cleaner than baseline cover). Baseline file UNCHANGED from Spec 001.
+
+**Quality gates result**: 6/6 Gradle tasks pass (assembleDebug, assembleRelease, testDebugUnitTest 9/9 pass, lintDebug, detekt, ktlintCheck). 16KB script: all 4 ABIs of `libandroidx.graphics.path.so` align 0x4000 (no new `.so` introduced). APK release size delta vs Spec 001 = +88KB (SC-007 budget 1MB easy pass).
+
+**Module structure created** (per "làm đến đâu tạo đến đó"):
+
+```
+app/src/main/kotlin/com/raumanian/thirtysix/browser/
+├── ThirtySixApplication.kt          (@HiltAndroidApp)
+├── MainActivity.kt                  (@AndroidEntryPoint)
+├── core/{base,result,error,dispatcher,di}/      (5 dirs, 6 files)
+└── presentation/{navigation,browser,tabs,bookmarks,history,downloads,settings,onboarding}/
+                                     (8 dirs, 9 files: AppDestination + AppNavGraph + 7 placeholder Screens)
+```
+
+**NOT created** (deferred to later specs per scope discipline):
+- `core/constants/*` (only Spec-001 stub `AppConstants.kt` exists; new constants per spec)
+- `data/`, `domain/` directories — Spec 005/013
+- Top-level `app/.../di/` — Spec 005 (DatabaseModule)
+- Repository / UseCase / Entity / Mapper classes — per-feature spec
+- `BaseUseCase.kt` — Spec 005 or 013
+- 7 locale string resources (`values-{vi,de,...}/`) — Spec 004
+
+---
+
 ### 2026-05-01 — Spec 001 hoàn tất
 
 **Versions chốt** (verified `central.sonatype.com` + `developer.android.com` 2026-04-30, refined 2026-05-01):
