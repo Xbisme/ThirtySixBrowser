@@ -270,9 +270,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Pending CI / Tooling Tasks
 
-| Task | Trigger | Action |
-|------|---------|--------|
-| Re-enable `instrumented-test` job in `.github/workflows/ci.yml` | Khi bắt đầu **Spec 007** (`webview-compose-wrapper`) hoặc **Spec 011** (`tabs-management`) — spec đầu tiên có UI test thực sự cần emulator | Set `if: true` (hoặc xóa dòng `if: false`) trong job `instrumented-test`. Disabled 2026-04-30 vì `reactivecircus/android-emulator-runner@v2` hang trên default trivial test. |
+> No outstanding CI tooling tasks at the moment. Spec 008 surfaced + resolved the `Terminate Emulator` hang (set `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5` + removed redundant manual `adb emu kill` from script — see CI workflow note).
 
 ## Recent Changes
 

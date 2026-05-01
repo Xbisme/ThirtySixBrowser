@@ -224,15 +224,22 @@ jobs:
 
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
+        # Spec 008 — emulator-runner@v2's built-in "Terminate Emulator" phase
+        # waits up to ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL seconds (default 20)
+        # for graceful shutdown before SIGKILL-ing qemu. CI was hanging at that
+        # phase even with the manual `adb emu kill` in the script (the manual
+        # kill was redundant — the action issues its own kill afterward and the
+        # double-shutdown raced the wait loop). Shortening the wait to 5 s and
+        # letting the action handle termination on its own resolves the hang.
+        env:
+          ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: "5"
         with:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            ./gradlew connectedDebugAndroidTest --build-cache --stacktrace
-            adb -s emulator-5554 emu kill || true
+          script: ./gradlew connectedDebugAndroidTest --build-cache --stacktrace
 
       - name: Force-kill emulator (workaround for hang on shutdown)
         if: always()
