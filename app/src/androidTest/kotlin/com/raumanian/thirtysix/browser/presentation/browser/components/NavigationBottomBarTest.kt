@@ -121,10 +121,15 @@ class NavigationBottomBarTest {
     // ---------- US4 (T039) — Home button ----------
 
     @Test
-    fun home_isAlwaysEnabled_regardlessOfHistoryState() {
+    fun home_isAlwaysEnabled_inIdleEmptyHistoryState() {
+        // composeRule.setContent can only be called once per test, so the
+        // "regardless of history state" assertion is split across two tests.
         setBar(canGoBack = false, canGoForward = false, isLoading = false)
         composeRule.onNodeWithTag(TEST_TAG_NAV_HOME).assertIsEnabled()
+    }
 
+    @Test
+    fun home_isAlwaysEnabled_inLoadingFullHistoryState() {
         setBar(canGoBack = true, canGoForward = true, isLoading = true)
         composeRule.onNodeWithTag(TEST_TAG_NAV_HOME).assertIsEnabled()
     }
