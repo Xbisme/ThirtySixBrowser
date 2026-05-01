@@ -241,12 +241,12 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            cleanup() {
-              pkill -9 -f qemu-system || true
-              pkill -9 -f crashpad_handler || true
-            }
-            trap cleanup EXIT
+            set +e
             ./gradlew connectedDebugAndroidTest --build-cache --stacktrace
+            STATUS=$?
+            pkill -9 -f qemu-system || true
+            pkill -9 -f crashpad_handler || true
+            exit $STATUS
 
       - name: Force-kill emulator (workaround for hang on shutdown)
         if: always()
