@@ -242,12 +242,18 @@ jobs:
           disable-animations: true
           # NOTE: must be a SINGLE LINE — emulator-runner@v2 invokes a fresh
           # `/usr/bin/sh -c "<line>"` for each YAML script line, so multi-line
-          # variables (STATUS=$?) don't survive between lines. Also: NO `-f`
-          # on pkill — `-f qemu-system` matches the wrapping shell's own
-          # cmdline (which contains the literal string "qemu-system" passed as
-          # arg) and killed the parent → "exit code null". Match by process
-          # name only.
-          script: ./gradlew connectedDebugAndroidTest --build-cache --stacktrace; STATUS=$?; pkill -9 qemu || true; pkill -9 crashpad_handler || true; exit $STATUS
+          # variables (STATUS=$?) don't survive between lines.
+          #
+          # Process kill via `ps aux | awk` with the classic `[q]` / `[c]`
+          # bracket trick:
+          #   - bypasses pkill's 15-char comm truncation (crashpad_handler is
+          #     16 chars, longer than /proc/PID/comm allows)
+          #   - bypasses the self-match problem (`pkill -f qemu-system` matched
+          #     this very shell's cmdline because the literal string "qemu-system"
+          #     is in the script). The bracket trick stores the pattern in the
+          #     awk source as `[q]emu-system`, which doesn't contain the literal
+          #     substring "qemu-system" → safe.
+          script: ./gradlew connectedDebugAndroidTest --build-cache --stacktrace; STATUS=$?; ps aux | awk '/[q]emu-system|[c]rashpad_handler/ { print $2 }' | xargs -r kill -9 2>/dev/null; sleep 2; exit $STATUS
 
       - name: Force-kill emulator (workaround for hang on shutdown)
         if: always()
