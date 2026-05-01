@@ -1,0 +1,11 @@
+<resources>
+    <!-- Spec 004 — Russian (ru) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <string name="app_name">ThirtySix Браузер</string>
+    <string name="browser_screen_placeholder">Браузер</string>
+    <string name="tabs_screen_placeholder">Вкладки</string>
+    <string name="bookmarks_screen_placeholder">Закладки</string>
+    <string name="history_screen_placeholder">История</string>
+    <string name="downloads_screen_placeholder">Загрузки</string>
+    <string name="settings_screen_placeholder">Настройки</string>
+    <string name="onboarding_screen_placeholder">Знакомство</string>
+</resources>

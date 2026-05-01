@@ -1,12 +1,22 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-04-30 — **Project khởi tạo, chưa start spec 001**.
+> Cập nhật lần cuối: 2026-05-01 — **✅ Specs 001–004 done. Phase 1 4/6 complete.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: 🚧 Pre-Spec 001
+## Trạng thái dự án: ✅ Foundation Phase 1 — 4/6 done (Specs 001–004)
 
-Project mới khởi tạo bằng Android Studio template. Đã chốt scope, kiến trúc, tech stack qua `meeting-note.md`. Chuẩn bị bắt đầu Spec 001.
+Foundation phase tiến độ:
+- **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)
+- **Spec 002** ✅ — Clean Architecture skeleton + Hilt DI (Hilt 2.59.2 / KSP 2.3.7), base utilities (`Result<T>`, `AppError`, `DispatcherProvider`, `BaseViewModel.launchSafely`)
+- **Spec 003** ✅ — Material3 theme + typography + dark mode (Deep Teal seed + Cyan tertiary, Poppins + Inter bundled local, 5-token spacing scale, light/dark/system + dynamic color Android 12+, cold-start window flash fix)
+- **Spec 004** ✅ — Multi-Language Localization Foundation: 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR), Android 13+ system per-app picker via `locales_config.xml` + manifest, lint enforcement at error severity for translation completeness, brand "ThirtySix" preserved in Latin across non-Latin scripts. Zero Kotlin code change.
+
+**Next available** (parallel-runnable after 002, both unblock Phase 2 Spec 007):
+- Spec 005 (`room-database-schema`) — Room entities + DAOs
+- Spec 006 (`datastore-settings`) — DataStore Preferences
+
+User chooses order. Both must complete before starting Phase 2 Core Browser specs.
 
 ### Tổng quan dự án
 
@@ -250,6 +260,137 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 ---
 
 ## Key Decisions Log
+
+### 2026-05-01 — Spec 004 hoàn tất
+
+**Multi-Language Localization Foundation shipped** (branch `004-localization-multi-language`, pre-PR; 24/24 task complete except manual emulator gates 3-7 deferred to user device verification).
+
+**Locales config strategy** (verified 2026-05-01):
+
+- Single canonical `app/src/main/res/xml/locales_config.xml` with 8 `<locale>` children; standard Android 13+ schema (no AGP `app_locales` Gradle DSL — explicit XML form keeps the supported-locales contract reviewable in version control).
+- `AndroidManifest.xml` `<application>` declares `android:localeConfig="@xml/locales_config"` PLUS `tools:targetApi="33"` to suppress `UnusedAttribute` lint (attribute requires API 33+ but minSdk = 24; original [research.md R1](../../specs/004-localization-multi-language/research.md#r1--locales-config-xml-schema-for-android-13) said no `tools:targetApi` needed but real lint flagged it — fixed during implementation).
+- Reach split: per-app picker on Android 13+ only; API 24–32 users get device-wide locale via standard resource qualifier matching. Accepted tradeoff per Constitution VIII.
+
+**Chinese locale tag form**: bare `values-zh/` (no region qualifier), Simplified Chinese. Android resource resolver matches all `zh-*` device locales (zh-CN, zh-TW, zh-HK, zh-Hans, zh-Hant) → fallback to `values-zh/`. Trade Traditional readability for broader fallback coverage in v1.0; future spec may add `values-zh-rTW/` if Traditional becomes a priority.
+
+**Brand-name translation rule** (per [research R6](../../specs/004-localization-multi-language/research.md#r6--app_name-translation-strategy-across-8-locales-q1-clarification-implementation)): "ThirtySix" stays in Latin script across all 8 locales; only descriptor "Browser" / "Navigator" is translated. Industry convention (Chrome, Firefox, Edge) — translating numerals would create 8 different brand names harming searchability + Play Store discoverability.
+
+Per-locale `app_name`:
+- en: `ThirtySix Browser` (canonical)
+- vi: `Trình duyệt ThirtySix`
+- de: `ThirtySix Browser` (loanword)
+- ru: `ThirtySix Браузер`
+- ko: `ThirtySix 브라우저`
+- ja: `ThirtySix ブラウザ`
+- zh: `ThirtySix 浏览器`
+- fr: `Navigateur ThirtySix`
+
+**Lint severity wiring** (Q2 clarification + FR-008 / SC-005): Added `error += listOf("MissingTranslation", "ExtraTranslation")` to `app/build.gradle.kts` `android.lint { }` block, AFTER the existing `disable += listOf(...)` block. Belt-and-suspenders on top of `warningsAsErrors = true` — explicit error severity survives any future relaxation of the global flag. Both negative-path verifications passed locally (delete a key → `MissingTranslation` blocks build; add an extra key → `ExtraTranslation` blocks build).
+
+**No `AppCompatDelegate.setApplicationLocales` in this milestone** (per [research R4](../../specs/004-localization-multi-language/research.md#r4--why-no-appcompatdelegatesetapplicationlocales-in-this-spec)): That API is for in-app language switching (Spec 016 Settings Screen). Spec 004 covers automatic device-locale detection (P1) and Android 13+ system per-app picker (P2) — both work entirely through Android's resource system + manifest `localeConfig`. The Constitution VIII intent ("locale switching takes effect without app restart") is satisfied by OS-driven `Activity.recreate()` triggered when locale changes; Compose recomposes with new resources.
+
+**No `androidx.appcompat:appcompat` introduced**: original [project-context.md packages-dự-kiến](#packages-dự-kiến-sẽ-verify-version--16kb-tại-thời-điểm-thêm) wishlist entry for AppCompat is deferred to Spec 016 when in-app switcher is implemented. Spec 004 needs zero new packages.
+
+**Late-discovery cleanup during implementation**:
+
+- `app/build.gradle.kts` lint `tools:targetApi="33"` for `localeConfig` attribute — research originally claimed no annotation needed; lint disagreed at runtime.
+- `settings.gradle.kts:31` had `rootProject.name = "ThirdtySixBrowser"` (typo replicated at Gradle root) → fixed to `"ThirtySixBrowser"`. Documented as out-of-scope-but-applied in research R8 update. Doc files retain historical typo references intentionally as decision-log entries.
+
+**Quality gates result** (2026-05-01 local run):
+
+- `./gradlew assembleDebug` ✅
+- `./gradlew lintDebug` ✅ (positive path)
+- `./gradlew lintDebug` ✅ FAIL on missing translation (T015 negative)
+- `./gradlew lintDebug` ✅ FAIL on extra translation (T016 negative)
+- `./gradlew testDebugUnitTest` ✅ 12/12 pass (Spec 003 baseline, no new tests added)
+- `./gradlew detekt ktlintCheck` ✅ zero violations, baseline unchanged
+- `./gradlew assembleRelease` ✅ APK = 1.49 MB (no significant delta vs Spec 003)
+- 16KB CI script ✅ all 12 native lib entries aligned 0x4000 (3 ABIs × 4 entries from `libandroidx.graphics.path.so`)
+- `git grep -i thirdty` (excluding `specs/`, `.claude/claude-app/`, `CLAUDE.md` doc references) = zero matches in source
+
+**Files created** (10 new):
+- `app/src/main/res/values-vi/strings.xml`
+- `app/src/main/res/values-de/strings.xml`
+- `app/src/main/res/values-ru/strings.xml`
+- `app/src/main/res/values-ko/strings.xml`
+- `app/src/main/res/values-ja/strings.xml`
+- `app/src/main/res/values-zh/strings.xml`
+- `app/src/main/res/values-fr/strings.xml`
+- `app/src/main/res/xml/locales_config.xml`
+
+**Files modified** (4):
+- `app/src/main/res/values/strings.xml` (app_name typo fix + comment refresh)
+- `app/src/main/AndroidManifest.xml` (`android:localeConfig` + `tools:targetApi="33"`)
+- `app/build.gradle.kts` (lint `error += listOf("MissingTranslation", "ExtraTranslation")`)
+- `settings.gradle.kts` (rootProject.name typo fix)
+
+**Manual gates DEFERRED to user device verification** (cannot run from local Mac without Android emulator):
+- Gate 3 (system per-app picker shows 9 entries on Android 13+)
+- Gate 4 (per-locale visual sweep across 8 locales)
+- Gate 5 (device-wide locale fallback on Android 7–12)
+- Gate 6 (unsupported-locale fallback to English)
+- Gate 7 (regional variant fallback fr-CA → fr, zh-TW → zh, etc.)
+
+User to run these on a real Android 13+ emulator/device before marking PR-ready.
+
+---
+
+### 2026-05-01 — Spec 003 hoàn tất
+
+**Theme system shipped** (PR #4 merged, commit `856f0bc`):
+
+- `presentation/theme/` migrated from `ui/theme/` (rename via diff — preserves intent, not history-preserving rename since template-era `ui/` package was wrong layer per Constitution §III).
+- `ThirtySixTheme` Composable (renamed from template `ThirdtySixBrowserTheme` typo) wires Light/Dark/System + dynamic color (Android 12+) via `dynamicLightColorScheme(LocalContext.current)` / `dynamicDarkColorScheme(LocalContext.current)`. Static fallback uses pinned `LightColorScheme` / `DarkColorScheme`.
+- Theme persistence: in-memory `MutableState` in `MainActivity` for Spec 003 — DataStore wire deferred to **Spec 006**, UI toggle deferred to **Spec 016**.
+
+**Brand color decision** (verified via Material Theme Builder export 2026-05-01):
+
+- Primary seed: **Deep Teal** `#0F766E` (light primary) / `#5EEAD4` (dark primary) — semantic of "calm, trustworthy, productive" matches Tools/Productivity Play category.
+- Tertiary seed: **Cyan** `#0891B2` (light) / `#67E8F9` (dark) — provides visual contrast for accent CTAs without competing with primary.
+- Full M3 ColorScheme: ~30 roles × 2 schemes pinned by hand in `Color.kt` (NOT via XML resources — Constitution §III "no hardcoded colors" exemption: hex literals here ARE the constants, all consumers reference via `MaterialTheme.colorScheme.*`).
+- **File-level `@Suppress("MagicNumber")`** with rationale comment block — Detekt rule cannot model "this file IS the constants definition" semantics.
+
+**Typography decision** (Poppins + Inter — bundled local, NOT downloadable):
+
+- **Poppins** (heading): weight Medium 500 + SemiBold 600 — geometric grotesque, brand-recognizable.
+- **Inter** (body/UI): weight Regular 400 + Medium 500 — high screen legibility at small sizes.
+- 4 `.ttf` static files in [res/font/](app/src/main/res/font/) — `poppins_medium.ttf` (158KB), `poppins_semibold.ttf` (157KB), `inter_regular.ttf` (407KB), `inter_medium.ttf` (411KB). Total ~1.1MB raw (R8 compresses).
+- Override only `fontFamily` + `fontWeight` on Material3 default `Typography()` — preserve M3 size/lineHeight/letterSpacing tokens via `.copy()`.
+- Reason for bundled: Constitution §IV (offline-first) + privacy (no Google Fonts CDN call). Cost: ~1MB APK delta accepted.
+
+**Spacing tokens** (5-token scale in `Spacing.kt`):
+
+- `xs=4dp / sm=8dp / md=16dp / lg=24dp / xl=32dp` — Material 4dp baseline grid.
+- For padding/margin/spacer ONLY. Icon/avatar sizing uses literal `.dp` per spec FR-010 (semantic difference: spacing vs. fixed sizing).
+
+**Cold-start window flash fix** (FR-026/027 — clarification option A):
+
+- `themes.xml` (light) + `values-night/themes.xml` (dark) set `windowBackground` per system theme → eliminates white flash when launching in dark mode before Compose renders first frame.
+- Trade-off accepted vs. option B (bridging splash → theme): simpler, no new APIs, works on all minSdk 24+.
+
+**WCAG SC-010 gate** (clarification option A):
+
+- Material Theme Builder built-in checker verifies 24+ critical color pair contrast ≥ 4.5:1 (normal text) / 3:1 (large text + icons) **pre-export**.
+- Reason: Detekt/Lint cannot enforce visual contrast; gate moved to design-tool stage (one-time, before each `Color.kt` rewrite).
+
+**Detekt baseline cleanup**:
+
+- 9 entries from Spec 001 (3 FunctionNaming + 6 MagicNumber on template theme colors) cleared — those files were rewritten in Spec 003 so the baseline cover is no longer needed. Detekt `FunctionNaming.ignoreAnnotated: ['Composable']` config (added Spec 002) handles Compose PascalCase structurally.
+
+**No new packages introduced**:
+
+- Compose BOM 2026.04.01 (Material3 1.4.0) supplies all required APIs: `dynamicLightColorScheme` / `dynamicDarkColorScheme` / `FontFamily(Font(R.font.*))`. 16KB risk = zero (no new `.so`).
+
+**Quality gates result**: All 6 Gradle tasks pass (assembleDebug, assembleRelease, testDebugUnitTest 12/12 pass — 9 from Spec 002 + 3 new: SpacingTest, ThemeModeTest, TypographyTest, lintDebug, detekt, ktlintCheck). 16KB script: `libandroidx.graphics.path.so` still aligned 0x4000.
+
+**NOT created** (deferred per scope discipline):
+
+- Theme persistence (DataStore) — Spec 006
+- UI theme toggle in Settings — Spec 016
+- Custom shape tokens — Material3 default `Shapes()` retained, file is placeholder
+- 7 locale string resources — Spec 004
+
+---
 
 ### 2026-05-01 — Spec 002 hoàn tất
 

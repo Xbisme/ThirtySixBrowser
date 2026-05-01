@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Spec 004 — Supported-locales declaration for Android 13+ per-app language picker.
+    Read by Android system Settings → Apps → ThirtySix Browser → Language at install time.
+    Members + rationale: see specs/004-localization-multi-language/data-model.md § Entity 1.
+    Tag form (bare zh, no region qualifiers): see specs/004-localization-multi-language/research.md § R2 + R7.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="vi" />
+    <locale android:name="de" />
+    <locale android:name="ru" />
+    <locale android:name="ko" />
+    <locale android:name="ja" />
+    <locale android:name="zh" />
+    <locale android:name="fr" />
+</locale-config>

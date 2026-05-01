@@ -1,0 +1,11 @@
+<resources>
+    <!-- Spec 004 — Japanese (ja) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <string name="app_name">ThirtySix ブラウザ</string>
+    <string name="browser_screen_placeholder">ブラウザ</string>
+    <string name="tabs_screen_placeholder">タブ</string>
+    <string name="bookmarks_screen_placeholder">ブックマーク</string>
+    <string name="history_screen_placeholder">履歴</string>
+    <string name="downloads_screen_placeholder">ダウンロード</string>
+    <string name="settings_screen_placeholder">設定</string>
+    <string name="onboarding_screen_placeholder">はじめに</string>
+</resources>
