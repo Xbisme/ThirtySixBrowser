@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-04-30 — **🚧 Pre-Spec 001**. Project khởi tạo, chưa start spec đầu tiên. Constitution v1.1.0 ratified.
+Auto-generated from project context. Last updated: 2026-05-01 — **✅ Specs 001–003 done**. Foundation hoàn tất (build config, Clean Architecture + Hilt, theme system). Constitution v1.2.0. Active: Spec 004 (`localization-multi-language`).
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-04-30 — **🚧 Pre-Spe
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** 🚧 **Pre-Spec 001 (2026-04-30)**. Constitution + roadmap + dev-workflow + project-context đã hoàn tất. Sẵn sàng bàn chi tiết Spec 001 (`project-init-build-config`).
+**Current Status:** ✅ **Specs 001–003 done (2026-05-01)**. Foundation phase 1 (build config, Clean Architecture skeleton + Hilt DI, theme/typography/dark mode) hoàn tất. Active spec: **004 `localization-multi-language`** — 8 locale + locale switcher.
 
 ## Active Technologies
 
@@ -241,11 +241,11 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 | # | Spec | Status | Description |
 |---|------|--------|-------------|
-| — | Constitution | ✅ Done v1.1.0 | Project governing principles |
-| 001 | `project-init-build-config` | ⬜ Next | Gradle Kotlin DSL + version catalog + 16KB-ready build |
-| 002 | `clean-architecture-skeleton-di` | ⬜ | Module structure + Hilt + base classes |
-| 003 | `theme-typography-darkmode` | ⬜ | Material3 + light/dark/system |
-| 004 | `localization-multi-language` | ⬜ | 8 locales + locale switcher |
+| — | Constitution | ✅ Done v1.2.0 | Project governing principles |
+| 001 | `project-init-build-config` | ✅ Done 2026-05-01 | Gradle Kotlin DSL + version catalog + 16KB-ready build |
+| 002 | `clean-architecture-skeleton-di` | ✅ Done 2026-05-01 | Module structure + Hilt + base classes |
+| 003 | `theme-typography-darkmode` | ✅ Done 2026-05-01 | Material3 + light/dark/system |
+| 004 | `localization-multi-language` | ⬜ Next | 8 locales + locale switcher |
 | 005 | `room-database-schema` | ⬜ | Bookmark/History/Tab entities + DAOs + WAL |
 | 006 | `datastore-settings` | ⬜ | DataStore Preferences for settings |
 | 007 | `webview-compose-wrapper` | ⬜ | `BrowserWebView` Composable bọc WebView |
@@ -276,6 +276,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Recent Changes
 
+- 2026-05-01: ✅ **Spec 003 done** — Theme + Typography + Dark Mode shipped (PR #4 merged commit `856f0bc`). `presentation/theme/` migrated from `ui/theme/` (rename + structural cleanup). `ThirtySixTheme` Composable wires Light/Dark/System + dynamic color (Android 12+) via `dynamicLightColorScheme`/`dynamicDarkColorScheme`. Brand: Deep Teal seed `#0F766E` (light primary) / `#5EEAD4` (dark primary), Cyan tertiary `#0891B2` / `#67E8F9` — full M3 ColorScheme (~30 roles × 2 schemes) in [Color.kt](app/src/main/kotlin/com/raumanian/thirtysix/browser/presentation/theme/Color.kt) with file-level `@Suppress("MagicNumber")` + rationale comment (hex literals ARE the constants per Constitution §III). Typography: Poppins (heading: Medium 500 + SemiBold 600) + Inter (body: Regular 400 + Medium 500), 4 `.ttf` bundled in [res/font/](app/src/main/res/font/) (~160KB total — within asset budget). Spacing tokens 5 levels (xs=4 / sm=8 / md=16 / lg=24 / xl=32 dp). `ThemeMode` enum (Light/Dark/System) — persistence deferred to Spec 006, UI toggle deferred to Spec 016 (currently in-memory `MutableState` in `MainActivity`). Cold-start window flash fix via `themes.xml` + `values-night/themes.xml` (FR-026/027). 3 unit tests pass (`SpacingTest`, `ThemeModeTest`, `TypographyTest`). Detekt baseline cleanup: 9 entries (3 FunctionNaming + 6 MagicNumber on theme colors) cleared post-rewrite. NO new packages (Compose BOM 2026.04.01 / Material3 1.4.0 sufficient). 2 clarifications applied: WCAG SC-010 gate (option A — Material Theme Builder verify pre-export); cold-start window background fix (option A).
 - 2026-05-01: ✅ **Spec 002 done** — Clean Architecture skeleton + Hilt DI wired. Hilt 2.59.2 via KSP 2.3.7 (Day-1 smoke test passed first-try — no kapt/Kotlin-downgrade fallback needed). 4 core utilities (`Result<T>` 2-state terminal, `AppError` Network/Database/Unknown with `from()` mapper, `DispatcherProvider` interface + `DefaultDispatcherProvider` Hilt singleton, `BaseViewModel.launchSafely(onError, block)` with type-based exception → AppError mapping + CancellationException re-throw). 7 placeholder Composable Screens via `AppDestination` sealed class + `AppNavGraph`. APK release size delta = 88KB (well under 1MB SC-007 budget). 8 unit tests pass. Detekt baseline UNCHANGED — added `FunctionNaming.ignoreAnnotated: ['Composable']` config (structural fix, not baseline cover) + targeted `@Suppress("TooGenericExceptionCaught")` on `BaseViewModel.launchSafely` catch with rationale comment.
 - 2026-05-01: ✅ **Spec 001 done** — version catalog wired (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01); java/→kotlin/ source migrated; Detekt + ktlint + Lint strict (with documented disable list for AGP-9.x lint false-positives); debug-signed release fallback per Constitution v1.2.0; CI 6-job pipeline (build/unit-test/lint/static-analysis/verify-16kb) + 16KB-verify script (already detecting native lib `libandroidx.graphics.path.so` and confirming 16KB alignment). AGP held at 9.1.1 instead of 9.2.0 for Android Studio compat.
 - 2026-05-01: Constitution v1.2.0 amended — Principle XI signing rule split into two scopes (distribution builds MUST use release keystore; local dev/CI MAY fall back to debug keystore with mandatory warning). Triggered by Spec 001 Q2 clarification.
@@ -287,20 +288,14 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: [Spec 003 — Theme + Typography + Dark Mode](specs/003-theme-typography-darkmode/plan.md) 📋 Planned 2026-05-01
+**Current**: Spec 004 — `localization-multi-language` ⬜ Next (not yet specified)
 
-- Branch: `003-theme-typography-darkmode`
-- Status: 🟡 Plan + research + data-model + quickstart artifacts done. Ready for `/speckit-tasks` → implementation.
-- Previous: [Spec 002 — Clean Architecture Skeleton + Hilt DI](specs/002-clean-architecture-skeleton-di/plan.md) ✅ Done 2026-05-01
-- Brand color: **Deep Teal** seed `#0F766E` (light primary) / `#5EEAD4` (dark primary), tertiary Cyan `#0891B2` / `#67E8F9` — pin tay 30+ M3 role × 2 scheme vào `Color.kt` qua Material Theme Builder export
-- Typography: **Poppins** (heading, weight Medium 500 + SemiBold 600) + **Inter** (body, weight Regular 400 + Medium 500) — bundled local trong `res/font/` (4 file `.ttf` static, ~160KB), KHÔNG dùng downloadable fonts
-- Spacing tokens 5 mức (xs=4dp, sm=8dp, md=16dp, lg=24dp, xl=32dp) trong `Spacing.kt`
-- WCAG AA gate (SC-010): 24+ critical color pair phải pass ≥ 4.5:1 normal text / 3:1 large+icon — Material Theme Builder built-in checker verify pre-export
-- Cold-start window flash fix (FR-026/027): `themes.xml` + `values-night/themes.xml` set `windowBackground` theo surface light/dark → tránh white flash trên dark mode
-- Theme persistence in-memory `MutableState` ở MainActivity Spec 003 — DataStore wire ở Spec 006, UI toggle ở Spec 016
-- Detekt baseline cleanup: clear 9 entries cũ (3 FunctionNaming + 6 MagicNumber) về `<CurrentIssues/>` empty post-rewrite
-- KHÔNG thêm package mới — toàn bộ API (`dynamicLightColorScheme`/`dynamicDarkColorScheme`/`FontFamily(Font(R.font.*))`) đã có sẵn từ Compose BOM 2026.04.01 (Material3 1.4.0)
-- 2 clarifications applied (2026-05-01): WCAG SC-010 gate (option A); cold-start window background fix (option A)
-- Next: `/speckit-tasks` → generate `tasks.md` dependency-ordered → implement → verify quickstart.md → CI 5/6 + 1 skip → PR
+- Branch: `004-localization-multi-language` (to be created via `/speckit.specify`)
+- Status: ⬜ Pre-specify — Foundation phase (001+002+003) complete. Specs 004/005/006 unblocked and runnable in parallel after 002 per [sdd-roadmap.md](.claude/claude-app/sdd-roadmap.md#dependency-graph).
+- Previous: [Spec 003 — Theme + Typography + Dark Mode](specs/003-theme-typography-darkmode/plan.md) ✅ Done 2026-05-01 (PR #4 merged)
+- Scope (from roadmap): 8 locales (EN default, VI, DE, RU, KO, JA, ZH, FR) + locale switcher via `AppCompatDelegate.setApplicationLocales` (per-app language API on Android 13+, fallback on older). String resource files in `res/values/`, `res/values-{vi,de,ru,ko,ja,zh,fr}/`. UI toggle in Settings deferred to Spec 016 — Spec 004 ships locale infra + initial baseline strings only.
+- Dependencies: Spec 002 ✅ (Hilt DI), Spec 003 ✅ (theme strings won't conflict). Independent of 005/006.
+- New packages expected (verify at plan time): `androidx.appcompat:appcompat` (already in dependency wishlist per [project-context.md](.claude/claude-app/project-context.md#packages-dự-kiến-sẽ-verify-version--16kb-tại-thời-điểm-thêm)) — Kotlin/Java only, 16KB-safe.
+- Next: bàn scope 004 → `/speckit.specify` → `/speckit.clarify` (if needed) → `/speckit.plan` → `/speckit.tasks` → implement → PR.
 
 <!-- SPECKIT END -->

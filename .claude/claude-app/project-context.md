@@ -1,12 +1,17 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-04-30 — **Project khởi tạo, chưa start spec 001**.
+> Cập nhật lần cuối: 2026-05-01 — **✅ Specs 001–003 done. Active: Spec 004**.
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: 🚧 Pre-Spec 001
+## Trạng thái dự án: ✅ Foundation Phase 1 done (Specs 001–003)
 
-Project mới khởi tạo bằng Android Studio template. Đã chốt scope, kiến trúc, tech stack qua `meeting-note.md`. Chuẩn bị bắt đầu Spec 001.
+Foundation phase hoàn tất:
+- **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)
+- **Spec 002** ✅ — Clean Architecture skeleton + Hilt DI (Hilt 2.59.2 / KSP 2.3.7), base utilities (`Result<T>`, `AppError`, `DispatcherProvider`, `BaseViewModel.launchSafely`)
+- **Spec 003** ✅ — Material3 theme + typography + dark mode (Deep Teal seed + Cyan tertiary, Poppins + Inter bundled local, 5-token spacing scale, light/dark/system + dynamic color Android 12+, cold-start window flash fix)
+
+**Active**: Spec 004 (`localization-multi-language`) — 8 locale + locale switcher. Dependency 002 ✅ thỏa, độc lập với 005/006 (cũng unblocked nhưng chọn 004 theo thứ tự số).
 
 ### Tổng quan dự án
 
@@ -250,6 +255,63 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 ---
 
 ## Key Decisions Log
+
+### 2026-05-01 — Spec 003 hoàn tất
+
+**Theme system shipped** (PR #4 merged, commit `856f0bc`):
+
+- `presentation/theme/` migrated from `ui/theme/` (rename via diff — preserves intent, not history-preserving rename since template-era `ui/` package was wrong layer per Constitution §III).
+- `ThirtySixTheme` Composable (renamed from template `ThirdtySixBrowserTheme` typo) wires Light/Dark/System + dynamic color (Android 12+) via `dynamicLightColorScheme(LocalContext.current)` / `dynamicDarkColorScheme(LocalContext.current)`. Static fallback uses pinned `LightColorScheme` / `DarkColorScheme`.
+- Theme persistence: in-memory `MutableState` in `MainActivity` for Spec 003 — DataStore wire deferred to **Spec 006**, UI toggle deferred to **Spec 016**.
+
+**Brand color decision** (verified via Material Theme Builder export 2026-05-01):
+
+- Primary seed: **Deep Teal** `#0F766E` (light primary) / `#5EEAD4` (dark primary) — semantic of "calm, trustworthy, productive" matches Tools/Productivity Play category.
+- Tertiary seed: **Cyan** `#0891B2` (light) / `#67E8F9` (dark) — provides visual contrast for accent CTAs without competing with primary.
+- Full M3 ColorScheme: ~30 roles × 2 schemes pinned by hand in `Color.kt` (NOT via XML resources — Constitution §III "no hardcoded colors" exemption: hex literals here ARE the constants, all consumers reference via `MaterialTheme.colorScheme.*`).
+- **File-level `@Suppress("MagicNumber")`** with rationale comment block — Detekt rule cannot model "this file IS the constants definition" semantics.
+
+**Typography decision** (Poppins + Inter — bundled local, NOT downloadable):
+
+- **Poppins** (heading): weight Medium 500 + SemiBold 600 — geometric grotesque, brand-recognizable.
+- **Inter** (body/UI): weight Regular 400 + Medium 500 — high screen legibility at small sizes.
+- 4 `.ttf` static files in [res/font/](app/src/main/res/font/) — `poppins_medium.ttf` (158KB), `poppins_semibold.ttf` (157KB), `inter_regular.ttf` (407KB), `inter_medium.ttf` (411KB). Total ~1.1MB raw (R8 compresses).
+- Override only `fontFamily` + `fontWeight` on Material3 default `Typography()` — preserve M3 size/lineHeight/letterSpacing tokens via `.copy()`.
+- Reason for bundled: Constitution §IV (offline-first) + privacy (no Google Fonts CDN call). Cost: ~1MB APK delta accepted.
+
+**Spacing tokens** (5-token scale in `Spacing.kt`):
+
+- `xs=4dp / sm=8dp / md=16dp / lg=24dp / xl=32dp` — Material 4dp baseline grid.
+- For padding/margin/spacer ONLY. Icon/avatar sizing uses literal `.dp` per spec FR-010 (semantic difference: spacing vs. fixed sizing).
+
+**Cold-start window flash fix** (FR-026/027 — clarification option A):
+
+- `themes.xml` (light) + `values-night/themes.xml` (dark) set `windowBackground` per system theme → eliminates white flash when launching in dark mode before Compose renders first frame.
+- Trade-off accepted vs. option B (bridging splash → theme): simpler, no new APIs, works on all minSdk 24+.
+
+**WCAG SC-010 gate** (clarification option A):
+
+- Material Theme Builder built-in checker verifies 24+ critical color pair contrast ≥ 4.5:1 (normal text) / 3:1 (large text + icons) **pre-export**.
+- Reason: Detekt/Lint cannot enforce visual contrast; gate moved to design-tool stage (one-time, before each `Color.kt` rewrite).
+
+**Detekt baseline cleanup**:
+
+- 9 entries from Spec 001 (3 FunctionNaming + 6 MagicNumber on template theme colors) cleared — those files were rewritten in Spec 003 so the baseline cover is no longer needed. Detekt `FunctionNaming.ignoreAnnotated: ['Composable']` config (added Spec 002) handles Compose PascalCase structurally.
+
+**No new packages introduced**:
+
+- Compose BOM 2026.04.01 (Material3 1.4.0) supplies all required APIs: `dynamicLightColorScheme` / `dynamicDarkColorScheme` / `FontFamily(Font(R.font.*))`. 16KB risk = zero (no new `.so`).
+
+**Quality gates result**: All 6 Gradle tasks pass (assembleDebug, assembleRelease, testDebugUnitTest 12/12 pass — 9 from Spec 002 + 3 new: SpacingTest, ThemeModeTest, TypographyTest, lintDebug, detekt, ktlintCheck). 16KB script: `libandroidx.graphics.path.so` still aligned 0x4000.
+
+**NOT created** (deferred per scope discipline):
+
+- Theme persistence (DataStore) — Spec 006
+- UI theme toggle in Settings — Spec 016
+- Custom shape tokens — Material3 default `Shapes()` retained, file is placeholder
+- 7 locale string resources — Spec 004
+
+---
 
 ### 2026-05-01 — Spec 002 hoàn tất
 
