@@ -10,8 +10,9 @@ import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -70,13 +71,13 @@ class SettingsDataStoreTest {
         val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, firstScope))
         val writeResult = first.setThemeMode(ThemeMode.Dark)
         assertTrue("write should succeed", writeResult is Result.Success)
-        firstScope.cancel("simulate process death")
+        firstScope.coroutineContext.job.cancelAndJoin()
 
         val secondScope = CoroutineScope(SupervisorJob())
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, secondScope))
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(ThemeMode.Dark, snapshot.themeMode)
-        secondScope.cancel()
+        secondScope.coroutineContext.job.cancelAndJoin()
     }
 
     // ----------------------------- US3 -------------------------------------
@@ -89,13 +90,13 @@ class SettingsDataStoreTest {
         val s1 = CoroutineScope(SupervisorJob())
         val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
         assertTrue(first.setLanguageOverride(LanguageOverride.Explicit("vi")) is Result.Success)
-        s1.cancel()
+        s1.coroutineContext.job.cancelAndJoin()
 
         val s2 = CoroutineScope(SupervisorJob())
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(LanguageOverride.Explicit("vi"), snapshot.languageOverride)
-        s2.cancel()
+        s2.coroutineContext.job.cancelAndJoin()
     }
 
     @Test
@@ -107,13 +108,13 @@ class SettingsDataStoreTest {
         val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
         first.setLanguageOverride(LanguageOverride.Explicit("vi"))
         first.setLanguageOverride(LanguageOverride.FollowSystem)
-        s1.cancel()
+        s1.coroutineContext.job.cancelAndJoin()
 
         val s2 = CoroutineScope(SupervisorJob())
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(LanguageOverride.FollowSystem, snapshot.languageOverride)
-        s2.cancel()
+        s2.coroutineContext.job.cancelAndJoin()
     }
 
     // ----------------------------- US4 -------------------------------------
@@ -126,13 +127,13 @@ class SettingsDataStoreTest {
         val s1 = CoroutineScope(SupervisorJob())
         val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
         assertTrue(first.setSearchEngine(SearchEngine.Google) is Result.Success)
-        s1.cancel()
+        s1.coroutineContext.job.cancelAndJoin()
 
         val s2 = CoroutineScope(SupervisorJob())
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(SearchEngine.Google, snapshot.searchEngine)
-        s2.cancel()
+        s2.coroutineContext.job.cancelAndJoin()
     }
 
     @Test
@@ -145,13 +146,13 @@ class SettingsDataStoreTest {
         // Write an unrecognized engine value directly via raw edit (simulating
         // a future build that wrote "bing" then user downgraded).
         raw1.edit { it[StorageKeys.SEARCH_ENGINE] = "bing" }
-        s1.cancel()
+        s1.coroutineContext.job.cancelAndJoin()
 
         val s2 = CoroutineScope(SupervisorJob())
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(SearchEngine.Google, snapshot.searchEngine)
-        s2.cancel()
+        s2.coroutineContext.job.cancelAndJoin()
     }
 
     // ----------------------------- US5 -------------------------------------
@@ -164,13 +165,13 @@ class SettingsDataStoreTest {
         val s1 = CoroutineScope(SupervisorJob())
         val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
         assertTrue(first.setOnboardingCompleted(true) is Result.Success)
-        s1.cancel()
+        s1.coroutineContext.job.cancelAndJoin()
 
         val s2 = CoroutineScope(SupervisorJob())
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(true, snapshot.isOnboardingCompleted)
-        s2.cancel()
+        s2.coroutineContext.job.cancelAndJoin()
     }
 
     // ----------------------------- US6 -------------------------------------
@@ -204,7 +205,7 @@ class SettingsDataStoreTest {
                 SearchEngine.Google,
                 snapshot.searchEngine,
             )
-            scope.cancel()
+            scope.coroutineContext.job.cancelAndJoin()
         }
     }
 
@@ -227,7 +228,7 @@ class SettingsDataStoreTest {
             "themeMode must be Dark or Light, got ${snapshot.themeMode}",
             snapshot.themeMode == ThemeMode.Dark || snapshot.themeMode == ThemeMode.Light,
         )
-        scope.cancel()
+        scope.coroutineContext.job.cancelAndJoin()
     }
 
     private companion object {
