@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 // --- Signing config (Constitution §XI v1.2.0 — two-scope rule) ----------------
@@ -143,7 +145,17 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
 
+    // Spec 002 — Hilt DI + Navigation Compose + Lifecycle ViewModel Compose.
+    // KSP processor MUST use `hilt-compiler` artifact; `hilt-android-compiler`
+    // is the kapt-era artifact and silently produces no Hilt code with KSP.
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

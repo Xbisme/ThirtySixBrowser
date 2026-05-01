@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">ThirdtySixBrowser</string>
+    <!-- Spec 002 — placeholder labels for the 7 navigation destinations. -->
+    <!-- Localization for VI/DE/RU/KO/JA/ZH/FR comes in Spec 004. -->
+    <string name="browser_screen_placeholder">Browser</string>
+    <string name="tabs_screen_placeholder">Tabs</string>
+    <string name="bookmarks_screen_placeholder">Bookmarks</string>
+    <string name="history_screen_placeholder">History</string>
+    <string name="downloads_screen_placeholder">Downloads</string>
+    <string name="settings_screen_placeholder">Settings</string>
+    <string name="onboarding_screen_placeholder">Onboarding</string>
 </resources>

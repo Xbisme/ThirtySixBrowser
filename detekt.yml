@@ -348,6 +348,10 @@ naming:
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
     functionPattern: '[a-z][a-zA-Z0-9]*'
     excludeClassPattern: '$^'
+    # Spec 002: @Composable functions are PascalCase by Compose convention
+    # (https://developer.android.com/jetpack/compose/api-guidelines#naming).
+    # ktlint already exempts via @file:Suppress in source files; align Detekt similarly.
+    ignoreAnnotated: ['Composable']
   FunctionParameterNaming:
     active: true
     parameterPattern: '[a-z][A-Za-z0-9]*'
