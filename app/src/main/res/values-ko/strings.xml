@@ -1,11 +1,16 @@
 <resources>
     <!-- Spec 004 — Korean (ko) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix 브라우저</string>
-    <string name="browser_screen_placeholder">브라우저</string>
     <string name="tabs_screen_placeholder">탭</string>
     <string name="bookmarks_screen_placeholder">북마크</string>
     <string name="history_screen_placeholder">기록</string>
     <string name="downloads_screen_placeholder">다운로드</string>
     <string name="settings_screen_placeholder">설정</string>
     <string name="onboarding_screen_placeholder">소개</string>
+
+    <!-- Spec 007 — Korean (ko) translations for Browser loading + error UI. -->
+    <string name="browser_loading_a11y">페이지 로드 중</string>
+    <string name="browser_error_title">페이지를 불러오지 못했습니다</string>
+    <string name="browser_error_offline_hint">인터넷 연결을 확인한 다음 다시 시도해 주세요.</string>
+    <string name="browser_error_generic">문제가 발생했습니다. 나중에 다시 시도해 주세요.</string>
 </resources>

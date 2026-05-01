@@ -6,11 +6,16 @@
     <!-- Per FR-007 naming convention: feature_section_purpose. -->
     <!-- Future feature specs (e.g., 011 tabs-management) MAY rename *_screen_placeholder → semantic key (*_screen_title) when they implement the real Screen — must update all 8 locale files in same change. -->
 
-    <string name="browser_screen_placeholder">Browser</string>
     <string name="tabs_screen_placeholder">Tabs</string>
     <string name="bookmarks_screen_placeholder">Bookmarks</string>
     <string name="history_screen_placeholder">History</string>
     <string name="downloads_screen_placeholder">Downloads</string>
     <string name="settings_screen_placeholder">Settings</string>
     <string name="onboarding_screen_placeholder">Onboarding</string>
+
+    <!-- Spec 007 — WebView Compose Wrapper. Loading state + error UI strings. -->
+    <string name="browser_loading_a11y">Loading page</string>
+    <string name="browser_error_title">Page didn\'t load</string>
+    <string name="browser_error_offline_hint">Check your internet connection and try again.</string>
+    <string name="browser_error_generic">Something went wrong. Try opening the page later.</string>
 </resources>

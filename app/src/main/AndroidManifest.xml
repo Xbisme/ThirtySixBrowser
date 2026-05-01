@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Spec 007 — WebView page load. Constitution §II "Permission table" assigns
+         these two to Spec 007. POST_NOTIFICATIONS is reserved for Spec 015 (downloads). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".ThirtySixApplication"
         android:allowBackup="true"
