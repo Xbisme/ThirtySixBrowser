@@ -176,9 +176,8 @@ jobs:
 
   instrumented-test:
     name: Instrumented tests (emulator)
-    # Re-enable at Spec 007 (webview-compose-wrapper) or Spec 011 (tabs-management)
-    # when first real UI test is added (FR-023).
-    if: false
+    # Re-enabled at Spec 007 (webview-compose-wrapper). Workaround for emulator
+    # hang on shutdown lives in the "Force-kill emulator" step below.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:

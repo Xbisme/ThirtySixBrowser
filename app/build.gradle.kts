@@ -38,7 +38,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Spec 007 — custom runner boots HiltTestApplication so @HiltAndroidTest works.
+        testInstrumentationRunner = "com.raumanian.thirtysix.browser.HiltTestRunner"
     }
 
     signingConfigs {
@@ -200,8 +201,16 @@ dependencies {
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Spec 007 — Espresso-Web for asserting WebView DOM in instrumented tests.
+    androidTestImplementation(libs.androidx.espresso.web)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    // Spec 007 — Hilt instrumented-test runtime. Required by @HiltAndroidTest +
+    // HiltAndroidRule + @TestInstallIn (TestUrlConfigModule swaps the default URL
+    // for the offline-error scenario). KSP processor must also run on androidTest
+    // sources to generate the test Hilt component.
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

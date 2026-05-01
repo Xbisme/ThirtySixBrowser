@@ -1,7 +1,7 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
 > Cập nhật lần cuối: 2026-05-01
-> v1.0: Android Native Browser — ✅ Specs 001–006 done. Foundation Phase 1 6/6 complete. Phase 2 Spec 007 (`webview-compose-wrapper`) unblocked.
+> v1.0: Android Native Browser — ✅ Specs 001–007 done. Foundation Phase 1 6/6 + Phase 2 first spec complete. Phase 2 Spec 008 (`navigation-controls`) unblocked.
 
 ## Nguyên tắc Roadmap
 
@@ -65,8 +65,8 @@ Constitution
 | 003 | `theme-typography-darkmode` | Material3 + light/dark/system | Toggle theme → app re-compose đúng | 002 | ✅ Done 2026-05-01 |
 | 004 | `localization-multi-language` | 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR) | Đổi locale → string thay đổi | 002 | ✅ Done 2026-05-01 |
 | 005 | `room-database-schema` | Bookmark/BookmarkFolder/History/Tab entities + DAOs + WAL + DB excluded from backup | Insert/query/observer + FK orphan-to-root + WAL concurrency tests pass | 002 | ✅ Done 2026-05-01 |
-| 006 | `datastore-settings` | DataStore Preferences cho settings | Read/write settings persist qua restart | 002 | ⬜ Next |
-| 007 | `webview-compose-wrapper` | `BrowserWebView` Composable | Load `https://example.com` → render | 005, 006 | ⬜ ⚠️ Re-enable `instrumented-test` job in `.github/workflows/ci.yml` (set `if: true`) — disabled 2026-04-30 because emulator-runner hung on the trivial default test |
+| 006 | `datastore-settings` | DataStore Preferences cho settings | Read/write settings persist qua restart | 002 | ✅ Done 2026-05-01 |
+| 007 | `webview-compose-wrapper` | `BrowserWebView` Composable + `LinearProgressIndicator` + localized error UI | Load `https://example.com` → render; throttled-load shows top progress bar; airplane-mode shows localized error | 005, 006 | ✅ Done 2026-05-01 — instrumented-test CI job re-enabled in same PR; Espresso-Web + Hilt URL injection wired; T042 manual UX gate deferred to user device verification |
 | 008 | `navigation-controls` | Back/Forward/Reload/Stop/Home + predictive back | Bấm back/forward → URL thay đổi | 007 | ⬜ |
 | 009 | `address-bar-omnibox` | TextField nhập URL/query + suggest | Nhập URL → load; nhập query → search | 008 | ⬜ |
 | 010 | `search-engine-google` | Build Google search URL | Nhập "android" → mở Google search | 009 | ⬜ |
