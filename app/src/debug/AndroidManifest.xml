@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!--
+        Spec 007 — register HiltTestActivity in the DEBUG variant only.
+        Lives in app/src/debug/ (not androidTest/) so the activity is bundled
+        into the debug APK's process (`com.raumanian.thirtysix.browser.debug`)
+        and instrumentation can launch it without the cross-process intent
+        mismatch that occurs when an Activity is declared inside the test APK.
+        See https://developer.android.com/training/dependency-injection/hilt-testing.
+    -->
+    <application>
+        <activity
+            android:name="com.raumanian.thirtysix.browser.HiltTestActivity"
+            android:exported="false"
+            tools:ignore="MissingClass" />
+    </application>
+</manifest>
