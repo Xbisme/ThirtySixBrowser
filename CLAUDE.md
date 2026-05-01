@@ -287,17 +287,20 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: [Spec 002 — Clean Architecture Skeleton + Hilt DI](specs/002-clean-architecture-skeleton-di/plan.md) ✅ Implemented 2026-05-01
+**Current**: [Spec 003 — Theme + Typography + Dark Mode](specs/003-theme-typography-darkmode/plan.md) 📋 Planned 2026-05-01
 
-- Branch: `002-clean-architecture-skeleton-di`
-- Status: 🟢 Implemented locally — all 6 quality gates pass (assembleDebug, assembleRelease, testDebugUnitTest 9/9, lintDebug, detekt, ktlintCheck); 16KB script all `.so` align 0x4000; APK release delta 88KB
-- Previous: [Spec 001 — Project Init & Build Config](specs/001-project-init-build-config/plan.md) ✅ Implemented 2026-05-01
-- Version pins added (verified 2026-05-01 via `central.sonatype.com` + GitHub releases — see [research.md](specs/002-clean-architecture-skeleton-di/research.md)):
-  - **Hilt 2.59.2** via **KSP 2.3.7** — Day-1 metadata smoke test passed first-try, no fallback needed
-  - Artifact ID `com.google.dagger:hilt-compiler` (NOT `hilt-android-compiler` for KSP wiring)
-  - `androidx.hilt:hilt-navigation-compose:1.3.0` / `androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0` (NOT BOM-managed, pinned separately) / `androidx.navigation:navigation-compose:2.9.8`
-  - Test: `kotlinx-coroutines-test:1.10.2` for `BaseViewModel.launchSafely` testing
-- Detekt config addition: `FunctionNaming.ignoreAnnotated: ['Composable']` — Compose PascalCase convention exempt cleanly without baseline cover
-- Next: push to GitHub (`git push -u origin 002-clean-architecture-skeleton-di`) → CI verify 5/6 green + 1 skipped → PR review → merge to main → start Spec 003
+- Branch: `003-theme-typography-darkmode`
+- Status: 🟡 Plan + research + data-model + quickstart artifacts done. Ready for `/speckit-tasks` → implementation.
+- Previous: [Spec 002 — Clean Architecture Skeleton + Hilt DI](specs/002-clean-architecture-skeleton-di/plan.md) ✅ Done 2026-05-01
+- Brand color: **Deep Teal** seed `#0F766E` (light primary) / `#5EEAD4` (dark primary), tertiary Cyan `#0891B2` / `#67E8F9` — pin tay 30+ M3 role × 2 scheme vào `Color.kt` qua Material Theme Builder export
+- Typography: **Poppins** (heading, weight Medium 500 + SemiBold 600) + **Inter** (body, weight Regular 400 + Medium 500) — bundled local trong `res/font/` (4 file `.ttf` static, ~160KB), KHÔNG dùng downloadable fonts
+- Spacing tokens 5 mức (xs=4dp, sm=8dp, md=16dp, lg=24dp, xl=32dp) trong `Spacing.kt`
+- WCAG AA gate (SC-010): 24+ critical color pair phải pass ≥ 4.5:1 normal text / 3:1 large+icon — Material Theme Builder built-in checker verify pre-export
+- Cold-start window flash fix (FR-026/027): `themes.xml` + `values-night/themes.xml` set `windowBackground` theo surface light/dark → tránh white flash trên dark mode
+- Theme persistence in-memory `MutableState` ở MainActivity Spec 003 — DataStore wire ở Spec 006, UI toggle ở Spec 016
+- Detekt baseline cleanup: clear 9 entries cũ (3 FunctionNaming + 6 MagicNumber) về `<CurrentIssues/>` empty post-rewrite
+- KHÔNG thêm package mới — toàn bộ API (`dynamicLightColorScheme`/`dynamicDarkColorScheme`/`FontFamily(Font(R.font.*))`) đã có sẵn từ Compose BOM 2026.04.01 (Material3 1.4.0)
+- 2 clarifications applied (2026-05-01): WCAG SC-010 gate (option A); cold-start window background fix (option A)
+- Next: `/speckit-tasks` → generate `tasks.md` dependency-ordered → implement → verify quickstart.md → CI 5/6 + 1 skip → PR
 
 <!-- SPECKIT END -->
