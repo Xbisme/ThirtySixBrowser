@@ -224,15 +224,36 @@ jobs:
 
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
+        # Spec 008 — emulator-runner@v2's built-in "Terminate Emulator" phase
+        # hangs with emulator binary v36+ because QEMU's `stop` command emits
+        # "stop: Not implemented" and the action's wait-for-shutdown loop
+        # never sees the process exit. The fix that actually works: kill qemu
+        # at the END of `script` via `trap EXIT` (fires on both success and
+        # failure), so the action's terminate phase finds a dead process and
+        # exits immediately. ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5 is kept
+        # as an additional safety bound.
+        env:
+          ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: "5"
         with:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            ./gradlew connectedDebugAndroidTest --build-cache --stacktrace
-            adb -s emulator-5554 emu kill || true
+          # NOTE: must be a SINGLE LINE — emulator-runner@v2 invokes a fresh
+          # `/usr/bin/sh -c "<line>"` for each YAML script line, so multi-line
+          # variables (STATUS=$?) don't survive between lines.
+          #
+          # Process kill via `ps aux | awk` with the classic `[q]` / `[c]`
+          # bracket trick:
+          #   - bypasses pkill's 15-char comm truncation (crashpad_handler is
+          #     16 chars, longer than /proc/PID/comm allows)
+          #   - bypasses the self-match problem (`pkill -f qemu-system` matched
+          #     this very shell's cmdline because the literal string "qemu-system"
+          #     is in the script). The bracket trick stores the pattern in the
+          #     awk source as `[q]emu-system`, which doesn't contain the literal
+          #     substring "qemu-system" → safe.
+          script: ./gradlew connectedDebugAndroidTest --build-cache --stacktrace; STATUS=$?; ps aux | awk '/[q]emu-system|[c]rashpad_handler/ { print $2 }' | xargs -r kill -9 2>/dev/null; sleep 2; exit $STATUS
 
       - name: Force-kill emulator (workaround for hang on shutdown)
         if: always()

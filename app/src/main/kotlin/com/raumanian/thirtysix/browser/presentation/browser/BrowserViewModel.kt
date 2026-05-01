@@ -14,16 +14,21 @@ import kotlinx.coroutines.flow.update
  * callbacks into state transitions.
  *
  * The default URL is Hilt-injected (production binding in
- * [com.raumanian.thirtysix.browser.di.UrlConfigModule]) so the instrumented
- * test can swap in an invalid host via `@TestInstallIn` (T036a) for the
- * offline-error scenario without disabling the emulator's network.
+ * [com.raumanian.thirtysix.browser.di.UrlConfigModule]). Instrumented tests
+ * construct this ViewModel directly with an explicit URL parameter (see
+ * `BrowserScreenOfflineErrorTest` / `BrowserScreenInstrumentedTest` patterns)
+ * — `@TestInstallIn` was tried for Spec 007 but turned out unreliable in
+ * androidTest; manual construction is the project's working pattern.
  *
- * Phasing:
- * - US1 (this file initial version) ships only the three happy-path entry
- *   points: [onLoadStarted], [onProgressChanged], [onLoadFinished].
- * - US3 (T030) ADDS `onLoadFailed(reason: ErrorReason)`. The method is
- *   deliberately absent here because [ErrorReason] (T028) and
- *   [LoadingState.Failed] (T029) are not yet declared.
+ * Spec 008 extension:
+ * - Exposes [homeUrl] getter so the UI layer (NavigationBottomBar Home tap +
+ *   `WebViewActionsHandle.loadHome`) can read the same constant the WebView
+ *   was initialized with, without re-injecting Hilt at the Composable layer.
+ * - Adds [onCanGoBackChanged] / [onCanGoForwardChanged] state mutators called
+ *   from `BrowserWebViewCallbacks` after every `WebViewClient.doUpdateVisitedHistory`.
+ * - Adds [onLoadStopped] for the Stop affordance (FR-006): user-initiated cancel
+ *   while `LoadingState.Loading` → transition to `LoadingState.Loaded`. The
+ *   loading indicator hides; partial page state remains as-is in the WebView.
  */
 @HiltViewModel
 class BrowserViewModel @Inject constructor(
@@ -38,6 +43,12 @@ class BrowserViewModel @Inject constructor(
     )
 
     val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
+
+    /**
+     * Spec 008 — exposed for the Home affordance + `WebViewActionsHandle.loadHome`
+     * so the UI layer doesn't need its own Hilt injection of the URL constant.
+     */
+    val homeUrl: String get() = defaultHomeUrl
 
     /** Called from `BrowserWebViewClient.onPageStarted`. */
     fun onLoadStarted(url: String) {
@@ -83,6 +94,40 @@ class BrowserViewModel @Inject constructor(
      */
     fun onLoadFailed(reason: ErrorReason) {
         _uiState.update { it.copy(loadingState = LoadingState.Failed(reason)) }
+    }
+
+    /**
+     * Spec 008 — called from `BrowserWebViewClient.doUpdateVisitedHistory`
+     * after every history-mutating commit (page nav, back/forward, fragment
+     * change, History API push). Source of truth: `WebView.canGoBack()`.
+     */
+    fun onCanGoBackChanged(canGoBack: Boolean) {
+        _uiState.update { it.copy(canGoBack = canGoBack) }
+    }
+
+    /**
+     * Spec 008 — symmetric to [onCanGoBackChanged]. Source of truth:
+     * `WebView.canGoForward()`.
+     */
+    fun onCanGoForwardChanged(canGoForward: Boolean) {
+        _uiState.update { it.copy(canGoForward = canGoForward) }
+    }
+
+    /**
+     * Spec 008 — called from the bottom-bar Reload/Stop click handler when the
+     * current state is [LoadingState.Loading]. Transitions to [LoadingState.Loaded]
+     * so the loading indicator hides immediately (FR-006: page settles at
+     * whatever state it had reached). Idempotent; non-Loading states pass
+     * through unchanged.
+     */
+    fun onLoadStopped() {
+        _uiState.update { current ->
+            if (current.loadingState is LoadingState.Loading) {
+                current.copy(loadingState = LoadingState.Loaded)
+            } else {
+                current
+            }
+        }
     }
 
     private companion object {

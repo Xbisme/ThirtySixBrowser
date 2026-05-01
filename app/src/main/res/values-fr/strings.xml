@@ -13,4 +13,11 @@
     <string name="browser_error_title">La page n\'a pas pu être chargée</string>
     <string name="browser_error_offline_hint">Vérifiez votre connexion Internet et réessayez.</string>
     <string name="browser_error_generic">Une erreur s\'est produite. Réessayez plus tard.</string>
+
+    <!-- Spec 008 — French (fr) translations for navigation bottom-bar a11y. -->
+    <string name="browser_action_back">Précédent</string>
+    <string name="browser_action_forward">Suivant</string>
+    <string name="browser_action_reload">Recharger la page</string>
+    <string name="browser_action_stop">Arrêter le chargement</string>
+    <string name="browser_action_home">Accueil</string>
 </resources>

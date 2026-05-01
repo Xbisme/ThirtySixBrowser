@@ -133,6 +133,95 @@ class BrowserViewModelTest {
         assertEquals(0.99f, (vm.uiState.value.loadingState as LoadingState.Loading).progress, FLOAT_TOLERANCE)
     }
 
+    // ---------- Spec 008 (T026) — canGoBack / canGoForward state mutators ----------
+
+    @Test
+    fun `initial canGoBack and canGoForward are false`() = runTest {
+        val vm = newViewModel()
+        val state = vm.uiState.value
+        assertEquals(false, state.canGoBack)
+        assertEquals(false, state.canGoForward)
+    }
+
+    @Test
+    fun `onCanGoBackChanged true propagates to state`() = runTest {
+        val vm = newViewModel()
+        vm.onCanGoBackChanged(true)
+        assertEquals(true, vm.uiState.value.canGoBack)
+        assertEquals(false, vm.uiState.value.canGoForward) // independent
+    }
+
+    @Test
+    fun `onCanGoBackChanged false reverts to false`() = runTest {
+        val vm = newViewModel()
+        vm.onCanGoBackChanged(true)
+        vm.onCanGoBackChanged(false)
+        assertEquals(false, vm.uiState.value.canGoBack)
+    }
+
+    @Test
+    fun `onCanGoForwardChanged true propagates to state`() = runTest {
+        val vm = newViewModel()
+        vm.onCanGoForwardChanged(true)
+        assertEquals(true, vm.uiState.value.canGoForward)
+        assertEquals(false, vm.uiState.value.canGoBack) // independent
+    }
+
+    @Test
+    fun `onCanGoBackChanged and onCanGoForwardChanged are independent`() = runTest {
+        val vm = newViewModel()
+        vm.onCanGoBackChanged(true)
+        vm.onCanGoForwardChanged(true)
+        val state = vm.uiState.value
+        assertEquals(true, state.canGoBack)
+        assertEquals(true, state.canGoForward)
+
+        vm.onCanGoBackChanged(false)
+        val after = vm.uiState.value
+        assertEquals(false, after.canGoBack)
+        assertEquals(true, after.canGoForward) // forward retains its value
+    }
+
+    // ---------- Spec 008 (T026) — onLoadStopped + homeUrl getter ----------
+
+    @Test
+    fun `onLoadStopped during Loading transitions to Loaded`() = runTest {
+        val vm = newViewModel()
+        vm.onLoadStarted("https://example.com")
+        vm.onProgressChanged(MID_PROGRESS) // partial load
+        assertTrue(vm.uiState.value.loadingState is LoadingState.Loading)
+
+        vm.onLoadStopped()
+        assertEquals(LoadingState.Loaded, vm.uiState.value.loadingState)
+    }
+
+    @Test
+    fun `onLoadStopped from non-Loading state is no-op`() = runTest {
+        val vm = newViewModel()
+        // From Idle
+        vm.onLoadStopped()
+        assertEquals(LoadingState.Idle, vm.uiState.value.loadingState)
+
+        // From Loaded
+        vm.onLoadStarted("https://example.com")
+        vm.onLoadFinished("https://example.com")
+        val loaded = vm.uiState.value
+        vm.onLoadStopped()
+        assertEquals(loaded, vm.uiState.value)
+
+        // From Failed
+        vm.onLoadFailed(ErrorReason.NetworkUnavailable)
+        val failed = vm.uiState.value
+        vm.onLoadStopped()
+        assertEquals(failed, vm.uiState.value)
+    }
+
+    @Test
+    fun `homeUrl getter returns the injected default URL`() = runTest {
+        val vm = newViewModel("https://www.google.com/")
+        assertEquals("https://www.google.com/", vm.homeUrl)
+    }
+
     private companion object {
         const val EARLY_PROGRESS: Int = 25
         const val MID_PROGRESS: Int = 50

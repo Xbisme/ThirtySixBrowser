@@ -13,4 +13,11 @@
     <string name="browser_error_title">Не удалось загрузить страницу</string>
     <string name="browser_error_offline_hint">Проверьте подключение к Интернету и попробуйте снова.</string>
     <string name="browser_error_generic">Что-то пошло не так. Попробуйте открыть страницу позже.</string>
+
+    <!-- Spec 008 — Russian (ru) translations for navigation bottom-bar a11y. -->
+    <string name="browser_action_back">Назад</string>
+    <string name="browser_action_forward">Вперёд</string>
+    <string name="browser_action_reload">Обновить страницу</string>
+    <string name="browser_action_stop">Остановить загрузку</string>
+    <string name="browser_action_home">Домой</string>
 </resources>

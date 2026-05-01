@@ -13,4 +13,11 @@
     <string name="browser_error_title">Seite konnte nicht geladen werden</string>
     <string name="browser_error_offline_hint">Überprüfe deine Internetverbindung und versuche es erneut.</string>
     <string name="browser_error_generic">Ein Fehler ist aufgetreten. Versuche es später erneut.</string>
+
+    <!-- Spec 008 — German (de) translations for navigation bottom-bar a11y. -->
+    <string name="browser_action_back">Zurück</string>
+    <string name="browser_action_forward">Vorwärts</string>
+    <string name="browser_action_reload">Seite neu laden</string>
+    <string name="browser_action_stop">Laden anhalten</string>
+    <string name="browser_action_home">Startseite</string>
 </resources>
