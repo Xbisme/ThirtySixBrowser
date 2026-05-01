@@ -21,38 +21,23 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Pre-Execution Checks
 
-**Check for extension hooks (before specification)**:
-- Check if `.specify/extensions.yml` exists in the project root.
-- If it exists, read it and look for entries under the `hooks.before_specify` key
-- If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
-- Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
-- For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
-  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
-  - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
-- When constructing slash commands from hook command names, replace dots (`.`) with hyphens (`-`). For example, `speckit.git.commit` → `/speckit-git-commit`.
-- For each executable hook, output the following based on its `optional` flag:
-  - **Optional hook** (`optional: true`):
-    ```
-    ## Extension Hooks
+**Auto-create the feature branch (inline, no prompt)**:
 
-    **Optional Pre-Hook**: {extension}
-    Command: `/{command}`
-    Description: {description}
+If `.specify/extensions.yml` exists and `hooks.before_specify` includes the `speckit.git.feature` git hook with `enabled: true` (default), invoke the create-new-feature script directly via Bash — do NOT route through the slash-command prompt mechanism. The user has explicitly opted into auto-branching; nagging on every `/speckit-specify` is unwanted.
 
-    Prompt: {prompt}
-    To execute: `/{command}`
-    ```
-  - **Mandatory hook** (`optional: false`):
-    ```
-    ## Extension Hooks
+Steps:
+1. Verify a git repo: `git rev-parse --is-inside-work-tree 2>/dev/null`. If not, skip branch creation and continue with a warning.
+2. Generate a 2–4 word short name from the feature description (per the rules in step 1 of the Outline).
+3. Run the script directly with the JSON flag:
+   - Bash: `.specify/extensions/git/scripts/bash/create-new-feature.sh --json --short-name "<short-name>" "<feature description>"`
+   - Honor `branch_numbering` from `.specify/extensions/git/git-config.yml` or `.specify/init-options.json` — pass `--timestamp` only when configured to `timestamp`.
+   - If the user explicitly provided `GIT_BRANCH_NAME`, set it as an env var so the script bypasses prefix/suffix generation.
+4. Parse the JSON output for `BRANCH_NAME` and `FEATURE_NUM`. Note them for reference; the spec directory name is determined independently in step 3 of the Outline.
+5. Run the script only ONCE per `/speckit-specify` invocation.
 
-    **Automatic Pre-Hook**: {extension}
-    Executing: `/{command}`
-    EXECUTE_COMMAND: {command}
+If the script fails or git is unavailable, surface a one-line warning and continue with spec creation on the current branch.
 
-    Wait for the result of the hook command before proceeding to the Outline.
-    ```
-- If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
+**Other before_specify hooks** (non-git, or future additions): if any executable hook other than `speckit.git.feature` is registered, fall back to the slash-command prompt mechanism — output `EXECUTE_COMMAND: {command}` and wait. This auto-inline path is specific to branch creation.
 
 ## Outline
 
