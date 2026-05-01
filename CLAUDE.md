@@ -286,13 +286,16 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: [Spec 001 — Project Init & Build Config](specs/001-project-init-build-config/plan.md) ✅ Implemented 2026-05-01
+**Current**: [Spec 002 — Clean Architecture Skeleton + Hilt DI](specs/002-clean-architecture-skeleton-di/plan.md) 🟡 Planned 2026-05-01
 
-- Branch: `001-project-init-build-config`
-- Status: 🟢 Implemented — all 6 acceptance Gradle tasks pass + 16KB script active
-- Key version pins (verified 2026-04-30, revised 2026-05-01 for IDE compat — see [research.md](specs/001-project-init-build-config/research.md)):
-  - AGP 9.1.1 (NOT 9.2.0 — Android Studio doesn't support 9.2 yet) / Gradle 9.5.0 / Kotlin 2.3.21 / Compose BOM 2026.04.01
-  - Detekt 1.23.8 (compat risk with Kotlin 2.3 — track CV-05) / ktlint plugin 14.2.0
-  - Java target 11 via Toolchain; **launcher JDK 17+ required by AGP 9.x**
+- Branch: `002-clean-architecture-skeleton-di`
+- Status: 🟡 Planned — spec + 4 clarifications + research + plan + quickstart done; ready for `/speckit.tasks` then implement
+- Previous: [Spec 001 — Project Init & Build Config](specs/001-project-init-build-config/plan.md) ✅ Implemented 2026-05-01
+- Key new version pins (verified 2026-05-01 via `central.sonatype.com` + GitHub releases — see [research.md](specs/002-clean-architecture-skeleton-di/research.md)):
+  - **Hilt 2.59.2** (first AGP-9 compatible release, 2026-02-20) via **KSP 2.3.7** (2026-04-22)
+  - Critical: artifact ID is `com.google.dagger:hilt-compiler` (NOT `hilt-android-compiler` — that's kapt-era; KSP wiring with wrong ID compiles silently but generates zero Hilt code)
+  - `androidx.hilt:hilt-navigation-compose:1.3.0` / `androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0` (NOT BOM-managed, pin separately) / `androidx.navigation:navigation-compose:2.9.8`
+  - Test only: `kotlinx-coroutines-test:1.10.2` (for `BaseViewModel.launchSafely` test)
+- Highest risk (per research.md Risk #1): Hilt × Kotlin 2.3.21 metadata not battle-tested. **Day-1 smoke test**: `./gradlew :app:kspDebugKotlin --info` must pass before building rest of spec. Fallback ladder: kapt → Kotlin 2.2.x → hold spec.
 
 <!-- SPECKIT END -->
