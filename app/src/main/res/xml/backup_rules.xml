@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
+   Auto Backup rules for Android < 12 (API 23–30).
+   Spec 005 FR-016 + Q4 clarification: ThirtySixBrowser's Room database is excluded
+   from Auto Backup to enforce the on-device-only privacy stance. WAL sidecar files
+   (-wal, -shm) are also excluded because they may contain transient transaction
+   data that would otherwise produce partial-database backup edge cases.
    See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="database" path="thirtysix_browser.db"/>
+    <exclude domain="database" path="thirtysix_browser.db-wal"/>
+    <exclude domain="database" path="thirtysix_browser.db-shm"/>
 </full-backup-content>

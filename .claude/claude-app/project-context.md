@@ -1,22 +1,22 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-05-01 — **✅ Specs 001–004 done. Phase 1 4/6 complete.**
+> Cập nhật lần cuối: 2026-05-01 — **✅ Specs 001–005 done. Phase 1 5/6 complete.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: ✅ Foundation Phase 1 — 4/6 done (Specs 001–004)
+## Trạng thái dự án: ✅ Foundation Phase 1 — 5/6 done (Specs 001–005)
 
 Foundation phase tiến độ:
 - **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)
 - **Spec 002** ✅ — Clean Architecture skeleton + Hilt DI (Hilt 2.59.2 / KSP 2.3.7), base utilities (`Result<T>`, `AppError`, `DispatcherProvider`, `BaseViewModel.launchSafely`)
 - **Spec 003** ✅ — Material3 theme + typography + dark mode (Deep Teal seed + Cyan tertiary, Poppins + Inter bundled local, 5-token spacing scale, light/dark/system + dynamic color Android 12+, cold-start window flash fix)
 - **Spec 004** ✅ — Multi-Language Localization Foundation: 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR), Android 13+ system per-app picker via `locales_config.xml` + manifest, lint enforcement at error severity for translation completeness, brand "ThirtySix" preserved in Latin across non-Latin scripts. Zero Kotlin code change.
+- **Spec 005** ✅ — Room database schema (Bookmark/BookmarkFolder/HistoryEntry/Tab) + DAOs + AppDatabase + Hilt DatabaseModule + WAL + strict-no-destructive migration + DB excluded from Auto Backup. Room 2.8.4 + Turbine 1.2.1 + Robolectric 4.16.1 (test-only). 29 new unit tests (51 total). APK release 1.4 MB (down from Spec 004 baseline 1.49 MB after R8 re-shrink). 16KB CI gate green (no new `.so`).
 
-**Next available** (parallel-runnable after 002, both unblock Phase 2 Spec 007):
-- Spec 005 (`room-database-schema`) — Room entities + DAOs
-- Spec 006 (`datastore-settings`) — DataStore Preferences
+**Next available** (unblocks Phase 2 Spec 007):
+- Spec 006 (`datastore-settings`) — DataStore Preferences (last Phase 1 spec; smaller scope than 005, persists Spec 003 in-memory `ThemeMode` to disk)
 
-User chooses order. Both must complete before starting Phase 2 Core Browser specs.
+After 006: Phase 2 Spec 007 `webview-compose-wrapper` unblocked.
 
 ### Tổng quan dự án
 
@@ -260,6 +260,88 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 ---
 
 ## Key Decisions Log
+
+### 2026-05-01 — Spec 005 hoàn tất
+
+**Room database schema shipped** (branch `005-room-database-schema`, pre-PR; 33/33 tasks complete).
+
+**Versions chốt** (verified `developer.android.com/jetpack/androidx/releases/room` + `central.sonatype.com` + `github.com/cashapp/turbine/releases` + `github.com/robolectric/robolectric/releases` 2026-05-01):
+
+- **Room 2.8.4** (released 2025-11-19) — `room-runtime` + `room-ktx` (impl) + `room-compiler` (ksp) + `room-testing` (testImpl). Pure Kotlin/Java, **zero `.so`** → 16KB CI gate auto-passes. minSdk floor 23 (project 24 above floor).
+- **Turbine 1.2.1** (released 2025-06-11) — Cash App Flow testing library. Pure JVM JAR, pulls `kotlinx-coroutines-core 1.10.2` transitively.
+- **Robolectric 4.16.1** (released 2026-01-21) — required to provide Android Context to Room in JVM unit tests. Robolectric DOES ship native code BUT it loads only into JVM test process — NOT packaged into release APK; Constitution §IX 16KB gate inspects release APK only → does NOT apply. **Pinned to SDK 33** via `app/src/test/resources/robolectric.properties` because SDK 34+ requires JDK 17 and SDK 36 requires JDK 21; project Kotlin toolchain is JDK 11. Room behaviour is SDK-independent for our entity / DAO test surfaces (CRUD + observers + FK SET NULL + WAL).
+
+**Schema decisions** (per spec.md 11 clarifications):
+
+- 4 entities: `BookmarkEntity` / `BookmarkFolderEntity` / `HistoryEntryEntity` / `TabEntity`. Auto-increment Long primary keys. Timestamps stored as `Long` epoch millis (no `TypeConverter` v1.0).
+- Bookmark folder support shipped (self-FK on `BookmarkFolderEntity.parent_id`). FK `ON DELETE SET NULL` on both `bookmark.parent_folder_id` and `folder.parent_id` — orphan-to-root preserves user data.
+- `favicon_url` deferred (no Coil/loading infra yet).
+- `is_incognito` NOT in `TabEntity` — incognito = in-memory only (Spec 011/012 enforces persistence-by-omission).
+- History = chronological log (each visit = new row); same URL multiple visits → multiple rows distinguished by `visited_at`. No UNIQUE constraint on bookmark URL either.
+- 3 indexes shipped at v1: `history.visited_at`, `bookmark.parent_folder_id`, `tab.position`. Designed for power-user envelope (10K bookmarks / 100K history / 500 tabs) per Q5 clarification.
+- Strict-no-destructive migration: NO `fallbackToDestructiveMigration*`. Schema export wired to `app/schemas/com.raumanian.thirtysix.browser.data.local.database.AppDatabase/1.json` (committed to git).
+
+**Backup exclusion** (Q4 clarification — stricter than Constitution §VII baseline which permits opt-in backup): `backup_rules.xml` (Android <12) and `data_extraction_rules.xml` (Android 12+) both exclude `thirtysix_browser.db` + `thirtysix_browser.db-wal` + `thirtysix_browser.db-shm` from cloud backup AND device-to-device transfer. Privacy-first stance — DB never leaves device.
+
+**Hilt module placement**: `app/src/main/kotlin/.../di/DatabaseModule.kt` (NEW top-level `di/` package). `core/di/DispatcherModule.kt` from Spec 002 untouched. Per Constitution §IV "ALL @Module annotations in `di/` package" — both placements valid; chose top-level for application-scoped composites (parallel to upcoming `RepositoryModule` Specs 013/014, `NetworkModule` Spec 007).
+
+**Out-of-scope (per incremental scope preference)**: Repository / Mapper / Domain model / `core/constants/` deferred to consuming specs (011/013/014). Encryption-at-rest, ContentProvider, data seeding, retention/pruning, full-text search, paging — all out of v1.0.
+
+**Test coverage**: 29 new unit tests across 7 test files. Total project: 51 unit tests (was 22 after Spec 003+004 baseline).
+
+| Test file | Tests | Covers |
+|---|---|---|
+| `BookmarkDaoTest` | 8 | CRUD + observer (Turbine) + FK orphan-to-root + same-URL-multi-row |
+| `BookmarkFolderDaoTest` | 4 | nested folder + self-FK orphan + observeChildren ordering |
+| `HistoryDaoTest` | 6 | chronological log invariant + range delete + Flow emission |
+| `TabDaoTest` | 6 | maxPosition + position ordering + lastActiveAt update |
+| `WalConcurrencyTest` | 1 | SC-006 — two coroutines concurrent insert under WAL |
+| `AppDatabaseConfigTest` | 2 | FR-007 PRAGMA journal_mode + SC-004 negative-path migration |
+| `DatabaseModuleSmokeTest` | 2 | SC-010 structural smoke — module providers + DAO round-trip |
+
+`WalConcurrencyTest` uses `runBlocking` (real time) instead of `runTest` (virtual time) because the concurrency claim is a real-wall-clock invariant; 1 s budget relaxed to 5 s for Robolectric-JVM SQLite shadow overhead — production-device 1 s target documented in spec.
+
+**Quality gates result** (2026-05-01 local run):
+
+- `./gradlew assembleDebug` ✅
+- `./gradlew testDebugUnitTest` ✅ 51/51 pass (29 new from Spec 005)
+- `./gradlew lintDebug` ✅ zero warnings
+- `./gradlew detekt` ✅ zero violations, baseline UNCHANGED
+- `./gradlew ktlintCheck` ✅ zero violations
+- `./gradlew assembleRelease` ✅ APK = 1.4 MB (DOWN from 1.49 MB Spec 004 baseline — R8 re-shrink absorbed Room runtime)
+- 16KB CI script ✅ all 12 native lib entries aligned 0x4000 (only `libandroidx.graphics.path.so` from Compose; Room added zero natives)
+- `git grep "fallbackToDestructiveMigration|allowMainThreadQueries()"` in `app/src/main/` = zero matches ✅
+
+**Files created** (16 production + test):
+
+- `app/src/main/kotlin/com/raumanian/thirtysix/browser/data/local/entity/BookmarkEntity.kt`
+- `.../entity/BookmarkFolderEntity.kt`
+- `.../entity/HistoryEntryEntity.kt`
+- `.../entity/TabEntity.kt`
+- `.../data/local/dao/BookmarkDao.kt`
+- `.../dao/BookmarkFolderDao.kt`
+- `.../dao/HistoryDao.kt`
+- `.../dao/TabDao.kt`
+- `.../data/local/database/AppDatabase.kt`
+- `.../di/DatabaseModule.kt`
+- `app/src/test/.../dao/TestDatabaseFactory.kt`
+- `app/src/test/.../dao/{Bookmark,BookmarkFolder,History,Tab}DaoTest.kt` (4)
+- `app/src/test/.../database/WalConcurrencyTest.kt`
+- `app/src/test/.../database/AppDatabaseConfigTest.kt`
+- `app/src/test/.../di/DatabaseModuleSmokeTest.kt`
+- `app/src/test/resources/robolectric.properties`
+- `app/schemas/com.raumanian.thirtysix.browser.data.local.database.AppDatabase/1.json` (auto-generated, committed)
+
+**Files modified** (4):
+
+- `gradle/libs.versions.toml` (+ room, turbine, robolectric versions + 6 library coords)
+- `app/build.gradle.kts` (+ Room deps + KSP `room.schemaLocation` arg + Robolectric `testOptions.unitTests.isIncludeAndroidResources = true`)
+- `app/src/main/res/xml/backup_rules.xml` (DB + WAL sidecars excluded)
+- `app/src/main/res/xml/data_extraction_rules.xml` (DB + WAL sidecars excluded under both `<cloud-backup>` and `<device-transfer>`)
+
+Constitution Check 11/11 PASS pre- and post-design. Stricter than minimum on §I + §VII (default-off backup vs constitutional "opt-in" baseline).
+
+---
 
 ### 2026-05-01 — Spec 004 hoàn tất
 
