@@ -2,9 +2,20 @@ package com.raumanian.thirtysix.browser.presentation.browser
 
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
+import java.net.URLEncoder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 /**
@@ -13,11 +24,45 @@ import org.junit.Test
  * Failed-state tests live in T034 (US3 phase) once `ErrorReason` and
  * `LoadingState.Failed` exist. This test class restricts itself to
  * Idle / Loading / Loaded transitions per [contracts/browser-screen-contract.md].
+ *
+ * Spec 010 — query-branch tests now exercise a real [BuildSearchUrlUseCase]
+ * backed by a [GoogleByteIdenticalRepository] fake. The fake reproduces the
+ * exact `URLEncoder.encode(query, "UTF-8")` + `GOOGLE_SEARCH_URL_TEMPLATE`
+ * formula Spec 009 used inline so SC-001 byte-identity holds at the ViewModel
+ * boundary as well. The query branch now runs inside `viewModelScope.launch`
+ * so query tests advance the [StandardTestDispatcher] before asserting.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelTest {
 
-    private fun newViewModel(url: String = UrlConstants.DEFAULT_HOME_URL): BrowserViewModel =
-        BrowserViewModel(defaultHomeUrl = url)
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    private fun newViewModel(
+        url: String = UrlConstants.DEFAULT_HOME_URL,
+        buildSearchUrl: BuildSearchUrlUseCase = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),
+    ): BrowserViewModel = BrowserViewModel(defaultHomeUrl = url, buildSearchUrl = buildSearchUrl)
+
+    /**
+     * Test fake reproducing the exact Spec 009 inline-encoding formula so the
+     * Google query-path assertions stay byte-identical to the prior production
+     * behavior (SC-001 non-regression).
+     */
+    private object GoogleByteIdenticalRepository : SearchEngineRepository {
+        override suspend fun buildSearchUrl(query: String): String {
+            val encoded = URLEncoder.encode(query, Charsets.UTF_8.name())
+            return String.format(UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE, encoded)
+        }
+    }
 
     @Test
     fun `initial state matches injected URL and Idle loading`() = runTest {
@@ -319,34 +364,98 @@ class BrowserViewModelTest {
     // ---------- Spec 009 (T020 — US2) — onAddressBarSubmit query path ----------
 
     @Test
-    fun `onAddressBarSubmit query input builds Google search URL`() = runTest {
+    fun `onAddressBarSubmit query input builds Google search URL`() = runTest(testDispatcher) {
         val vm = newViewModel()
         vm.onAddressBarTextChange("kotlin coroutines")
         val calls = mutableListOf<String>()
         val submitted = vm.onAddressBarSubmit { calls.add(it) }
         assertEquals(true, submitted)
+        advanceUntilIdle()
         // URLEncoder.encode renders space as `+` in form-urlencoded mode.
         assertEquals(listOf("https://www.google.com/search?q=kotlin+coroutines"), calls)
     }
 
     @Test
-    fun `onAddressBarSubmit query encodes special characters`() = runTest {
+    fun `onAddressBarSubmit query encodes special characters`() = runTest(testDispatcher) {
         val vm = newViewModel()
         vm.onAddressBarTextChange("c++ vs rust")
         val calls = mutableListOf<String>()
         vm.onAddressBarSubmit { calls.add(it) }
+        advanceUntilIdle()
         // `+` becomes `%2B`; space becomes `+`.
         assertEquals(listOf("https://www.google.com/search?q=c%2B%2B+vs+rust"), calls)
     }
 
     @Test
-    fun `onAddressBarSubmit query encodes Unicode`() = runTest {
+    fun `onAddressBarSubmit query encodes Unicode`() = runTest(testDispatcher) {
         val vm = newViewModel()
         vm.onAddressBarTextChange("안녕")
         val calls = mutableListOf<String>()
         vm.onAddressBarSubmit { calls.add(it) }
+        advanceUntilIdle()
         // Korean "annyeong" UTF-8 percent-encoded.
         assertEquals(listOf("https://www.google.com/search?q=%EC%95%88%EB%85%95"), calls)
+    }
+
+    // ---------- Spec 010 — onAddressBarSubmit query path routes through BuildSearchUrlUseCase ----------
+
+    @Test
+    fun `query branch dispatches to BuildSearchUrlUseCase`() = runTest(testDispatcher) {
+        var receivedQuery: String? = null
+        val recordingRepo = object : SearchEngineRepository {
+            override suspend fun buildSearchUrl(query: String): String {
+                receivedQuery = query
+                return "https://example.test/search?q=$query"
+            }
+        }
+        val vm = newViewModel(buildSearchUrl = BuildSearchUrlUseCase(recordingRepo))
+        vm.onAddressBarTextChange("kotlin")
+        val calls = mutableListOf<String>()
+        val submitted = vm.onAddressBarSubmit { calls.add(it) }
+        advanceUntilIdle()
+
+        assertEquals(true, submitted)
+        assertEquals("kotlin", receivedQuery)
+        assertEquals(listOf("https://example.test/search?q=kotlin"), calls)
+    }
+
+    @Test
+    fun `URL branch does not invoke BuildSearchUrlUseCase`() = runTest(testDispatcher) {
+        var useCaseCalled = false
+        val watcher = object : SearchEngineRepository {
+            override suspend fun buildSearchUrl(query: String): String {
+                useCaseCalled = true
+                return "should-not-be-used"
+            }
+        }
+        val vm = newViewModel(buildSearchUrl = BuildSearchUrlUseCase(watcher))
+        vm.onAddressBarTextChange("example.com")
+        val calls = mutableListOf<String>()
+        vm.onAddressBarSubmit { calls.add(it) }
+        advanceUntilIdle()
+
+        assertEquals(false, useCaseCalled)
+        assertEquals(listOf("https://example.com"), calls)
+    }
+
+    @Test
+    fun `empty submit returns false and never invokes BuildSearchUrlUseCase`() = runTest(testDispatcher) {
+        var useCaseCalled = false
+        val watcher = object : SearchEngineRepository {
+            override suspend fun buildSearchUrl(query: String): String {
+                useCaseCalled = true
+                return "irrelevant"
+            }
+        }
+        val vm = newViewModel(buildSearchUrl = BuildSearchUrlUseCase(watcher))
+        // No onAddressBarTextChange call → addressBarText is empty.
+        val calls = mutableListOf<String>()
+        val submitted = vm.onAddressBarSubmit { calls.add(it) }
+        advanceUntilIdle()
+
+        assertEquals(false, submitted)
+        assertEquals(false, useCaseCalled)
+        assertTrue(calls.isEmpty())
     }
 
     // ---------- Spec 009 (T024 — US3) — onUrlChanged + onLoadStarted refactor ----------

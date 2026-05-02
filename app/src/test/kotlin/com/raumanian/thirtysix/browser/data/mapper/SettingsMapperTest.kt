@@ -40,8 +40,10 @@ class SettingsMapperTest {
 
     @Test
     fun unknownSearchEngineValue_fallsBackToDefault() {
+        // Spec 010 added Google + DuckDuckGo + Bing; this fixture uses a
+        // still-unknown engine name to exercise the fallback.
         val prefs = mutablePreferencesOf().toMutablePreferences()
-        prefs[StorageKeys.SEARCH_ENGINE] = "bing"
+        prefs[StorageKeys.SEARCH_ENGINE] = "yandex"
         assertEquals(AppDefaults.SEARCH_ENGINE, mapper.toDomain(prefs).searchEngine)
     }
 
