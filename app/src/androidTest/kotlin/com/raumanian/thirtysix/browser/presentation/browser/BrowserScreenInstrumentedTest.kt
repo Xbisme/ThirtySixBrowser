@@ -13,6 +13,8 @@ import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
+import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -62,7 +64,14 @@ class BrowserScreenInstrumentedTest {
             // (Spec 008 changed the production constant to Google). VM is
             // class-scoped so the rotation test can re-attach it after
             // activity recreate, preserving the same UiState.
-            viewModel = BrowserViewModel(defaultHomeUrl = TEST_PAGE_URL)
+            // Spec 010 — instrumented tests do not exercise the address-bar
+            // query path, so a no-op `BuildSearchUrlUseCase` is sufficient.
+            // The Query branch in `BrowserViewModel.onAddressBarSubmit` is
+            // never invoked under this test's WebView load-only flow.
+            viewModel = BrowserViewModel(
+                defaultHomeUrl = TEST_PAGE_URL,
+                buildSearchUrl = BuildSearchUrlUseCase(InstrumentedNoopSearchEngineRepository),
+            )
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
     }
@@ -132,4 +141,14 @@ class BrowserScreenInstrumentedTest {
         const val LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS: Long = 5_000L
         const val LOADING_INDICATOR_HIDE_TIMEOUT_MS: Long = 10_000L
     }
+}
+
+/**
+ * Spec 010 — file-private no-op [SearchEngineRepository] for the WebView-load-only
+ * instrumented test. The Query branch of `BrowserViewModel.onAddressBarSubmit` is
+ * never invoked here, so this stub never executes.
+ */
+private object InstrumentedNoopSearchEngineRepository : SearchEngineRepository {
+    override suspend fun buildSearchUrl(query: String): String =
+        error("instrumented test should not reach the search-URL build path")
 }

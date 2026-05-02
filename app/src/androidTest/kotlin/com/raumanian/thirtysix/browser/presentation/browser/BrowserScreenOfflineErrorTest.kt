@@ -7,6 +7,8 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_ERROR_STATE
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -60,7 +62,12 @@ class BrowserScreenOfflineErrorTest {
             // the WebView is never created → no real network load → no race
             // between WebView's onPageFinished and the test's assertion (which
             // would re-transition Failed → Loaded and hide the error UI).
-            viewModel = BrowserViewModel(defaultHomeUrl = UrlConstants.DEFAULT_HOME_URL).apply {
+            // Spec 010 — error-rendering test never invokes the address-bar
+            // Query branch, so a no-op `BuildSearchUrlUseCase` is sufficient.
+            viewModel = BrowserViewModel(
+                defaultHomeUrl = UrlConstants.DEFAULT_HOME_URL,
+                buildSearchUrl = BuildSearchUrlUseCase(OfflineErrorNoopSearchEngineRepository),
+            ).apply {
                 onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)
             }
@@ -82,4 +89,13 @@ class BrowserScreenOfflineErrorTest {
         // earlier 15 s budget targeted real DNS NXDOMAIN, no longer applicable.
         const val ERROR_STATE_TIMEOUT_MS: Long = 5_000L
     }
+}
+
+/**
+ * Spec 010 — file-private no-op [SearchEngineRepository] for the error-state
+ * rendering test. Query branch is never reached.
+ */
+private object OfflineErrorNoopSearchEngineRepository : SearchEngineRepository {
+    override suspend fun buildSearchUrl(query: String): String =
+        error("instrumented test should not reach the search-URL build path")
 }
