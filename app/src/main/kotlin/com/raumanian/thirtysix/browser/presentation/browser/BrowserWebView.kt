@@ -54,12 +54,21 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  *   guard, the WebView would auto-load the URL and override the seeded Failed
  *   state via subsequent `onPageFinished`).
  */
+@Suppress("LongParameterList")
+// 6 params after Spec 009: state + homeUrl + actions + 2 callback bundles + modifier.
+// Spec 008's split of [BrowserWebViewCallbacks] (6 fields → 4) and the new
+// [BrowserNavigationCallbacks] (3 fields) was specifically structured to keep
+// each bundle's data-class constructor under detekt's `constructorThreshold = 7`.
+// Bundling the two callback objects further into a wrapper would defeat that
+// split (pushing the wrapper to 7 fields again) without semantic gain. The
+// 6th param here is intentional and tied to the spec design.
 @Composable
 internal fun BrowserWebView(
     state: BrowserUiState,
     homeUrl: String,
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
+    navigationCallbacks: BrowserNavigationCallbacks,
     modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -92,8 +101,9 @@ internal fun BrowserWebView(
                     onLoadStarted = callbacks.onLoadStarted,
                     onLoadFinished = callbacks.onLoadFinished,
                     onLoadFailed = callbacks.onLoadFailed,
-                    onCanGoBackChange = callbacks.onCanGoBackChange,
-                    onCanGoForwardChange = callbacks.onCanGoForwardChange,
+                    onUrlChange = navigationCallbacks.onUrlChange,
+                    onCanGoBackChange = navigationCallbacks.onCanGoBackChange,
+                    onCanGoForwardChange = navigationCallbacks.onCanGoForwardChange,
                 )
                 wv.webChromeClient = BrowserChromeClient(onProgressChanged = callbacks.onProgressChanged)
 
@@ -105,6 +115,8 @@ internal fun BrowserWebView(
                 actions.reload = { wv.reload() }
                 actions.stopLoading = { wv.stopLoading() }
                 actions.loadHome = { wv.loadUrl(homeUrl) }
+                // Spec 009 — address-bar submit path.
+                actions.loadUrl = { url -> wv.loadUrl(url) }
 
                 // Spec 008 — conditional initial load. When state is seeded to
                 // Failed (instrumented test pattern), skip the initial loadUrl
@@ -183,11 +195,18 @@ private class BrowserWebViewClient(
     private val onLoadStarted: (String) -> Unit,
     private val onLoadFinished: (String) -> Unit,
     private val onLoadFailed: (ErrorReason) -> Unit,
+    private val onUrlChange: (String) -> Unit,
     private val onCanGoBackChange: (Boolean) -> Unit,
     private val onCanGoForwardChange: (Boolean) -> Unit,
 ) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        url?.let(onLoadStarted)
+        url?.let {
+            // Spec 009 — fire URL change FIRST so the address bar reflects
+            // the submitted (or redirected-to) URL on the same UI tick the
+            // load starts (FR-019a / FR-019b live mirror).
+            onUrlChange(it)
+            onLoadStarted(it)
+        }
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
@@ -198,10 +217,14 @@ private class BrowserWebViewClient(
      * Spec 008 — fires AFTER each successful page commit (incl. fragment nav,
      * History API push, back/forward). Re-reads platform truth and pushes to
      * the ViewModel. Lighter than `copyBackForwardList()` (which allocates a
-     * full snapshot per call); we only need two booleans.
+     * full snapshot per call); we only need three signals.
+     *
+     * Spec 009 — also fires [onUrlChange] so SPA-style `pushState` /
+     * `replaceState` URL transitions flow into the live mirror (FR-019).
      */
     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
         val v = view ?: return
+        url?.let(onUrlChange)
         onCanGoBackChange(v.canGoBack())
         onCanGoForwardChange(v.canGoForward())
     }

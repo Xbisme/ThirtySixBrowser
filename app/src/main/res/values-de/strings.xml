@@ -20,4 +20,8 @@
     <string name="browser_action_reload">Seite neu laden</string>
     <string name="browser_action_stop">Laden anhalten</string>
     <string name="browser_action_home">Startseite</string>
+
+    <!-- Spec 009 — German (de) translations for address-bar hint + clear button. -->
+    <string name="browser_address_bar_hint">Suchen oder URL eingeben</string>
+    <string name="browser_address_bar_clear_cd">Adressleiste leeren</string>
 </resources>

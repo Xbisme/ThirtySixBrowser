@@ -20,4 +20,8 @@
     <string name="browser_action_reload">페이지 새로 고침</string>
     <string name="browser_action_stop">로드 중지</string>
     <string name="browser_action_home">홈</string>
+
+    <!-- Spec 009 — Korean (ko) translations for address-bar hint + clear button. -->
+    <string name="browser_address_bar_hint">검색 또는 URL 입력</string>
+    <string name="browser_address_bar_clear_cd">주소창 지우기</string>
 </resources>

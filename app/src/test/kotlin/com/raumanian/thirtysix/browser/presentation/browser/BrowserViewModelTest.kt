@@ -33,6 +33,11 @@ class BrowserViewModelTest {
     @Test
     fun `happy path Idle to Loading to Loaded via progress`() = runTest {
         val vm = newViewModel()
+        // Spec 009 — production wiring fires onUrlChange BEFORE onLoadStarted
+        // (see `BrowserWebViewClient.onPageStarted`). Mirror that order here
+        // since `onLoadStarted` no longer mutates `currentUrl` after the Spec
+        // 009 refactor.
+        vm.onUrlChanged("https://example.com")
         vm.onLoadStarted("https://example.com")
         vm.onProgressChanged(EARLY_PROGRESS)
         vm.onProgressChanged(MID_PROGRESS)
@@ -220,6 +225,189 @@ class BrowserViewModelTest {
     fun `homeUrl getter returns the injected default URL`() = runTest {
         val vm = newViewModel("https://www.google.com/")
         assertEquals("https://www.google.com/", vm.homeUrl)
+    }
+
+    // ---------- Spec 009 (T009) — Foundational address-bar default state ----------
+
+    @Test
+    fun `initial address-bar text is empty and not focused`() = runTest {
+        val vm = newViewModel()
+        val state = vm.uiState.value
+        assertEquals("", state.addressBarText)
+        assertEquals(false, state.isAddressBarFocused)
+    }
+
+    // ---------- Spec 009 (T011) — onAddressBarTextChange / FocusChange / Submit (US1) ----------
+
+    @Test
+    fun `onAddressBarTextChange updates state`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("foo")
+        assertEquals("foo", vm.uiState.value.addressBarText)
+    }
+
+    @Test
+    fun `onAddressBarFocusChange toggles flag`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarFocusChange(true)
+        assertEquals(true, vm.uiState.value.isAddressBarFocused)
+        vm.onAddressBarFocusChange(false)
+        assertEquals(false, vm.uiState.value.isAddressBarFocused)
+    }
+
+    @Test
+    fun `onAddressBarSubmit returns false on empty input and does not call loadUrl`() = runTest {
+        val vm = newViewModel()
+        val calls = mutableListOf<String>()
+        val submitted = vm.onAddressBarSubmit { calls.add(it) }
+        assertEquals(false, submitted)
+        assertTrue(calls.isEmpty())
+    }
+
+    @Test
+    fun `onAddressBarSubmit returns false on whitespace-only input`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("   ")
+        val calls = mutableListOf<String>()
+        val submitted = vm.onAddressBarSubmit { calls.add(it) }
+        assertEquals(false, submitted)
+        assertTrue(calls.isEmpty())
+    }
+
+    @Test
+    fun `onAddressBarSubmit URL input prepends https and calls loadUrl`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("example.com")
+        val calls = mutableListOf<String>()
+        val submitted = vm.onAddressBarSubmit { calls.add(it) }
+        assertEquals(true, submitted)
+        assertEquals(listOf("https://example.com"), calls)
+    }
+
+    @Test
+    fun `onAddressBarSubmit explicit http scheme is preserved`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("http://example.com")
+        val calls = mutableListOf<String>()
+        vm.onAddressBarSubmit { calls.add(it) }
+        assertEquals(listOf("http://example.com"), calls)
+    }
+
+    /**
+     * C1 remediation — FR-013 cancel-previous-load assertion. Two consecutive
+     * non-empty submits MUST forward both URLs to `loadUrl` in order. The
+     * underlying WebView platform contract guarantees the second `loadUrl`
+     * cancels the first; this test asserts the ViewModel does not coalesce
+     * or skip submissions.
+     */
+    @Test
+    fun `two consecutive submits forward both URLs to loadUrl in order (FR-013)`() = runTest {
+        val vm = newViewModel()
+        val calls = mutableListOf<String>()
+        val loadUrl: (String) -> Unit = { calls.add(it) }
+
+        vm.onAddressBarTextChange("first.com")
+        val first = vm.onAddressBarSubmit(loadUrl)
+        vm.onAddressBarTextChange("second.com")
+        val second = vm.onAddressBarSubmit(loadUrl)
+
+        assertEquals(true, first)
+        assertEquals(true, second)
+        assertEquals(listOf("https://first.com", "https://second.com"), calls)
+    }
+
+    // ---------- Spec 009 (T020 — US2) — onAddressBarSubmit query path ----------
+
+    @Test
+    fun `onAddressBarSubmit query input builds Google search URL`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("kotlin coroutines")
+        val calls = mutableListOf<String>()
+        val submitted = vm.onAddressBarSubmit { calls.add(it) }
+        assertEquals(true, submitted)
+        // URLEncoder.encode renders space as `+` in form-urlencoded mode.
+        assertEquals(listOf("https://www.google.com/search?q=kotlin+coroutines"), calls)
+    }
+
+    @Test
+    fun `onAddressBarSubmit query encodes special characters`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("c++ vs rust")
+        val calls = mutableListOf<String>()
+        vm.onAddressBarSubmit { calls.add(it) }
+        // `+` becomes `%2B`; space becomes `+`.
+        assertEquals(listOf("https://www.google.com/search?q=c%2B%2B+vs+rust"), calls)
+    }
+
+    @Test
+    fun `onAddressBarSubmit query encodes Unicode`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("안녕")
+        val calls = mutableListOf<String>()
+        vm.onAddressBarSubmit { calls.add(it) }
+        // Korean "annyeong" UTF-8 percent-encoded.
+        assertEquals(listOf("https://www.google.com/search?q=%EC%95%88%EB%85%95"), calls)
+    }
+
+    // ---------- Spec 009 (T024 — US3) — onUrlChanged + onLoadStarted refactor ----------
+
+    @Test
+    fun `onUrlChanged updates currentUrl and does not affect addressBarText or focus`() = runTest {
+        val vm = newViewModel("https://example.com")
+        vm.onAddressBarTextChange("typing-in-progress")
+        vm.onAddressBarFocusChange(true)
+        vm.onUrlChanged("https://example.com/about")
+        val state = vm.uiState.value
+        assertEquals("https://example.com/about", state.currentUrl)
+        assertEquals("typing-in-progress", state.addressBarText)
+        assertEquals(true, state.isAddressBarFocused)
+    }
+
+    /**
+     * Spec 009 refactor — `onLoadStarted` previously mutated `currentUrl`
+     * (Spec 007 behavior); the responsibility moved to [onUrlChanged]. This
+     * test asserts the refactor: `onLoadStarted` only flips loading state.
+     */
+    @Test
+    fun `onLoadStarted no longer mutates currentUrl after Spec 009 refactor`() = runTest {
+        val vm = newViewModel("https://initial.example.com")
+        vm.onLoadStarted("https://other.example.com")
+        val state = vm.uiState.value
+        assertEquals("https://initial.example.com", state.currentUrl)
+        assertTrue(state.loadingState is LoadingState.Loading)
+    }
+
+    /**
+     * C2 remediation — FR-019a immediacy. After submit, the WebView's
+     * `onPageStarted` callback fires synchronously; the test wires a stub
+     * `loadUrl` that calls `onUrlChanged(target)` directly to mirror that
+     * platform contract. Asserts `currentUrl` reflects the submitted target
+     * before any `onLoadFinished` callback fires.
+     */
+    @Test
+    fun `submit triggers immediate currentUrl update via onUrlChanged (FR-019a)`() = runTest {
+        val vm = newViewModel("https://before.example.com")
+        // Stub mirrors the real WebView's onPageStarted → onUrlChanged chain.
+        val loadUrl: (String) -> Unit = { url -> vm.onUrlChanged(url) }
+
+        vm.onAddressBarTextChange("example.com")
+        val submitted = vm.onAddressBarSubmit(loadUrl)
+
+        assertEquals(true, submitted)
+        assertEquals("https://example.com", vm.uiState.value.currentUrl)
+    }
+
+    // ---------- Spec 009 (T034 — US4) — onAddressBarClear ----------
+
+    @Test
+    fun `onAddressBarClear empties text and preserves focus`() = runTest {
+        val vm = newViewModel()
+        vm.onAddressBarTextChange("partial input")
+        vm.onAddressBarFocusChange(true)
+        vm.onAddressBarClear()
+        val state = vm.uiState.value
+        assertEquals("", state.addressBarText)
+        assertEquals(true, state.isAddressBarFocused)
     }
 
     private companion object {

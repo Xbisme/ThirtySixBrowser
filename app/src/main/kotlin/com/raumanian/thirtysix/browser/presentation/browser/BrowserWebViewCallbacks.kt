@@ -1,20 +1,19 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 /**
- * Bundles the event callbacks `BrowserWebView` forwards to the ViewModel.
- * Keeps the Composable parameter count under detekt's `LongParameterList`
- * threshold (6) without sacrificing readability.
+ * Bundles the load-lifecycle callbacks `BrowserWebView` forwards to the
+ * ViewModel.
  *
- * Spec 007 baseline: 4 callbacks (load lifecycle + progress + error).
- * Spec 008 adds 2 history-state callbacks (total 6, exactly at threshold) so
- * the ViewModel can reflect WebView session-history changes into
- * [BrowserUiState.canGoBack] / [BrowserUiState.canGoForward] reactively.
+ * Spec 007 baseline: 4 callbacks (page lifecycle + progress + error).
+ * Spec 008 added 2 history-state callbacks (total 6 = at threshold).
+ * Spec 009 split: the 2 history-state callbacks moved into
+ * [BrowserNavigationCallbacks] alongside the new `onUrlChange` callback,
+ * leaving this bundle at its original Spec 007 size of 4 fields. Mirrors
+ * Spec 008's `NavigationBottomBarCallbacks` extraction precedent.
  */
 internal data class BrowserWebViewCallbacks(
     val onLoadStarted: (String) -> Unit,
     val onProgressChanged: (Int) -> Unit,
     val onLoadFinished: (String) -> Unit,
     val onLoadFailed: (ErrorReason) -> Unit,
-    val onCanGoBackChange: (Boolean) -> Unit,
-    val onCanGoForwardChange: (Boolean) -> Unit,
 )

@@ -20,4 +20,8 @@
     <string name="browser_action_reload">重新加载</string>
     <string name="browser_action_stop">停止加载</string>
     <string name="browser_action_home">主页</string>
+
+    <!-- Spec 009 — Simplified Chinese (zh) translations for address-bar hint + clear button. -->
+    <string name="browser_address_bar_hint">搜索或输入网址</string>
+    <string name="browser_address_bar_clear_cd">清除地址栏</string>
 </resources>

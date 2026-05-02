@@ -20,4 +20,8 @@
     <string name="browser_action_reload">ページを再読み込み</string>
     <string name="browser_action_stop">読み込みを停止</string>
     <string name="browser_action_home">ホーム</string>
+
+    <!-- Spec 009 — Japanese (ja) translations for address-bar hint + clear button. -->
+    <string name="browser_address_bar_hint">検索またはURLを入力</string>
+    <string name="browser_address_bar_clear_cd">アドレスバーをクリア</string>
 </resources>
