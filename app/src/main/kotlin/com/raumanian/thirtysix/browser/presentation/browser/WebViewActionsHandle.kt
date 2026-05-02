@@ -29,4 +29,11 @@ internal class WebViewActionsHandle {
     var reload: () -> Unit = {}
     var stopLoading: () -> Unit = {}
     var loadHome: () -> Unit = {}
+
+    /**
+     * Spec 009 — load an arbitrary URL (used by the address-bar omnibox submit
+     * path). Wired inside `BrowserWebView.factory` to `webView.loadUrl(url)`.
+     * Same lifecycle / closure semantics as the existing 5 lambdas.
+     */
+    var loadUrl: (String) -> Unit = {}
 }

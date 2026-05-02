@@ -20,4 +20,8 @@
     <string name="browser_action_reload">Recharger la page</string>
     <string name="browser_action_stop">Arrêter le chargement</string>
     <string name="browser_action_home">Accueil</string>
+
+    <!-- Spec 009 — French (fr) translations for address-bar hint + clear button. -->
+    <string name="browser_address_bar_hint">Rechercher ou saisir une URL</string>
+    <string name="browser_address_bar_clear_cd">Effacer la barre d\'adresse</string>
 </resources>

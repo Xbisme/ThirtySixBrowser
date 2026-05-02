@@ -20,4 +20,8 @@
     <string name="browser_action_reload">Tải lại trang</string>
     <string name="browser_action_stop">Dừng tải</string>
     <string name="browser_action_home">Trang chủ</string>
+
+    <!-- Spec 009 — Vietnamese (vi) translations for address-bar hint + clear button. -->
+    <string name="browser_address_bar_hint">Tìm kiếm hoặc nhập URL</string>
+    <string name="browser_address_bar_clear_cd">Xóa thanh địa chỉ</string>
 </resources>

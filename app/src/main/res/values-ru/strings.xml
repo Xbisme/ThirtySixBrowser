@@ -20,4 +20,8 @@
     <string name="browser_action_reload">Обновить страницу</string>
     <string name="browser_action_stop">Остановить загрузку</string>
     <string name="browser_action_home">Домой</string>
+
+    <!-- Spec 009 — Russian (ru) translations for address-bar hint + clear button. -->
+    <string name="browser_address_bar_hint">Поиск или адрес</string>
+    <string name="browser_address_bar_clear_cd">Очистить адресную строку</string>
 </resources>

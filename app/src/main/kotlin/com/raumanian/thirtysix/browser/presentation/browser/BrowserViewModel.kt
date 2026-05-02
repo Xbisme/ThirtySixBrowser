@@ -1,7 +1,9 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.lifecycle.ViewModel
+import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.net.URLEncoder
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +32,13 @@ import kotlinx.coroutines.flow.update
  *   while `LoadingState.Loading` → transition to `LoadingState.Loaded`. The
  *   loading indicator hides; partial page state remains as-is in the WebView.
  */
+// 12 callback methods (load lifecycle + navigation + address bar); each is a thin
+// state-mutator (`_uiState.update { ... }`) with no business logic. Splitting this
+// into smaller ViewModels is premature — every method shares the same single source
+// of truth (`BrowserUiState`). Reconsider if Spec 011 / 012 introduce orthogonal
+// state surfaces.
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class BrowserViewModel @Inject constructor(
     @param:Named("default_home_url") private val defaultHomeUrl: String,
 ) : ViewModel() {
@@ -50,10 +58,21 @@ class BrowserViewModel @Inject constructor(
      */
     val homeUrl: String get() = defaultHomeUrl
 
-    /** Called from `BrowserWebViewClient.onPageStarted`. */
+    /**
+     * Called from `BrowserWebViewClient.onPageStarted`.
+     *
+     * Spec 009 narrows the responsibility: this method no longer mutates
+     * [BrowserUiState.currentUrl]. The Spec 009 [onUrlChanged] is the single
+     * source of truth for `currentUrl` mutation; in production, `onPageStarted`
+     * fires `onUrlChange` BEFORE `onLoadStarted` so the URL is already up to
+     * date when this callback runs. The `url` parameter is retained on the
+     * signature for binary-compatibility with existing call sites and to
+     * preserve symmetry with [onLoadFinished].
+     */
+    @Suppress("UNUSED_PARAMETER")
     fun onLoadStarted(url: String) {
         _uiState.update {
-            it.copy(currentUrl = url, loadingState = LoadingState.Loading(progress = 0f))
+            it.copy(loadingState = LoadingState.Loading(progress = 0f))
         }
     }
 
@@ -128,6 +147,64 @@ class BrowserViewModel @Inject constructor(
                 current
             }
         }
+    }
+
+    // ---------- Spec 009 — Address Bar / Omnibox ----------
+
+    /** Update the address-bar text on every keystroke from the Composable. */
+    fun onAddressBarTextChange(newText: String) {
+        _uiState.update { it.copy(addressBarText = newText) }
+    }
+
+    /** Update the address-bar focus flag from the Composable's focus listener. */
+    fun onAddressBarFocusChange(focused: Boolean) {
+        _uiState.update { it.copy(isAddressBarFocused = focused) }
+    }
+
+    /**
+     * Spec 009 — classify the current [BrowserUiState.addressBarText] and
+     * dispatch to [loadUrl] (the imperative `WebViewActionsHandle.loadUrl`
+     * lambda passed by the Composable closure). Returns `true` iff a non-empty
+     * submit was made; the Composable uses this to decide whether to dismiss
+     * focus + keyboard (FR-013a).
+     *
+     * Empty / whitespace-only input is a no-op (FR-012) and returns `false`.
+     * Spec 010 will refactor the [AddressBarSubmitResult.Query] branch into a
+     * `SearchEngineRepository`; until then it inlines `URLEncoder.encode(...)`
+     * + the [com.raumanian.thirtysix.browser.core.constants.UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE].
+     */
+    fun onAddressBarSubmit(loadUrl: (String) -> Unit): Boolean {
+        val raw = _uiState.value.addressBarText
+        return when (val classified = classifyAddressBarInput(raw)) {
+            AddressBarSubmitResult.Empty -> false
+            is AddressBarSubmitResult.Url -> {
+                loadUrl(classified.target)
+                true
+            }
+            is AddressBarSubmitResult.Query -> {
+                val encoded = URLEncoder.encode(classified.text, Charsets.UTF_8.name())
+                val searchUrl = String.format(UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE, encoded)
+                loadUrl(searchUrl)
+                true
+            }
+        }
+    }
+
+    /** Empty the address-bar text while preserving focus (FR-021). */
+    fun onAddressBarClear() {
+        _uiState.update { it.copy(addressBarText = "") }
+    }
+
+    /**
+     * Spec 009 — single source of truth for [BrowserUiState.currentUrl] mutation.
+     * Wired (in Phase 5 / US3) to fire from `onPageStarted` AND
+     * `doUpdateVisitedHistory`, which gives the live URL trace through any
+     * redirect chain (FR-019 / FR-019a / FR-019b). [onLoadStarted] no longer
+     * touches `currentUrl` after the Spec 009 refactor — the responsibility
+     * narrowed to loading-state transitions only.
+     */
+    fun onUrlChanged(url: String) {
+        _uiState.update { it.copy(currentUrl = url) }
     }
 
     private companion object {

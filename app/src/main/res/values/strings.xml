@@ -25,4 +25,8 @@
     <string name="browser_action_reload">Reload page</string>
     <string name="browser_action_stop">Stop loading</string>
     <string name="browser_action_home">Home</string>
+
+    <!-- Spec 009 — Address Bar / Omnibox. Placeholder hint shown when the bar is unfocused with no URL loaded; clear-button content description (TalkBack). -->
+    <string name="browser_address_bar_hint">Search or enter URL</string>
+    <string name="browser_address_bar_clear_cd">Clear address bar</string>
 </resources>
