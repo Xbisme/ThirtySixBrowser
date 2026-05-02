@@ -144,8 +144,10 @@ class SettingsDataStoreTest {
         val s1 = CoroutineScope(SupervisorJob())
         val raw1 = createTestSettingsDataStore(folder, fileName, s1)
         // Write an unrecognized engine value directly via raw edit (simulating
-        // a future build that wrote "bing" then user downgraded).
-        raw1.edit { it[StorageKeys.SEARCH_ENGINE] = "bing" }
+        // a future build that wrote a not-yet-supported engine then user
+        // downgraded). Spec 010 added Google + DuckDuckGo + Bing; any value
+        // outside that set must round-trip to default.
+        raw1.edit { it[StorageKeys.SEARCH_ENGINE] = "yandex" }
         s1.coroutineContext.job.cancelAndJoin()
 
         val s2 = CoroutineScope(SupervisorJob())

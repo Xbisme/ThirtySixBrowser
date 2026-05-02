@@ -1,15 +1,16 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.lifecycle.ViewModel
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.net.URLEncoder
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * Spec 007 — owns [BrowserUiState] and translates WebView client/chrome
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.update
 @Suppress("TooManyFunctions")
 class BrowserViewModel @Inject constructor(
     @param:Named("default_home_url") private val defaultHomeUrl: String,
+    private val buildSearchUrl: BuildSearchUrlUseCase,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<BrowserUiState> = MutableStateFlow(
@@ -169,9 +171,14 @@ class BrowserViewModel @Inject constructor(
      * focus + keyboard (FR-013a).
      *
      * Empty / whitespace-only input is a no-op (FR-012) and returns `false`.
-     * Spec 010 will refactor the [AddressBarSubmitResult.Query] branch into a
-     * `SearchEngineRepository`; until then it inlines `URLEncoder.encode(...)`
-     * + the [com.raumanian.thirtysix.browser.core.constants.UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE].
+     *
+     * Spec 010 — the [AddressBarSubmitResult.Query] branch now dispatches the
+     * URL build through [buildSearchUrl] (a `BuildSearchUrlUseCase`) inside
+     * [viewModelScope]. The function still returns `Boolean` synchronously so
+     * the Composable can release focus + keyboard immediately per FR-013a; the
+     * actual `loadUrl` invocation happens asynchronously inside the launched
+     * coroutine after the use case resolves the engine + encodes the query.
+     * The URL branch (no settings read needed) stays fully synchronous.
      */
     fun onAddressBarSubmit(loadUrl: (String) -> Unit): Boolean {
         val raw = _uiState.value.addressBarText
@@ -182,9 +189,10 @@ class BrowserViewModel @Inject constructor(
                 true
             }
             is AddressBarSubmitResult.Query -> {
-                val encoded = URLEncoder.encode(classified.text, Charsets.UTF_8.name())
-                val searchUrl = String.format(UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE, encoded)
-                loadUrl(searchUrl)
+                viewModelScope.launch {
+                    val searchUrl = buildSearchUrl(classified.text)
+                    loadUrl(searchUrl)
+                }
                 true
             }
         }
