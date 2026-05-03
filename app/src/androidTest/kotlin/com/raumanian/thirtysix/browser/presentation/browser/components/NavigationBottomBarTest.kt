@@ -2,9 +2,15 @@ package com.raumanian.thirtysix.browser.presentation.browser.components
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.filterToOne
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
@@ -34,11 +40,14 @@ class NavigationBottomBarTest {
     private var forwardCount = 0
     private var reloadOrStopCount = 0
     private var homeCount = 0
+    private var tabsSwitcherClickCount = 0
+    private var tabsSwitcherLongClickCount = 0
 
     private fun setBar(
         canGoBack: Boolean = false,
         canGoForward: Boolean = false,
         isLoading: Boolean = false,
+        tabCount: Int = 0,
     ) {
         composeRule.setContent {
             ThirtySixTheme {
@@ -46,11 +55,14 @@ class NavigationBottomBarTest {
                     canGoBack = canGoBack,
                     canGoForward = canGoForward,
                     isLoading = isLoading,
+                    tabCount = tabCount,
                     callbacks = NavigationBottomBarCallbacks(
                         onBack = { backCount++ },
                         onForward = { forwardCount++ },
                         onReloadOrStop = { reloadOrStopCount++ },
                         onHome = { homeCount++ },
+                        onTabsSwitcherClick = { tabsSwitcherClickCount++ },
+                        onTabsSwitcherLongClick = { tabsSwitcherLongClickCount++ },
                     ),
                 )
             }
@@ -161,7 +173,51 @@ class NavigationBottomBarTest {
         assertEquals(RAPID_TAP_COUNT, reloadOrStopCount)
     }
 
+    // ---------- Spec 011 (T025) — 5th button: Tabs switcher + long-press ----------
+
+    @Test
+    fun renders_5_buttons_with_tabs_switcher() {
+        setBar()
+        composeRule.onNodeWithTag(TEST_TAG_NAV_BACK).assertIsNotEnabled()
+        composeRule.onNodeWithTag(TEST_TAG_NAV_FORWARD).assertIsNotEnabled()
+        composeRule.onNodeWithTag(TEST_TAG_NAV_RELOAD_STOP).assertIsEnabled()
+        composeRule.onNodeWithTag(TEST_TAG_NAV_HOME).assertIsEnabled()
+        // 5th button is a clickable Box wrapped in BadgedBox; it always
+        // exists regardless of tab count.
+        composeRule.onNodeWithTag(TEST_TAG_NAV_TABS_SWITCHER).assertExists()
+    }
+
+    @Test
+    fun switcher_singleTap_invokesOnTabsSwitcherClick() {
+        setBar(tabCount = 3)
+        composeRule.onNodeWithTag(TEST_TAG_NAV_TABS_SWITCHER).performClick()
+        assertEquals(1, tabsSwitcherClickCount)
+        assertEquals(0, tabsSwitcherLongClickCount)
+    }
+
+    @Test
+    fun switcher_longPress_invokesOnTabsSwitcherLongClick() {
+        setBar(tabCount = 3)
+        composeRule.onNodeWithTag(TEST_TAG_NAV_TABS_SWITCHER)
+            .performTouchInput { longClick() }
+        assertEquals(1, tabsSwitcherLongClickCount)
+        assertEquals(0, tabsSwitcherClickCount)
+    }
+
+    @Test
+    fun switcher_badge_reflectsTabCount() {
+        setBar(tabCount = TEST_BADGE_COUNT)
+        // BadgedBox renders its badge content as a child node containing the
+        // count text. Search the subtree of the switcher button for the
+        // text node and assert the value matches.
+        composeRule.onNodeWithTag(TEST_TAG_NAV_TABS_SWITCHER)
+            .onChildren()
+            .filterToOne(hasText(TEST_BADGE_COUNT.toString()))
+            .assertTextEquals(TEST_BADGE_COUNT.toString())
+    }
+
     private companion object {
         const val RAPID_TAP_COUNT: Int = 10
+        const val TEST_BADGE_COUNT: Int = 7
     }
 }

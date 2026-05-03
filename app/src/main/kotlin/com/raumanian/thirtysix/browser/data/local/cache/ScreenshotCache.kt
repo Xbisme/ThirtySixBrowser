@@ -57,7 +57,7 @@ interface ScreenshotCache {
 
 @Singleton
 class DiskScreenshotCache @Inject constructor(
-    @param:ApplicationContext context: Context,
+    @ApplicationContext context: Context,
     private val dispatchers: DispatcherProvider,
 ) : ScreenshotCache {
 

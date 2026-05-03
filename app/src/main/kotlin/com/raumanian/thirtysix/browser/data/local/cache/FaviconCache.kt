@@ -67,7 +67,7 @@ interface FaviconCache {
  */
 @Singleton
 class DiskFaviconCache @Inject constructor(
-    @param:ApplicationContext context: Context,
+    @ApplicationContext context: Context,
     private val dispatchers: DispatcherProvider,
 ) : FaviconCache {
 
