@@ -43,13 +43,12 @@ class TabPersistenceProcessDeathTest {
         hiltRule.inject()
 
         // Seed 3 tabs with distinct lastActiveAt so the active-tab pointer is
-        // deterministic. The fresh home tab auto-seeded on first observation
-        // is closed once we add our 3 tabs (count == 4, then close the seed).
-        // Simpler: rely on auto-seed creating one tab, then add 2 more — ends
-        // at 3 tabs total with the most recently created as active.
+        // deterministic. Auto-seed fires via `onStart` only when `observeTabs`
+        // is collected on an empty DB — collect once first to trigger it, then
+        // add 2 more tabs for a total of 3.
+        repository.observeTabs().first()
         repository.createTab("https://a.example/")
         repository.createTab("https://b.example/")
-        // 2 created tabs + 1 auto-seeded = 3 tabs.
 
         val before = repository.observeTabs().first()
         assertEquals(EXPECTED_TAB_COUNT, before.size)

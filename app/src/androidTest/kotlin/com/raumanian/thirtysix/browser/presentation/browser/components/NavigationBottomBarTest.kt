@@ -2,13 +2,10 @@ package com.raumanian.thirtysix.browser.presentation.browser.components
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.filterToOne
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
-import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -207,13 +204,11 @@ class NavigationBottomBarTest {
     @Test
     fun switcher_badge_reflectsTabCount() {
         setBar(tabCount = TEST_BADGE_COUNT)
-        // BadgedBox renders its badge content as a child node containing the
-        // count text. Search the subtree of the switcher button for the
-        // text node and assert the value matches.
-        composeRule.onNodeWithTag(TEST_TAG_NAV_TABS_SWITCHER)
-            .onChildren()
-            .filterToOne(hasText(TEST_BADGE_COUNT.toString()))
-            .assertTextEquals(TEST_BADGE_COUNT.toString())
+        // BadgedBox merges its Badge subtree into the parent semantics node by
+        // default. Look up the badge text node directly in the unmerged tree —
+        // the count is unique in this isolated component test.
+        composeRule.onNodeWithText(TEST_BADGE_COUNT.toString(), useUnmergedTree = true)
+            .assertExists()
     }
 
     private companion object {
