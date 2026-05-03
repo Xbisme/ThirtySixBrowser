@@ -6,7 +6,6 @@
     <!-- Per FR-007 naming convention: feature_section_purpose. -->
     <!-- Future feature specs (e.g., 011 tabs-management) MAY rename *_screen_placeholder → semantic key (*_screen_title) when they implement the real Screen — must update all 8 locale files in same change. -->
 
-    <string name="tabs_screen_placeholder">Tabs</string>
     <string name="bookmarks_screen_placeholder">Bookmarks</string>
     <string name="history_screen_placeholder">History</string>
     <string name="downloads_screen_placeholder">Downloads</string>
@@ -29,4 +28,19 @@
     <!-- Spec 009 — Address Bar / Omnibox. Placeholder hint shown when the bar is unfocused with no URL loaded; clear-button content description (TalkBack). -->
     <string name="browser_address_bar_hint">Search or enter URL</string>
     <string name="browser_address_bar_clear_cd">Clear address bar</string>
+
+    <!-- Spec 011 — Tabs Management. Switcher screen + tab card + BrowserScreen new affordances + plural-aware count. -->
+    <string name="tabs_switcher_new_tab">New tab</string>
+    <string name="tabs_switcher_close_all">Close all tabs</string>
+    <string name="tabs_switcher_close_all_confirm">Close all tabs? This cannot be undone.</string>
+    <string name="tabs_card_close">Close tab</string>
+    <string name="tabs_default_title">New tab</string>
+    <string name="browser_action_tabs_switcher">Open tabs switcher</string>
+    <string name="browser_action_new_tab">Open new tab</string>
+    <string name="browser_max_tabs_reached">Maximum number of tabs reached. Close a tab to open a new one.</string>
+
+    <plurals name="tabs_switcher_title_count">
+        <item quantity="one">%1$d tab</item>
+        <item quantity="other">%1$d tabs</item>
+    </plurals>
 </resources>

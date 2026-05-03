@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.graphics.Bitmap
 import android.webkit.WebView
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -13,11 +14,26 @@ import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
+import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
+import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import java.io.File
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import org.hamcrest.Matchers.containsString
 import org.junit.Before
 import org.junit.Rule
@@ -68,9 +84,22 @@ class BrowserScreenInstrumentedTest {
             // query path, so a no-op `BuildSearchUrlUseCase` is sufficient.
             // The Query branch in `BrowserViewModel.onAddressBarSubmit` is
             // never invoked under this test's WebView load-only flow.
+            // Spec 011 — instrumented tests do not exercise tab logic, so a
+            // no-op TabRepository fake is sufficient for the 4 new use-case
+            // dependencies. Mirrors the InstrumentedNoopSearchEngineRepository
+            // pattern (Spec 010). Construction is verbose because we wire 4
+            // use cases against a single shared no-op repo instance.
+            val noopTabRepo = InstrumentedNoopTabRepository
+            val observeTabs = ObserveTabsUseCase(noopTabRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = TEST_PAGE_URL,
                 buildSearchUrl = BuildSearchUrlUseCase(InstrumentedNoopSearchEngineRepository),
+                observeActiveTab = ObserveActiveTabUseCase(observeTabs),
+                observeTabs = observeTabs,
+                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo),
+                createTab = CreateTabUseCase(noopTabRepo, TEST_PAGE_URL),
+                faviconCache = InstrumentedNoopFaviconCache,
+                screenshotCache = InstrumentedNoopScreenshotCache,
             )
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
@@ -151,4 +180,47 @@ class BrowserScreenInstrumentedTest {
 private object InstrumentedNoopSearchEngineRepository : SearchEngineRepository {
     override suspend fun buildSearchUrl(query: String): String =
         error("instrumented test should not reach the search-URL build path")
+}
+
+/**
+ * Spec 011 — file-private no-op [TabRepository] for the WebView-load-only
+ * instrumented test. Emits an empty tab list (`Tab?` = null in
+ * `ObserveActiveTabUseCase`) so `BrowserViewModel.activeTabFlow` stays at
+ * `null` and the `init {}` collectors do not mutate state. All write methods
+ * are no-ops. Matches the InstrumentedNoopSearchEngineRepository pattern.
+ */
+private object InstrumentedNoopTabRepository : TabRepository {
+    override fun observeTabs(): Flow<List<Tab>> = flowOf(emptyList())
+    override suspend fun createTab(url: String): Result<Tab> =
+        error("instrumented test should not reach createTab")
+    override suspend fun switchActiveTab(tabId: Long) = Unit
+    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
+    override suspend fun closeTab(tabId: Long) = Unit
+    override suspend fun closeAllTabs() = Unit
+    override suspend fun getTabCount(): Int = 0
+}
+
+/**
+ * Spec 011 favicon amendment — no-op [FaviconCache] for the WebView-load
+ * instrumented test. `onReceivedIcon` may fire as the page loads but the
+ * test never asserts on the cache; recording is a no-op.
+ */
+private object InstrumentedNoopFaviconCache : FaviconCache {
+    private val state = MutableStateFlow(0L)
+    override val version: StateFlow<Long> = state.asStateFlow()
+    override suspend fun save(url: String, bitmap: Bitmap) = Unit
+    override fun fileFor(url: String): File? = null
+}
+
+/**
+ * Spec 011 Q4 amendment — no-op [ScreenshotCache] for the WebView-load
+ * instrumented test.
+ */
+private object InstrumentedNoopScreenshotCache : ScreenshotCache {
+    private val state = MutableStateFlow(0L)
+    override val version: StateFlow<Long> = state.asStateFlow()
+    override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+    override fun fileFor(tabId: Long): File? = null
+    override suspend fun delete(tabId: Long) = Unit
+    override suspend fun clearAll() = Unit
 }

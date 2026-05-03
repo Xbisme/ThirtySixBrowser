@@ -8,62 +8,83 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserErrorState
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserLoadingIndicator
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBarCallbacks
+import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
+import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
 
 /**
- * Spec 007 + Spec 008 + Spec 009 — top-level Browser screen.
+ * Spec 007 + Spec 008 + Spec 009 + Spec 011 — top-level Browser screen.
  *
  * Layout (Spec 008): Material 3 [Scaffold] with always-visible
  * [NavigationBottomBar] in the `bottomBar` slot (FR-018) and the WebView
  * surface in the content slot.
  *
  * Spec 009 — adds the [AddressBar] in the [Scaffold] `topBar` slot. Always
- * visible (FR-001/02/03), even during error overlay. The submit chain dismisses
- * keyboard + clears focus *before* invoking `WebViewActionsHandle.loadUrl`
- * (FR-013a). The address-bar text + focus state survive rotation by virtue of
- * being held inside the ViewModel-scoped `BrowserUiState` (FR-027).
+ * visible (FR-001/02/03), even during error overlay.
  *
- * Spec 008 system-back integration: [PredictiveBackHandler] is enabled only
- * when `state.canGoBack == true`. Spec 009 adds an in-screen [BackHandler]
- * ahead of it that consumes the back gesture iff the address bar is focused
- * — clears focus + dismisses keyboard, leaving session-history back to the
- * predictive handler on the next press (FR-026 / research R6). The Android
- * IME platform contract handles the standard "keyboard is open → back closes
- * keyboard" case automatically; this in-screen `BackHandler` covers the niche
- * "keyboard hidden but bar still focused" path.
+ * Spec 011:
+ * - Receives [navController] so the 5th BottomAppBar button (single-tap)
+ *   navigates to the tab switcher route.
+ * - Long-press on that same button dispatches [BrowserViewModel.onLongPressNewTab]
+ *   for the inline new-tab path (Q2 / R6).
+ * - Reads `tabCount` + `activeTab` StateFlows from the ViewModel — `tabCount`
+ *   drives the bottom-bar `BadgedBox`, and `activeTab.id` drives a
+ *   `LaunchedEffect` that issues `webViewActions.loadUrl(activeTab.url)` on
+ *   every tab switch (R8 — single live WebView, recreate on switch).
+ * - The WebView is wrapped in `key(activeTab.id)` so Compose disposes the
+ *   prior instance and instantiates a fresh one on activation, re-applying
+ *   Spec 007's lockdown settings (FR-028).
+ * - Surfaces a snackbar for [BrowserUiState.tabsEvent] (FR-016 cap-reached)
+ *   then calls [BrowserViewModel.consumeTabsEvent].
  */
 @Composable
 fun BrowserScreen(
     modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController(),
     viewModel: BrowserViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
+    val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
     val webViewActions = remember { WebViewActionsHandle() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
 
-    BackHandler(enabled = state.isAddressBarFocused) {
-        keyboardController?.hide()
-        focusManager.clearFocus()
+    BrowserBackHandlers(state = state, webViewActions = webViewActions)
+
+    LaunchedEffect(activeTab?.id) {
+        // Spec 011 — tab-switch driver. On every activeTab.id change, issue
+        // a fresh URL load on the (key-recomposed) WebView.
+        activeTab?.let { webViewActions.loadUrl(it.url) }
     }
 
-    PredictiveBackHandler(enabled = state.canGoBack && !state.isAddressBarFocused) { progress ->
-        progress.collect { /* no-op — system renders preview on Android 14+ */ }
-        webViewActions.goBack()
+    LaunchedEffect(state.tabsEvent) {
+        // Spec 011 — surface MaxTabsReached snackbar from BrowserScreen long-press.
+        if (state.tabsEvent is TabsErrorEvent.MaxTabsReached) {
+            snackbarHostState.showSnackbar(maxTabsMessage)
+            viewModel.consumeTabsEvent()
+        }
     }
 
     val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions)
@@ -76,18 +97,52 @@ fun BrowserScreen(
                 canGoBack = state.canGoBack,
                 canGoForward = state.canGoForward,
                 isLoading = state.loadingState is LoadingState.Loading,
-                callbacks = rememberBottomBarCallbacks(state, webViewActions, viewModel::onLoadStopped),
+                tabCount = tabCount,
+                callbacks = rememberBottomBarCallbacks(
+                    state = state,
+                    webViewActions = webViewActions,
+                    onStopRequested = viewModel::onLoadStopped,
+                    onTabsSwitcherClick = {
+                        navController.navigate(AppDestination.Tabs.route)
+                    },
+                    onTabsSwitcherLongClick = viewModel::onLongPressNewTab,
+                ),
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { padding ->
         BrowserScaffoldContent(
             state = state,
             viewModel = viewModel,
             webViewActions = webViewActions,
+            activeTabId = activeTab?.id ?: 0L,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
         )
+    }
+}
+
+/**
+ * Spec 008 + Spec 009 — system-back integration. [PredictiveBackHandler] is
+ * enabled only when the WebView has back history; the in-screen [BackHandler]
+ * ahead of it consumes the back gesture iff the address bar is focused
+ * (clears focus + dismisses keyboard).
+ */
+@Composable
+private fun BrowserBackHandlers(
+    state: BrowserUiState,
+    webViewActions: WebViewActionsHandle,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    BackHandler(enabled = state.isAddressBarFocused) {
+        keyboardController?.hide()
+        focusManager.clearFocus()
+    }
+    PredictiveBackHandler(enabled = state.canGoBack && !state.isAddressBarFocused) { progress ->
+        progress.collect { /* no-op — system renders preview on Android 14+ */ }
+        webViewActions.goBack()
     }
 }
 
@@ -98,32 +153,42 @@ fun BrowserScreen(
  * error-state overlays. Spec 008 ordering preserved: WebView at the back,
  * loading on top, error fully covers (FR-001/02/03 — bar always visible
  * because it lives in the Scaffold's `topBar` slot, not here).
+ *
+ * Spec 011 — wraps `BrowserWebView` in `key(activeTabId)` so Compose
+ * disposes the prior WebView (Spec 007 `DisposableEffect` cleanup fires) and
+ * instantiates a fresh one on every tab switch (R8 — single live WebView).
  */
 @Composable
 private fun BrowserScaffoldContent(
     state: BrowserUiState,
     viewModel: BrowserViewModel,
     webViewActions: WebViewActionsHandle,
+    activeTabId: Long,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
-        BrowserWebView(
-            state = state,
-            homeUrl = viewModel.homeUrl,
-            actions = webViewActions,
-            callbacks = BrowserWebViewCallbacks(
-                onLoadStarted = viewModel::onLoadStarted,
-                onProgressChanged = viewModel::onProgressChanged,
-                onLoadFinished = viewModel::onLoadFinished,
-                onLoadFailed = viewModel::onLoadFailed,
-            ),
-            navigationCallbacks = BrowserNavigationCallbacks(
-                onUrlChange = viewModel::onUrlChanged,
-                onCanGoBackChange = viewModel::onCanGoBackChanged,
-                onCanGoForwardChange = viewModel::onCanGoForwardChanged,
-            ),
-            modifier = Modifier.fillMaxSize(),
-        )
+        androidx.compose.runtime.key(activeTabId) {
+            BrowserWebView(
+                state = state,
+                homeUrl = viewModel.homeUrl,
+                actions = webViewActions,
+                callbacks = BrowserWebViewCallbacks(
+                    onLoadStarted = viewModel::onLoadStarted,
+                    onProgressChanged = viewModel::onProgressChanged,
+                    onLoadFinished = viewModel::onLoadFinished,
+                    onLoadFailed = viewModel::onLoadFailed,
+                ),
+                navigationCallbacks = BrowserNavigationCallbacks(
+                    onUrlChange = viewModel::onUrlChanged,
+                    onCanGoBackChange = viewModel::onCanGoBackChanged,
+                    onCanGoForwardChange = viewModel::onCanGoForwardChanged,
+                    onTitleChange = viewModel::onTitleReceived,
+                    onIconReceived = viewModel::onIconReceived,
+                    onScreenshotReady = viewModel::onScreenshotReady,
+                ),
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
         (state.loadingState as? LoadingState.Loading)?.let { loading ->
             BrowserLoadingIndicator(
                 progress = loading.progress,
@@ -141,19 +206,26 @@ private fun BrowserScaffoldContent(
 
 /**
  * Spec 008 — extracted to keep [BrowserScreen] under detekt's `LongMethod`
- * threshold. Builds the four click lambdas the bottom bar dispatches:
+ * threshold. Builds the click lambdas the bottom bar dispatches:
  * Back/Forward route directly through [WebViewActionsHandle]; Reload/Stop
  * dispatches conditionally on [BrowserUiState.loadingState] (Stop semantic
  * during Loading also flips state via [onStopRequested] so the loading
  * indicator hides immediately per FR-006); Home calls
  * [WebViewActionsHandle.loadHome] which the WebView factory wired to
  * `loadUrl(homeUrl)`.
+ *
+ * Spec 011 — adds the 5th-button single-tap (switcher navigate) and
+ * long-press (inline new tab) callbacks. Both lambdas hoisted from
+ * `BrowserScreen` so the bar stays purely presentational.
  */
 @Composable
+@Suppress("LongParameterList")
 private fun rememberBottomBarCallbacks(
     state: BrowserUiState,
     webViewActions: WebViewActionsHandle,
     onStopRequested: () -> Unit,
+    onTabsSwitcherClick: () -> Unit,
+    onTabsSwitcherLongClick: () -> Unit,
 ): NavigationBottomBarCallbacks = NavigationBottomBarCallbacks(
     onBack = { webViewActions.goBack() },
     onForward = { webViewActions.goForward() },
@@ -166,6 +238,8 @@ private fun rememberBottomBarCallbacks(
         }
     },
     onHome = { webViewActions.loadHome() },
+    onTabsSwitcherClick = onTabsSwitcherClick,
+    onTabsSwitcherLongClick = onTabsSwitcherLongClick,
 )
 
 /**

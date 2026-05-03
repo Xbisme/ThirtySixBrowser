@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Japanese (ja) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix ブラウザ</string>
-    <string name="tabs_screen_placeholder">タブ</string>
     <string name="bookmarks_screen_placeholder">ブックマーク</string>
     <string name="history_screen_placeholder">履歴</string>
     <string name="downloads_screen_placeholder">ダウンロード</string>
@@ -24,4 +23,18 @@
     <!-- Spec 009 — Japanese (ja) translations for address-bar hint + clear button. -->
     <string name="browser_address_bar_hint">検索またはURLを入力</string>
     <string name="browser_address_bar_clear_cd">アドレスバーをクリア</string>
+
+    <!-- Spec 011 — Japanese (ja) translations for tabs management. -->
+    <string name="tabs_switcher_new_tab">新しいタブ</string>
+    <string name="tabs_switcher_close_all">すべてのタブを閉じる</string>
+    <string name="tabs_switcher_close_all_confirm">すべてのタブを閉じますか?この操作は取り消せません。</string>
+    <string name="tabs_card_close">タブを閉じる</string>
+    <string name="tabs_default_title">新しいタブ</string>
+    <string name="browser_action_tabs_switcher">タブスイッチャーを開く</string>
+    <string name="browser_action_new_tab">新しいタブを開く</string>
+    <string name="browser_max_tabs_reached">タブの最大数に達しました。新しいタブを開くにはタブを閉じてください。</string>
+
+    <plurals name="tabs_switcher_title_count">
+        <item quantity="other">%1$d 個のタブ</item>
+    </plurals>
 </resources>

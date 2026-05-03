@@ -19,6 +19,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.scale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -94,38 +95,14 @@ internal fun BrowserWebView(
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            WebView(context).also { wv ->
-                webView[0] = wv
-                applySecuritySettings(wv)
-                wv.webViewClient = BrowserWebViewClient(
-                    onLoadStarted = callbacks.onLoadStarted,
-                    onLoadFinished = callbacks.onLoadFinished,
-                    onLoadFailed = callbacks.onLoadFailed,
-                    onUrlChange = navigationCallbacks.onUrlChange,
-                    onCanGoBackChange = navigationCallbacks.onCanGoBackChange,
-                    onCanGoForwardChange = navigationCallbacks.onCanGoForwardChange,
-                )
-                wv.webChromeClient = BrowserChromeClient(onProgressChanged = callbacks.onProgressChanged)
-
-                // Spec 008 — wire imperative handle. Each lambda captures `wv`
-                // via the factory closure; the lambdas persist for the lifetime
-                // of the WebView instance.
-                actions.goBack = { if (wv.canGoBack()) wv.goBack() }
-                actions.goForward = { if (wv.canGoForward()) wv.goForward() }
-                actions.reload = { wv.reload() }
-                actions.stopLoading = { wv.stopLoading() }
-                actions.loadHome = { wv.loadUrl(homeUrl) }
-                // Spec 009 — address-bar submit path.
-                actions.loadUrl = { url -> wv.loadUrl(url) }
-
-                // Spec 008 — conditional initial load. When state is seeded to
-                // Failed (instrumented test pattern), skip the initial loadUrl
-                // so the test assertion on the error UI is not overridden by a
-                // successful auto-load.
-                if (state.loadingState !is LoadingState.Failed) {
-                    wv.loadUrl(state.currentUrl)
-                }
-            }
+            buildConfiguredWebView(
+                context = context,
+                state = state,
+                homeUrl = homeUrl,
+                actions = actions,
+                callbacks = callbacks,
+                navigationCallbacks = navigationCallbacks,
+            ).also { wv -> webView[0] = wv }
         },
     )
 
@@ -141,6 +118,52 @@ internal fun BrowserWebView(
             }
             webView[0] = null
         }
+    }
+}
+
+/**
+ * Spec 011 — extracted from [BrowserWebView] factory body to keep the host
+ * Composable under detekt's `LongMethod = 60` threshold after the favicon
+ * amendment (2026-05-03) added `onIconReceived` plumbing.
+ */
+@Suppress("LongParameterList")
+private fun buildConfiguredWebView(
+    context: android.content.Context,
+    state: BrowserUiState,
+    homeUrl: String,
+    actions: WebViewActionsHandle,
+    callbacks: BrowserWebViewCallbacks,
+    navigationCallbacks: BrowserNavigationCallbacks,
+): WebView = WebView(context).also { wv ->
+    applySecuritySettings(wv)
+    wv.webViewClient = BrowserWebViewClient(
+        onLoadStarted = callbacks.onLoadStarted,
+        onLoadFinished = callbacks.onLoadFinished,
+        onLoadFailed = callbacks.onLoadFailed,
+        onUrlChange = navigationCallbacks.onUrlChange,
+        onCanGoBackChange = navigationCallbacks.onCanGoBackChange,
+        onCanGoForwardChange = navigationCallbacks.onCanGoForwardChange,
+        onScreenshotReady = navigationCallbacks.onScreenshotReady,
+    )
+    wv.webChromeClient = BrowserChromeClient(
+        onProgressChanged = callbacks.onProgressChanged,
+        onReceivedTitle = navigationCallbacks.onTitleChange,
+        onReceivedIcon = navigationCallbacks.onIconReceived,
+    )
+    // Spec 008 — wire imperative handle. Each lambda captures `wv` via the
+    // factory closure; the lambdas persist for the lifetime of the WebView.
+    actions.goBack = { if (wv.canGoBack()) wv.goBack() }
+    actions.goForward = { if (wv.canGoForward()) wv.goForward() }
+    actions.reload = { wv.reload() }
+    actions.stopLoading = { wv.stopLoading() }
+    actions.loadHome = { wv.loadUrl(homeUrl) }
+    actions.loadUrl = { url -> wv.loadUrl(url) }
+
+    // Spec 008 — conditional initial load. When state is seeded to Failed
+    // (instrumented test pattern), skip the initial loadUrl so the test
+    // assertion on the error UI is not overridden by a successful auto-load.
+    if (state.loadingState !is LoadingState.Failed) {
+        wv.loadUrl(state.currentUrl)
     }
 }
 
@@ -191,6 +214,7 @@ private fun applySecuritySettings(webView: WebView) {
  * Spec 008 — adds `doUpdateVisitedHistory` override to surface `canGoBack` /
  * `canGoForward` flips into [BrowserUiState] via the new callbacks.
  */
+@Suppress("LongParameterList")
 private class BrowserWebViewClient(
     private val onLoadStarted: (String) -> Unit,
     private val onLoadFinished: (String) -> Unit,
@@ -198,6 +222,7 @@ private class BrowserWebViewClient(
     private val onUrlChange: (String) -> Unit,
     private val onCanGoBackChange: (Boolean) -> Unit,
     private val onCanGoForwardChange: (Boolean) -> Unit,
+    private val onScreenshotReady: (Bitmap) -> Unit,
 ) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         url?.let {
@@ -211,6 +236,56 @@ private class BrowserWebViewClient(
 
     override fun onPageFinished(view: WebView?, url: String?) {
         url?.let(onLoadFinished)
+        // Spec 011 Q4 amendment — schedule a screenshot capture after the
+        // WebView has actually painted. `postDelayed` defers past the next
+        // layout pass + buffers for animated / progressive content (e.g.,
+        // Google logo fade-in) so the captured bitmap shows the
+        // fully-rendered page. The cache is tab-id-keyed at the consumer
+        // side; we just hand off the raw bitmap here.
+        val v = view ?: return
+        v.postDelayed({ captureScreenshot(v) }, SCREENSHOT_DELAY_MS)
+    }
+
+    private fun captureScreenshot(view: WebView) {
+        if (view.width <= 0 || view.height <= 0) return
+        try {
+            // Spec 011 Q4 amendment (2026-05-03 user feedback) — crop the
+            // top portion of the WebView to 16:9 BEFORE scaling so the
+            // preview keeps the original page's aspect ratio (no horizontal
+            // stretch / vertical squish that `createScaledBitmap(480, 270)`
+            // alone would produce on a portrait WebView surface).
+            //
+            // Algorithm:
+            //  1. Compute a 16:9 crop region anchored at the top of the
+            //     WebView, height = width × (270 / 480). If the WebView is
+            //     itself shorter than that (rare — narrow phone landscape),
+            //     fall back to the full height.
+            //  2. Allocate a bitmap of the crop dimensions and draw the
+            //     WebView into it. WebView renders top-left aligned, so the
+            //     header/visible-viewport portion of the page is captured.
+            //  3. Scale the crop down to 480×270 with bilinear filtering
+            //     (preserves aspect; no distortion).
+            val targetW = com.raumanian.thirtysix.browser.core.constants.AppConstants.SCREENSHOT_TARGET_WIDTH_PX
+            val targetH = com.raumanian.thirtysix.browser.core.constants.AppConstants.SCREENSHOT_TARGET_HEIGHT_PX
+            val cropHeight = ((view.width.toLong() * targetH) / targetW)
+                .toInt()
+                .coerceAtMost(view.height)
+                .coerceAtLeast(1)
+            val source = androidx.core.graphics.createBitmap(
+                view.width,
+                cropHeight,
+                Bitmap.Config.ARGB_8888,
+            )
+            view.draw(android.graphics.Canvas(source))
+            // filter = true → bilinear scaling for smoother downscale.
+            val scaled = source.scale(targetW, targetH, filter = true)
+            if (scaled !== source) source.recycle()
+            onScreenshotReady(scaled)
+        } catch (e: OutOfMemoryError) {
+            // Bitmap allocation failed (large WebView surface, low memory).
+            // Fall back to placeholder; not a crash.
+            android.util.Log.w("BrowserWebView", "Screenshot OOM", e)
+        }
     }
 
     /**
@@ -264,14 +339,27 @@ private class BrowserWebViewClient(
 }
 
 /**
- * Forwards progress and silently denies all web-origin runtime permissions
- * (FR-017). Manifest stays at three Constitution-mandated permissions.
+ * Forwards progress, page title (Spec 011 / M1), favicon (Spec 011 favicon
+ * amendment 2026-05-03), and silently denies all web-origin runtime
+ * permissions (FR-017). Manifest stays at three Constitution-mandated
+ * permissions.
  */
 private class BrowserChromeClient(
     private val onProgressChanged: (Int) -> Unit,
+    private val onReceivedTitle: (String) -> Unit,
+    private val onReceivedIcon: (String, android.graphics.Bitmap) -> Unit,
 ) : WebChromeClient() {
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
         onProgressChanged(newProgress)
+    }
+
+    override fun onReceivedTitle(view: WebView?, title: String?) {
+        title?.let(onReceivedTitle)
+    }
+
+    override fun onReceivedIcon(view: WebView?, icon: android.graphics.Bitmap?) {
+        val url = view?.url ?: return
+        if (icon != null) onReceivedIcon(url, icon)
     }
 
     override fun onPermissionRequest(request: PermissionRequest?) {
@@ -288,3 +376,12 @@ private class BrowserChromeClient(
 }
 
 private const val BLANK_PAGE: String = "about:blank"
+
+/**
+ * Spec 011 Q4 amendment — delay between `onPageFinished` and the screenshot
+ * capture. 200 ms gives the WebView time to finish painting (animated
+ * elements like the Google logo fade-in, progressive image loads) before
+ * we grab the bitmap. Lower → risk of capturing a half-painted frame; higher
+ * → more wasted memory if the user navigates away quickly.
+ */
+private const val SCREENSHOT_DELAY_MS: Long = 200L
