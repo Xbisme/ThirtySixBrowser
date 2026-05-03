@@ -18,4 +18,18 @@ object BrowserLimits {
      * 2 GB RAM) given Spec 011's single-active-WebView strategy (FR-027 / R8).
      */
     const val MAX_TABS: Int = 50
+
+    /**
+     * Spec 012 — independent ceiling for incognito tabs (Q1 clarification).
+     *
+     * Incognito tabs do NOT count against [MAX_TABS]. A user with [MAX_TABS] normal
+     * tabs can still open up to [MAX_INCOGNITO_TABS] incognito tabs. Defaults to the
+     * same value as [MAX_TABS] for symmetry; can be tuned independently if memory
+     * pressure surfaces in stress tests (SC-005, the 100-cycle gate).
+     *
+     * Hitting this cap surfaces a distinct localized error string
+     * (`tabs_error_max_incognito_tabs_reached`) — different from the [MAX_TABS]
+     * cap message — so users immediately understand which kind of tab is full.
+     */
+    const val MAX_INCOGNITO_TABS: Int = 50
 }

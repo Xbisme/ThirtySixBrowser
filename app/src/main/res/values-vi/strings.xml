@@ -37,4 +37,15 @@
     <plurals name="tabs_switcher_title_count">
         <item quantity="other">%1$d thẻ</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. -->
+    <string name="tabs_action_new_incognito_tab">Thẻ ẩn danh mới</string>
+    <string name="tabs_a11y_new_incognito_tab">Mở thẻ ẩn danh mới</string>
+    <string name="tabs_a11y_incognito_glyph">Thẻ ẩn danh</string>
+    <string name="tabs_error_max_incognito_tabs_reached">Đã đạt giới hạn %d thẻ ẩn danh</string>
+    <string name="browser_a11y_incognito_indicator">Đang ở chế độ ẩn danh</string>
+    <string name="tabs_a11y_incognito_card_placeholder">Thẻ ẩn danh — nội dung đã ẩn để bảo mật</string>
+    <string name="tabs_card_incognito_label">Ẩn danh</string>
+    <string name="tabs_action_close_all_incognito">Đóng tất cả thẻ ẩn danh</string>
+    <string name="tabs_close_all_incognito_confirm">Đóng tất cả %d thẻ ẩn danh?</string>
 </resources>

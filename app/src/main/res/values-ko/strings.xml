@@ -37,4 +37,15 @@
     <plurals name="tabs_switcher_title_count">
         <item quantity="other">탭 %1$d개</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. -->
+    <string name="tabs_action_new_incognito_tab">새 시크릿 탭</string>
+    <string name="tabs_a11y_new_incognito_tab">새 시크릿 탭 열기</string>
+    <string name="tabs_a11y_incognito_glyph">시크릿 탭</string>
+    <string name="tabs_error_max_incognito_tabs_reached">시크릿 탭 최대 %d개에 도달했습니다</string>
+    <string name="browser_a11y_incognito_indicator">시크릿 모드 활성화됨</string>
+    <string name="tabs_a11y_incognito_card_placeholder">시크릿 탭 — 보안을 위해 콘텐츠 숨김</string>
+    <string name="tabs_card_incognito_label">시크릿</string>
+    <string name="tabs_action_close_all_incognito">모든 시크릿 탭 닫기</string>
+    <string name="tabs_close_all_incognito_confirm">시크릿 탭 %d개를 모두 닫으시겠습니까?</string>
 </resources>

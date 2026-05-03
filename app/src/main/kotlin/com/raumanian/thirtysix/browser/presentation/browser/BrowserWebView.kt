@@ -92,6 +92,12 @@ internal fun BrowserWebView(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    // Spec 012 — capture the incognito flag at first composition. The flag
+    // never changes within a single BrowserWebView instance lifetime (a tab
+    // either is or isn't incognito for its entire life), so capturing-at-first
+    // is correct and safe.
+    val isIncognito = state.isIncognito
+
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -108,10 +114,24 @@ internal fun BrowserWebView(
 
     // Native-resource cleanup. Keyed to Unit so this fires only once on
     // disposal (NOT every recomposition). See research.md R2.
+    //
+    // Spec 012 R5 — incognito tabs run a 9-step teardown that prepends 5
+    // clear*() calls before the existing Spec 007 4-step destroy, ensuring
+    // no per-WebView state (history, form data, find-on-page, SSL decisions,
+    // disk cache) outlives the close-tab moment. Order is fixed; each clear*
+    // is idempotent so re-entry under stress is harmless.
     DisposableEffect(Unit) {
         onDispose {
             webView[0]?.let { wv ->
                 wv.stopLoading()
+                if (isIncognito) {
+                    wv.clearHistory()
+                    wv.clearFormData()
+                    wv.clearMatches()
+                    wv.clearSslPreferences()
+                    // includeDiskFiles = true → wipe disk cache too.
+                    wv.clearCache(true)
+                }
                 wv.loadUrl(BLANK_PAGE)
                 wv.removeAllViews()
                 wv.destroy()
@@ -136,6 +156,7 @@ private fun buildConfiguredWebView(
     navigationCallbacks: BrowserNavigationCallbacks,
 ): WebView = WebView(context).also { wv ->
     applySecuritySettings(wv)
+    if (state.isIncognito) applyIncognitoSettings(wv)
     wv.webViewClient = BrowserWebViewClient(
         onLoadStarted = callbacks.onLoadStarted,
         onLoadFinished = callbacks.onLoadFinished,
@@ -201,6 +222,31 @@ private fun applySecuritySettings(webView: WebView) {
 }
 
 /**
+ * Spec 012 — additional WebView lockdown applied ONLY to incognito tabs
+ * (research.md R5). Sits on top of [applySecuritySettings], inheriting all
+ * Spec 007 protections; adds:
+ *
+ *  - `saveFormData = false` (FR-008): no autofill capture from form fields.
+ *    Deprecated since API 26 but still honoured on minSdk 24..API 25 devices;
+ *    setting it costs nothing on newer Androids.
+ *  - `cacheMode = LOAD_NO_CACHE` (FR-011): every request bypasses disk cache,
+ *    so no page resource artefact is left behind for forensic recovery.
+ *
+ * The on-destroy `clear*()` sequence is in [BrowserWebView]'s
+ * [DisposableEffect] cleanup (R5 9-step teardown).
+ */
+@Suppress("DEPRECATION")
+// setSaveFormData is deprecated since API 26 but Constitution §I + FR-008
+// require explicit disable on older devices. Suppression scoped to this
+// single setter; setting on newer Androids is a no-op.
+private fun applyIncognitoSettings(webView: WebView) {
+    with(webView.settings) {
+        saveFormData = false
+        cacheMode = WebSettings.LOAD_NO_CACHE
+    }
+}
+
+/**
  * Forwards page lifecycle + main-frame failures to [BrowserViewModel] state
  * transitions. Sub-frame errors are filtered out (do not surface to the user).
  *
@@ -224,6 +270,39 @@ private class BrowserWebViewClient(
     private val onCanGoForwardChange: (Boolean) -> Unit,
     private val onScreenshotReady: (Bitmap) -> Unit,
 ) : WebViewClient() {
+    /**
+     * Spec 012 (T065 / FR-018) — external-intent crash safety.
+     *
+     * Non-http(s) URLs (`tel:`, `mailto:`, `intent://`, custom app schemes)
+     * are dispatched to [Intent.parseUri] + `startActivity`. Both calls can
+     * throw on malformed URIs ([URISyntaxException]) or on devices without
+     * a handler ([ActivityNotFoundException], [SecurityException]). A single
+     * outer `try { … } catch (Throwable) { … }` consumes the URL silently
+     * (`return true`) and prevents any platform exception from propagating
+     * into the Compose tree — strengthens both Spec 007/008 baseline AND
+     * the FR-018 incognito requirement (the wrapper applies universally).
+     */
+    @Suppress("TooGenericExceptionCaught", "ReturnCount")
+    // Intentional generic catch + 3 early returns — defence-in-depth against
+    // any platform call that may throw on a misbehaving handler app or
+    // malformed URI. Spec 012 FR-018 mandates "MUST NOT crash"; broad catch
+    // is the simplest correct fix.
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val uri = request?.url ?: return false
+        val scheme = uri.scheme?.lowercase() ?: return false
+        if (scheme in WEB_NATIVE_SCHEMES) return false // let WebView load it normally
+        val context = view?.context ?: return false
+        try {
+            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (t: Throwable) {
+            android.util.Log.w("BrowserWebView", "External intent dispatch failed: $uri", t)
+        }
+        return true
+    }
+
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         url?.let {
             // Spec 009 — fire URL change FIRST so the address bar reflects
@@ -376,6 +455,13 @@ private class BrowserChromeClient(
 }
 
 private const val BLANK_PAGE: String = "about:blank"
+
+/**
+ * Spec 012 FR-018 — schemes the WebView itself loads natively. Anything else
+ * (`tel:`, `mailto:`, `intent://`, custom app schemes) is dispatched as an
+ * external Intent inside [shouldOverrideUrlLoading] with full crash safety.
+ */
+private val WEB_NATIVE_SCHEMES: Set<String> = setOf("http", "https", "about", "data")
 
 /**
  * Spec 011 Q4 amendment — delay between `onPageFinished` and the screenshot

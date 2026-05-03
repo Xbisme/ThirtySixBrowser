@@ -10,6 +10,7 @@ import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -68,6 +69,7 @@ class BrowserViewModel @Inject constructor(
     private val buildSearchUrl: BuildSearchUrlUseCase,
     observeActiveTab: ObserveActiveTabUseCase,
     observeTabs: ObserveTabsUseCase,
+    observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
     private val updateActiveTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase,
     private val createTab: CreateTabUseCase,
     private val faviconCache: FaviconCache,
@@ -132,6 +134,15 @@ class BrowserViewModel @Inject constructor(
             .map { it?.id }
             .distinctUntilChanged()
             .onEach { currentTitleCache.value = "" }
+            .launchIn(viewModelScope)
+
+        // Spec 012 — observe active-tab incognito state into UiState. Drives
+        // the address-bar indicator (FR-015), cache-write gates (FR-009 /
+        // FR-010), and the WebView lockdown branch (research.md R5).
+        observeActiveTabIsIncognito()
+            .onEach { incognito ->
+                _uiState.update { state -> state.copy(isIncognito = incognito) }
+            }
             .launchIn(viewModelScope)
     }
 
@@ -312,8 +323,14 @@ class BrowserViewModel @Inject constructor(
     fun onTitleReceived(title: String) {
         currentTitleCache.value = title
         val activeId = activeTabFlow.value?.id ?: return
+        val incognito = _uiState.value.isIncognito
         viewModelScope.launch {
-            updateActiveTabUrlAndTitle(activeId, _uiState.value.currentUrl, title)
+            updateActiveTabUrlAndTitle(
+                tabId = activeId,
+                url = _uiState.value.currentUrl,
+                title = title,
+                isIncognito = incognito,
+            )
         }
     }
 
@@ -344,6 +361,10 @@ class BrowserViewModel @Inject constructor(
      * lookups can find it synchronously at composition time.
      */
     fun onIconReceived(url: String, icon: Bitmap) {
+        // Spec 012 FR-010 — incognito tabs MUST NOT write to the on-disk
+        // favicon cache (the cache is hostname-keyed and would leak browsing
+        // across the normal/incognito boundary).
+        if (_uiState.value.isIncognito) return
         viewModelScope.launch {
             faviconCache.save(url, icon)
         }
@@ -361,6 +382,10 @@ class BrowserViewModel @Inject constructor(
      * `onPageFinished` will fire another capture.
      */
     fun onScreenshotReady(bitmap: Bitmap) {
+        // Spec 012 FR-009 — incognito tabs MUST NOT write screenshots to the
+        // on-disk cache (privacy: file recovery from disk would leak page
+        // content even after the tab is closed).
+        if (_uiState.value.isIncognito) return
         val tabId = activeTabFlow.value?.id ?: return
         viewModelScope.launch {
             screenshotCache.save(tabId, bitmap)
@@ -369,8 +394,14 @@ class BrowserViewModel @Inject constructor(
 
     private fun persistActiveTabState(url: String) {
         val activeId = activeTabFlow.value?.id ?: return
+        val incognito = _uiState.value.isIncognito
         viewModelScope.launch {
-            updateActiveTabUrlAndTitle(activeId, url, currentTitleCache.value)
+            updateActiveTabUrlAndTitle(
+                tabId = activeId,
+                url = url,
+                title = currentTitleCache.value,
+                isIncognito = incognito,
+            )
         }
     }
 

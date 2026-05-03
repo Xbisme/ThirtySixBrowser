@@ -21,6 +21,18 @@ data class TabsUiState(
     val activeTabId: Long? = null,
     val isCloseAllDialogVisible: Boolean = false,
     val errorEvent: TabsErrorEvent? = null,
+    /**
+     * Spec 012 — derived from [tabs] as `tabs.count { it.isIncognito }`.
+     * Drives the visibility logic of the "Close all incognito" affordance
+     * (US5 acceptance scenarios 1+2 — hidden iff this is 0).
+     */
+    val incognitoTabCount: Int = 0,
+    /**
+     * Spec 012 — UI-only flag toggled by `TabsViewModel.onCloseAllIncognitoRequested()`,
+     * `onCloseAllIncognitoDismissed()`, and `onCloseAllIncognitoConfirmed()`.
+     * Drives the "Close all incognito" confirmation dialog visibility.
+     */
+    val isCloseAllIncognitoDialogVisible: Boolean = false,
 ) {
     companion object {
         val EMPTY: TabsUiState = TabsUiState()

@@ -38,4 +38,15 @@
         <item quantity="one">%1$d Tab</item>
         <item quantity="other">%1$d Tabs</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. -->
+    <string name="tabs_action_new_incognito_tab">Neuer Inkognito-Tab</string>
+    <string name="tabs_a11y_new_incognito_tab">Neuen Inkognito-Tab öffnen</string>
+    <string name="tabs_a11y_incognito_glyph">Inkognito-Tab</string>
+    <string name="tabs_error_max_incognito_tabs_reached">Maximum von %d Inkognito-Tabs erreicht</string>
+    <string name="browser_a11y_incognito_indicator">Inkognito-Modus aktiv</string>
+    <string name="tabs_a11y_incognito_card_placeholder">Inkognito-Tab — Inhalt zur Privatsphäre verborgen</string>
+    <string name="tabs_card_incognito_label">Inkognito</string>
+    <string name="tabs_action_close_all_incognito">Alle Inkognito-Tabs schließen</string>
+    <string name="tabs_close_all_incognito_confirm">Alle %d Inkognito-Tabs schließen?</string>
 </resources>

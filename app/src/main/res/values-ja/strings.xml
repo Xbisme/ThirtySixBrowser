@@ -37,4 +37,15 @@
     <plurals name="tabs_switcher_title_count">
         <item quantity="other">%1$d 個のタブ</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. -->
+    <string name="tabs_action_new_incognito_tab">新しいシークレットタブ</string>
+    <string name="tabs_a11y_new_incognito_tab">新しいシークレットタブを開く</string>
+    <string name="tabs_a11y_incognito_glyph">シークレットタブ</string>
+    <string name="tabs_error_max_incognito_tabs_reached">シークレットタブの上限 %d 個に達しました</string>
+    <string name="browser_a11y_incognito_indicator">シークレットモード有効</string>
+    <string name="tabs_a11y_incognito_card_placeholder">シークレットタブ — プライバシー保護のため非表示</string>
+    <string name="tabs_card_incognito_label">シークレット</string>
+    <string name="tabs_action_close_all_incognito">すべてのシークレットタブを閉じる</string>
+    <string name="tabs_close_all_incognito_confirm">%d 個のシークレットタブをすべて閉じますか？</string>
 </resources>

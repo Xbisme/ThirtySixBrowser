@@ -9,9 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.presentation.navigation.AppNavGraph
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.presentation.util.SecureWindowEffect
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -19,6 +21,9 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var observeUserSettings: ObserveUserSettingsUseCase
+
+    @Inject
+    lateinit var observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +42,16 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.Dark -> true
                 ThemeMode.System -> isSystemInDarkTheme()
             }
+
+            // Spec 012 (FR-016 / FR-016a) — collect active-tab incognito
+            // state and toggle the activity window's FLAG_SECURE accordingly.
+            // Recents thumbnail is blanked + screenshots/screen-recording
+            // are blocked while incognito is the active tab.
+            val isIncognito by observeActiveTabIsIncognito()
+                .collectAsStateWithLifecycle(initialValue = false)
+
             ThirtySixTheme(darkTheme = darkTheme) {
+                SecureWindowEffect(secure = isIncognito)
                 AppNavGraph()
             }
         }

@@ -39,4 +39,15 @@
         <item quantity="many">%1$d onglets</item>
         <item quantity="other">%1$d onglets</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. -->
+    <string name="tabs_action_new_incognito_tab">Nouvel onglet privé</string>
+    <string name="tabs_a11y_new_incognito_tab">Ouvrir un nouvel onglet privé</string>
+    <string name="tabs_a11y_incognito_glyph">Onglet privé</string>
+    <string name="tabs_error_max_incognito_tabs_reached">Maximum de %d onglets privés atteint</string>
+    <string name="browser_a11y_incognito_indicator">Mode privé activé</string>
+    <string name="tabs_a11y_incognito_card_placeholder">Onglet privé — contenu masqué pour la confidentialité</string>
+    <string name="tabs_card_incognito_label">Privé</string>
+    <string name="tabs_action_close_all_incognito">Fermer tous les onglets privés</string>
+    <string name="tabs_close_all_incognito_confirm">Fermer tous les %d onglets privés ?</string>
 </resources>

@@ -6,6 +6,7 @@ import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
+import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +31,9 @@ import org.junit.Test
 class TabUseCasesTest {
 
     private lateinit var fake: FakeTabRepository
+    private lateinit var fakeIncognito: FakeIncognitoTabRepository
     private lateinit var observeTabs: ObserveTabsUseCase
+    private lateinit var observeAllTabs: ObserveAllTabsUseCase
     private lateinit var observeActiveTab: ObserveActiveTabUseCase
     private lateinit var createTab: CreateTabUseCase
     private lateinit var switchActiveTab: SwitchActiveTabUseCase
@@ -41,14 +44,16 @@ class TabUseCasesTest {
     @Before
     fun setup() {
         fake = FakeTabRepository(homeUrl = HOME_URL)
+        fakeIncognito = FakeIncognitoTabRepository()
         val screenshotCache = NoopScreenshotCache
         observeTabs = ObserveTabsUseCase(fake)
-        observeActiveTab = ObserveActiveTabUseCase(observeTabs)
+        observeAllTabs = ObserveAllTabsUseCase(fake, fakeIncognito)
+        observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
         createTab = CreateTabUseCase(fake, HOME_URL)
         switchActiveTab = SwitchActiveTabUseCase(fake)
         closeTab = CloseTabUseCase(fake, screenshotCache)
         closeAllTabs = CloseAllTabsUseCase(fake, screenshotCache)
-        updateTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(fake)
+        updateTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(fake, fakeIncognito)
     }
 
     /** Spec 011 Q4 amendment — no-op [ScreenshotCache] for the use-case tests. */

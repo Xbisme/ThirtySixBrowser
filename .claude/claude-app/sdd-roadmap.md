@@ -1,7 +1,7 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
 > Cập nhật lần cuối: 2026-05-03
-> v1.0: Android Native Browser — ✅ Specs 001–010 done. Phase 1 6/6 + Phase 2 4/6 done.
+> v1.0: Android Native Browser — ✅ Specs 001–011 done. 🟡 Spec 012 production code done. Phase 1 6/6 + Phase 2 6/6 (production) done.
 
 ## Nguyên tắc Roadmap
 
@@ -70,8 +70,8 @@ Constitution
 | 008 | `navigation-controls` | Back/Forward/Reload/Stop/Home + predictive back | Bấm back/forward → URL thay đổi; system back gesture honor history; predictive preview Android 14+ | 007 | ✅ Implemented 2026-05-01 — 41/51 tasks; 102/102 unit tests pass; APK 1.67 MB; 16KB green; 4 instrumented integration tests + 3 manual gates deferred (mirrors Spec 007 T042 pattern) |
 | 009 | `address-bar-omnibox` | TextField nhập URL/query + suggest | Nhập URL → load; nhập query → search | 008 | ✅ Done 2026-05-03 — 143/143 unit tests; APK 2.05 MB; 9 manual user-device gates verified |
 | 010 | `search-engine-google` | Build search URL via `SearchEngineRepository` | Nhập "android" → Google; flip engine via Settings → DuckDuckGo / Bing | 009 | ✅ Done 2026-05-03 — 162/162 unit tests; APK 2.0 MB (R8 -50 KB delta); 16KB ✅; Constitution 11/11; 5 manual gates verified |
-| 011 | `tabs-management` | Multi-tab grid switcher + persist | Tạo/đóng/chuyển 3 tabs, kill app, mở lại còn nguyên | 007 | ⬜ |
-| 012 | `private-incognito-mode` | Tab incognito riêng biệt | Mở incognito → cookie/history không lưu | 011 | ⬜ |
+| 011 | `tabs-management` | Multi-tab grid switcher + persist | Tạo/đóng/chuyển 3 tabs, kill app, mở lại còn nguyên | 007 | ✅ Done 2026-05-03 — 64/64 tasks; 201/201 unit tests; APK 2.1 MB; 5 manual gates verified |
+| 012 | `private-incognito-mode` | Tab incognito riêng biệt | Mở incognito → cookie/history không lưu | 011 | 🟡 Production code done 2026-05-03 — 53/84 tasks; APK 2.1 MB (no delta); 16KB ✅; Constitution 11/11 PASS; lintDebug + detekt + ktlint + testDebugUnitTest all green; 31 deferred (test files + 6 manual gates + PR) |
 | 013 | `bookmarks-crud` | Add/edit/delete bookmark + folder | Thêm bookmark → mở list → xóa | 005, 007 | ⬜ |
 | 014 | `history-view` | Group theo ngày + search + clear | Visit 3 URLs → list theo ngày → search | 005, 007 | ⬜ |
 | 015 | `downloads-manager` | DownloadManager integration + list | Download file → notification → mở | 007 | ⬜ |

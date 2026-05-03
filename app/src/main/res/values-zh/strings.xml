@@ -37,4 +37,15 @@
     <plurals name="tabs_switcher_title_count">
         <item quantity="other">%1$d 个标签页</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. -->
+    <string name="tabs_action_new_incognito_tab">新建无痕标签页</string>
+    <string name="tabs_a11y_new_incognito_tab">打开新无痕标签页</string>
+    <string name="tabs_a11y_incognito_glyph">无痕标签页</string>
+    <string name="tabs_error_max_incognito_tabs_reached">已达到 %d 个无痕标签页上限</string>
+    <string name="browser_a11y_incognito_indicator">无痕模式已启用</string>
+    <string name="tabs_a11y_incognito_card_placeholder">无痕标签页 — 内容已隐藏</string>
+    <string name="tabs_card_incognito_label">无痕</string>
+    <string name="tabs_action_close_all_incognito">关闭所有无痕标签页</string>
+    <string name="tabs_close_all_incognito_confirm">关闭所有 %d 个无痕标签页？</string>
 </resources>

@@ -9,7 +9,6 @@ import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
@@ -56,16 +55,31 @@ class TabsViewModelTest {
 
     private fun newViewModel(
         repository: FakeTabRepository = FakeTabRepository(homeUrl = HOME_URL),
+        incognitoRepository: com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository =
+            com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository(),
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
     ): TabsViewModel {
-        val observeTabs = ObserveTabsUseCase(repository)
+        val observeAllTabs = com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase(
+            repository,
+            incognitoRepository,
+        )
         return TabsViewModel(
-            observeTabs = observeTabs,
+            observeAllTabs = observeAllTabs,
             createTab = CreateTabUseCase(repository, HOME_URL),
+            createIncognitoTab = com.raumanian.thirtysix.browser.domain.usecase.CreateIncognitoTabUseCase(
+                incognitoRepository,
+            ),
             switchActiveTab = SwitchActiveTabUseCase(repository),
             closeTab = CloseTabUseCase(repository, screenshotCache),
+            closeIncognitoTab = com.raumanian.thirtysix.browser.domain.usecase.CloseIncognitoTabUseCase(
+                incognitoRepository,
+            ),
             closeAllTabs = CloseAllTabsUseCase(repository, screenshotCache),
+            closeAllIncognitoTabs = com.raumanian.thirtysix.browser.domain.usecase.CloseAllIncognitoTabsUseCase(
+                incognitoRepository,
+            ),
+            homeUrl = HOME_URL,
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
         )
