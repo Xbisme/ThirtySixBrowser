@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.graphics.Bitmap
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
@@ -7,11 +8,26 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
+import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_ERROR_STATE
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import java.io.File
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -64,9 +80,20 @@ class BrowserScreenOfflineErrorTest {
             // would re-transition Failed → Loaded and hide the error UI).
             // Spec 010 — error-rendering test never invokes the address-bar
             // Query branch, so a no-op `BuildSearchUrlUseCase` is sufficient.
+            // Spec 011 — error-rendering test does not exercise tab logic;
+            // a no-op TabRepository fake suffices for the 4 new use-case
+            // dependencies.
+            val noopTabRepo = OfflineErrorNoopTabRepository
+            val observeTabs = ObserveTabsUseCase(noopTabRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = UrlConstants.DEFAULT_HOME_URL,
                 buildSearchUrl = BuildSearchUrlUseCase(OfflineErrorNoopSearchEngineRepository),
+                observeActiveTab = ObserveActiveTabUseCase(observeTabs),
+                observeTabs = observeTabs,
+                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo),
+                createTab = CreateTabUseCase(noopTabRepo, UrlConstants.DEFAULT_HOME_URL),
+                faviconCache = OfflineErrorNoopFaviconCache,
+                screenshotCache = OfflineErrorNoopScreenshotCache,
             ).apply {
                 onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)
@@ -98,4 +125,40 @@ class BrowserScreenOfflineErrorTest {
 private object OfflineErrorNoopSearchEngineRepository : SearchEngineRepository {
     override suspend fun buildSearchUrl(query: String): String =
         error("instrumented test should not reach the search-URL build path")
+}
+
+/**
+ * Spec 011 — file-private no-op [TabRepository] for the error-rendering test.
+ * Mirrors the OfflineErrorNoopSearchEngineRepository pattern.
+ */
+private object OfflineErrorNoopTabRepository : TabRepository {
+    override fun observeTabs(): Flow<List<Tab>> = flowOf(emptyList())
+    override suspend fun createTab(url: String): Result<Tab> =
+        error("error-rendering test should not reach createTab")
+    override suspend fun switchActiveTab(tabId: Long) = Unit
+    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
+    override suspend fun closeTab(tabId: Long) = Unit
+    override suspend fun closeAllTabs() = Unit
+    override suspend fun getTabCount(): Int = 0
+}
+
+/**
+ * Spec 011 favicon amendment — no-op [FaviconCache] for the error-rendering
+ * instrumented test. The test never triggers `onReceivedIcon` (loading
+ * state seeded to Failed before WebView is constructed).
+ */
+private object OfflineErrorNoopFaviconCache : FaviconCache {
+    private val state = MutableStateFlow(0L)
+    override val version: StateFlow<Long> = state.asStateFlow()
+    override suspend fun save(url: String, bitmap: Bitmap) = Unit
+    override fun fileFor(url: String): File? = null
+}
+
+private object OfflineErrorNoopScreenshotCache : ScreenshotCache {
+    private val state = MutableStateFlow(0L)
+    override val version: StateFlow<Long> = state.asStateFlow()
+    override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+    override fun fileFor(tabId: Long): File? = null
+    override suspend fun delete(tabId: Long) = Unit
+    override suspend fun clearAll() = Unit
 }

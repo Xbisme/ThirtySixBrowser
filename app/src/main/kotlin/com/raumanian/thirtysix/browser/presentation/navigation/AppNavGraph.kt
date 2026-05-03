@@ -21,8 +21,11 @@ fun AppNavGraph(
     startDestination: String = AppDestination.Browser.route,
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
-        composable(AppDestination.Browser.route) { BrowserScreen() }
-        composable(AppDestination.Tabs.route) { TabsScreen() }
+        // Spec 011 — BrowserScreen + TabsScreen receive NavController so the
+        // 5th BottomAppBar button can navigate to AppDestination.Tabs (single
+        // tap), and the switcher can pop back via TabsViewModel.popBackEvent.
+        composable(AppDestination.Browser.route) { BrowserScreen(navController = navController) }
+        composable(AppDestination.Tabs.route) { TabsScreen(navController = navController) }
         composable(AppDestination.Bookmarks.route) { BookmarksScreen() }
         composable(AppDestination.History.route) { HistoryScreen() }
         composable(AppDestination.Downloads.route) { DownloadsScreen() }

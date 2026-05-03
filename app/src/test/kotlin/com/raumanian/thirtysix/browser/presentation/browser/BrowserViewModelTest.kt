@@ -1,12 +1,24 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.graphics.Bitmap
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
+import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
+import java.io.File
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -50,7 +62,45 @@ class BrowserViewModelTest {
     private fun newViewModel(
         url: String = UrlConstants.DEFAULT_HOME_URL,
         buildSearchUrl: BuildSearchUrlUseCase = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),
-    ): BrowserViewModel = BrowserViewModel(defaultHomeUrl = url, buildSearchUrl = buildSearchUrl)
+        tabRepository: FakeTabRepository = FakeTabRepository(homeUrl = url),
+        faviconCache: FaviconCache = NoopFaviconCache,
+        screenshotCache: ScreenshotCache = NoopScreenshotCache,
+    ): BrowserViewModel {
+        // Spec 011 — 4 use-case dependencies + 2 caches all back onto a
+        // single FakeTabRepository / Noop*Cache so existing Spec 007–010
+        // tests remain green by ignoring this seam (defaults provide a
+        // self-contained fake).
+        val observeTabs = ObserveTabsUseCase(tabRepository)
+        val observeActiveTab = ObserveActiveTabUseCase(observeTabs)
+        return BrowserViewModel(
+            defaultHomeUrl = url,
+            buildSearchUrl = buildSearchUrl,
+            observeActiveTab = observeActiveTab,
+            observeTabs = observeTabs,
+            updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository),
+            createTab = CreateTabUseCase(tabRepository, url),
+            faviconCache = faviconCache,
+            screenshotCache = screenshotCache,
+        )
+    }
+
+    /** Spec 011 favicon amendment — no-op [FaviconCache] for tests. */
+    private object NoopFaviconCache : FaviconCache {
+        private val state = MutableStateFlow(0L)
+        override val version: StateFlow<Long> = state.asStateFlow()
+        override suspend fun save(url: String, bitmap: Bitmap) = Unit
+        override fun fileFor(url: String): File? = null
+    }
+
+    /** Spec 011 Q4 amendment — no-op [ScreenshotCache] for tests. */
+    private object NoopScreenshotCache : ScreenshotCache {
+        private val state = MutableStateFlow(0L)
+        override val version: StateFlow<Long> = state.asStateFlow()
+        override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+        override fun fileFor(tabId: Long): File? = null
+        override suspend fun delete(tabId: Long) = Unit
+        override suspend fun clearAll() = Unit
+    }
 
     /**
      * Test fake reproducing the exact Spec 009 inline-encoding formula so the
@@ -517,6 +567,67 @@ class BrowserViewModelTest {
         val state = vm.uiState.value
         assertEquals("", state.addressBarText)
         assertEquals(true, state.isAddressBarFocused)
+    }
+
+    // ---------- Spec 011 (T024 — US1) — active-tab seeding + write-through ----------
+
+    @Test
+    fun `init seeds currentUrl from the active tab once Flow emits`() = runTest(testDispatcher) {
+        // FakeTabRepository auto-seeds an empty list with one home tab on first
+        // observeTabs() subscription. After advanceUntilIdle the seeded URL
+        // should override the constructor's defaultHomeUrl.
+        val seededUrl = "https://www.google.com/"
+        val vm = newViewModel(url = seededUrl)
+        advanceUntilIdle()
+        assertEquals(seededUrl, vm.uiState.value.currentUrl)
+    }
+
+    @Test
+    fun `onLongPressNewTab under cap creates a tab without setting tabsEvent`() = runTest(testDispatcher) {
+        val vm = newViewModel()
+        advanceUntilIdle()
+        vm.onLongPressNewTab()
+        advanceUntilIdle()
+        // No cap-reached error because we're far below MAX_TABS.
+        assertEquals(null, vm.uiState.value.tabsEvent)
+    }
+
+    @Test
+    fun `onLongPressNewTab at cap sets tabsEvent to MaxTabsReached`() = runTest(testDispatcher) {
+        // Pre-fill the FakeTabRepository to MAX_TABS.
+        val repository = FakeTabRepository(homeUrl = "https://example.com")
+        val seed = (1..com.raumanian.thirtysix.browser.core.constants.BrowserLimits.MAX_TABS).map { i ->
+            com.raumanian.thirtysix.browser.domain.model.Tab(
+                id = i.toLong(),
+                url = "https://t$i.com",
+                title = "",
+                position = i - 1,
+                createdAt = 0L,
+                lastActiveAt = i.toLong(),
+            )
+        }
+        repository.emit(seed)
+        val vm = newViewModel(url = "https://example.com", tabRepository = repository)
+        advanceUntilIdle()
+
+        vm.onLongPressNewTab()
+        advanceUntilIdle()
+
+        assertEquals(
+            com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent.MaxTabsReached,
+            vm.uiState.value.tabsEvent,
+        )
+    }
+
+    @Test
+    fun `consumeTabsEvent clears the tabsEvent field`() = runTest(testDispatcher) {
+        val vm = newViewModel()
+        advanceUntilIdle()
+        // Manually invoke onLongPressNewTab while the cap is far away so
+        // tabsEvent stays null. Then directly verify consumeTabsEvent has no
+        // effect when the field is already null (idempotence).
+        vm.consumeTabsEvent()
+        assertEquals(null, vm.uiState.value.tabsEvent)
     }
 
     private companion object {

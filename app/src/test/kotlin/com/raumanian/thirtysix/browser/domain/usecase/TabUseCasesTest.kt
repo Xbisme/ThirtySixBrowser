@@ -1,10 +1,16 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import android.graphics.Bitmap
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
+import java.io.File
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -35,13 +41,24 @@ class TabUseCasesTest {
     @Before
     fun setup() {
         fake = FakeTabRepository(homeUrl = HOME_URL)
+        val screenshotCache = NoopScreenshotCache
         observeTabs = ObserveTabsUseCase(fake)
         observeActiveTab = ObserveActiveTabUseCase(observeTabs)
         createTab = CreateTabUseCase(fake, HOME_URL)
         switchActiveTab = SwitchActiveTabUseCase(fake)
-        closeTab = CloseTabUseCase(fake)
-        closeAllTabs = CloseAllTabsUseCase(fake)
+        closeTab = CloseTabUseCase(fake, screenshotCache)
+        closeAllTabs = CloseAllTabsUseCase(fake, screenshotCache)
         updateTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(fake)
+    }
+
+    /** Spec 011 Q4 amendment — no-op [ScreenshotCache] for the use-case tests. */
+    private object NoopScreenshotCache : ScreenshotCache {
+        private val state = MutableStateFlow(0L)
+        override val version: StateFlow<Long> = state.asStateFlow()
+        override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+        override fun fileFor(tabId: Long): File? = null
+        override suspend fun delete(tabId: Long) = Unit
+        override suspend fun clearAll() = Unit
     }
 
     @Test

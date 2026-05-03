@@ -49,9 +49,9 @@ class FakeTabRepository(
             seedHomeTab()
         }
         return state.asStateFlow()
-            // The state flow already carries the user-side ordering as we
-            // mutate it; assertions in tests use `value` snapshots which we
-            // pre-sort below.
+        // The state flow already carries the user-side ordering as we
+        // mutate it; assertions in tests use `value` snapshots which we
+        // pre-sort below.
     }
 
     override suspend fun createTab(url: String): Result<Tab> {

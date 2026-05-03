@@ -5,9 +5,9 @@ import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
-import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.data.local.dao.TabDao
 import com.raumanian.thirtysix.browser.data.local.dao.inMemoryAppDatabase
+import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.data.local.entity.TabEntity
 import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
 import kotlinx.coroutines.Dispatchers

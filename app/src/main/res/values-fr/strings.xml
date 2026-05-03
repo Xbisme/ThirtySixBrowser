@@ -36,6 +36,7 @@
 
     <plurals name="tabs_switcher_title_count">
         <item quantity="one">%1$d onglet</item>
+        <item quantity="many">%1$d onglets</item>
         <item quantity="other">%1$d onglets</item>
     </plurals>
 </resources>
