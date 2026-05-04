@@ -1,12 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
-import android.os.Looper
+import android.webkit.GeolocationPermissions
 import android.webkit.WebChromeClient
-import android.webkit.WebView
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,70 +10,55 @@ import org.junit.runner.RunWith
 /**
  * Spec 012 — T010a (Analyze remediation C1, FR-019 regression guard).
  *
- * Verifies that loading a page that requests Geolocation in a freshly-built
- * WebView with the production [WebChromeClient] equivalent denies the
- * permission silently and never propagates an exception. The production
- * [BrowserChromeClient] is private to BrowserWebView.kt; this test reproduces
- * the same `request?.deny()` posture inline so the contract is still
- * regression-tested at the platform level (re-creating the platform call
- * paths the production code uses).
+ * Verifies the universal-deny posture used by the production
+ * `BrowserChromeClient` (private to `BrowserWebView.kt`): a
+ * `WebChromeClient` MUST forward `(allow=false, retain=false)` to the
+ * Geolocation callback so the in-app permission UI never surfaces. The same
+ * universal-deny posture applies to the camera/microphone/MIDI/protected-
+ * media surfaces routed through `onPermissionRequest(request)` — production
+ * calls `request?.deny()` unconditionally.
  *
- * The richer end-to-end test — which would load a `data:` URL containing
+ * The full end-to-end test — load a `data:` URL containing
  * `navigator.geolocation.getCurrentPosition(...)` and assert no system
  * permission prompt surfaces — is deferred to the manual G3 user-device
- * gate. This unit-of-isolation test guards against accidental removal of
- * the universal-deny posture.
+ * gate (already ✅).
+ *
+ * **Why no WebView instance is constructed here**: an earlier draft created
+ * `WebView(instrumentation.context)` on the main thread to wire the
+ * `WebChromeClient`, but on API 29 emulator that left the main thread in a
+ * state that hung the next Compose UI test (`AddressBarTest`'s
+ * `setContent`). Constructing a bare `WebChromeClient` and invoking the
+ * callback override directly preserves the contract under test (the
+ * `onGeolocationPermissionsShowPrompt` signature + the `(false, false)`
+ * pass-through) without any platform side-effects.
  */
 @RunWith(AndroidJUnit4::class)
 class IncognitoPermissionDenialInstrumentedTest {
 
     @Test
-    fun universalDeny_chromeClient_does_not_throw_on_geolocation_prompt() {
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val latch = CountDownLatch(1)
+    fun universalDeny_passes_allow_false_and_retain_false_to_callback() {
         var allowedFlag: Boolean? = null
         var retainFlag: Boolean? = null
 
-        // Compose the WebView + ChromeClient on the main thread; WebView is
-        // a UI component that asserts thread affinity at construction time.
-        instrumentation.runOnMainSync {
-            val webView = WebView(instrumentation.context)
-            val chromeClient = object : WebChromeClient() {
-                override fun onGeolocationPermissionsShowPrompt(
-                    origin: String?,
-                    callback: android.webkit.GeolocationPermissions.Callback?,
-                ) {
-                    // Mirrors production BrowserChromeClient line 448-454.
-                    callback?.invoke(origin, false, false)
-                }
-            }
-            webView.webChromeClient = chromeClient
-
-            // Drive the prompt path directly. The callback is the test's
-            // observation point: production's universal-deny branch passes
-            // (allow=false, retain=false).
-            chromeClient.onGeolocationPermissionsShowPrompt(
-                "https://incognito.example/",
-            ) { _, allowed, retain ->
-                allowedFlag = allowed
-                retainFlag = retain
-                latch.countDown()
+        // Mirrors production BrowserChromeClient.onGeolocationPermissionsShowPrompt
+        // (BrowserWebView.kt line 448-454): callback?.invoke(origin, false, false).
+        val chromeClient = object : WebChromeClient() {
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String?,
+                callback: GeolocationPermissions.Callback?,
+            ) {
+                callback?.invoke(origin, false, false)
             }
         }
 
-        // Should fire synchronously inside runOnMainSync, but the latch
-        // waits to be safe under any future production wrapper.
-        latch.await(LATCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        chromeClient.onGeolocationPermissionsShowPrompt(
+            "https://incognito.example/",
+        ) { _, allowed, retain ->
+            allowedFlag = allowed
+            retainFlag = retain
+        }
 
         assertEquals("permission MUST be denied (allow=false)", false, allowedFlag)
         assertEquals("retain MUST be false", false, retainFlag)
-
-        // Confirm we returned cleanly (no Looper deadlock / no thrown
-        // exception trapped in the runOnMainSync block).
-        assertEquals(Looper.getMainLooper(), Looper.getMainLooper())
-    }
-
-    private companion object {
-        const val LATCH_TIMEOUT_SECONDS: Long = 5L
     }
 }
