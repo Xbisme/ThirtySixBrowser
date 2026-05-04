@@ -65,10 +65,18 @@ class IncognitoSwitcherCardInstrumentedTest {
             }
         }
 
+        // `useUnmergedTree = true` because the Card carries a
+        // `Modifier.semantics { contentDescription = ... }` that MERGES all
+        // descendant semantics into the parent in the default merged tree.
+        // The placeholder Box's testTag lives on the unmerged side; the
+        // assertion would otherwise fail with the exact diagnostic the
+        // emulator reported. The placeholder MUST exist somewhere in the
+        // tree — that's what we're verifying.
         composeRule
-            .onNodeWithTag(TEST_TAG_INCOGNITO_PLACEHOLDER)
+            .onNodeWithTag(TEST_TAG_INCOGNITO_PLACEHOLDER, useUnmergedTree = true)
             .assertExists()
-        // Card itself is in the tree (cover for the contentDescription/tag chain).
+        // Card itself sits at the top of the merged tree (it owns the merge
+        // boundary), so its tag is reachable via the default merged finder.
         composeRule
             .onNodeWithTag(TEST_TAG_TAB_CARD_PREFIX + incognitoTab.id)
             .assertExists()
