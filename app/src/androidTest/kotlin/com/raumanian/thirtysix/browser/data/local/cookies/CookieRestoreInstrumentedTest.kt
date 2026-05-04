@@ -2,13 +2,14 @@ package com.raumanian.thirtysix.browser.data.local.cookies
 
 import android.webkit.CookieManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.coroutines.resume
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -47,12 +48,12 @@ class CookieRestoreInstrumentedTest {
         hiltRule.inject()
         // Force-clean the global cookie store before each run — CookieManager
         // is process-global, prior tests in the same APK may have left state.
-        suspendRemoveAllCookies()
+        wipeCookieJarOnMainThread()
         // If a snapshot survived from a prior test, purge it.
         if (manager.hasSnapshot()) {
             manager.restoreSnapshot()
         }
-        suspendRemoveAllCookies()
+        wipeCookieJarOnMainThread()
     }
 
     @Test
@@ -95,16 +96,30 @@ class CookieRestoreInstrumentedTest {
         )
     }
 
-    private suspend fun suspendRemoveAllCookies() {
-        val cookieManager = CookieManager.getInstance()
-        suspendCancellableCoroutine<Unit> { cont ->
-            cookieManager.removeAllCookies { if (cont.isActive) cont.resume(Unit) }
+    /**
+     * Wipe the global cookie jar synchronously. The callback variant of
+     * `CookieManager.removeAllCookies` is documented to require a thread
+     * with a Looper (the JavaScriptThread / WebView core thread); coroutine
+     * IO threads do NOT carry a Looper, which is why a direct
+     * `suspendCancellableCoroutine` wrapper is unsafe in instrumented tests.
+     * Production code wraps the call in `runCatching` so failures degrade to
+     * "cookies wiped" — the test does not have that fallback, so we hop
+     * onto the main thread (which has a Looper) for the cleanup helper.
+     */
+    private fun wipeCookieJarOnMainThread() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val latch = CountDownLatch(1)
+        instrumentation.runOnMainSync {
+            val cookieManager = CookieManager.getInstance()
+            cookieManager.removeAllCookies { latch.countDown() }
+            cookieManager.flush()
         }
-        cookieManager.flush()
+        latch.await(LATCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)
     }
 
     private companion object {
         const val ORIGIN_NORMAL: String = "https://normal.test.example"
         const val ORIGIN_INCOGNITO: String = "https://incognito.test.example"
+        const val LATCH_TIMEOUT_SECONDS: Long = 5L
     }
 }

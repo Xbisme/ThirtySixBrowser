@@ -10,8 +10,10 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,10 +47,27 @@ class ProcessDeathIncognitoEraseInstrumentedTest {
     @Inject
     lateinit var tabRepository: TabRepository
 
+    @Before
+    fun setup() = runBlocking {
+        hiltRule.inject()
+        // Reset the shared Hilt-singleton Room database state. The instrumented
+        // test APK shares one Hilt container across @HiltAndroidTest classes,
+        // so leftover tabs from a prior test would otherwise pollute counts.
+        tabRepository.closeAllTabs()
+        if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
+    }
+
+    @After
+    fun tearDown() = runBlocking {
+        // Same rationale as @Before — leave the shared state clean for the
+        // next test class (TabPersistenceProcessDeathTest from Spec 011 was
+        // observed failing on a leaked extra tab in CI).
+        tabRepository.closeAllTabs()
+        if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
+    }
+
     @Test
     fun recreate_preserves_normal_tabs_but_incognito_pool_remains_in_memory_only() = runBlocking {
-        hiltRule.inject()
-
         // Cold start: incognito repo MUST be empty by FR-012 invariant.
         assertTrue(
             "incognito repo MUST start empty (FR-012)",
