@@ -12,11 +12,14 @@ import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.Tab
+import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_ERROR_STATE
@@ -84,13 +87,16 @@ class BrowserScreenOfflineErrorTest {
             // a no-op TabRepository fake suffices for the 4 new use-case
             // dependencies.
             val noopTabRepo = OfflineErrorNoopTabRepository
+            val noopIncognitoRepo = OfflineErrorNoopIncognitoTabRepository
             val observeTabs = ObserveTabsUseCase(noopTabRepo)
+            val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = UrlConstants.DEFAULT_HOME_URL,
                 buildSearchUrl = BuildSearchUrlUseCase(OfflineErrorNoopSearchEngineRepository),
-                observeActiveTab = ObserveActiveTabUseCase(observeTabs),
+                observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 observeTabs = observeTabs,
-                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo),
+                observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
+                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
                 createTab = CreateTabUseCase(noopTabRepo, UrlConstants.DEFAULT_HOME_URL),
                 faviconCache = OfflineErrorNoopFaviconCache,
                 screenshotCache = OfflineErrorNoopScreenshotCache,
@@ -140,6 +146,18 @@ private object OfflineErrorNoopTabRepository : TabRepository {
     override suspend fun closeTab(tabId: Long) = Unit
     override suspend fun closeAllTabs() = Unit
     override suspend fun getTabCount(): Int = 0
+}
+
+/** Spec 012 — no-op [IncognitoTabRepository] for the error-rendering test. */
+private object OfflineErrorNoopIncognitoTabRepository : IncognitoTabRepository {
+    override fun observeTabs(): Flow<List<Tab>> = flowOf(emptyList())
+    override suspend fun createTab(url: String): Result<Tab> =
+        error("error-rendering test should not reach incognito createTab")
+    override suspend fun switchActiveTab(tabId: Long) = Unit
+    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
+    override suspend fun closeTab(tabId: Long) = Unit
+    override suspend fun closeAll() = Unit
+    override suspend fun getCount(): Int = 0
 }
 
 /**

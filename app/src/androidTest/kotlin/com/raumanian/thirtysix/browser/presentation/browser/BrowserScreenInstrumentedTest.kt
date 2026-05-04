@@ -18,11 +18,14 @@ import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.Tab
+import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
@@ -90,13 +93,16 @@ class BrowserScreenInstrumentedTest {
             // pattern (Spec 010). Construction is verbose because we wire 4
             // use cases against a single shared no-op repo instance.
             val noopTabRepo = InstrumentedNoopTabRepository
+            val noopIncognitoRepo = InstrumentedNoopIncognitoTabRepository
             val observeTabs = ObserveTabsUseCase(noopTabRepo)
+            val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = TEST_PAGE_URL,
                 buildSearchUrl = BuildSearchUrlUseCase(InstrumentedNoopSearchEngineRepository),
-                observeActiveTab = ObserveActiveTabUseCase(observeTabs),
+                observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 observeTabs = observeTabs,
-                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo),
+                observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
+                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
                 createTab = CreateTabUseCase(noopTabRepo, TEST_PAGE_URL),
                 faviconCache = InstrumentedNoopFaviconCache,
                 screenshotCache = InstrumentedNoopScreenshotCache,
@@ -198,6 +204,22 @@ private object InstrumentedNoopTabRepository : TabRepository {
     override suspend fun closeTab(tabId: Long) = Unit
     override suspend fun closeAllTabs() = Unit
     override suspend fun getTabCount(): Int = 0
+}
+
+/**
+ * Spec 012 — file-private no-op [IncognitoTabRepository] mirroring the
+ * [InstrumentedNoopTabRepository] pattern. Emits empty list so the
+ * `BrowserViewModel.observeActiveTabIsIncognito` Flow stays at `false`.
+ */
+private object InstrumentedNoopIncognitoTabRepository : IncognitoTabRepository {
+    override fun observeTabs(): Flow<List<Tab>> = flowOf(emptyList())
+    override suspend fun createTab(url: String): Result<Tab> =
+        error("instrumented test should not reach incognito createTab")
+    override suspend fun switchActiveTab(tabId: Long) = Unit
+    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
+    override suspend fun closeTab(tabId: Long) = Unit
+    override suspend fun closeAll() = Unit
+    override suspend fun getCount(): Int = 0
 }
 
 /**
