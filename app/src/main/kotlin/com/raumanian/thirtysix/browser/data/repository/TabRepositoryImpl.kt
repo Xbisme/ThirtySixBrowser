@@ -43,8 +43,13 @@ class TabRepositoryImpl @Inject constructor(
     override fun observeTabs(): Flow<List<Tab>> = tabDao.observeAll()
         .onStart { ensureAtLeastOneTab() }
         .map { entities ->
+            // Spec 012 FR-021 — defensive per-row mapping. If a future or
+            // downgraded build leaves behind a malformed row, mapNotNull +
+            // runCatching silently drops it instead of crashing the cold
+            // start path. Production rows always succeed; this is a forward-
+            // compatibility guard.
             entities
-                .map(TabEntity::toDomain)
+                .mapNotNull { entity -> runCatching { entity.toDomain() }.getOrNull() }
                 .sortedWith(
                     compareByDescending(Tab::lastActiveAt).thenBy(Tab::id),
                 )

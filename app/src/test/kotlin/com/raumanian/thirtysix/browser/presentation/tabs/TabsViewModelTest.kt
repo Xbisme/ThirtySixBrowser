@@ -9,7 +9,6 @@ import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
@@ -56,16 +55,31 @@ class TabsViewModelTest {
 
     private fun newViewModel(
         repository: FakeTabRepository = FakeTabRepository(homeUrl = HOME_URL),
+        incognitoRepository: com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository =
+            com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository(),
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
     ): TabsViewModel {
-        val observeTabs = ObserveTabsUseCase(repository)
+        val observeAllTabs = com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase(
+            repository,
+            incognitoRepository,
+        )
         return TabsViewModel(
-            observeTabs = observeTabs,
+            observeAllTabs = observeAllTabs,
             createTab = CreateTabUseCase(repository, HOME_URL),
+            createIncognitoTab = com.raumanian.thirtysix.browser.domain.usecase.CreateIncognitoTabUseCase(
+                incognitoRepository,
+            ),
             switchActiveTab = SwitchActiveTabUseCase(repository),
             closeTab = CloseTabUseCase(repository, screenshotCache),
+            closeIncognitoTab = com.raumanian.thirtysix.browser.domain.usecase.CloseIncognitoTabUseCase(
+                incognitoRepository,
+            ),
             closeAllTabs = CloseAllTabsUseCase(repository, screenshotCache),
+            closeAllIncognitoTabs = com.raumanian.thirtysix.browser.domain.usecase.CloseAllIncognitoTabsUseCase(
+                incognitoRepository,
+            ),
+            homeUrl = HOME_URL,
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
         )
@@ -296,6 +310,58 @@ class TabsViewModelTest {
         val tabs = repository.observeTabs().first()
         assertEquals(1, tabs.size)
         assertEquals(HOME_URL, tabs.single().url)
+    }
+
+    // ---------- Spec 012 (T040a — US2 / Analyze remediation C3) — last-tab edge case ----------
+
+    /**
+     * FR-005 across the both-kinds-empty boundary that Spec 012 newly enables.
+     *
+     * Scenario: starting from "1 normal home + 1 incognito" (the operational
+     * minimum since `TabRepository.observeTabs()` auto-seeds a home tab on
+     * first subscription per Spec 011 / R5), closing the incognito tab MUST
+     * leave the user with exactly 1 normal home tab — and that home tab MUST
+     * NOT have been duplicated or wiped during the close.
+     */
+    @Test
+    fun `closing the only incognito tab leaves exactly one normal home tab`() = runTest(testDispatcher) {
+        val repository = FakeTabRepository(homeUrl = HOME_URL)
+        val incognitoRepo = com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository()
+        // Pre-seed an incognito tab (negative id per R3) with a higher
+        // lastActiveAt so it is the active tab in the merged Flow.
+        incognitoRepo.emit(
+            listOf(
+                Tab(
+                    id = -1L,
+                    url = "https://incognito.example.com",
+                    title = "",
+                    position = 0,
+                    createdAt = Long.MAX_VALUE,
+                    lastActiveAt = Long.MAX_VALUE,
+                    isIncognito = true,
+                ),
+            ),
+        )
+        val vm = newViewModel(repository, incognitoRepo)
+        advanceUntilIdle()
+
+        // Sanity: prior to close, repository auto-seeded 1 home tab and
+        // incognitoRepo holds 1 incognito tab → merged head is incognito.
+        val before = repository.observeTabs().first()
+        assertEquals(1, before.size)
+        assertEquals(HOME_URL, before.single().url)
+        assertEquals(1, incognitoRepo.observeTabs().first().size)
+
+        vm.onCloseTab(-1L)
+        advanceUntilIdle()
+
+        // After close: incognito gone, the auto-seeded normal home tab is the
+        // sole survivor — NOT duplicated, NOT wiped, NOT replaced.
+        val afterNormal = repository.observeTabs().first()
+        val afterIncognito = incognitoRepo.observeTabs().first()
+        assertEquals("normal home tab survived", 1, afterNormal.size)
+        assertEquals(HOME_URL, afterNormal.single().url)
+        assertTrue("incognito list is empty", afterIncognito.isEmpty())
     }
 
     @Test

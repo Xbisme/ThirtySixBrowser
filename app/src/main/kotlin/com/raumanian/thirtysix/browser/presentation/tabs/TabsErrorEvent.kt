@@ -20,4 +20,14 @@ sealed class TabsErrorEvent {
      * call `consumeXxx()` to clear the event.
      */
     data object MaxTabsReached : TabsErrorEvent()
+
+    /**
+     * Spec 012 — emitted when
+     * [com.raumanian.thirtysix.browser.domain.usecase.CreateIncognitoTabUseCase]
+     * returns `Result.Error(MaxIncognitoTabsReachedException())`. Distinct
+     * from [MaxTabsReached] (Q1 clarification — independent caps require
+     * distinct localized error strings). Consumers display the localized
+     * `R.string.tabs_error_max_incognito_tabs_reached` text in a snackbar.
+     */
+    data object MaxIncognitoTabsReached : TabsErrorEvent()
 }

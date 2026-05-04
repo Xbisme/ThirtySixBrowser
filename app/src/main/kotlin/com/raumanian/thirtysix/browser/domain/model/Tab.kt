@@ -22,6 +22,17 @@ package com.raumanian.thirtysix.browser.domain.model
  *                        pointer (`MAX(last_active_at)` per R1) AND the
  *                        switcher's most-recently-active-first ordering
  *                        (FR-014).
+ * @property isIncognito Spec 012 — `true` for in-memory incognito tabs that
+ *                       are NEVER persisted to Room. For tabs originating
+ *                       from `TabRepository` (Room-backed) this is always
+ *                       `false`. For tabs originating from
+ *                       `IncognitoTabRepository` (in-memory) this is always
+ *                       `true`. Default `false` preserves backwards
+ *                       compatibility with all Spec 011 fixtures and tests.
+ *                       ID-space invariant per R3: incognito tabs use
+ *                       NEGATIVE Long ids (≤ -1) so the merged
+ *                       `ObserveAllTabsUseCase` Flow has guaranteed-disjoint
+ *                       keys across the two repository sources.
  */
 data class Tab(
     val id: Long,
@@ -30,4 +41,5 @@ data class Tab(
     val position: Int,
     val createdAt: Long,
     val lastActiveAt: Long,
+    val isIncognito: Boolean = false,
 )

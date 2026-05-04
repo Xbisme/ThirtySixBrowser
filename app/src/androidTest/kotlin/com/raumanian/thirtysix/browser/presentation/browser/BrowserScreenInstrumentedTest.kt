@@ -18,11 +18,14 @@ import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.Tab
+import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
@@ -33,7 +36,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOf
 import org.hamcrest.Matchers.containsString
 import org.junit.Before
 import org.junit.Rule
@@ -90,13 +92,16 @@ class BrowserScreenInstrumentedTest {
             // pattern (Spec 010). Construction is verbose because we wire 4
             // use cases against a single shared no-op repo instance.
             val noopTabRepo = InstrumentedNoopTabRepository
+            val noopIncognitoRepo = InstrumentedNoopIncognitoTabRepository
             val observeTabs = ObserveTabsUseCase(noopTabRepo)
+            val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = TEST_PAGE_URL,
                 buildSearchUrl = BuildSearchUrlUseCase(InstrumentedNoopSearchEngineRepository),
-                observeActiveTab = ObserveActiveTabUseCase(observeTabs),
+                observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 observeTabs = observeTabs,
-                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo),
+                observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
+                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
                 createTab = CreateTabUseCase(noopTabRepo, TEST_PAGE_URL),
                 faviconCache = InstrumentedNoopFaviconCache,
                 screenshotCache = InstrumentedNoopScreenshotCache,
@@ -190,7 +195,15 @@ private object InstrumentedNoopSearchEngineRepository : SearchEngineRepository {
  * are no-ops. Matches the InstrumentedNoopSearchEngineRepository pattern.
  */
 private object InstrumentedNoopTabRepository : TabRepository {
-    override fun observeTabs(): Flow<List<Tab>> = flowOf(emptyList())
+    // Spec 012 — `combine(...)` inside `ObserveAllTabsUseCase` requires both
+    // upstreams to remain HOT (never complete) so the merged flow keeps
+    // emitting on demand. `flowOf(emptyList())` completes after one emission
+    // which can leave downstream collectors in a stale state and starve the
+    // Compose recomposer of subsequent updates — switched to a hot
+    // `MutableStateFlow` mirroring the unit-test `FakeTabRepository` pattern.
+    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
+    override fun observeTabs(): Flow<List<Tab>> = state
     override suspend fun createTab(url: String): Result<Tab> =
         error("instrumented test should not reach createTab")
     override suspend fun switchActiveTab(tabId: Long) = Unit
@@ -198,6 +211,24 @@ private object InstrumentedNoopTabRepository : TabRepository {
     override suspend fun closeTab(tabId: Long) = Unit
     override suspend fun closeAllTabs() = Unit
     override suspend fun getTabCount(): Int = 0
+}
+
+/**
+ * Spec 012 — file-private no-op [IncognitoTabRepository] mirroring the
+ * [InstrumentedNoopTabRepository] pattern. Hot `MutableStateFlow` (NOT
+ * `flowOf`) so `ObserveAllTabsUseCase.combine(...)` stays subscribed.
+ */
+private object InstrumentedNoopIncognitoTabRepository : IncognitoTabRepository {
+    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
+    override fun observeTabs(): Flow<List<Tab>> = state
+    override suspend fun createTab(url: String): Result<Tab> =
+        error("instrumented test should not reach incognito createTab")
+    override suspend fun switchActiveTab(tabId: Long) = Unit
+    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
+    override suspend fun closeTab(tabId: Long) = Unit
+    override suspend fun closeAll() = Unit
+    override suspend fun getCount(): Int = 0
 }
 
 /**

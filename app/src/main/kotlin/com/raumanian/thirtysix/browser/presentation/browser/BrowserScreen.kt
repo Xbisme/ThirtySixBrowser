@@ -4,8 +4,11 @@ package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -28,10 +31,12 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBa
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserErrorState
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserLoadingIndicator
+import com.raumanian.thirtysix.browser.presentation.browser.components.IncognitoIndicator
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
+import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 
 /**
  * Spec 007 + Spec 008 + Spec 009 + Spec 011 — top-level Browser screen.
@@ -91,7 +96,9 @@ fun BrowserScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { AddressBar(state = state, callbacks = addressBarCallbacks) },
+        topBar = {
+            BrowserTopBar(state = state, callbacks = addressBarCallbacks)
+        },
         bottomBar = {
             NavigationBottomBar(
                 canGoBack = state.canGoBack,
@@ -158,6 +165,36 @@ private fun BrowserBackHandlers(
  * disposes the prior WebView (Spec 007 `DisposableEffect` cleanup fires) and
  * instantiates a fresh one on every tab switch (R8 — single live WebView).
  */
+/**
+ * Spec 012 — Scaffold topBar slot. When the active tab is incognito (FR-015),
+ * the [IncognitoIndicator] precedes the [AddressBar] inside a Row; on normal
+ * tabs the AddressBar renders alone (preserves Spec 009 visual treatment).
+ *
+ * Extracted to keep [BrowserScreen] under detekt's `LongMethod = 60`.
+ */
+@Composable
+private fun BrowserTopBar(
+    state: BrowserUiState,
+    callbacks: com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks,
+) {
+    if (state.isIncognito) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.sm),
+        ) {
+            IncognitoIndicator()
+            Box(modifier = Modifier.weight(1f)) {
+                AddressBar(state = state, callbacks = callbacks)
+            }
+        }
+    } else {
+        AddressBar(state = state, callbacks = callbacks)
+    }
+}
+
 @Composable
 private fun BrowserScaffoldContent(
     state: BrowserUiState,

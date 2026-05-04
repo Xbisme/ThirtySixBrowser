@@ -40,4 +40,15 @@
         <item quantity="many">%1$d вкладок</item>
         <item quantity="other">%1$d вкладки</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. -->
+    <string name="tabs_action_new_incognito_tab">Новая вкладка инкогнито</string>
+    <string name="tabs_a11y_new_incognito_tab">Открыть новую вкладку инкогнито</string>
+    <string name="tabs_a11y_incognito_glyph">Вкладка инкогнито</string>
+    <string name="tabs_error_max_incognito_tabs_reached">Достигнут максимум: %d вкладок инкогнито</string>
+    <string name="browser_a11y_incognito_indicator">Режим инкогнито активен</string>
+    <string name="tabs_a11y_incognito_card_placeholder">Вкладка инкогнито — содержимое скрыто</string>
+    <string name="tabs_card_incognito_label">Инкогнито</string>
+    <string name="tabs_action_close_all_incognito">Закрыть все вкладки инкогнито</string>
+    <string name="tabs_close_all_incognito_confirm">Закрыть все %d вкладок инкогнито?</string>
 </resources>

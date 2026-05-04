@@ -8,9 +8,12 @@ import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.net.URLEncoder
@@ -71,13 +74,17 @@ class BrowserViewModelTest {
         // tests remain green by ignoring this seam (defaults provide a
         // self-contained fake).
         val observeTabs = ObserveTabsUseCase(tabRepository)
-        val observeActiveTab = ObserveActiveTabUseCase(observeTabs)
+        val incognitoRepo = FakeIncognitoTabRepository()
+        val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
+        val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
+        val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
         return BrowserViewModel(
             defaultHomeUrl = url,
             buildSearchUrl = buildSearchUrl,
             observeActiveTab = observeActiveTab,
             observeTabs = observeTabs,
-            updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository),
+            observeActiveTabIsIncognito = observeActiveTabIsIncognito,
+            updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
             createTab = CreateTabUseCase(tabRepository, url),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,

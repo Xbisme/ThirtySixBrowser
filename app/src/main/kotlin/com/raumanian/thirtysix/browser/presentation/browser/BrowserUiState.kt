@@ -38,4 +38,18 @@ data class BrowserUiState(
     val addressBarText: String = "",
     val isAddressBarFocused: Boolean = false,
     val tabsEvent: TabsErrorEvent? = null,
+    /**
+     * Spec 012 — derived from the active tab's [com.raumanian.thirtysix.browser.domain.model.Tab.isIncognito]
+     * via [com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase].
+     *
+     * Drives:
+     *  - The address-bar incognito indicator (FR-015).
+     *  - Cache-write gates in `BrowserViewModel.onIconReceived` /
+     *    `onScreenshotReady` (FR-009 / FR-010).
+     *  - WebView lockdown branch in [BrowserWebView] (per research.md R5).
+     *
+     * Default `false` preserves binary compatibility with all Spec 007/008/009/010/011
+     * call sites and tests.
+     */
+    val isIncognito: Boolean = false,
 )

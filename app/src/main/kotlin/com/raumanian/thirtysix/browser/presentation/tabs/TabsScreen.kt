@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,8 +35,10 @@ import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
+import com.raumanian.thirtysix.browser.presentation.tabs.components.CloseAllIncognitoConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.tabs.components.CloseAllTabsConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherCard
+import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherNewIncognitoTabCard
 import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherNewTabCard
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 
@@ -73,6 +76,10 @@ fun TabsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
+    val maxIncognitoMessage = stringResource(
+        R.string.tabs_error_max_incognito_tabs_reached,
+        BrowserLimits.MAX_INCOGNITO_TABS,
+    )
 
     LaunchedEffect(Unit) {
         viewModel.popBackEvent.collect {
@@ -80,19 +87,15 @@ fun TabsScreen(
         }
     }
 
-    LaunchedEffect(state.errorEvent) {
-        if (state.errorEvent is TabsErrorEvent.MaxTabsReached) {
-            snackbarHostState.showSnackbar(maxTabsMessage)
-            viewModel.consumeErrorEvent()
-        }
-    }
+    TabsErrorEventEffect(
+        errorEvent = state.errorEvent,
+        maxTabsMessage = maxTabsMessage,
+        maxIncognitoMessage = maxIncognitoMessage,
+        snackbarHostState = snackbarHostState,
+        consumeErrorEvent = viewModel::consumeErrorEvent,
+    )
 
-    if (state.isCloseAllDialogVisible) {
-        CloseAllTabsConfirmDialog(
-            onConfirm = viewModel::onCloseAllConfirmed,
-            onDismiss = viewModel::onCloseAllDismissed,
-        )
-    }
+    TabsConfirmDialogs(state = state, viewModel = viewModel)
 
     // Spec 011 favicon amendment (2026-05-03) — re-read favicon files when
     // a fresh icon arrives. `faviconVersion` bumps on every successful save;
@@ -113,7 +116,9 @@ fun TabsScreen(
         topBar = {
             TabsTopBar(
                 tabCount = state.tabs.size,
+                incognitoTabCount = state.incognitoTabCount,
                 onCloseAllRequested = viewModel::onCloseAllRequested,
+                onCloseAllIncognitoRequested = viewModel::onCloseAllIncognitoRequested,
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -128,13 +133,65 @@ fun TabsScreen(
             onTabClick = viewModel::onTabClick,
             onTabClose = viewModel::onCloseTab,
             onNewTabClick = viewModel::onNewTabClick,
+            onNewIncognitoTabClick = viewModel::onNewIncognitoTabClick,
+        )
+    }
+}
+
+/**
+ * Spec 012 — extracted to keep [TabsScreen] under detekt's `LongMethod = 60`.
+ */
+@Composable
+private fun TabsErrorEventEffect(
+    errorEvent: TabsErrorEvent?,
+    maxTabsMessage: String,
+    maxIncognitoMessage: String,
+    snackbarHostState: SnackbarHostState,
+    consumeErrorEvent: () -> Unit,
+) {
+    LaunchedEffect(errorEvent) {
+        when (errorEvent) {
+            is TabsErrorEvent.MaxTabsReached -> {
+                snackbarHostState.showSnackbar(maxTabsMessage)
+                consumeErrorEvent()
+            }
+            is TabsErrorEvent.MaxIncognitoTabsReached -> {
+                snackbarHostState.showSnackbar(maxIncognitoMessage)
+                consumeErrorEvent()
+            }
+            null -> Unit
+        }
+    }
+}
+
+/**
+ * Spec 012 — extracted to keep [TabsScreen] under detekt's `LongMethod = 60`.
+ */
+@Composable
+private fun TabsConfirmDialogs(state: TabsUiState, viewModel: TabsViewModel) {
+    if (state.isCloseAllDialogVisible) {
+        CloseAllTabsConfirmDialog(
+            onConfirm = viewModel::onCloseAllConfirmed,
+            onDismiss = viewModel::onCloseAllDismissed,
+        )
+    }
+    if (state.isCloseAllIncognitoDialogVisible) {
+        CloseAllIncognitoConfirmDialog(
+            count = state.incognitoTabCount,
+            onConfirm = viewModel::onCloseAllIncognitoConfirmed,
+            onDismiss = viewModel::onCloseAllIncognitoDismissed,
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TabsTopBar(tabCount: Int, onCloseAllRequested: () -> Unit) {
+private fun TabsTopBar(
+    tabCount: Int,
+    incognitoTabCount: Int,
+    onCloseAllRequested: () -> Unit,
+    onCloseAllIncognitoRequested: () -> Unit,
+) {
     TopAppBar(
         title = {
             Text(
@@ -146,6 +203,21 @@ private fun TabsTopBar(tabCount: Int, onCloseAllRequested: () -> Unit) {
             )
         },
         actions = {
+            // Spec 012 — "Close all incognito" affordance, visible iff
+            // incognitoTabCount > 0 (US5 acceptance scenarios 1+2).
+            if (incognitoTabCount > 0) {
+                IconButton(
+                    onClick = onCloseAllIncognitoRequested,
+                    modifier = Modifier.testTag(TEST_TAG_CLOSE_ALL_INCOGNITO_ACTION),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = stringResource(
+                            R.string.tabs_action_close_all_incognito,
+                        ),
+                    )
+                }
+            }
             IconButton(
                 onClick = onCloseAllRequested,
                 modifier = Modifier.testTag(TEST_TAG_CLOSE_ALL_ACTION),
@@ -171,6 +243,7 @@ private fun TabsGrid(
     onTabClick: (Long) -> Unit,
     onTabClose: (Long) -> Unit,
     onNewTabClick: () -> Unit,
+    onNewIncognitoTabClick: () -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = TAB_CARD_MIN_WIDTH_DP),
@@ -192,16 +265,30 @@ private fun TabsGrid(
             TabSwitcherCard(
                 tab = tab,
                 isActive = tab.id == state.activeTabId,
-                faviconFile = faviconFor(tab.url),
-                screenshotFile = screenshotFor(tab.id),
+                // Spec 012 — incognito cards never read from caches; pass
+                // null so TabSwitcherCard's branch (T051) renders the
+                // placeholder regardless of any (theoretical) cache file.
+                faviconFile = if (tab.isIncognito) null else faviconFor(tab.url),
+                screenshotFile = if (tab.isIncognito) null else screenshotFor(tab.id),
                 onClick = { onTabClick(tab.id) },
                 onCloseClick = { onTabClose(tab.id) },
             )
         }
+        // Normal new-tab card — disabled at MAX_TABS (existing Spec 011 logic).
+        // Counts only normal tabs against MAX_TABS per Q1 independent caps.
+        val normalTabCount = state.tabs.count { !it.isIncognito }
         item(key = NEW_TAB_CARD_KEY) {
             TabSwitcherNewTabCard(
-                enabled = state.tabs.size < BrowserLimits.MAX_TABS,
+                enabled = normalTabCount < BrowserLimits.MAX_TABS,
                 onClick = onNewTabClick,
+            )
+        }
+        // Spec 012 — incognito new-tab card. Always rendered; disabled at
+        // MAX_INCOGNITO_TABS (FR-004).
+        item(key = NEW_INCOGNITO_TAB_CARD_KEY) {
+            TabSwitcherNewIncognitoTabCard(
+                enabled = state.incognitoTabCount < BrowserLimits.MAX_INCOGNITO_TABS,
+                onClick = onNewIncognitoTabClick,
             )
         }
     }
@@ -209,6 +296,8 @@ private fun TabsGrid(
 
 const val TEST_TAG_TABS_SCREEN: String = "tabs_screen"
 const val TEST_TAG_CLOSE_ALL_ACTION: String = "tabs_close_all_action"
+const val TEST_TAG_CLOSE_ALL_INCOGNITO_ACTION: String = "tabs_close_all_incognito_action"
 
 private val TAB_CARD_MIN_WIDTH_DP = 160.dp
 private const val NEW_TAB_CARD_KEY: String = "tabs_new_tab_card"
+private const val NEW_INCOGNITO_TAB_CARD_KEY: String = "tabs_new_incognito_tab_card"

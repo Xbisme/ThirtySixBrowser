@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">ThirtySix Browser</string>
     <!-- Spec 002 — placeholder labels for the 7 navigation destinations. -->
     <!-- Spec 004 — VI/DE/RU/KO/JA/ZH/FR translations live in values-<locale>/. -->
@@ -43,4 +43,17 @@
         <item quantity="one">%1$d tab</item>
         <item quantity="other">%1$d tabs</item>
     </plurals>
+
+    <!-- Spec 012 — Private / Incognito Mode. New strings: incognito affordances, indicator, dialog, errors, a11y. -->
+    <string name="tabs_action_new_incognito_tab">New incognito tab</string>
+    <string name="tabs_a11y_new_incognito_tab">Open new incognito tab</string>
+    <string name="tabs_a11y_incognito_glyph">Incognito tab</string>
+    <!-- Spec 012 — cap is MAX_INCOGNITO_TABS = 50 (always > 1), so the singular case is unreachable. Plural form intentionally omitted. -->
+    <string name="tabs_error_max_incognito_tabs_reached" tools:ignore="PluralsCandidate">You\'ve reached the maximum of %d incognito tabs</string>
+    <string name="browser_a11y_incognito_indicator">Incognito mode active</string>
+    <string name="tabs_a11y_incognito_card_placeholder">Incognito tab — content hidden for privacy</string>
+    <string name="tabs_card_incognito_label">Incognito</string>
+    <string name="tabs_action_close_all_incognito">Close all incognito</string>
+    <!-- Spec 012 — affordance only visible when count > 0; in practice users see this dialog with count ≥ 1, plural form is the rule. tools:ignore acknowledged in lint per project policy. -->
+    <string name="tabs_close_all_incognito_confirm" tools:ignore="PluralsCandidate">Close all %d incognito tabs?</string>
 </resources>
