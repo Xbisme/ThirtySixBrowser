@@ -7,6 +7,7 @@ import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManage
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -116,11 +117,23 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
 
     /**
      * Suspending wrapper around [CookieManager.removeAllCookies] callback API.
+     *
+     * Platform requirement (Android API 29 / older WebView builds): the
+     * callback variant of `removeAllCookies` MUST be invoked on a thread that
+     * carries a `Looper` — otherwise [AwCookieManager] throws
+     * `IllegalStateException: removeAllCookies must be called on a thread with
+     * a running Looper.` The IO dispatcher does NOT carry a Looper, so we hop
+     * onto [Dispatchers.Main] (the immediate variant when already on Main, to
+     * minimise dispatch overhead) for the platform call. Newer Android
+     * versions are more permissive but the explicit hop is harmless and
+     * portable across all supported API levels (24 .. 36).
      */
     private suspend fun removeAllCookiesAwait(cookieManager: CookieManager) {
-        suspendCancellableCoroutine<Unit> { continuation ->
-            cookieManager.removeAllCookies {
-                if (continuation.isActive) continuation.resume(Unit)
+        withContext(Dispatchers.Main.immediate) {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                cookieManager.removeAllCookies {
+                    if (continuation.isActive) continuation.resume(Unit)
+                }
             }
         }
     }
