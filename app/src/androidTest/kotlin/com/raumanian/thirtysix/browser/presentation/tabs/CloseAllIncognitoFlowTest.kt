@@ -44,7 +44,7 @@ class CloseAllIncognitoFlowTest {
         if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
     }
 
-    @Test
+    @Test(timeout = TEST_TIMEOUT_MS)
     fun closeAll_wipes_every_incognito_tab() = runBlocking {
         // Open 3 incognito tabs.
         repeat(EXPECTED_TAB_COUNT) { i ->
@@ -65,5 +65,6 @@ class CloseAllIncognitoFlowTest {
 
     private companion object {
         const val EXPECTED_TAB_COUNT: Int = 3
+        const val TEST_TIMEOUT_MS: Long = 30_000L
     }
 }

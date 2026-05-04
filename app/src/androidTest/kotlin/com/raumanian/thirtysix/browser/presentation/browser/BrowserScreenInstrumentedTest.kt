@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOf
 import org.hamcrest.Matchers.containsString
 import org.junit.Before
 import org.junit.Rule
@@ -196,7 +195,15 @@ private object InstrumentedNoopSearchEngineRepository : SearchEngineRepository {
  * are no-ops. Matches the InstrumentedNoopSearchEngineRepository pattern.
  */
 private object InstrumentedNoopTabRepository : TabRepository {
-    override fun observeTabs(): Flow<List<Tab>> = flowOf(emptyList())
+    // Spec 012 — `combine(...)` inside `ObserveAllTabsUseCase` requires both
+    // upstreams to remain HOT (never complete) so the merged flow keeps
+    // emitting on demand. `flowOf(emptyList())` completes after one emission
+    // which can leave downstream collectors in a stale state and starve the
+    // Compose recomposer of subsequent updates — switched to a hot
+    // `MutableStateFlow` mirroring the unit-test `FakeTabRepository` pattern.
+    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
+    override fun observeTabs(): Flow<List<Tab>> = state
     override suspend fun createTab(url: String): Result<Tab> =
         error("instrumented test should not reach createTab")
     override suspend fun switchActiveTab(tabId: Long) = Unit
@@ -208,11 +215,13 @@ private object InstrumentedNoopTabRepository : TabRepository {
 
 /**
  * Spec 012 — file-private no-op [IncognitoTabRepository] mirroring the
- * [InstrumentedNoopTabRepository] pattern. Emits empty list so the
- * `BrowserViewModel.observeActiveTabIsIncognito` Flow stays at `false`.
+ * [InstrumentedNoopTabRepository] pattern. Hot `MutableStateFlow` (NOT
+ * `flowOf`) so `ObserveAllTabsUseCase.combine(...)` stays subscribed.
  */
 private object InstrumentedNoopIncognitoTabRepository : IncognitoTabRepository {
-    override fun observeTabs(): Flow<List<Tab>> = flowOf(emptyList())
+    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
+    override fun observeTabs(): Flow<List<Tab>> = state
     override suspend fun createTab(url: String): Result<Tab> =
         error("instrumented test should not reach incognito createTab")
     override suspend fun switchActiveTab(tabId: Long) = Unit

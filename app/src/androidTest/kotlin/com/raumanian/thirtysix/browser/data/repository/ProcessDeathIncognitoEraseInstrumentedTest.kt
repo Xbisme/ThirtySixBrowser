@@ -66,7 +66,7 @@ class ProcessDeathIncognitoEraseInstrumentedTest {
         if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
     }
 
-    @Test
+    @Test(timeout = TEST_TIMEOUT_MS)
     fun recreate_preserves_normal_tabs_but_incognito_pool_remains_in_memory_only() = runBlocking {
         // Cold start: incognito repo MUST be empty by FR-012 invariant.
         assertTrue(
@@ -96,5 +96,9 @@ class ProcessDeathIncognitoEraseInstrumentedTest {
             )
             assertEquals(0, incognitoRepository.getCount())
         }
+    }
+
+    private companion object {
+        const val TEST_TIMEOUT_MS: Long = 30_000L
     }
 }

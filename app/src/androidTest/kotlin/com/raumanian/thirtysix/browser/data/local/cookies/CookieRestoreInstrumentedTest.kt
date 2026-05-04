@@ -56,7 +56,7 @@ class CookieRestoreInstrumentedTest {
         wipeCookieJarOnMainThread()
     }
 
-    @Test
+    @Test(timeout = TEST_TIMEOUT_MS)
     fun snapshot_capture_then_restore_preserves_normal_cookies_and_wipes_incognito_writes() = runBlocking {
         val cookieManager = CookieManager.getInstance()
 
@@ -121,5 +121,6 @@ class CookieRestoreInstrumentedTest {
         const val ORIGIN_NORMAL: String = "https://normal.test.example"
         const val ORIGIN_INCOGNITO: String = "https://incognito.test.example"
         const val LATCH_TIMEOUT_SECONDS: Long = 5L
+        const val TEST_TIMEOUT_MS: Long = 30_000L
     }
 }

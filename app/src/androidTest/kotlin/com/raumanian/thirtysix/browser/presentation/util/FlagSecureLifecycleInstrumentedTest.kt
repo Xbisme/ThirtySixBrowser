@@ -31,7 +31,7 @@ class FlagSecureLifecycleInstrumentedTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    @Test
+    @Test(timeout = TEST_TIMEOUT_MS)
     fun flagSecure_set_andCleared_onIncognitoToggle() {
         var secure by mutableStateOf(false)
         var capturedView: View? = null
@@ -72,5 +72,9 @@ class FlagSecureLifecycleInstrumentedTest {
                 (window?.attributes?.flags ?: 0) and WindowManager.LayoutParams.FLAG_SECURE,
             )
         }
+    }
+
+    private companion object {
+        const val TEST_TIMEOUT_MS: Long = 30_000L
     }
 }

@@ -41,7 +41,7 @@ class IncognitoSwitcherCardInstrumentedTest {
         isIncognito = true,
     )
 
-    @Test
+    @Test(timeout = TEST_TIMEOUT_MS)
     fun incognitoCard_rendersPlaceholderInsteadOfScreenshot() {
         // Wrap in a Box with a fixed width so the Card's `aspectRatio(16:9)`
         // preview gets non-zero layout dimensions. Without this, the default
@@ -72,5 +72,9 @@ class IncognitoSwitcherCardInstrumentedTest {
         composeRule
             .onNodeWithTag(TEST_TAG_TAB_CARD_PREFIX + incognitoTab.id)
             .assertExists()
+    }
+
+    private companion object {
+        const val TEST_TIMEOUT_MS: Long = 30_000L
     }
 }
