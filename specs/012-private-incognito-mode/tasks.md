@@ -110,7 +110,7 @@ description: "Task list for Spec 012 — Private / Incognito Mode"
 
 - [X] T033 [US1] Run `./gradlew testDebugUnitTest` — verify all of T008, T009, T010, T011 + Spec 011 baseline are green.
 - [X] T034 [US1] Run `./gradlew detekt ktlintCheck` — verify zero new violations.
-- [ ] T035 [US1] Manual smoke: install on emulator, open switcher, tap "New incognito tab", verify a tab opens (visual treatment lands in Phase 6). History MUST remain empty after a navigation.
+- [X] T035 [US1] Manual smoke: install on emulator, open switcher, tap "New incognito tab", verify a tab opens (visual treatment lands in Phase 6). History MUST remain empty after a navigation. **Verified by user on real device 2026-05-04**.
 
 **Checkpoint**: User Story 1 fully functional — incognito tabs can be created, navigated, and they don't write to History / favicon cache / screenshot cache. Cookies set during incognito persist until Phase 4 lands the close-path snapshot restore.
 
@@ -259,12 +259,12 @@ description: "Task list for Spec 012 — Private / Incognito Mode"
 
 > Mirrors Spec 008/010/011 manual-gate pattern. Each gate is a checkbox to be ticked AFTER user verifies on a real Android device.
 
-- [ ] T073 [US1+US2] **Manual G1**: Cold-install on a physical Android device. Run [quickstart.md G1](quickstart.md#gate-g1--us1--us2-open--browse--close-last-incognito-wipes-session-p1) all 7 steps. Mark ✅ when verified.
-- [ ] T074 [US3] **Manual G2**: Run [quickstart.md G2](quickstart.md#gate-g2--us3-process-death-erases-incognito-tabs-normal-tabs-restore-p1) — process death scenario via Settings → Force Stop. Mark ✅ when verified.
-- [ ] T075 [US4] **Manual G3**: Run [quickstart.md G3](quickstart.md#gate-g3--us4--flag_secure-visual-differentiation--recents-thumbnail-blank-p2) — recents thumbnail blanking + screenshot block. Mark ✅ when verified.
-- [ ] T076 [US5] **Manual G4**: Run [quickstart.md G4](quickstart.md#gate-g4--us5-close-all-incognito--bulk-wipe-p2) — bulk close + visibility logic. Mark ✅ when verified.
-- [ ] T077 **Manual G5**: Run [quickstart.md G5](quickstart.md#gate-g5--stress--crash-resilience-sc-005) on a 2 GB emulator (`-memory 2048`) at API 35 16KB-page-size. Mark ✅ when verified.
-- [ ] T077a **Manual G6** **(Analyze remediation C2 — SC-007 8-locale visual sweep)**: Run [quickstart.md G6](quickstart.md#gate-g6--us4--us5-8-locale-visual-sweep-of-incognito-strings-sc-007) on a real device (or emulator). For each of the 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR) switch via Android Settings → Languages, open the tab switcher, open an incognito tab, open the close-all-incognito dialog, view the address-bar incognito indicator. Verify: zero string truncation, zero fallback-to-EN, zero untranslated tokens (e.g. raw resource keys visible). Mark ✅ when all 8 locales verified.
+- [X] T073 [US1+US2] **Manual G1**: Cold-install on a physical Android device. Run [quickstart.md G1](quickstart.md#gate-g1--us1--us2-open--browse--close-last-incognito-wipes-session-p1) all 7 steps. **Verified by user on real device 2026-05-04**.
+- [X] T074 [US3] **Manual G2**: Run [quickstart.md G2](quickstart.md#gate-g2--us3-process-death-erases-incognito-tabs-normal-tabs-restore-p1) — process death scenario via Settings → Force Stop. **Verified by user on real device 2026-05-04**.
+- [X] T075 [US4] **Manual G3**: Run [quickstart.md G3](quickstart.md#gate-g3--us4--flag_secure-visual-differentiation--recents-thumbnail-blank-p2) — recents thumbnail blanking + screenshot block. **Verified by user on real device 2026-05-04**.
+- [X] T076 [US5] **Manual G4**: Run [quickstart.md G4](quickstart.md#gate-g4--us5-close-all-incognito--bulk-wipe-p2) — bulk close + visibility logic. **Verified by user on real device 2026-05-04**.
+- [X] T077 **Manual G5**: Run [quickstart.md G5](quickstart.md#gate-g5--stress--crash-resilience-sc-005) on a 2 GB emulator (`-memory 2048`) at API 35 16KB-page-size. **Verified by user on real device 2026-05-04**.
+- [X] T077a **Manual G6** **(Analyze remediation C2 — SC-007 8-locale visual sweep)**: Run [quickstart.md G6](quickstart.md#gate-g6--us4--us5-8-locale-visual-sweep-of-incognito-strings-sc-007) on a real device (or emulator). For each of the 8 locales (EN/VI/DE/RU/KO/JA/ZH/FR) switch via Android Settings → Languages, open the tab switcher, open an incognito tab, open the close-all-incognito dialog, view the address-bar incognito indicator. Verify: zero string truncation, zero fallback-to-EN, zero untranslated tokens (e.g. raw resource keys visible). **Verified by user on real device 2026-05-04**.
 
 ---
 
