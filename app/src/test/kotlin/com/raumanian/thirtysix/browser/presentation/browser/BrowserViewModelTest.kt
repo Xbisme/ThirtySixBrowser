@@ -62,12 +62,15 @@ class BrowserViewModelTest {
         Dispatchers.resetMain()
     }
 
+    @Suppress("LongParameterList")
     private fun newViewModel(
         url: String = UrlConstants.DEFAULT_HOME_URL,
         buildSearchUrl: BuildSearchUrlUseCase = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),
         tabRepository: FakeTabRepository = FakeTabRepository(homeUrl = url),
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
+        bookmarkRepository: com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository =
+            com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository(),
     ): BrowserViewModel {
         // Spec 011 — 4 use-case dependencies + 2 caches all back onto a
         // single FakeTabRepository / Noop*Cache so existing Spec 007–010
@@ -78,6 +81,13 @@ class BrowserViewModelTest {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
         val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
+        // Spec 013 — star-icon use cases. Defaults to a self-contained fake.
+        val isUrlBookmarked =
+            com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase(bookmarkRepository)
+        val addBookmark =
+            com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(bookmarkRepository)
+        val toggleBookmark =
+            com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase(bookmarkRepository, addBookmark)
         return BrowserViewModel(
             defaultHomeUrl = url,
             buildSearchUrl = buildSearchUrl,
@@ -88,6 +98,8 @@ class BrowserViewModelTest {
             createTab = CreateTabUseCase(tabRepository, url),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
+            isUrlBookmarked = isUrlBookmarked,
+            toggleBookmark = toggleBookmark,
         )
     }
 

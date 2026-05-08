@@ -52,4 +52,16 @@ data class BrowserUiState(
      * call sites and tests.
      */
     val isIncognito: Boolean = false,
+    /**
+     * Spec 013 — drives the star icon fill state on [BrowserScreen]'s top bar
+     * (FR-002). Updates reactively via `IsUrlBookmarkedUseCase(currentUrl)`
+     * collected in [BrowserViewModel.init].
+     */
+    val isBookmarked: Boolean = false,
+    /**
+     * Spec 013 — one-shot snackbar event after a star toggle (FR-001 / FR-003).
+     * Cleared via `BrowserViewModel.consumeBookmarkSnackbarEvent()` after the
+     * SnackbarHost has shown the message.
+     */
+    val bookmarkSnackbarEvent: BookmarkSnackbarEvent? = null,
 )

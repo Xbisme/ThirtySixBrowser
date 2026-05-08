@@ -105,6 +105,11 @@ class BrowserScreenInstrumentedTest {
                 createTab = CreateTabUseCase(noopTabRepo, TEST_PAGE_URL),
                 faviconCache = InstrumentedNoopFaviconCache,
                 screenshotCache = InstrumentedNoopScreenshotCache,
+                isUrlBookmarked = com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase(InstrumentedNoopBookmarkRepository),
+                toggleBookmark = com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase(
+                    InstrumentedNoopBookmarkRepository,
+                    com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(InstrumentedNoopBookmarkRepository),
+                ),
             )
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
@@ -254,4 +259,39 @@ private object InstrumentedNoopScreenshotCache : ScreenshotCache {
     override fun fileFor(tabId: Long): File? = null
     override suspend fun delete(tabId: Long) = Unit
     override suspend fun clearAll() = Unit
+}
+
+/**
+ * Spec 013 — no-op [com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository]
+ * for the instrumented BrowserScreen tests; star-icon path is exercised in
+ * dedicated `BrowserScreenStarIconTest`, not here.
+ */
+private object InstrumentedNoopBookmarkRepository :
+    com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository {
+    override fun observeBookmarksByFolder(folderId: Long?) =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+    override fun observeBookmarksByUrl(url: String) =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+    override fun searchBookmarks(query: String) =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+    override suspend fun getBookmark(id: Long) = null
+    override suspend fun countBookmarksByUrl(url: String) = 0
+    override suspend fun addBookmark(bookmark: com.raumanian.thirtysix.browser.domain.model.Bookmark) = Result.Success(0L)
+    override suspend fun updateBookmark(bookmark: com.raumanian.thirtysix.browser.domain.model.Bookmark) = Result.Success(Unit)
+    override suspend fun deleteBookmark(id: Long) = Result.Success(Unit)
+    override suspend fun deleteMostRecentBookmarkByUrl(url: String) = Result.Success(0)
+    override suspend fun moveBookmarkToFolder(bookmarkId: Long, newParentId: Long?) = Result.Success(Unit)
+    override fun observeFoldersByParent(parentId: Long?) =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.BookmarkFolder>())
+    override fun observeAllFolders() =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.BookmarkFolder>())
+    override suspend fun getFolder(id: Long) = null
+    override suspend fun getAncestorChain(folderId: Long) = emptyList<com.raumanian.thirtysix.browser.domain.model.BookmarkFolder>()
+    override suspend fun countDescendants(folderId: Long) =
+        com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0)
+    override suspend fun createFolder(name: String, parentId: Long?) = Result.Success(0L)
+    override suspend fun renameFolder(folderId: Long, newName: String) = Result.Success(Unit)
+    override suspend fun moveFolder(folderId: Long, newParentId: Long?) = Result.Success(Unit)
+    override suspend fun deleteFolderCascade(folderId: Long) =
+        Result.Success(com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0))
 }

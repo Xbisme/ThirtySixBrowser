@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Russian (ru) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix Браузер</string>
-    <string name="bookmarks_screen_placeholder">Закладки</string>
     <string name="history_screen_placeholder">История</string>
     <string name="downloads_screen_placeholder">Загрузки</string>
     <string name="settings_screen_placeholder">Настройки</string>
@@ -51,4 +50,49 @@
     <string name="tabs_card_incognito_label">Инкогнито</string>
     <string name="tabs_action_close_all_incognito">Закрыть все вкладки инкогнито</string>
     <string name="tabs_close_all_incognito_confirm">Закрыть все %d вкладок инкогнито?</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <string name="bookmark_action_star_add_cd">Добавить закладку для этой страницы</string>
+    <string name="bookmark_action_star_remove_cd">Удалить закладку для этой страницы</string>
+    <string name="bookmark_added_snackbar">Закладка сохранена</string>
+    <string name="bookmark_removed_snackbar">Закладка удалена</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <string name="bookmarks_screen_title">Закладки</string>
+    <string name="bookmarks_empty_title">Закладок пока нет</string>
+    <string name="bookmarks_empty_body">Нажмите на значок сердца при просмотре страницы или используйте кнопку +, чтобы добавить.</string>
+    <string name="bookmarks_action_back_to_parent_cd">К родительской папке</string>
+    <string name="bookmarks_breadcrumb_root_label">Корень</string>
+
+    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <string name="bookmarks_action_new_folder_cd">Новая папка</string>
+    <string name="bookmarks_dialog_create_folder_title">Новая папка</string>
+    <string name="bookmarks_dialog_rename_folder_title">Переименовать папку</string>
+    <string name="bookmarks_dialog_folder_picker_title">Выбрать папку</string>
+    <string name="bookmarks_field_folder_label">Папка</string>
+    <string name="bookmarks_action_rename">Переименовать</string>
+    <string name="bookmarks_action_move">Переместить</string>
+    <string name="bookmarks_validation_folder_name_required">Имя папки не может быть пустым</string>
+    <string name="bookmarks_error_folder_cycle">Папку нельзя переместить в саму себя или в свою подпапку.</string>
+    <string name="bookmarks_action_search_cd">Поиск закладок</string>
+    <string name="bookmarks_no_search_matches">Нет закладок, соответствующих \"%1$s\"</string>
+    <string name="bookmarks_action_open">Открыть</string>
+    <string name="bookmarks_action_edit">Изменить</string>
+    <string name="bookmarks_action_delete">Удалить</string>
+    <string name="bookmarks_dialog_edit_title">Изменить закладку</string>
+    <string name="bookmarks_field_title_label">Название</string>
+    <string name="bookmarks_field_url_label">URL</string>
+    <string name="bookmarks_validation_title_required">Название не может быть пустым</string>
+    <string name="bookmarks_validation_url_required">URL не может быть пустым</string>
+    <string name="bookmarks_validation_url_invalid">Введите корректный URL http:// или https://</string>
+    <string name="bookmarks_confirm_delete_folder_title">Удалить папку?</string>
+    <string name="bookmarks_confirm_delete_folder_button">Удалить папку с содержимым</string>
+    <plurals name="bookmarks_confirm_delete_folder_body">
+        <item quantity="one">Это безвозвратно удалит %1$d закладку и %2$d подпапку.</item>
+        <item quantity="few">Это безвозвратно удалит %1$d закладки и %2$d подпапки.</item>
+        <item quantity="many">Это безвозвратно удалит %1$d закладок и %2$d подпапок.</item>
+        <item quantity="other">Это безвозвратно удалит %1$d закладок и %2$d подпапок.</item>
+    </plurals>
+    <string name="bookmarks_action_add_cd">Добавить закладку</string>
+    <string name="bookmarks_dialog_add_title">Добавить закладку</string>
 </resources>

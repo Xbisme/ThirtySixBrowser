@@ -10,6 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -21,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -64,6 +70,7 @@ import com.raumanian.thirtysix.browser.presentation.theme.Spacing
  *   then calls [BrowserViewModel.consumeTabsEvent].
  */
 @Composable
+@Suppress("LongMethod") // Top-level Compose host wires Scaffold, snackbar, three LaunchedEffects.
 fun BrowserScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -75,6 +82,8 @@ fun BrowserScreen(
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
     val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
+    val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
+    val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
 
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
 
@@ -92,12 +101,31 @@ fun BrowserScreen(
         }
     }
 
+    LaunchedEffect(state.bookmarkSnackbarEvent) {
+        // Spec 013 — surface star toggle confirmation snackbar (FR-001 / FR-003).
+        when (state.bookmarkSnackbarEvent) {
+            BookmarkSnackbarEvent.Added -> {
+                snackbarHostState.showSnackbar(bookmarkAddedMessage)
+                viewModel.consumeBookmarkSnackbarEvent()
+            }
+            BookmarkSnackbarEvent.Removed -> {
+                snackbarHostState.showSnackbar(bookmarkRemovedMessage)
+                viewModel.consumeBookmarkSnackbarEvent()
+            }
+            null -> Unit
+        }
+    }
+
     val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            BrowserTopBar(state = state, callbacks = addressBarCallbacks)
+            BrowserTopBar(
+                state = state,
+                callbacks = addressBarCallbacks,
+                onStarTapped = viewModel::onStarTapped,
+            )
         },
         bottomBar = {
             NavigationBottomBar(
@@ -109,6 +137,9 @@ fun BrowserScreen(
                     state = state,
                     webViewActions = webViewActions,
                     onStopRequested = viewModel::onLoadStopped,
+                    onBookmarksClick = {
+                        navController.navigate(AppDestination.Bookmarks.route)
+                    },
                     onTabsSwitcherClick = {
                         navController.navigate(AppDestination.Tabs.route)
                     },
@@ -176,8 +207,10 @@ private fun BrowserBackHandlers(
 private fun BrowserTopBar(
     state: BrowserUiState,
     callbacks: com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks,
+    onStarTapped: () -> Unit,
 ) {
-    if (state.isIncognito) {
+    val canBookmark = canBookmarkCurrentPage(state)
+    if (state.isIncognito || canBookmark) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -185,15 +218,66 @@ private fun BrowserTopBar(
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.sm),
         ) {
-            IncognitoIndicator()
+            if (state.isIncognito) {
+                IncognitoIndicator()
+            }
             Box(modifier = Modifier.weight(1f)) {
                 AddressBar(state = state, callbacks = callbacks)
+            }
+            if (canBookmark) {
+                StarBookmarkButton(
+                    isBookmarked = state.isBookmarked,
+                    onClick = onStarTapped,
+                )
             }
         }
     } else {
         AddressBar(state = state, callbacks = callbacks)
     }
 }
+
+/**
+ * Spec 013 FR-004 — star icon is hidden (rather than disabled-grey) when the
+ * current page cannot be bookmarked: incognito tab, error state, or non-http(s)
+ * scheme. Per research.md R11.
+ */
+private fun canBookmarkCurrentPage(state: BrowserUiState): Boolean {
+    val url = state.currentUrl
+    val isHttp = url.startsWith("http://", ignoreCase = true) ||
+        url.startsWith("https://", ignoreCase = true)
+    return !state.isIncognito &&
+        state.loadingState !is LoadingState.Failed &&
+        url.isNotBlank() &&
+        isHttp
+}
+
+/**
+ * Spec 013 FR-001..003 — star icon rendered trailing the address bar. Tap
+ * adds a bookmark for the current page; second tap removes the most recently
+ * created bookmark for that URL (Q4 toggle semantic).
+ */
+@Composable
+private fun StarBookmarkButton(
+    isBookmarked: Boolean,
+    onClick: () -> Unit,
+) {
+    val cd = if (isBookmarked) {
+        stringResource(R.string.bookmark_action_star_remove_cd)
+    } else {
+        stringResource(R.string.bookmark_action_star_add_cd)
+    }
+    IconButton(onClick = onClick, modifier = Modifier.testTag(TEST_TAG_BROWSER_STAR_ICON)) {
+        Icon(
+            // Spec 013 — `material-icons-core` lacks `Bookmark` / `BookmarkBorder`;
+            // use the Favorite / FavoriteBorder pair instead. Same filled-vs-outline
+            // affordance, no new package dependency (research.md R11 + R-icon-fallback).
+            imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+            contentDescription = cd,
+        )
+    }
+}
+
+internal const val TEST_TAG_BROWSER_STAR_ICON: String = "browser_star_icon"
 
 @Composable
 private fun BrowserScaffoldContent(
@@ -261,6 +345,7 @@ private fun rememberBottomBarCallbacks(
     state: BrowserUiState,
     webViewActions: WebViewActionsHandle,
     onStopRequested: () -> Unit,
+    onBookmarksClick: () -> Unit,
     onTabsSwitcherClick: () -> Unit,
     onTabsSwitcherLongClick: () -> Unit,
 ): NavigationBottomBarCallbacks = NavigationBottomBarCallbacks(
@@ -275,6 +360,7 @@ private fun rememberBottomBarCallbacks(
         }
     },
     onHome = { webViewActions.loadHome() },
+    onBookmarksClick = onBookmarksClick,
     onTabsSwitcherClick = onTabsSwitcherClick,
     onTabsSwitcherLongClick = onTabsSwitcherLongClick,
 )

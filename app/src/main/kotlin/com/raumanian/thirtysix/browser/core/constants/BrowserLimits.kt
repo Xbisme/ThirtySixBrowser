@@ -32,4 +32,34 @@ object BrowserLimits {
      * cap message — so users immediately understand which kind of tab is full.
      */
     const val MAX_INCOGNITO_TABS: Int = 50
+
+    /**
+     * Spec 013 — bookmark title length cap. Enforced by the manual-add and edit
+     * dialogs as `maxLength` on the input field (FR-006 / FR-022) and re-asserted
+     * inside `AddBookmarkUseCase` / `UpdateBookmarkUseCase` as a safety net before
+     * the value reaches the repository. 200 chars accommodates non-Latin scripts.
+     */
+    const val MAX_BOOKMARK_TITLE_LENGTH: Int = 200
+
+    /**
+     * Spec 013 — bookmark URL length cap. Matches the de-facto limit modern
+     * browsers enforce for navigation URLs.
+     */
+    const val MAX_BOOKMARK_URL_LENGTH: Int = 2048
+
+    /**
+     * Spec 013 — folder name length cap. Folder names are short labels.
+     */
+    const val MAX_FOLDER_NAME_LENGTH: Int = 100
+
+    /**
+     * Spec 013 — power-user soft envelope from Spec 005 plan. Not enforced as a
+     * hard reject in v1.0; reserved for future "approaching capacity" snackbar.
+     */
+    const val MAX_BOOKMARKS: Int = 10_000
+
+    /**
+     * Spec 013 — power-user soft envelope. Same policy as [MAX_BOOKMARKS].
+     */
+    const val MAX_FOLDERS: Int = 1_000
 }

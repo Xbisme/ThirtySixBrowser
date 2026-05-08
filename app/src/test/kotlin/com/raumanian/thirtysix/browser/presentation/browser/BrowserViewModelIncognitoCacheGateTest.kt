@@ -110,6 +110,9 @@ class BrowserViewModelIncognitoCacheGateTest {
         screenshotCache: ScreenshotCache,
     ): BrowserViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
+        // Spec 013 — star use cases. Self-contained fake repo; no impact on incognito tests.
+        val bookmarkRepo = com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository()
+        val addBookmark = com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(bookmarkRepo)
         return BrowserViewModel(
             defaultHomeUrl = "https://normal.example.com",
             buildSearchUrl = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),
@@ -120,6 +123,10 @@ class BrowserViewModelIncognitoCacheGateTest {
             createTab = CreateTabUseCase(tabRepository, "https://normal.example.com"),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
+            isUrlBookmarked = com.raumanian.thirtysix.browser.domain.usecase
+                .IsUrlBookmarkedUseCase(bookmarkRepo),
+            toggleBookmark = com.raumanian.thirtysix.browser.domain.usecase
+                .ToggleBookmarkUseCase(bookmarkRepo, addBookmark),
         )
     }
 

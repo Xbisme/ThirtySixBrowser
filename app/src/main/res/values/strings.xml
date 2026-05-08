@@ -6,7 +6,6 @@
     <!-- Per FR-007 naming convention: feature_section_purpose. -->
     <!-- Future feature specs (e.g., 011 tabs-management) MAY rename *_screen_placeholder → semantic key (*_screen_title) when they implement the real Screen — must update all 8 locale files in same change. -->
 
-    <string name="bookmarks_screen_placeholder">Bookmarks</string>
     <string name="history_screen_placeholder">History</string>
     <string name="downloads_screen_placeholder">Downloads</string>
     <string name="settings_screen_placeholder">Settings</string>
@@ -56,4 +55,55 @@
     <string name="tabs_action_close_all_incognito">Close all incognito</string>
     <!-- Spec 012 — affordance only visible when count > 0; in practice users see this dialog with count ≥ 1, plural form is the rule. tools:ignore acknowledged in lint per project policy. -->
     <string name="tabs_close_all_incognito_confirm" tools:ignore="PluralsCandidate">Close all %d incognito tabs?</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US1: star icon on browser top bar (bookmark current page). -->
+    <string name="bookmark_action_star_add_cd">Add bookmark for this page</string>
+    <string name="bookmark_action_star_remove_cd">Remove bookmark for this page</string>
+    <string name="bookmark_added_snackbar">Bookmark saved</string>
+    <string name="bookmark_removed_snackbar">Bookmark removed</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US2: bookmarks screen list, breadcrumb, empty state. -->
+    <string name="bookmarks_screen_title">Bookmarks</string>
+    <string name="bookmarks_empty_title">No bookmarks yet</string>
+    <string name="bookmarks_empty_body">Tap the heart icon while viewing a page, or use the + button to add one.</string>
+    <string name="bookmarks_action_back_to_parent_cd">Up to parent folder</string>
+    <string name="bookmarks_breadcrumb_root_label">Root</string>
+
+    <!-- Spec 013 US3 — folder management. -->
+    <string name="bookmarks_action_new_folder_cd">New folder</string>
+    <string name="bookmarks_dialog_create_folder_title">New folder</string>
+    <string name="bookmarks_dialog_rename_folder_title">Rename folder</string>
+    <string name="bookmarks_dialog_folder_picker_title">Pick folder</string>
+    <string name="bookmarks_field_folder_label">Folder</string>
+    <string name="bookmarks_action_rename">Rename</string>
+    <string name="bookmarks_action_move">Move</string>
+    <string name="bookmarks_validation_folder_name_required">Folder name cannot be empty</string>
+    <string name="bookmarks_error_folder_cycle">A folder cannot be moved into itself or its sub-folder.</string>
+
+    <!-- Spec 013 US4 — search. -->
+    <string name="bookmarks_action_search_cd">Search bookmarks</string>
+    <string name="bookmarks_no_search_matches">No bookmarks match \"%1$s\"</string>
+
+    <!-- Spec 013 US5 — edit + actions. -->
+    <string name="bookmarks_action_open">Open</string>
+    <string name="bookmarks_action_edit">Edit</string>
+    <string name="bookmarks_action_delete">Delete</string>
+    <string name="bookmarks_dialog_edit_title">Edit bookmark</string>
+    <string name="bookmarks_field_title_label">Title</string>
+    <string name="bookmarks_field_url_label">URL</string>
+    <string name="bookmarks_validation_title_required">Title cannot be empty</string>
+    <string name="bookmarks_validation_url_required">URL cannot be empty</string>
+    <string name="bookmarks_validation_url_invalid">Enter a valid http:// or https:// URL</string>
+
+    <!-- Spec 013 US6 — cascade-delete confirmation. -->
+    <string name="bookmarks_confirm_delete_folder_title">Delete folder?</string>
+    <string name="bookmarks_confirm_delete_folder_button">Delete folder and contents</string>
+    <plurals name="bookmarks_confirm_delete_folder_body">
+        <item quantity="one">This will permanently delete %1$d bookmark and %2$d sub-folder.</item>
+        <item quantity="other">This will permanently delete %1$d bookmarks and %2$d sub-folders.</item>
+    </plurals>
+
+    <!-- Spec 013 US7 — manual add. -->
+    <string name="bookmarks_action_add_cd">Add bookmark</string>
+    <string name="bookmarks_dialog_add_title">Add bookmark</string>
 </resources>

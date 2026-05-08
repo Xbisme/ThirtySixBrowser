@@ -26,7 +26,7 @@ fun AppNavGraph(
         // tap), and the switcher can pop back via TabsViewModel.popBackEvent.
         composable(AppDestination.Browser.route) { BrowserScreen(navController = navController) }
         composable(AppDestination.Tabs.route) { TabsScreen(navController = navController) }
-        composable(AppDestination.Bookmarks.route) { BookmarksScreen() }
+        composable(AppDestination.Bookmarks.route) { BookmarksScreen(navController = navController) }
         composable(AppDestination.History.route) { HistoryScreen() }
         composable(AppDestination.Downloads.route) { DownloadsScreen() }
         composable(AppDestination.Settings.route) { SettingsScreen() }
