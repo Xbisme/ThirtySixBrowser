@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Vietnamese (vi) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">Trình duyệt ThirtySix</string>
-    <string name="history_screen_placeholder">Lịch sử</string>
     <string name="downloads_screen_placeholder">Tải xuống</string>
     <string name="settings_screen_placeholder">Cài đặt</string>
     <string name="onboarding_screen_placeholder">Giới thiệu</string>
@@ -89,4 +88,13 @@
     </plurals>
     <string name="bookmarks_action_add_cd">Thêm dấu trang</string>
     <string name="bookmarks_dialog_add_title">Thêm dấu trang</string>
+
+    <!-- Spec 014 — History view (Vietnamese). -->
+    <string name="history_screen_title">Lịch sử</string>
+    <string name="history_action_back">Quay lại</string>
+    <string name="history_day_today">Hôm nay</string>
+    <string name="history_day_yesterday">Hôm qua</string>
+    <string name="history_empty_title">Chưa có lịch sử</string>
+    <string name="history_empty_body">Các trang bạn truy cập sẽ xuất hiện ở đây.</string>
+    <string name="history_row_content_description">%1$s, %2$s, đã truy cập lúc %3$s</string>
 </resources>

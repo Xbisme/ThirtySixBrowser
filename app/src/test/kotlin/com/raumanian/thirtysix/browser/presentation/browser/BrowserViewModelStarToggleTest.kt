@@ -147,6 +147,9 @@ class BrowserViewModelStarToggleTest {
             screenshotCache = NoopScreenshotCache,
             isUrlBookmarked = isUrlBookmarked,
             toggleBookmark = toggleBookmark,
+            recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
+                com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+            ),
         )
     }
 

@@ -1,7 +1,7 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
-> Cập nhật lần cuối: 2026-05-07
-> v1.0: Android Native Browser — ✅ Specs 001–012 done. 🟡 Spec 013 production code done. Phase 1 6/6 + Phase 2 6/6 done; Phase 3 1/3 production-ready (manual gates + PR pending).
+> Cập nhật lần cuối: 2026-05-08
+> v1.0: Android Native Browser — ✅ Specs 001–013 done. 🟡 Spec 014 MVP (US1) production code done. Phase 1 6/6 + Phase 2 6/6 done; Phase 3 2/3 production-ready (1/3 fully done with PR merged).
 
 ## Nguyên tắc Roadmap
 
@@ -72,8 +72,8 @@ Constitution
 | 010 | `search-engine-google` | Build search URL via `SearchEngineRepository` | Nhập "android" → Google; flip engine via Settings → DuckDuckGo / Bing | 009 | ✅ Done 2026-05-03 — 162/162 unit tests; APK 2.0 MB (R8 -50 KB delta); 16KB ✅; Constitution 11/11; 5 manual gates verified |
 | 011 | `tabs-management` | Multi-tab grid switcher + persist | Tạo/đóng/chuyển 3 tabs, kill app, mở lại còn nguyên | 007 | ✅ Done 2026-05-03 — 64/64 tasks; 201/201 unit tests; APK 2.1 MB; 5 manual gates verified |
 | 012 | `private-incognito-mode` | Tab incognito riêng biệt | Mở incognito → cookie/history không lưu | 011 | ✅ Done 2026-05-03 — PR #13 merged into `main`; APK 2.1 MB (no delta); 16KB ✅; Constitution 11/11 PASS; documented §IV exception for `IncognitoTabRepositoryImpl` reading from `TabRepository` for cookie origin enumeration |
-| 013 | `bookmarks-crud` | Star icon save current page + bookmarks bottom-bar entry → list/folder browse + add/edit/delete + nested folders + global search | Long-press bookmark → action sheet; tap folder → into folder; breadcrumb tap → jump; cascade delete confirm | 005, 007, 011, 012 | 🟡 Production code done 2026-05-07 — 103/122 tasks; APK 2.38 MB (+280 KB vs 2.1 MB; SC-008 +100 KB budget overrun by 180 KB, accepted as feature scope); 16KB ✅; Constitution 11/11 PASS; testDebugUnitTest + lintDebug + detekt + ktlint all green; 19 deferred (instrumented test suites + 10 manual gates G1–G10 + PR open); 4 user-feedback fixes shipped (bottom-bar entry, depth-indented folder picker, dialog folder selector, ArrowBack always visible) |
-| 014 | `history-view` | Group theo ngày + search + clear | Visit 3 URLs → list theo ngày → search | 005, 007 | ⬜ |
+| 013 | `bookmarks-crud` | Star icon save current page + bookmarks bottom-bar entry → list/folder browse + add/edit/delete + nested folders + global search | Long-press bookmark → action sheet; tap folder → into folder; breadcrumb tap → jump; cascade delete confirm | 005, 007, 011, 012 | ✅ Done 2026-05-07 — PR #14 merged into `main` |
+| 014 | `history-view` | Auto-record + group theo ngày + search + per-entry actions + clear-all | Visit 3 URLs → list theo ngày → tap mở lại; long-press → action sheet; clear all | 005, 007, 011, 012 | 🟡 MVP (US1) production code done 2026-05-08 — 48/113 tasks (Phase 1 + 2 + 3); 341/341 unit tests pass (+26 Spec 014); APK 2.3 MB (-80 KB vs Spec 013 baseline 2.38 MB; SC-008 ≤ +200 KB budget); 16KB ✅; Constitution 11/11 PASS; build-time tool addition `desugar_jdk_libs` 2.1.5 for `java.time` at minSdk 24; icon-set pivot to `Icons.Filled.DateRange` (Schedule/History/Public not in core); US2 search + US3 actions + US4 clear-all + 4 instrumented tests + 8 manual gates G1–G8 deferred to follow-up `/speckit-implement` |
 | 015 | `downloads-manager` | DownloadManager integration + list | Download file → notification → mở | 007 | ⬜ |
 | 016 | `settings-screen` | Theme/language/search engine/clear data | Đổi setting → áp dụng ngay + persist | 003, 004, 006 | ⬜ |
 | 017 | `splash-screen` | Splash API + branding | Cold start → splash → main | 002 | ⬜ |

@@ -140,6 +140,9 @@ fun BrowserScreen(
                     onBookmarksClick = {
                         navController.navigate(AppDestination.Bookmarks.route)
                     },
+                    onHistoryClick = {
+                        navController.navigate(AppDestination.History.route)
+                    },
                     onTabsSwitcherClick = {
                         navController.navigate(AppDestination.Tabs.route)
                     },
@@ -346,6 +349,7 @@ private fun rememberBottomBarCallbacks(
     webViewActions: WebViewActionsHandle,
     onStopRequested: () -> Unit,
     onBookmarksClick: () -> Unit,
+    onHistoryClick: () -> Unit,
     onTabsSwitcherClick: () -> Unit,
     onTabsSwitcherLongClick: () -> Unit,
 ): NavigationBottomBarCallbacks = NavigationBottomBarCallbacks(
@@ -361,6 +365,7 @@ private fun rememberBottomBarCallbacks(
     },
     onHome = { webViewActions.loadHome() },
     onBookmarksClick = onBookmarksClick,
+    onHistoryClick = onHistoryClick,
     onTabsSwitcherClick = onTabsSwitcherClick,
     onTabsSwitcherLongClick = onTabsSwitcherLongClick,
 )

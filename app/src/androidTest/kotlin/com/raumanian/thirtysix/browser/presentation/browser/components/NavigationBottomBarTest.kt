@@ -59,6 +59,7 @@ class NavigationBottomBarTest {
                         onReloadOrStop = { reloadOrStopCount++ },
                         onHome = { homeCount++ },
                         onBookmarksClick = { /* Spec 013 — no test coverage in this file. */ },
+                        onHistoryClick = { /* Spec 014 — no test coverage in this file. */ },
                         onTabsSwitcherClick = { tabsSwitcherClickCount++ },
                         onTabsSwitcherLongClick = { tabsSwitcherLongClickCount++ },
                     ),

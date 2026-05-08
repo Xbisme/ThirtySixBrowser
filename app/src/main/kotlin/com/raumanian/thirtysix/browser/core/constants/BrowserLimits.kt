@@ -62,4 +62,20 @@ object BrowserLimits {
      * Spec 013 — power-user soft envelope. Same policy as [MAX_BOOKMARKS].
      */
     const val MAX_FOLDERS: Int = 1_000
+
+    /**
+     * Spec 014 FR-011a / Q4 clarification — the History screen begins live-filtering only once
+     * the user-typed search query reaches this length. Below it (0 or 1 characters), the full
+     * unfiltered list is shown. Avoids wasteful filtering on a single common letter that would
+     * match nearly every entry, while staying instantaneous past the threshold (no debounce).
+     */
+    const val SEARCH_MIN_CHARS: Int = 2
+
+    /**
+     * Spec 014 — defensive cap on the History search input length to bound the per-keystroke
+     * filter cost. 200 characters is far beyond any reasonable URL substring or page-title query
+     * a user would type by hand; the search field's `maxLength` enforces it at the input
+     * boundary so the in-memory `String.contains` scan never sees a pathological query.
+     */
+    const val MAX_HISTORY_QUERY_LENGTH: Int = 200
 }

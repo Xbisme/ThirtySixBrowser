@@ -127,6 +127,10 @@ class BrowserViewModelIncognitoCacheGateTest {
                 .IsUrlBookmarkedUseCase(bookmarkRepo),
             toggleBookmark = com.raumanian.thirtysix.browser.domain.usecase
                 .ToggleBookmarkUseCase(bookmarkRepo, addBookmark),
+            recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase
+                .RecordHistoryEntryUseCase(
+                    com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+                ),
         )
     }
 

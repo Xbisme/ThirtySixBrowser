@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Japanese (ja) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix ブラウザ</string>
-    <string name="history_screen_placeholder">履歴</string>
     <string name="downloads_screen_placeholder">ダウンロード</string>
     <string name="settings_screen_placeholder">設定</string>
     <string name="onboarding_screen_placeholder">はじめに</string>
@@ -89,4 +88,13 @@
     </plurals>
     <string name="bookmarks_action_add_cd">ブックマークを追加</string>
     <string name="bookmarks_dialog_add_title">ブックマークを追加</string>
+
+    <!-- Spec 014 — History view (Japanese). -->
+    <string name="history_screen_title">履歴</string>
+    <string name="history_action_back">戻る</string>
+    <string name="history_day_today">今日</string>
+    <string name="history_day_yesterday">昨日</string>
+    <string name="history_empty_title">履歴はまだありません</string>
+    <string name="history_empty_body">訪問したページがここに表示されます。</string>
+    <string name="history_row_content_description">%1$s、%2$s、%3$s に訪問</string>
 </resources>

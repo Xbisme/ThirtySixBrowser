@@ -14,6 +14,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkResult
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -81,6 +82,7 @@ class BrowserViewModel @Inject constructor(
     private val screenshotCache: ScreenshotCache,
     private val isUrlBookmarked: IsUrlBookmarkedUseCase,
     private val toggleBookmark: ToggleBookmarkUseCase,
+    private val recordHistoryEntry: RecordHistoryEntryUseCase,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<BrowserUiState> = MutableStateFlow(
@@ -244,6 +246,9 @@ class BrowserViewModel @Inject constructor(
      * restoration (FR-022).
      */
     fun onLoadFinished(url: String) {
+        val previous = _uiState.value
+        val isIdempotentRefire = previous.loadingState is LoadingState.Loaded &&
+            previous.currentUrl == url
         _uiState.update { current ->
             if (current.loadingState is LoadingState.Loaded && current.currentUrl == url) {
                 current
@@ -252,6 +257,16 @@ class BrowserViewModel @Inject constructor(
             }
         }
         persistActiveTabState(url)
+        // Spec 014 FR-001 / FR-002 — record one history entry per genuine
+        // page-finish (not for the progress=100 + onPageFinished idempotent
+        // pair). Use case suppresses incognito internally.
+        if (!isIdempotentRefire) {
+            val title = currentTitleCache.value
+            val incognito = previous.isIncognito
+            viewModelScope.launch {
+                recordHistoryEntry(url = url, title = title, isIncognito = incognito)
+            }
+        }
     }
 
     /**

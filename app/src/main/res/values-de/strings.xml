@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — German (de) translation. "Browser" is a German loanword, kept as-is. -->
     <string name="app_name">ThirtySix Browser</string>
-    <string name="history_screen_placeholder">Verlauf</string>
     <string name="downloads_screen_placeholder">Downloads</string>
     <string name="settings_screen_placeholder">Einstellungen</string>
     <string name="onboarding_screen_placeholder">Einführung</string>
@@ -91,4 +90,13 @@
     </plurals>
     <string name="bookmarks_action_add_cd">Lesezeichen hinzufügen</string>
     <string name="bookmarks_dialog_add_title">Lesezeichen hinzufügen</string>
+
+    <!-- Spec 014 — History view (German). -->
+    <string name="history_screen_title">Verlauf</string>
+    <string name="history_action_back">Zurück</string>
+    <string name="history_day_today">Heute</string>
+    <string name="history_day_yesterday">Gestern</string>
+    <string name="history_empty_title">Noch kein Verlauf</string>
+    <string name="history_empty_body">Besuchte Seiten erscheinen hier.</string>
+    <string name="history_row_content_description">%1$s, %2$s, besucht um %3$s</string>
 </resources>

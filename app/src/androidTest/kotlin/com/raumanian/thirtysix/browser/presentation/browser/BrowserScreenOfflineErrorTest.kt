@@ -104,6 +104,9 @@ class BrowserScreenOfflineErrorTest {
                     OfflineErrorNoopBookmarkRepository,
                     com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(OfflineErrorNoopBookmarkRepository),
                 ),
+                recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
+                    OfflineErrorNoopHistoryRepository,
+                ),
             ).apply {
                 onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)
@@ -229,4 +232,18 @@ private object OfflineErrorNoopBookmarkRepository :
         com.raumanian.thirtysix.browser.core.result.Result.Success(
             com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0),
         )
+}
+
+/**
+ * Spec 014 — no-op [HistoryRepository] for the error-rendering test. Recorder
+ * never fires (state seeded to Failed before any onLoadFinished can run).
+ */
+private object OfflineErrorNoopHistoryRepository :
+    com.raumanian.thirtysix.browser.domain.repository.HistoryRepository {
+    override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
+    override fun observeAll() =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.HistoryEntry>())
+    override suspend fun deleteById(id: Long): Int = 0
+    override suspend fun clearAll(): Int = 0
+    override suspend fun count(): Int = 0
 }

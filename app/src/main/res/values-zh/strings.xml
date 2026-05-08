@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Simplified Chinese (zh). Single zh tag covers all Chinese variants per research.md R2. -->
     <string name="app_name">ThirtySix 浏览器</string>
-    <string name="history_screen_placeholder">历史</string>
     <string name="downloads_screen_placeholder">下载</string>
     <string name="settings_screen_placeholder">设置</string>
     <string name="onboarding_screen_placeholder">引导</string>
@@ -89,4 +88,13 @@
     </plurals>
     <string name="bookmarks_action_add_cd">添加书签</string>
     <string name="bookmarks_dialog_add_title">添加书签</string>
+
+    <!-- Spec 014 — History view (Simplified Chinese). -->
+    <string name="history_screen_title">历史</string>
+    <string name="history_action_back">返回</string>
+    <string name="history_day_today">今天</string>
+    <string name="history_day_yesterday">昨天</string>
+    <string name="history_empty_title">暂无历史记录</string>
+    <string name="history_empty_body">您访问过的页面将显示在这里。</string>
+    <string name="history_row_content_description">%1$s, %2$s, 访问于 %3$s</string>
 </resources>

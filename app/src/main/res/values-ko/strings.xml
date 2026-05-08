@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Korean (ko) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix 브라우저</string>
-    <string name="history_screen_placeholder">기록</string>
     <string name="downloads_screen_placeholder">다운로드</string>
     <string name="settings_screen_placeholder">설정</string>
     <string name="onboarding_screen_placeholder">소개</string>
@@ -89,4 +88,13 @@
     </plurals>
     <string name="bookmarks_action_add_cd">북마크 추가</string>
     <string name="bookmarks_dialog_add_title">북마크 추가</string>
+
+    <!-- Spec 014 — History view (Korean). -->
+    <string name="history_screen_title">기록</string>
+    <string name="history_action_back">뒤로</string>
+    <string name="history_day_today">오늘</string>
+    <string name="history_day_yesterday">어제</string>
+    <string name="history_empty_title">아직 기록이 없습니다</string>
+    <string name="history_empty_body">방문한 페이지가 여기에 표시됩니다.</string>
+    <string name="history_row_content_description">%1$s, %2$s, %3$s에 방문</string>
 </resources>

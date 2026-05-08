@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — French (fr) translation. Brand "ThirtySix" preserved per research.md R6. -->
     <string name="app_name">Navigateur ThirtySix</string>
-    <string name="history_screen_placeholder">Historique</string>
     <string name="downloads_screen_placeholder">Téléchargements</string>
     <string name="settings_screen_placeholder">Paramètres</string>
     <string name="onboarding_screen_placeholder">Présentation</string>
@@ -93,4 +92,13 @@
     </plurals>
     <string name="bookmarks_action_add_cd">Ajouter un favori</string>
     <string name="bookmarks_dialog_add_title">Ajouter un favori</string>
+
+    <!-- Spec 014 — History view (French). -->
+    <string name="history_screen_title">Historique</string>
+    <string name="history_action_back">Retour</string>
+    <string name="history_day_today">Aujourd\'hui</string>
+    <string name="history_day_yesterday">Hier</string>
+    <string name="history_empty_title">Aucun historique</string>
+    <string name="history_empty_body">Les pages visitées apparaîtront ici.</string>
+    <string name="history_row_content_description">%1$s, %2$s, visité à %3$s</string>
 </resources>

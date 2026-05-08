@@ -110,6 +110,9 @@ class BrowserScreenInstrumentedTest {
                     InstrumentedNoopBookmarkRepository,
                     com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(InstrumentedNoopBookmarkRepository),
                 ),
+                recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
+                    InstrumentedNoopHistoryRepository,
+                ),
             )
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
@@ -294,4 +297,15 @@ private object InstrumentedNoopBookmarkRepository :
     override suspend fun moveFolder(folderId: Long, newParentId: Long?) = Result.Success(Unit)
     override suspend fun deleteFolderCascade(folderId: Long) =
         Result.Success(com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0))
+}
+
+/** Spec 014 — no-op [HistoryRepository] for the instrumented test. */
+private object InstrumentedNoopHistoryRepository :
+    com.raumanian.thirtysix.browser.domain.repository.HistoryRepository {
+    override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
+    override fun observeAll() =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.HistoryEntry>())
+    override suspend fun deleteById(id: Long): Int = 0
+    override suspend fun clearAll(): Int = 0
+    override suspend fun count(): Int = 0
 }

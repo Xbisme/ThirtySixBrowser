@@ -56,4 +56,12 @@ interface HistoryDao {
 
     @Query("SELECT COUNT(*) FROM ${HistoryEntryEntity.TABLE_NAME}")
     suspend fun count(): Int
+
+    /**
+     * Spec 014 FR-020 — single-row delete by id. Cleaner ergonomics than the
+     * `getById(id) → delete(entity)` round-trip the existing [delete] needs.
+     * Returns the number of rows removed: 0 if id no longer present, 1 if removed.
+     */
+    @Query("DELETE FROM ${HistoryEntryEntity.TABLE_NAME} WHERE ${HistoryEntryEntity.COL_ID} = :id")
+    suspend fun deleteById(id: Long): Int
 }

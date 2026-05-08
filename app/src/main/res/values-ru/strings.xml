@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Russian (ru) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix Браузер</string>
-    <string name="history_screen_placeholder">История</string>
     <string name="downloads_screen_placeholder">Загрузки</string>
     <string name="settings_screen_placeholder">Настройки</string>
     <string name="onboarding_screen_placeholder">Знакомство</string>
@@ -95,4 +94,13 @@
     </plurals>
     <string name="bookmarks_action_add_cd">Добавить закладку</string>
     <string name="bookmarks_dialog_add_title">Добавить закладку</string>
+
+    <!-- Spec 014 — History view (Russian). -->
+    <string name="history_screen_title">История</string>
+    <string name="history_action_back">Назад</string>
+    <string name="history_day_today">Сегодня</string>
+    <string name="history_day_yesterday">Вчера</string>
+    <string name="history_empty_title">Истории пока нет</string>
+    <string name="history_empty_body">Посещённые страницы появятся здесь.</string>
+    <string name="history_row_content_description">%1$s, %2$s, посещено в %3$s</string>
 </resources>
