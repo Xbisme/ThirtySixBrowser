@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Simplified Chinese (zh). Single zh tag covers all Chinese variants per research.md R2. -->
     <string name="app_name">ThirtySix 浏览器</string>
-    <string name="bookmarks_screen_placeholder">书签</string>
     <string name="history_screen_placeholder">历史</string>
     <string name="downloads_screen_placeholder">下载</string>
     <string name="settings_screen_placeholder">设置</string>
@@ -48,4 +47,46 @@
     <string name="tabs_card_incognito_label">无痕</string>
     <string name="tabs_action_close_all_incognito">关闭所有无痕标签页</string>
     <string name="tabs_close_all_incognito_confirm">关闭所有 %d 个无痕标签页？</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <string name="bookmark_action_star_add_cd">将此页面加入书签</string>
+    <string name="bookmark_action_star_remove_cd">将此页面从书签中移除</string>
+    <string name="bookmark_added_snackbar">书签已保存</string>
+    <string name="bookmark_removed_snackbar">书签已移除</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <string name="bookmarks_screen_title">书签</string>
+    <string name="bookmarks_empty_title">尚无书签</string>
+    <string name="bookmarks_empty_body">在浏览页面时点击心形图标，或使用 + 按钮来添加。</string>
+    <string name="bookmarks_action_back_to_parent_cd">返回上级文件夹</string>
+    <string name="bookmarks_breadcrumb_root_label">根目录</string>
+
+    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <string name="bookmarks_action_new_folder_cd">新建文件夹</string>
+    <string name="bookmarks_dialog_create_folder_title">新建文件夹</string>
+    <string name="bookmarks_dialog_rename_folder_title">重命名文件夹</string>
+    <string name="bookmarks_dialog_folder_picker_title">选择文件夹</string>
+    <string name="bookmarks_field_folder_label">文件夹</string>
+    <string name="bookmarks_action_rename">重命名</string>
+    <string name="bookmarks_action_move">移动</string>
+    <string name="bookmarks_validation_folder_name_required">文件夹名称不能为空</string>
+    <string name="bookmarks_error_folder_cycle">文件夹无法移动到自身或其子文件夹。</string>
+    <string name="bookmarks_action_search_cd">搜索书签</string>
+    <string name="bookmarks_no_search_matches">没有书签匹配 \"%1$s\"</string>
+    <string name="bookmarks_action_open">打开</string>
+    <string name="bookmarks_action_edit">编辑</string>
+    <string name="bookmarks_action_delete">删除</string>
+    <string name="bookmarks_dialog_edit_title">编辑书签</string>
+    <string name="bookmarks_field_title_label">标题</string>
+    <string name="bookmarks_field_url_label">URL</string>
+    <string name="bookmarks_validation_title_required">标题不能为空</string>
+    <string name="bookmarks_validation_url_required">URL 不能为空</string>
+    <string name="bookmarks_validation_url_invalid">请输入有效的 http:// 或 https:// URL</string>
+    <string name="bookmarks_confirm_delete_folder_title">删除文件夹？</string>
+    <string name="bookmarks_confirm_delete_folder_button">删除文件夹及内容</string>
+    <plurals name="bookmarks_confirm_delete_folder_body">
+        <item quantity="other">这将永久删除 %1$d 个书签和 %2$d 个子文件夹。</item>
+    </plurals>
+    <string name="bookmarks_action_add_cd">添加书签</string>
+    <string name="bookmarks_dialog_add_title">添加书签</string>
 </resources>

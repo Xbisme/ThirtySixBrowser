@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Japanese (ja) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix ブラウザ</string>
-    <string name="bookmarks_screen_placeholder">ブックマーク</string>
     <string name="history_screen_placeholder">履歴</string>
     <string name="downloads_screen_placeholder">ダウンロード</string>
     <string name="settings_screen_placeholder">設定</string>
@@ -48,4 +47,46 @@
     <string name="tabs_card_incognito_label">シークレット</string>
     <string name="tabs_action_close_all_incognito">すべてのシークレットタブを閉じる</string>
     <string name="tabs_close_all_incognito_confirm">%d 個のシークレットタブをすべて閉じますか？</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <string name="bookmark_action_star_add_cd">このページをブックマークに追加</string>
+    <string name="bookmark_action_star_remove_cd">このページのブックマークを削除</string>
+    <string name="bookmark_added_snackbar">ブックマークを保存しました</string>
+    <string name="bookmark_removed_snackbar">ブックマークを削除しました</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <string name="bookmarks_screen_title">ブックマーク</string>
+    <string name="bookmarks_empty_title">まだブックマークがありません</string>
+    <string name="bookmarks_empty_body">ページを表示中にハートアイコンをタップするか、+ ボタンで追加してください。</string>
+    <string name="bookmarks_action_back_to_parent_cd">親フォルダへ</string>
+    <string name="bookmarks_breadcrumb_root_label">ルート</string>
+
+    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <string name="bookmarks_action_new_folder_cd">新しいフォルダ</string>
+    <string name="bookmarks_dialog_create_folder_title">新しいフォルダ</string>
+    <string name="bookmarks_dialog_rename_folder_title">フォルダの名前を変更</string>
+    <string name="bookmarks_dialog_folder_picker_title">フォルダを選択</string>
+    <string name="bookmarks_field_folder_label">フォルダ</string>
+    <string name="bookmarks_action_rename">名前変更</string>
+    <string name="bookmarks_action_move">移動</string>
+    <string name="bookmarks_validation_folder_name_required">フォルダ名は空にできません</string>
+    <string name="bookmarks_error_folder_cycle">フォルダを自分自身またはサブフォルダに移動できません。</string>
+    <string name="bookmarks_action_search_cd">ブックマークを検索</string>
+    <string name="bookmarks_no_search_matches">\"%1$s\" に一致するブックマークがありません</string>
+    <string name="bookmarks_action_open">開く</string>
+    <string name="bookmarks_action_edit">編集</string>
+    <string name="bookmarks_action_delete">削除</string>
+    <string name="bookmarks_dialog_edit_title">ブックマークを編集</string>
+    <string name="bookmarks_field_title_label">タイトル</string>
+    <string name="bookmarks_field_url_label">URL</string>
+    <string name="bookmarks_validation_title_required">タイトルは空にできません</string>
+    <string name="bookmarks_validation_url_required">URLは空にできません</string>
+    <string name="bookmarks_validation_url_invalid">有効な http:// または https:// URL を入力してください</string>
+    <string name="bookmarks_confirm_delete_folder_title">フォルダを削除しますか？</string>
+    <string name="bookmarks_confirm_delete_folder_button">フォルダと内容を削除</string>
+    <plurals name="bookmarks_confirm_delete_folder_body">
+        <item quantity="other">%1$d 件のブックマークと %2$d 件のサブフォルダが完全に削除されます。</item>
+    </plurals>
+    <string name="bookmarks_action_add_cd">ブックマークを追加</string>
+    <string name="bookmarks_dialog_add_title">ブックマークを追加</string>
 </resources>

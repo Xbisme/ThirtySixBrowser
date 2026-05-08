@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Korean (ko) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix 브라우저</string>
-    <string name="bookmarks_screen_placeholder">북마크</string>
     <string name="history_screen_placeholder">기록</string>
     <string name="downloads_screen_placeholder">다운로드</string>
     <string name="settings_screen_placeholder">설정</string>
@@ -48,4 +47,46 @@
     <string name="tabs_card_incognito_label">시크릿</string>
     <string name="tabs_action_close_all_incognito">모든 시크릿 탭 닫기</string>
     <string name="tabs_close_all_incognito_confirm">시크릿 탭 %d개를 모두 닫으시겠습니까?</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <string name="bookmark_action_star_add_cd">이 페이지를 북마크에 추가</string>
+    <string name="bookmark_action_star_remove_cd">이 페이지의 북마크 삭제</string>
+    <string name="bookmark_added_snackbar">북마크 저장됨</string>
+    <string name="bookmark_removed_snackbar">북마크 삭제됨</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <string name="bookmarks_screen_title">북마크</string>
+    <string name="bookmarks_empty_title">아직 북마크가 없습니다</string>
+    <string name="bookmarks_empty_body">페이지를 보는 동안 하트 아이콘을 누르거나 + 버튼을 사용하여 추가하세요.</string>
+    <string name="bookmarks_action_back_to_parent_cd">상위 폴더로</string>
+    <string name="bookmarks_breadcrumb_root_label">루트</string>
+
+    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <string name="bookmarks_action_new_folder_cd">새 폴더</string>
+    <string name="bookmarks_dialog_create_folder_title">새 폴더</string>
+    <string name="bookmarks_dialog_rename_folder_title">폴더 이름 변경</string>
+    <string name="bookmarks_dialog_folder_picker_title">폴더 선택</string>
+    <string name="bookmarks_field_folder_label">폴더</string>
+    <string name="bookmarks_action_rename">이름 변경</string>
+    <string name="bookmarks_action_move">이동</string>
+    <string name="bookmarks_validation_folder_name_required">폴더 이름은 비워둘 수 없습니다</string>
+    <string name="bookmarks_error_folder_cycle">폴더를 자기 자신이나 하위 폴더로 이동할 수 없습니다.</string>
+    <string name="bookmarks_action_search_cd">북마크 검색</string>
+    <string name="bookmarks_no_search_matches">\"%1$s\"와 일치하는 북마크가 없습니다</string>
+    <string name="bookmarks_action_open">열기</string>
+    <string name="bookmarks_action_edit">편집</string>
+    <string name="bookmarks_action_delete">삭제</string>
+    <string name="bookmarks_dialog_edit_title">북마크 편집</string>
+    <string name="bookmarks_field_title_label">제목</string>
+    <string name="bookmarks_field_url_label">URL</string>
+    <string name="bookmarks_validation_title_required">제목은 비워둘 수 없습니다</string>
+    <string name="bookmarks_validation_url_required">URL은 비워둘 수 없습니다</string>
+    <string name="bookmarks_validation_url_invalid">유효한 http:// 또는 https:// URL을 입력하세요</string>
+    <string name="bookmarks_confirm_delete_folder_title">폴더를 삭제하시겠습니까?</string>
+    <string name="bookmarks_confirm_delete_folder_button">폴더와 내용 모두 삭제</string>
+    <plurals name="bookmarks_confirm_delete_folder_body">
+        <item quantity="other">북마크 %1$d개와 하위 폴더 %2$d개가 영구적으로 삭제됩니다.</item>
+    </plurals>
+    <string name="bookmarks_action_add_cd">북마크 추가</string>
+    <string name="bookmarks_dialog_add_title">북마크 추가</string>
 </resources>

@@ -10,9 +10,12 @@ import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkResult
+import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -64,6 +68,7 @@ import kotlinx.coroutines.launch
 // same single source of truth (`BrowserUiState`).
 @HiltViewModel
 @Suppress("TooManyFunctions", "LongParameterList")
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class BrowserViewModel @Inject constructor(
     @param:Named("default_home_url") private val defaultHomeUrl: String,
     private val buildSearchUrl: BuildSearchUrlUseCase,
@@ -74,6 +79,8 @@ class BrowserViewModel @Inject constructor(
     private val createTab: CreateTabUseCase,
     private val faviconCache: FaviconCache,
     private val screenshotCache: ScreenshotCache,
+    private val isUrlBookmarked: IsUrlBookmarkedUseCase,
+    private val toggleBookmark: ToggleBookmarkUseCase,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<BrowserUiState> = MutableStateFlow(
@@ -144,6 +151,51 @@ class BrowserViewModel @Inject constructor(
                 _uiState.update { state -> state.copy(isIncognito = incognito) }
             }
             .launchIn(viewModelScope)
+
+        // Spec 013 — observe whether the current URL has any bookmark, so the
+        // star icon reflects the canonical "any exists" state per FR-002.
+        // `flatMapLatest` cancels the previous URL's Flow when the URL changes.
+        _uiState
+            .map { it.currentUrl }
+            .distinctUntilChanged()
+            .flatMapLatest { url -> isUrlBookmarked(url) }
+            .onEach { bookmarked ->
+                _uiState.update { state -> state.copy(isBookmarked = bookmarked) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    /**
+     * Spec 013 FR-001..003 — toggle bookmark for the currently displayed URL.
+     * Surfaces a [BookmarkSnackbarEvent] so the SnackbarHost can render
+     * "Bookmark saved" / "Bookmark removed" once.
+     *
+     * The current page title (cached via `onTitleChange`) is used as the
+     * fallback bookmark title; if the title is blank, [AddBookmarkUseCase]
+     * substitutes the URL string per FR-007.
+     */
+    fun onStarTapped() {
+        val state = _uiState.value
+        val url = state.currentUrl
+        val title = currentTitleCache.value
+        viewModelScope.launch {
+            val result = toggleBookmark(url = url, fallbackTitle = title)
+            if (result is Result.Success) {
+                val event = when (result.data) {
+                    ToggleBookmarkResult.Added -> BookmarkSnackbarEvent.Added
+                    ToggleBookmarkResult.Removed -> BookmarkSnackbarEvent.Removed
+                }
+                _uiState.update { current -> current.copy(bookmarkSnackbarEvent = event) }
+            }
+        }
+    }
+
+    /**
+     * Spec 013 — clears the snackbar event after the SnackbarHost has shown
+     * the message. Idempotent.
+     */
+    fun consumeBookmarkSnackbarEvent() {
+        _uiState.update { it.copy(bookmarkSnackbarEvent = null) }
     }
 
     /**

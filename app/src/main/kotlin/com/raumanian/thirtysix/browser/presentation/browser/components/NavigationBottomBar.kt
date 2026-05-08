@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomAppBar
@@ -100,6 +101,15 @@ fun NavigationBottomBar(
                 contentDescription = stringResource(R.string.browser_action_home),
             )
         }
+        IconButton(
+            onClick = callbacks.onBookmarksClick,
+            modifier = Modifier.testTag(TEST_TAG_NAV_BOOKMARKS),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = stringResource(R.string.bookmarks_screen_title),
+            )
+        }
         TabsSwitcherButton(
             tabCount = tabCount,
             onClick = callbacks.onTabsSwitcherClick,
@@ -178,4 +188,5 @@ const val TEST_TAG_NAV_BACK: String = "nav_back"
 const val TEST_TAG_NAV_FORWARD: String = "nav_forward"
 const val TEST_TAG_NAV_RELOAD_STOP: String = "nav_reload_stop"
 const val TEST_TAG_NAV_HOME: String = "nav_home"
+const val TEST_TAG_NAV_BOOKMARKS: String = "nav_bookmarks"
 const val TEST_TAG_NAV_TABS_SWITCHER: String = "nav_tabs_switcher"

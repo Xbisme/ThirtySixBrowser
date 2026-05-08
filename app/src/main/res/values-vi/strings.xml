@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Vietnamese (vi) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">Trình duyệt ThirtySix</string>
-    <string name="bookmarks_screen_placeholder">Dấu trang</string>
     <string name="history_screen_placeholder">Lịch sử</string>
     <string name="downloads_screen_placeholder">Tải xuống</string>
     <string name="settings_screen_placeholder">Cài đặt</string>
@@ -48,4 +47,46 @@
     <string name="tabs_card_incognito_label">Ẩn danh</string>
     <string name="tabs_action_close_all_incognito">Đóng tất cả thẻ ẩn danh</string>
     <string name="tabs_close_all_incognito_confirm">Đóng tất cả %d thẻ ẩn danh?</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <string name="bookmark_action_star_add_cd">Thêm dấu trang cho trang này</string>
+    <string name="bookmark_action_star_remove_cd">Xóa dấu trang khỏi trang này</string>
+    <string name="bookmark_added_snackbar">Đã lưu dấu trang</string>
+    <string name="bookmark_removed_snackbar">Đã xóa dấu trang</string>
+
+    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <string name="bookmarks_screen_title">Dấu trang</string>
+    <string name="bookmarks_empty_title">Chưa có dấu trang</string>
+    <string name="bookmarks_empty_body">Nhấn biểu tượng trái tim khi xem trang, hoặc dùng nút + để thêm.</string>
+    <string name="bookmarks_action_back_to_parent_cd">Lên thư mục cha</string>
+    <string name="bookmarks_breadcrumb_root_label">Gốc</string>
+
+    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <string name="bookmarks_action_new_folder_cd">Thư mục mới</string>
+    <string name="bookmarks_dialog_create_folder_title">Thư mục mới</string>
+    <string name="bookmarks_dialog_rename_folder_title">Đổi tên thư mục</string>
+    <string name="bookmarks_dialog_folder_picker_title">Chọn thư mục</string>
+    <string name="bookmarks_field_folder_label">Thư mục</string>
+    <string name="bookmarks_action_rename">Đổi tên</string>
+    <string name="bookmarks_action_move">Chuyển</string>
+    <string name="bookmarks_validation_folder_name_required">Tên thư mục không được để trống</string>
+    <string name="bookmarks_error_folder_cycle">Không thể chuyển thư mục vào chính nó hoặc thư mục con.</string>
+    <string name="bookmarks_action_search_cd">Tìm dấu trang</string>
+    <string name="bookmarks_no_search_matches">Không có dấu trang nào khớp với \"%1$s\"</string>
+    <string name="bookmarks_action_open">Mở</string>
+    <string name="bookmarks_action_edit">Sửa</string>
+    <string name="bookmarks_action_delete">Xóa</string>
+    <string name="bookmarks_dialog_edit_title">Sửa dấu trang</string>
+    <string name="bookmarks_field_title_label">Tiêu đề</string>
+    <string name="bookmarks_field_url_label">URL</string>
+    <string name="bookmarks_validation_title_required">Tiêu đề không được để trống</string>
+    <string name="bookmarks_validation_url_required">URL không được để trống</string>
+    <string name="bookmarks_validation_url_invalid">Nhập URL http:// hoặc https:// hợp lệ</string>
+    <string name="bookmarks_confirm_delete_folder_title">Xóa thư mục?</string>
+    <string name="bookmarks_confirm_delete_folder_button">Xóa thư mục và nội dung</string>
+    <plurals name="bookmarks_confirm_delete_folder_body">
+        <item quantity="other">Hành động này sẽ xóa vĩnh viễn %1$d dấu trang và %2$d thư mục con.</item>
+    </plurals>
+    <string name="bookmarks_action_add_cd">Thêm dấu trang</string>
+    <string name="bookmarks_dialog_add_title">Thêm dấu trang</string>
 </resources>
