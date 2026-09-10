@@ -277,7 +277,7 @@ Android single-module project. Source under `app/src/main/kotlin/com/raumanian/t
 
 ### Quality gates
 
-- [X] T102 Run `./gradlew testDebugUnitTest connectedDebugAndroidTest lintDebug detekt ktlintCheck assembleRelease` — entire suite green. Capture unit-test count delta vs Spec 013 baseline (~30+ new) for PR body. **✅ GREEN 2026-05-08** — testDebugUnitTest ✅ **379/379** · lintDebug ✅ · detekt ✅ · ktlintCheck ✅ · assembleDebug ✅ · assembleRelease ✅ · 16 KB gate ✅ · `connectedDebugAndroidTest` **60/60**, run three times back-to-back on the `TA016_API24` AVD (Android 7.0 / **minSdk**, arm64) with no flakes. Closing this needed a fix to the pre-existing Spec 007 flake — see the note below. Not re-run on the API 36 AVD: that device's `/data` is 96 % full and refuses installs; its last full run was 59/60 with only this same (now-fixed) test failing.
+- [X] T102 Run `./gradlew testDebugUnitTest connectedDebugAndroidTest lintDebug detekt ktlintCheck assembleRelease` — entire suite green. Capture unit-test count delta vs Spec 013 baseline (~30+ new) for PR body. **✅ GREEN 2026-05-08** — testDebugUnitTest ✅ **379/379** · lintDebug ✅ · detekt ✅ · ktlintCheck ✅ · assembleDebug ✅ · assembleRelease ✅ · 16 KB gate ✅ · `connectedDebugAndroidTest` **61/61**, run three times back-to-back on an API 24 AVD booted with **CI's own emulator flags** (`-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim`). Closing this required properly fixing the pre-existing Spec 007 flake — see the note below, including the before/after reproduction against `main`.
 - [X] T103 Verify 16 KB native-lib gate per [plan.md](plan.md) Constitution §IX gate — `unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so | objdump -p - | grep LOAD | awk '{print $NF}'` should output only `0x4000` (or larger). Record APK size delta vs Spec 013 baseline 2.38 MB; SC-008 budget = +200 KB.
 - [X] T103a Implement a **debug-only** history seeder for the SC-005 / SC-006 perf benchmark (G8). Either a hidden `HistorySeederActivity` (gated by `BuildConfig.DEBUG`) or an `adb shell am start-service` debug receiver that bulk-inserts 10,000 rows spanning 30 days via `HistoryRepository.recordVisit` in batched coroutines. NOT shipped in release builds (verify via `manifestPlaceholders` or source-set isolation under `app/src/debug/...`). Path: `app/src/debug/kotlin/com/raumanian/thirtysix/browser/dev/HistorySeeder.kt`. 
 - [ ] T103b Manual user-device gate **G8** (10K-row benchmark — SC-005 + SC-006 + SC-003 reaffirmed) per [quickstart.md](quickstart.md). PASS/FAIL recorded in PR body. Skip-and-defer is permitted but MUST be flagged as DEFERRED in PR body. **◐ MEASURED on emulator, SC-005 NOT met** — see the perf note below. Search responsiveness improved ~4× after a main-thread fix; initial-open frame budget still misses the 16 ms p99 target on a **debug** build on an emulator. A release-build measurement on Pixel 5-class hardware is still required before sign-off.
@@ -501,25 +501,39 @@ crashes).
 > sweep does not run". Always check `adb install` output. Verification moved to the API 24
 > AVD, which is the better target for this change anyway.
 
-### Pre-existing Spec 007 flake fixed so T102 could close (2026-05-08)
+### Pre-existing Spec 007 flake — properly fixed (2026-05-08)
 
 `BrowserScreenInstrumentedTest.loadingIndicator_appearsAndHidesOnFinish` was the single
 failure standing between the suite and green. It is **not** a Spec 014 regression: it
-reproduces identically on `main` (commit `954742a`, checked out in a clean worktree) and on
-both an API 24 and an API 36 emulator, while passing 3/3 in isolation.
+reproduces on `main` (commit `954742a`) in a clean worktree, on API 24, API 36, and on
+CI's API 29 runner.
 
 **Why it failed.** The test asserted the loading indicator becomes visible during a live
-`example.com` load. When a sibling test in the same class had already warmed the WebView's
-HTTP cache, the `Loading` window closed faster than the assertion could observe it — so the
-outcome depended on execution order, not on the code under test.
+`example.com` load. Once a sibling test in the class had warmed the WebView's HTTP cache,
+the `Loading` window closed faster than the assertion could observe it.
 
-**Fix (test-only).** The test now waits for the real page to settle — which guarantees no
-stray WebView callback is still in flight to race the assertions — then drives
-`onLoadStarted` / `onProgressChanged` / `onLoadFinished` on the ViewModel explicitly. That
-is precisely what the test claims to guard: the Compose binding between
-`BrowserUiState.loadingState` and the indicator. The live-load path remains covered by
-`pageRenders_assertsDomContainsExampleDomain` in the same class, and the platform's real
-callback ordering by `BrowserViewModelHistoryRecordSequenceTest` on the JVM.
+**First attempt, which was not enough.** Waiting for the page to settle and then driving
+the state machine still failed on CI: a settled WebView can re-fire `onProgressChanged` /
+`onPageFinished`, flipping the synthetic `Loading` straight back to `Loaded`. CI's
+software-rendered emulator (`-gpu swiftshader_indirect`) widens that window enough to lose
+the race every time — which is why it passed locally on arm64 and failed on CI.
 
-> This edits a **Spec 007** test file from the Spec 014 branch. Called out here and in the
-> PR body so the reviewer sees it deliberately rather than as drive-by churn.
+**The actual fix.** Remove the WebView from the equation, reusing the seam
+`BrowserScreenOfflineErrorTest` already established: seed the ViewModel to
+`LoadingState.Failed` **before** `setContent`, because `BrowserWebView` skips its initial
+`loadUrl` in that state. The WebView is constructed but never loads, so it emits no
+callbacks at all, and the state machine can be driven deterministically — no network, no
+cache warmth, no ordering dependency. This lives in a new
+`BrowserScreenLoadingIndicatorTest` (2 cases: indicator shown while `Loading` / hidden once
+`Loaded`, and absent while `Failed`), and the racy method was removed from
+`BrowserScreenInstrumentedTest`, which now keeps only assertions that genuinely need a real
+page load. Live-load coverage stays in `pageRenders_assertsDomContainsExampleDomain`; real
+platform callback ordering stays in `BrowserViewModelHistoryRecordSequenceTest`.
+
+**Verified before/after under CI-like conditions** — the local AVD was booted with the same
+flags CI uses (`-no-window -gpu swiftshader_indirect -noaudio -no-boot-anim`):
+- `main`, original test → **FAILS** (CI failure reproduced locally).
+- this branch → full suite **61/61, three runs back-to-back**.
+
+> This touches two **Spec 007** test files from the Spec 014 branch. Called out here and in
+> the PR body so the reviewer sees it deliberately rather than as drive-by churn.

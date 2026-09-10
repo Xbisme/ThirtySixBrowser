@@ -3,8 +3,6 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import android.webkit.WebView
 import androidx.activity.compose.setContent
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
@@ -29,7 +27,6 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.io.File
@@ -58,8 +55,10 @@ import org.junit.runner.RunWith
  * `BrowserScreenOfflineErrorTest` which uses the same manual-VM-construction
  * pattern instead of `@TestInstallIn`-based Hilt module replacement).
  *
- * US2 / US3 extend this class with loading-indicator and offline-error tests
- * (T026, T036).
+ * US2 / US3 render-branch coverage lives in sibling classes that seed the
+ * ViewModel before `setContent` so no live WebView load can race the assertion:
+ * `BrowserScreenLoadingIndicatorTest` (T026) and `BrowserScreenOfflineErrorTest`
+ * (T036). This class keeps only assertions that genuinely need a real page load.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -128,47 +127,6 @@ class BrowserScreenInstrumentedTest {
             .check(webMatches(getText(), containsString("Example Domain")))
     }
 
-    @OptIn(ExperimentalTestApi::class)
-    @Test
-    fun loadingIndicator_appearsAndHidesOnFinish() {
-        // The indicator is bound to `BrowserUiState.loadingState`: visible while
-        // `Loading`, gone otherwise. What this test guards is that Compose binding.
-        //
-        // It used to assert that against a live `example.com` load, which made it
-        // order-dependent and flaky: whenever a sibling test in this class had already
-        // warmed the WebView's HTTP cache, the `Loading` window closed faster than the
-        // assertion could observe it and the test failed. (Verified 2026-05-08: it fails
-        // identically on `main` and on both an API 24 and an API 36 emulator, yet passes
-        // 3/3 in isolation.) The real-load path stays covered by
-        // `pageRenders_assertsDomContainsExampleDomain`, and the platform callback
-        // ordering by `BrowserViewModelHistoryRecordSequenceTest` on the JVM.
-        //
-        // So: let the real page settle first — that guarantees no stray WebView callback
-        // is still in flight to race the assertions — then drive the state machine
-        // explicitly and deterministically.
-        composeRule.waitUntil(PAGE_SETTLE_TIMEOUT_MS) {
-            viewModel.uiState.value.loadingState is LoadingState.Loaded
-        }
-
-        composeRule.activity.runOnUiThread {
-            viewModel.onLoadStarted(TEST_PAGE_URL)
-            viewModel.onProgressChanged(PROGRESS_MIDWAY)
-        }
-        composeRule.waitUntilExactlyOneExists(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
-            timeoutMillis = LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS,
-        )
-
-        composeRule.activity.runOnUiThread {
-            viewModel.onProgressChanged(PROGRESS_COMPLETE)
-            viewModel.onLoadFinished(TEST_PAGE_URL)
-        }
-        composeRule.waitUntilDoesNotExist(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
-            timeoutMillis = LOADING_INDICATOR_HIDE_TIMEOUT_MS,
-        )
-    }
-
     @Test
     fun rotation_preservesCurrentUrlInUiState() {
         // T021b — SC-004: simulate configuration change. The same VM instance
@@ -197,14 +155,6 @@ class BrowserScreenInstrumentedTest {
 
         // CI emulator budget — NOT the user-facing SC-002 production target
         // (200 ms). See test method KDoc above.
-        /** Upper bound for the initial real page load to reach `Loaded`. */
-        const val PAGE_SETTLE_TIMEOUT_MS: Long = 20_000L
-
-        const val PROGRESS_MIDWAY: Int = 40
-        const val PROGRESS_COMPLETE: Int = 100
-
-        const val LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS: Long = 5_000L
-        const val LOADING_INDICATOR_HIDE_TIMEOUT_MS: Long = 10_000L
     }
 }
 
