@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
@@ -110,6 +111,15 @@ fun NavigationBottomBar(
                 contentDescription = stringResource(R.string.bookmarks_screen_title),
             )
         }
+        IconButton(
+            onClick = callbacks.onHistoryClick,
+            modifier = Modifier.testTag(TEST_TAG_NAV_HISTORY),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.DateRange,
+                contentDescription = stringResource(R.string.history_screen_title),
+            )
+        }
         TabsSwitcherButton(
             tabCount = tabCount,
             onClick = callbacks.onTabsSwitcherClick,
@@ -189,4 +199,5 @@ const val TEST_TAG_NAV_FORWARD: String = "nav_forward"
 const val TEST_TAG_NAV_RELOAD_STOP: String = "nav_reload_stop"
 const val TEST_TAG_NAV_HOME: String = "nav_home"
 const val TEST_TAG_NAV_BOOKMARKS: String = "nav_bookmarks"
+const val TEST_TAG_NAV_HISTORY: String = "nav_history"
 const val TEST_TAG_NAV_TABS_SWITCHER: String = "nav_tabs_switcher"

@@ -3,8 +3,6 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import android.webkit.WebView
 import androidx.activity.compose.setContent
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
@@ -28,7 +26,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.io.File
@@ -57,8 +55,10 @@ import org.junit.runner.RunWith
  * `BrowserScreenOfflineErrorTest` which uses the same manual-VM-construction
  * pattern instead of `@TestInstallIn`-based Hilt module replacement).
  *
- * US2 / US3 extend this class with loading-indicator and offline-error tests
- * (T026, T036).
+ * US2 / US3 render-branch coverage lives in sibling classes that seed the
+ * ViewModel before `setContent` so no live WebView load can race the assertion:
+ * `BrowserScreenLoadingIndicatorTest` (T026) and `BrowserScreenOfflineErrorTest`
+ * (T036). This class keeps only assertions that genuinely need a real page load.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -110,6 +110,10 @@ class BrowserScreenInstrumentedTest {
                     InstrumentedNoopBookmarkRepository,
                     com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(InstrumentedNoopBookmarkRepository),
                 ),
+                recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
+                    InstrumentedNoopHistoryRepository,
+                ),
+                updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(InstrumentedNoopHistoryRepository),
             )
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
@@ -121,32 +125,6 @@ class BrowserScreenInstrumentedTest {
         onWebView(isAssignableFrom(WebView::class.java))
             .withElement(findElement(Locator.TAG_NAME, "h1"))
             .check(webMatches(getText(), containsString("Example Domain")))
-    }
-
-    @OptIn(ExperimentalTestApi::class)
-    @Test
-    fun loadingIndicator_appearsAndHidesOnFinish() {
-        // SC-002 (production): indicator visible within 200 ms of load start
-        // event (`WebChromeClient.onProgressChanged` first tick). That budget
-        // measures pure Compose recomposition latency on a real device and is
-        // verified manually via Gate 7 step 3.
-        //
-        // THIS test runs on emulator API 29 and times the assertion from
-        // `setContent` — it includes WebView initialization, emulator network
-        // bring-up, and the JNI ↔ webkit handoff before `onProgressChanged`
-        // fires. Empirically that overhead is hundreds of milliseconds on a
-        // cold AVD, which is irrelevant to SC-002. Budget here is generous
-        // enough not to flake on slow CI runners while still catching a
-        // regression where the indicator never appears at all.
-        composeRule.waitUntilExactlyOneExists(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
-            timeoutMillis = LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS,
-        )
-        // Indicator must hide once the page finishes loading. SC-001 budget.
-        composeRule.waitUntilDoesNotExist(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
-            timeoutMillis = LOADING_INDICATOR_HIDE_TIMEOUT_MS,
-        )
     }
 
     @Test
@@ -177,8 +155,6 @@ class BrowserScreenInstrumentedTest {
 
         // CI emulator budget — NOT the user-facing SC-002 production target
         // (200 ms). See test method KDoc above.
-        const val LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS: Long = 5_000L
-        const val LOADING_INDICATOR_HIDE_TIMEOUT_MS: Long = 10_000L
     }
 }
 
@@ -294,4 +270,17 @@ private object InstrumentedNoopBookmarkRepository :
     override suspend fun moveFolder(folderId: Long, newParentId: Long?) = Result.Success(Unit)
     override suspend fun deleteFolderCascade(folderId: Long) =
         Result.Success(com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0))
+}
+
+/** Spec 014 — no-op [HistoryRepository] for the instrumented test. */
+private object InstrumentedNoopHistoryRepository :
+    com.raumanian.thirtysix.browser.domain.repository.HistoryRepository {
+    override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
+    override fun observeAll() =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.HistoryEntry>())
+    override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
+    override suspend fun updateTitle(id: Long, title: String): Int = 0
+    override suspend fun deleteById(id: Long): Int = 0
+    override suspend fun clearAll(): Int = 0
+    override suspend fun count(): Int = 0
 }

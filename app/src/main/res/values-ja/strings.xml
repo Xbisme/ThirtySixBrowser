@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Japanese (ja) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix ブラウザ</string>
-    <string name="history_screen_placeholder">履歴</string>
     <string name="downloads_screen_placeholder">ダウンロード</string>
     <string name="settings_screen_placeholder">設定</string>
     <string name="onboarding_screen_placeholder">はじめに</string>
@@ -89,4 +88,34 @@
     </plurals>
     <string name="bookmarks_action_add_cd">ブックマークを追加</string>
     <string name="bookmarks_dialog_add_title">ブックマークを追加</string>
+
+    <!-- Spec 014 — History view (Japanese). -->
+    <string name="history_screen_title">履歴</string>
+    <string name="history_action_back">戻る</string>
+    <string name="history_day_today">今日</string>
+    <string name="history_day_yesterday">昨日</string>
+    <string name="history_empty_title">履歴はまだありません</string>
+    <string name="history_empty_body">訪問したページがここに表示されます。</string>
+    <string name="history_row_content_description">%1$s、%2$s、%3$s に訪問</string>
+
+    <!-- Spec 014 US2 — search. -->
+    <string name="history_search_placeholder">履歴を検索</string>
+    <string name="history_search_clear_content_description">検索をクリア</string>
+    <string name="history_no_matches_title">「%1$s」に一致する履歴はありません</string>
+    <string name="history_no_matches_body">別のキーワードを試すか、つづりを確認してください。</string>
+
+    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <string name="history_action_open_in_new_tab">新しいタブで開く</string>
+    <string name="history_action_delete_entry">この項目を削除</string>
+    <string name="history_action_copy_url">URL をコピー</string>
+    <string name="history_snackbar_clipboard_copied">URL をクリップボードにコピーしました</string>
+    <string name="history_snackbar_tab_cap_reached">タブの上限に達しました。新しいタブを開くにはタブを 1 つ閉じてください。</string>
+    <string name="history_snackbar_deletion_failed">項目を削除できませんでした。もう一度お試しください。</string>
+
+    <!-- Spec 014 US4 — clear all. -->
+    <string name="history_action_clear_all">履歴をすべて削除</string>
+    <string name="history_clear_all_dialog_title">履歴をすべて削除しますか?</string>
+    <string name="history_clear_all_dialog_body">閲覧履歴のすべてのページが完全に削除されます。この操作は取り消せません。</string>
+    <string name="history_clear_all_dialog_confirm">削除</string>
+    <string name="history_clear_all_dialog_cancel">キャンセル</string>
 </resources>

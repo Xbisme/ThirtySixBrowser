@@ -12,7 +12,10 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognit
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
+import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
@@ -71,6 +74,7 @@ class BrowserViewModelTest {
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
         bookmarkRepository: com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository =
             com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository(),
+        historyRepository: FakeHistoryRepository = FakeHistoryRepository(),
     ): BrowserViewModel {
         // Spec 011 — 4 use-case dependencies + 2 caches all back onto a
         // single FakeTabRepository / Noop*Cache so existing Spec 007–010
@@ -100,6 +104,8 @@ class BrowserViewModelTest {
             screenshotCache = screenshotCache,
             isUrlBookmarked = isUrlBookmarked,
             toggleBookmark = toggleBookmark,
+            recordHistoryEntry = RecordHistoryEntryUseCase(historyRepository),
+            updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(historyRepository),
         )
     }
 
@@ -648,6 +654,66 @@ class BrowserViewModelTest {
         vm.consumeTabsEvent()
         assertEquals(null, vm.uiState.value.tabsEvent)
     }
+
+    // ──────── Spec 014 — history recording (FR-001 / FR-002 / FR-003 / FR-004) ────────
+
+    @Test
+    fun `onLoadFinished records one history entry on a fresh load`() = runTest(testDispatcher) {
+        val historyRepo = FakeHistoryRepository()
+        val vm = newViewModel(historyRepository = historyRepo)
+        advanceUntilIdle()
+        vm.onLoadStarted("https://example.com")
+        vm.onTitleReceived("Example")
+        vm.onLoadFinished("https://example.com")
+        advanceUntilIdle()
+        assertEquals(1, historyRepo.recorded.size)
+        val entry = historyRepo.recorded.first()
+        assertEquals("https://example.com", entry.url)
+        assertEquals("Example", entry.title)
+    }
+
+    @Test
+    fun `progress 100 plus onLoadFinished records exactly one entry (no double)`() =
+        runTest(testDispatcher) {
+            val historyRepo = FakeHistoryRepository()
+            val vm = newViewModel(historyRepository = historyRepo)
+            advanceUntilIdle()
+            vm.onLoadStarted("https://example.com")
+            vm.onTitleReceived("Example")
+            vm.onProgressChanged(MAX_PROGRESS) // marks state Loaded
+            vm.onLoadFinished("https://example.com") // idempotent on Loaded+sameUrl → no record
+            advanceUntilIdle()
+            assertEquals(1, historyRepo.recorded.size)
+        }
+
+    @Test
+    fun `repeat onLoadFinished after reload produces a second entry`() =
+        runTest(testDispatcher) {
+            val historyRepo = FakeHistoryRepository()
+            val vm = newViewModel(historyRepository = historyRepo)
+            advanceUntilIdle()
+            // First load.
+            vm.onLoadStarted("https://example.com")
+            vm.onLoadFinished("https://example.com")
+            advanceUntilIdle()
+            // Reload (state transitions from Loaded → Loading → Loaded).
+            vm.onLoadStarted("https://example.com")
+            vm.onLoadFinished("https://example.com")
+            advanceUntilIdle()
+            assertEquals(2, historyRepo.recorded.size)
+        }
+
+    @Test
+    fun `onLoadFailed never invokes the recorder (FR-003 negative)`() =
+        runTest(testDispatcher) {
+            val historyRepo = FakeHistoryRepository()
+            val vm = newViewModel(historyRepository = historyRepo)
+            advanceUntilIdle()
+            vm.onLoadStarted("https://example.com")
+            vm.onLoadFailed(ErrorReason.NetworkUnavailable)
+            advanceUntilIdle()
+            assertEquals(0, historyRepo.recorded.size)
+        }
 
     private companion object {
         const val EARLY_PROGRESS: Int = 25

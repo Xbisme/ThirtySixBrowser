@@ -80,6 +80,13 @@ android {
     // Java target 11 via Toolchain — Gradle auto-provisions JDK 11 for compilation
     // regardless of the launcher JDK. (Spec 001 Q3 clarification + FR-006.)
 
+    // Spec 014 — core library desugaring brings `java.time` (LocalDate / Instant /
+    // DateTimeFormatter) to minSdk 24. Wired alongside the desugar_jdk_libs
+    // dependency declared with `coreLibraryDesugaring(...)` below.
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+
     buildFeatures {
         compose = true
     }
@@ -167,6 +174,9 @@ gradle.taskGraph.whenReady {
 }
 
 dependencies {
+    // Spec 014 — core library desugaring runtime (build-time tool, NOT runtime lib).
+    coreLibraryDesugaring(libs.android.desugar.jdk.libs)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

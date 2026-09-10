@@ -27,6 +27,7 @@ data class NavigationBottomBarCallbacks(
     val onReloadOrStop: () -> Unit,
     val onHome: () -> Unit,
     val onBookmarksClick: () -> Unit,
+    val onHistoryClick: () -> Unit,
     val onTabsSwitcherClick: () -> Unit,
     val onTabsSwitcherLongClick: () -> Unit,
 )

@@ -62,4 +62,39 @@ object BrowserLimits {
      * Spec 013 — power-user soft envelope. Same policy as [MAX_BOOKMARKS].
      */
     const val MAX_FOLDERS: Int = 1_000
+
+    /**
+     * Spec 014 FR-011a / Q4 clarification — the History screen begins live-filtering only once
+     * the user-typed search query reaches this length. Below it (0 or 1 characters), the full
+     * unfiltered list is shown. Avoids wasteful filtering on a single common letter that would
+     * match nearly every entry, while staying instantaneous past the threshold (no debounce).
+     */
+    const val SEARCH_MIN_CHARS: Int = 2
+
+    /**
+     * Spec 014 — defensive cap on the History search input length to bound the per-keystroke
+     * filter cost. 200 characters is far beyond any reasonable URL substring or page-title query
+     * a user would type by hand; the search field's `maxLength` enforces it at the input
+     * boundary so the in-memory `String.contains` scan never sees a pathological query.
+     */
+    const val MAX_HISTORY_QUERY_LENGTH: Int = 200
+
+    /**
+     * Spec 014 — retention window for browsing history, in days.
+     *
+     * History is otherwise unbounded: `HistoryRepository.observeAll()` loads the whole
+     * table, so memory scales linearly with how long the app has been used. Measured on
+     * an API 36 emulator, 10 000 rows cost ~3 MB of Java heap (~300 B/row) — fine today,
+     * but a heavy user (~200 page loads/day) reaches 100 000 rows inside two years, and
+     * ~30 MB for one screen is not acceptable on a minSdk-24 device with a ~96 MB heap
+     * cap.
+     *
+     * Pruning the table (rather than capping the query with `LIMIT`) is deliberate: it
+     * keeps the "what the list shows is what actually exists" invariant, so search can
+     * never report "no matches" for a row that is still sitting in the database.
+     *
+     * 90 days matches the default retention of mainstream browsers. Making this
+     * user-configurable belongs to Spec 016 (settings-screen).
+     */
+    const val MAX_HISTORY_DAYS: Int = 90
 }
