@@ -277,7 +277,7 @@ Android single-module project. Source under `app/src/main/kotlin/com/raumanian/t
 
 ### Quality gates
 
-- [ ] T102 Run `./gradlew testDebugUnitTest connectedDebugAndroidTest lintDebug detekt ktlintCheck assembleRelease` — entire suite green. Capture unit-test count delta vs Spec 013 baseline (~30+ new) for PR body. **◐ 6/7 GREEN** — testDebugUnitTest ✅ **379/379** · lintDebug ✅ · detekt ✅ · ktlintCheck ✅ · assembleDebug ✅ · assembleRelease ✅ · 16 KB gate ✅ · `connectedDebugAndroidTest` **59/60**, the one failure being the pre-existing Spec 007 flake described below.
+- [X] T102 Run `./gradlew testDebugUnitTest connectedDebugAndroidTest lintDebug detekt ktlintCheck assembleRelease` — entire suite green. Capture unit-test count delta vs Spec 013 baseline (~30+ new) for PR body. **✅ GREEN 2026-05-08** — testDebugUnitTest ✅ **379/379** · lintDebug ✅ · detekt ✅ · ktlintCheck ✅ · assembleDebug ✅ · assembleRelease ✅ · 16 KB gate ✅ · `connectedDebugAndroidTest` **60/60**, run three times back-to-back on the `TA016_API24` AVD (Android 7.0 / **minSdk**, arm64) with no flakes. Closing this needed a fix to the pre-existing Spec 007 flake — see the note below. Not re-run on the API 36 AVD: that device's `/data` is 96 % full and refuses installs; its last full run was 59/60 with only this same (now-fixed) test failing.
 - [X] T103 Verify 16 KB native-lib gate per [plan.md](plan.md) Constitution §IX gate — `unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so | objdump -p - | grep LOAD | awk '{print $NF}'` should output only `0x4000` (or larger). Record APK size delta vs Spec 013 baseline 2.38 MB; SC-008 budget = +200 KB.
 - [X] T103a Implement a **debug-only** history seeder for the SC-005 / SC-006 perf benchmark (G8). Either a hidden `HistorySeederActivity` (gated by `BuildConfig.DEBUG`) or an `adb shell am start-service` debug receiver that bulk-inserts 10,000 rows spanning 30 days via `HistoryRepository.recordVisit` in batched coroutines. NOT shipped in release builds (verify via `manifestPlaceholders` or source-set isolation under `app/src/debug/...`). Path: `app/src/debug/kotlin/com/raumanian/thirtysix/browser/dev/HistorySeeder.kt`. 
 - [ ] T103b Manual user-device gate **G8** (10K-row benchmark — SC-005 + SC-006 + SC-003 reaffirmed) per [quickstart.md](quickstart.md). PASS/FAIL recorded in PR body. Skip-and-defer is permitted but MUST be flagged as DEFERRED in PR body. **◐ MEASURED on emulator, SC-005 NOT met** — see the perf note below. Search responsiveness improved ~4× after a main-thread fix; initial-open frame budget still misses the 16 ms p99 target on a **debug** build on an emulator. A release-build measurement on Pixel 5-class hardware is still required before sign-off.
@@ -500,3 +500,26 @@ crashes).
 > silently and the device kept running a stale APK, which briefly looked like "the retention
 > sweep does not run". Always check `adb install` output. Verification moved to the API 24
 > AVD, which is the better target for this change anyway.
+
+### Pre-existing Spec 007 flake fixed so T102 could close (2026-05-08)
+
+`BrowserScreenInstrumentedTest.loadingIndicator_appearsAndHidesOnFinish` was the single
+failure standing between the suite and green. It is **not** a Spec 014 regression: it
+reproduces identically on `main` (commit `954742a`, checked out in a clean worktree) and on
+both an API 24 and an API 36 emulator, while passing 3/3 in isolation.
+
+**Why it failed.** The test asserted the loading indicator becomes visible during a live
+`example.com` load. When a sibling test in the same class had already warmed the WebView's
+HTTP cache, the `Loading` window closed faster than the assertion could observe it — so the
+outcome depended on execution order, not on the code under test.
+
+**Fix (test-only).** The test now waits for the real page to settle — which guarantees no
+stray WebView callback is still in flight to race the assertions — then drives
+`onLoadStarted` / `onProgressChanged` / `onLoadFinished` on the ViewModel explicitly. That
+is precisely what the test claims to guard: the Compose binding between
+`BrowserUiState.loadingState` and the indicator. The live-load path remains covered by
+`pageRenders_assertsDomContainsExampleDomain` in the same class, and the platform's real
+callback ordering by `BrowserViewModelHistoryRecordSequenceTest` on the JVM.
+
+> This edits a **Spec 007** test file from the Spec 014 branch. Called out here and in the
+> PR body so the reviewer sees it deliberately rather than as drive-by churn.
