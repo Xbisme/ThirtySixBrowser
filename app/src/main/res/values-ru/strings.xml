@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Russian (ru) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix Браузер</string>
-    <string name="downloads_screen_placeholder">Загрузки</string>
     <string name="settings_screen_placeholder">Настройки</string>
     <string name="onboarding_screen_placeholder">Знакомство</string>
 
@@ -124,4 +123,49 @@
     <string name="history_clear_all_dialog_body">Все страницы из истории посещений будут удалены безвозвратно. Это действие нельзя отменить.</string>
     <string name="history_clear_all_dialog_confirm">Очистить</string>
     <string name="history_clear_all_dialog_cancel">Отмена</string>
+
+    <!-- Spec 015 — downloads (US1) -->
+    <string name="downloads_started_snackbar">Загрузка %1$s</string>
+    <string name="downloads_service_unavailable">Загрузки недоступны на этом устройстве.</string>
+    <string name="downloads_storage_permission_denied">Для сохранения загрузок нужен доступ к хранилищу.</string>
+    <string name="downloads_storage_permission_denied_permanently">Доступ к хранилищу заблокирован. Включите его в настройках, чтобы сохранять загрузки.</string>
+    <string name="downloads_storage_permission_rationale_title">Разрешить доступ к хранилищу?</string>
+    <string name="downloads_storage_permission_rationale_body">На этой версии Android браузеру ThirtySix нужен доступ к хранилищу, чтобы сохранять файлы в папку «Загрузки».</string>
+    <string name="downloads_storage_permission_rationale_confirm">Продолжить</string>
+    <string name="downloads_storage_permission_rationale_cancel">Не сейчас</string>
+
+    <!-- Spec 015 — downloads (US2-US7) -->
+    <string name="downloads_screen_title">Загрузки</string>
+    <string name="downloads_action_back">Назад</string>
+    <string name="downloads_state_pending">Ожидание</string>
+    <string name="downloads_state_downloading">Загрузка</string>
+    <string name="downloads_state_paused">Приостановлено</string>
+    <string name="downloads_state_complete">Завершено</string>
+    <string name="downloads_state_cancelled">Отменено</string>
+    <string name="downloads_state_missing">Файл не найден</string>
+    <string name="downloads_failure_insufficient_space">Ошибка — недостаточно места</string>
+    <string name="downloads_failure_network">Ошибка — соединение потеряно</string>
+    <string name="downloads_failure_generic">Ошибка</string>
+    <string name="downloads_size_unknown">Размер неизвестен</string>
+    <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
+    <string name="browser_action_more">Ещё</string>
+    <string name="downloads_no_app_can_open">На этом устройстве нет приложения для открытия файла.</string>
+    <string name="downloads_file_missing">Этого файла больше нет на устройстве.</string>
+    <string name="downloads_not_complete">Эта загрузка ещё не завершена.</string>
+    <string name="downloads_action_open">Открыть</string>
+    <string name="downloads_action_copy_link">Скопировать ссылку</string>
+    <string name="downloads_action_remove">Убрать из списка</string>
+    <string name="downloads_action_delete_file">Удалить файл</string>
+    <string name="downloads_link_copied">Ссылка скопирована</string>
+    <string name="downloads_record_removed">Убрано из списка</string>
+    <string name="downloads_file_deleted">Файл удалён</string>
+    <string name="downloads_delete_dialog_title">Удалить этот файл?</string>
+    <string name="downloads_delete_dialog_body">%1$s будет безвозвратно удалён с устройства. Это действие нельзя отменить.</string>
+    <string name="downloads_delete_dialog_confirm">Удалить</string>
+    <string name="downloads_delete_dialog_cancel">Отмена</string>
+    <string name="downloads_action_cancel">Отменить загрузку</string>
+    <string name="downloads_cancelled">Загрузка отменена</string>
+    <string name="downloads_empty_title">Загрузок пока нет</string>
+    <string name="downloads_empty_body">Скачанные файлы появятся здесь.</string>
+    <string name="downloads_operation_failed">Что-то пошло не так. Попробуйте ещё раз.</string>
 </resources>

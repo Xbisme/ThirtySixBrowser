@@ -3,9 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Spec 007 — WebView page load. Constitution §II "Permission table" assigns
-         these two to Spec 007. POST_NOTIFICATIONS is reserved for Spec 015 (downloads). -->
+         these two to Spec 007. POST_NOTIFICATIONS was reserved for Spec 015; see the note below. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Spec 015 FR-009 – FR-013 — writing to the device's PUBLIC Downloads folder needed
+         this permission before Scoped Storage arrived in API 29, and this project's
+         minSdk is 24. The maxSdkVersion ceiling means it is absent from the effective
+         manifest on API 29+, so modern users never see it in the Play listing and it can
+         never be requested there; on API 24-28 it is requested at the moment of the first
+         download, never at launch.
+
+         This is the FOURTH permission, against the Constitution's three-row table — a
+         deliberate, documented deviation recorded in
+         specs/015-downloads-manager/plan.md "Complexity Tracking". MANAGE_EXTERNAL_STORAGE
+         remains forbidden (FR-013) and is NOT declared.
+
+         POST_NOTIFICATIONS is deliberately still absent: gate G9 must determine on a device
+         whether the system download service's own notifications require it (FR-048). -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:name=".ThirtySixApplication"

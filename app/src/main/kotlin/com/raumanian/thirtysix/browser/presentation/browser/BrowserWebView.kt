@@ -166,6 +166,13 @@ private fun buildConfiguredWebView(
         onCanGoForwardChange = navigationCallbacks.onCanGoForwardChange,
         onScreenshotReady = navigationCallbacks.onScreenshotReady,
     )
+    // Spec 015 FR-001 — the engine hands off anything it will not render. Attached beside
+    // the two platform clients because this is the same shape of event they carry, and the
+    // incognito flag is in scope here yet deliberately NOT consulted: FR-014a records an
+    // incognito download exactly like any other, so there is no branch to add.
+    wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
+        callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
+    }
     wv.webChromeClient = BrowserChromeClient(
         onProgressChanged = callbacks.onProgressChanged,
         onReceivedTitle = navigationCallbacks.onTitleChange,

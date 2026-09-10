@@ -74,11 +74,11 @@ class AppDatabaseConfigTest {
         assertTrue(insertedId > 0L)
         dbV1.close()
 
-        // 2) Open the SAME file with a v2 schema declaration — same entities + version
-        //    bump but NO migration registered. Room must throw IllegalStateException.
+        // 2) Open the SAME file with a schema declared one version AHEAD of production —
+        //    same entities, no migration registered. Room must throw IllegalStateException.
         val dbV2Builder = Room.databaseBuilder(
             context,
-            AppDatabaseV2Fixture::class.java,
+            AppDatabaseFutureVersionFixture::class.java,
             dbFile.absolutePath,
         )
         var threw: IllegalStateException? = null
@@ -110,8 +110,16 @@ class AppDatabaseConfigTest {
     }
 
     /**
-     * v2 fixture — same entities as production [AppDatabase] but bumped version, no
-     * migration class registered. Used purely to drive the negative-path assertion above.
+     * Future-version fixture — the production entity set at a version **ahead of**
+     * [AppDatabase.SCHEMA_VERSION], with no migration registered. Used purely to drive the
+     * negative-path assertion above.
+     *
+     * > Spec 015 note: this was `version = 2` and named `AppDatabaseV2Fixture` while
+     * > production sat at v1. Spec 015 moved production to v2, at which point the fixture
+     * > stopped meaning "a future version" and started meaning "the same version with a
+     * > different shape" — so Room raised an identity-mismatch error instead of a
+     * > missing-migration error and the message assertion failed. Deriving the version from
+     * > [AppDatabase.SCHEMA_VERSION] means it can never drift out of date again.
      */
     @Database(
         entities = [
@@ -120,8 +128,8 @@ class AppDatabaseConfigTest {
             HistoryEntryEntity::class,
             TabEntity::class,
         ],
-        version = 2,
+        version = AppDatabase.SCHEMA_VERSION + 1,
         exportSchema = false,
     )
-    internal abstract class AppDatabaseV2Fixture : RoomDatabase()
+    internal abstract class AppDatabaseFutureVersionFixture : RoomDatabase()
 }

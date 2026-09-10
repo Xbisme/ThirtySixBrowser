@@ -59,6 +59,12 @@ data class BrowserUiState(
      */
     val isBookmarked: Boolean = false,
     /**
+     * Spec 015 — one-shot snackbar event for the download flow (FR-002 / FR-008a / FR-012).
+     * Cleared via `BrowserViewModel.consumeDownloadSnackbarEvent()` once shown. Kept
+     * separate from [bookmarkSnackbarEvent] so the two never overwrite each other.
+     */
+    val downloadSnackbarEvent: DownloadSnackbarEvent? = null,
+    /**
      * Spec 013 — one-shot snackbar event after a star toggle (FR-001 / FR-003).
      * Cleared via `BrowserViewModel.consumeBookmarkSnackbarEvent()` after the
      * SnackbarHost has shown the message.

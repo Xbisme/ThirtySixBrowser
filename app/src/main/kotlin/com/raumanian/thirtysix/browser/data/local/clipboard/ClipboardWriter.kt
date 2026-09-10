@@ -27,12 +27,16 @@ interface ClipboardWriter {
     /**
      * Place [url] on the system clipboard as plain text.
      *
+     * Spec 015 added [label], defaulted so every Spec 014 call site is unchanged. Android
+     * 13+ surfaces it in the system clipboard preview, so a copied download link can be
+     * told apart from a copied page address.
+     *
      * @return `true` when the write reached the platform clipboard, `false` when the
      *  service was unavailable or the platform rejected the write. Callers surface a
      *  confirmation snackbar only on `true` — on Android 13+ the system shows its own
      *  clipboard preview, but the in-app confirmation still covers older releases.
      */
-    fun copyUrl(url: String): Boolean
+    fun copyUrl(url: String, label: String = AppConstants.CLIPBOARD_URL_LABEL): Boolean
 }
 
 /**
@@ -48,10 +52,10 @@ class AndroidClipboardWriter @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ClipboardWriter {
 
-    override fun copyUrl(url: String): Boolean =
+    override fun copyUrl(url: String, label: String): Boolean =
         runCatching {
             val manager = context.getSystemService<ClipboardManager>() ?: return false
-            manager.setPrimaryClip(ClipData.newPlainText(AppConstants.CLIPBOARD_URL_LABEL, url))
+            manager.setPrimaryClip(ClipData.newPlainText(label, url))
             true
         }.getOrDefault(false)
 }

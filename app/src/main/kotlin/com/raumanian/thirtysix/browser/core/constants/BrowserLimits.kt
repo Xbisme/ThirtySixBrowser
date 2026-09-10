@@ -97,4 +97,27 @@ object BrowserLimits {
      * user-configurable belongs to Spec 016 (settings-screen).
      */
     const val MAX_HISTORY_DAYS: Int = 90
+
+    /**
+     * Spec 015 FR-005 — hard upper bound on a downloaded file's name, in characters.
+     *
+     * The name reaching this bound has already been derived from a server-supplied
+     * `Content-Disposition` header, which is attacker-controlled: an unbounded name can
+     * exhaust a filesystem's per-component limit and make the write fail in ways that are
+     * awkward to report. 255 is the per-component limit on every filesystem Android ships
+     * on, so bounding here means the sanitiser never emits a name the platform will reject.
+     */
+    const val MAX_DOWNLOAD_FILENAME_LENGTH: Int = 255
+
+    /**
+     * Spec 015 SC-007 — how often the Downloads screen re-reads live transfer state, in
+     * milliseconds.
+     *
+     * SC-007 requires an in-flight row's progress to advance visibly at least once per
+     * second, which sets the ceiling; polling faster buys nothing a user can perceive and
+     * costs battery. The loop runs only while the screen is in the foreground AND at least
+     * one entry is actually in flight (research.md R7), so a list of finished downloads
+     * polls zero times.
+     */
+    const val DOWNLOAD_STATUS_POLL_INTERVAL_MS: Long = 1_000L
 }

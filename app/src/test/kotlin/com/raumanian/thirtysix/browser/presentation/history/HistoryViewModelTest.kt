@@ -516,9 +516,16 @@ class HistoryViewModelTest {
         private val succeeds: Boolean = true,
     ) : ClipboardWriter {
         val copied: MutableList<String> = mutableListOf()
+        val labels: MutableList<String> = mutableListOf()
 
-        override fun copyUrl(url: String): Boolean {
-            if (succeeds) copied += url
+        // Spec 015 added the `label` parameter to ClipboardWriter (defaulted, so History's
+        // own call sites are unchanged). Recorded here too, so a future change that starts
+        // labelling history copies differently shows up rather than passing silently.
+        override fun copyUrl(url: String, label: String): Boolean {
+            if (succeeds) {
+                copied += url
+                labels += label
+            }
             return succeeds
         }
     }

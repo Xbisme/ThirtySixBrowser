@@ -136,6 +136,7 @@ class BrowserViewModelIncognitoCacheGateTest {
                 .RecordHistoryEntryUseCase(
                     com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
                 ),
+            startDownload = noOpStartDownloadUseCase(),
         )
     }
 

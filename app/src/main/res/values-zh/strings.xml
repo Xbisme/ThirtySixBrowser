@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Simplified Chinese (zh). Single zh tag covers all Chinese variants per research.md R2. -->
     <string name="app_name">ThirtySix 浏览器</string>
-    <string name="downloads_screen_placeholder">下载</string>
     <string name="settings_screen_placeholder">设置</string>
     <string name="onboarding_screen_placeholder">引导</string>
 
@@ -118,4 +117,49 @@
     <string name="history_clear_all_dialog_body">这将永久删除浏览历史中的所有页面，且无法撤消。</string>
     <string name="history_clear_all_dialog_confirm">清除</string>
     <string name="history_clear_all_dialog_cancel">取消</string>
+
+    <!-- Spec 015 — downloads (US1) -->
+    <string name="downloads_started_snackbar">正在下载 %1$s</string>
+    <string name="downloads_service_unavailable">此设备不支持下载功能。</string>
+    <string name="downloads_storage_permission_denied">保存下载内容需要存储权限。</string>
+    <string name="downloads_storage_permission_denied_permanently">存储权限已被阻止。请在“设置”中开启后才能保存下载内容。</string>
+    <string name="downloads_storage_permission_rationale_title">允许访问存储空间？</string>
+    <string name="downloads_storage_permission_rationale_body">在此 Android 版本上，ThirtySix 浏览器需要存储权限才能将文件保存到“下载”文件夹。</string>
+    <string name="downloads_storage_permission_rationale_confirm">继续</string>
+    <string name="downloads_storage_permission_rationale_cancel">暂不</string>
+
+    <!-- Spec 015 — downloads (US2-US7) -->
+    <string name="downloads_screen_title">下载</string>
+    <string name="downloads_action_back">返回</string>
+    <string name="downloads_state_pending">等待中</string>
+    <string name="downloads_state_downloading">下载中</string>
+    <string name="downloads_state_paused">已暂停</string>
+    <string name="downloads_state_complete">已完成</string>
+    <string name="downloads_state_cancelled">已取消</string>
+    <string name="downloads_state_missing">找不到文件</string>
+    <string name="downloads_failure_insufficient_space">失败 — 存储空间不足</string>
+    <string name="downloads_failure_network">失败 — 连接中断</string>
+    <string name="downloads_failure_generic">失败</string>
+    <string name="downloads_size_unknown">大小未知</string>
+    <string name="downloads_row_content_description">%1$s，%2$s，%3$s</string>
+    <string name="browser_action_more">更多</string>
+    <string name="downloads_no_app_can_open">此设备上没有可打开该文件的应用。</string>
+    <string name="downloads_file_missing">该文件已不在您的设备上。</string>
+    <string name="downloads_not_complete">此下载尚未完成。</string>
+    <string name="downloads_action_open">打开</string>
+    <string name="downloads_action_copy_link">复制链接</string>
+    <string name="downloads_action_remove">从列表中移除</string>
+    <string name="downloads_action_delete_file">删除文件</string>
+    <string name="downloads_link_copied">已复制链接</string>
+    <string name="downloads_record_removed">已从列表中移除</string>
+    <string name="downloads_file_deleted">已删除文件</string>
+    <string name="downloads_delete_dialog_title">要删除此文件吗？</string>
+    <string name="downloads_delete_dialog_body">%1$s 将从您的设备中永久删除，此操作无法撤消。</string>
+    <string name="downloads_delete_dialog_confirm">删除</string>
+    <string name="downloads_delete_dialog_cancel">取消</string>
+    <string name="downloads_action_cancel">取消下载</string>
+    <string name="downloads_cancelled">已取消下载</string>
+    <string name="downloads_empty_title">暂无下载内容</string>
+    <string name="downloads_empty_body">您下载的文件会显示在这里。</string>
+    <string name="downloads_operation_failed">出了点问题，请重试。</string>
 </resources>

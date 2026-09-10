@@ -39,6 +39,7 @@ class NavigationBottomBarTest {
     private var homeCount = 0
     private var tabsSwitcherClickCount = 0
     private var tabsSwitcherLongClickCount = 0
+    private var overflowCount = 0
 
     private fun setBar(
         canGoBack: Boolean = false,
@@ -58,8 +59,9 @@ class NavigationBottomBarTest {
                         onForward = { forwardCount++ },
                         onReloadOrStop = { reloadOrStopCount++ },
                         onHome = { homeCount++ },
-                        onBookmarksClick = { /* Spec 013 — no test coverage in this file. */ },
-                        onHistoryClick = { /* Spec 014 — no test coverage in this file. */ },
+                        // Spec 015 folded Bookmarks and History into the overflow menu;
+                        // BrowserOverflowMenuTest covers what it opens.
+                        onOverflowClick = { overflowCount++ },
                         onTabsSwitcherClick = { tabsSwitcherClickCount++ },
                         onTabsSwitcherLongClick = { tabsSwitcherLongClickCount++ },
                     ),

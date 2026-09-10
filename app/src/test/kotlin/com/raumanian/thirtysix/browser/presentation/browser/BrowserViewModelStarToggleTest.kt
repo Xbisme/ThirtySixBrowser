@@ -155,6 +155,7 @@ class BrowserViewModelStarToggleTest {
                 .UpdateHistoryEntryTitleUseCase(
                     com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
                 ),
+            startDownload = noOpStartDownloadUseCase(),
         )
     }
 
