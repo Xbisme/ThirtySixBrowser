@@ -54,6 +54,89 @@ class ResolveDownloadStatusUseCaseTest {
         assertEquals(DownloadStatus.Complete(), useCase(listOf(record())).single().status)
     }
 
+    /**
+     * The G8 regression.
+     *
+     * `pm clear com.android.providers.downloads` is the honest reproduction of "the platform
+     * forgot this transfer": the handle stops resolving **and so does the content URI that
+     * was recorded for it**, because that URI belongs to the provider whose data was just
+     * wiped. The file itself is untouched.
+     *
+     * The first version of this fallback answered presence by opening the recorded URI, so
+     * in exactly that situation it reported `Missing` for ten downloads whose files were all
+     * still sitting in the Downloads folder — the "present → Complete" branch was
+     * unreachable in the one scenario it was written for. Presence now asks the filesystem
+     * about the real file, which is what this pins.
+     */
+    @Test
+    fun `FR-024a - the file is found by name when the recorded URI has died with the provider`() =
+        runTest {
+            val useCase = ResolveDownloadStatusUseCase(
+                // The name is on disk; the recorded URI resolves to nothing any more.
+                FakeGateway(statuses = emptyMap(), existingFiles = setOf("a.pdf")),
+                InMemoryDownloadsRepository(),
+            )
+
+            assertEquals(
+                DownloadStatus.Complete(),
+                useCase(listOf(record(localUri = "content://d/10"))).single().status,
+            )
+        }
+
+    @Test
+    fun `FR-024a - a forgotten handle with no recorded URI still resolves by file name`() = runTest {
+        val useCase = ResolveDownloadStatusUseCase(
+            FakeGateway(statuses = emptyMap(), existingFiles = setOf("a.pdf")),
+            InMemoryDownloadsRepository(),
+        )
+
+        assertEquals(DownloadStatus.Complete(), useCase(listOf(record(localUri = null))).single().status)
+    }
+
+    // ---- FR-007 / FR-014 : the name the platform actually used ---------------------
+
+    /**
+     * The platform renames colliding downloads rather than overwriting (FR-007), so the name
+     * on disk is not always the name that was requested. Until the resolved name is stored,
+     * three downloads of one filename display identically *and* — now that presence is
+     * answered by looking for the real file — all three probe for the same one.
+     */
+    @Test
+    fun `FR-007 - completion stores the name the platform actually used`() = runTest {
+        val repository = InMemoryDownloadsRepository()
+        val id = repository.insert(record(localUri = null))
+        val gateway = FakeGateway(
+            statuses = mapOf(10L to DownloadStatus.Complete(totalBytes = 12L)),
+            contentUri = "content://d/10",
+            resolvedName = "a-1.pdf",
+        )
+
+        val item = ResolveDownloadStatusUseCase(gateway, repository)(
+            listOf(record(id = id, localUri = null)),
+        ).single()
+
+        assertEquals("a-1.pdf", item.record.fileName)
+        assertEquals("content://d/10", item.record.localUri)
+        assertEquals("the rename must be durable, not just displayed", "a-1.pdf", repository.current.single().fileName)
+    }
+
+    @Test
+    fun `a platform that cannot name the file leaves the requested name alone`() = runTest {
+        val repository = InMemoryDownloadsRepository()
+        val id = repository.insert(record(localUri = null))
+        val gateway = FakeGateway(
+            statuses = mapOf(10L to DownloadStatus.Complete()),
+            contentUri = "content://d/10",
+            resolvedName = null,
+        )
+
+        val item = ResolveDownloadStatusUseCase(gateway, repository)(
+            listOf(record(id = id, localUri = null)),
+        ).single()
+
+        assertEquals("a.pdf", item.record.fileName)
+    }
+
     @Test
     fun `FR-024a - a forgotten handle with the file absent resolves to Missing`() = runTest {
         val useCase = ResolveDownloadStatusUseCase(
@@ -155,6 +238,8 @@ class ResolveDownloadStatusUseCaseTest {
     private class FakeGateway(
         private val statuses: Map<Long, DownloadStatus>,
         private val existingFiles: Set<String> = emptySet(),
+        private val contentUri: String? = null,
+        private val resolvedName: String? = null,
     ) : DownloadManagerGateway {
         var batchQueryCount = 0
         var fileExistsCount = 0
@@ -164,16 +249,15 @@ class ResolveDownloadStatusUseCaseTest {
             return statuses.filterKeys { it in transferHandles }
         }
 
-        override suspend fun queryStatus(transferHandle: Long): DownloadStatus? = statuses[transferHandle]
-
-        override suspend fun fileExists(localUri: String): Boolean {
+        override suspend fun fileExists(localUri: String?, fileName: String): Boolean {
             fileExistsCount++
-            return localUri in existingFiles
+            return fileName in existingFiles || localUri in existingFiles
         }
 
         override suspend fun enqueue(request: DownloadRequest): Long? = null
         override suspend fun cancel(transferHandle: Long) = false
-        override suspend fun contentUriFor(transferHandle: Long): String? = null
+        override suspend fun contentUriFor(transferHandle: Long): String? = contentUri
+        override suspend fun resolvedFileNameFor(transferHandle: Long): String? = resolvedName
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
         override suspend fun isAvailable() = true
     }

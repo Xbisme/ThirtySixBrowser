@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.downloads
 
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
 
 /**
  * Spec 015 — one-shot events from the Downloads screen.
@@ -18,7 +18,7 @@ sealed class DownloadsEvent {
     data object NoAppCanOpenFile : DownloadsEvent()
 
     /** FR-029 — the file is gone from disk; offer to clear the stale row. */
-    data class FileMissing(val record: DownloadRecord) : DownloadsEvent()
+    data class FileMissing(val item: DownloadListItem) : DownloadsEvent()
 
     /** FR-028 — the entry has not finished, so there is nothing to open yet. */
     data object DownloadNotComplete : DownloadsEvent()

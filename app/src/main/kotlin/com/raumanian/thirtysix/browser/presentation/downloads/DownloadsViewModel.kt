@@ -153,7 +153,7 @@ class DownloadsViewModel @Inject constructor(
             val event = when (openDownloadedFile(item)) {
                 OpenDownloadResult.Opened -> null
                 OpenDownloadResult.NotComplete -> DownloadsEvent.DownloadNotComplete
-                OpenDownloadResult.FileMissing -> DownloadsEvent.FileMissing(item.record)
+                OpenDownloadResult.FileMissing -> DownloadsEvent.FileMissing(item)
                 OpenDownloadResult.NoAppAvailable -> DownloadsEvent.NoAppCanOpenFile
             }
             event?.let(::emitEvent)

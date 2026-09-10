@@ -50,12 +50,15 @@ interface DownloadsRepository {
     suspend fun getById(id: Long): DownloadRecord?
 
     /**
-     * Record where the finished file landed, once the transfer completes.
+     * Record where the finished file landed and what it is actually called, once the
+     * transfer completes (FR-014).
      *
-     * The only post-insert mutation in this feature. It stores durable metadata (*where*
-     * the file is), not live transfer state, so FR-015 is not violated.
+     * The only post-insert mutation in this feature. It stores durable metadata — *where*
+     * the file is and *what* it is named — not live transfer state, so FR-015 is not
+     * violated. The name can differ from the one requested because the platform resolves
+     * filename collisions itself (FR-007).
      */
-    suspend fun updateLocalUri(id: Long, localUri: String)
+    suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String)
 
     /**
      * Delete one record, leaving the downloaded file untouched (FR-031).

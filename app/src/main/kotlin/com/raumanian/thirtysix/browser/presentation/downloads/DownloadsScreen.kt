@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -109,6 +110,7 @@ private fun DownloadsSnackbarEffect(
     val recordRemoved = stringResource(R.string.downloads_record_removed)
     val cancelled = stringResource(R.string.downloads_cancelled)
     val failed = stringResource(R.string.downloads_operation_failed)
+    val removeLabel = stringResource(R.string.downloads_action_remove)
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -122,7 +124,17 @@ private fun DownloadsSnackbarEffect(
                 DownloadsEvent.DownloadCancelled -> cancelled
                 DownloadsEvent.OperationFailed -> failed
             }
-            snackbarHostState.showSnackbar(message)
+            // FR-029 / FR-024b — telling the user the file is gone is only half of it; the
+            // stale row has to be removable from the same message, or they are left with a
+            // list entry they were just told is meaningless and no way to act on it.
+            val stale = event as? DownloadsEvent.FileMissing
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = stale?.let { removeLabel },
+            )
+            if (stale != null && result == SnackbarResult.ActionPerformed) {
+                viewModel.onRemoveFromListClicked(stale.item)
+            }
         }
     }
 }

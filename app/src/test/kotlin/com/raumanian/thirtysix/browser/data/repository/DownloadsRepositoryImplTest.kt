@@ -82,11 +82,11 @@ class DownloadsRepositoryImplTest {
     }
 
     @Test
-    fun `updateLocalUri records where the finished file landed`() = runTest {
+    fun `updateCompletionMetadata records where the finished file landed and its resolved name`() = runTest {
         val id = repository.insert(record())
         assertNull(repository.getById(id)?.localUri)
 
-        repository.updateLocalUri(id, "content://downloads/all_downloads/9")
+        repository.updateCompletionMetadata(id, "content://downloads/all_downloads/9", "report-1.pdf")
 
         assertEquals("content://downloads/all_downloads/9", repository.getById(id)?.localUri)
     }

@@ -25,11 +25,11 @@ internal fun instrumentedNoOpStartDownloadUseCase(): StartDownloadUseCase = Star
 
 private object InstrumentedInertGateway : DownloadManagerGateway {
     override suspend fun enqueue(request: DownloadRequest): Long? = null
-    override suspend fun queryStatus(transferHandle: Long): DownloadStatus? = null
     override suspend fun queryStatuses(transferHandles: List<Long>) = emptyMap<Long, DownloadStatus>()
     override suspend fun cancel(transferHandle: Long) = false
     override suspend fun contentUriFor(transferHandle: Long): String? = null
-    override suspend fun fileExists(localUri: String) = false
+    override suspend fun fileExists(localUri: String?, fileName: String) = false
+    override suspend fun resolvedFileNameFor(transferHandle: Long): String? = null
     override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
     override suspend fun isAvailable() = false
 }
@@ -40,7 +40,7 @@ private object InstrumentedInertDownloadsRepository : DownloadsRepository {
 
     override fun observeAll(): Flow<List<DownloadRecord>> = flowOf(emptyList())
     override suspend fun getById(id: Long): DownloadRecord? = null
-    override suspend fun updateLocalUri(id: Long, localUri: String) = Unit
+    override suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String) = Unit
     override suspend fun deleteById(id: Long) = false
     override suspend fun count() = 0
 }

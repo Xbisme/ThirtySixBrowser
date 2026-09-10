@@ -153,11 +153,11 @@ class StartDownloadUseCaseTest {
             return handle
         }
 
-        override suspend fun queryStatus(transferHandle: Long): DownloadStatus? = null
         override suspend fun queryStatuses(transferHandles: List<Long>) = emptyMap<Long, DownloadStatus>()
         override suspend fun cancel(transferHandle: Long) = false
         override suspend fun contentUriFor(transferHandle: Long): String? = null
-        override suspend fun fileExists(localUri: String) = false
+        override suspend fun fileExists(localUri: String?, fileName: String) = false
+        override suspend fun resolvedFileNameFor(transferHandle: Long): String? = null
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
         override suspend fun isAvailable() = handle != null
     }
@@ -174,7 +174,7 @@ class StartDownloadUseCaseTest {
 
         override fun observeAll(): Flow<List<DownloadRecord>> = flowOf(inserted.toList())
         override suspend fun getById(id: Long): DownloadRecord? = inserted.firstOrNull { it.id == id }
-        override suspend fun updateLocalUri(id: Long, localUri: String) = Unit
+        override suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String) = Unit
         override suspend fun deleteById(id: Long) = false
         override suspend fun count(): Int = inserted.size
     }

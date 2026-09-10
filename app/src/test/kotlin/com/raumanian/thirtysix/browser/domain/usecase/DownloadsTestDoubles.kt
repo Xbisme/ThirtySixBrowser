@@ -43,6 +43,7 @@ internal open class RecordingGateway(
     private val cancelSucceeds: Boolean = true,
     private val deleteSucceeds: Boolean = true,
     private val contentUri: String? = null,
+    private val resolvedNames: Map<Long, String> = emptyMap(),
 ) : DownloadManagerGateway {
 
     val cancelled = mutableListOf<Long>()
@@ -52,10 +53,10 @@ internal open class RecordingGateway(
         if (status == null) statuses.remove(handle) else statuses[handle] = status
     }
 
+    /** Marks a file present, by recorded URI or by name — the probe accepts either. */
     fun addFile(uri: String) = existingFiles.add(uri)
 
     override suspend fun enqueue(request: DownloadRequest): Long? = null
-    override suspend fun queryStatus(transferHandle: Long): DownloadStatus? = statuses[transferHandle]
     override suspend fun queryStatuses(transferHandles: List<Long>): Map<Long, DownloadStatus> =
         statuses.filterKeys { it in transferHandles }
 
@@ -65,7 +66,14 @@ internal open class RecordingGateway(
     }
 
     override suspend fun contentUriFor(transferHandle: Long): String? = contentUri
-    override suspend fun fileExists(localUri: String): Boolean = localUri in existingFiles
+    override suspend fun resolvedFileNameFor(transferHandle: Long): String? = resolvedNames[transferHandle]
+
+    /**
+     * Mirrors production: the set may hold a **file name** (the file is on disk) or a
+     * recorded **URI**, and either one counts as present.
+     */
+    override suspend fun fileExists(localUri: String?, fileName: String): Boolean =
+        fileName in existingFiles || localUri in existingFiles
 
     override suspend fun deleteFile(transferHandle: Long, fileName: String): Boolean {
         deletedFiles += fileName
@@ -94,8 +102,10 @@ internal class InMemoryDownloadsRepository(
 
     override suspend fun getById(id: Long): DownloadRecord? = records.value.firstOrNull { it.id == id }
 
-    override suspend fun updateLocalUri(id: Long, localUri: String) {
-        records.value = records.value.map { if (it.id == id) it.copy(localUri = localUri) else it }
+    override suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String) {
+        records.value = records.value.map {
+            if (it.id == id) it.copy(localUri = localUri, fileName = fileName) else it
+        }
     }
 
     override suspend fun deleteById(id: Long): Boolean {

@@ -52,7 +52,7 @@ class ResolveDownloadStatusUseCase @Inject constructor(
         val reported = gateway.queryStatuses(records.map { it.transferHandle })
         return records.map { record ->
             val status = reported[record.transferHandle] ?: resolveForgotten(record)
-            DownloadListItem(record = backfillLocalUriIfNeeded(record, status), status = status)
+            DownloadListItem(record = backfillCompletionMetadata(record, status), status = status)
         }
     }
 
@@ -64,18 +64,24 @@ class ResolveDownloadStatusUseCase @Inject constructor(
         )
 
     /**
-     * FR-014 — record where the finished file landed, the first time we see it complete.
+     * FR-014 — record where the finished file landed **and what it ended up called**, the
+     * first time we see it complete.
      *
-     * The platform only knows the file's location once the transfer succeeds, so there is
-     * no earlier moment to capture it. Without this the column stayed null forever: the
-     * FR-024a fallback then had nothing to test and resolved every forgotten download to
-     * `Missing`, whatever was actually on disk.
+     * The platform only knows both once the transfer succeeds, so there is no earlier moment
+     * to capture them. Without this the URI column stayed null forever, and the FR-024a
+     * fallback had nothing to work with.
      *
-     * This writes **durable metadata** — *where* the file is — not live transfer state, so
-     * FR-015 and FR-024c are untouched. It runs at most once per download: the moment the
-     * URI is stored, the null check stops matching.
+     * The resolved name matters just as much as the URI, because the platform renames
+     * colliding downloads itself (FR-007). Three downloads of `dup.txt` become `dup.txt`,
+     * `dup-1.txt` and `dup-2.txt` on disk while all three records still say `dup.txt` — so
+     * the list shows the same name three times, and, now that presence is answered by
+     * looking for the real file, all three rows probe for whichever one happens to exist.
+     *
+     * This writes **durable metadata** — where the file is and what it is named — not live
+     * transfer state, so FR-015 and FR-024c are untouched. It runs at most once per
+     * download: the moment the URI is stored, the null check stops matching.
      */
-    private suspend fun backfillLocalUriIfNeeded(
+    private suspend fun backfillCompletionMetadata(
         record: DownloadRecord,
         status: DownloadStatus,
     ): DownloadRecord {
@@ -84,16 +90,19 @@ class ResolveDownloadStatusUseCase @Inject constructor(
         return when (uri) {
             null -> record
             else -> {
-                repository.updateLocalUri(record.id, uri)
-                record.copy(localUri = uri)
+                val fileName = gateway.resolvedFileNameFor(record.transferHandle) ?: record.fileName
+                repository.updateCompletionMetadata(record.id, uri, fileName)
+                record.copy(localUri = uri, fileName = fileName)
             }
         }
     }
 
-    private suspend fun resolveForgotten(record: DownloadRecord): DownloadStatus {
-        val uri = record.localUri ?: return DownloadStatus.Missing
+    private suspend fun resolveForgotten(record: DownloadRecord): DownloadStatus =
         // The platform no longer knows this transfer, so it cannot tell us a size either;
         // null is the honest answer rather than a fabricated one.
-        return if (gateway.fileExists(uri)) DownloadStatus.Complete() else DownloadStatus.Missing
-    }
+        if (gateway.fileExists(record.localUri, record.fileName)) {
+            DownloadStatus.Complete()
+        } else {
+            DownloadStatus.Missing
+        }
 }

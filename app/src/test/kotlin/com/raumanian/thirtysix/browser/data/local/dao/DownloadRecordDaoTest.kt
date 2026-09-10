@@ -96,13 +96,13 @@ class DownloadRecordDaoTest {
     }
 
     @Test
-    fun `updateLocalUri persists and returns the affected row count`() = runTest {
+    fun `updateCompletionMetadata persists and returns the affected row count`() = runTest {
         val id = dao.insert(record())
         assertNull(dao.getById(id)?.localUri)
 
-        assertEquals(1, dao.updateLocalUri(id, "content://downloads/1"))
+        assertEquals(1, dao.updateCompletionMetadata(id, "content://downloads/1", "a.txt"))
         assertEquals("content://downloads/1", dao.getById(id)?.localUri)
-        assertEquals(0, dao.updateLocalUri(99_999L, "content://downloads/2"))
+        assertEquals(0, dao.updateCompletionMetadata(99_999L, "content://downloads/2", "b.txt"))
     }
 
     @Test

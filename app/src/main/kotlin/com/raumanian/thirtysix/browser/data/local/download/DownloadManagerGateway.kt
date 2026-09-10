@@ -8,7 +8,6 @@ import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,12 +42,16 @@ interface DownloadManagerGateway {
     /**
      * Read the live state of one transfer.
      *
+     * Definitionally [queryStatuses] of one, so it is given a body here rather than being
+     * reimplemented by every implementation and every test double.
+     *
      * @return the status, or **null** when the service does not recognise the handle. Null
      *   is an ordinary, expected outcome — the service prunes its own records on its own
      *   schedule — resolved by callers via the file-presence fallback in FR-024a. It is
      *   never an error, and this never throws on an unknown handle.
      */
-    suspend fun queryStatus(transferHandle: Long): DownloadStatus?
+    suspend fun queryStatus(transferHandle: Long): DownloadStatus? =
+        queryStatuses(listOf(transferHandle))[transferHandle]
 
     /**
      * Read many transfers in one round trip.
@@ -77,12 +80,24 @@ interface DownloadManagerGateway {
     suspend fun contentUriFor(transferHandle: Long): String?
 
     /**
-     * Whether the file behind a recorded content URI is still present and readable.
+     * Whether the downloaded file is still present and readable.
      *
      * Backs both FR-029 (deleted outside the app) and the FR-024a fallback (handle
      * forgotten, so presence decides between Complete and Missing).
+     *
+     * Takes [fileName] as well as the URI because the URI alone is not a usable signal in
+     * the very case FR-024a exists for — see the implementation.
      */
-    suspend fun fileExists(localUri: String): Boolean
+    suspend fun fileExists(localUri: String?, fileName: String): Boolean
+
+    /**
+     * The name the file actually has on disk, which is not always the name that was
+     * requested: the platform de-duplicates collisions by appending a suffix, so three
+     * downloads of `dup.txt` land as `dup.txt`, `dup-1.txt` and `dup-2.txt` (FR-007).
+     *
+     * @return the resolved name, or null when the platform no longer knows the transfer.
+     */
+    suspend fun resolvedFileNameFor(transferHandle: Long): String?
 
     /**
      * Delete the downloaded file itself (FR-032), after the user has confirmed.
@@ -125,9 +140,6 @@ class AndroidDownloadManagerGateway @Inject constructor(
         manager.enqueue(platformRequest)
     }.getOrNull()
 
-    override suspend fun queryStatus(transferHandle: Long): DownloadStatus? =
-        queryStatuses(listOf(transferHandle))[transferHandle]
-
     override suspend fun queryStatuses(transferHandles: List<Long>): Map<Long, DownloadStatus> =
         when {
             transferHandles.isEmpty() -> emptyMap()
@@ -151,10 +163,27 @@ class AndroidDownloadManagerGateway @Inject constructor(
         downloadManager?.getUriForDownloadedFile(transferHandle)?.toString()
     }.getOrNull()
 
-    override suspend fun fileExists(localUri: String): Boolean = runCatching {
-        context.contentResolver.openFileDescriptor(localUri.toUri(), FILE_MODE_READ)
-            ?.use { true } ?: false
-    }.getOrDefault(false)
+    /**
+     * Presence is checked against the **real file** first, and only then against the
+     * content URI.
+     *
+     * The order is the whole point. The recorded URI belongs to the platform's download
+     * provider, so it stops resolving at the exact moment the provider forgets the
+     * transfer — which is precisely the situation FR-024a's fallback is for. Checking the
+     * URI first made that branch unreachable: every forgotten download reported `Missing`
+     * even with the file sitting in the Downloads folder. Found at gate G8.
+     */
+    override suspend fun fileExists(localUri: String?, fileName: String): Boolean =
+        DownloadedFileProbe.exists(context, localUri, fileName)
+
+    override suspend fun resolvedFileNameFor(transferHandle: Long): String? = runCatching {
+        val manager = downloadManager ?: return null
+        manager.query(buildQuery(listOf(transferHandle)))?.use { cursor ->
+            val index = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+            if (index < 0 || !cursor.moveToFirst()) return null
+            cursor.getString(index)?.toUri()?.lastPathSegment
+        }
+    }.getOrNull()
 
     /**
      * Deleting used to be `contentResolver.delete(localUri)` and to return whatever row
@@ -167,10 +196,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
     override suspend fun deleteFile(transferHandle: Long, fileName: String): Boolean =
         runCatching {
             downloadManager?.remove(transferHandle)
-            val file = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                fileName,
-            )
+            val file = DownloadedFileProbe.publicDownloadFile(fileName)
             if (file.exists()) file.delete()
             // The only answer that matters: is it gone?
             !file.exists()
@@ -195,7 +221,6 @@ class AndroidDownloadManagerGateway @Inject constructor(
     private companion object {
         const val HEADER_USER_AGENT = "User-Agent"
         const val HEADER_REFERER = "Referer"
-        const val FILE_MODE_READ = "r"
         const val DOWNLOAD_PROVIDER_PACKAGE = "com.android.providers.downloads"
         val DISABLED_STATES = setOf(
             android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED,

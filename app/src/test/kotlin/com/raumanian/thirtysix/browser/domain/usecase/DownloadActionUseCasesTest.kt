@@ -58,6 +58,20 @@ class DownloadActionUseCasesTest {
         assertEquals(OpenDownloadResult.NoAppAvailable, result)
     }
 
+    /**
+     * FR-024b — a row the FR-024a fallback already resolved as missing must take FR-029's
+     * path, offering removal, rather than being told its transfer has not finished. Missing
+     * is a terminal state, so the "not complete" message would be simply false.
+     */
+    @Test
+    fun `FR-024b - a missing entry reports FileMissing rather than NotComplete`() = runTest {
+        val result = OpenDownloadedFileUseCase(RecordingGateway(), RecordingFileOpener())(
+            testItem(status = DownloadStatus.Missing),
+        )
+
+        assertEquals(OpenDownloadResult.FileMissing, result)
+    }
+
     @Test
     fun `open falls back to asking the platform when no URI was recorded`() = runTest {
         val gateway = RecordingGateway(contentUri = "content://downloads/fresh")

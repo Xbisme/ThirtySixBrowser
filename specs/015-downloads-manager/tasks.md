@@ -117,8 +117,8 @@ description: "Task list for Spec 015 — Downloads Manager"
 ### Tests and gates
 
 - [X] T046 [US1] Instrumented test `DownloadStartIntegrationTest` at `app/src/androidTest/kotlin/.../downloads/DownloadStartIntegrationTest.kt` — drive `StartDownloadUseCase` against real Room through repository → mapper → DAO, asserting a record appears with the sanitised filename and a handle, and that an unavailable gateway leaves the table empty.
-- [ ] T047 [US1] Manual user-device gate **G1** (download end-to-end, both AVDs, **≥10 downloads across ≥3 content types** per SC-002, including the API-24-only permission prompt and the API-36 zero-prompt path) per [quickstart.md](quickstart.md). Record PASS/FAIL in the PR body.
-- [ ] T048 [US1] Manual user-device gate **G3** (duplicate filenames yield two files, no overwrite) per [quickstart.md](quickstart.md). A failure here invalidates research.md R11 and requires a de-duplication step to be added.
+- [X] T047 [US1] Manual user-device gate **G1** (download end-to-end, both AVDs, **≥10 downloads across ≥3 content types** per SC-002, including the API-24-only permission prompt and the API-36 zero-prompt path) per [quickstart.md](quickstart.md). Record PASS/FAIL in the PR body.
+- [X] T048 [US1] Manual user-device gate **G3** (duplicate filenames yield two files, no overwrite) per [quickstart.md](quickstart.md). A failure here invalidates research.md R11 and requires a de-duplication step to be added.
 
 **Checkpoint**: US1 is independently shippable — files download and land correctly, verifiable entirely through a file manager and the system notification shade.
 
@@ -158,8 +158,8 @@ description: "Task list for Spec 015 — Downloads Manager"
 - [X] T063 [US2] Add the US2 string keys to `app/src/main/res/values/strings.xml` — screen title, back content description, the state labels (pending / downloading / paused / complete / failed / cancelled / missing), and the failure-cause messages.
 - [X] T064 [US2] Mirror every US2 key into all 7 non-EN locale files at `app/src/main/res/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml`.
 - [X] T065 [US2] Instrumented test `DownloadsScreenBrowseTest` at `app/src/androidTest/kotlin/.../downloads/DownloadsScreenBrowseTest.kt` driving `DownloadsViewModel` directly with test doubles — ordering, field rendering, and the three-way state branch. Add a shared `DownloadsScreenTestDoubles.kt`, mirroring Spec 014's approach of skipping the Hilt + WebView setup the project documents as flaky.
-- [ ] T066 [US2] Manual user-device gate **G2** (list, live status, process-death survival, airplane-mode interruption) per [quickstart.md](quickstart.md).
-- [ ] T067 [US2] Manual user-device gate **G8** (forgotten transfer handle → file-presence fallback, via `adb shell pm clear com.android.providers.downloads`) per [quickstart.md](quickstart.md). Confirm no exception appears in `adb logcat` — this is the half of research.md R4 that needed device confirmation.
+- [X] T066 [US2] Manual user-device gate **G2** (list, live status, process-death survival, airplane-mode interruption) per [quickstart.md](quickstart.md).
+- [X] T067 [US2] Manual user-device gate **G8** (forgotten transfer handle → file-presence fallback, via `adb shell pm clear com.android.providers.downloads`) per [quickstart.md](quickstart.md). Confirm no exception appears in `adb logcat` — this is the half of research.md R4 that needed device confirmation.
 
 **Checkpoint**: US1 + US2 both work. Downloads are visible and honest, though only reachable by deep link until US3 lands.
 
@@ -179,7 +179,7 @@ description: "Task list for Spec 015 — Downloads Manager"
 - [X] T073 [US3] Mirror every new US3 key into all 7 non-EN locale files at `app/src/main/res/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml`.
 - [X] T074 [US3] Instrumented test `BrowserOverflowMenuTest` at `app/src/androidTest/kotlin/.../browser/BrowserOverflowMenuTest.kt` — the menu opens, lists exactly three entries, each fires its callback, and outside-tap plus system back both dismiss with no side effect.
 - [X] T075 [US3] Update the existing `NavigationBottomBarTest` at `app/src/androidTest/kotlin/.../browser/components/NavigationBottomBarTest.kt` for the new five-plus-overflow shape, removing assertions on the now-absent Bookmarks and History buttons.
-- [ ] T076 [US3] Manual user-device gate **G7** (360dp layout via `adb shell wm size 1080x1920 && adb shell wm density 480`, menu behaviour, the Bookmarks/History regression check, and the **SC-004** tap count from a browsed page to a download on screen — budget 3, intended route 2) per [quickstart.md](quickstart.md). Restore the display afterwards with `wm size reset && wm density reset`.
+- [X] T076 [US3] Manual user-device gate **G7** (360dp layout via `adb shell wm size 1080x1920 && adb shell wm density 480`, menu behaviour, the Bookmarks/History regression check, and the **SC-004** tap count from a browsed page to a download on screen — budget 3, intended route 2) per [quickstart.md](quickstart.md). Restore the display afterwards with `wm size reset && wm density reset`.
 
 **Checkpoint**: The feature is reachable and the first genuinely shippable increment (US1 + US2 + US3) is complete.
 
@@ -196,7 +196,7 @@ description: "Task list for Spec 015 — Downloads Manager"
 - [X] T079 [US4] Unit test `OpenDownloadedFileUseCaseTest` at `app/src/test/kotlin/.../domain/usecase/OpenDownloadedFileUseCaseTest.kt` with a fake gateway — the happy path requests the content URI; a missing file reports `FileMissing`; a non-terminal entry is refused without any open attempt; no path throws.
 - [X] T080 [US4] Wire row taps in `DownloadsScreen.kt` to the use case, rendering each outcome through the snackbar host, and offering removal on `FileMissing`.
 - [X] T081 [US4] Add the US4 string keys to `app/src/main/res/values/strings.xml` and mirror them into `app/src/main/res/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml` — no-app-can-open, file-missing (with the offer to remove), and the not-yet-complete message.
-- [ ] T082 [US4] Manual user-device gate **G4** on **both** AVDs per [quickstart.md](quickstart.md) — the API 24 run is the real risk, since a raw path would throw there. Confirm no `FileUriExposedException` in `adb logcat`.
+- [X] T082 [US4] Manual user-device gate **G4** on **both** AVDs per [quickstart.md](quickstart.md) — the API 24 run is the real risk, since a raw path would throw there. Confirm no `FileUriExposedException` in `adb logcat`.
 
 **Checkpoint**: Downloads are openable from inside the browser.
 
@@ -219,7 +219,7 @@ description: "Task list for Spec 015 — Downloads Manager"
 - [X] T091 [US5] Wire long-press in `.../presentation/downloads/components/DownloadRow.kt` to `pendingActionSheetTarget` in `.../presentation/downloads/DownloadsScreen.kt`, and ensure outside-tap and system back dismiss with no action performed (FR-035).
 - [X] T092 [US5] Add the US5 string keys to `app/src/main/res/values/strings.xml` and mirror them into `app/src/main/res/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml` — the four action labels, the delete-confirmation title and body, the confirm and cancel labels, and the link-copied confirmation. Do **not** add a dismiss content description for the sheet: `ModalBottomSheet` dismisses natively with no describable affordance, and an unused key is build-blocking under `warningsAsErrors = true` (the exact trap Spec 014 documented at its T071).
 - [X] T093 [US5] Instrumented test `DownloadsScreenActionSheetTest` at `app/src/androidTest/kotlin/.../downloads/DownloadsScreenActionSheetTest.kt` — the rendered sheet matches the matrix for each state, removal leaves the record's file reference intact, and deletion requires confirmation.
-- [ ] T094 [US5] Manual user-device gate **G5** (the full five-state matrix plus every action exercised) per [quickstart.md](quickstart.md).
+- [X] T094 [US5] Manual user-device gate **G5** (the full five-state matrix plus every action exercised) per [quickstart.md](quickstart.md).
 
 **Checkpoint**: The list stays manageable over time, and orphaning an in-flight transfer is structurally impossible.
 
@@ -237,7 +237,7 @@ description: "Task list for Spec 015 — Downloads Manager"
 - [X] T098 [US6] Confirm in `.../presentation/downloads/components/DownloadActionSheet.kt` that the sheet still opens on an in-flight row, offering only what the matrix allows — the inline control **adds to** the sheet rather than replacing it (FR-036b).
 - [X] T099 [US6] Add the cancel control's content description to `app/src/main/res/values/strings.xml` and mirror it into `app/src/main/res/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml` (FR-051).
 - [X] T100 [US6] Instrumented test `DownloadsScreenCancelTest` at `app/src/androidTest/kotlin/.../downloads/DownloadsScreenCancelTest.kt` — the control is present on in-flight rows and absent on all four terminal states, and a single tap invokes cancellation.
-- [ ] T101 [US6] Manual user-device gate **G6** (five cancellations at different progress points; zero partial files) per [quickstart.md](quickstart.md).
+- [X] T101 [US6] Manual user-device gate **G6** (five cancellations at different progress points; zero partial files) per [quickstart.md](quickstart.md).
 
 **Checkpoint**: Users can stop a transfer they did not want.
 
@@ -262,13 +262,13 @@ description: "Task list for Spec 015 — Downloads Manager"
 
 - [X] T106 Remove the obsolete `downloads_screen_placeholder` key from all 8 locale `strings.xml` files (FR-052). `lintDebug` fails on an unused or extra key under `warningsAsErrors = true`, so this is build-blocking rather than cosmetic.
 - [X] T107 Create the debug-only seeder at `app/src/debug/kotlin/com/raumanian/thirtysix/browser/dev/DownloadSeeder.kt` — an `@AndroidEntryPoint BroadcastReceiver` registered in `app/src/debug/AndroidManifest.xml`, seeding 500 records with at least 5 in flight for gate G12. Living in the `debug` source set is stronger than a `BuildConfig.DEBUG` check because the class does not exist in the release artifact at all (Spec 014's `HistorySeeder` precedent).
-- [ ] T108 ⛔ **BLOCKING** — Manual user-device gate **G9** on `Medium_Phone_API_36.1` per [quickstart.md](quickstart.md): with **no** notification permission declared and after a fresh install, determine whether the system's own download notification still appears. **The manifest's notification line is not written until this runs.** Record the outcome, device and OS build in the PR body.
-- [ ] T109 Act on the G9 outcome. **Outcome A** (notification appears): leave the permission undeclared. **Outcome B**: add `POST_NOTIFICATIONS` to `app/src/main/AndroidManifest.xml`, implement the runtime request with a localized rationale, and add those strings across all 8 locales.
-- [ ] T110 Amend the Constitution's permission table in `.specify/memory/constitution.md` — add the legacy storage row (with its `maxSdkVersion=28` ceiling), and reconcile the existing `POST_NOTIFICATIONS`-against-Spec-015 row with the T108 outcome. Leaving it untouched would let the Constitution misdescribe the shipped app in both directions at once.
-- [ ] T111 Manual user-device gate **G10** (8-locale sweep via `adb shell cmd locale set-app-locales`, plus a TalkBack pass over every interactive element including the inline cancel control) per [quickstart.md](quickstart.md).
-- [ ] T112 Manual user-device gate **G11** per [quickstart.md](quickstart.md) — empty state, live replacement, and **step 4**: an incognito download must appear in the list with **no** incognito marking (FR-014a).
-- [ ] T113 ⚠️ Manual user-device gate **G11 step 5 — the real upgrade path**. Install `main`'s build (schema v1), create data in all four existing tables, install this branch **over it** with `adb install -r`, and confirm nothing is lost. **Read the `adb install` output** — Spec 014 lost time to silently failing installs on a full `/data`. A failure here is a release blocker regardless of anything else.
-- [ ] T114 Manual user-device gate **G12** per [quickstart.md](quickstart.md) — 500-record performance (SC-006) and the six hostile filenames on-device (SC-015). Measure a **release** build on **real Pixel 5-class hardware**, or record the gate as explicitly DEFERRED in the PR body. Do not repeat Spec 014's T103b, which measured a debug build on an emulator against a release-on-hardware target and unsurprisingly missed it.
+- [X] T108 ⛔ **BLOCKING** — Manual user-device gate **G9** on `Medium_Phone_API_36.1` per [quickstart.md](quickstart.md): with **no** notification permission declared and after a fresh install, determine whether the system's own download notification still appears. **The manifest's notification line is not written until this runs.** Record the outcome, device and OS build in the PR body.
+- [X] T109 Act on the G9 outcome. **Outcome A** (notification appears): leave the permission undeclared. **Outcome B**: add `POST_NOTIFICATIONS` to `app/src/main/AndroidManifest.xml`, implement the runtime request with a localized rationale, and add those strings across all 8 locales.
+- [X] T110 Amend the Constitution's permission table in `.specify/memory/constitution.md` — add the legacy storage row (with its `maxSdkVersion=28` ceiling), and reconcile the existing `POST_NOTIFICATIONS`-against-Spec-015 row with the T108 outcome. Leaving it untouched would let the Constitution misdescribe the shipped app in both directions at once.
+- [X] T111 Manual user-device gate **G10** (8-locale sweep via `adb shell cmd locale set-app-locales`, plus a TalkBack pass over every interactive element including the inline cancel control) per [quickstart.md](quickstart.md).
+- [X] T112 Manual user-device gate **G11** per [quickstart.md](quickstart.md) — empty state, live replacement, and **step 4**: an incognito download must appear in the list with **no** incognito marking (FR-014a).
+- [X] T113 ⚠️ Manual user-device gate **G11 step 5 — the real upgrade path**. Install `main`'s build (schema v1), create data in all four existing tables, install this branch **over it** with `adb install -r`, and confirm nothing is lost. **Read the `adb install` output** — Spec 014 lost time to silently failing installs on a full `/data`. A failure here is a release blocker regardless of anything else.
+- [X] T114 Manual user-device gate **G12** per [quickstart.md](quickstart.md) — 500-record performance (SC-006) and the six hostile filenames on-device (SC-015). Measure a **release** build on **real Pixel 5-class hardware**, or record the gate as explicitly DEFERRED in the PR body. Do not repeat Spec 014's T103b, which measured a debug build on an emulator against a release-on-hardware target and unsurprisingly missed it.
 - [X] T115 Run the full automated gate set: `./gradlew testDebugUnitTest lintDebug detekt ktlintCheck assembleDebug assembleRelease` plus `./gradlew connectedDebugAndroidTest`. All must be green, and the **detekt baseline must remain UNCHANGED**.
 - [X] T116 Run `.specify/scripts/bash/verify-16kb-alignment.sh` and confirm every native library entry is `align 0x4000` (SC-013). No new `.so` is expected — the only two remain `libandroidx.graphics.path.so` and `libdatastore_shared_counter.so`.
 - [X] T117 Measure `app/build/outputs/apk/release/app-release.apk` and confirm the delta against the 2.36 MB Spec 014 baseline is within +200 KB (SC-012). Record the figure in the PR body.
@@ -489,3 +489,168 @@ from `/sdcard/Download/`.
 
 Unit tests after the fixes: **475** (was 472).
 
+---
+
+## ⛔→✅ Gate G9 RESOLVED — device pass 2, API 36, 2026-09-10
+
+**Outcome A.** The notification permission is **not needed** and stays undeclared. T108,
+T109 and T110 are closed; the blocking item on this spec is gone.
+
+Run on a purpose-built clean AVD (`G9_API36_Clean`, Pixel 5 profile, Android 16 / API 36,
+build `google/sdk_gphone64_arm64/emu64a:16/BE4B.251210.005/14574095`) after a **fresh
+install** — the existing `Medium_Phone_API_36.1` could not be used because its `/data` is
+96 % full and `installDebug` fails with `Requested internal only, but not enough space`.
+
+### Evidence
+
+| Check | Result |
+|---|---|
+| `POST_NOTIFICATIONS` declared or granted | **No** — absent from the package dump entirely |
+| Downloads-provider notifications *before* the download | **0** |
+| Downloads-provider notifications *after* | **2**, `opPkg=com.android.providers.downloads`, **`uid=10111`**, channel `complete` |
+| Visible in the shade | **Yes** — "Download Manager · sample-1.txt · Download complete." |
+| Notifications posted by the app itself | **0** — FR-047 holds, the app composes none |
+| `WRITE_EXTERNAL_STORAGE` on API 36 | **0 occurrences** — the `maxSdkVersion="28"` ceiling works (FR-011, SC-005) |
+| File | `sample-1.txt`, 71 B, in the public Downloads folder |
+
+The notification is posted under the **download provider's own UID**, not the browser's, so
+the browser's grant is irrelevant to it — exactly the prior stated in research.md R2, now
+measured rather than assumed. Declaring the permission would have violated §I's "MUST NOT
+request runtime permissions it does not actively use".
+
+**T110 applied**: the Constitution's permission table now carries the storage row and an
+explicit note that `POST_NOTIFICATIONS` is deliberately absent, with the measurement cited.
+
+### 🐞 Separate finding, OUT OF SCOPE for Spec 015 — needs a Spec 007 decision
+
+`http://` pages **do not load at all** on Android 9+: the first attempt at the local test
+server returned `net::ERR_CLEARTEXT_NOT_PERMITTED`. The main manifest declares neither
+`usesCleartextTraffic` nor a `networkSecurityConfig`, and **neither Spec 007 nor the
+Constitution ever discusses cleartext** — so this is an inherited platform default that
+nobody decided, not a security posture anyone chose. For a browser it is a significant
+functional gap, and the fix belongs to Spec 007's WebView configuration, not here.
+
+To run this gate a **debug-source-set-only** `android:usesCleartextTraffic="true"` was added
+to `app/src/debug/AndroidManifest.xml`, with a comment pointing at the above. The release
+manifest is untouched and the shipped app still refuses cleartext. **Reviewers should note
+the debug/release divergence this creates**: a tester on a debug build will not observe the
+block. If Spec 007 decides the shipped behaviour should allow cleartext, this debug-only
+attribute should be removed in favour of the real configuration.
+
+
+---
+
+## Device pass 3 — every remaining gate, 2026-09-11
+
+Devices: `G9_API36_Clean` (Android 16, build `BE4B.251210.005`) and `TA016_API24` (Android 7.0,
+**minSdk**). Driven against a local test server that could throttle, resume, fail on demand,
+and serve hostile `Content-Disposition` names.
+
+**All twelve gates are now closed.** The pass found and fixed two more real defects.
+
+### 🐞 Defect 3 — the FR-024a fallback could never reach its "present → Complete" branch
+
+**Found by**: G8, which is the gate written specifically to exercise it.
+
+`pm clear com.android.providers.downloads` makes the platform forget a transfer. The app
+then asked "is the file still there?" by opening the **content URI recorded for that
+download** — a URI owned by the very provider whose data had just been wiped. So the URI
+died at exactly the moment the fallback needed it, and all ten downloads reported
+`File not found` with all ten files sitting untouched in `/sdcard/Download`.
+
+The branch was unreachable in precisely the scenario it was written for, and no unit test
+caught it because every fake answered presence from a set of URIs — faithfully reproducing
+the assumption instead of the platform.
+
+**Fix**: presence is answered by looking for the **real file** first, falling back to the URI
+only for a file the platform put somewhere else ([DownloadedFileProbe.kt](../../app/src/main/kotlin/com/raumanian/thirtysix/browser/data/local/download/DownloadedFileProbe.kt)).
+`fileExists` now takes the filename as well as the URI, and the open path was separated from
+the presence path because they are different questions. Two regression tests pin it, both of
+which fail against the old code.
+
+**Knock-on fix — the resolved filename (FR-007 / FR-014).** Once presence keys on the
+filename, storing the *requested* name rather than the one on disk stops being cosmetic: the
+platform de-duplicates collisions, so three downloads of `dup.txt` land as `dup.txt`,
+`dup-1.txt`, `dup-2.txt` while all three records still said `dup.txt` — displaying the same
+name three times *and* probing for whichever file happened to exist. The resolved name is now
+captured alongside the URI on first completion (`updateLocalUri` → `updateCompletionMetadata`).
+Verified on both AVDs: rows read `dup-2.txt` / `dup-1.txt` / `dup.txt`, and `archive-1.zip`,
+`report-1.pdf` on API 24.
+
+### 🐞 Defect 4 — FR-029's "offer to remove the stale entry" was never wired up
+
+**Found by**: G4 step 4.
+
+`DownloadsEvent.FileMissing` carried the record *specifically* so removal could be offered,
+and `DownloadsScreen` then collapsed every event to a bare message and dropped it. Tapping a
+row whose file was gone said so and left the user holding a list entry they had just been
+told was meaningless, with no way to act on it. FR-029 and FR-024b both require the offer.
+
+Two fixes: the snackbar now carries a **Remove from list** action, and
+`OpenDownloadedFileUseCase` routes a `Missing` entry to `FileMissing` rather than letting it
+fall through to `NotComplete` — which had been telling the user to wait for a transfer that
+finished long ago. Regression test added for the FR-024b branch.
+
+### Gate results
+
+| Gate | Device | Result |
+|------|--------|--------|
+| G1 download end-to-end, ≥10 downloads / ≥4 types | both | ✅ API 24 prompts once then never again; API 36 never prompts |
+| G2 list, live status, process death ×5, airplane mode | API 36 | ✅ progress ≥1 Hz; 5/5 relaunches showed the platform's real state; `Paused` → resumed |
+| G3 duplicate filenames | both | ✅ 3 files, none overwritten, 3 correctly-named rows |
+| G4 opening a download (4 cases) | **both** | ✅ **zero `FileUriExposedException` on API 24** |
+| G5 action-sheet matrix + every action | API 36 | ✅ 4 reachable states match exactly (see note) |
+| G6 five cancellations | API 36 | ✅ 25/50/52/75/90 %, one tap each, **zero partial files** |
+| G7 360dp layout, menu, regression, tap count | API 36 | ✅ 5 controls + overflow, no clipping; **SC-004 = 2 taps** (budget 3) |
+| G8 forgotten transfer handle | API 36 | ✅ **after defect 3 was fixed** — Complete while present, Missing once deleted, no exception |
+| G9 notification permission ⛔ | API 36 | ✅ Outcome A (closed in device pass 2) |
+| G10 8 locales + accessibility | API 36 | ✅ all 8 translated; every element labelled; `20 Б` / `20 octet(s)` / `오후 11:55` |
+| G11 empty state, live replace, incognito, upgrade | API 36 | ✅ incognito download listed with **no** marking (FR-014a) |
+| G12 hostile filenames (SC-015) | both | ✅ all six land as plain single segments; nothing written outside Downloads |
+| G12 performance (SC-006) | — | ⚠️ **DEFERRED** — see below |
+
+### SC-006 is DEFERRED, deliberately
+
+512 seeded records on a **debug** build on a **software-rendered emulator** measured p99
+700 ms / 96 % janky. That number is **not** reported against SC-006, whose target is
+p99 ≤ 16 ms on a **release** build on **Pixel 5-class hardware** — quickstart.md warns
+explicitly against repeating Spec 014's T103b, which measured the wrong build on the wrong
+hardware and missed by 20×.
+
+The pipeline was re-read rather than guessed at: `itemsFlow` already carries
+`.flowOn(dispatchers.default)`, so the O(n) resolve runs off the main thread, and the poll
+loop stops the moment nothing is in flight (R7). Spec 014's pass-4 defect is not repeated
+here. The gap is a measurement, not a suspected regression.
+
+### Two findings recorded rather than fixed
+
+- **`DownloadStatus.Cancelled` is unreachable.** `CancelDownloadUseCase` deletes the row on
+  cancel — a deliberate reading of FR-038 documented on that class — and the cursor mapper
+  never produces `Cancelled`. So G5's matrix row for it can never be exercised. The state is
+  modelled but dead. Either the sealed member goes or FR-038's reading changes; both are
+  larger than a gate pass and neither is a defect in shipped behaviour.
+- **quickstart.md's FR-016 check gives a false positive.**
+  `git grep fallbackToDestructiveMigration -- app/src/main/` returns 2 hits, both **comments
+  documenting the ban**. The invariant holds; the check needs `-- ':!*.kt'` or an eyeball.
+
+### Automated gates, re-run after both fixes
+
+`testDebugUnitTest` ✅ **480** · `lintDebug` ✅ · `detekt` ✅ baseline UNCHANGED ·
+`ktlintCheck` ✅ · `assembleDebug` ✅ · `assembleRelease` ✅ · 16 KB ✅ (every `.so`
+`align=0x4000`) · APK release **2.44 MB** vs 2.36 MB baseline = **+80 KB**, inside SC-012's
++200 KB budget · `app/schemas/…/2.json` tracked (FR-017).
+
+### Tooling notes for whoever runs these next
+
+- The debug build's applicationId is `com.raumanian.thirtysix.browser.debug`. `am start` and
+  `pm clear` against the un-suffixed id fail with "No activities found to run".
+- `adb shell input text` silently went nowhere for a long stretch: a Gboard **"Try out your
+  stylus"** tutorial dialog was on top, swallowing every keystroke. Screenshot before
+  concluding the app is at fault.
+- The address bar and its Clear affordance are drawn under the status bar strip; taps only
+  register at y ≈ 140 on a 1080×2340 screen, and the field must be cleared from the keyboard
+  rather than via Clear, or the old URL is silently appended to the new one.
+- Revoking `WRITE_EXTERNAL_STORAGE` alone on API 24 does nothing — it shares a permission
+  group with `READ_EXTERNAL_STORAGE` and is re-granted. Revoke both.
+- A resumable download needs `Accept-Ranges` **and an `ETag`**; without a validator the
+  platform reports `CANNOT_RESUME` and the airplane-mode recovery step cannot pass.

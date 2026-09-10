@@ -37,6 +37,11 @@ class OpenDownloadedFileUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(item: DownloadListItem): OpenDownloadResult = when {
+        // FR-024b — a row already resolved as missing gets FR-029's removal offer, not the
+        // "still downloading" message. Ordering matters: Missing is terminal, so without
+        // this branch it would fall through to NotComplete and tell the user to wait for a
+        // transfer that finished long ago.
+        item.status is DownloadStatus.Missing -> OpenDownloadResult.FileMissing
         item.status !is DownloadStatus.Complete -> OpenDownloadResult.NotComplete
         else -> when (val uri = resolveReadableUri(item)) {
             null -> OpenDownloadResult.FileMissing
@@ -50,11 +55,20 @@ class OpenDownloadedFileUseCase @Inject constructor(
 
     /**
      * Prefer the URI recorded at completion; fall back to asking the platform, which still
-     * knows it as long as the transfer has not been pruned. Either way the file must
-     * actually be readable — a recorded URI pointing at a deleted file is FR-029, not a
+     * knows one as long as the transfer has not been pruned. Either way the file must
+     * actually still be there — a URI pointing at a deleted file is FR-029, not a
      * successful open.
+     *
+     * The candidate URI is resolved *before* presence is checked, not after, so that a
+     * record with nothing stored yet is still judged on the URI the platform can supply
+     * rather than being written off as missing.
      */
-    private suspend fun resolveReadableUri(item: DownloadListItem): String? =
-        item.record.localUri?.takeIf { gateway.fileExists(it) }
-            ?: gateway.contentUriFor(item.record.transferHandle)?.takeIf { gateway.fileExists(it) }
+    private suspend fun resolveReadableUri(item: DownloadListItem): String? {
+        val uri = item.record.localUri ?: gateway.contentUriFor(item.record.transferHandle)
+        return when {
+            uri == null -> null
+            gateway.fileExists(uri, item.record.fileName) -> uri
+            else -> null
+        }
+    }
 }

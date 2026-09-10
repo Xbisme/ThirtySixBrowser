@@ -109,11 +109,11 @@ class DownloadStartIntegrationTest {
 
     private class FakeGateway(private val handle: Long?) : DownloadManagerGateway {
         override suspend fun enqueue(request: DownloadRequest): Long? = handle
-        override suspend fun queryStatus(transferHandle: Long): DownloadStatus? = null
         override suspend fun queryStatuses(transferHandles: List<Long>) = emptyMap<Long, DownloadStatus>()
         override suspend fun cancel(transferHandle: Long) = false
         override suspend fun contentUriFor(transferHandle: Long): String? = null
-        override suspend fun fileExists(localUri: String) = false
+        override suspend fun fileExists(localUri: String?, fileName: String) = false
+        override suspend fun resolvedFileNameFor(transferHandle: Long): String? = null
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
         override suspend fun isAvailable() = handle != null
     }

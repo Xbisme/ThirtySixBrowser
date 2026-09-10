@@ -72,7 +72,7 @@ internal class InstrumentedDownloadsRepository(initial: List<DownloadRecord>) : 
     override suspend fun insert(record: DownloadRecord): Long = 0L
     override fun observeAll(): Flow<List<DownloadRecord>> = records
     override suspend fun getById(id: Long): DownloadRecord? = records.value.firstOrNull { it.id == id }
-    override suspend fun updateLocalUri(id: Long, localUri: String) = Unit
+    override suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String) = Unit
 
     override suspend fun deleteById(id: Long): Boolean {
         val before = records.value.size
@@ -90,7 +90,6 @@ internal class InstrumentedGateway(
     val cancelled = mutableListOf<Long>()
 
     override suspend fun enqueue(request: DownloadRequest): Long? = null
-    override suspend fun queryStatus(transferHandle: Long): DownloadStatus? = statuses[transferHandle]
     override suspend fun queryStatuses(transferHandles: List<Long>): Map<Long, DownloadStatus> =
         statuses.filterKeys { it in transferHandles }
 
@@ -100,7 +99,11 @@ internal class InstrumentedGateway(
     }
 
     override suspend fun contentUriFor(transferHandle: Long): String? = null
-    override suspend fun fileExists(localUri: String): Boolean = localUri in existingFiles
+    override suspend fun resolvedFileNameFor(transferHandle: Long): String? = null
+
+    /** Either a name or a recorded URI counts as present, mirroring production. */
+    override suspend fun fileExists(localUri: String?, fileName: String): Boolean =
+        fileName in existingFiles || localUri in existingFiles
     override suspend fun deleteFile(transferHandle: Long, fileName: String): Boolean = true
     override suspend fun isAvailable(): Boolean = true
 }

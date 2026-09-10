@@ -31,8 +31,8 @@ class DownloadsRepositoryImpl @Inject constructor(
     override suspend fun getById(id: Long): DownloadRecord? =
         withContext(dispatchers.io) { dao.getById(id)?.let(DownloadRecordMapper::toDomain) }
 
-    override suspend fun updateLocalUri(id: Long, localUri: String) {
-        withContext(dispatchers.io) { dao.updateLocalUri(id, localUri) }
+    override suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String) {
+        withContext(dispatchers.io) { dao.updateCompletionMetadata(id, localUri, fileName) }
     }
 
     override suspend fun deleteById(id: Long): Boolean =
