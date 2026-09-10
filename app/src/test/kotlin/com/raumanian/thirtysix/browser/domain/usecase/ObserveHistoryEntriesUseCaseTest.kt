@@ -27,6 +27,8 @@ class ObserveHistoryEntriesUseCaseTest {
     private class StaticRepository(private val rows: List<HistoryEntry>) : HistoryRepository {
         override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
         override fun observeAll(): Flow<List<HistoryEntry>> = flowOf(rows)
+        override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
+        override suspend fun updateTitle(id: Long, title: String): Int = 0
         override suspend fun deleteById(id: Long): Int = 0
         override suspend fun clearAll(): Int = 0
         override suspend fun count(): Int = rows.size

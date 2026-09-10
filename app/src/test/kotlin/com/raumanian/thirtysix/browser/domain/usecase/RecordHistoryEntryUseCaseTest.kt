@@ -70,6 +70,8 @@ class RecordHistoryEntryUseCaseTest {
         }
 
         override fun observeAll(): Flow<List<HistoryEntry>> = flowOf(emptyList())
+        override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
+        override suspend fun updateTitle(id: Long, title: String): Int = 0
         override suspend fun deleteById(id: Long): Int = 0
         override suspend fun clearAll(): Int = 0
         override suspend fun count(): Int = recordCount

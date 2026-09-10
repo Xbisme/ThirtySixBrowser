@@ -16,6 +16,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
@@ -150,6 +151,10 @@ class BrowserViewModelStarToggleTest {
             recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
                 com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
             ),
+            updateHistoryEntryTitle = com.raumanian.thirtysix.browser.domain.usecase
+                .UpdateHistoryEntryTitleUseCase(
+                    com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+                ),
         )
     }
 

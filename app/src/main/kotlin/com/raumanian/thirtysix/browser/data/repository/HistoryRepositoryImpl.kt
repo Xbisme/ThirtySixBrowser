@@ -37,8 +37,18 @@ class HistoryRepositoryImpl @Inject constructor(
     override fun observeAll(): Flow<List<HistoryEntry>> =
         dao.observeAll().map { list -> list.map(HistoryEntryMapper::toDomain) }
 
+    override suspend fun updateTitle(id: Long, title: String): Int =
+        withContext(dispatchers.io) { dao.updateTitle(id, title) }
+
     override suspend fun deleteById(id: Long): Int =
         withContext(dispatchers.io) { dao.deleteById(id) }
+
+    override suspend fun pruneOlderThan(cutoffMillis: Long): Int =
+        withContext(dispatchers.io) {
+            // `deleteInRange` is inclusive on both ends; epoch 0 as the lower bound covers
+            // every row ever written, and `cutoffMillis - 1` keeps the cutoff itself alive.
+            dao.deleteInRange(fromInclusive = 0L, toInclusive = cutoffMillis - 1L)
+        }
 
     override suspend fun clearAll(): Int =
         withContext(dispatchers.io) { dao.deleteAll() }

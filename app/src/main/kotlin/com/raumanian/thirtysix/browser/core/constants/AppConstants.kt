@@ -33,4 +33,11 @@ object AppConstants {
     // typical card sizes (~160–240dp wide) without bloating disk usage.
     const val SCREENSHOT_TARGET_WIDTH_PX = 480
     const val SCREENSHOT_TARGET_HEIGHT_PX = 270
+
+    // Spec 014 FR-021 — label attached to the `ClipData` written by the History
+    // screen's "Copy URL" action. Android surfaces this label in some system
+    // clipboard UIs (Android 13+ clipboard preview); it is an identifier for the
+    // clip's origin rather than translated user-facing copy, so it lives here
+    // instead of `strings.xml`.
+    const val CLIPBOARD_URL_LABEL = "ThirtySix Browser URL"
 }

@@ -6,13 +6,16 @@ import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 /**
  * Spec 014 — immutable UI state for the HistoryScreen.
  *
- * Fields are introduced incrementally per user-story. US1 covers the listing path:
- * `entries` flow drives `groupedEntries` (reverse-chronological, bucketed); `openUrl`
- * is the consumed-once signal that pops the screen back to BrowserScreen after the
- * user taps a row (FR-010, mirroring Spec 013's `BookmarksUiState.openUrl`).
- *
- * US2 (search), US3 (long-press actions), and US4 (clear-all) extend this state with
- * `searchQuery`, `pendingActionSheetTarget`, and `isClearAllDialogVisible` respectively.
+ * Field map by user story:
+ *  - **US1** — `entries` (the full observed list) drives `groupedEntries`
+ *    (reverse-chronological, day-bucketed); `openUrl` is the consumed-once signal that
+ *    pops the screen back to BrowserScreen after the user taps a row or successfully
+ *    opens one in a new tab (FR-010 / FR-019, mirroring Spec 013's `BookmarksUiState.openUrl`).
+ *  - **US2** — `searchQuery` holds the raw user-typed text. It filters `groupedEntries`
+ *    only once it reaches `BrowserLimits.SEARCH_MIN_CHARS` (FR-011a); `entries` always
+ *    stays unfiltered so the screen can tell "no history at all" apart from "no matches".
+ *  - **US3** — `pendingActionSheetTarget` is non-null while the long-press sheet is open.
+ *  - **US4** — `isClearAllDialogVisible` gates the destructive confirmation dialog.
  */
 data class HistoryUiState(
     val entries: List<HistoryEntry> = emptyList(),

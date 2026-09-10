@@ -14,5 +14,22 @@
             android:name="com.raumanian.thirtysix.browser.HiltTestActivity"
             android:exported="false"
             tools:ignore="MissingClass" />
+
+        <!--
+            Spec 014 T103a — debug-only bulk history seeder for the SC-005 / SC-006
+            benchmark (quickstart gate G8). Declared here so it ships in the debug APK
+            only; the release variant never compiles `app/src/debug/`. `exported="true"`
+            is required for `adb shell am broadcast` to reach it from the shell uid, and
+            is safe because the receiver exists solely in debug builds.
+        -->
+        <receiver
+            android:name="com.raumanian.thirtysix.browser.dev.HistorySeeder"
+            android:exported="true"
+            tools:ignore="MissingClass,ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.raumanian.thirtysix.browser.debug.SEED_HISTORY" />
+                <action android:name="com.raumanian.thirtysix.browser.debug.CLEAR_HISTORY" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

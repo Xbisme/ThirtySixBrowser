@@ -97,4 +97,25 @@
     <string name="history_empty_title">아직 기록이 없습니다</string>
     <string name="history_empty_body">방문한 페이지가 여기에 표시됩니다.</string>
     <string name="history_row_content_description">%1$s, %2$s, %3$s에 방문</string>
+
+    <!-- Spec 014 US2 — search. -->
+    <string name="history_search_placeholder">방문 기록 검색</string>
+    <string name="history_search_clear_content_description">검색어 지우기</string>
+    <string name="history_no_matches_title">\"%1$s\"과(와) 일치하는 기록이 없습니다</string>
+    <string name="history_no_matches_body">다른 단어로 검색하거나 철자를 확인해 보세요.</string>
+
+    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <string name="history_action_open_in_new_tab">새 탭에서 열기</string>
+    <string name="history_action_delete_entry">항목 삭제</string>
+    <string name="history_action_copy_url">URL 복사</string>
+    <string name="history_snackbar_clipboard_copied">URL을 클립보드에 복사했습니다</string>
+    <string name="history_snackbar_tab_cap_reached">탭을 최대 개수까지 열었습니다. 새 탭을 열려면 탭을 하나 닫으세요.</string>
+    <string name="history_snackbar_deletion_failed">항목을 삭제하지 못했습니다. 다시 시도해 주세요.</string>
+
+    <!-- Spec 014 US4 — clear all. -->
+    <string name="history_action_clear_all">방문 기록 모두 삭제</string>
+    <string name="history_clear_all_dialog_title">방문 기록을 모두 삭제할까요?</string>
+    <string name="history_clear_all_dialog_body">방문 기록의 모든 페이지가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="history_clear_all_dialog_confirm">삭제</string>
+    <string name="history_clear_all_dialog_cancel">취소</string>
 </resources>

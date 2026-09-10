@@ -14,6 +14,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
@@ -127,6 +128,10 @@ class BrowserViewModelIncognitoCacheGateTest {
                 .IsUrlBookmarkedUseCase(bookmarkRepo),
             toggleBookmark = com.raumanian.thirtysix.browser.domain.usecase
                 .ToggleBookmarkUseCase(bookmarkRepo, addBookmark),
+            updateHistoryEntryTitle = com.raumanian.thirtysix.browser.domain.usecase
+                .UpdateHistoryEntryTitleUseCase(
+                    com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+                ),
             recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase
                 .RecordHistoryEntryUseCase(
                     com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),

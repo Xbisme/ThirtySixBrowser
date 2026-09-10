@@ -14,6 +14,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
@@ -104,6 +105,7 @@ class BrowserViewModelTest {
             isUrlBookmarked = isUrlBookmarked,
             toggleBookmark = toggleBookmark,
             recordHistoryEntry = RecordHistoryEntryUseCase(historyRepository),
+            updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(historyRepository),
         )
     }
 

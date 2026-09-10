@@ -29,9 +29,21 @@ class FakeHistoryRepository : HistoryRepository {
 
     override fun observeAll(): Flow<List<HistoryEntry>> = state.asStateFlow().map { it }
 
+    override suspend fun updateTitle(id: Long, title: String): Int {
+        val before = state.value
+        state.value = before.map { if (it.id == id) it.copy(title = title) else it }
+        return if (before.any { it.id == id }) 1 else 0
+    }
+
     override suspend fun deleteById(id: Long): Int {
         val before = state.value.size
         state.value = state.value.filterNot { it.id == id }
+        return before - state.value.size
+    }
+
+    override suspend fun pruneOlderThan(cutoffMillis: Long): Int {
+        val before = state.value.size
+        state.value = state.value.filterNot { it.visitedAt < cutoffMillis }
         return before - state.value.size
     }
 

@@ -18,6 +18,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkResult
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -83,6 +84,7 @@ class BrowserViewModel @Inject constructor(
     private val isUrlBookmarked: IsUrlBookmarkedUseCase,
     private val toggleBookmark: ToggleBookmarkUseCase,
     private val recordHistoryEntry: RecordHistoryEntryUseCase,
+    private val updateHistoryEntryTitle: UpdateHistoryEntryTitleUseCase,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<BrowserUiState> = MutableStateFlow(
@@ -119,6 +121,26 @@ class BrowserViewModel @Inject constructor(
         )
 
     private val currentTitleCache: MutableStateFlow<String> = MutableStateFlow("")
+
+    /**
+     * Spec 014 FR-001 / FR-003 — URL of a navigation that has started but has not yet
+     * been written to history. Set by [onLoadStarted], consumed by [onLoadFinished],
+     * and cleared by [onLoadFailed] so an error page is never recorded.
+     *
+     * This replaces an earlier `(loadingState == Loaded && currentUrl == url)` heuristic
+     * that tried to infer "is this an idempotent re-fire?" from UI state. That heuristic
+     * was wrong against the platform's real ordering: `onProgressChanged(100)` moves the
+     * state to `Loaded` and `doUpdateVisitedHistory` publishes the new URL *before*
+     * `onPageFinished` arrives, so the check matched on genuine navigations and
+     * suppressed almost every write. An explicit per-navigation token cannot drift.
+     */
+    private var pendingHistoryUrl: String? = null
+
+    /** Row id of the most recent history write, so a late title can be patched onto it. */
+    private var lastRecordedHistoryId: Long = NO_HISTORY_ROW
+
+    /** URL that [lastRecordedHistoryId] belongs to — guards against patching a stale row. */
+    private var lastRecordedHistoryUrl: String? = null
 
     /**
      * Spec 008 — exposed for the Home affordance + `WebViewActionsHandle.loadHome`
@@ -213,6 +235,13 @@ class BrowserViewModel @Inject constructor(
      */
     @Suppress("UNUSED_PARAMETER")
     fun onLoadStarted(url: String) {
+        // Spec 014 FR-001 — arm the recorder for exactly this navigation.
+        pendingHistoryUrl = url
+        // Spec 014 FR-001 — drop the previous page's title so it can never be attached
+        // to a different URL. An empty title is safe: the history row and the tab card
+        // both fall back to the hostname (FR-009), and [onTitleReceived] patches the
+        // real title in as soon as the page announces one.
+        currentTitleCache.value = ""
         _uiState.update {
             it.copy(loadingState = LoadingState.Loading(progress = 0f))
         }
@@ -247,8 +276,11 @@ class BrowserViewModel @Inject constructor(
      */
     fun onLoadFinished(url: String) {
         val previous = _uiState.value
-        val isIdempotentRefire = previous.loadingState is LoadingState.Loaded &&
-            previous.currentUrl == url
+        // Spec 014 FR-001 / FR-004 — one write per started navigation. A platform
+        // re-fire of `onPageFinished` for the same navigation finds the token already
+        // consumed; a genuine revisit re-arms it through [onLoadStarted].
+        val shouldRecord = pendingHistoryUrl != null
+        pendingHistoryUrl = null
         _uiState.update { current ->
             if (current.loadingState is LoadingState.Loaded && current.currentUrl == url) {
                 current
@@ -257,14 +289,15 @@ class BrowserViewModel @Inject constructor(
             }
         }
         persistActiveTabState(url)
-        // Spec 014 FR-001 / FR-002 — record one history entry per genuine
-        // page-finish (not for the progress=100 + onPageFinished idempotent
-        // pair). Use case suppresses incognito internally.
-        if (!isIdempotentRefire) {
+        // Spec 014 FR-001 / FR-002 — record one history entry per genuine page-finish.
+        // The use case suppresses incognito internally and returns 0L when it does.
+        if (shouldRecord) {
             val title = currentTitleCache.value
             val incognito = previous.isIncognito
             viewModelScope.launch {
-                recordHistoryEntry(url = url, title = title, isIncognito = incognito)
+                val rowId = recordHistoryEntry(url = url, title = title, isIncognito = incognito)
+                lastRecordedHistoryId = rowId
+                lastRecordedHistoryUrl = url.takeIf { rowId > NO_HISTORY_ROW }
             }
         }
     }
@@ -274,6 +307,9 @@ class BrowserViewModel @Inject constructor(
      * (US3 / T031). Sub-frame errors are filtered upstream before reaching here.
      */
     fun onLoadFailed(reason: ErrorReason) {
+        // Spec 014 FR-003 — a main-frame failure must never reach history, even though
+        // the platform still delivers `onPageFinished` for the error page afterwards.
+        pendingHistoryUrl = null
         _uiState.update { it.copy(loadingState = LoadingState.Failed(reason)) }
     }
 
@@ -389,6 +425,13 @@ class BrowserViewModel @Inject constructor(
      */
     fun onTitleReceived(title: String) {
         currentTitleCache.value = title
+        // Spec 014 FR-001 — the page announced its title after the load finished, which
+        // is the common ordering. Patch it onto the row that was just written so the
+        // history list shows the real title instead of the hostname fallback.
+        if (lastRecordedHistoryUrl == _uiState.value.currentUrl) {
+            val rowId = lastRecordedHistoryId
+            viewModelScope.launch { updateHistoryEntryTitle(rowId, title) }
+        }
         val activeId = activeTabFlow.value?.id ?: return
         val incognito = _uiState.value.isIncognito
         viewModelScope.launch {
@@ -473,6 +516,9 @@ class BrowserViewModel @Inject constructor(
     }
 
     private companion object {
+        /** Sentinel for "no history row written" — see [lastRecordedHistoryId]. */
+        const val NO_HISTORY_ROW: Long = 0L
+
         const val MAX_PROGRESS: Int = 100
         const val MAX_PROGRESS_F: Float = 100f
         const val SUBSCRIBE_TIMEOUT_MS: Long = 5_000L

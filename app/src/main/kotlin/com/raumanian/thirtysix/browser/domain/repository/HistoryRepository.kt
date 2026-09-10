@@ -34,9 +34,27 @@ interface HistoryRepository {
     fun observeAll(): Flow<List<HistoryEntry>>
 
     /**
+     * Spec 014 FR-001 (title backfill) — correct the title of an already-recorded row.
+     *
+     * A page's title routinely arrives after its load finishes, so [recordVisit] stores
+     * whatever was known at page-finish and the caller patches it here once
+     * `onReceivedTitle` fires for the same navigation. Returns rows updated (0 or 1).
+     */
+    suspend fun updateTitle(id: Long, title: String): Int
+
+    /**
      * Hard-delete a single entry by id. Returns rows removed (0 or 1).
      */
     suspend fun deleteById(id: Long): Int
+
+    /**
+     * Spec 014 — delete every entry visited strictly before [cutoffMillis].
+     *
+     * Backs the [com.raumanian.thirtysix.browser.core.constants.BrowserLimits.MAX_HISTORY_DAYS]
+     * retention window, which is what keeps the table — and therefore the in-memory list
+     * the History screen holds — bounded over the app's lifetime. Returns rows removed.
+     */
+    suspend fun pruneOlderThan(cutoffMillis: Long): Int
 
     /**
      * Hard-delete every history entry. Caller is responsible for confirmation UI.

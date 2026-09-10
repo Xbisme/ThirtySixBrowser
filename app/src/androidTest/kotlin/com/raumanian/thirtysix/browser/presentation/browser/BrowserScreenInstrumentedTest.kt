@@ -28,6 +28,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -113,6 +114,7 @@ class BrowserScreenInstrumentedTest {
                 recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
                     InstrumentedNoopHistoryRepository,
                 ),
+                updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(InstrumentedNoopHistoryRepository),
             )
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }
@@ -129,23 +131,38 @@ class BrowserScreenInstrumentedTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun loadingIndicator_appearsAndHidesOnFinish() {
-        // SC-002 (production): indicator visible within 200 ms of load start
-        // event (`WebChromeClient.onProgressChanged` first tick). That budget
-        // measures pure Compose recomposition latency on a real device and is
-        // verified manually via Gate 7 step 3.
+        // The indicator is bound to `BrowserUiState.loadingState`: visible while
+        // `Loading`, gone otherwise. What this test guards is that Compose binding.
         //
-        // THIS test runs on emulator API 29 and times the assertion from
-        // `setContent` — it includes WebView initialization, emulator network
-        // bring-up, and the JNI ↔ webkit handoff before `onProgressChanged`
-        // fires. Empirically that overhead is hundreds of milliseconds on a
-        // cold AVD, which is irrelevant to SC-002. Budget here is generous
-        // enough not to flake on slow CI runners while still catching a
-        // regression where the indicator never appears at all.
+        // It used to assert that against a live `example.com` load, which made it
+        // order-dependent and flaky: whenever a sibling test in this class had already
+        // warmed the WebView's HTTP cache, the `Loading` window closed faster than the
+        // assertion could observe it and the test failed. (Verified 2026-05-08: it fails
+        // identically on `main` and on both an API 24 and an API 36 emulator, yet passes
+        // 3/3 in isolation.) The real-load path stays covered by
+        // `pageRenders_assertsDomContainsExampleDomain`, and the platform callback
+        // ordering by `BrowserViewModelHistoryRecordSequenceTest` on the JVM.
+        //
+        // So: let the real page settle first — that guarantees no stray WebView callback
+        // is still in flight to race the assertions — then drive the state machine
+        // explicitly and deterministically.
+        composeRule.waitUntil(PAGE_SETTLE_TIMEOUT_MS) {
+            viewModel.uiState.value.loadingState is LoadingState.Loaded
+        }
+
+        composeRule.activity.runOnUiThread {
+            viewModel.onLoadStarted(TEST_PAGE_URL)
+            viewModel.onProgressChanged(PROGRESS_MIDWAY)
+        }
         composeRule.waitUntilExactlyOneExists(
             matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
             timeoutMillis = LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS,
         )
-        // Indicator must hide once the page finishes loading. SC-001 budget.
+
+        composeRule.activity.runOnUiThread {
+            viewModel.onProgressChanged(PROGRESS_COMPLETE)
+            viewModel.onLoadFinished(TEST_PAGE_URL)
+        }
         composeRule.waitUntilDoesNotExist(
             matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
             timeoutMillis = LOADING_INDICATOR_HIDE_TIMEOUT_MS,
@@ -180,6 +197,12 @@ class BrowserScreenInstrumentedTest {
 
         // CI emulator budget — NOT the user-facing SC-002 production target
         // (200 ms). See test method KDoc above.
+        /** Upper bound for the initial real page load to reach `Loaded`. */
+        const val PAGE_SETTLE_TIMEOUT_MS: Long = 20_000L
+
+        const val PROGRESS_MIDWAY: Int = 40
+        const val PROGRESS_COMPLETE: Int = 100
+
         const val LOADING_INDICATOR_FIRST_SHOW_TIMEOUT_MS: Long = 5_000L
         const val LOADING_INDICATOR_HIDE_TIMEOUT_MS: Long = 10_000L
     }
@@ -305,6 +328,8 @@ private object InstrumentedNoopHistoryRepository :
     override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
     override fun observeAll() =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.HistoryEntry>())
+    override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
+    override suspend fun updateTitle(id: Long, title: String): Int = 0
     override suspend fun deleteById(id: Long): Int = 0
     override suspend fun clearAll(): Int = 0
     override suspend fun count(): Int = 0

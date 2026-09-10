@@ -22,6 +22,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_ERROR_STATE
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -107,6 +108,7 @@ class BrowserScreenOfflineErrorTest {
                 recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
                     OfflineErrorNoopHistoryRepository,
                 ),
+                updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(OfflineErrorNoopHistoryRepository),
             ).apply {
                 onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)
@@ -243,6 +245,8 @@ private object OfflineErrorNoopHistoryRepository :
     override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
     override fun observeAll() =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.HistoryEntry>())
+    override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
+    override suspend fun updateTitle(id: Long, title: String): Int = 0
     override suspend fun deleteById(id: Long): Int = 0
     override suspend fun clearAll(): Int = 0
     override suspend fun count(): Int = 0

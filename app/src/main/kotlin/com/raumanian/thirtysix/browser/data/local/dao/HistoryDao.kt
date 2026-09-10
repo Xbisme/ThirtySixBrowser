@@ -64,4 +64,18 @@ interface HistoryDao {
      */
     @Query("DELETE FROM ${HistoryEntryEntity.TABLE_NAME} WHERE ${HistoryEntryEntity.COL_ID} = :id")
     suspend fun deleteById(id: Long): Int
+
+    /**
+     * Spec 014 FR-001 (title backfill) — patch the title of an already-recorded row.
+     *
+     * `WebChromeClient.onReceivedTitle` frequently arrives *after*
+     * `WebViewClient.onPageFinished`, so the row is inserted with whatever title was
+     * known at page-finish (often empty) and corrected here the moment the real title
+     * lands. Returns rows updated: 0 if the row was deleted in between, 1 otherwise.
+     */
+    @Query(
+        "UPDATE ${HistoryEntryEntity.TABLE_NAME} SET ${HistoryEntryEntity.COL_TITLE} = :title " +
+            "WHERE ${HistoryEntryEntity.COL_ID} = :id",
+    )
+    suspend fun updateTitle(id: Long, title: String): Int
 }

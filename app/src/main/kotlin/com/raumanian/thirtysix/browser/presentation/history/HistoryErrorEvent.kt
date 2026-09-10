@@ -6,9 +6,10 @@ package com.raumanian.thirtysix.browser.presentation.history
  * event once and surfaces a localized snackbar message; the channel does not retain
  * past events.
  *
- * Per-event surface introduced incrementally:
- *  - US3 introduces [ClipboardCopied] (Copy URL action) + [TabCapReached]
- *    (Open in new tab cap-reached fallback) + [DeletionFailed] (single-row delete failure).
+ * Event map:
+ *  - [ClipboardCopied] — FR-021, confirms the Copy URL action reached the clipboard.
+ *  - [TabCapReached] — FR-019a, the normal-tab cap blocked "Open in new tab".
+ *  - [DeletionFailed] — FR-020 / FR-025, a single-row delete or a clear-all wipe threw.
  */
 sealed class HistoryErrorEvent {
     data object ClipboardCopied : HistoryErrorEvent()

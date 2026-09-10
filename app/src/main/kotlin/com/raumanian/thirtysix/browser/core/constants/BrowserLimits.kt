@@ -78,4 +78,23 @@ object BrowserLimits {
      * boundary so the in-memory `String.contains` scan never sees a pathological query.
      */
     const val MAX_HISTORY_QUERY_LENGTH: Int = 200
+
+    /**
+     * Spec 014 — retention window for browsing history, in days.
+     *
+     * History is otherwise unbounded: `HistoryRepository.observeAll()` loads the whole
+     * table, so memory scales linearly with how long the app has been used. Measured on
+     * an API 36 emulator, 10 000 rows cost ~3 MB of Java heap (~300 B/row) — fine today,
+     * but a heavy user (~200 page loads/day) reaches 100 000 rows inside two years, and
+     * ~30 MB for one screen is not acceptable on a minSdk-24 device with a ~96 MB heap
+     * cap.
+     *
+     * Pruning the table (rather than capping the query with `LIMIT`) is deliberate: it
+     * keeps the "what the list shows is what actually exists" invariant, so search can
+     * never report "no matches" for a row that is still sitting in the database.
+     *
+     * 90 days matches the default retention of mainstream browsers. Making this
+     * user-configurable belongs to Spec 016 (settings-screen).
+     */
+    const val MAX_HISTORY_DAYS: Int = 90
 }
