@@ -200,6 +200,16 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      # Spec 015 — `ImageVersion` is part of the key on purpose.
+      #
+      # The cached AVD contains a *quickboot snapshot*, which is only valid for the
+      # emulator binary that wrote it. The old key (`avd-api29-Linux`) carried no
+      # version component, so when the runner image upgraded the emulator the stale
+      # snapshot kept being restored forever. The result was a zombie boot: the
+      # emulator reported `sys.boot_completed=1` while `settings` and `input` were
+      # never published, so the action's unlock step failed, the Gradle script never
+      # ran at all, and the job sat wedged until its 20-minute timeout. Keying on the
+      # runner image makes that self-healing.
       - name: AVD cache
         uses: actions/cache@v4
         id: avd-cache
@@ -207,10 +217,11 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-api${{ matrix.api-level }}-${{ runner.os }}
+          key: avd-api${{ matrix.api-level }}-${{ runner.os }}-${{ env.ImageVersion }}
 
       - name: Create AVD snapshot (first run only)
         if: steps.avd-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 10
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -223,6 +234,10 @@ jobs:
       - run: chmod +x ./gradlew
 
       - name: Run instrumented tests
+        # Bounded below the job's 20 minutes so a wedged emulator surfaces as a
+        # failing step with its own log, rather than a silent cancellation that
+        # hides which phase actually stalled.
+        timeout-minutes: 16
         uses: reactivecircus/android-emulator-runner@v2
         # Spec 008 — emulator-runner@v2's built-in "Terminate Emulator" phase
         # hangs with emulator binary v36+ because QEMU's `stop` command emits
