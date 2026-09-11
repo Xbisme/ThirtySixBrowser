@@ -1,6 +1,6 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-11 — **✅ Specs 001–015 done (013 PR #14, 014 PR #15, 015 PR #16 đều đã merge). 🟢 Spec 016 `settings-screen` đã implement trên branch `016-settings-screen` — 111/113 tasks, chờ PR; TalkBack pass của T109 cần người thật.**
+> Cập nhật lần cuối: 2026-09-11 — **✅ Specs 001–015 done (013 PR #14, 014 PR #15, 015 PR #16 đều đã merge). 🟢 Spec 016 `settings-screen` đã implement — PR #18 đang mở, 112/113 tasks; TalkBack pass của T109 cần người thật.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
@@ -19,7 +19,7 @@ Foundation phase tiến độ:
 **Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
 **Phase 4** (0/3 merged): **Spec 016 `settings-screen`** đã implement xong trên branch, còn chờ PR; tiếp theo là 017 `splash-screen`.
 
-### Spec 016 — Settings Screen (🟢 implemented 2026-09-11 — 111/113; còn TalkBack pass cần người thật và PR)
+### Spec 016 — Settings Screen (🟢 implemented 2026-09-11 — PR #18 đang mở, 112/113; còn TalkBack pass cần người thật)
 
 Spec đầu tiên của Phase 4. Settings mở từ overflow menu, ở vị trí Spec 015 đã chừa sẵn, và thay cho placeholder của Spec 002. Gồm bảy phần:
 - **Theme**: Light / Dark / System.

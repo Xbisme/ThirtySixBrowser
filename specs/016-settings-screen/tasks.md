@@ -362,7 +362,7 @@ description: "Task list for Spec 016 — Settings Screen"
 - [X] T110 Manual gate **G12**: consolidate T105–T107; confirm research.md records each new dependency's version, lookup date and native-code status (FR-045); and run **Constitution Testing Gate 8** — install and exercise the release APK on an API 35+ **16 KB page-size** emulator image, recording `getconf PAGE_SIZE` (G12 step 4).
 - [X] T111 Re-run the Constitution Check post-implementation and confirm **11/11 PASS** with no deviations. In `.specify/memory/constitution.md`, mark `TODO(MANIFEST_COMMENT)` as done inline in the Sync Impact Report — the precedent `TODO(SIGNING)` set; bookkeeping only, no version change.
 - [X] T112 Update `CLAUDE.md` (roadmap row, Active Spec, Recent Changes), `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md` with the outcome: the task count, every gate result including any DEFERRED, the release APK bytes against the budget, and the `language_override` retirement. Per the Constitution's Review Requirements, `project-context.md` MUST record each new dependency's version, lookup date **and 16 KB compliance status** — research.md already does.
-- [ ] T113 Open the PR `016-settings-screen → main` with a body containing:
+- [X] T113 Open the PR `016-settings-screen → main` ([#18](https://github.com/Xbisme/ThirtySixBrowser/pull/18)) with a body containing:
   - a link to this `tasks.md`
   - the SC-014 result in bytes against the 3,258,091 B budget
   - the Constitution Check line
@@ -574,6 +574,9 @@ Each item below is what was actually observed. PASS means every step the gate de
   - Tab A's address was still `www.bing.com/search?q=weather+%26+forecast`.
   - The switcher showed both results pages, and returning to tab A showed `www.bing.com`.
 - **Persistence**: after force-stop + relaunch, Settings still showed Google.
+- **Supplementary API 36 run** on the 16 KB API 36 AVD:
+  - **Queries**: 8/9 results pages came from the chosen engine with the query intact. The ninth — Google with `cà phê sữa` — was Google's unusual-traffic interstitial. Its `continue` URL carries the same correctly encoded query (`search?q=c%C3%A0+ph%C3%AA+s%E1%BB%AFa`), so the app sent the query correctly and Google blocked the emulator's traffic.
+  - **FR-012**: tab A stayed on Bing's results after the engine switch. The search in the new tab did not run, because its fixture page failed to load.
 
 ### ✅ T062 — G4 language + G10 step 1: PASS
 

@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-11 — **✅ Specs 001–015 done. 🟢 Spec 016 `settings-screen` implemented on branch `016-settings-screen` — 111/113 tasks; open: T109's TalkBack pass (DEFERRED — needs a person, because scripted TalkBack is unreliable on emulators) and the PR (T113).** Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-11 — **✅ Specs 001–015 done. 🟢 Spec 016 `settings-screen` implemented — PR #18 open (`016-settings-screen` → `main`), 112/113 tasks; open: T109's TalkBack pass (DEFERRED — needs a person, because scripted TalkBack is unreliable on emulators).** Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-09-11 — **✅ Specs 00
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** ✅ **Specs 001–015 done (2026-09-11)** — Phase 1–3 hoàn tất (Foundation, Core Browser, Data Features). 🟢 **Phase 4 — 016 `settings-screen` implemented** on branch `016-settings-screen` (111/113; PR pending, and T109's TalkBack pass deferred to a person); next 017 `splash-screen`, then 018 `onboarding-flow` (018 depends on 017). Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** ✅ **Specs 001–015 done (2026-09-11)** — Phase 1–3 hoàn tất (Foundation, Core Browser, Data Features). 🟢 **Phase 4 — 016 `settings-screen` implemented**, PR #18 open (112/113; T109's TalkBack pass deferred to a person); next 017 `splash-screen`, then 018 `onboarding-flow` (018 depends on 017). Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -258,7 +258,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 | 013 | `bookmarks-crud` | ✅ Done 2026-05-07 (PR #14 merged into `main`) | Star icon on browser top bar + Bookmarks bottom-bar entry + unlimited-depth folders + breadcrumb + global search w/ folder path inline + cascade delete confirm + 15 use cases |
 | 014 | `history-view` | ✅ Done 2026-09-10 (PR #15 merged into `main`, commit `2e7c633`; 111/113 tasks — T103b SC-005 perf gate deferred to real hardware) | Auto-record on page-finish (non-incognito only) + bottom-bar History entry + grouped list (Today/Yesterday/explicit-date) + tap-to-replace-active-tab + live search (≥2 chars, no debounce) + long-press action sheet (open in new tab / delete / copy URL) + confirmed clear-all + 4 use cases |
 | 015 | `downloads-manager` | ✅ Done 2026-09-11 (PR #16 merged into `main`, commit `e925f9d`; 121/121 tasks — SC-006 perf gate deferred to real hardware) | System DownloadManager + public Downloads folder + hybrid Room/platform source of truth + **first schema migration (v1→v2)** + overflow menu replacing the Bookmarks/History bottom-bar entries + 8 use cases |
-| 016 | `settings-screen` | 🟢 Implemented 2026-09-11 on branch `016-settings-screen` (111/113 — PR pending; T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
+| 016 | `settings-screen` | 🟢 Implemented 2026-09-11 — PR #18 open (112/113; T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
 | 017 | `splash-screen` | ⬜ | SplashScreen API + branding |
 | 018 | `onboarding-flow` | ⬜ | 3–4 slides chọn ngôn ngữ/theme/search |
 | 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
@@ -275,7 +275,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Recent Changes
 
-- 2026-09-11 (Spec 016 second pass — fixes and the remaining device gates): 🟢 **Spec 016 at 111/113.** The owner asked to fix what could be fixed and run what could be run.
+- 2026-09-11 (Spec 016 second pass — fixes and the remaining device gates): 🟢 **Spec 016 at 112/113 — [PR #18](https://github.com/Xbisme/ThirtySixBrowser/pull/18) open.** The owner asked to fix what could be fixed and run what could be run.
 
   **Fixes.**
   - **Losing the renderer process no longer ends the app** (carry-forward debt from the first pass).
@@ -305,7 +305,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
   - **T109**:
     - The 8-locale sweep of the screen, the six dialogs and the message at 360dp passed.
     - The **TalkBack pass is DEFERRED to a person**: scripted TalkBack does not work on these emulators. Injected swipes and keys do not move focus reliably, even in system Settings, and injected taps act as clicks.
-  - **T113**: the PR.
+  - **T113**: ✅ closed — PR #18 opened.
 
   **Observations.**
   - **Language change**: 111–288 ms of black frames appear while the activity is recreated, where a rotation shows none. This is inside SC-004 and is noted against R12.
@@ -419,7 +419,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 016 — Settings Screen](specs/016-settings-screen/) — **implemented on branch `016-settings-screen` (2026-09-11), 111/113 tasks.** Open: T109's TalkBack pass (DEFERRED — needs a person; the 8-locale sweep passed) and T113 (the PR).
+**Current**: 🟢 [Spec 016 — Settings Screen](specs/016-settings-screen/) — **implemented (2026-09-11), 112/113 tasks — [PR #18](https://github.com/Xbisme/ThirtySixBrowser/pull/18) open (`016-settings-screen` → `main`).** Open: T109's TalkBack pass (DEFERRED — needs a person; the 8-locale sweep passed).
 
 - Artifacts: [spec.md](specs/016-settings-screen/spec.md) · [plan.md](specs/016-settings-screen/plan.md) · [research.md](specs/016-settings-screen/research.md) (R1–R15) · [data-model.md](specs/016-settings-screen/data-model.md) · [quickstart.md](specs/016-settings-screen/quickstart.md) (G1–G12) · [tasks.md](specs/016-settings-screen/tasks.md) — see **Implementation Notes** and **Device Gate Results** · [contracts/](specs/016-settings-screen/contracts/).
 - **Gates**:
