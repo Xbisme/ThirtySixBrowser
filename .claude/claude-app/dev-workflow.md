@@ -99,24 +99,24 @@ Các Spec theo thứ tự implement:
 
 | # | Tên | Dependencies | Status |
 |---|-----|-------------|--------|
-| 001 | `project-init-build-config` | Constitution | ⬜ Next |
-| 002 | `clean-architecture-skeleton-di` | 001 | ⬜ |
-| 003 | `theme-typography-darkmode` | 002 | ⬜ |
-| 004 | `localization-multi-language` | 002 | ⬜ |
-| 005 | `room-database-schema` | 002 | ⬜ |
-| 006 | `datastore-settings` | 002 | ⬜ |
-| 007 | `webview-compose-wrapper` | 005, 006 | ⬜ |
-| 008 | `navigation-controls` | 007 | ⬜ |
-| 009 | `address-bar-omnibox` | 008 | ⬜ |
-| 010 | `search-engine-google` | 009 | ⬜ |
-| 011 | `tabs-management` | 007 | ⬜ |
-| 012 | `private-incognito-mode` | 011 | ⬜ |
-| 013 | `bookmarks-crud` | 005, 007 | ⬜ |
-| 014 | `history-view` | 005, 007 | ⬜ |
-| 015 | `downloads-manager` | 007 | ⬜ |
-| 016 | `settings-screen` | 003, 004, 006 | ⬜ |
+| 001 | `project-init-build-config` | Constitution | ✅ Done |
+| 002 | `clean-architecture-skeleton-di` | 001 | ✅ Done |
+| 003 | `theme-typography-darkmode` | 002 | ✅ Done |
+| 004 | `localization-multi-language` | 002 | ✅ Done |
+| 005 | `room-database-schema` | 002 | ✅ Done |
+| 006 | `datastore-settings` | 002 | ✅ Done |
+| 007 | `webview-compose-wrapper` | 005, 006 | ✅ Done |
+| 008 | `navigation-controls` | 007 | ✅ Done |
+| 009 | `address-bar-omnibox` | 008 | ✅ Done |
+| 010 | `search-engine-google` | 009 | ✅ Done |
+| 011 | `tabs-management` | 007 | ✅ Done (PR #12) |
+| 012 | `private-incognito-mode` | 011 | ✅ Done (PR #13) |
+| 013 | `bookmarks-crud` | 005, 007 | ✅ Done (PR #14) |
+| 014 | `history-view` | 005, 007 | ✅ Done (PR #15) |
+| 015 | `downloads-manager` | 007 | ✅ Done (PR #16) |
+| 016 | `settings-screen` | 003, 004, 006 | ⬜ Next |
 | 017 | `splash-screen` | 002 | ⬜ |
 | 018 | `onboarding-flow` | 003, 004, 006, 017 | ⬜ |
 | 019 | `tracker-blocker-hostlist` | 011–018 | ⬜ Optional |
 
-> Project chưa start. Bước tiếp theo: thảo luận chi tiết Spec 001 trước khi chạy `/speckit.specify`.
+> Cập nhật 2026-09-11: Specs 001–015 đã merge vào `main`. Bước tiếp theo: thảo luận chi tiết Spec 016 (`settings-screen`) trước khi chạy `/speckit-specify`. Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.

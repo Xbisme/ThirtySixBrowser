@@ -9,8 +9,32 @@ Version Change: (none) → 1.0.0 (INITIAL — project constitution created)
                                 "distribution" builds; debug-keystore fallback
                                 explicitly permitted for local dev/CI iteration
                                 with mandatory warning string)
+                1.2.0 → 1.3.0 (MINOR — Principle II permission rule reconciled
+                                with the manifest shipped by Spec 015:
+                                POST_NOTIFICATIONS removed from the minimum set;
+                                WRITE_EXTERNAL_STORAGE capped at maxSdkVersion 28
+                                admitted as the single documented legacy-storage
+                                exception)
 
-Modified Principles:
+Modified Principles (1.3.0):
+- II. Google Play Compliance — permission bullet: the minimum set is now `INTERNET` +
+       `ACCESS_NETWORK_STATE`, and any further permission MUST be justified in its spec
+       AND recorded in the Android Permissions & Entitlements table. New bullet:
+       `POST_NOTIFICATIONS` MUST NOT be declared while the app composes no notification
+       of its own (Spec 015 gate G9 Outcome A — the system download service notifies
+       under its own UID). Scoped Storage bullet: legacy storage permissions stay
+       forbidden except `WRITE_EXTERNAL_STORAGE` with `maxSdkVersion="28"`, justified in
+       specs/015-downloads-manager/plan.md Complexity Tracking; `MANAGE_EXTERNAL_STORAGE`
+       remains forbidden outright.
+- Technical Standards → Android Permissions & Entitlements — the table was amended
+       during Spec 015 (task T110) without a version bump, which left §II contradicting
+       it on both permissions. 1.3.0 records that change; the deviation note now points
+       at §II instead of "the three-permission minimum this table previously described".
+- Bump rationale: MINOR, not MAJOR — no principle is removed, and nothing that complied
+       with 1.2.0 stops complying (no spec ever declared POST_NOTIFICATIONS); the storage
+       exception was already approved during Spec 015.
+
+Modified Principles (1.1.0, 1.2.0):
 - III. Code Quality & Safety — added "No-Hardcode Rule (NON-NEGOTIABLE)" subsection
        with 18-row category table mapping every literal type to its constants file,
        plus the Constants file organization layout under core/constants/ and code
@@ -40,12 +64,17 @@ Templates Requiring Updates:
 - .specify/templates/plan-template.md ✅ compatible — Constitution Check section dynamically loads
 - .specify/templates/spec-template.md ✅ compatible — no structural change needed
 - .specify/templates/tasks-template.md ✅ compatible — phase structure unchanged
+  (1.3.0 re-check: no template references the permission set — all three still ✅)
 
 Follow-up TODOs:
 - TODO(SIGNING): Configure signing config in Spec 001 ✅ DONE (FR-013, debug
                  fallback active per v1.2.0 §XI). Generate real release keystore
                  — DEFERRED until user supplies; debug-fallback continues until then.
 - TODO(PLAY_LISTING): Prepare Play Store listing assets (icon, screenshots, copy) before v1.0 release
+- TODO(MANIFEST_COMMENT): app/src/main/AndroidManifest.xml's permission comments still
+                 describe G9 as pending and cite a "three-row table". Comment-only drift in
+                 an application source file, outside a constitution amendment's scope —
+                 correct it in the next change that touches the manifest.
 ================================================================================
 -->
 
@@ -91,11 +120,17 @@ constraint.
   or privacy-focused security app (avoids stricter review categories)
 - WebView MUST be `android.webkit.WebView` — Google Play approved, no custom Chromium
   build, no GeckoView (avoids large binary + sideload concerns)
-- Permissions MUST be the minimum set: `INTERNET`, `ACCESS_NETWORK_STATE`,
-  `POST_NOTIFICATIONS` (Android 13+ for download progress); any new permission
-  request MUST be justified in the spec and visible to user
+- Permissions MUST be the minimum set: `INTERNET`, `ACCESS_NETWORK_STATE`; any
+  additional permission MUST be justified in the spec, recorded in the Android
+  Permissions & Entitlements table below, and visible to the user
+- `POST_NOTIFICATIONS` MUST NOT be declared while the app composes no notification of
+  its own — download progress and completion are posted by the system download service
+  under its own UID (verified at Spec 015 gate G9)
 - Scoped Storage MUST be respected — downloads go to `MediaStore.Downloads` via
-  `DownloadManager`; NO `MANAGE_EXTERNAL_STORAGE`, NO legacy storage permissions
+  `DownloadManager`; NO `MANAGE_EXTERNAL_STORAGE`; legacy storage permissions are
+  forbidden except `WRITE_EXTERNAL_STORAGE` capped at `maxSdkVersion="28"` (Android
+  7.0–9.0, where Scoped Storage does not exist) — the single documented deviation,
+  justified in `specs/015-downloads-manager/plan.md` Complexity Tracking
 - Foreground service notifications (if added later for downloads) MUST follow Android
   13+ runtime notification permission flow
 - Google Play data safety form MUST be accurate — declare zero data collected
@@ -514,8 +549,8 @@ granted, "Download complete" still appeared in the shade. Declaring it would hav
 §I's "MUST NOT request runtime permissions it does not actively use". Should the app ever
 compose a notification of its own, this decision must be revisited.
 
-> The storage row is a **documented deviation** from the three-permission minimum this table
-> previously described — see `specs/015-downloads-manager/plan.md` Complexity Tracking for
+> The storage row is the **documented deviation** from the two-permission minimum in §II —
+> see `specs/015-downloads-manager/plan.md` Complexity Tracking for
 > the justification and the rejected alternatives. `MANAGE_EXTERNAL_STORAGE` remains
 > forbidden outright.
 
@@ -617,4 +652,4 @@ All implementation decisions MUST align with these principles.
   red 16KB CI gate
 - Constitution supersedes all other practices; in case of conflict, the constitution wins
 
-**Version**: 1.2.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-05-01
+**Version**: 1.3.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-09-11

@@ -1,10 +1,10 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-11 — **✅ Specs 001–014 done (013 PR #14 + 014 PR #15 đã merge). 🟢 Spec 015 `downloads-manager` hoàn tất, 120/121 — cả 12 manual gate đã đóng qua 3 lượt test trên máy, chỉ còn mở PR. Phase 1 6/6 + Phase 2 6/6 + Phase 3 3/3 → Phase 4 mở khoá.**
+> Cập nhật lần cuối: 2026-09-11 — **✅ Specs 001–015 done (013 PR #14, 014 PR #15, 015 PR #16 đều đã merge). Phase 1 6/6 + Phase 2 6/6 + Phase 3 3/3 → Phase 4 mở khoá; spec kế tiếp: 016 `settings-screen`.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) — 14/19 shipped
+## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) + ✅ Spec 015 merged (PR #16, 2026-09-11, commit `e925f9d`) — 15/19 shipped
 
 Foundation phase tiến độ:
 - **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)
@@ -16,13 +16,14 @@ Foundation phase tiến độ:
 - **Spec 007** ✅ — **First feature-bearing UI**. **T042 manual UX gate verified by user on device 2026-05-01**: cold-start ≤ 5s ✅, 200ms loading first-show ✅, error UI in 8 locales ✅, rotation no-flash ✅ — closes the last deferred gate. WebView Compose Wrapper: `BrowserScreen` → `BrowserWebView` (`AndroidView` wrapping `android.webkit.WebView`) → loads `https://example.com`. State: `BrowserUiState` + sealed `LoadingState{Idle, Loading(Float), Loaded, Failed(ErrorReason)}` + sealed `ErrorReason{NetworkUnavailable, DnsFailure, HttpError, SslError, Generic}` with `@StringRes` mapping. UI: top Material3 `LinearProgressIndicator` (US2) + full-screen localized error UI (US3, 4 string keys × 8 locales = 32 translations). **WebView lockdown**: 4 file-access settings off (FR-013), zero `addJavascriptInterface` (FR-006), `MIXED_CONTENT_NEVER_ALLOW` (FR-018), all web-origin permissions denied silently (FR-017), cookies persist via Android default (FR-016, local-only). **Lifecycle**: `DisposableEffect(Unit)` + `loadUrl("about:blank") + removeAllViews() + destroy()` for the WebView 116+ native-resource race. **Hilt URL injection** via `UrlConfigModule` (`@InstallIn(ViewModelComponent::class)`); test override per-class via `@UninstallModules` + nested `FakeUrlConfigModule` inside `BrowserScreenOfflineErrorTest` (chosen over global `@TestInstallIn` after analysis surfaced that the latter would break happy-path tests). New deps: `espresso-web` (androidTest, version pinned to existing `espressoCore = 3.7.0`, pure-Java JAR), `hilt-android-testing` + `kspAndroidTest(hilt-compiler)`, `material-icons-core` (Compose-BOM-managed, used by `BrowserErrorState`). Custom `HiltTestRunner` boots `HiltTestApplication`; `HiltTestActivity` provides minimal `@AndroidEntryPoint` Compose host. Manifest expanded to 2 permissions (`INTERNET`, `ACCESS_NETWORK_STATE`); POST_NOTIFICATIONS reserved for Spec 015. **CI**: `instrumented-test` job re-enabled in `.github/workflows/ci.yml` (uncommitted edit carried from `main` ships in this PR). 4 clarifications applied (Q1 cookies persist, Q2 deny permissions, Q3 top linear progress, Q4 mixed content NEVER_ALLOW). 4 post-analyze remediations (C1 type ordering, M1 rotation test T021b, M2 200ms first-show enforcement, M3 deterministic offline trigger via Hilt). 15 new unit tests (94 total: 79 baseline + BrowserViewModelTest 10 + ErrorReasonTest 5). APK release **1.61 MB** (delta +50 KB vs Spec 006 baseline 1.56 MB; SC-008 ≤ 200 KB ✅; most of delta = `material-icons-core`). 16KB CI gate green: 24/24 entries `align=0x4000`, zero new `.so`. Detekt fix: 4-callback bundle in `BrowserWebViewCallbacks` keeps `BrowserWebView` parameter count under `LongParameterList.functionThreshold = 6`. `browser_screen_placeholder` removed from all 8 locales (Spec 002 placeholder → real screen). Constitution Check 11/11 PASS pre + post-implementation. **T042 manual emulator UX gate (cold-start ≤ 5s, loading 200ms first-show, error UI in 8 locales, rotation no-flash) DEFERRED to user device verification** — mirrors Spec 004/006 manual-gate pattern.
 
 **Phase 2 done** (6/6 ship-ready): 008 / 009 / 010 / 011 / 012 all merged into `main`.
-**Phase 3** (2/3 merged, 3/3 hoàn tất): 🟢 **Spec 015 `downloads-manager` hoàn tất** trên branch `015-downloads-manager` (120/121; **cả 12 manual device gate đã đóng**, G9 = Outcome A, chỉ còn T121 mở PR). Spec 013 merged into `main` via PR #14; **✅ Spec 014 merged into `main` via PR #15** (2026-09-10, commit `2e7c633`; **111/113 tasks** — chỉ còn T103b, tức SC-005 perf p99 ≤ 16 ms cần **release build trên máy thật cỡ Pixel 5**, deferred và đã flag trong PR body). Còn lại của Phase 3: **Spec 015 `downloads-manager`**.
+**Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
+**Phase 4** (0/3): kế tiếp là **Spec 016 `settings-screen`**.
 
-### Spec 015 — Downloads Manager (🟢 hoàn tất 2026-09-11, 120/121 — 12/12 gate đóng; SC-006 perf DEFERRED chờ máy thật)
+### Spec 015 — Downloads Manager (✅ merged 2026-09-11 via PR #16 — 121/121; 12/12 gate đóng; SC-006 perf DEFERRED chờ máy thật)
 
 Phase 3's final spec. Downloads land in the device's **public** Downloads folder on every supported version, listed on a rewritten `DownloadsScreen` that replaced the Spec 002 placeholder.
 
-**Gates**: testDebugUnitTest ✅ **472/472** (Spec 014 baseline 379 → +93) · lintDebug ✅ (8 locales at 127 keys each) · detekt ✅ **baseline UNCHANGED** · ktlintCheck ✅ · assembleDebug/Release ✅ · `compileDebugAndroidTestKotlin` ✅ (**not executed** — no device) · 16 KB ✅ zero new `.so` · APK **2.44 MB** (+80 KB) · Constitution **11/11 PASS with one documented deviation**.
+**Gates** (final, after device pass 3): testDebugUnitTest ✅ **480/480** (Spec 014 baseline 379 → +101) · lintDebug ✅ (all 8 locales in parity) · detekt ✅ **baseline UNCHANGED** · ktlintCheck ✅ · assembleDebug/Release ✅ · instrumented tests ✅ in CI (API 29 emulator job, green on `main` after merge) · 16 KB ✅ zero new `.so` · APK **2.44 MB** (+80 KB) · Constitution **11/11 PASS with one documented deviation**.
 
 **⚠️ The project's first schema migration.** `AppDatabase.SCHEMA_VERSION` 1 → 2 adds `download_records`. Strictly additive — the migration names no pre-existing table, so existing user data cannot be altered by construction. `2.json` exported and committed; `fallbackToDestructiveMigration` still zero real call sites. `AppDatabaseMigrationTest` passes 3/3 and deliberately avoids `MigrationTestHelper`, which loads schemas from instrumentation *assets* that AGP never merges for JVM unit tests — using it would have put the spec's most important test behind a device. It drives the real `Room.databaseBuilder` path instead, which still catches a drifted migration because Room validates schema identity on open.
 
@@ -30,11 +31,13 @@ Phase 3's final spec. Downloads land in the device's **public** Downloads folder
 
 **Other decisions worth remembering**: the FR-024a fallback resolves a forgotten transfer handle from **file presence** and never yields an in-flight state, and deliberately does not model *when* the platform prunes; cancelling also deletes the record, because a cancelled row would otherwise resolve to `Missing` forever and misrepresent a deliberate act as a lost file; the bottom bar went 7 affordances → 5 + a `MoreVert` overflow (Bookmarks · History · Downloads), a deliberate one-tap regression that also reserves Settings' slot for Spec 016.
 
-**⛔ G9 blocks a manifest line.** The app ships **without** `POST_NOTIFICATIONS` — the prior is that the system download service notifies under its own identity, and declaring a permission the app does not use would itself violate §I. T109/T110 wait on a device. `WRITE_EXTERNAL_STORAGE` **is** declared with `maxSdkVersion="28"`: the one documented Constitution deviation.
+**✅ G9 = Outcome A.** Verified on Android 16 (build `BE4B.251210.005`): with `POST_NOTIFICATIONS` neither declared nor granted, the system download service still posts its progress and completion notifications under its own UID — so the permission stays undeclared (declaring an unused permission would violate §I). `WRITE_EXTERNAL_STORAGE` **is** declared with `maxSdkVersion="28"`: the one documented Constitution deviation. Constitution §II was reconciled with both in **v1.3.0** (2026-09-11).
 
 **Files from earlier specs touched** (flagged for review, same courtesy Spec 014 extended to Spec 007): `ClipboardWriter` gained a defaulted `label`; Spec 005's `AppDatabaseConfigTest` fixture now derives from `SCHEMA_VERSION + 1` after the bump turned it from "a future version" into "the same version, different shape"; `NavigationBottomBar`/`Callbacks` restructured and their stale KDoc corrected; seven Browser tests gained the new constructor parameter via shared inert doubles.
 
-**Next**: install the debug build → run **G1–G12** from `specs/015-downloads-manager/quickstart.md` (**G9 first — it gates the manifest**; **G11 step 5**, the install-over-`main` upgrade check, is a release blocker) → `./gradlew connectedDebugAndroidTest` → open PR `015-downloads-manager → main`. **Phase 4 (016 settings-screen, 017 splash, 018 onboarding) is unblocked.**
+**Device passes** (3 passes on `TA016_API24` minSdk + an API 36 AVD, all 12 gates closed) found **four real defects, all fixed**: "Unknown size" on every completed download; "File deleted" over a file still on disk; the FR-024a fallback probing a provider-owned content URI that dies exactly when the fallback needs it (presence now checks the real file first via `DownloadedFileProbe`, and the platform's de-duplicated filename is captured on completion); and FR-029's "remove the stale entry" never reaching the snackbar. **Recorded, not fixed**: `DownloadStatus.Cancelled` is modelled but unreachable (cancel deletes the row), and quickstart.md's FR-016 grep gives a false positive (its two hits are comments). **SC-006 is DEFERRED** — a debug build on a software-rendered emulator is not evidence against a release-on-Pixel-5 target.
+
+**Next**: ✅ merged 2026-09-11 via PR #16 (commit `e925f9d`; all six CI jobs green on `main`). **T121 closed (121/121)** — the PR merged with a generic auto-generated body, so its description was rewritten after merge to carry the APK delta, the Constitution deviation, the nine clarifications, the G9 outcome and the SC-006 deferral. Still owed on real hardware: SC-006, best measured together with Spec 014's T103b (note the seeders are debug-only, so a release build needs another way to seed). **Phase 4 is unblocked — next: Spec 016 `settings-screen`.**
 
 ### Spec 014 — History View (✅ merged 2026-09-10 via PR #15 — US1–US5 + Polish)
 
@@ -63,7 +66,7 @@ Branch `014-history-view`. Shipped in two passes: the **MVP pass** (US1 — auto
 
 - **Pass 6 — Spec 007 flake properly fixed (2026-05-08)**: pass 5's attempt was not a real fix — it passed on local arm64 API 24/36 but CI (API 29) still failed at the same assertion, because waiting for the page to settle does not stop a settled WebView from re-firing `onProgressChanged` / `onPageFinished` and flipping the synthetic `Loading` back to `Loaded`; CI's `-gpu swiftshader_indirect` emulator widens that window enough to lose every time. Fixed properly by removing the WebView from the equation: seed the ViewModel to `LoadingState.Failed` before `setContent`, which makes `BrowserWebView` skip its initial `loadUrl` (the seam `BrowserScreenOfflineErrorTest` already relies on), so it emits no callbacks and the state machine can be driven deterministically. New `BrowserScreenLoadingIndicatorTest` (2 cases); the racy method removed from `BrowserScreenInstrumentedTest`. Validated by booting the local AVD with CI's own flags: `main`'s original test fails there (first local reproduction of the CI failure), this branch runs **61/61 three times back-to-back**. `connectedDebugAndroidTest` is now green, leaving only T103b (SC-005 on real hardware) and T111 (PR).
 
-**Next**: ✅ tất cả đã xong — PR #15 merged 2026-09-10. Chỉ còn **T103b** treo lại: chạy **release** build trên **máy thật cỡ Pixel 5**, seed 10 K rows bằng `HistorySeeder` (debug-only receiver), đo lại SC-005 (p99 ≤ 16 ms). Không block gì. **Spec kế tiếp: 015 `downloads-manager`** — Phase 3 cuối cùng, bắt buộc trước Phase 4 theo Constitution §X.
+**Next**: ✅ tất cả đã xong — PR #15 merged 2026-09-10. Chỉ còn **T103b** treo lại: chạy **release** build trên **máy thật cỡ Pixel 5**, seed 10 K rows bằng `HistorySeeder` (debug-only receiver), đo lại SC-005 (p99 ≤ 16 ms). Không block gì. Spec kế tiếp lúc đó là 015 `downloads-manager` — đã merge qua PR #16 ngày 2026-09-11.
 
 ### Spec 013 — Bookmarks CRUD (production code done 2026-05-07)
 
@@ -266,7 +269,7 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 - Material3 default Shapes
 
 ### Iconography
-- Material Icons Extended (`androidx.compose.material:material-icons-extended`)
+- **Core-only** `material-icons-core` (Compose-BOM-managed, added Spec 007) — `material-icons-extended` is deliberately **not** used; pick the closest core glyph, or no icon when none is honest (Specs 013–015 precedent)
 
 ---
 
@@ -323,7 +326,7 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 | `androidx.compose:compose-bom` | Compose BOM | ✅ |
 | `androidx.compose.ui:ui` | Compose UI | ✅ |
 | `androidx.compose.material3:material3` | Material 3 | ✅ |
-| `androidx.compose.material:material-icons-extended` | Material Icons | ✅ |
+| `androidx.compose.material:material-icons-core` | Material Icons (core-only — `-extended` is NOT used) | ✅ |
 | `androidx.navigation:navigation-compose` | Navigation | ✅ |
 | `com.google.dagger:hilt-android` | DI | ✅ (Kotlin only) |
 | `androidx.hilt:hilt-navigation-compose` | Hilt + Nav | ✅ |
@@ -656,14 +659,16 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 - **Category**: Tools / Productivity (Google Play)
 - **Content Rating**: Everyone
 - **Privacy**: No analytics, no crash reporting by default, zero data transmitted to ThirtySix servers
-- **Permissions tối thiểu**: Internet, ACCESS_NETWORK_STATE (cho download), READ/WRITE_EXTERNAL_STORAGE chỉ khi cần (Scoped Storage cho Android 11+)
+- **Permissions tối thiểu**: `INTERNET`, `ACCESS_NETWORK_STATE`, và `WRITE_EXTERNAL_STORAGE` giới hạn `maxSdkVersion="28"` (deviation duy nhất, Spec 015 — chỉ để ghi vào thư mục Downloads công khai trên Android 7.0–9.0). Không `POST_NOTIFICATIONS` (Spec 015 G9), không `MANAGE_EXTERNAL_STORAGE`.
 
 ### Permissions cần
 | Permission | Khi |
 |------------|-----|
 | `android.permission.INTERNET` | v1 (bắt buộc cho WebView) |
 | `android.permission.ACCESS_NETWORK_STATE` | v1 (offline detection) |
-| `android.permission.POST_NOTIFICATIONS` | v1 (download progress, Android 13+) |
+| `android.permission.WRITE_EXTERNAL_STORAGE` (`maxSdkVersion="28"`) | v1 (Spec 015 — tải về thư mục Downloads công khai trên Android 7.0–9.0; không có trong manifest hiệu lực từ API 29) |
+
+> `POST_NOTIFICATIONS` cố ý **không** khai báo: thông báo tiến độ/hoàn tất do dịch vụ tải của hệ thống đăng dưới UID riêng của nó (Spec 015 G9, Android 16). Chỉ xem lại nếu app tự tạo notification của mình (Constitution v1.3.0 §II).
 
 ---
 
