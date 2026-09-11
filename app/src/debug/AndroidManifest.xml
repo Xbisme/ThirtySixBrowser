@@ -9,7 +9,21 @@
         mismatch that occurs when an Activity is declared inside the test APK.
         See https://developer.android.com/training/dependency-injection/hilt-testing.
     -->
-    <application>
+    <!--
+        Spec 015 gate G9 — DEBUG ONLY. Android 9+ blocks cleartext HTTP by default, so a
+        local `http://10.0.2.2:8000` test server is unreachable from the app and the gate
+        cannot be driven without an external HTTPS host. This attribute exists solely so
+        manual gates can use a local server; the release manifest is untouched and the app
+        as shipped still refuses cleartext.
+
+        >> NOTE FOR SPEC 007: that refusal is currently UNEXAMINED, not a decision. The main
+        >> manifest declares neither `usesCleartextTraffic` nor a `networkSecurityConfig`,
+        >> and neither Spec 007 nor the Constitution discusses it — so ThirtySix Browser
+        >> silently fails to load ANY `http://` page on Android 9+. For a browser that is a
+        >> significant functional gap, and it needs a deliberate decision rather than an
+        >> inherited default. Filed from the Spec 015 device pass.
+    -->
+    <application android:usesCleartextTraffic="true">
         <activity
             android:name="com.raumanian.thirtysix.browser.HiltTestActivity"
             android:exported="false"
@@ -29,6 +43,21 @@
             <intent-filter>
                 <action android:name="com.raumanian.thirtysix.browser.debug.SEED_HISTORY" />
                 <action android:name="com.raumanian.thirtysix.browser.debug.CLEAR_HISTORY" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+            Spec 015 T107 — debug-only downloads seeder for the SC-006 benchmark
+            (quickstart gate G12). Same posture as HistorySeeder above: debug source set
+            only, so it cannot exist in a release build.
+        -->
+        <receiver
+            android:name="com.raumanian.thirtysix.browser.dev.DownloadSeeder"
+            android:exported="true"
+            tools:ignore="MissingClass,ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.raumanian.thirtysix.browser.debug.SEED_DOWNLOADS" />
+                <action android:name="com.raumanian.thirtysix.browser.debug.CLEAR_DOWNLOADS" />
             </intent-filter>
         </receiver>
     </application>

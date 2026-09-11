@@ -15,6 +15,8 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognit
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.StartDownloadResult
+import com.raumanian.thirtysix.browser.domain.usecase.StartDownloadUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkResult
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -85,6 +87,7 @@ class BrowserViewModel @Inject constructor(
     private val toggleBookmark: ToggleBookmarkUseCase,
     private val recordHistoryEntry: RecordHistoryEntryUseCase,
     private val updateHistoryEntryTitle: UpdateHistoryEntryTitleUseCase,
+    private val startDownload: StartDownloadUseCase,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<BrowserUiState> = MutableStateFlow(
@@ -220,6 +223,50 @@ class BrowserViewModel @Inject constructor(
      */
     fun consumeBookmarkSnackbarEvent() {
         _uiState.update { it.copy(bookmarkSnackbarEvent = null) }
+    }
+
+    /**
+     * Spec 015 FR-001 / FR-002 — the web engine handed back a resource it will not render.
+     *
+     * Hands it straight to [StartDownloadUseCase], which sanitises the filename, asks the
+     * platform, and only then records it. Nothing about the active tab's incognito state is
+     * consulted: FR-014a records incognito downloads identically.
+     */
+    fun onDownloadRequested(
+        url: String,
+        userAgent: String,
+        contentDisposition: String?,
+        mimeType: String?,
+    ) {
+        viewModelScope.launch {
+            val event = when (val result = startDownload(url, contentDisposition, mimeType, userAgent)) {
+                is StartDownloadResult.Started -> DownloadSnackbarEvent.Started(result.fileName)
+                StartDownloadResult.ServiceUnavailable -> DownloadSnackbarEvent.ServiceUnavailable
+            }
+            _uiState.update { current -> current.copy(downloadSnackbarEvent = event) }
+        }
+    }
+
+    /**
+     * Spec 015 FR-012 — surface the outcome when the storage permission blocks a download
+     * before it can start. Called from the permission launcher, which is the only place
+     * that knows the user's answer.
+     */
+    fun onStoragePermissionDenied(permanently: Boolean) {
+        _uiState.update { current ->
+            current.copy(
+                downloadSnackbarEvent = if (permanently) {
+                    DownloadSnackbarEvent.StoragePermissionPermanentlyDenied
+                } else {
+                    DownloadSnackbarEvent.StoragePermissionDenied
+                },
+            )
+        }
+    }
+
+    /** Spec 015 — clears the download snackbar event once shown. Idempotent. */
+    fun consumeDownloadSnackbarEvent() {
+        _uiState.update { it.copy(downloadSnackbarEvent = null) }
     }
 
     /**

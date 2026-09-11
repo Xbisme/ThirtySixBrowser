@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — German (de) translation. "Browser" is a German loanword, kept as-is. -->
     <string name="app_name">ThirtySix Browser</string>
-    <string name="downloads_screen_placeholder">Downloads</string>
     <string name="settings_screen_placeholder">Einstellungen</string>
     <string name="onboarding_screen_placeholder">Einführung</string>
 
@@ -120,4 +119,49 @@
     <string name="history_clear_all_dialog_body">Dadurch werden alle Seiten deines Browserverlaufs dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden.</string>
     <string name="history_clear_all_dialog_confirm">Löschen</string>
     <string name="history_clear_all_dialog_cancel">Abbrechen</string>
+
+    <!-- Spec 015 — downloads (US1) -->
+    <string name="downloads_started_snackbar">%1$s wird heruntergeladen</string>
+    <string name="downloads_service_unavailable">Downloads sind auf diesem Gerät nicht verfügbar.</string>
+    <string name="downloads_storage_permission_denied">Für Downloads wird Speicherzugriff benötigt.</string>
+    <string name="downloads_storage_permission_denied_permanently">Der Speicherzugriff ist blockiert. Aktiviere ihn in den Einstellungen, um Downloads zu speichern.</string>
+    <string name="downloads_storage_permission_rationale_title">Speicherzugriff erlauben?</string>
+    <string name="downloads_storage_permission_rationale_body">ThirtySix Browser benötigt auf dieser Android-Version Speicherzugriff, um Dateien im Ordner „Downloads“ zu speichern.</string>
+    <string name="downloads_storage_permission_rationale_confirm">Weiter</string>
+    <string name="downloads_storage_permission_rationale_cancel">Später</string>
+
+    <!-- Spec 015 — downloads (US2-US7) -->
+    <string name="downloads_screen_title">Downloads</string>
+    <string name="downloads_action_back">Zurück</string>
+    <string name="downloads_state_pending">Wartet</string>
+    <string name="downloads_state_downloading">Wird heruntergeladen</string>
+    <string name="downloads_state_paused">Pausiert</string>
+    <string name="downloads_state_complete">Abgeschlossen</string>
+    <string name="downloads_state_cancelled">Abgebrochen</string>
+    <string name="downloads_state_missing">Datei nicht gefunden</string>
+    <string name="downloads_failure_insufficient_space">Fehlgeschlagen — zu wenig Speicher</string>
+    <string name="downloads_failure_network">Fehlgeschlagen — Verbindung verloren</string>
+    <string name="downloads_failure_generic">Fehlgeschlagen</string>
+    <string name="downloads_size_unknown">Größe unbekannt</string>
+    <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
+    <string name="browser_action_more">Mehr</string>
+    <string name="downloads_no_app_can_open">Keine App auf diesem Gerät kann diese Datei öffnen.</string>
+    <string name="downloads_file_missing">Diese Datei ist nicht mehr auf deinem Gerät.</string>
+    <string name="downloads_not_complete">Dieser Download ist noch nicht fertig.</string>
+    <string name="downloads_action_open">Öffnen</string>
+    <string name="downloads_action_copy_link">Link kopieren</string>
+    <string name="downloads_action_remove">Aus Liste entfernen</string>
+    <string name="downloads_action_delete_file">Datei löschen</string>
+    <string name="downloads_link_copied">Link kopiert</string>
+    <string name="downloads_record_removed">Aus Liste entfernt</string>
+    <string name="downloads_file_deleted">Datei gelöscht</string>
+    <string name="downloads_delete_dialog_title">Diese Datei löschen?</string>
+    <string name="downloads_delete_dialog_body">%1$s wird endgültig von deinem Gerät gelöscht. Das lässt sich nicht rückgängig machen.</string>
+    <string name="downloads_delete_dialog_confirm">Löschen</string>
+    <string name="downloads_delete_dialog_cancel">Abbrechen</string>
+    <string name="downloads_action_cancel">Download abbrechen</string>
+    <string name="downloads_cancelled">Download abgebrochen</string>
+    <string name="downloads_empty_title">Noch keine Downloads</string>
+    <string name="downloads_empty_body">Heruntergeladene Dateien erscheinen hier.</string>
+    <string name="downloads_operation_failed">Etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
 </resources>

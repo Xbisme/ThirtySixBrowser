@@ -113,6 +113,7 @@ class BrowserScreenLoadingIndicatorTest {
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(
                     LoadingIndicatorNoopHistoryRepository,
                 ),
+                startDownload = instrumentedNoOpStartDownloadUseCase(),
             ).apply {
                 // Seeded BEFORE setContent so `BrowserWebView` skips its initial
                 // `loadUrl` — the WebView then never fires a single callback.

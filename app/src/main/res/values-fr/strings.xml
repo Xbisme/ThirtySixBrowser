@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — French (fr) translation. Brand "ThirtySix" preserved per research.md R6. -->
     <string name="app_name">Navigateur ThirtySix</string>
-    <string name="downloads_screen_placeholder">Téléchargements</string>
     <string name="settings_screen_placeholder">Paramètres</string>
     <string name="onboarding_screen_placeholder">Présentation</string>
 
@@ -122,4 +121,49 @@
     <string name="history_clear_all_dialog_body">Toutes les pages de votre historique de navigation seront définitivement supprimées. Cette action est irréversible.</string>
     <string name="history_clear_all_dialog_confirm">Effacer</string>
     <string name="history_clear_all_dialog_cancel">Annuler</string>
+
+    <!-- Spec 015 — downloads (US1) -->
+    <string name="downloads_started_snackbar">Téléchargement de %1$s</string>
+    <string name="downloads_service_unavailable">Les téléchargements ne sont pas disponibles sur cet appareil.</string>
+    <string name="downloads_storage_permission_denied">L\'accès au stockage est nécessaire pour enregistrer les téléchargements.</string>
+    <string name="downloads_storage_permission_denied_permanently">L\'accès au stockage est bloqué. Activez-le dans les Paramètres pour enregistrer les téléchargements.</string>
+    <string name="downloads_storage_permission_rationale_title">Autoriser l\'accès au stockage ?</string>
+    <string name="downloads_storage_permission_rationale_body">Sur cette version d\'Android, ThirtySix Browser a besoin d\'accéder au stockage pour enregistrer les fichiers dans le dossier Téléchargements.</string>
+    <string name="downloads_storage_permission_rationale_confirm">Continuer</string>
+    <string name="downloads_storage_permission_rationale_cancel">Plus tard</string>
+
+    <!-- Spec 015 — downloads (US2-US7) -->
+    <string name="downloads_screen_title">Téléchargements</string>
+    <string name="downloads_action_back">Retour</string>
+    <string name="downloads_state_pending">En attente</string>
+    <string name="downloads_state_downloading">Téléchargement</string>
+    <string name="downloads_state_paused">En pause</string>
+    <string name="downloads_state_complete">Terminé</string>
+    <string name="downloads_state_cancelled">Annulé</string>
+    <string name="downloads_state_missing">Fichier introuvable</string>
+    <string name="downloads_failure_insufficient_space">Échec — espace insuffisant</string>
+    <string name="downloads_failure_network">Échec — connexion perdue</string>
+    <string name="downloads_failure_generic">Échec</string>
+    <string name="downloads_size_unknown">Taille inconnue</string>
+    <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
+    <string name="browser_action_more">Plus</string>
+    <string name="downloads_no_app_can_open">Aucune application de cet appareil ne peut ouvrir ce fichier.</string>
+    <string name="downloads_file_missing">Ce fichier n\'est plus sur votre appareil.</string>
+    <string name="downloads_not_complete">Ce téléchargement n\'est pas encore terminé.</string>
+    <string name="downloads_action_open">Ouvrir</string>
+    <string name="downloads_action_copy_link">Copier le lien</string>
+    <string name="downloads_action_remove">Retirer de la liste</string>
+    <string name="downloads_action_delete_file">Supprimer le fichier</string>
+    <string name="downloads_link_copied">Lien copié</string>
+    <string name="downloads_record_removed">Retiré de la liste</string>
+    <string name="downloads_file_deleted">Fichier supprimé</string>
+    <string name="downloads_delete_dialog_title">Supprimer ce fichier ?</string>
+    <string name="downloads_delete_dialog_body">%1$s sera définitivement supprimé de votre appareil. Cette action est irréversible.</string>
+    <string name="downloads_delete_dialog_confirm">Supprimer</string>
+    <string name="downloads_delete_dialog_cancel">Annuler</string>
+    <string name="downloads_action_cancel">Annuler le téléchargement</string>
+    <string name="downloads_cancelled">Téléchargement annulé</string>
+    <string name="downloads_empty_title">Aucun téléchargement</string>
+    <string name="downloads_empty_body">Les fichiers que vous téléchargez apparaîtront ici.</string>
+    <string name="downloads_operation_failed">Une erreur est survenue. Veuillez réessayer.</string>
 </resources>

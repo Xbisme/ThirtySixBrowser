@@ -145,7 +145,9 @@ internal object InstrumentedNoopIncognitoRepository : IncognitoTabRepository {
 /** Records what "Copy URL" put on the clipboard without touching the platform service. */
 internal class InstrumentedRecordingClipboardWriter : ClipboardWriter {
     val copied: MutableList<String> = mutableListOf()
-    override fun copyUrl(url: String): Boolean {
+
+    // Spec 015 added the defaulted `label` parameter to ClipboardWriter.
+    override fun copyUrl(url: String, label: String): Boolean {
         copied += url
         return true
     }

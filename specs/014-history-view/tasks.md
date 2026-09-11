@@ -297,7 +297,7 @@ Android single-module project. Source under `app/src/main/kotlin/com/raumanian/t
 ### PR & merge
 
 - [X] T110 Verify branch `014-history-view` is rebased onto `main` (PR #14 already merged 2026-05-07; should be a clean fast-forward base).
-- [ ] T111 Open PR `014-history-view → main` with body referencing this `tasks.md`, the SC-008 APK delta, the Constitution Check 11/11 PASS line, the 4 clarification answers (Q1–Q4), and the list of any deferred manual gates. **⏸ DEFERRED — PR creation is the user's call.**
+- [X] T111 Open PR `014-history-view → main` with body referencing this `tasks.md`, the SC-008 APK delta, the Constitution Check 11/11 PASS line, the 4 clarification answers (Q1–Q4), and the list of any deferred manual gates. **✅ DONE — PR #15 opened and merged into `main` 2026-09-10 (merge commit `2e7c633`). T103b flagged as DEFERRED in the PR body.**
 
 ---
 

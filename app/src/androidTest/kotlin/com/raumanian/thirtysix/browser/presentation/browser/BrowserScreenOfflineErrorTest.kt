@@ -109,6 +109,7 @@ class BrowserScreenOfflineErrorTest {
                     OfflineErrorNoopHistoryRepository,
                 ),
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(OfflineErrorNoopHistoryRepository),
+                startDownload = instrumentedNoOpStartDownloadUseCase(),
             ).apply {
                 onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)

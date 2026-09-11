@@ -40,4 +40,11 @@ object AppConstants {
     // clip's origin rather than translated user-facing copy, so it lives here
     // instead of `strings.xml`.
     const val CLIPBOARD_URL_LABEL = "ThirtySix Browser URL"
+
+    // Spec 015 FR-033 — label attached to the `ClipData` written by the Downloads
+    // screen's "Copy link" action. Distinct from CLIPBOARD_URL_LABEL so the system
+    // clipboard preview (Android 13+) can tell a copied page address apart from a
+    // copied download source. Like its sibling, this is an origin identifier rather
+    // than translated user-facing copy, so it belongs here and not in strings.xml.
+    const val CLIPBOARD_DOWNLOAD_LINK_LABEL = "ThirtySix Browser download link"
 }

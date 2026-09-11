@@ -114,6 +114,7 @@ class BrowserScreenInstrumentedTest {
                     InstrumentedNoopHistoryRepository,
                 ),
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(InstrumentedNoopHistoryRepository),
+                startDownload = instrumentedNoOpStartDownloadUseCase(),
             )
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
         }

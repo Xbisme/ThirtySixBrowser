@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import com.raumanian.thirtysix.browser.data.local.dao.BookmarkDao
 import com.raumanian.thirtysix.browser.data.local.dao.BookmarkFolderDao
+import com.raumanian.thirtysix.browser.data.local.dao.DownloadRecordDao
 import com.raumanian.thirtysix.browser.data.local.dao.HistoryDao
 import com.raumanian.thirtysix.browser.data.local.dao.TabDao
 import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
+import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration1To2
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,6 +26,10 @@ object DatabaseModule {
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
             // No fallbackToDestructiveMigration*: strict-no-destructive policy (FR-009).
             // No setJournalMode: rely on Room's WRITE_AHEAD_LOGGING default (FR-007 / R8).
+            // Spec 015 FR-016: v1 -> v2 registered explicitly. Every future migration is
+            // appended here; omitting one makes Room throw rather than destroy data, which
+            // is the behaviour the strict policy is protecting.
+            .addMigrations(Migration1To2.MIGRATION_1_2)
             .build()
 
     @Provides
@@ -31,6 +37,9 @@ object DatabaseModule {
 
     @Provides
     fun provideBookmarkFolderDao(db: AppDatabase): BookmarkFolderDao = db.bookmarkFolderDao()
+
+    @Provides
+    fun provideDownloadRecordDao(db: AppDatabase): DownloadRecordDao = db.downloadRecordDao()
 
     @Provides
     fun provideHistoryDao(db: AppDatabase): HistoryDao = db.historyDao()

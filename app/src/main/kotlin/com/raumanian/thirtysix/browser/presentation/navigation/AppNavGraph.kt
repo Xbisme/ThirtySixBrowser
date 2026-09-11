@@ -28,7 +28,7 @@ fun AppNavGraph(
         composable(AppDestination.Tabs.route) { TabsScreen(navController = navController) }
         composable(AppDestination.Bookmarks.route) { BookmarksScreen(navController = navController) }
         composable(AppDestination.History.route) { HistoryScreen(navController = navController) }
-        composable(AppDestination.Downloads.route) { DownloadsScreen() }
+        composable(AppDestination.Downloads.route) { DownloadsScreen(navController = navController) }
         composable(AppDestination.Settings.route) { SettingsScreen() }
         composable(AppDestination.Onboarding.route) { OnboardingScreen() }
     }

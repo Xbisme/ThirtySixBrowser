@@ -502,7 +502,22 @@ that complexity without adding value for a free, single-tier app.
 |------------|---------|------|
 | `android.permission.INTERNET` | WebView page load | 007 |
 | `android.permission.ACCESS_NETWORK_STATE` | Offline detection | 007 |
-| `android.permission.POST_NOTIFICATIONS` | Download progress (Android 13+) | 015 |
+| `android.permission.WRITE_EXTERNAL_STORAGE` (`maxSdkVersion="28"`) | Write downloads to the **public** Downloads folder on Android 7.0–9.0, where Scoped Storage does not yet exist. Absent from the effective manifest on API 29+, requested at point of first use, never at launch. | 015 |
+
+**`POST_NOTIFICATIONS` is deliberately NOT declared.** It was listed here against Spec 015
+until measured on a device, and the measurement said it is not needed: the download
+service's progress and completion notifications are posted by
+`com.android.providers.downloads` under **its own UID**, so the browser's own notification
+grant is irrelevant to them. Verified at Spec 015 gate G9 on Android 16 / API 36
+(`sdk_gphone64_arm64`, build `BE4B.251210.005`): with the permission neither declared nor
+granted, "Download complete" still appeared in the shade. Declaring it would have violated
+§I's "MUST NOT request runtime permissions it does not actively use". Should the app ever
+compose a notification of its own, this decision must be revisited.
+
+> The storage row is a **documented deviation** from the three-permission minimum this table
+> previously described — see `specs/015-downloads-manager/plan.md` Complexity Tracking for
+> the justification and the rejected alternatives. `MANAGE_EXTERNAL_STORAGE` remains
+> forbidden outright.
 
 ### Architecture
 

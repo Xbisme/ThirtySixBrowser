@@ -11,10 +11,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomAppBar
@@ -103,21 +102,12 @@ fun NavigationBottomBar(
             )
         }
         IconButton(
-            onClick = callbacks.onBookmarksClick,
-            modifier = Modifier.testTag(TEST_TAG_NAV_BOOKMARKS),
+            onClick = callbacks.onOverflowClick,
+            modifier = Modifier.testTag(TEST_TAG_NAV_OVERFLOW),
         ) {
             Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = stringResource(R.string.bookmarks_screen_title),
-            )
-        }
-        IconButton(
-            onClick = callbacks.onHistoryClick,
-            modifier = Modifier.testTag(TEST_TAG_NAV_HISTORY),
-        ) {
-            Icon(
-                imageVector = Icons.Filled.DateRange,
-                contentDescription = stringResource(R.string.history_screen_title),
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.browser_action_more),
             )
         }
         TabsSwitcherButton(
@@ -198,6 +188,8 @@ const val TEST_TAG_NAV_BACK: String = "nav_back"
 const val TEST_TAG_NAV_FORWARD: String = "nav_forward"
 const val TEST_TAG_NAV_RELOAD_STOP: String = "nav_reload_stop"
 const val TEST_TAG_NAV_HOME: String = "nav_home"
-const val TEST_TAG_NAV_BOOKMARKS: String = "nav_bookmarks"
-const val TEST_TAG_NAV_HISTORY: String = "nav_history"
+
+// Spec 015 — the Bookmarks and History tags retired with their bottom-bar buttons;
+// both destinations now live behind the overflow menu (FR-042).
+const val TEST_TAG_NAV_OVERFLOW: String = "nav_overflow"
 const val TEST_TAG_NAV_TABS_SWITCHER: String = "nav_tabs_switcher"

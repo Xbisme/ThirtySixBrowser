@@ -21,6 +21,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,8 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBa
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserErrorState
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserLoadingIndicator
+import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserOverflowMenu
+import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserOverflowMenuCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.IncognitoIndicator
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBarCallbacks
@@ -83,6 +86,13 @@ fun BrowserScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
     val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
+    // Spec 015 — resolved here rather than inside the effect because `stringResource` is a
+    // Composable call and cannot be made from a coroutine body.
+    val downloadStartedTemplate = stringResource(R.string.downloads_started_snackbar)
+    val downloadServiceUnavailableMessage = stringResource(R.string.downloads_service_unavailable)
+    val storagePermissionDeniedMessage = stringResource(R.string.downloads_storage_permission_denied)
+    val storagePermissionSettingsMessage =
+        stringResource(R.string.downloads_storage_permission_denied_permanently)
     val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
 
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
@@ -116,6 +126,24 @@ fun BrowserScreen(
         }
     }
 
+    LaunchedEffect(state.downloadSnackbarEvent) {
+        // Spec 015 FR-002 / FR-008a / FR-012 — confirm or explain, over the page the user
+        // is still on, without blocking it.
+        val message = when (val event = state.downloadSnackbarEvent) {
+            is DownloadSnackbarEvent.Started -> downloadStartedTemplate.format(event.fileName)
+            DownloadSnackbarEvent.ServiceUnavailable -> downloadServiceUnavailableMessage
+            DownloadSnackbarEvent.StoragePermissionDenied -> storagePermissionDeniedMessage
+            DownloadSnackbarEvent.StoragePermissionPermanentlyDenied -> storagePermissionSettingsMessage
+            null -> null
+        }
+        if (message != null) {
+            snackbarHostState.showSnackbar(message)
+            viewModel.consumeDownloadSnackbarEvent()
+        }
+    }
+
+    val overflowExpanded = remember { mutableStateOf(false) }
+
     val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions)
 
     Scaffold(
@@ -137,16 +165,30 @@ fun BrowserScreen(
                     state = state,
                     webViewActions = webViewActions,
                     onStopRequested = viewModel::onLoadStopped,
-                    onBookmarksClick = {
-                        navController.navigate(AppDestination.Bookmarks.route)
-                    },
-                    onHistoryClick = {
-                        navController.navigate(AppDestination.History.route)
-                    },
+                    onOverflowClick = { overflowExpanded.value = true },
                     onTabsSwitcherClick = {
                         navController.navigate(AppDestination.Tabs.route)
                     },
                     onTabsSwitcherLongClick = viewModel::onLongPressNewTab,
+                ),
+            )
+            // Spec 015 FR-042 — anchored to the bar so it opens over the overflow control.
+            BrowserOverflowMenu(
+                expanded = overflowExpanded.value,
+                onDismiss = { overflowExpanded.value = false },
+                callbacks = BrowserOverflowMenuCallbacks(
+                    onBookmarksClick = {
+                        overflowExpanded.value = false
+                        navController.navigate(AppDestination.Bookmarks.route)
+                    },
+                    onHistoryClick = {
+                        overflowExpanded.value = false
+                        navController.navigate(AppDestination.History.route)
+                    },
+                    onDownloadsClick = {
+                        overflowExpanded.value = false
+                        navController.navigate(AppDestination.Downloads.route)
+                    },
                 ),
             )
         },
@@ -290,6 +332,14 @@ private fun BrowserScaffoldContent(
     activeTabId: Long,
     modifier: Modifier = Modifier,
 ) {
+    // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
+    // reaching the ViewModel. On API 29+ the gate is a straight pass-through and no
+    // permission is ever requested.
+    val onDownloadRequested = rememberDownloadRequestHandler(
+        onGranted = viewModel::onDownloadRequested,
+        onDenied = viewModel::onStoragePermissionDenied,
+    )
+
     Box(modifier = modifier) {
         androidx.compose.runtime.key(activeTabId) {
             BrowserWebView(
@@ -301,6 +351,7 @@ private fun BrowserScaffoldContent(
                     onProgressChanged = viewModel::onProgressChanged,
                     onLoadFinished = viewModel::onLoadFinished,
                     onLoadFailed = viewModel::onLoadFailed,
+                    onDownloadRequested = onDownloadRequested,
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
                     onUrlChange = viewModel::onUrlChanged,
@@ -348,8 +399,7 @@ private fun rememberBottomBarCallbacks(
     state: BrowserUiState,
     webViewActions: WebViewActionsHandle,
     onStopRequested: () -> Unit,
-    onBookmarksClick: () -> Unit,
-    onHistoryClick: () -> Unit,
+    onOverflowClick: () -> Unit,
     onTabsSwitcherClick: () -> Unit,
     onTabsSwitcherLongClick: () -> Unit,
 ): NavigationBottomBarCallbacks = NavigationBottomBarCallbacks(
@@ -364,8 +414,7 @@ private fun rememberBottomBarCallbacks(
         }
     },
     onHome = { webViewActions.loadHome() },
-    onBookmarksClick = onBookmarksClick,
-    onHistoryClick = onHistoryClick,
+    onOverflowClick = onOverflowClick,
     onTabsSwitcherClick = onTabsSwitcherClick,
     onTabsSwitcherLongClick = onTabsSwitcherLongClick,
 )

@@ -188,6 +188,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
             toggleBookmark = ToggleBookmarkUseCase(bookmarkRepo, AddBookmarkUseCase(bookmarkRepo)),
             recordHistoryEntry = RecordHistoryEntryUseCase(history),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(history),
+            startDownload = noOpStartDownloadUseCase(),
         )
     }
 
