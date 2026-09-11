@@ -97,6 +97,62 @@ class CookieRestoreInstrumentedTest {
     }
 
     /**
+     * Spec 016 T069 — ⚠️ non-negotiable privacy test (FR-030, research R7).
+     *
+     * The user clears cookies while an incognito session is open. Discarding the set-aside must
+     * leave restore still WIPING the jar — so the incognito write is gone — while writing NOTHING
+     * back — so the cookie the user cleared does not return when the last incognito tab closes.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    fun discard_then_restore_still_wipes_the_jar_and_writes_nothing_back() = runBlocking {
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setCookie(ORIGIN_NORMAL, "session=cleared-by-user")
+        cookieManager.flush()
+        manager.captureSnapshot(listOf(ORIGIN_NORMAL))
+        cookieManager.setCookie(ORIGIN_INCOGNITO, "secret=incognito-write")
+        cookieManager.flush()
+
+        manager.discardSetAsideCookies()
+        assertTrue("the set-aside is EMPTY, not released", manager.hasSnapshot())
+        manager.restoreSnapshot()
+
+        val normalAfter = cookieManager.getCookie(ORIGIN_NORMAL).orEmpty()
+        val incognitoAfter = cookieManager.getCookie(ORIGIN_INCOGNITO).orEmpty()
+        assertFalse(
+            "a cleared cookie must not be written back, got=$normalAfter",
+            normalAfter.contains("session=cleared-by-user"),
+        )
+        assertFalse(
+            "restore must still wipe incognito writes, got=$incognitoAfter",
+            incognitoAfter.contains("secret=incognito-write"),
+        )
+    }
+
+    /**
+     * Spec 016 T069 — the observable proof that the discard left `EMPTY` behind rather than
+     * `null`: a second capture while `EMPTY` is held must stay a no-op. Had it replaced the
+     * snapshot, cookie B would be written back on restore. `hasSnapshot()` alone cannot tell
+     * the two apart.
+     */
+    @Test(timeout = TEST_TIMEOUT_MS)
+    fun a_capture_after_discard_cannot_bring_cookies_back() = runBlocking {
+        val cookieManager = CookieManager.getInstance()
+        cookieManager.setCookie(ORIGIN_NORMAL, "first=cleared-a")
+        cookieManager.flush()
+        manager.captureSnapshot(listOf(ORIGIN_NORMAL))
+
+        manager.discardSetAsideCookies()
+        cookieManager.setCookie(ORIGIN_NORMAL, "second=later-b")
+        cookieManager.flush()
+        manager.captureSnapshot(listOf(ORIGIN_NORMAL))
+        manager.restoreSnapshot()
+
+        val after = cookieManager.getCookie(ORIGIN_NORMAL).orEmpty()
+        assertFalse("cookie A must stay cleared, got=$after", after.contains("first=cleared-a"))
+        assertFalse("cookie B must not be written back, got=$after", after.contains("second=later-b"))
+    }
+
+    /**
      * Wipe the global cookie jar synchronously. The callback variant of
      * `CookieManager.removeAllCookies` is documented to require a thread
      * with a Looper (the JavaScriptThread / WebView core thread); coroutine

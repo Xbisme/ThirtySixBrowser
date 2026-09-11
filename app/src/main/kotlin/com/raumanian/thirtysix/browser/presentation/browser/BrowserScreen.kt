@@ -189,6 +189,11 @@ fun BrowserScreen(
                         overflowExpanded.value = false
                         navController.navigate(AppDestination.Downloads.route)
                     },
+                    // Spec 016 FR-001 — the slot Spec 015 reserved.
+                    onSettingsClick = {
+                        overflowExpanded.value = false
+                        navController.navigate(AppDestination.Settings.route)
+                    },
                 ),
             )
         },

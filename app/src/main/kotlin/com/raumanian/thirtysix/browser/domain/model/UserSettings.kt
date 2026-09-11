@@ -9,11 +9,17 @@ import com.raumanian.thirtysix.browser.core.constants.AppDefaults
  * and branch on individual fields. New emissions are produced when any single
  * key changes; the repository applies distinctUntilChanged so identical
  * snapshots collapse.
+ *
+ * Spec 016 added [isDynamicColorEnabled] and [historyRetention], and removed the language
+ * field: the app language is held by the platform's per-app language setting, which is the
+ * single source of truth, so a copy here would go stale whenever the user changed the
+ * language from system settings (FR-016, FR-017).
  */
 data class UserSettings(
     val themeMode: ThemeMode,
-    val languageOverride: LanguageOverride,
+    val isDynamicColorEnabled: Boolean,
     val searchEngine: SearchEngine,
+    val historyRetention: HistoryRetention,
     val isOnboardingCompleted: Boolean,
 ) {
     companion object {
@@ -24,8 +30,9 @@ data class UserSettings(
          */
         val DEFAULT = UserSettings(
             themeMode = AppDefaults.THEME_MODE,
-            languageOverride = AppDefaults.LANGUAGE_OVERRIDE,
+            isDynamicColorEnabled = AppDefaults.DYNAMIC_COLOR_ENABLED,
             searchEngine = AppDefaults.SEARCH_ENGINE,
+            historyRetention = AppDefaults.HISTORY_RETENTION,
             isOnboardingCompleted = AppDefaults.IS_ONBOARDING_COMPLETED,
         )
     }

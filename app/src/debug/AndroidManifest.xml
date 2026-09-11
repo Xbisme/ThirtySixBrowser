@@ -60,5 +60,18 @@
                 <action android:name="com.raumanian.thirtysix.browser.debug.CLEAR_DOWNLOADS" />
             </intent-filter>
         </receiver>
+
+        <!--
+            Spec 016 T078 — debug-only tab seeder for the clear-browsing-data gates
+            (quickstart G5 / G8). Same posture as the seeders above: debug source set only.
+        -->
+        <receiver
+            android:name="com.raumanian.thirtysix.browser.dev.TabSeeder"
+            android:exported="true"
+            tools:ignore="MissingClass,ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.raumanian.thirtysix.browser.debug.SEED_TABS" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

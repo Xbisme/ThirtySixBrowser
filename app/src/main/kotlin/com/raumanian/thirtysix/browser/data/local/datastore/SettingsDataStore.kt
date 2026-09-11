@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.raumanian.thirtysix.browser.core.constants.StorageKeys
 import com.raumanian.thirtysix.browser.core.result.Result
-import com.raumanian.thirtysix.browser.domain.model.LanguageOverride
+import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import java.io.IOException
@@ -39,16 +39,18 @@ class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Pre
         prefs[StorageKeys.THEME_MODE] = mode.storageValue
     }
 
-    suspend fun setLanguageOverride(override: LanguageOverride): Result<Unit> =
-        editCatching { prefs ->
-            when (override) {
-                LanguageOverride.FollowSystem -> prefs.remove(StorageKeys.LANGUAGE_OVERRIDE)
-                is LanguageOverride.Explicit -> prefs[StorageKeys.LANGUAGE_OVERRIDE] = override.bcp47
-            }
-        }
+    /** Spec 016 FR-009. */
+    suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit> = editCatching { prefs ->
+        prefs[StorageKeys.DYNAMIC_COLOR_ENABLED] = enabled
+    }
 
     suspend fun setSearchEngine(engine: SearchEngine): Result<Unit> = editCatching { prefs ->
         prefs[StorageKeys.SEARCH_ENGINE] = engine.storageValue
+    }
+
+    /** Spec 016 FR-020 — stored as the window's day count (data-model §1). */
+    suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> = editCatching { prefs ->
+        prefs[StorageKeys.HISTORY_RETENTION_DAYS] = retention.days
     }
 
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = editCatching { prefs ->

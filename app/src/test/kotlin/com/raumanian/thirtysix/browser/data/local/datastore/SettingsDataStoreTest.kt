@@ -5,7 +5,7 @@ import com.raumanian.thirtysix.browser.core.constants.AppDefaults
 import com.raumanian.thirtysix.browser.core.constants.StorageKeys
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
-import com.raumanian.thirtysix.browser.domain.model.LanguageOverride
+import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import kotlinx.coroutines.CoroutineScope
@@ -34,12 +34,15 @@ import org.junit.rules.TemporaryFolder
  * Story coverage:
  *  - US1 (theme persist): writeThemeMode_then_freshReadReturnsThemeMode
  *  - US2 (first-launch defaults): defaultRead_returnsDocumentedDefaults
- *  - US3 (language persist + clear): writeLanguageOverrideExplicit_*, writeFollowSystem_*
  *  - US4 (search engine persist + corrupted fallback):
  *        writeSearchEngine_*, corruptedSearchEngineDisk_fallsBackToDefault
  *  - US5 (onboarding flag): writeOnboardingCompleted_then_freshReadReturnsTrue
  *  - US6 (concurrent writes): concurrentWrites_differentKeys_bothPersist (100 reps),
  *        concurrentWrites_sameKey_lastWriterWins
+ *  - Spec 016 (dynamic color + retention persist, out-of-set retention fallback):
+ *        writeDynamicColorEnabled_*, writeHistoryRetention_*, outOfSetRetentionDisk_*
+ *
+ * Spec 016 removed the language cases along with the language value itself (research R4).
  */
 class SettingsDataStoreTest {
 
@@ -55,8 +58,9 @@ class SettingsDataStoreTest {
         val snapshot = mapper.toDomain(ds.data.first())
 
         assertEquals(AppDefaults.THEME_MODE, snapshot.themeMode)
-        assertEquals(AppDefaults.LANGUAGE_OVERRIDE, snapshot.languageOverride)
+        assertEquals(AppDefaults.DYNAMIC_COLOR_ENABLED, snapshot.isDynamicColorEnabled)
         assertEquals(AppDefaults.SEARCH_ENGINE, snapshot.searchEngine)
+        assertEquals(AppDefaults.HISTORY_RETENTION, snapshot.historyRetention)
         assertEquals(AppDefaults.IS_ONBOARDING_COMPLETED, snapshot.isOnboardingCompleted)
     }
 
@@ -78,43 +82,6 @@ class SettingsDataStoreTest {
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(ThemeMode.Dark, snapshot.themeMode)
         secondScope.coroutineContext.job.cancelAndJoin()
-    }
-
-    // ----------------------------- US3 -------------------------------------
-
-    @Test
-    fun writeLanguageOverrideExplicit_then_freshReadReturnsExplicit() = runBlocking {
-        val folder = tempFolder.newFolder()
-        val fileName = "lang.preferences_pb"
-
-        val s1 = CoroutineScope(SupervisorJob())
-        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
-        assertTrue(first.setLanguageOverride(LanguageOverride.Explicit("vi")) is Result.Success)
-        s1.coroutineContext.job.cancelAndJoin()
-
-        val s2 = CoroutineScope(SupervisorJob())
-        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
-        val snapshot = mapper.toDomain(second.data.first())
-        assertEquals(LanguageOverride.Explicit("vi"), snapshot.languageOverride)
-        s2.coroutineContext.job.cancelAndJoin()
-    }
-
-    @Test
-    fun writeFollowSystem_after_explicit_clears() = runBlocking {
-        val folder = tempFolder.newFolder()
-        val fileName = "lang2.preferences_pb"
-
-        val s1 = CoroutineScope(SupervisorJob())
-        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
-        first.setLanguageOverride(LanguageOverride.Explicit("vi"))
-        first.setLanguageOverride(LanguageOverride.FollowSystem)
-        s1.coroutineContext.job.cancelAndJoin()
-
-        val s2 = CoroutineScope(SupervisorJob())
-        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
-        val snapshot = mapper.toDomain(second.data.first())
-        assertEquals(LanguageOverride.FollowSystem, snapshot.languageOverride)
-        s2.coroutineContext.job.cancelAndJoin()
     }
 
     // ----------------------------- US4 -------------------------------------
@@ -173,6 +140,56 @@ class SettingsDataStoreTest {
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
         val snapshot = mapper.toDomain(second.data.first())
         assertEquals(true, snapshot.isOnboardingCompleted)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    // ----------------------------- Spec 016 --------------------------------
+
+    @Test
+    fun writeDynamicColorEnabled_then_freshReadReturnsIt() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "dynamic.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertTrue(first.setDynamicColorEnabled(false) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(false, mapper.toDomain(second.data.first()).isDynamicColorEnabled)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    @Test
+    fun writeHistoryRetention_then_freshReadReturnsIt() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "retention.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertTrue(first.setHistoryRetention(HistoryRetention.Days7) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(HistoryRetention.Days7, mapper.toDomain(second.data.first()).historyRetention)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    @Test
+    fun outOfSetRetentionDisk_fallsBackToDefault() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "retention-corrupt.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        createTestSettingsDataStore(folder, fileName, s1)
+            .edit { it[StorageKeys.HISTORY_RETENTION_DAYS] = OUT_OF_SET_RETENTION_DAYS }
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(AppDefaults.HISTORY_RETENTION, mapper.toDomain(second.data.first()).historyRetention)
         s2.coroutineContext.job.cancelAndJoin()
     }
 
@@ -238,5 +255,8 @@ class SettingsDataStoreTest {
         // the test becomes a CI bottleneck reduce to 50 with a corresponding
         // SC clarification.
         const val REPEAT_COUNT = 100
+
+        /** A day count that is not one of the four Spec 016 windows. */
+        const val OUT_OF_SET_RETENTION_DAYS = 45
     }
 }

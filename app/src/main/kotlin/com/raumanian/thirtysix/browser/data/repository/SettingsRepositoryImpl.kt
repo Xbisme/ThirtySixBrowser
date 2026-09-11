@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.data.repository
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
-import com.raumanian.thirtysix.browser.domain.model.LanguageOverride
+import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
@@ -26,10 +26,13 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = dataStore.setThemeMode(mode)
 
-    override suspend fun setLanguageOverride(override: LanguageOverride): Result<Unit> =
-        dataStore.setLanguageOverride(override)
+    override suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit> =
+        dataStore.setDynamicColorEnabled(enabled)
 
     override suspend fun setSearchEngine(engine: SearchEngine): Result<Unit> = dataStore.setSearchEngine(engine)
+
+    override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
+        dataStore.setHistoryRetention(retention)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         dataStore.setOnboardingCompleted(value)

@@ -116,6 +116,20 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
     override fun hasSnapshot(): Boolean = snapshot != null
 
     /**
+     * Spec 016 FR-030 — replaces a held snapshot with [CookieJarSnapshot.EMPTY], never with
+     * `null`. [restoreSnapshot] returns early when nothing is held, so `null` would make the end
+     * of the incognito session skip its wipe and leak incognito cookies into normal browsing;
+     * `EMPTY` keeps the wipe and removes only the write-back (research R7). It also keeps
+     * [captureSnapshot] a no-op for the rest of the session, so the cleared cookies cannot be
+     * re-captured by the next incognito tab.
+     */
+    override suspend fun discardSetAsideCookies() {
+        mutex.withLock {
+            if (snapshot != null) snapshot = CookieJarSnapshot.EMPTY
+        }
+    }
+
+    /**
      * Suspending wrapper around [CookieManager.removeAllCookies] callback API.
      *
      * Platform requirement (Android API 29 / older WebView builds): the

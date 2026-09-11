@@ -50,4 +50,21 @@ interface CookieJarSnapshotManager {
 
     /** For diagnostic / unit-testing. */
     fun hasSnapshot(): Boolean
+
+    /**
+     * Spec 016 FR-030 — discard the normal-browsing cookies set aside for restoring at the end
+     * of the current incognito session, so that closing the last incognito tab restores nothing.
+     *
+     * Contract:
+     *  - If a snapshot is held, REPLACE it with `CookieJarSnapshot.EMPTY`. Do NOT clear it to
+     *    null: [restoreSnapshot] returns early when nothing is held and would then skip its
+     *    wipe, leaking cookies set during the incognito session into normal browsing
+     *    (data-model §5, research R7).
+     *  - If no snapshot is held (no incognito session), this is a no-op.
+     *  - Serialised with capture and restore under the manager's existing mutex.
+     *  - Never throws; there is no platform call to fail.
+     *
+     * Callers MUST invoke this BEFORE wiping the cookie jar, never after (research R7).
+     */
+    suspend fun discardSetAsideCookies()
 }

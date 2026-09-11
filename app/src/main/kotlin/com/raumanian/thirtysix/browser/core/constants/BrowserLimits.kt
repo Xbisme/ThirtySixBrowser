@@ -80,23 +80,41 @@ object BrowserLimits {
     const val MAX_HISTORY_QUERY_LENGTH: Int = 200
 
     /**
-     * Spec 014 — retention window for browsing history, in days.
+     * Spec 016 FR-020 — the four history retention windows a user can choose, in days. They
+     * replace Spec 014's fixed 90-day window, which remains the default.
      *
-     * History is otherwise unbounded: `HistoryRepository.observeAll()` loads the whole
-     * table, so memory scales linearly with how long the app has been used. Measured on
-     * an API 36 emulator, 10 000 rows cost ~3 MB of Java heap (~300 B/row) — fine today,
-     * but a heavy user (~200 page loads/day) reaches 100 000 rows inside two years, and
-     * ~30 MB for one screen is not acceptable on a minSdk-24 device with a ~96 MB heap
-     * cap.
+     * Deliberately bounded, with no "keep forever": `HistoryRepository.observeAll()` loads the
+     * whole table, so memory scales linearly with how long the app has been used. Spec 014
+     * measured ~3 MB of Java heap per 10 000 rows (~300 B/row) on an API 36 emulator; a heavy
+     * user (~200 page loads/day) would reach 100 000 rows inside two years, and ~30 MB for one
+     * screen is not acceptable on a minSdk-24 device with a ~96 MB heap cap. 180 days is the
+     * longest window on offer for the same reason.
      *
-     * Pruning the table (rather than capping the query with `LIMIT`) is deliberate: it
-     * keeps the "what the list shows is what actually exists" invariant, so search can
-     * never report "no matches" for a row that is still sitting in the database.
-     *
-     * 90 days matches the default retention of mainstream browsers. Making this
-     * user-configurable belongs to Spec 016 (settings-screen).
+     * Pruning the table (rather than capping the query with `LIMIT`) keeps the "what the list
+     * shows is what actually exists" invariant, so search never reports "no matches" for a row
+     * still sitting in the database. `HistoryRetention` is the only intended consumer.
      */
-    const val MAX_HISTORY_DAYS: Int = 90
+    const val HISTORY_RETENTION_DAYS_7: Int = 7
+
+    /** Spec 016 FR-020 — see [HISTORY_RETENTION_DAYS_7]. */
+    const val HISTORY_RETENTION_DAYS_30: Int = 30
+
+    /** Spec 016 FR-020 — see [HISTORY_RETENTION_DAYS_7]. The default, matching Spec 014. */
+    const val HISTORY_RETENTION_DAYS_90: Int = 90
+
+    /** Spec 016 FR-020 — see [HISTORY_RETENTION_DAYS_7]. */
+    const val HISTORY_RETENTION_DAYS_180: Int = 180
+
+    /**
+     * Spec 016 FR-032, FR-043 — how long clearing cookies and site data may wait for the web
+     * engine's completion callback before the step counts as failed.
+     *
+     * The Settings dialog cannot be dismissed while a clear runs, so a callback that never
+     * arrives would otherwise leave the user stuck behind it for good. The bound is generous —
+     * SC-009's target for the whole clear is 3 seconds on Pixel 5-class hardware — so it only
+     * ever trips on a web engine that has genuinely stopped responding.
+     */
+    const val WEB_DATA_CLEAR_TIMEOUT_MS: Long = 15_000L
 
     /**
      * Spec 015 FR-005 — hard upper bound on a downloaded file's name, in characters.

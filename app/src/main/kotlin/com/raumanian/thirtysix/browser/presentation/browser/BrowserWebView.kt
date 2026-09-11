@@ -4,8 +4,10 @@ package com.raumanian.thirtysix.browser.presentation.browser
 
 import android.graphics.Bitmap
 import android.net.http.SslError
+import android.os.Build
 import android.webkit.GeolocationPermissions
 import android.webkit.PermissionRequest
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
@@ -14,9 +16,15 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
@@ -54,6 +62,14 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  *   `BrowserScreenOfflineErrorTest` deterministic assertion — without this
  *   guard, the WebView would auto-load the URL and override the seeded Failed
  *   state via subsequent `onPageFinished`).
+ *
+ * Renderer recovery (Spec 016 carry-forward debt, lint `MissingOnRenderProcessGone`):
+ * - Losing the renderer process no longer ends the app. The WebView is keyed to
+ *   [WebViewHost.generation]; the loss advances it, which disposes the dead WebView and
+ *   builds a replacement for the same tab.
+ * - After a crash the error state stays up and the replacement stays empty until Reload.
+ *   After the system reclaimed the renderer, the page reloads straight away.
+ * - The replacement starts with no back/forward history.
  */
 @Suppress("LongParameterList")
 // 6 params after Spec 009: state + homeUrl + actions + 2 callback bundles + modifier.
@@ -73,18 +89,15 @@ internal fun BrowserWebView(
     modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val webView = remember {
-        // Mutable holder; populated inside AndroidView.factory below.
-        @Suppress("VariableNaming")
-        arrayOfNulls<WebView>(1)
-    }
+    val currentUrl = rememberUpdatedState(state.currentUrl)
+    val host = remember { WebViewHost(currentUrl) }
 
     // Lifecycle: pause WebView when host stops, resume when started.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> webView[0]?.onPause()
-                Lifecycle.Event.ON_RESUME -> webView[0]?.onResume()
+                Lifecycle.Event.ON_PAUSE -> host.current?.onPause()
+                Lifecycle.Event.ON_RESUME -> host.current?.onResume()
                 else -> Unit
             }
         }
@@ -98,45 +111,43 @@ internal fun BrowserWebView(
     // is correct and safe.
     val isIncognito = state.isIncognito
 
-    AndroidView(
-        modifier = modifier,
-        factory = { context ->
-            buildConfiguredWebView(
-                context = context,
-                state = state,
-                homeUrl = homeUrl,
-                actions = actions,
-                callbacks = callbacks,
-                navigationCallbacks = navigationCallbacks,
-            ).also { wv -> webView[0] = wv }
-        },
-    )
+    // Renderer recovery — each generation owns one WebView. When its renderer process goes
+    // away, the host moves to the next generation, which disposes the dead WebView and builds
+    // a replacement.
+    key(host.generation) {
+        val generation = host.generation
+        // This generation's own WebView: by the time its cleanup runs after a renderer loss,
+        // `host.current` no longer points at it.
+        val instance = remember { arrayOfNulls<WebView>(1) }
 
-    // Native-resource cleanup. Keyed to Unit so this fires only once on
-    // disposal (NOT every recomposition). See research.md R2.
-    //
-    // Spec 012 R5 — incognito tabs run a 9-step teardown that prepends 5
-    // clear*() calls before the existing Spec 007 4-step destroy, ensuring
-    // no per-WebView state (history, form data, find-on-page, SSL decisions,
-    // disk cache) outlives the close-tab moment. Order is fixed; each clear*
-    // is idempotent so re-entry under stress is harmless.
-    DisposableEffect(Unit) {
-        onDispose {
-            webView[0]?.let { wv ->
-                wv.stopLoading()
-                if (isIncognito) {
-                    wv.clearHistory()
-                    wv.clearFormData()
-                    wv.clearMatches()
-                    wv.clearSslPreferences()
-                    // includeDiskFiles = true → wipe disk cache too.
-                    wv.clearCache(true)
+        AndroidView(
+            modifier = modifier,
+            factory = { context ->
+                buildConfiguredWebView(
+                    context = context,
+                    state = state,
+                    homeUrl = homeUrl,
+                    actions = actions,
+                    callbacks = callbacks,
+                    navigationCallbacks = navigationCallbacks,
+                    host = host,
+                ).also { wv ->
+                    instance[0] = wv
+                    host.current = wv
                 }
-                wv.loadUrl(BLANK_PAGE)
-                wv.removeAllViews()
-                wv.destroy()
+            },
+        )
+
+        // Native-resource cleanup. Keyed to Unit so this fires only once per generation, on
+        // disposal (NOT every recomposition). See research.md R2 and [releaseWebView].
+        DisposableEffect(Unit) {
+            onDispose {
+                instance[0]?.let { wv ->
+                    releaseWebView(wv, isIncognito, rendererGone = generation != host.generation)
+                    if (host.current === wv) host.current = null
+                }
+                instance[0] = null
             }
-            webView[0] = null
         }
     }
 }
@@ -154,6 +165,7 @@ private fun buildConfiguredWebView(
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
+    host: WebViewHost,
 ): WebView = WebView(context).also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
@@ -165,6 +177,16 @@ private fun buildConfiguredWebView(
         onCanGoBackChange = navigationCallbacks.onCanGoBackChange,
         onCanGoForwardChange = navigationCallbacks.onCanGoForwardChange,
         onScreenshotReady = navigationCallbacks.onScreenshotReady,
+        onRendererGone = { crashed ->
+            // This WebView must never be used again: silence the handle until the
+            // replacement re-wires it.
+            actions.detach()
+            // The replacement starts without this WebView's back/forward history.
+            navigationCallbacks.onCanGoBackChange(false)
+            navigationCallbacks.onCanGoForwardChange(false)
+            if (crashed) callbacks.onLoadFailed(ErrorReason.Generic)
+            host.replaceAfterRendererGone(crashed)
+        },
     )
     // Spec 015 FR-001 — the engine hands off anything it will not render. Attached beside
     // the two platform clients because this is the same shape of event they carry, and the
@@ -182,7 +204,9 @@ private fun buildConfiguredWebView(
     // factory closure; the lambdas persist for the lifetime of the WebView.
     actions.goBack = { if (wv.canGoBack()) wv.goBack() }
     actions.goForward = { if (wv.canGoForward()) wv.goForward() }
-    actions.reload = { wv.reload() }
+    // A replacement built after a renderer crash has loaded nothing, and `reload()` on an
+    // empty WebView does nothing — so Reload loads the tab's current address instead.
+    actions.reload = { if (wv.url == null) wv.loadUrl(host.currentUrl) else wv.reload() }
     actions.stopLoading = { wv.stopLoading() }
     actions.loadHome = { wv.loadUrl(homeUrl) }
     actions.loadUrl = { url -> wv.loadUrl(url) }
@@ -190,7 +214,9 @@ private fun buildConfiguredWebView(
     // Spec 008 — conditional initial load. When state is seeded to Failed
     // (instrumented test pattern), skip the initial loadUrl so the test
     // assertion on the error UI is not overridden by a successful auto-load.
-    if (state.loadingState !is LoadingState.Failed) {
+    // Renderer recovery — also skipped by the replacement for a crashed renderer, so a page
+    // that crashes its renderer waits for Reload instead of crashing it again in a loop.
+    if (host.loadInitialUrl && state.loadingState !is LoadingState.Failed) {
         wv.loadUrl(state.currentUrl)
     }
 }
@@ -266,8 +292,16 @@ private fun applyIncognitoSettings(webView: WebView) {
  *
  * Spec 008 — adds `doUpdateVisitedHistory` override to surface `canGoBack` /
  * `canGoForward` flips into [BrowserUiState] via the new callbacks.
+ *
+ * Renderer recovery — [onRenderProcessGone] reports the loss of the renderer process through
+ * [onRendererGone] instead of letting it end the app.
  */
 @Suppress("LongParameterList")
+// androidx.webkit's `MissingOnRenderProcessGone` check has two halves. One looks for an
+// `onRenderProcessGone` override, which this class has. The other reports every call to the
+// `WebViewClient` constructor, and in Kotlin that includes the superclass call in this class
+// header, so no implementation can clear it. Suppressed for that half only.
+@android.annotation.SuppressLint("MissingOnRenderProcessGone")
 private class BrowserWebViewClient(
     private val onLoadStarted: (String) -> Unit,
     private val onLoadFinished: (String) -> Unit,
@@ -276,6 +310,7 @@ private class BrowserWebViewClient(
     private val onCanGoBackChange: (Boolean) -> Unit,
     private val onCanGoForwardChange: (Boolean) -> Unit,
     private val onScreenshotReady: (Bitmap) -> Unit,
+    private val onRendererGone: (crashed: Boolean) -> Unit,
 ) : WebViewClient() {
     /**
      * Spec 012 (T065 / FR-018) — external-intent crash safety.
@@ -422,6 +457,90 @@ private class BrowserWebViewClient(
         handler?.cancel()
         onLoadFailed(ErrorReason.SslError)
     }
+
+    /**
+     * The renderer process behind [view] is gone: it crashed, or the system reclaimed it for
+     * memory.
+     *
+     * Returning `false`, the platform default, ends the whole app and every tab with it.
+     * Returning `true` promises [view] is never used again: [onRendererGone] detaches it, and
+     * [BrowserWebView] then disposes it and builds a replacement. After a crash the replacement
+     * waits for Reload, so a page that crashes its renderer cannot keep doing so; after the
+     * system reclaimed the renderer, the replacement reloads the page by itself.
+     *
+     * Called on API 26+ only. Below that the renderer runs inside the app's own process, so a
+     * renderer crash is an app crash and there is nothing left to recover.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+        // Unknown counts as a crash: the cautious choice is not to reload the page automatically.
+        val crashed = detail?.didCrash() ?: true
+        // No address in the log line: it would write browsing activity to logcat.
+        android.util.Log.w("BrowserWebView", "Renderer process gone (crashed=$crashed); replacing the WebView")
+        onRendererGone(crashed)
+        return true
+    }
+}
+
+/**
+ * Renderer-recovery state for one [BrowserWebView], that is, one tab activation. It outlives
+ * the WebViews it replaces.
+ */
+private class WebViewHost(private val currentUrlState: androidx.compose.runtime.State<String>) {
+    /** The WebView that lifecycle events act on, or null while none is attached. */
+    var current: WebView? = null
+
+    /** Advances each time a renderer goes away, which re-keys [BrowserWebView]'s WebView. */
+    var generation by mutableIntStateOf(0)
+        private set
+
+    /** Whether the next WebView built loads the page by itself. False after a renderer crash. */
+    var loadInitialUrl: Boolean = true
+        private set
+
+    /** The tab's live address, so a replacement loads the page the tab is actually on. */
+    val currentUrl: String get() = currentUrlState.value
+
+    fun replaceAfterRendererGone(crashed: Boolean) {
+        current = null
+        loadInitialUrl = !crashed
+        generation++
+    }
+}
+
+/**
+ * Releases a WebView when its [BrowserWebView] generation leaves composition.
+ *
+ * Spec 007 (research.md R2) — `stopLoading` + `loadUrl("about:blank")` + `removeAllViews` +
+ * `destroy` avoids the WebView 116+ native-resource race.
+ *
+ * Spec 012 R5 — incognito tabs run a 9-step teardown that prepends 5 clear*() calls before the
+ * Spec 007 4-step destroy, ensuring no per-WebView state (history, form data, find-on-page, SSL
+ * decisions, disk cache) outlives the close-tab moment. Order is fixed; each clear* is
+ * idempotent so re-entry under stress is harmless.
+ *
+ * Renderer recovery — once [rendererGone], the platform forbids any further use of the WebView,
+ * so it is only destroyed; its history, form data and find-on-page matches go with it. The
+ * replacement belongs to the same tab and runs the full sequence when it is released, which is
+ * when an incognito tab's SSL decisions and disk cache are cleared.
+ */
+private fun releaseWebView(webView: WebView, isIncognito: Boolean, rendererGone: Boolean) {
+    if (rendererGone) {
+        webView.destroy()
+        return
+    }
+    webView.stopLoading()
+    if (isIncognito) {
+        webView.clearHistory()
+        webView.clearFormData()
+        webView.clearMatches()
+        webView.clearSslPreferences()
+        // includeDiskFiles = true → wipe disk cache too.
+        webView.clearCache(true)
+    }
+    webView.loadUrl(BLANK_PAGE)
+    webView.removeAllViews()
+    webView.destroy()
 }
 
 /**

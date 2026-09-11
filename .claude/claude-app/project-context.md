@@ -1,10 +1,10 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-11 — **✅ Specs 001–015 done (013 PR #14, 014 PR #15, 015 PR #16 đều đã merge). Phase 1 6/6 + Phase 2 6/6 + Phase 3 3/3 → Phase 4 mở khoá; spec kế tiếp: 016 `settings-screen`.**
+> Cập nhật lần cuối: 2026-09-11 — **✅ Specs 001–015 done (013 PR #14, 014 PR #15, 015 PR #16 đều đã merge). 🟢 Spec 016 `settings-screen` đã implement trên branch `016-settings-screen` — 111/113 tasks, chờ PR; TalkBack pass của T109 cần người thật.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) + ✅ Spec 015 merged (PR #16, 2026-09-11, commit `e925f9d`) — 15/19 shipped
+## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) + ✅ Spec 015 merged (PR #16, 2026-09-11, commit `e925f9d`) + 🟢 Spec 016 implemented (branch `016-settings-screen`, chưa commit) — 15/19 shipped
 
 Foundation phase tiến độ:
 - **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)
@@ -17,7 +17,68 @@ Foundation phase tiến độ:
 
 **Phase 2 done** (6/6 ship-ready): 008 / 009 / 010 / 011 / 012 all merged into `main`.
 **Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
-**Phase 4** (0/3): kế tiếp là **Spec 016 `settings-screen`**.
+**Phase 4** (0/3 merged): **Spec 016 `settings-screen`** đã implement xong trên branch, còn chờ PR; tiếp theo là 017 `splash-screen`.
+
+### Spec 016 — Settings Screen (🟢 implemented 2026-09-11 — 111/113; còn TalkBack pass cần người thật và PR)
+
+Spec đầu tiên của Phase 4. Settings mở từ overflow menu, ở vị trí Spec 015 đã chừa sẵn, và thay cho placeholder của Spec 002. Gồm bảy phần:
+- **Theme**: Light / Dark / System.
+- **Dynamic color**: công tắc bật/tắt, chỉ hiện trên Android 12+.
+- **App language**: Follow system + 8 ngôn ngữ, mỗi ngôn ngữ ghi bằng tên gốc (endonym).
+- **Search engine**: Google / DuckDuckGo / Bing.
+- **History retention**: 7/30/90/180 ngày. Rút ngắn thì cảnh báo và hỏi lại; ghi thời hạn mới trước rồi mới xoá.
+- **Clear browsing data**: kiểu Chrome, gồm history · cookies và dữ liệu trang · ảnh và file trong cache.
+- **About**: phiên bản và tuyên bố quyền riêng tư.
+
+**Dependencies mới** — tra cứu lúc 2026-09-11T04:16Z, đều là bản stable mới nhất:
+
+| Package | Version | Mục đích | 16 KB |
+|---|---|---|---|
+| `androidx.appcompat:appcompat` | **1.8.0** | `AppCompatDelegate.setApplicationLocales` — đổi ngôn ngữ trong app trên Android 7–12 (bắt buộc `AppCompatActivity`) | ✅ zero `.so`; release APK vẫn đúng 8 `.so`, tất cả `align=0x4000` |
+| `androidx.webkit:webkit` | **1.17.0** | `WebStorageCompat.deleteBrowsingData` + `WebViewFeature` — xoá trọn dữ liệu trang. Thẻ `<release>` trên maven chỉ tới 1.18.0-alpha01, đã loại | ✅ zero `.so` |
+
+**Gates**:
+- testDebugUnitTest ✅ **557/557** (+77).
+- Instrumented ✅ **109/109** trên AVD API 29 (WebView 74, cùng API level với CI) và trên AVD 16 KB API 36. Lượt đầu là 107/107 trên API 36; sau khi sửa renderer có thêm 2 test.
+- lintDebug ✅ · detekt ✅ baseline không đổi · ktlintCheck ✅.
+- 16 KB ✅ · APK release **3,122,115 B**, trong ngân sách SC-014 ≤ 3,258,091 B.
+- Constitution **11/11 PASS**, `TODO(MANIFEST_COMMENT)` đã đóng.
+- Room vẫn **v2**, không có migration.
+
+**Quyết định mang theo**:
+- **Nền tảng giữ ngôn ngữ app.** `language_override` / `LanguageOverride` / `SetLanguageOverrideUseCase` bị xoá hẳn.
+- **`MainActivity` → `AppCompatActivity`**, theme parent đổi sang AppCompat NoActionBar ở cả hai file.
+- **`MAX_HISTORY_DAYS` bị xoá.** Sweep lúc khởi động đọc thời hạn đã lưu.
+- **Xoá cookie khi đang có tab ẩn danh**: thay snapshot đang giữ bằng `CookieJarSnapshot.EMPTY` (không bao giờ null), và luôn làm việc này **trước** khi xoá.
+
+**Kết quả trên máy** (API 24 `NYC` WebView 53 · API 36 `BE4B` WebView 134 · AVD 16 KB API 36 `BE2A` WebView 133 · AVD API 29 WebView 74):
+- **G1, G2, G5, G6, G7, G8, G9 đạt.** G5 đi nhánh Complete trên API 36 và nhánh fallback trên API 24, đúng A17.
+- **G3 đạt.** Trên API 24: 3 engine × 3 query (`cà phê sữa`, `東京タワー`, `weather & forecast`) cho 9/9 URL đúng engine và decode ra đúng query; FR-012 và persistence cũng đạt.
+- **G4 đạt.**
+  - Đủ 8 ngôn ngữ + Follow system khi mở 3 tab thường + 1 tab ẩn danh, trên API 24 và trên AVD 16 KB API 36.
+  - Fallback: `es-ES` → English, `fr-CA` → Français.
+  - Khứ hồi `cmd locale` 3/3 mỗi chiều.
+  - SC-004: 169–504 ms.
+- **G10 đạt.** Cold start không flash (API 36 cả sáng lẫn tối, API 24 sáng). Bookmarks/History/Downloads, FLAG_SECURE và sweep khởi động vẫn đúng.
+- **G11:**
+  - Quét 8 locale (màn hình + 6 dialog + message, ở 360dp) đạt.
+  - **TalkBack pass DEFERRED**: script adb không điều khiển TalkBack ổn định trên emulator, cần người thật.
+- **G12 / Constitution Gate 8 đạt.** AVD 16 KB (`PAGE_SIZE` 16384) chạy APK release; instrumented 109/109.
+- **SC-002** — đo trên emulator, chỉ để tham khảo:
+  - Đổi theme hoàn tất 22–59 ms sau khi dialog đóng.
+  - Tính từ lúc dialog bắt đầu mờ đi thì có một lần 121 ms.
+- **Chưa đo trên máy thật cỡ Pixel 5:** SC-009 và 60 fps của list.
+
+**Phát hiện & sửa**:
+- `SettingsModuleSmokeTest` (Spec 006) bị flaky vì sweep khởi động mở cùng file DataStore; đã sửa bằng `@Config(application = Application::class)`.
+- **Mất renderer không còn làm sập app.**
+  - `onRenderProcessGone` giờ trả `true`. WebView chết bị huỷ và dựng lại cho cùng tab.
+  - Renderer crash → hiện màn lỗi và chờ Reload. Renderer bị hệ thống kill → tự tải lại trang.
+  - `@SuppressLint` vẫn giữ: nửa `visitConstructor` của detector báo cả lời gọi super-constructor trong Kotlin.
+  - `BrowserWebViewRendererRecoveryTest` đạt 2/2.
+- **`HistorySeeder` hết ANR.** Mỗi batch dùng một transaction, và seed được chia thành nhiều broadcast, mỗi broadcast ≤ 1,000 dòng.
+- **ANR trên `G9_API36_Clean` (2 GB RAM)** là do máy ảo thiếu CPU — SystemUI, launcher và GMS cũng ANR cùng lúc — không phải lỗi app.
+- **Đổi ngôn ngữ có 111–288 ms frame đen** khi tạo lại activity; xoay màn hình thì không có. Chỉ ghi nhận, không tính là lỗi.
 
 ### Spec 015 — Downloads Manager (✅ merged 2026-09-11 via PR #16 — 121/121; 12/12 gate đóng; SC-006 perf DEFERRED chờ máy thật)
 
@@ -335,9 +396,9 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 | `androidx.room:room-compiler` | KSP | ✅ |
 | `androidx.datastore:datastore-preferences` | DataStore | ✅ |
 | `org.jetbrains.kotlinx:kotlinx-coroutines-android` | Coroutines | ✅ |
-| `androidx.webkit:webkit` | WebView extensions | ✅ |
+| `androidx.webkit:webkit` **1.17.0** (Spec 016, lookup 2026-09-11) | `WebStorageCompat.deleteBrowsingData`, `WebViewFeature` | ✅ verified — zero `.so`, release 16 KB gate green |
 | `androidx.core:core-splashscreen` | Splash API | ✅ |
-| `androidx.appcompat:appcompat` | Locale switching | ✅ |
+| `androidx.appcompat:appcompat` **1.8.0** (Spec 016, lookup 2026-09-11) | Per-app language on Android 7–12 (`AppCompatActivity`) | ✅ verified — zero `.so`, release 16 KB gate green |
 | `coil-kt:coil-compose` | Favicon loading (TBD) | ⚠️ verify khi thêm |
 
 > Mọi version cụ thể sẽ được lookup tại thời điểm thêm. Không hardcode version từ trí nhớ.

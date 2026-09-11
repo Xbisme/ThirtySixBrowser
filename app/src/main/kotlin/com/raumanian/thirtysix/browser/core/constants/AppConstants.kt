@@ -47,4 +47,14 @@ object AppConstants {
     // copied download source. Like its sibling, this is an origin identifier rather
     // than translated user-facing copy, so it belongs here and not in strings.xml.
     const val CLIPBOARD_DOWNLOAD_LINK_LABEL = "ThirtySix Browser download link"
+
+    // Spec 016 R9 — Hilt `@Named` qualifier for whether the device supports Material dynamic
+    // color (Android 12+). Injected rather than read from `Build` inside the ViewModel so the
+    // Settings tests can exercise both branches on the JVM. `const val` because annotation
+    // arguments must be compile-time constants.
+    const val QUALIFIER_SUPPORTS_DYNAMIC_COLOR = "supports_dynamic_color"
+
+    // Spec 016 R10 — Hilt `@Named` qualifier for the installed version name shown in About,
+    // sourced from `BuildConfig.VERSION_NAME`. Injected for the same testability reason.
+    const val QUALIFIER_APP_VERSION_NAME = "app_version_name"
 }

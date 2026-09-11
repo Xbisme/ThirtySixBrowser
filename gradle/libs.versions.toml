@@ -69,6 +69,20 @@ coroutinesTest = "1.10.2"
 # Latest 2.x at lookup time 2026-05-08.
 desugar = "2.1.5"
 
+# Spec 016 — androidx.appcompat for in-app language switching. Below API 33,
+# AppCompatDelegate.setApplicationLocales only works on an AppCompatActivity
+# (specs/016-settings-screen/research.md R1, R2). Latest stable at lookup
+# 2026-09-11T04:16Z (Google Maven metadata + release notes). Zero .so across its
+# dependency graph — confirmed in a release-build spike, research.md R3.
+appcompat = "1.8.0"
+
+# Spec 016 — androidx.webkit for WebStorageCompat.deleteBrowsingData: complete
+# site-data removal including service workers and Cache Storage (research.md R5).
+# Latest STABLE at lookup 2026-09-11T04:16Z; the maven-metadata <release> tag points
+# at 1.18.0-alpha01, excluded per Constitution §IX. Zero .so in the AAR and its
+# declared AndroidX dependencies, confirmed in a release-build spike (research.md R3).
+webkit = "1.17.0"
+
 [libraries]
 # AndroidX core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -121,6 +135,11 @@ app-cash-turbine = { group = "app.cash.turbine", name = "turbine", version.ref =
 # transitively pulls androidx.datastore:datastore-core (also pure Kotlin) +
 # kotlinx-coroutines-core (already in catalog).
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# Spec 016 — AppCompatActivity + AppCompatDelegate per-app language API. Java + resources, no .so.
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+# Spec 016 — WebStorageCompat.deleteBrowsingData + WebViewFeature. Pure Java, no .so.
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 
 
 # Robolectric (Spec 005) — provides Android Context to Room in JVM unit tests.
