@@ -60,27 +60,40 @@ class DownloadsScreenCancelTest {
         )
     }
 
+    /**
+     * All four terminal states are rendered **together, in one composition**, rather than a
+     * state per iteration: `setContent` may be called only once per [composeRule], so the
+     * loop this started as threw `has already set content` on its second pass and only ever
+     * really checked `Complete`.
+     *
+     * The row-count assertion is not decoration. Without it "no cancel controls" would pass
+     * just as happily against an empty list, which is the failure mode this test exists to
+     * rule out.
+     */
     @Test
     fun terminalRows_carryNoCancelControl() {
-        listOf(
+        val statuses = listOf(
             DownloadStatus.Complete(),
             DownloadStatus.Failed(DownloadFailureCause.Generic),
             DownloadStatus.Cancelled,
             DownloadStatus.Missing,
-        ).forEach { status ->
-            val vm = instrumentedViewModel(
-                records = listOf(record),
-                statuses = mapOf(record.transferHandle to status),
-                existingFiles = setOf(record.localUri!!),
-            )
-            composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
-            composeRule.waitForIdle()
-
-            assertEquals(
-                "$status must not offer cancellation",
-                0,
-                composeRule.onAllNodesWithTag(TEST_TAG_DOWNLOAD_CANCEL).fetchSemanticsNodes().size,
-            )
+        )
+        val records = statuses.indices.map { index ->
+            instrumentedRecord(id = index + 1L, fileName = "terminal-$index.bin")
         }
+        val vm = instrumentedViewModel(
+            records = records,
+            statuses = records.map { it.transferHandle }.zip(statuses).toMap(),
+            existingFiles = records.mapNotNull { it.localUri }.toSet(),
+        )
+        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.waitForIdle()
+
+        assertEquals("every terminal row must be on screen", statuses.size, vm.uiState.value.items.size)
+        assertEquals(
+            "no terminal state may offer cancellation: $statuses",
+            0,
+            composeRule.onAllNodesWithTag(TEST_TAG_DOWNLOAD_CANCEL).fetchSemanticsNodes().size,
+        )
     }
 }
