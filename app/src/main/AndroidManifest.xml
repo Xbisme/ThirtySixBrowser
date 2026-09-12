@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Spec 007 — WebView page load. Constitution §II "Permission table" assigns
-         these two to Spec 007. POST_NOTIFICATIONS was reserved for Spec 015; see the note below. -->
+    <!-- Spec 007 — WebView page load. Constitution v1.3.0 §II names these two as the app's
+         minimum permission set. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -14,13 +14,13 @@
          never be requested there; on API 24-28 it is requested at the moment of the first
          download, never at launch.
 
-         This is the FOURTH permission, against the Constitution's three-row table — a
-         deliberate, documented deviation recorded in
-         specs/015-downloads-manager/plan.md "Complexity Tracking". MANAGE_EXTERNAL_STORAGE
-         remains forbidden (FR-013) and is NOT declared.
+         This is the single documented deviation in Constitution v1.3.0 §II's permission table,
+         recorded in specs/015-downloads-manager/plan.md "Complexity Tracking".
+         MANAGE_EXTERNAL_STORAGE remains forbidden (FR-013) and is NOT declared.
 
-         POST_NOTIFICATIONS is deliberately still absent: gate G9 must determine on a device
-         whether the system download service's own notifications require it (FR-048). -->
+         POST_NOTIFICATIONS is deliberately NOT declared and MUST NOT be: Spec 015 gate G9
+         (Outcome A) confirmed on device that the system download service posts its
+         notifications under its own identity, so this app never needs the permission. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
@@ -48,6 +48,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Spec 016 research R1 — lets AndroidX persist the in-app language on Android 7.0–12.
+             With autoStoreLocales, AppCompat saves the user's choice and re-applies it at start-up;
+             on Android 13+ the framework stores it instead. Disabled and not exported: the service
+             is never started, it only carries this metadata. -->
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
     </application>
 
 </manifest>

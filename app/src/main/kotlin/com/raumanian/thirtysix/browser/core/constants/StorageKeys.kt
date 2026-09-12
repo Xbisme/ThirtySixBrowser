@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.core.constants
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 /**
@@ -22,10 +23,19 @@ import androidx.datastore.preferences.core.stringPreferencesKey
  * The negative-path test SettingsMapperTest#renamedKey_returnsDefault_oldValueGone
  * codifies rule 1 by simulating a rename and asserting the documented "default
  * returned, old value not silently inherited" behavior.
+ *
+ * Spec 016 deleted `language_override` outright rather than deprecating it. Rules 1–4 bind
+ * keys that have shipped to a user in a release build, and this one never did — the app
+ * is unreleased and nothing ever read the value (specs/016-settings-screen/research.md R4).
  */
 object StorageKeys {
     val THEME_MODE = stringPreferencesKey("theme_mode")
-    val LANGUAGE_OVERRIDE = stringPreferencesKey("language_override")
     val SEARCH_ENGINE = stringPreferencesKey("search_engine")
     val IS_ONBOARDING_COMPLETED = booleanPreferencesKey("is_onboarding_completed")
+
+    /** Spec 016 FR-009 — whether Material dynamic color is applied on Android 12+. */
+    val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
+
+    /** Spec 016 FR-020 — the history retention window, stored as its day count. */
+    val HISTORY_RETENTION_DAYS = intPreferencesKey("history_retention_days")
 }

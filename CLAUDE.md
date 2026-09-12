@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-11 — **✅ Specs 001–015 done — Spec 015 `downloads-manager` merged via PR #16 (merge commit `e925f9d`, all six CI jobs green on `main`). Phase 1 6/6 + Phase 2 6/6 + Phase 3 3/3; Phase 4 unblocked, next up Spec 016 `settings-screen`.** Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-11 — **✅ Specs 001–015 done. 🟢 Spec 016 `settings-screen` implemented — PR #18 open (`016-settings-screen` → `main`), 112/113 tasks; open: T109's TalkBack pass (DEFERRED — needs a person, because scripted TalkBack is unreliable on emulators).** Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-09-11 — **✅ Specs 00
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** ✅ **Specs 001–015 done (2026-09-11)** — Phase 1–3 hoàn tất (Foundation, Core Browser, Data Features). Next: **Phase 4** — 016 `settings-screen`, 017 `splash-screen`, 018 `onboarding-flow` (018 depends on 017; the roadmap lists 016 first). Two perf gates remain deferred to real hardware: Spec 014 T103b (SC-005) and Spec 015 SC-006.
+**Current Status:** ✅ **Specs 001–015 done (2026-09-11)** — Phase 1–3 hoàn tất (Foundation, Core Browser, Data Features). 🟢 **Phase 4 — 016 `settings-screen` implemented**, PR #18 open (112/113; T109's TalkBack pass deferred to a person); next 017 `splash-screen`, then 018 `onboarding-flow` (018 depends on 017). Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -24,6 +24,7 @@ ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckD
   - `androidx.compose.ui:ui`, `ui-graphics`, `ui-tooling-preview`
   - `androidx.compose.material3:material3`
   - Test: `junit`, `androidx.test.ext:junit`, `androidx.test.espresso:espresso-core`, `androidx.compose.ui:ui-test-junit4`, `androidx.compose.ui:ui-tooling`, `androidx.compose.ui:ui-test-manifest`
+- **Spec 016 (`settings-screen`, planned 2026-09-11)**: `androidx.appcompat:appcompat` **1.8.0** (per-app language on Android 7–12) · `androidx.webkit:webkit` **1.17.0** (complete site-data removal) — both latest stable at lookup, zero `.so` in real release builds; re-verify at the moment of addition (§IX)
 
 ### Dependencies (final versions looked up at implementation time per Constitution §IX)
 
@@ -257,7 +258,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 | 013 | `bookmarks-crud` | ✅ Done 2026-05-07 (PR #14 merged into `main`) | Star icon on browser top bar + Bookmarks bottom-bar entry + unlimited-depth folders + breadcrumb + global search w/ folder path inline + cascade delete confirm + 15 use cases |
 | 014 | `history-view` | ✅ Done 2026-09-10 (PR #15 merged into `main`, commit `2e7c633`; 111/113 tasks — T103b SC-005 perf gate deferred to real hardware) | Auto-record on page-finish (non-incognito only) + bottom-bar History entry + grouped list (Today/Yesterday/explicit-date) + tap-to-replace-active-tab + live search (≥2 chars, no debounce) + long-press action sheet (open in new tab / delete / copy URL) + confirmed clear-all + 4 use cases |
 | 015 | `downloads-manager` | ✅ Done 2026-09-11 (PR #16 merged into `main`, commit `e925f9d`; 121/121 tasks — SC-006 perf gate deferred to real hardware) | System DownloadManager + public Downloads folder + hybrid Room/platform source of truth + **first schema migration (v1→v2)** + overflow menu replacing the Bookmarks/History bottom-bar entries + 8 use cases |
-| 016 | `settings-screen` | ⬜ | Theme/language/search engine/clear data |
+| 016 | `settings-screen` | 🟢 Implemented 2026-09-11 — PR #18 open (112/113; T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
 | 017 | `splash-screen` | ⬜ | SplashScreen API + branding |
 | 018 | `onboarding-flow` | ⬜ | 3–4 slides chọn ngôn ngữ/theme/search |
 | 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
@@ -273,6 +274,105 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 > No outstanding CI tooling tasks at the moment. Spec 008 surfaced + resolved the `Terminate Emulator` hang (set `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5` + removed redundant manual `adb emu kill` from script — see CI workflow note).
 
 ## Recent Changes
+
+- 2026-09-11 (Spec 016 second pass — fixes and the remaining device gates): 🟢 **Spec 016 at 112/113 — [PR #18](https://github.com/Xbisme/ThirtySixBrowser/pull/18) open.** The owner asked to fix what could be fixed and run what could be run.
+
+  **Fixes.**
+  - **Losing the renderer process no longer ends the app** (carry-forward debt from the first pass).
+    - **Mechanism**: `BrowserWebViewClient.onRenderProcessGone` returns `true`. `BrowserWebView` keys its WebView to a renderer generation held by `WebViewHost`, so the dead WebView is destroyed and a replacement is built for the same tab.
+    - **Behaviour**: a crash shows the error state and waits for Reload, so a crashing page cannot loop; Reload on an empty WebView now loads the tab's address. A system kill reloads the page by itself.
+    - **Tests**: the new `BrowserWebViewRendererRecoveryTest` (`chrome://crash`, `chrome://kill`) passes on API 29 (WebView 74) and on the 16 KB API 36 AVD. The release build was checked by signalling the renderer process as root.
+    - **Lint**: `@SuppressLint("MissingOnRenderProcessGone")` stays, with a corrected rationale. The detector's `visitConstructor` half reports every `WebViewClient()` constructor call, including a Kotlin subclass's own superclass call.
+  - **`HistorySeeder` no longer ANRs.**
+    - **Change**: batches share a transaction, and a seed is split across self-continuing broadcasts of ≤ 1,000 rows.
+    - **Result**: on the API 24 AVD, 10,000 rows seed in 10 parts of 4–12 s with no ANR, where they took 66.8 s and raised a broadcast ANR before.
+
+  **Gates closed.**
+  - **T045 / G3** ✅: 9/9 non-ASCII and symbol queries across Google, DuckDuckGo and Bing on API 24, pasted into the address bar through the device clipboard, plus FR-012 and persistence.
+  - **T062 / G4 + G10 step 1** ✅:
+    - all eight languages plus Follow system, with 3 normal + 1 incognito tab open, on API 24 and on the 16 KB API 36 AVD;
+    - device-language fallback: `es-ES` → English, `fr-CA` → French;
+    - SC-004: 169–504 ms;
+    - cold start shows no flash of the wrong window background (API 36 light and dark, API 24 light).
+  - **T110 / G12 + Constitution Testing Gate 8** ✅:
+    - AVD `TA016_API36_16K`, created from the downloaded `system-images;android-36;google_apis_ps16k;arm64-v8a` (`PAGE_SIZE` 16384);
+    - the release APK was exercised there with no crash;
+    - instrumented tests 109/109 on the same AVD.
+  - **SC-002**, measured with the emulator's host-side recorder: the theme lands 22–59 ms after the dialog closes. Indicative only; by the strictest reading one transition took 121 ms.
+  - **Instrumented 109/109** also on an API 29 AVD, the CI emulator's API level.
+
+  **Still open.**
+  - **T109**:
+    - The 8-locale sweep of the screen, the six dialogs and the message at 360dp passed.
+    - The **TalkBack pass is DEFERRED to a person**: scripted TalkBack does not work on these emulators. Injected swipes and keys do not move focus reliably, even in system Settings, and injected taps act as clicks.
+  - **T113**: ✅ closed — PR #18 opened.
+
+  **Observations.**
+  - **Language change**: 111–288 ms of black frames appear while the activity is recreated, where a rotation shows none. This is inside SC-004 and is noted against R12.
+  - **ANRs on `G9_API36_Clean`**: the two input-dispatch ANRs came from the 2 GB AVD starving for CPU — SystemUI, the launcher and GMS ANR'd too — not from the app.
+  - **FR-013a under automation**: the address bar keeping focus after submit is an input-mode artefact; touch-only input clears focus as specified.
+
+- 2026-09-11 (Spec 016 implementation): 🟢 **Spec 016 `settings-screen` implemented — 107/113 tasks, uncommitted on branch `016-settings-screen`.**
+
+  **Scope.** Settings is reached from the browser's overflow menu, in the slot Spec 015 reserved, and replaces the Spec 002 placeholder. It has seven parts:
+  - **Theme**: Light / Dark / System default.
+  - **Dynamic color**: an on/off switch, shown on Android 12+ only.
+  - **App language**: Follow system plus the eight languages, listed by endonym, through the AndroidX per-app language API, so the platform is the single source of truth.
+  - **Search engine**: Google / DuckDuckGo / Bing.
+  - **History retention**: 7 / 30 / 90 / 180 days. Shortening warns and confirms; the new window is written first, then history is pruned.
+  - **Clear browsing data**: Chrome-style, over history · cookies and site data · cached images and files.
+  - **About**: the version and a privacy statement.
+
+  **Gates.**
+  - testDebugUnitTest ✅ **557/557** (+77 over the 480 baseline).
+  - `connectedDebugAndroidTest` ✅ **107/107** on the API 36 AVD.
+  - lintDebug ✅ (8-locale parity), detekt ✅ **baseline unchanged**, ktlintCheck ✅.
+  - assembleDebug / assembleRelease ✅.
+  - 16 KB ✅: still exactly 8 `.so` entries, all `align=0x4000`.
+  - Release APK **3,122,115 B**, against the SC-014 budget of ≤ 3,258,091 B: +563,937 B, almost all of it appcompat's structural cost.
+  - Constitution **11/11 PASS, no deviations**; `TODO(MANIFEST_COMMENT)` closed.
+
+  **Dependencies**, each the latest stable at lookup on 2026-09-11T04:16Z and each adding zero `.so`:
+  - `androidx.appcompat:appcompat` **1.8.0**
+  - `androidx.webkit:webkit` **1.17.0** (the maven `<release>` tag pointed at 1.18.0-alpha01, which was excluded)
+
+  **Structural changes.**
+  - `MainActivity` is now an `AppCompatActivity`, with both theme files re-parented to AppCompat NoActionBar themes.
+  - `language_override`, `LanguageOverride` and `SetLanguageOverrideUseCase` were deleted.
+  - `MAX_HISTORY_DAYS` was deleted; the start-up sweep now reads the persisted window.
+  - Two new platform seams: `AppLanguageController` and `WebDataCleaner`.
+  - Clearing cookies first discards the incognito set-aside — replacing it with `CookieJarSnapshot.EMPTY`, never null — and only then wipes the cookie jar.
+
+  **Device gates** (API 36 `BE4B.251210.005` / WebView 134, and API 24 `NYC` / WebView 53):
+  - **G1 theme** — passed on both AVDs. Rows keep their scroll position, the choice survives a relaunch, and System follows `cmd uimode`.
+  - **G2 dynamic color** — passed.
+  - **G4 language** — passed on both AVDs.
+    - API 36: 3/3 round trips in each direction against `cmd locale`.
+    - API 24: German survives force-stop through `autoStoreLocales`.
+  - **G5 clear browsing data** — passed on both AVDs against a local fixture that stores five kinds of site data.
+    - API 36 takes the **Complete** path: all five kinds removed, and the web cache emptied too (A16).
+    - API 24 takes the **fallback** path: the service worker and Cache Storage remain (A17).
+    - Three runs on each AVD, with tabs, bookmarks and downloads unchanged (FR-031).
+  - **G6 incognito cookies** — passed 3/3 on each AVD, plus a control run on each that proves Spec 012's restore really runs.
+  - **G7 retention** — passed with all four windows, including 10,320 rows with no ANR.
+  - **G8** — clearing 10,091 history rows and 50 tabs on API 24 finished within ≤ 5.7 s with no ANR.
+  - **G9 About** — passed, including in airplane mode.
+  - **G10 steps 2–4** — passed; `FLAG_SECURE` was checked on both AVDs.
+  - **G11** — the Settings screen is fully translated in all 8 locales.
+
+  **Findings.**
+  - **🐞 Spec 006's `SettingsModuleSmokeTest` turned flaky.** Robolectric boots `ThirtySixApplication`, whose start-up sweep now opens Hilt's DataStore on the same file the test opens itself, which raised "multiple DataStores active". The test now runs under a plain `Application`.
+  - **androidx.webkit ships the lint check `MissingOnRenderProcessGone`**, which flagged Spec 007's `BrowserWebViewClient`. A renderer crash still ends the app, as it always has. The check is suppressed with a rationale and recorded as debt.
+  - **Tooling**: running `assembleRelease` and `lintDebug` in one Gradle invocation crashes `lintAnalyzeDebugUnitTest`; run them separately. A 10,000-row `HistorySeeder` broadcast trips a system broadcast ANR.
+
+  **DEFERRED or partial — each recorded in tasks.md "Device Gate Results".**
+  - SC-002 ≤ 100 ms: emulator `screenrecord` could not capture it.
+  - G3: only one ASCII query per engine; the non-ASCII queries cannot be typed through adb.
+  - G4: the all-eight-languages sweep with an incognito tab open was not run.
+  - G10 step 1: the cold-start flash check needs a human eye.
+  - G11: the dialog sweep and TalkBack pass were not run.
+  - Constitution Testing Gate 8: no 16 KB system image is installed.
+  - Pixel 5-class hardware figures: no hardware.
 
 - 2026-09-11 (post-merge sync): ✅ **Spec 015 merged — PR #16 (`015-downloads-manager` → `main`, merge commit `e925f9d`)**, with all six CI jobs green on `main` (debug build, unit tests, lint, detekt + ktlint, 16 KB, instrumented tests on the API 29 emulator). **T121 closed — Spec 015 at 121/121**: the PR was merged with a generic auto-generated body carrying none of what T121 required, so its description was rewritten after merge to include the SC-012 APK delta, the Constitution Check line and its one deviation, the nine clarification answers, the G9 outcome, and the **SC-006 DEFERRED** flag. **Constitution v1.2.0 → v1.3.0 (MINOR)**: Spec 015's T110 amended the permissions table without bumping the version, which left §II still listing `POST_NOTIFICATIONS` in the minimum set and forbidding every legacy storage permission — contradicting the table beneath it on both counts. §II now matches the shipped manifest. **Docs drift corrected**: `CLAUDE.md`, `sdd-roadmap.md` and `project-context.md` still said "PR pending", `dev-workflow.md`'s progress table still said the project had not started, and the carry-forward debt list claimed the theme was an in-memory `MutableState` — `MainActivity` has observed DataStore through `ObserveUserSettingsUseCase` since Spec 006, so only the toggle UI is missing. **Next: Phase 4, Spec 016 `settings-screen`.**
 
@@ -319,13 +419,24 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: none in progress — **Spec 016 `settings-screen` is next** (Phase 4, Constitution §X). Hold the pre-spec discussion (`dev-workflow.md` Bước 1) before `/speckit-specify`.
+**Current**: 🟢 [Spec 016 — Settings Screen](specs/016-settings-screen/) — **implemented (2026-09-11), 112/113 tasks — [PR #18](https://github.com/Xbisme/ThirtySixBrowser/pull/18) open (`016-settings-screen` → `main`).** Open: T109's TalkBack pass (DEFERRED — needs a person; the 8-locale sweep passed).
 
-### Spec 016 — what already exists, what needs deciding
-
-- **Already built**: `SettingsRepository` with `SetThemeModeUseCase` / `SetLanguageOverrideUseCase` / `SetSearchEngineUseCase` / `SetOnboardingCompletedUseCase`; `MainActivity` already applies settings via `ObserveUserSettingsUseCase`; `BrowserOverflowMenuCallbacks` was shaped so Settings can join Bookmarks · History · Downloads. `SettingsScreen.kt` is still the Spec 002 placeholder — retire `settings_screen_placeholder` in all 8 locales, as Specs 013–015 did for theirs.
-- **Clear-data primitives**: history has `ClearAllHistoryUseCase`; cookie removal exists only inside the incognito `CookieJarSnapshotManagerImpl`; nothing yet for the WebView cache or the downloads list.
-- **Open questions**: (1) in-app language switching — Constitution §VIII already names `AppCompatDelegate.setApplicationLocales`, but `androidx.appcompat` is not on the classpath (a new dependency ⇒ §IX version lookup + 16 KB check) and `MainActivity` extends `ComponentActivity`; (2) is the home URL user-configurable? Today it is a compile-time constant behind `UrlConfigModule`; (3) is history retention configurable (`MAX_HISTORY_DAYS = 90`)? (4) which clear-data controls — history / cookies / cache / downloads list — and does clearing downloads delete files or only records? (5) an About section?
+- Artifacts: [spec.md](specs/016-settings-screen/spec.md) · [plan.md](specs/016-settings-screen/plan.md) · [research.md](specs/016-settings-screen/research.md) (R1–R15) · [data-model.md](specs/016-settings-screen/data-model.md) · [quickstart.md](specs/016-settings-screen/quickstart.md) (G1–G12) · [tasks.md](specs/016-settings-screen/tasks.md) — see **Implementation Notes** and **Device Gate Results** · [contracts/](specs/016-settings-screen/contracts/).
+- **Gates**:
+  - testDebugUnitTest ✅ **557/557** · instrumented ✅ **109/109** on an API 29 AVD (WebView 74, CI's API level) and on the 16 KB API 36 AVD.
+  - lintDebug ✅ · detekt ✅ baseline unchanged · ktlintCheck ✅.
+  - assembleRelease ✅ · 16 KB ✅ — 8 `.so`, zero new · Constitution Testing Gate 8 ✅ on the 16 KB AVD.
+  - APK **3,122,115 B** against the ≤ 3,258,091 B budget.
+  - Constitution **11/11 PASS**.
+- **Dependencies**, each looked up 2026-09-11 and each with zero `.so`: `androidx.appcompat:appcompat` **1.8.0** and `androidx.webkit:webkit` **1.17.0**.
+- **Room stays at v2** — no migration.
+- **Facts to keep in mind**:
+  - **The platform owns the app language.** Nothing in the app stores it, so read and write it only through `AppLanguageController`.
+  - **`MainActivity` is an `AppCompatActivity`, and its theme parents must stay AppCompat.** A non-AppCompat parent crashes at launch.
+  - **The retention window is persisted** (`history_retention_days`, default 90) and enforced by the start-up sweep. There is deliberately no "keep forever".
+  - **Incognito cookie discard**: a held snapshot becomes `CookieJarSnapshot.EMPTY`, never null, and the discard always runs *before* the wipe. `ClearBrowsingDataUseCaseTest` and `CookieRestoreInstrumentedTest` guard this.
+  - **The web engine decides the clear-data path.** WebView 133+ takes the Complete path via `WebStorageCompat.deleteBrowsingData`, which also empties the web cache (A16). Older engines fall back, and service workers and Cache Storage survive there (A17).
+  - **Returning to the browser reloads the tab's page** (FR-004). Any device check that stores data on page load has to park the tab on a page that doesn't.
 
 **Previous**: ✅ [Spec 015 — Downloads Manager](specs/015-downloads-manager/) — **merged into `main` via PR #16 (2026-09-11, merge commit `e925f9d`; all six CI jobs green)**. **121/121 tasks** — T121 closed once PR #16's description was rewritten post-merge to carry the contents T121 required.
 
@@ -355,7 +466,13 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 - **Two Spec 014 traps, both avoided here**: derive list state with `flowOn(dispatchers.default)`, never on `viewModelScope` (Main); and use the compose-observable locale bridge, never `Locale.getDefault()` in a Composable.
 - **`java.time` works at minSdk 24** via `coreLibraryDesugaring`, already wired.
 
-### Known carry-forward debt (mostly Spec 016 `settings-screen`)
+### Known carry-forward debt
 
-- Search-engine picker UI (Spec 010) · theme toggle UI — persistence is already wired (`MainActivity` observes DataStore via `ObserveUserSettingsUseCase` since Spec 006), only the control is missing (Spec 003) · language switcher, `androidx.appcompat` not yet on the classpath (Spec 004) · user-configurable history retention, hard-coded `MAX_HISTORY_DAYS = 90` (Spec 014) · clear-data controls · **a "clear all downloads" action, explicitly out of scope for Spec 015**.
+- **Delivered by Spec 016**: the search-engine picker, the theme toggle, the language switcher, configurable history retention and clear-data controls.
+- **A "clear all downloads" action** — explicitly out of scope since Spec 015.
+- **Spec 016's TalkBack pass (T109 step 2) is DEFERRED to a person.** Scripted TalkBack does not work on the local emulators.
+  - Injected swipes and Alt+Right do not move accessibility focus reliably — not even in system Settings.
+  - Injected taps act as clicks instead of explore-by-touch.
+  - What did pass: the 8-locale text and visual sweep of the screen, all six dialogs and the reachable message.
+- **A language change shows 111–288 ms of black frames** while the activity is recreated; a rotation shows none. This is inside SC-004 and is recorded as an observation against R12, not a defect.
 - `AppError.from(IOException) = Network` not `Database` — Spec 006 semantic limitation, deferred to a Spec 002 amendment.

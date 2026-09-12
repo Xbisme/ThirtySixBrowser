@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Vietnamese (vi) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">Trình duyệt ThirtySix</string>
-    <string name="settings_screen_placeholder">Cài đặt</string>
     <string name="onboarding_screen_placeholder">Giới thiệu</string>
 
     <!-- Spec 007 — Vietnamese (vi) translations for Browser loading + error UI. -->
@@ -162,4 +161,61 @@
     <string name="downloads_empty_title">Chưa có tệp nào</string>
     <string name="downloads_empty_body">Các tệp bạn tải về sẽ xuất hiện ở đây.</string>
     <string name="downloads_operation_failed">Đã xảy ra lỗi. Vui lòng thử lại.</string>
+
+    <!-- Spec 016 — Settings screen scaffold. -->
+    <string name="settings_screen_title">Cài đặt</string>
+    <string name="settings_action_back">Quay lại</string>
+    <string name="settings_action_cancel">Huỷ</string>
+    <string name="settings_section_appearance">Giao diện</string>
+    <string name="settings_section_language">Ngôn ngữ</string>
+    <string name="settings_section_search">Tìm kiếm</string>
+    <string name="settings_section_privacy">Quyền riêng tư</string>
+    <string name="settings_section_about">Giới thiệu</string>
+    <string name="settings_error_not_saved">Không thể lưu cài đặt. Vui lòng thử lại.</string>
+
+    <!-- Spec 016 US1 — theme. -->
+    <string name="settings_theme_title">Chủ đề</string>
+    <string name="settings_theme_light">Sáng</string>
+    <string name="settings_theme_dark">Tối</string>
+    <string name="settings_theme_system">Theo hệ thống</string>
+
+    <!-- Spec 016 US2 — search engine. -->
+    <string name="settings_search_engine_title">Công cụ tìm kiếm</string>
+
+    <!-- Spec 016 US3 — app language. -->
+    <string name="settings_language_title">Ngôn ngữ ứng dụng</string>
+    <string name="settings_language_follow_system">Theo hệ thống</string>
+    <string name="settings_error_language_not_applied">Không thể đổi ngôn ngữ. Vui lòng thử lại.</string>
+
+    <!-- Spec 016 US4 — clear browsing data. -->
+    <string name="settings_clear_browsing_data_title">Xoá dữ liệu duyệt web</string>
+    <string name="settings_clear_dialog_title">Xoá dữ liệu duyệt web?</string>
+    <string name="settings_clear_category_history">Lịch sử duyệt web</string>
+    <string name="settings_clear_category_history_description">Mọi trang trong lịch sử của bạn</string>
+    <string name="settings_clear_category_cookies">Cookie và dữ liệu trang web</string>
+    <string name="settings_clear_category_cookies_description">Đăng xuất bạn khỏi hầu hết các trang web</string>
+    <string name="settings_clear_category_cache">Hình ảnh và tệp trong bộ nhớ đệm</string>
+    <string name="settings_clear_category_cache_description">Giải phóng dung lượng. Một số trang web có thể tải chậm hơn vào lần sau.</string>
+    <string name="settings_clear_confirm">Xoá dữ liệu</string>
+    <string name="settings_clear_in_progress">Đang xoá…</string>
+    <string name="settings_clear_done">Đã xoá dữ liệu duyệt web</string>
+    <string name="settings_clear_partial_failure">Không thể xoá một số dữ liệu. Vui lòng thử lại.</string>
+
+    <!-- Spec 016 US5 — history retention. -->
+    <string name="settings_history_retention_title">Giữ lịch sử trong</string>
+    <plurals name="settings_history_retention_days">
+        <item quantity="other">%d ngày</item>
+    </plurals>
+    <string name="settings_retention_shorten_title">Xoá lịch sử cũ hơn?</string>
+    <string name="settings_retention_shorten_body">Lịch sử cũ hơn %1$s sẽ bị xoá ngay bây giờ. Không thể hoàn tác.</string>
+    <string name="settings_retention_shorten_confirm">Xoá</string>
+    <string name="settings_retention_prune_deferred">Chưa thể xoá lịch sử cũ lúc này. Lịch sử đó sẽ bị xoá vào lần tới ứng dụng khởi động.</string>
+
+    <!-- Spec 016 US6 — dynamic color. -->
+    <string name="settings_dynamic_color_title">Màu động</string>
+    <string name="settings_dynamic_color_summary">Dùng màu từ hình nền của bạn</string>
+
+    <!-- Spec 016 US7 — About. -->
+    <string name="settings_about_version">Phiên bản %1$s</string>
+    <string name="settings_about_privacy_statement">Ứng dụng này không thu thập dữ liệu cá nhân và không gửi bất cứ thứ gì đến máy chủ nào do ThirtySix vận hành. Lịch sử, dấu trang, tệp tải xuống và cài đặt của bạn chỉ lưu trên thiết bị này.</string>
 </resources>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.ThirtySix" parent="android:Theme.Material.Light.NoActionBar">
+    <!-- Spec 016 research R2 — MainActivity is an AppCompatActivity (needed for in-app language
+         switching below Android 13), and AppCompat refuses to start without an AppCompat theme.
+         The two items are Spec 003's cold-start fix and are unchanged. -->
+    <style name="Theme.ThirtySix" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/window_background_light</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>

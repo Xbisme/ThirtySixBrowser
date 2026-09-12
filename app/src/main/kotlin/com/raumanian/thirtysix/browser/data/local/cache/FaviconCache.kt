@@ -59,6 +59,19 @@ interface FaviconCache {
      * is cached, else `null`. Composable-safe — at most a stat() syscall.
      */
     fun fileFor(url: String): File?
+
+    /**
+     * Spec 016 FR-029 — delete every cached site icon.
+     *
+     * Contract (mirrors `ScreenshotCache.clearAll`):
+     *  - Runs on the IO dispatcher. Idempotent; a missing directory is not an error.
+     *  - Bumps [version] afterwards, so every composable reading an icon re-evaluates and
+     *    falls back to its placeholder until the icon is fetched again.
+     *  - A file that cannot be deleted is logged and skipped rather than aborting the rest;
+     *    the call returns normally, and the caller treats a thrown exception — not a partial
+     *    deletion — as the category's failure signal.
+     */
+    suspend fun clearAll()
 }
 
 /**
@@ -97,6 +110,14 @@ class DiskFaviconCache @Inject constructor(
         val key = keyFor(url) ?: return null
         val file = File(cacheDir, "$key.png")
         return if (file.exists() && file.length() > 0L) file else null
+    }
+
+    override suspend fun clearAll() = withContext(dispatchers.io) {
+        cacheDir.listFiles()?.forEach { file ->
+            // The file name derives from a visited host, so it is deliberately not logged (§I).
+            if (!file.delete()) android.util.Log.w(LOG_TAG, "Failed to delete a cached favicon")
+        }
+        versionState.update { it + 1 }
     }
 
     private fun keyFor(url: String): String? {

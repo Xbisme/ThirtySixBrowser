@@ -6,7 +6,6 @@
     <!-- Per FR-007 naming convention: feature_section_purpose. -->
     <!-- Future feature specs (e.g., 011 tabs-management) MAY rename *_screen_placeholder → semantic key (*_screen_title) when they implement the real Screen — must update all 8 locale files in same change. -->
 
-    <string name="settings_screen_placeholder">Settings</string>
     <string name="onboarding_screen_placeholder">Onboarding</string>
 
     <!-- Spec 007 — WebView Compose Wrapper. Loading state + error UI strings. -->
@@ -179,4 +178,74 @@
     <string name="downloads_empty_title">No downloads yet</string>
     <string name="downloads_empty_body">Files you download will appear here.</string>
     <string name="downloads_operation_failed">Something went wrong. Please try again.</string>
+
+    <!-- Spec 016 — Settings screen scaffold. -->
+    <string name="settings_screen_title">Settings</string>
+    <string name="settings_action_back">Back</string>
+    <string name="settings_action_cancel">Cancel</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_language">Language</string>
+    <string name="settings_section_search">Search</string>
+    <string name="settings_section_privacy">Privacy</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_error_not_saved">Couldn\'t save the setting. Please try again.</string>
+
+    <!-- Spec 016 US1 — theme. -->
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System default</string>
+
+    <!-- Spec 016 US2 — search engine. Brand names are identical in every locale, so they live here only. -->
+    <string name="settings_search_engine_title">Search engine</string>
+    <string name="search_engine_name_google" translatable="false">Google</string>
+    <string name="search_engine_name_duckduckgo" translatable="false">DuckDuckGo</string>
+    <string name="search_engine_name_bing" translatable="false">Bing</string>
+
+    <!-- Spec 016 US3 — app language. -->
+    <string name="settings_language_title">App language</string>
+    <string name="settings_language_follow_system">Follow system</string>
+    <string name="settings_error_language_not_applied">Couldn\'t change the language. Please try again.</string>
+    <!-- FR-014 — each language is listed by its own name, identical in every locale, so these live here only. -->
+    <string name="language_name_en" translatable="false">English</string>
+    <string name="language_name_vi" translatable="false">Tiếng Việt</string>
+    <string name="language_name_de" translatable="false">Deutsch</string>
+    <string name="language_name_ru" translatable="false">Русский</string>
+    <string name="language_name_ko" translatable="false">한국어</string>
+    <string name="language_name_ja" translatable="false">日本語</string>
+    <string name="language_name_zh" translatable="false">中文</string>
+    <string name="language_name_fr" translatable="false">Français</string>
+
+    <!-- Spec 016 US4 — clear browsing data. Cancel reuses settings_action_cancel. -->
+    <string name="settings_clear_browsing_data_title">Clear browsing data</string>
+    <string name="settings_clear_dialog_title">Clear browsing data?</string>
+    <string name="settings_clear_category_history">Browsing history</string>
+    <string name="settings_clear_category_history_description">Every page in your history</string>
+    <string name="settings_clear_category_cookies">Cookies and site data</string>
+    <string name="settings_clear_category_cookies_description">Signs you out of most sites</string>
+    <string name="settings_clear_category_cache">Cached images and files</string>
+    <string name="settings_clear_category_cache_description">Frees up space. Some sites may load more slowly next time.</string>
+    <string name="settings_clear_confirm">Clear data</string>
+    <string name="settings_clear_in_progress">Clearing…</string>
+    <string name="settings_clear_done">Browsing data cleared</string>
+    <string name="settings_clear_partial_failure">Some data couldn\'t be cleared. Please try again.</string>
+
+    <!-- Spec 016 US5 — history retention. The body names the new window, e.g. "30 days". -->
+    <string name="settings_history_retention_title">Keep history for</string>
+    <plurals name="settings_history_retention_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="settings_retention_shorten_title">Delete older history?</string>
+    <string name="settings_retention_shorten_body">History older than %1$s will be deleted now. This can\'t be undone.</string>
+    <string name="settings_retention_shorten_confirm">Delete</string>
+    <string name="settings_retention_prune_deferred">Older history couldn\'t be deleted now. It will be removed the next time the app starts.</string>
+
+    <!-- Spec 016 US6 — dynamic color (Android 12+ only). -->
+    <string name="settings_dynamic_color_title">Dynamic color</string>
+    <string name="settings_dynamic_color_summary">Use colors from your wallpaper</string>
+
+    <!-- Spec 016 US7 — About. The app name comes from app_name. -->
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_privacy_statement">This app collects no personal data and sends nothing to any server run by ThirtySix. Your history, bookmarks, downloads and settings stay on this device.</string>
 </resources>

@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Russian (ru) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix Браузер</string>
-    <string name="settings_screen_placeholder">Настройки</string>
     <string name="onboarding_screen_placeholder">Знакомство</string>
 
     <!-- Spec 007 — Russian (ru) translations for Browser loading + error UI. -->
@@ -168,4 +167,64 @@
     <string name="downloads_empty_title">Загрузок пока нет</string>
     <string name="downloads_empty_body">Скачанные файлы появятся здесь.</string>
     <string name="downloads_operation_failed">Что-то пошло не так. Попробуйте ещё раз.</string>
+
+    <!-- Spec 016 — Settings screen scaffold. -->
+    <string name="settings_screen_title">Настройки</string>
+    <string name="settings_action_back">Назад</string>
+    <string name="settings_action_cancel">Отмена</string>
+    <string name="settings_section_appearance">Оформление</string>
+    <string name="settings_section_language">Язык</string>
+    <string name="settings_section_search">Поиск</string>
+    <string name="settings_section_privacy">Конфиденциальность</string>
+    <string name="settings_section_about">О приложении</string>
+    <string name="settings_error_not_saved">Не удалось сохранить настройку. Попробуйте ещё раз.</string>
+
+    <!-- Spec 016 US1 — theme. -->
+    <string name="settings_theme_title">Тема</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_theme_system">Как в системе</string>
+
+    <!-- Spec 016 US2 — search engine. -->
+    <string name="settings_search_engine_title">Поисковая система</string>
+
+    <!-- Spec 016 US3 — app language. -->
+    <string name="settings_language_title">Язык приложения</string>
+    <string name="settings_language_follow_system">Как в системе</string>
+    <string name="settings_error_language_not_applied">Не удалось сменить язык. Попробуйте ещё раз.</string>
+
+    <!-- Spec 016 US4 — clear browsing data. -->
+    <string name="settings_clear_browsing_data_title">Очистить данные браузера</string>
+    <string name="settings_clear_dialog_title">Очистить данные браузера?</string>
+    <string name="settings_clear_category_history">История браузера</string>
+    <string name="settings_clear_category_history_description">Все страницы из истории</string>
+    <string name="settings_clear_category_cookies">Файлы cookie и данные сайтов</string>
+    <string name="settings_clear_category_cookies_description">Вы выйдете из аккаунтов на большинстве сайтов</string>
+    <string name="settings_clear_category_cache">Изображения и файлы в кеше</string>
+    <string name="settings_clear_category_cache_description">Освобождает место. Некоторые сайты могут загружаться медленнее при следующем посещении.</string>
+    <string name="settings_clear_confirm">Удалить данные</string>
+    <string name="settings_clear_in_progress">Удаление…</string>
+    <string name="settings_clear_done">Данные браузера удалены</string>
+    <string name="settings_clear_partial_failure">Не удалось удалить часть данных. Попробуйте ещё раз.</string>
+
+    <!-- Spec 016 US5 — history retention. -->
+    <string name="settings_history_retention_title">Хранить историю</string>
+    <plurals name="settings_history_retention_days">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
+    <string name="settings_retention_shorten_title">Удалить более старую историю?</string>
+    <string name="settings_retention_shorten_body">История за период более %1$s будет удалена сейчас. Это действие нельзя отменить.</string>
+    <string name="settings_retention_shorten_confirm">Удалить</string>
+    <string name="settings_retention_prune_deferred">Не удалось удалить старую историю сейчас. Она будет удалена при следующем запуске приложения.</string>
+
+    <!-- Spec 016 US6 — dynamic color. -->
+    <string name="settings_dynamic_color_title">Динамические цвета</string>
+    <string name="settings_dynamic_color_summary">Использовать цвета обоев</string>
+
+    <!-- Spec 016 US7 — About. -->
+    <string name="settings_about_version">Версия %1$s</string>
+    <string name="settings_about_privacy_statement">Это приложение не собирает персональные данные и ничего не отправляет на серверы ThirtySix. История, закладки, загрузки и настройки хранятся только на этом устройстве.</string>
 </resources>

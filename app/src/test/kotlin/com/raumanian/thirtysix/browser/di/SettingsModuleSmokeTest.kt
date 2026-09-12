@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.di
 
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
@@ -19,6 +20,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 
 /**
  * Structural smoke for [SettingsDataStoreProviderModule] (Spec 006 SC-010).
@@ -30,8 +32,15 @@ import org.junit.runner.RunWith
  * Full @HiltAndroidTest end-to-end graph boot is deferred to Spec 016 when the
  * first ViewModel consumer materializes (heavier scaffolding than the data
  * layer alone justifies — same rationale as Spec 005's DatabaseModuleSmokeTest).
+ *
+ * Spec 016 — runs under a plain [Application]. Robolectric otherwise boots the manifest's
+ * `ThirtySixApplication`, whose start-up retention sweep now reads settings through Hilt's
+ * singleton DataStore on the very file this test opens with a second DataStore. The two raced,
+ * failing intermittently with "There are multiple DataStores active for the same file". This
+ * test is about the provider in isolation, so it should not boot the app's graph at all.
  */
 @RunWith(AndroidJUnit4::class)
+@Config(application = Application::class)
 class SettingsModuleSmokeTest {
 
     private val context = ApplicationProvider.getApplicationContext<android.content.Context>()

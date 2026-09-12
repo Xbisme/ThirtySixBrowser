@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.result.Result
-import com.raumanian.thirtysix.browser.domain.model.LanguageOverride
+import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
@@ -14,8 +14,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Verifies the 5 use cases are pure delegations to [SettingsRepository] (Spec 006).
+ * Verifies the settings use cases are pure delegations to [SettingsRepository] (Spec 006).
  * Uses a hand-rolled FakeSettingsRepository (no MockK in classpath).
+ *
+ * Spec 016 removed the Spec 006 language use case with its value (research R4); the language now goes
+ * through `AppLanguageController`, covered by `AppLanguageUseCasesTest`.
  */
 class SettingsUseCasesTest {
 
@@ -37,19 +40,19 @@ class SettingsUseCasesTest {
     }
 
     @Test
-    fun setLanguageOverrideUseCase_delegates() = runBlocking {
-        val useCase = SetLanguageOverrideUseCase(fake)
-        val result = useCase(LanguageOverride.Explicit("vi"))
-        assertTrue(result is Result.Success)
-        assertEquals(LanguageOverride.Explicit("vi"), fake.lastLanguageOverride)
-    }
-
-    @Test
     fun setSearchEngineUseCase_delegates() = runBlocking {
         val useCase = SetSearchEngineUseCase(fake)
         val result = useCase(SearchEngine.Google)
         assertTrue(result is Result.Success)
         assertEquals(SearchEngine.Google, fake.lastSearchEngine)
+    }
+
+    @Test
+    fun setDynamicColorEnabledUseCase_delegates() = runBlocking {
+        val useCase = SetDynamicColorEnabledUseCase(fake)
+        val result = useCase(false)
+        assertTrue(result is Result.Success)
+        assertEquals(false, fake.lastDynamicColorEnabled)
     }
 
     @Test
@@ -65,8 +68,9 @@ private class FakeSettingsRepository : SettingsRepository {
     val observeFlow: Flow<UserSettings> = flowOf(UserSettings.DEFAULT)
 
     var lastThemeMode: ThemeMode? = null
-    var lastLanguageOverride: LanguageOverride? = null
+    var lastDynamicColorEnabled: Boolean? = null
     var lastSearchEngine: SearchEngine? = null
+    var lastHistoryRetention: HistoryRetention? = null
     var lastOnboardingCompleted: Boolean? = null
 
     override fun observeSettings(): Flow<UserSettings> = observeFlow
@@ -76,13 +80,18 @@ private class FakeSettingsRepository : SettingsRepository {
         return Result.Success(Unit)
     }
 
-    override suspend fun setLanguageOverride(override: LanguageOverride): Result<Unit> {
-        lastLanguageOverride = override
+    override suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit> {
+        lastDynamicColorEnabled = enabled
         return Result.Success(Unit)
     }
 
     override suspend fun setSearchEngine(engine: SearchEngine): Result<Unit> {
         lastSearchEngine = engine
+        return Result.Success(Unit)
+    }
+
+    override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> {
+        lastHistoryRetention = retention
         return Result.Success(Unit)
     }
 

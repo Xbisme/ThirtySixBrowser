@@ -89,6 +89,9 @@ android {
 
     buildFeatures {
         compose = true
+        // Spec 016 R10 — generates BuildConfig.VERSION_NAME for the Settings About section.
+        // AGP 9 defaults this to false and no longer honours the gradle.properties flag.
+        buildConfig = true
     }
 
     // Spec 005 — Robolectric requires merged Android resources to be visible to
@@ -201,6 +204,13 @@ dependencies {
     // Spec 006 — DataStore Preferences for user settings (theme, language, search engine,
     // onboarding flag). Pure Kotlin, zero native libs.
     implementation(libs.androidx.datastore.preferences)
+
+    // Spec 016 — in-app language switching on API 24–32 needs AppCompatActivity +
+    // AppCompatDelegate.setApplicationLocales (research.md R1). No native libraries.
+    implementation(libs.androidx.appcompat)
+    // Spec 016 — WebStorageCompat.deleteBrowsingData for complete site-data removal where
+    // the installed WebView supports it (research.md R5). No native libraries.
+    implementation(libs.androidx.webkit)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

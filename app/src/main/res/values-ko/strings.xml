@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Korean (ko) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix 브라우저</string>
-    <string name="settings_screen_placeholder">설정</string>
     <string name="onboarding_screen_placeholder">소개</string>
 
     <!-- Spec 007 — Korean (ko) translations for Browser loading + error UI. -->
@@ -162,4 +161,61 @@
     <string name="downloads_empty_title">아직 다운로드가 없습니다</string>
     <string name="downloads_empty_body">다운로드한 파일이 여기에 표시됩니다.</string>
     <string name="downloads_operation_failed">문제가 발생했습니다. 다시 시도해 주세요.</string>
+
+    <!-- Spec 016 — Settings screen scaffold. -->
+    <string name="settings_screen_title">설정</string>
+    <string name="settings_action_back">뒤로</string>
+    <string name="settings_action_cancel">취소</string>
+    <string name="settings_section_appearance">모양</string>
+    <string name="settings_section_language">언어</string>
+    <string name="settings_section_search">검색</string>
+    <string name="settings_section_privacy">개인정보 보호</string>
+    <string name="settings_section_about">정보</string>
+    <string name="settings_error_not_saved">설정을 저장하지 못했습니다. 다시 시도해 주세요.</string>
+
+    <!-- Spec 016 US1 — theme. -->
+    <string name="settings_theme_title">테마</string>
+    <string name="settings_theme_light">밝게</string>
+    <string name="settings_theme_dark">어둡게</string>
+    <string name="settings_theme_system">시스템 기본값</string>
+
+    <!-- Spec 016 US2 — search engine. -->
+    <string name="settings_search_engine_title">검색엔진</string>
+
+    <!-- Spec 016 US3 — app language. -->
+    <string name="settings_language_title">앱 언어</string>
+    <string name="settings_language_follow_system">시스템 설정 따르기</string>
+    <string name="settings_error_language_not_applied">언어를 변경하지 못했습니다. 다시 시도해 주세요.</string>
+
+    <!-- Spec 016 US4 — clear browsing data. -->
+    <string name="settings_clear_browsing_data_title">인터넷 사용 기록 삭제</string>
+    <string name="settings_clear_dialog_title">인터넷 사용 기록을 삭제할까요?</string>
+    <string name="settings_clear_category_history">방문 기록</string>
+    <string name="settings_clear_category_history_description">방문 기록에 있는 모든 페이지</string>
+    <string name="settings_clear_category_cookies">쿠키 및 사이트 데이터</string>
+    <string name="settings_clear_category_cookies_description">대부분의 사이트에서 로그아웃됩니다</string>
+    <string name="settings_clear_category_cache">캐시된 이미지 및 파일</string>
+    <string name="settings_clear_category_cache_description">저장 공간을 확보합니다. 다음에 방문할 때 일부 사이트가 더 느리게 로드될 수 있습니다.</string>
+    <string name="settings_clear_confirm">데이터 삭제</string>
+    <string name="settings_clear_in_progress">삭제 중…</string>
+    <string name="settings_clear_done">인터넷 사용 기록이 삭제되었습니다</string>
+    <string name="settings_clear_partial_failure">일부 데이터를 삭제하지 못했습니다. 다시 시도해 주세요.</string>
+
+    <!-- Spec 016 US5 — history retention. -->
+    <string name="settings_history_retention_title">방문 기록 보관 기간</string>
+    <plurals name="settings_history_retention_days">
+        <item quantity="other">%d일</item>
+    </plurals>
+    <string name="settings_retention_shorten_title">이전 방문 기록을 삭제할까요?</string>
+    <string name="settings_retention_shorten_body">%1$s보다 오래된 방문 기록이 지금 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="settings_retention_shorten_confirm">삭제</string>
+    <string name="settings_retention_prune_deferred">지금은 이전 방문 기록을 삭제하지 못했습니다. 다음에 앱을 시작할 때 삭제됩니다.</string>
+
+    <!-- Spec 016 US6 — dynamic color. -->
+    <string name="settings_dynamic_color_title">동적 색상</string>
+    <string name="settings_dynamic_color_summary">배경화면의 색상 사용</string>
+
+    <!-- Spec 016 US7 — About. -->
+    <string name="settings_about_version">버전 %1$s</string>
+    <string name="settings_about_privacy_statement">이 앱은 개인정보를 수집하지 않으며 ThirtySix가 운영하는 서버에 아무것도 보내지 않습니다. 방문 기록, 북마크, 다운로드, 설정은 이 기기에만 저장됩니다.</string>
 </resources>

@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,8 +17,15 @@ import com.raumanian.thirtysix.browser.presentation.util.SecureWindowEffect
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+/**
+ * Spec 016 research R2 — an [AppCompatActivity] rather than a plain `ComponentActivity`: below
+ * Android 13, `AppCompatDelegate.setApplicationLocales` only takes effect on an AppCompat
+ * activity. It is still a `ComponentActivity` underneath, so `setContent`, `enableEdgeToEdge`,
+ * Hilt and Spec 012's window flag behave exactly as before. The app never calls
+ * `AppCompatDelegate.setDefaultNightMode`; the in-app theme stays a Compose concern.
+ */
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var observeUserSettings: ObserveUserSettingsUseCase
 
@@ -50,7 +57,9 @@ class MainActivity : ComponentActivity() {
             val isIncognito by observeActiveTabIsIncognito()
                 .collectAsStateWithLifecycle(initialValue = false)
 
-            ThirtySixTheme(darkTheme = darkTheme) {
+            // Spec 016 FR-009 / FR-010 — the user's dynamic color choice. ThirtySixTheme itself
+            // ignores it below Android 12, where dynamic color does not exist (research R9).
+            ThirtySixTheme(darkTheme = darkTheme, dynamicColor = settings.isDynamicColorEnabled) {
                 SecureWindowEffect(secure = isIncognito)
                 AppNavGraph()
             }

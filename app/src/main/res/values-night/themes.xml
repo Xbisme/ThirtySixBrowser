@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.ThirtySix" parent="android:Theme.Material.NoActionBar">
+    <!-- Spec 016 research R2 — AppCompat parent, see values/themes.xml. -->
+    <style name="Theme.ThirtySix" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@color/window_background_dark</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>

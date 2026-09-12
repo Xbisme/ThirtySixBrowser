@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Simplified Chinese (zh). Single zh tag covers all Chinese variants per research.md R2. -->
     <string name="app_name">ThirtySix 浏览器</string>
-    <string name="settings_screen_placeholder">设置</string>
     <string name="onboarding_screen_placeholder">引导</string>
 
     <!-- Spec 007 — Simplified Chinese (zh) translations for Browser loading + error UI. -->
@@ -162,4 +161,61 @@
     <string name="downloads_empty_title">暂无下载内容</string>
     <string name="downloads_empty_body">您下载的文件会显示在这里。</string>
     <string name="downloads_operation_failed">出了点问题，请重试。</string>
+
+    <!-- Spec 016 — Settings screen scaffold. -->
+    <string name="settings_screen_title">设置</string>
+    <string name="settings_action_back">返回</string>
+    <string name="settings_action_cancel">取消</string>
+    <string name="settings_section_appearance">外观</string>
+    <string name="settings_section_language">语言</string>
+    <string name="settings_section_search">搜索</string>
+    <string name="settings_section_privacy">隐私</string>
+    <string name="settings_section_about">关于</string>
+    <string name="settings_error_not_saved">无法保存设置，请重试。</string>
+
+    <!-- Spec 016 US1 — theme. -->
+    <string name="settings_theme_title">主题</string>
+    <string name="settings_theme_light">浅色</string>
+    <string name="settings_theme_dark">深色</string>
+    <string name="settings_theme_system">跟随系统</string>
+
+    <!-- Spec 016 US2 — search engine. -->
+    <string name="settings_search_engine_title">搜索引擎</string>
+
+    <!-- Spec 016 US3 — app language. -->
+    <string name="settings_language_title">应用语言</string>
+    <string name="settings_language_follow_system">跟随系统</string>
+    <string name="settings_error_language_not_applied">无法更改语言，请重试。</string>
+
+    <!-- Spec 016 US4 — clear browsing data. -->
+    <string name="settings_clear_browsing_data_title">清除浏览数据</string>
+    <string name="settings_clear_dialog_title">要清除浏览数据吗？</string>
+    <string name="settings_clear_category_history">浏览记录</string>
+    <string name="settings_clear_category_history_description">历史记录中的所有页面</string>
+    <string name="settings_clear_category_cookies">Cookie 及网站数据</string>
+    <string name="settings_clear_category_cookies_description">您将从大多数网站退出登录</string>
+    <string name="settings_clear_category_cache">缓存的图片和文件</string>
+    <string name="settings_clear_category_cache_description">释放存储空间。下次访问时，部分网站的加载速度可能会变慢。</string>
+    <string name="settings_clear_confirm">清除数据</string>
+    <string name="settings_clear_in_progress">正在清除…</string>
+    <string name="settings_clear_done">已清除浏览数据</string>
+    <string name="settings_clear_partial_failure">部分数据无法清除，请重试。</string>
+
+    <!-- Spec 016 US5 — history retention. -->
+    <string name="settings_history_retention_title">历史记录保留时长</string>
+    <plurals name="settings_history_retention_days">
+        <item quantity="other">%d 天</item>
+    </plurals>
+    <string name="settings_retention_shorten_title">要删除较早的历史记录吗？</string>
+    <string name="settings_retention_shorten_body">超过%1$s的历史记录将被立即删除，此操作无法撤消。</string>
+    <string name="settings_retention_shorten_confirm">删除</string>
+    <string name="settings_retention_prune_deferred">暂时无法删除较早的历史记录，将在下次启动应用时删除。</string>
+
+    <!-- Spec 016 US6 — dynamic color. -->
+    <string name="settings_dynamic_color_title">动态取色</string>
+    <string name="settings_dynamic_color_summary">使用壁纸中的颜色</string>
+
+    <!-- Spec 016 US7 — About. -->
+    <string name="settings_about_version">版本 %1$s</string>
+    <string name="settings_about_privacy_statement">此应用不收集任何个人数据，也不会向 ThirtySix 运营的任何服务器发送任何内容。您的历史记录、书签、下载内容和设置仅保存在此设备上。</string>
 </resources>

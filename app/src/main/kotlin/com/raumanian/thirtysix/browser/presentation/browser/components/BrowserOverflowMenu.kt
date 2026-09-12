@@ -15,14 +15,15 @@ internal const val TEST_TAG_OVERFLOW_MENU: String = "browser_overflow_menu"
 internal const val TEST_TAG_OVERFLOW_BOOKMARKS: String = "browser_overflow_bookmarks"
 internal const val TEST_TAG_OVERFLOW_HISTORY: String = "browser_overflow_history"
 internal const val TEST_TAG_OVERFLOW_DOWNLOADS: String = "browser_overflow_downloads"
+internal const val TEST_TAG_OVERFLOW_SETTINGS: String = "browser_overflow_settings"
 
 /**
  * Spec 015 FR-042 – FR-046 — the browser's overflow menu.
  *
  * Bookmarks, History and Downloads — the browser's three collections — live here rather
  * than on the bottom bar. Seven affordances already crowded a 360dp-wide device and an
- * eighth would have overflowed it; consolidating also reserves the slot Settings needs in
- * Spec 016 instead of forcing this same refactor one spec later (FR-046).
+ * eighth would have overflowed it; consolidating also reserved the slot Settings needed.
+ * Spec 016 FR-001 fills it: Settings is the fourth entry, after the three collections.
  *
  * This is a deliberate one-tap regression for Bookmarks and History, which shipped with
  * direct bottom-bar entries in Specs 013 and 014. Both still reach exactly the screens and
@@ -57,6 +58,11 @@ fun BrowserOverflowMenu(
             text = { Text(stringResource(R.string.downloads_screen_title)) },
             onClick = callbacks.onDownloadsClick,
             modifier = Modifier.testTag(TEST_TAG_OVERFLOW_DOWNLOADS),
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.settings_screen_title)) },
+            onClick = callbacks.onSettingsClick,
+            modifier = Modifier.testTag(TEST_TAG_OVERFLOW_SETTINGS),
         )
     }
 }

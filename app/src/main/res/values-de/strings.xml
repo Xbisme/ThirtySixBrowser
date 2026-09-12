@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — German (de) translation. "Browser" is a German loanword, kept as-is. -->
     <string name="app_name">ThirtySix Browser</string>
-    <string name="settings_screen_placeholder">Einstellungen</string>
     <string name="onboarding_screen_placeholder">Einführung</string>
 
     <!-- Spec 007 — German (de) translations for Browser loading + error UI. -->
@@ -164,4 +163,62 @@
     <string name="downloads_empty_title">Noch keine Downloads</string>
     <string name="downloads_empty_body">Heruntergeladene Dateien erscheinen hier.</string>
     <string name="downloads_operation_failed">Etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
+
+    <!-- Spec 016 — Settings screen scaffold. -->
+    <string name="settings_screen_title">Einstellungen</string>
+    <string name="settings_action_back">Zurück</string>
+    <string name="settings_action_cancel">Abbrechen</string>
+    <string name="settings_section_appearance">Darstellung</string>
+    <string name="settings_section_language">Sprache</string>
+    <string name="settings_section_search">Suche</string>
+    <string name="settings_section_privacy">Datenschutz</string>
+    <string name="settings_section_about">Über</string>
+    <string name="settings_error_not_saved">Die Einstellung konnte nicht gespeichert werden. Bitte versuche es erneut.</string>
+
+    <!-- Spec 016 US1 — theme. -->
+    <string name="settings_theme_title">Design</string>
+    <string name="settings_theme_light">Hell</string>
+    <string name="settings_theme_dark">Dunkel</string>
+    <string name="settings_theme_system">Systemstandard</string>
+
+    <!-- Spec 016 US2 — search engine. -->
+    <string name="settings_search_engine_title">Suchmaschine</string>
+
+    <!-- Spec 016 US3 — app language. -->
+    <string name="settings_language_title">App-Sprache</string>
+    <string name="settings_language_follow_system">Systemsprache verwenden</string>
+    <string name="settings_error_language_not_applied">Die Sprache konnte nicht geändert werden. Bitte versuche es erneut.</string>
+
+    <!-- Spec 016 US4 — clear browsing data. -->
+    <string name="settings_clear_browsing_data_title">Browserdaten löschen</string>
+    <string name="settings_clear_dialog_title">Browserdaten löschen?</string>
+    <string name="settings_clear_category_history">Browserverlauf</string>
+    <string name="settings_clear_category_history_description">Alle Seiten in deinem Verlauf</string>
+    <string name="settings_clear_category_cookies">Cookies und Websitedaten</string>
+    <string name="settings_clear_category_cookies_description">Du wirst von den meisten Websites abgemeldet</string>
+    <string name="settings_clear_category_cache">Bilder und Dateien im Cache</string>
+    <string name="settings_clear_category_cache_description">Gibt Speicherplatz frei. Manche Websites laden beim nächsten Besuch eventuell langsamer.</string>
+    <string name="settings_clear_confirm">Daten löschen</string>
+    <string name="settings_clear_in_progress">Wird gelöscht …</string>
+    <string name="settings_clear_done">Browserdaten gelöscht</string>
+    <string name="settings_clear_partial_failure">Einige Daten konnten nicht gelöscht werden. Bitte versuche es erneut.</string>
+
+    <!-- Spec 016 US5 — history retention. -->
+    <string name="settings_history_retention_title">Verlauf speichern für</string>
+    <plurals name="settings_history_retention_days">
+        <item quantity="one">%d Tag</item>
+        <item quantity="other">%d Tage</item>
+    </plurals>
+    <string name="settings_retention_shorten_title">Älteren Verlauf löschen?</string>
+    <string name="settings_retention_shorten_body">Verlauf, der älter als %1$s ist, wird jetzt gelöscht. Das kann nicht rückgängig gemacht werden.</string>
+    <string name="settings_retention_shorten_confirm">Löschen</string>
+    <string name="settings_retention_prune_deferred">Älterer Verlauf konnte gerade nicht gelöscht werden. Er wird beim nächsten Start der App entfernt.</string>
+
+    <!-- Spec 016 US6 — dynamic color. -->
+    <string name="settings_dynamic_color_title">Dynamische Farben</string>
+    <string name="settings_dynamic_color_summary">Farben aus deinem Hintergrundbild verwenden</string>
+
+    <!-- Spec 016 US7 — About. -->
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_privacy_statement">Diese App erfasst keine personenbezogenen Daten und sendet nichts an Server von ThirtySix. Dein Verlauf, deine Lesezeichen, Downloads und Einstellungen bleiben auf diesem Gerät.</string>
 </resources>

@@ -50,9 +50,9 @@ interface HistoryRepository {
     /**
      * Spec 014 — delete every entry visited strictly before [cutoffMillis].
      *
-     * Backs the [com.raumanian.thirtysix.browser.core.constants.BrowserLimits.MAX_HISTORY_DAYS]
-     * retention window, which is what keeps the table — and therefore the in-memory list
-     * the History screen holds — bounded over the app's lifetime. Returns rows removed.
+     * Backs the history retention window — chosen by the user since Spec 016, 90 days by
+     * default — which is what keeps the table, and therefore the in-memory list the History
+     * screen holds, bounded over the app's lifetime. Returns rows removed.
      */
     suspend fun pruneOlderThan(cutoffMillis: Long): Int
 

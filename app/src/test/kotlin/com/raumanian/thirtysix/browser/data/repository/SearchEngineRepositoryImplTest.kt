@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.result.Result
-import com.raumanian.thirtysix.browser.domain.model.LanguageOverride
+import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
@@ -182,12 +182,15 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = error("not used in this test")
 
-    override suspend fun setLanguageOverride(override: LanguageOverride): Result<Unit> = error("not used in this test")
+    override suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit> = error("not used in this test")
 
     override suspend fun setSearchEngine(engine: SearchEngine): Result<Unit> {
         set(engine)
         return Result.Success(Unit)
     }
+
+    override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
+        error("not used in this test")
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = error("not used in this test")
 }

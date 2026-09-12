@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — French (fr) translation. Brand "ThirtySix" preserved per research.md R6. -->
     <string name="app_name">Navigateur ThirtySix</string>
-    <string name="settings_screen_placeholder">Paramètres</string>
     <string name="onboarding_screen_placeholder">Présentation</string>
 
     <!-- Spec 007 — French (fr) translations for Browser loading + error UI. -->
@@ -166,4 +165,63 @@
     <string name="downloads_empty_title">Aucun téléchargement</string>
     <string name="downloads_empty_body">Les fichiers que vous téléchargez apparaîtront ici.</string>
     <string name="downloads_operation_failed">Une erreur est survenue. Veuillez réessayer.</string>
+
+    <!-- Spec 016 — Settings screen scaffold. -->
+    <string name="settings_screen_title">Paramètres</string>
+    <string name="settings_action_back">Retour</string>
+    <string name="settings_action_cancel">Annuler</string>
+    <string name="settings_section_appearance">Apparence</string>
+    <string name="settings_section_language">Langue</string>
+    <string name="settings_section_search">Recherche</string>
+    <string name="settings_section_privacy">Confidentialité</string>
+    <string name="settings_section_about">À propos</string>
+    <string name="settings_error_not_saved">Impossible d\'enregistrer le paramètre. Veuillez réessayer.</string>
+
+    <!-- Spec 016 US1 — theme. -->
+    <string name="settings_theme_title">Thème</string>
+    <string name="settings_theme_light">Clair</string>
+    <string name="settings_theme_dark">Sombre</string>
+    <string name="settings_theme_system">Valeur par défaut du système</string>
+
+    <!-- Spec 016 US2 — search engine. -->
+    <string name="settings_search_engine_title">Moteur de recherche</string>
+
+    <!-- Spec 016 US3 — app language. -->
+    <string name="settings_language_title">Langue de l\'application</string>
+    <string name="settings_language_follow_system">Utiliser la langue du système</string>
+    <string name="settings_error_language_not_applied">Impossible de changer la langue. Veuillez réessayer.</string>
+
+    <!-- Spec 016 US4 — clear browsing data. -->
+    <string name="settings_clear_browsing_data_title">Effacer les données de navigation</string>
+    <string name="settings_clear_dialog_title">Effacer les données de navigation ?</string>
+    <string name="settings_clear_category_history">Historique de navigation</string>
+    <string name="settings_clear_category_history_description">Toutes les pages de votre historique</string>
+    <string name="settings_clear_category_cookies">Cookies et données des sites</string>
+    <string name="settings_clear_category_cookies_description">Vous déconnecte de la plupart des sites</string>
+    <string name="settings_clear_category_cache">Images et fichiers en cache</string>
+    <string name="settings_clear_category_cache_description">Libère de l\'espace. Certains sites risquent de se charger plus lentement la prochaine fois.</string>
+    <string name="settings_clear_confirm">Effacer les données</string>
+    <string name="settings_clear_in_progress">Suppression…</string>
+    <string name="settings_clear_done">Données de navigation effacées</string>
+    <string name="settings_clear_partial_failure">Certaines données n\'ont pas pu être effacées. Veuillez réessayer.</string>
+
+    <!-- Spec 016 US5 — history retention. -->
+    <string name="settings_history_retention_title">Conserver l\'historique pendant</string>
+    <plurals name="settings_history_retention_days">
+        <item quantity="one">%d jour</item>
+        <item quantity="many">%d jours</item>
+        <item quantity="other">%d jours</item>
+    </plurals>
+    <string name="settings_retention_shorten_title">Supprimer l\'historique plus ancien ?</string>
+    <string name="settings_retention_shorten_body">L\'historique de plus de %1$s sera supprimé maintenant. Cette action est irréversible.</string>
+    <string name="settings_retention_shorten_confirm">Supprimer</string>
+    <string name="settings_retention_prune_deferred">L\'historique plus ancien n\'a pas pu être supprimé maintenant. Il le sera au prochain démarrage de l\'application.</string>
+
+    <!-- Spec 016 US6 — dynamic color. -->
+    <string name="settings_dynamic_color_title">Couleurs dynamiques</string>
+    <string name="settings_dynamic_color_summary">Utiliser les couleurs de votre fond d\'écran</string>
+
+    <!-- Spec 016 US7 — About. -->
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_privacy_statement">Cette application ne collecte aucune donnée personnelle et n\'envoie rien à un serveur exploité par ThirtySix. Votre historique, vos favoris, vos téléchargements et vos paramètres restent sur cet appareil.</string>
 </resources>

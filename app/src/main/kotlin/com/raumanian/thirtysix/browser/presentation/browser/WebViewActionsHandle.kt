@@ -36,4 +36,18 @@ internal class WebViewActionsHandle {
      * Same lifecycle / closure semantics as the existing 5 lambdas.
      */
     var loadUrl: (String) -> Unit = {}
+
+    /**
+     * Points every action back at a no-op. Called when the renderer process behind the
+     * current WebView goes away: that WebView must not be used again, and the replacement
+     * `BrowserWebView` builds re-wires this handle as soon as it exists.
+     */
+    fun detach() {
+        goBack = {}
+        goForward = {}
+        reload = {}
+        stopLoading = {}
+        loadHome = {}
+        loadUrl = {}
+    }
 }

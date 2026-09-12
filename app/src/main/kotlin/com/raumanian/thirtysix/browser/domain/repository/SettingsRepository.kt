@@ -1,26 +1,26 @@
 package com.raumanian.thirtysix.browser.domain.repository
 
 import com.raumanian.thirtysix.browser.core.result.Result
-import com.raumanian.thirtysix.browser.domain.model.LanguageOverride
+import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Persistence-backed user settings (Spec 006 FR-015).
+ * Persistence-backed user settings (Spec 006 FR-015, amended by Spec 016).
  *
- * Per Constitution §IV (Repository pattern): consumers (ViewModels, Activities)
- * interact via this interface, never the underlying DataStore.
+ * Unchanged conventions from Spec 006:
+ *  - Setters return `Result<Unit>`; a disk-write failure is `Result.Error(IOException)`,
+ *    never a thrown exception. `CancellationException` is not caught.
+ *  - [observeSettings] emits one coherent [UserSettings] snapshot whenever any key changes,
+ *    with `distinctUntilChanged` applied.
+ *  - The implementation depends only on `SettingsDataStore` and `SettingsMapper` — never on
+ *    another repository and never on a platform service (Constitution §IV).
  *
- * Per Spec 006 Q1 clarification: setters return `Result<Unit>` from the existing
- * `core/result/` wrapper. On disk-write failure they return `Result.Error(throwable)`
- * carrying the underlying `IOException`; consumers may map to `AppError` via
- * `AppError.from(throwable)` if typed error handling is needed.
- *
- * Per FR-010: observeSettings emits a coherent snapshot every time any individual
- * key changes; consumers branch on UserSettings fields, not on per-key flows.
- * The implementation applies distinctUntilChanged so duplicate snapshots collapse.
+ * Deliberately absent: any language accessor. A second, app-owned copy of the language
+ * would go stale the moment the user changed it from Android 13+ system settings (FR-016);
+ * the platform seam `AppLanguageController` owns it instead.
  */
 interface SettingsRepository {
 
@@ -28,9 +28,20 @@ interface SettingsRepository {
 
     suspend fun setThemeMode(mode: ThemeMode): Result<Unit>
 
-    suspend fun setLanguageOverride(override: LanguageOverride): Result<Unit>
+    /**
+     * Spec 016 FR-009. Persisted on every Android version; consulted only on Android 12+
+     * (FR-010). The capability check belongs to the presentation layer, not here.
+     */
+    suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit>
 
     suspend fun setSearchEngine(engine: SearchEngine): Result<Unit>
+
+    /**
+     * Spec 016 FR-020. Stores the window's day count. Writes the value only — pruning is the
+     * caller's concern (`ChangeHistoryRetentionUseCase`), because a repository must not depend
+     * on `HistoryRepository`.
+     */
+    suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit>
 
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit>
 }

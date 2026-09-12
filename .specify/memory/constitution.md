@@ -75,6 +75,9 @@ Follow-up TODOs:
                  describe G9 as pending and cite a "three-row table". Comment-only drift in
                  an application source file, outside a constitution amendment's scope —
                  correct it in the next change that touches the manifest.
+                 ✅ DONE (Spec 016 T053, 2026-09-11): the comments now cite v1.3.0 §II, name
+                 WRITE_EXTERNAL_STORAGE as the single documented deviation, and record
+                 POST_NOTIFICATIONS as deliberately undeclared per Spec 015 G9 Outcome A.
 ================================================================================
 -->
 

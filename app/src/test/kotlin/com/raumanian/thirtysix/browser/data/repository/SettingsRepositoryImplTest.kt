@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.core.constants.AppDefaults
 import com.raumanian.thirtysix.browser.data.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.data.local.datastore.createTestSettingsDataStore
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
+import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import kotlinx.coroutines.CoroutineScope
@@ -58,8 +59,9 @@ class SettingsRepositoryImplTest {
             val updated = awaitItem()
             assertEquals(ThemeMode.Dark, updated.themeMode)
             // Other fields unchanged
-            assertEquals(AppDefaults.LANGUAGE_OVERRIDE, updated.languageOverride)
+            assertEquals(AppDefaults.DYNAMIC_COLOR_ENABLED, updated.isDynamicColorEnabled)
             assertEquals(AppDefaults.SEARCH_ENGINE, updated.searchEngine)
+            assertEquals(AppDefaults.HISTORY_RETENTION, updated.historyRetention)
 
             cancelAndConsumeRemainingEvents()
         }
@@ -83,11 +85,26 @@ class SettingsRepositoryImplTest {
         }
     }
 
+    /** Spec 016 FR-009 / FR-020 — both new setters reach observers through the repository. */
+    @Test
+    fun dynamicColorAndRetentionWrites_areObserved() = runTest {
+        repository.observeSettings().test {
+            awaitItem() // defaults
+
+            repository.setDynamicColorEnabled(false)
+            assertEquals(false, awaitItem().isDynamicColorEnabled)
+
+            repository.setHistoryRetention(HistoryRetention.Days180)
+            val updated = awaitItem()
+            assertEquals(HistoryRetention.Days180, updated.historyRetention)
+            assertEquals(false, updated.isDynamicColorEnabled)
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
     private fun assertEquals_appDefaults(snapshot: UserSettings) {
-        assertEquals(AppDefaults.THEME_MODE, snapshot.themeMode)
-        assertEquals(AppDefaults.LANGUAGE_OVERRIDE, snapshot.languageOverride)
-        assertEquals(AppDefaults.SEARCH_ENGINE, snapshot.searchEngine)
-        assertEquals(AppDefaults.IS_ONBOARDING_COMPLETED, snapshot.isOnboardingCompleted)
+        assertEquals(UserSettings.DEFAULT, snapshot)
     }
 
     private fun assertEquals(expected: Any?, actual: Any?) {

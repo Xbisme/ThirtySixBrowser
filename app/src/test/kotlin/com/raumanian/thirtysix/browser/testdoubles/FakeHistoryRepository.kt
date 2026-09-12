@@ -12,11 +12,23 @@ import kotlinx.coroutines.flow.map
  * Records visits into a backing list flow; supports observing, deleting by id,
  * clearing, and counting. Sufficient for any test that needs to verify the
  * recorder fires (or doesn't fire) without standing up a real Room DB.
+ *
+ * Spec 016 — [clearAll] and [pruneOlderThan] append to an optional [callLog] shared with other
+ * fakes, and can be made to throw through [clearAllError] / [pruneError], for the ordering and
+ * failure-boundary tests of `ClearBrowsingDataUseCase` and `ChangeHistoryRetentionUseCase`.
  */
-class FakeHistoryRepository : HistoryRepository {
+class FakeHistoryRepository(
+    private val callLog: MutableList<String> = mutableListOf(),
+) : HistoryRepository {
 
     private val state = MutableStateFlow<List<HistoryEntry>>(emptyList())
     private var nextId: Long = 1L
+
+    /** When set, [clearAll] throws it instead of clearing. */
+    var clearAllError: Throwable? = null
+
+    /** When set, [pruneOlderThan] throws it instead of pruning. */
+    var pruneError: Throwable? = null
 
     val recorded: List<HistoryEntry>
         get() = state.value
@@ -42,16 +54,25 @@ class FakeHistoryRepository : HistoryRepository {
     }
 
     override suspend fun pruneOlderThan(cutoffMillis: Long): Int {
+        callLog += CALL_PRUNE
+        pruneError?.let { throw it }
         val before = state.value.size
         state.value = state.value.filterNot { it.visitedAt < cutoffMillis }
         return before - state.value.size
     }
 
     override suspend fun clearAll(): Int {
+        callLog += CALL_CLEAR_ALL
+        clearAllError?.let { throw it }
         val before = state.value.size
         state.value = emptyList()
         return before
     }
 
     override suspend fun count(): Int = state.value.size
+
+    companion object {
+        const val CALL_CLEAR_ALL: String = "history.clearAll"
+        const val CALL_PRUNE: String = "history.pruneOlderThan"
+    }
 }
