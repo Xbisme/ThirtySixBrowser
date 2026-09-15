@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** 🟢 Spec 018 `onboarding-flow` implemented (41/41, [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open) · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** ✅ Spec 018 `onboarding-flow` done — merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41 · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FE
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), 🟢 **018 `onboarding-flow` implemented 2026-09-15 (41/41, PR #24 open)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), ✅ **018 `onboarding-flow` merged 2026-09-15 (41/41, PR #24, `492e4f3`)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -238,6 +238,20 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 - Scoped Storage MUST be respected — no `MANAGE_EXTERNAL_STORAGE`
 - `targetSdk = 36` for v1.0; bump within 12 months of any new Android release per Play policy
 
+## 🎉 v1.0 status — feature-complete, not yet submittable
+
+**Specs 001–018 are all merged into `main`** (2026-09-15). Phase 1–4 is done, which is what Constitution §X requires before Phase 5.
+
+**What still stands between this and a Play Store submission** — none of it is feature work:
+
+| # | Item | Blocked on |
+|---|---|---|
+| 1 | **Screen-reader passes** — Spec 016 T109, Spec 017 SC-012, Spec 018 SC-010 | A person. TalkBack is not scriptable on these emulators; three specs have now hit this. |
+| 2 | **SC-005 (Spec 014 T103b) + SC-006 (Spec 015)** — list p99 ≤ 16 ms | **A release-seeding mechanism, first.** Confirmed on device that a release build cannot be seeded at all (see below), so hardware alone does not unblock this. |
+| 3 | **Emulator CI cache** propagating broken AVD snapshots | A workflow change — see Pending CI / Tooling Tasks. |
+
+Item 2's ordering matters: booking Pixel 5-class hardware before fixing release seeding would waste the session, because there is no way to get 10,000 rows into the build being measured.
+
 ## Spec Roadmap
 
 | # | Spec | Status | Description |
@@ -260,7 +274,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 | 015 | `downloads-manager` | ✅ Done 2026-09-11 (PR #16 merged into `main`, commit `e925f9d`; 121/121 tasks — SC-006 perf gate deferred to real hardware) | System DownloadManager + public Downloads folder + hybrid Room/platform source of truth + **first schema migration (v1→v2)** + overflow menu replacing the Bookmarks/History bottom-bar entries + 8 use cases |
 | 016 | `settings-screen` | ✅ Done 2026-09-12 (PR #18 merged into `main`, merge commit `3083941`; 112/113 — T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
 | 017 | `splash-screen` | ✅ Done 2026-09-15 (PR #20 merged, `cca5c0c`; 35/35; G1–G10 PASS, chỉ TalkBack deferred) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
-| 018 | `onboarding-flow` | 🟢 Implemented 2026-09-15 (41/41; G1–G12 PASS, chỉ screen-reader deferred; [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
+| 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
@@ -271,7 +285,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Pending CI / Tooling Tasks
 
-> No outstanding CI tooling tasks at the moment.
+> ⚠️ **ONE OUTSTANDING TASK: the emulator job's AVD cache propagates broken snapshots.** Three emulator-CI failures happened on 2026-09-15 alone. The job needs either no AVD cache, or a cache written **only when the tests pass** — the latter keeps the speed without propagating a corrupt snapshot. Until then: if the emulator job fails or hangs with `Broken pipe` / `DeadSystemException` / `stop: Not implemented` **and `Starting 0 tests`**, run `gh cache list | grep avd`, delete the cache, and re-run **before suspecting the code**. Verified on 2026-09-15: every run without a cache passed, every run with the 11:53 cache failed — including one on `main`.
 >
 > Two emulator-job hangs have been surfaced and fixed, and they are **different bugs with similar symptoms** — check both before assuming a new one:
 > 1. **Spec 008 — shutdown hang.** QEMU's `stop` emits `stop: Not implemented`, so the action's terminate phase never sees the process exit. Fixed by killing qemu at the end of `script` plus `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5`.
@@ -281,7 +295,29 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Recent Changes
 
-- 2026-09-15 (Spec 018 implementation — 🎉 **v1.0 feature-complete**): 🟢 **Spec 018 `onboarding-flow` implemented — 41/41 tasks, [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open. With this, Specs 001–018 are all implemented and Phase 1–4 is done.**
+- 2026-09-15 (Spec 018 merged — 🎉 **v1.0 FEATURE-COMPLETE** + a third emulator-CI failure, diagnosed): ✅ **Spec 018 merged — PR #24 (`018-onboarding-flow` → `main`, merge commit `492e4f3`), all six CI jobs green, 109/109 instrumented tests actually run on API 29.** **Specs 001–018 are now all merged: Phase 1–4 is done.**
+
+  **⚠️ The emulator job failed twice on this PR, and it was never Spec 018's fault.** The proof: **`main` itself failed the same job** at `4041f608` (PR #23, docs-only) — code with no Spec 018 in it at all, with the identical signature: `Broken pipe (32)`, `stop: Not implemented`, **zero tests run**.
+
+  **Root cause: the job poisons its own AVD cache.** The timeline is unambiguous:
+
+  | Time | Condition | Result |
+  |---|---|---|
+  | 11:45, 11:50 | **no cache** — AVD created fresh | ✅ green |
+  | **11:53:26** | a run **writes** the cache | — |
+  | 11:54 | `main` — **uses that cache** | ❌ fail |
+  | 13:46, 13:52 | PR #24 — **uses that cache** | ❌ fail / hang |
+  | 14:06 | cache deleted → **created fresh** | ✅ green, 109/109 |
+
+  Every run before the cache existed passed; every run after it inherited a broken snapshot. Deleting it fixed the run immediately.
+
+  **This is NOT the bug PR #22 fixed, and PR #22 is still correct and still needed.** That fix stops a snapshot from a *different runner image* being restored forever — the key now carries a real version (`avd-api29-20260907.300.1`), and the `Resolve runner image version` step succeeds on every run. What it cannot stop is a snapshot **written broken at the current version**, because the key matches by design.
+
+  **Still outstanding — and a fresh cache was written again at 14:06:53 under the same key**, so the next run may inherit it. **This is the third emulator-CI failure in one day** (Spec 017's stale snapshot, this PR's corrupt snapshot twice). The job needs either no AVD cache at all, or a cache written **only when the tests actually pass**. The second keeps the speed without propagating a broken snapshot. Deliberately not changed here: it is CI infrastructure, not part of Spec 018.
+
+  **How to recognise it**: emulator job fails or hangs with `Broken pipe` / `DeadSystemException` / `stop: Not implemented` **and `Starting 0 tests`**. Check `gh cache list | grep avd`; if a cache exists, delete it and re-run before suspecting the code.
+
+- 2026-09-15 (Spec 018 implementation — 🎉 **v1.0 feature-complete**): ✅ **Spec 018 `onboarding-flow` merged — [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24), merge commit `492e4f3`, all 6 CI jobs green. 41/41 tasks. With this, Specs 001–018 are all implemented and Phase 1–4 is done.**
 
   **Scope.** A four-slide first-run flow — welcome (with the privacy promise), language, theme, search engine — shown once per install, skippable from any slide, every choice saved and applied the moment it is made. It stores nothing of its own: it is a second presentation of settings that already exist, plus one flag that already exists. Room stays at v2, **no new dependency**.
 
@@ -480,7 +516,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 018 — Onboarding Flow](specs/018-onboarding-flow/) — **implemented 2026-09-15, 41/41 tasks — [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open. This is the LAST spec of v1.0.**
+**Current**: ✅ [Spec 018 — Onboarding Flow](specs/018-onboarding-flow/) — **merged into `main` via [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, all 6 CI jobs green), 41/41 tasks. 🎉 This was the LAST spec of v1.0 — Specs 001–018 are now all merged.**
 
 - Artifacts: [spec.md](specs/018-onboarding-flow/spec.md) (27 FR · 15 SC · 10 assumptions) · [plan.md](specs/018-onboarding-flow/plan.md) · [research.md](specs/018-onboarding-flow/research.md) (R1–R10) · [data-model.md](specs/018-onboarding-flow/data-model.md) (13 invariants) · [quickstart.md](specs/018-onboarding-flow/quickstart.md) (G1–G12) · [tasks.md](specs/018-onboarding-flow/tasks.md) — see **Device Gate Results** · [contracts/](specs/018-onboarding-flow/contracts/).
 - **Gates**: unit ✅ 579/579 (+22) · instrumented ✅ 109/109 (16 KB AVD) · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero new · APK **3,134,976 B** (+8,764 B, 4.3% of budget) · **G1–G12 all pass** · Constitution **11/11 PASS, zero deviations**.
@@ -535,6 +571,17 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 1. **G9 is resolved (Outcome A).** The system download service notifies under its own identity, so `POST_NOTIFICATIONS` stays undeclared — confirmed on Android 16 build `BE4B.251210.005`, and the Constitution's permission table was amended accordingly.
 2. **The schema is now v2** (`AppDatabase.SCHEMA_VERSION = 2`, the project's first migration, upgrade path verified on device by G11 step 5). Every future schema change needs an explicit additive migration plus an exported `app/schemas/…/N.json`; `git grep fallbackToDestructiveMigration -- app/src/main/` must stay at zero real call sites (its two current hits are comments documenting the ban).
+
+### ⚠️ Release builds cannot be seeded — confirmed on device 2026-09-15
+
+Spec 018's perf pass proved what earlier specs suspected. Both routes are closed:
+
+- `am broadcast … SEED_HISTORY` against the **release** applicationId returns `result=0` — the seeders live in the `debug` source set, so no receiver exists.
+- `run-as com.raumanian.thirtysix.browser` fails with **`package not debuggable`**.
+
+So **SC-005 (Spec 014 T103b) and SC-006 (Spec 015) cannot be measured on a release build by any route today.** Settle a release-seeding mechanism *before* booking hardware, or the session is wasted.
+
+Also settled: **the project's AVDs are not Pixel 5-equivalent for frame timing.** `TA016_API36_16K` runs `swiftshader_indirect` — software rendering, no GPU — with 2.5 GB RAM and 4 virtual cores. Measured there for reference only (10,000 seeded rows): scrolling p99 **57 ms** / 3.9% janky, typing p99 **73 ms** / 58.7% janky. Those are facts about the emulator, not the app; reporting them against a 16 ms target would repeat Spec 014's T103b.
 
 ### Still deferred to real hardware
 
