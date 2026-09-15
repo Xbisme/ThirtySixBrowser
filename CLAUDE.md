@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** 🟢 Spec 018 `onboarding-flow` implemented (39/41, branch `018-onboarding-flow`, PR chưa mở) · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** 🟢 Spec 018 `onboarding-flow` implemented (41/41, [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open) · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FE
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), 🟢 **018 `onboarding-flow` implemented 2026-09-15 (39/41, branch `018-onboarding-flow`, PR chưa mở)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), 🟢 **018 `onboarding-flow` implemented 2026-09-15 (41/41, PR #24 open)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -260,7 +260,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 | 015 | `downloads-manager` | ✅ Done 2026-09-11 (PR #16 merged into `main`, commit `e925f9d`; 121/121 tasks — SC-006 perf gate deferred to real hardware) | System DownloadManager + public Downloads folder + hybrid Room/platform source of truth + **first schema migration (v1→v2)** + overflow menu replacing the Bookmarks/History bottom-bar entries + 8 use cases |
 | 016 | `settings-screen` | ✅ Done 2026-09-12 (PR #18 merged into `main`, merge commit `3083941`; 112/113 — T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
 | 017 | `splash-screen` | ✅ Done 2026-09-15 (PR #20 merged, `cca5c0c`; 35/35; G1–G10 PASS, chỉ TalkBack deferred) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
-| 018 | `onboarding-flow` | 🟢 Implemented 2026-09-15 (39/41; G1–G12 PASS, chỉ screen-reader deferred; PR chưa mở) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
+| 018 | `onboarding-flow` | 🟢 Implemented 2026-09-15 (41/41; G1–G12 PASS, chỉ screen-reader deferred; [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
@@ -281,7 +281,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Recent Changes
 
-- 2026-09-15 (Spec 018 implementation — 🎉 **v1.0 feature-complete**): 🟢 **Spec 018 `onboarding-flow` implemented — 39/41 tasks on branch `018-onboarding-flow`, PR not yet opened. With this, Specs 001–018 are all implemented and Phase 1–4 is done.**
+- 2026-09-15 (Spec 018 implementation — 🎉 **v1.0 feature-complete**): 🟢 **Spec 018 `onboarding-flow` implemented — 41/41 tasks, [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open. With this, Specs 001–018 are all implemented and Phase 1–4 is done.**
 
   **Scope.** A four-slide first-run flow — welcome (with the privacy promise), language, theme, search engine — shown once per install, skippable from any slide, every choice saved and applied the moment it is made. It stores nothing of its own: it is a second presentation of settings that already exist, plus one flag that already exists. Room stays at v2, **no new dependency**.
 
@@ -480,7 +480,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 018 — Onboarding Flow](specs/018-onboarding-flow/) — **implemented 2026-09-15, 39/41 tasks on branch `018-onboarding-flow`; PR not yet opened. This is the LAST spec of v1.0.**
+**Current**: 🟢 [Spec 018 — Onboarding Flow](specs/018-onboarding-flow/) — **implemented 2026-09-15, 41/41 tasks — [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) open. This is the LAST spec of v1.0.**
 
 - Artifacts: [spec.md](specs/018-onboarding-flow/spec.md) (27 FR · 15 SC · 10 assumptions) · [plan.md](specs/018-onboarding-flow/plan.md) · [research.md](specs/018-onboarding-flow/research.md) (R1–R10) · [data-model.md](specs/018-onboarding-flow/data-model.md) (13 invariants) · [quickstart.md](specs/018-onboarding-flow/quickstart.md) (G1–G12) · [tasks.md](specs/018-onboarding-flow/tasks.md) — see **Device Gate Results** · [contracts/](specs/018-onboarding-flow/contracts/).
 - **Gates**: unit ✅ 579/579 (+22) · instrumented ✅ 109/109 (16 KB AVD) · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero new · APK **3,134,976 B** (+8,764 B, 4.3% of budget) · **G1–G12 all pass** · Constitution **11/11 PASS, zero deviations**.
