@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Spec 017 — launch-screen constants.
+
+  Declared as a named resource rather than an inline literal in themes.xml, per
+  Constitution §III (No-Hardcode Rule).
+-->
+<resources>
+    <!-- Reported back by SplashScreenView.getIconAnimationDuration(); it does NOT
+         extend the launch screen, which ends at the first drawable frame (FR-008,
+         specs/017-splash-screen/research.md R4). The value only has to be > 0 for an
+         animated icon. 500 ms matches the motion authored in
+         res/drawable-v31/ic_brand_mark.xml. -->
+    <integer name="splash_icon_animation_duration">500</integer>
+</resources>

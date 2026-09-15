@@ -212,6 +212,11 @@ dependencies {
     // the installed WebView supports it (research.md R5). No native libraries.
     implementation(libs.androidx.webkit)
 
+    // Spec 017 — SplashScreen compat backs the branded launch screen down to minSdk 24 and
+    // maps the splash attributes onto the platform API from Android 12 up
+    // (specs/017-splash-screen/research.md R1, R6). No native libraries.
+    implementation(libs.androidx.core.splashscreen)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.room.testing)

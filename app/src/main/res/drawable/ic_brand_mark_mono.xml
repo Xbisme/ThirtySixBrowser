@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Spec 017 — ThirtySix brand mark, monochrome variant for themed app icons (Android 13+).
+
+  The system tints this with a single colour, so it MUST NOT be a silhouette of the
+  colour mark: flattening a filled disc yields a featureless circle, which is exactly
+  the failure FR-006 names. The disc is therefore drawn as an OUTLINE RING and the
+  numerals stay solid inside it, so the mark is still recognisable once tinted
+  (INV-5).
+
+  Derived from the same approved source as ic_brand_mark.xml (INV-1). Geometry matches:
+  432-unit viewport, ring at r=134, numerals at the same coordinates. Intrinsic size is
+  108dp for the same VectorRaster reason noted in ic_brand_mark.xml.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="432"
+    android:viewportHeight="432">
+
+    <!-- Disc as an outline ring: outer r=134 clockwise, inner r=113 counter-clockwise
+         so nonZero fill leaves the middle open. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M216,82a134,134 0 1,0 0,268a134,134 0 1,0 0,-268zM216,103a113,113 0 1,1 0,226a113,113 0 1,1 0,-226z" />
+
+    <!-- Numerals, identical geometry to ic_brand_mark.xml. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M150,194c0,-13 11,-23 30,-23c19,0 30,10 30,24c0,9 -5,16 -13,19c9,3 15,11 15,21c0,16 -13,27 -32,27c-19,0 -32,-10 -33,-25l17,0c1,6 7,10 16,10c9,0 15,-5 15,-12c0,-8 -6,-12 -16,-12l-8,0l0,-14l8,0c9,0 14,-4 14,-11c0,-7 -5,-11 -13,-11c-8,0 -13,4 -14,10z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M252,171c18,0 30,9 32,24l-17,0c-2,-6 -7,-10 -15,-10c-12,0 -19,9 -19,26l0,3c4,-8 13,-13 24,-13c17,0 30,12 30,30c0,18 -14,31 -34,31c-23,0 -37,-15 -37,-43l0,-8c0,-26 14,-40 36,-40zM251,227c-9,0 -16,7 -16,16c0,9 7,16 16,16c10,0 16,-6 16,-16c0,-9 -6,-16 -16,-16z" />
+</vector>
