@@ -238,8 +238,24 @@ jobs:
           echo "Runner image: $ImageVersion"
           echo "version=$ImageVersion" >> "$GITHUB_OUTPUT"
 
-      - name: AVD cache
-        uses: actions/cache@v4
+      # Spec 018 — ⚠️ RESTORE ONLY. The matching save is the LAST step of this job and is
+      # gated on the tests having passed.
+      #
+      # `actions/cache@v4` saves in a post-step that runs even when the job FAILS. That is how
+      # this job poisoned itself on 2026-09-15: a run wrote a broken snapshot at 11:53, and
+      # every run afterwards restored it and died with `Broken pipe` / `stop: Not implemented`
+      # and `Starting 0 tests` — including one on `main` at 4041f608, a docs-only commit. Every
+      # run *before* that cache existed had passed. Deleting it by hand fixed the next run
+      # immediately.
+      #
+      # This is a DIFFERENT bug from the one the key fixes (see the comment above): that one is
+      # a snapshot from an older runner image being restored forever, and its fix — the version
+      # in the key — is still correct and still needed. It cannot help here, because a snapshot
+      # written broken at the *current* version matches the key by design.
+      #
+      # Splitting restore from save means a failed run leaves the cache exactly as it found it.
+      - name: AVD cache (restore)
+        uses: actions/cache/restore@v4
         id: avd-cache
         with:
           path: |
@@ -315,3 +331,28 @@ jobs:
           name: instrumented-test-report-api${{ matrix.api-level }}
           path: app/build/reports/androidTests/
           if-no-files-found: ignore
+
+      # Spec 018 — the save half of the split above. Deliberately the LAST step, and NOT
+      # `if: always()`: it runs only when every preceding step succeeded, which for this job
+      # means the instrumented tests actually ran and passed.
+      #
+      # A snapshot is therefore only ever cached if it demonstrably booted an emulator that
+      # ran 109 tests. A run that fails or hangs leaves the existing cache untouched instead
+      # of overwriting it with whatever broken state it produced.
+      #
+      # ⚠️ `success()` is spelled out on purpose. A step with no `if` inherits an implicit
+      # success check, but writing ANY custom `if` REPLACES that check rather than adding to
+      # it — so `if: steps.avd-cache.outputs.cache-hit != 'true'` alone would run after a
+      # failed test run and cache the broken snapshot, which is the exact bug being fixed.
+      #
+      # The second half skips the upload when the cache was already restored: saving under a
+      # key that exists is a no-op, and skipping it keeps the log honest about when a snapshot
+      # is genuinely new.
+      - name: AVD cache (save, only when the tests passed)
+        if: success() && steps.avd-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api${{ matrix.api-level }}-${{ steps.runner-image.outputs.version }}
