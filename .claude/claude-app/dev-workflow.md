@@ -115,8 +115,8 @@ Các Spec theo thứ tự implement:
 | 014 | `history-view` | 005, 007 | ✅ Done (PR #15) |
 | 015 | `downloads-manager` | 007 | ✅ Done (PR #16) |
 | 016 | `settings-screen` | 003, 004, 006 | ✅ Done (PR #18) |
-| 017 | `splash-screen` | 002 | 🟢 Implemented, PR #20 |
+| 017 | `splash-screen` | 002 | ✅ Done (PR #20) |
 | 018 | `onboarding-flow` | 003, 004, 006, 017 | ⬜ Next |
 | 019 | `tracker-blocker-hostlist` | 011–018 | ⬜ Optional |
 
-> Cập nhật 2026-09-15: Specs 001–016 đã merge vào `main` (016 qua PR #18, 2026-09-12). 🟢 Spec 017 `splash-screen` đã implement (35/35, PR #20 đang mở) — G1–G10 đều PASS trên máy ảo, chỉ còn TalkBack cần người thật; bước tiếp theo là thảo luận Spec 018 (`onboarding-flow`). Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
+> Cập nhật 2026-09-15: Specs 001–016 đã merge vào `main` (016 qua PR #18, 2026-09-12). ✅ Spec 017 `splash-screen` đã merge (PR #20, `cca5c0c`, 35/35) — G1–G10 đều PASS, chỉ còn TalkBack cần người thật. Phase 4 giờ 2/3; bước tiếp theo là thảo luận Spec 018 (`onboarding-flow`). Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
