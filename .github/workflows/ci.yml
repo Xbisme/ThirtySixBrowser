@@ -200,16 +200,44 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # Spec 015 — `ImageVersion` is part of the key on purpose.
+      # Spec 015 — the runner image version is part of the AVD cache key on purpose.
       #
       # The cached AVD contains a *quickboot snapshot*, which is only valid for the
-      # emulator binary that wrote it. The old key (`avd-api29-Linux`) carried no
-      # version component, so when the runner image upgraded the emulator the stale
-      # snapshot kept being restored forever. The result was a zombie boot: the
-      # emulator reported `sys.boot_completed=1` while `settings` and `input` were
-      # never published, so the action's unlock step failed, the Gradle script never
-      # ran at all, and the job sat wedged until its 20-minute timeout. Keying on the
-      # runner image makes that self-healing.
+      # emulator binary that wrote it. A key with no version component means the
+      # stale snapshot keeps being restored forever, so when the runner image
+      # upgrades the emulator the result is a zombie boot: the emulator reports
+      # `sys.boot_completed=1` while `settings` and `input` are never published, the
+      # action's unlock step fails with `adb ... exit code 1`, the Gradle script
+      # never runs at all, and the job sits wedged until its 20-minute timeout.
+      # Keying on the runner image makes that self-healing.
+      #
+      # Spec 017 — ⚠️ the previous form of this key, `${{ env.ImageVersion }}`, did
+      # NOT work and the bug above kept happening. `ImageVersion` is an environment
+      # variable of the *runner image*, not a workflow-level `env:` entry, and the
+      # `env` context in an expression only exposes what the workflow, job or step
+      # declares. It therefore interpolated to an empty string, which was visible in
+      # the cache listing as `avd-api29-Linux-` (trailing dash, no version) — the key
+      # was effectively unversioned, exactly what the comment above says to avoid.
+      # It was only caught when the emulator job hung on PR #20 and the cache list
+      # was inspected by hand.
+      #
+      # The variable IS available to a shell, so read it there and republish it as a
+      # step output, which expressions can see. `runner.os` is dropped from the key:
+      # the image version already identifies the OS, and keeping both invites the
+      # same false sense of specificity.
+      # Fails loudly if the variable ever disappears. A silent fallback such as
+      # `${ImageVersion:-unknown}` would pin every run to one constant and quietly
+      # recreate the unversioned key this step exists to prevent.
+      - name: Resolve runner image version
+        id: runner-image
+        run: |
+          if [ -z "${ImageVersion:-}" ]; then
+            echo "::error::ImageVersion is empty — the AVD cache key would be unversioned. See the comment above this step."
+            exit 1
+          fi
+          echo "Runner image: $ImageVersion"
+          echo "version=$ImageVersion" >> "$GITHUB_OUTPUT"
+
       - name: AVD cache
         uses: actions/cache@v4
         id: avd-cache
@@ -217,7 +245,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-api${{ matrix.api-level }}-${{ runner.os }}-${{ env.ImageVersion }}
+          key: avd-api${{ matrix.api-level }}-${{ steps.runner-image.outputs.version }}
 
       - name: Create AVD snapshot (first run only)
         if: steps.avd-cache.outputs.cache-hit != 'true'
