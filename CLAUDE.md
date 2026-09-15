@@ -248,9 +248,11 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 |---|---|---|
 | 1 | **Screen-reader passes** — Spec 016 T109, Spec 017 SC-012, Spec 018 SC-010 | A person. TalkBack is not scriptable on these emulators; three specs have now hit this. |
 | 2 | **SC-005 (Spec 014 T103b) + SC-006 (Spec 015)** — list p99 ≤ 16 ms | **A release-seeding mechanism, first.** Confirmed on device that a release build cannot be seeded at all (see below), so hardware alone does not unblock this. |
-| 3 | **Emulator CI cache** propagating broken AVD snapshots | A workflow change — see Pending CI / Tooling Tasks. |
+| 3 | ~~**Emulator CI cache** propagating broken AVD snapshots~~ | ✅ **Fixed** in [PR #26](https://github.com/Xbisme/ThirtySixBrowser/pull/26) — the cache is now saved only when the tests pass. Merge pending. |
 
 Item 2's ordering matters: booking Pixel 5-class hardware before fixing release seeding would waste the session, because there is no way to get 10,000 rows into the build being measured.
+
+So the two remaining blockers are both **people-and-hardware** problems, not code: someone to run TalkBack, and a way to seed a release build before hardware is booked.
 
 ## Spec Roadmap
 
@@ -285,15 +287,31 @@ Item 2's ordering matters: booking Pixel 5-class hardware before fixing release 
 
 ## Pending CI / Tooling Tasks
 
-> ⚠️ **ONE OUTSTANDING TASK: the emulator job's AVD cache propagates broken snapshots.** Three emulator-CI failures happened on 2026-09-15 alone. The job needs either no AVD cache, or a cache written **only when the tests pass** — the latter keeps the speed without propagating a corrupt snapshot. Until then: if the emulator job fails or hangs with `Broken pipe` / `DeadSystemException` / `stop: Not implemented` **and `Starting 0 tests`**, run `gh cache list | grep avd`, delete the cache, and re-run **before suspecting the code**. Verified on 2026-09-15: every run without a cache passed, every run with the 11:53 cache failed — including one on `main`.
+> **No outstanding CI tooling tasks.** The emulator job has now surfaced **three** distinct hangs with confusingly similar symptoms, all three fixed. Check all three before assuming a fourth:
 >
-> Two emulator-job hangs have been surfaced and fixed, and they are **different bugs with similar symptoms** — check both before assuming a new one:
 > 1. **Spec 008 — shutdown hang.** QEMU's `stop` emits `stop: Not implemented`, so the action's terminate phase never sees the process exit. Fixed by killing qemu at the end of `script` plus `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5`.
-> 2. **Spec 017 — stale AVD snapshot (PR #22, `d5ab63d`).** The cache key used `${{ env.ImageVersion }}`, which is **always empty** — `ImageVersion` belongs to the runner image, not the workflow's `env:` block, and the `env` context only exposes what the workflow, job or step declares. The key was therefore unversioned (`avd-api29-Linux-`), so a snapshot written by an older emulator binary was restored forever, giving a zombie boot: `sys.boot_completed=1` but `settings`/`input` never published, `adb` exits 1, Gradle never runs, job wedges until timeout. Now resolved through a step output, with a hard failure if the variable disappears.
+> 2. **Spec 017 — stale AVD snapshot, a *key* bug (PR #22, `d5ab63d`).** The cache key used `${{ env.ImageVersion }}`, which is **always empty** — `ImageVersion` belongs to the runner image, not the workflow's `env:` block, and the `env` context only exposes what the workflow, job or step declares. The key was therefore unversioned (`avd-api29-Linux-`), so a snapshot written by an older emulator binary was restored forever, giving a zombie boot: `sys.boot_completed=1` but `settings`/`input` never published, `adb` exits 1, Gradle never runs, job wedges until timeout. Now resolved through a step output, with a hard failure if the variable disappears.
+> 3. **Spec 018 — corrupt AVD snapshot, a *write* bug (PR #26).** `actions/cache@v4` saves in a **post-step that runs even when the job fails**, so a run that booted a broken emulator wrote that broken snapshot to the cache and every later run restored it. Fixed by splitting the step into `actions/cache/restore@v4` at the top of the job and `actions/cache/save@v4` as the **last** step, gated on `success()`.
 >
-> **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd` — a key without a version component is bug 2 returning.
+> **⚠️ Bugs 2 and 3 are different and neither fix covers the other.** Bug 2 is a snapshot from a *different runner image* being restored forever; bug 3 is a snapshot written broken at the *current* version, which matches the versioned key by design. Both fixes are needed.
+>
+> **⚠️ A custom `if` REPLACES the implicit success check, it does not add to it.** This is why the save step spells out `if: success() && …`. Writing only the cache-hit condition would let the step run after a failed test run and cache the broken snapshot — recreating bug 3 exactly.
+>
+> **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd`. A key with no version component is bug 2 returning. `Starting 0 tests` alongside `Broken pipe` / `DeadSystemException` / `stop: Not implemented` is the bug-3 signature — delete the cache and re-run **before suspecting the code**; a healthy run logs `Starting 109 tests` → `Finished 109 tests`.
 
 ## Recent Changes
+
+- 2026-09-15 (CI — the AVD cache bug fixed at the root, [PR #26](https://github.com/Xbisme/ThirtySixBrowser/pull/26)): ✅ **The emulator job no longer caches a snapshot it never proved works.** This closes the last item on the CI backlog and the third of three emulator hangs.
+
+  **The mechanism.** `actions/cache@v4` saves in a **post-step that runs even when the job fails**. So a run that booted a broken emulator wrote that broken AVD to the cache anyway, and every later run restored it. Splitting the action into `actions/cache/restore@v4` at the top of the job and `actions/cache/save@v4` as the **last** step means a failed run now leaves the cache exactly as it found it.
+
+  **Why this was not Spec 018's fault, established before changing anything**: `main` at `4041f608` — a **docs-only** commit — failed the identical job with the identical signature. Every run *before* the 11:53 cache existed passed; every run *after* it failed; deleting the cache by hand made the next run green at 109/109.
+
+  **⚠️ Not the bug PR #22 fixed, and PR #22 is still needed.** That one was a snapshot from an *older runner image* restored forever, fixed by putting a real version in the key. It cannot help here, because a snapshot written broken at the *current* version matches the versioned key by design. Two failure modes, two fixes, both required.
+
+  **⚠️ The subtlety that nearly reintroduced the bug while fixing it.** The save step's condition was first written as `if: steps.avd-cache.outputs.cache-hit != 'true'`. That is wrong: a step with no `if` inherits an implicit success check, but writing **any** custom `if` **replaces** that check rather than adding to it — so the step would still have run after a failed test run and cached the broken snapshot. Corrected to `if: success() && …` before committing, and the reasoning is recorded in the workflow itself so it cannot be "simplified" away later.
+
+  **Verified on the PR's own CI, 6/6 green.** The emulator job restored the existing `avd-api29-20260907.300.1` cache (471 MB, **versioned key intact** — PR #22 still holding), skipped AVD creation, ran **`Starting 109 tests` → `Finished 109 tests` → `BUILD SUCCESSFUL`**, and correctly skipped the save on cache-hit. That exercises the restore path, which is the path the poisoning travelled. The save path first runs after a cache eviction. **`Starting 0 tests` is the signature of the bug; `Starting 109 tests` is the proof it is gone.** `actionlint` clean — its one remaining finding (`SC2162`) was confirmed pre-existing by running it against `main`.
 
 - 2026-09-15 (Spec 018 merged — 🎉 **v1.0 FEATURE-COMPLETE** + a third emulator-CI failure, diagnosed): ✅ **Spec 018 merged — PR #24 (`018-onboarding-flow` → `main`, merge commit `492e4f3`), all six CI jobs green, 109/109 instrumented tests actually run on API 29.** **Specs 001–018 are now all merged: Phase 1–4 is done.**
 
