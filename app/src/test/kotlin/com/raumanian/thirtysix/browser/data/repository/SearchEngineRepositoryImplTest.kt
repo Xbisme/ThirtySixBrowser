@@ -180,6 +180,9 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
 
     override fun observeSettings(): Flow<UserSettings> = state.asStateFlow()
 
+    // Spec 018 — the one-shot read. Same snapshot observeSettings would emit.
+    override suspend fun currentSettings(): UserSettings = state.value
+
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = error("not used in this test")
 
     override suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit> = error("not used in this test")

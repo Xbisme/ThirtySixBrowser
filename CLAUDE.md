@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** 🟢 Spec 018 `onboarding-flow` implemented (39/41, branch `018-onboarding-flow`, PR chưa mở) · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 00
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** ✅ **Specs 001–016 done (2026-09-12)** — Phase 1–3 hoàn tất; **Phase 4: 016 merged, ✅ 017 `splash-screen` merged 2026-09-15 (35/35, PR #20, `cca5c0c`)**. Next: mở PR cho 017, rồi 018 `onboarding-flow`. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), 🟢 **018 `onboarding-flow` implemented 2026-09-15 (39/41, branch `018-onboarding-flow`, PR chưa mở)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -260,7 +260,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 | 015 | `downloads-manager` | ✅ Done 2026-09-11 (PR #16 merged into `main`, commit `e925f9d`; 121/121 tasks — SC-006 perf gate deferred to real hardware) | System DownloadManager + public Downloads folder + hybrid Room/platform source of truth + **first schema migration (v1→v2)** + overflow menu replacing the Bookmarks/History bottom-bar entries + 8 use cases |
 | 016 | `settings-screen` | ✅ Done 2026-09-12 (PR #18 merged into `main`, merge commit `3083941`; 112/113 — T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
 | 017 | `splash-screen` | ✅ Done 2026-09-15 (PR #20 merged, `cca5c0c`; 35/35; G1–G10 PASS, chỉ TalkBack deferred) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
-| 018 | `onboarding-flow` | ⬜ | 3–4 slides chọn ngôn ngữ/theme/search |
+| 018 | `onboarding-flow` | 🟢 Implemented 2026-09-15 (39/41; G1–G12 PASS, chỉ screen-reader deferred; PR chưa mở) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
@@ -280,6 +280,30 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 > **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd` — a key without a version component is bug 2 returning.
 
 ## Recent Changes
+
+- 2026-09-15 (Spec 018 implementation — 🎉 **v1.0 feature-complete**): 🟢 **Spec 018 `onboarding-flow` implemented — 39/41 tasks on branch `018-onboarding-flow`, PR not yet opened. With this, Specs 001–018 are all implemented and Phase 1–4 is done.**
+
+  **Scope.** A four-slide first-run flow — welcome (with the privacy promise), language, theme, search engine — shown once per install, skippable from any slide, every choice saved and applied the moment it is made. It stores nothing of its own: it is a second presentation of settings that already exist, plus one flag that already exists. Room stays at v2, **no new dependency**.
+
+  **⚠️ The feature's central technical problem, and why it is not where anyone would look.** The obvious implementation reads `isOnboardingCompleted` from the settings flow inside `setContent`, beside the theme. That is wrong, and wrong in a way that does not look like a flicker: `collectAsStateWithLifecycle` starts at `UserSettings.DEFAULT`, whose flag is `false`, and **`NavHost` captures its `startDestination` at first composition** — so onboarding becomes the graph's *actual start route* on every launch, including for a user who finished months ago. Fixed by adding a one-shot `currentSettings()` read to the settings repository and awaiting it before `setContent`. ⚠️ **Not** via `setKeepOnScreenCondition`: Spec 017's INV-12 forbids that call, and its absence is what makes Spec 017's FR-008 true.
+
+  **⚠️ The second trap: a plain ViewModel field passes every rotation test and fails the real one.** Applying a language recreates the activity, which **clears the ViewModel store** — so a slide index held in an ordinary field resets to slide 1, exactly the failure FR-015 exists to prevent. The index lives in a `SavedStateHandle`. Verified on device: from the language slide, choosing Tiếng Việt returned the flow to **"Bước 2 trên 4"** in Vietnamese, not to the welcome slide.
+
+  **The KDoc that was half wrong.** Spec 016's three choosers say onboarding "can reuse it unchanged". Accurate about statelessness, wrong about presentation: all three are `AlertDialog`s and their option row is `private`. Reusing them would cost two extra taps per slide and break SC-008. **What is reused is what matters** — the public `themeModeLabel` / `searchEngineLabel` / `appLanguageLabel` functions and the option enums, so Settings and onboarding cannot disagree. The row itself is new.
+
+  **Gates.** unit ✅ **579/579** (557 + 22 new) · instrumented ✅ **109/109** on the 16 KB AVD · lint ✅ (12 new keys × 8 locales; `onboarding_screen_placeholder` removed from all 8) · detekt ✅ baseline unchanged · ktlint ✅ · 16 KB ✅ 8 `.so` zero new · **G1–G12 all pass on device**, including the four blocking ones (G1 routing, G4 slide position, G7 Back, G8 inclusive pop) · APK **3,134,976 B**, delta **+8,764 B** against a 204,800 B allowance — **4.3% used**.
+
+  **Three findings worth keeping.**
+  - **Adding one interface method broke four test doubles.** `SettingsRepository.currentSettings()` had to be implemented in the shared `FakeSettingsRepository`, two file-private fakes in unit tests, and one in `androidTest`. The fakes are not centralised — worth knowing before the next interface change.
+  - **⚠️ Force-stop the app before `connectedDebugAndroidTest`.** The suite first failed with `Starting 0 tests` and `IllegalStateException: The component was not created. Check that you have added the HiltAndroidRule.` That was device state left by a stress test: `MainActivity` was still running, and when instrumentation restarted the process under `HiltTestApplication` the OS relaunched it, where it cannot be injected. Not a code defect — `adb shell am force-stop` first gives a clean 109/109.
+  - **One unreproduced FATAL, recorded rather than buried.** A single crash line appeared in one 10-launch batch and did not reproduce in 40 subsequent launches, with no stack trace in either logcat buffer. Probably stale output from the `pm clear` churn. Forty clean launches is evidence, not proof.
+
+  **DEFERRED — one item**: SC-010's screen-reader pass needs a person; TalkBack is not scriptable on these emulators (Spec 016 T109, Spec 017 SC-012). **This spec adds nothing to the hardware-measurement backlog** (A8).
+
+  **⚠️ The release-seeding blocker is now confirmed on device, not merely suspected.** At the owner's request, perf was measured on the 16 KB AVD. Two things came out of it:
+  - **The AVD is not Pixel 5-equivalent for frame timing**: it runs `swiftshader_indirect` — software rendering, no GPU — with 2.5 GB RAM and 4 virtual cores. SC-005/SC-006 target p99 ≤ 16 ms, which measures *rasterisation*, so the numbers say nothing about hardware. Measured anyway and **recorded as reference only**: with 10,000 seeded rows (verified by row count), scrolling gives p99 57 ms / 3.9% janky and typing p99 73 ms / 58.7% janky. **Neither gate is closed by this.**
+  - **A release build cannot be seeded at all.** `am broadcast … SEED_HISTORY` against the release applicationId returns `result=0` (no receiver — the seeders are `debug`-only), and `run-as` fails with **`package not debuggable`**. So SC-005/SC-006 cannot be measured on a release build today by any route. **Settle a release-seeding mechanism before booking hardware.**
+  - What the release build *did* verify honestly: it launches and runs the flow correctly under R8 with zero FATAL, cold start median **331.5 ms** in the first-run state and **503.5 ms** once the browser loads a page.
 
 - 2026-09-15 (Spec 017 merged + CI emulator hang): ✅ **Spec 017 merged — PR #20 (`017-splash-screen` → `main`, merge commit `cca5c0c`), all six CI jobs green.**
 
@@ -456,7 +480,19 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: ✅ [Spec 017 — Splash Screen](specs/017-splash-screen/) — **merged into `main` via [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, all 6 CI jobs green), 35/35 tasks. All ten device gates G1–G10 pass; only the TalkBack silence check is deferred to a person.**
+**Current**: 🟢 [Spec 018 — Onboarding Flow](specs/018-onboarding-flow/) — **implemented 2026-09-15, 39/41 tasks on branch `018-onboarding-flow`; PR not yet opened. This is the LAST spec of v1.0.**
+
+- Artifacts: [spec.md](specs/018-onboarding-flow/spec.md) (27 FR · 15 SC · 10 assumptions) · [plan.md](specs/018-onboarding-flow/plan.md) · [research.md](specs/018-onboarding-flow/research.md) (R1–R10) · [data-model.md](specs/018-onboarding-flow/data-model.md) (13 invariants) · [quickstart.md](specs/018-onboarding-flow/quickstart.md) (G1–G12) · [tasks.md](specs/018-onboarding-flow/tasks.md) — see **Device Gate Results** · [contracts/](specs/018-onboarding-flow/contracts/).
+- **Gates**: unit ✅ 579/579 (+22) · instrumented ✅ 109/109 (16 KB AVD) · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero new · APK **3,134,976 B** (+8,764 B, 4.3% of budget) · **G1–G12 all pass** · Constitution **11/11 PASS, zero deviations**.
+- **Facts to keep in mind**:
+  - **Never read the first-run flag from the settings *flow* to route.** `UserSettings.DEFAULT` carries `isOnboardingCompleted = false` and `NavHost` captures `startDestination` at first composition — that makes onboarding the graph's actual start on every launch. Use the one-shot `currentSettings()` before `setContent`.
+  - **The slide index lives in `SavedStateHandle`.** A plain ViewModel field survives rotation and dies on the locale restart, which is the one case that matters.
+  - **The first-run flag has exactly two write sites** — finishing and skipping. Never a lifecycle hook: backing out must leave it unwritten.
+  - **Leaving pops the onboarding route inclusively**, or Back from the browser returns to it.
+  - **The welcome slide reuses `settings_about_privacy_statement`** — one wording for the app's central claim, never two.
+  - **⚠️ Force-stop the app before `connectedDebugAndroidTest`**, or a still-running `MainActivity` crashes the run under `HiltTestApplication` before any test starts.
+
+**Previous**: ✅ [Spec 017 — Splash Screen](specs/017-splash-screen/) — **merged into `main` via [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, all 6 CI jobs green), 35/35 tasks. All ten device gates G1–G10 pass; only the TalkBack silence check is deferred to a person.**
 
 - Artifacts: [spec.md](specs/017-splash-screen/spec.md) (21 FR · 13 SC · 10 assumptions) · [plan.md](specs/017-splash-screen/plan.md) · [research.md](specs/017-splash-screen/research.md) (R1–R10) · [data-model.md](specs/017-splash-screen/data-model.md) (14 invariants) · [quickstart.md](specs/017-splash-screen/quickstart.md) (G1–G10) · [tasks.md](specs/017-splash-screen/tasks.md) — see **Device Gate Results** · [contracts/](specs/017-splash-screen/contracts/README.md) · [assets/brand-mark-approved.svg](specs/017-splash-screen/assets/brand-mark-approved.svg).
 - **Gates**: unit ✅ 557/557 · instrumented ✅ 109/109 (16 KB API 36 AVD) · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero new · APK **3,126,212 B** (+4,097 B, 2% of budget) · cold start **−1.4%** · Constitution **11/11 PASS, zero deviations**.

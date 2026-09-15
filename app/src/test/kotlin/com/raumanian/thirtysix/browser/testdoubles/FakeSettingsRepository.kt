@@ -36,6 +36,9 @@ class FakeSettingsRepository(
 
     override fun observeSettings(): Flow<UserSettings> = state.asStateFlow()
 
+    /** Spec 018 — the one-shot read. Returns the same snapshot [observeSettings] would emit. */
+    override suspend fun currentSettings(): UserSettings = state.value
+
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> =
         write(CALL_SET_THEME_MODE) { copy(themeMode = mode) }
 

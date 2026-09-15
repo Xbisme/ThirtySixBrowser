@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — German (de) translation. "Browser" is a German loanword, kept as-is. -->
     <string name="app_name">ThirtySix Browser</string>
-    <string name="onboarding_screen_placeholder">Einführung</string>
 
     <!-- Spec 007 — German (de) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">Seite wird geladen</string>
@@ -221,4 +220,18 @@
     <!-- Spec 016 US7 — About. -->
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_privacy_statement">Diese App erfasst keine personenbezogenen Daten und sendet nichts an Server von ThirtySix. Dein Verlauf, deine Lesezeichen, Downloads und Einstellungen bleiben auf diesem Gerät.</string>
+    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
+         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <string name="onboarding_welcome_title">Willkommen bei ThirtySix</string>
+    <string name="onboarding_welcome_body">Ein ruhiger Browser, der dir nicht im Weg steht.</string>
+    <string name="onboarding_language_title">Sprache wählen</string>
+    <string name="onboarding_language_body">Du kannst das später in den Einstellungen ändern.</string>
+    <string name="onboarding_theme_title">Hell oder dunkel?</string>
+    <string name="onboarding_theme_body">Dem Gerät folgen oder eine Variante festlegen.</string>
+    <string name="onboarding_search_title">Suchmaschine wählen</string>
+    <string name="onboarding_search_body">Eingaben in der Adressleiste suchen damit.</string>
+    <string name="onboarding_action_next">Weiter</string>
+    <string name="onboarding_action_done">Fertig</string>
+    <string name="onboarding_action_skip">Überspringen</string>
+    <string name="onboarding_progress_a11y">Schritt %1$d von %2$d</string>
 </resources>

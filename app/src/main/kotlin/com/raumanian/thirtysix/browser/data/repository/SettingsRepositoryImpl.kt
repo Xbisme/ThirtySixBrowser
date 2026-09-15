@@ -12,6 +12,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 @Singleton
@@ -23,6 +24,11 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.data
             .map(mapper::toDomain)
             .distinctUntilChanged()
+
+    // Spec 018 — first real value from the same source observeSettings uses, so the two can
+    // never disagree. `first()` suspends until DataStore has read from disk; on a fresh
+    // install that read legitimately yields the documented defaults, which IS the truth there.
+    override suspend fun currentSettings(): UserSettings = mapper.toDomain(dataStore.data.first())
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = dataStore.setThemeMode(mode)
 

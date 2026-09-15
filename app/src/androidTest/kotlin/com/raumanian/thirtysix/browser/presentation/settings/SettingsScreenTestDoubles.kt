@@ -57,6 +57,9 @@ internal class InstrumentedFakeSettingsRepository(
 
     override fun observeSettings(): Flow<UserSettings> = state.asStateFlow()
 
+    // Spec 018 — the one-shot read. Same snapshot observeSettings would emit.
+    override suspend fun currentSettings(): UserSettings = state.value
+
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = write { copy(themeMode = mode) }
 
     override suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit> =

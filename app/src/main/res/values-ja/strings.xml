@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Japanese (ja) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix ブラウザ</string>
-    <string name="onboarding_screen_placeholder">はじめに</string>
 
     <!-- Spec 007 — Japanese (ja) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">ページを読み込み中</string>
@@ -218,4 +217,18 @@
     <!-- Spec 016 US7 — About. -->
     <string name="settings_about_version">バージョン %1$s</string>
     <string name="settings_about_privacy_statement">このアプリは個人データを収集せず、ThirtySix が運営するサーバーには何も送信しません。履歴、ブックマーク、ダウンロード、設定はこのデバイスにのみ保存されます。</string>
+    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
+         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <string name="onboarding_welcome_title">ThirtySix へようこそ</string>
+    <string name="onboarding_welcome_body">邪魔をしない、静かなブラウザです。</string>
+    <string name="onboarding_language_title">言語を選択</string>
+    <string name="onboarding_language_body">後から設定で変更できます。</string>
+    <string name="onboarding_theme_title">ライトかダークか</string>
+    <string name="onboarding_theme_body">端末に合わせるか、どちらかを選びます。</string>
+    <string name="onboarding_search_title">検索エンジンを選択</string>
+    <string name="onboarding_search_body">アドレスバーへの入力はこれで検索します。</string>
+    <string name="onboarding_action_next">次へ</string>
+    <string name="onboarding_action_done">完了</string>
+    <string name="onboarding_action_skip">スキップ</string>
+    <string name="onboarding_progress_a11y">%2$d 件中 %1$d 件目</string>
 </resources>

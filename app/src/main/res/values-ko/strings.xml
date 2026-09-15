@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Korean (ko) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix 브라우저</string>
-    <string name="onboarding_screen_placeholder">소개</string>
 
     <!-- Spec 007 — Korean (ko) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">페이지 로드 중</string>
@@ -218,4 +217,18 @@
     <!-- Spec 016 US7 — About. -->
     <string name="settings_about_version">버전 %1$s</string>
     <string name="settings_about_privacy_statement">이 앱은 개인정보를 수집하지 않으며 ThirtySix가 운영하는 서버에 아무것도 보내지 않습니다. 방문 기록, 북마크, 다운로드, 설정은 이 기기에만 저장됩니다.</string>
+    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
+         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <string name="onboarding_welcome_title">ThirtySix에 오신 것을 환영합니다</string>
+    <string name="onboarding_welcome_body">방해하지 않는 조용한 브라우저입니다.</string>
+    <string name="onboarding_language_title">언어 선택</string>
+    <string name="onboarding_language_body">나중에 설정에서 변경할 수 있습니다.</string>
+    <string name="onboarding_theme_title">밝게 또는 어둡게?</string>
+    <string name="onboarding_theme_body">기기를 따르거나 하나를 선택하세요.</string>
+    <string name="onboarding_search_title">검색 엔진 선택</string>
+    <string name="onboarding_search_body">주소창에 입력하면 이 엔진으로 검색합니다.</string>
+    <string name="onboarding_action_next">다음</string>
+    <string name="onboarding_action_done">완료</string>
+    <string name="onboarding_action_skip">건너뛰기</string>
+    <string name="onboarding_progress_a11y">%2$d단계 중 %1$d단계</string>
 </resources>

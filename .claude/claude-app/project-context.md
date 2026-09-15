@@ -1,6 +1,6 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-15 — **✅ Spec 017 `splash-screen` đã merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35. ✅ Specs 001–016 done (013 PR #14, 014 PR #15, 015 PR #16, 016 PR #18 đều đã merge). Spec 016 `settings-screen` merged vào `main` 2026-09-12 (merge commit `3083941`, CI xanh), 112/113 tasks; TalkBack pass của T109 vẫn cần người thật. Tiếp theo: 017 `splash-screen`.**
+> Cập nhật lần cuối: 2026-09-15 — 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** 🟢 Spec 018 `onboarding-flow` implemented (39/41, branch `018-onboarding-flow`, chưa mở PR). ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
@@ -18,6 +18,23 @@ Foundation phase tiến độ:
 **Phase 2 done** (6/6 ship-ready): 008 / 009 / 010 / 011 / 012 all merged into `main`.
 **Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
 **Phase 4** (1/3 merged, 017 đã implement): **Spec 016** merged qua PR #18 (2026-09-12, `3083941`). 🟢 ✅ **Spec 017 `splash-screen` merged 2026-09-15** — PR #20, `cca5c0c`, CI xanh 6/6, 35/35 tasks. Tiếp theo: 018 `onboarding-flow`.
+
+### Spec 018 — Onboarding Flow (🟢 implemented 2026-09-15 — 39/41, branch `018-onboarding-flow`) — **SPEC CUỐI CỦA v1.0**
+
+Onboarding lần đầu mở app: 4 slide — chào (kèm cam kết riêng tư) · ngôn ngữ · theme · search engine. Skip hiện trên mọi slide. Lựa chọn lưu ngay và áp dụng tức thì. **Không lưu gì của riêng nó** — chỉ là cách trình bày thứ hai cho các setting đã có, cộng một cờ đã có. Room vẫn v2, **không thêm dependency**.
+
+**⚠️ Hai bẫy kỹ thuật, cả hai đều hỏng theo kiểu khó đoán:**
+
+1. **Đọc cờ từ settings *flow* trong `setContent` sẽ đưa MỌI lần mở vào onboarding.** `UserSettings.DEFAULT` có `isOnboardingCompleted = false`, và **`NavHost` chốt `startDestination` ở lần compose đầu** — nên đó không phải nháy một khung mà là route khởi đầu thật của graph. Sửa bằng cách thêm `currentSettings()` đọc một lần vào repository và chờ nó xong trước `setContent`. ⚠️ **Không** dùng `setKeepOnScreenCondition` — Spec 017 INV-12 cấm.
+2. **Chỉ số slide trong field ViewModel thường sống qua xoay màn hình nhưng chết khi đổi ngôn ngữ**, vì recreate activity xoá ViewModel store. Phải nằm trong `SavedStateHandle`. Kiểm trên máy: chọn Tiếng Việt ở slide ngôn ngữ → quay lại đúng **"Bước 2 trên 4"** bằng tiếng Việt.
+
+**KDoc của Spec 016 đúng một nửa**: ba chooser nói "reuse unchanged" — đúng về stateless, sai về trình bày (cả ba là `AlertDialog`, option row `private`). Tái dùng **nhãn** (`themeModeLabel`/`searchEngineLabel`/`appLanguageLabel`) và enum; viết row mới.
+
+**Gates**: unit ✅ 579/579 (+22) · instrumented ✅ 109/109 trên AVD 16 KB · lint/detekt/ktlint ✅ · 16KB ✅ · APK **3,134,976 B** (+8,764 B, dùng **4,3%** ngân sách) · **G1–G12 đều PASS** gồm 4 gate blocking · Constitution **11/11 PASS**.
+
+**Deferred**: screen-reader pass (SC-010) cần người thật — TalkBack không script được trên emulator.
+
+**⚠️ Ghi nhớ**: phải `adb shell am force-stop` trước khi chạy `connectedDebugAndroidTest`, nếu không `MainActivity` còn chạy sẽ làm sập cả lượt test dưới `HiltTestApplication` trước khi có test nào khởi động.
 
 ### Spec 017 — Splash Screen (✅ done 2026-09-15 — PR #20 merged `cca5c0c`, 35/35)
 

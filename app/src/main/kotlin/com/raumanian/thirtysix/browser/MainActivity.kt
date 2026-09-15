@@ -8,15 +8,19 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.domain.usecase.GetUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.navigation.AppNavGraph
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.util.SecureWindowEffect
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 /**
  * Spec 016 research R2 — an [AppCompatActivity] rather than a plain `ComponentActivity`: below
@@ -32,6 +36,13 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase
+
+    /**
+     * Spec 018 — the ONE-SHOT read behind the start-up decision. Deliberately not the
+     * observing use case above: see the block in [onCreate].
+     */
+    @Inject
+    lateinit var getUserSettings: GetUserSettingsUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Spec 017 — MUST be the first statement, before super.onCreate().
@@ -51,6 +62,33 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Spec 018 T008 — resolve the start destination BEFORE composing anything.
+        //
+        // The obvious implementation is to read `isOnboardingCompleted` from the settings flow
+        // inside setContent, alongside the theme below. That is WRONG, and wrong in a way that
+        // does not look like a flicker: collectAsStateWithLifecycle starts at
+        // UserSettings.DEFAULT, whose isOnboardingCompleted is `false`, and NavHost captures
+        // its startDestination at FIRST COMPOSITION. Routing on that first emission makes
+        // Onboarding the graph's actual start route on every launch — including for a user who
+        // finished it months ago (research.md R2, data-model.md INV-5).
+        //
+        // So the flag is read once, off the main thread, and setContent runs only once the real
+        // value is in hand. The launch screen covers the gap, which is a DataStore read.
+        //
+        // ⚠️ NOT via setKeepOnScreenCondition: Spec 017's INV-12 forbids that call outright —
+        // its absence is what makes Spec 017's FR-008 ("never held open") true.
+        lifecycleScope.launch {
+            val startDestination = if (getUserSettings().isOnboardingCompleted) {
+                AppDestination.Browser.route
+            } else {
+                AppDestination.Onboarding.route
+            }
+            renderApp(startDestination)
+        }
+    }
+
+    private fun renderApp(startDestination: String) {
         setContent {
             // Spec 006 FR-020: theme mode now sourced from DataStore via the
             // settings-observe use case. Initial value is UserSettings.DEFAULT
@@ -77,7 +115,7 @@ class MainActivity : AppCompatActivity() {
             // ignores it below Android 12, where dynamic color does not exist (research R9).
             ThirtySixTheme(darkTheme = darkTheme, dynamicColor = settings.isDynamicColorEnabled) {
                 SecureWindowEffect(secure = isIncognito)
-                AppNavGraph()
+                AppNavGraph(startDestination = startDestination)
             }
         }
     }
