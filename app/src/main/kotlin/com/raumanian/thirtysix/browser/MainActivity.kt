@@ -6,6 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
@@ -33,6 +34,21 @@ class MainActivity : AppCompatActivity() {
     lateinit var observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Spec 017 — MUST be the first statement, before super.onCreate().
+        //
+        // The activity is declared with Theme.ThirtySix.Splash, whose parent descends
+        // from android:Theme.DeviceDefault rather than AppCompat (deliberately — see
+        // res/values/themes.xml). installSplashScreen() resolves that theme's
+        // postSplashScreenTheme attribute and calls setTheme(Theme.ThirtySix) here, and
+        // AppCompatActivity.onCreate reads the theme while building its delegate. Move
+        // this call below super.onCreate() and the activity stays on a non-AppCompat
+        // theme, which throws at launch (research.md R3, contracts Contract 2, INV-11).
+        //
+        // The returned handle is discarded on purpose: setKeepOnScreenCondition and
+        // setOnExitAnimationListener are its only uses, and both are forbidden here.
+        // The launch screen must end at the first drawable frame, never be held open
+        // for an animation or a disk read (FR-008, INV-12, INV-13).
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {

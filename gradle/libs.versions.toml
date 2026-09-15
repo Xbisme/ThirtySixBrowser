@@ -83,6 +83,16 @@ appcompat = "1.8.0"
 # declared AndroidX dependencies, confirmed in a release-build spike (research.md R3).
 webkit = "1.17.0"
 
+# Spec 017 — androidx.core:core-splashscreen for the branded launch screen
+# (specs/017-splash-screen/research.md R1). Latest STABLE at lookup 2026-09-15
+# against Google Maven maven-metadata.xml: <latest> and <release> both point at
+# 1.2.0 (released 2025-11-05) — unlike androidx.webkit above, no alpha to exclude.
+# Library minSdk 21, below the project's 24. ZERO .so — verified by inspecting the
+# AAR itself, whose 39 entries are classes.jar plus resource XML only, not by
+# trusting release notes (Constitution §IX). Re-verified against the built APK at
+# gate G1.
+coreSplashscreen = "1.2.0"
+
 [libraries]
 # AndroidX core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -140,6 +150,10 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 # Spec 016 — WebStorageCompat.deleteBrowsingData + WebViewFeature. Pure Java, no .so.
 androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
+# Spec 017 — SplashScreen compat for the branded launch screen. No .so. Its only runtime
+# dependencies are appcompat-resources 1.7.0 and annotation 1.8.1, both already in the graph
+# at newer versions (appcompat 1.8.0 from Spec 016), so Gradle adds no new artifact.
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 
 
 # Robolectric (Spec 005) — provides Android Context to Room in JVM unit tests.

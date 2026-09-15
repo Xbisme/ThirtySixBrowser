@@ -34,14 +34,16 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ThirtySix"
         tools:targetApi="33">
+        <!-- Spec 017 — the activity starts on the splash theme; installSplashScreen()
+             swaps in Theme.ThirtySix (its postSplashScreenTheme) before AppCompat builds
+             its delegate. The <application> theme above stays Theme.ThirtySix. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.ThirtySix">
+            android:theme="@style/Theme.ThirtySix.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

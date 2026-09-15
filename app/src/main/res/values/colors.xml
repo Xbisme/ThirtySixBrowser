@@ -7,8 +7,23 @@
 
   Other color tokens belong to Material3 ColorScheme in presentation/theme/Color.kt
   per Constitution §III; do NOT add UI colors here.
+
+  Spec 017 — the brand_mark_* colors below are the second sanctioned exception, for
+  the same reason as the window backgrounds above: they are consumed by VectorDrawable
+  XML (the launcher icon and the launch-screen mark), which is resolved by the resource
+  system and cannot reference Kotlin values in Color.kt. Declaring them here keeps them
+  named constants rather than literals inside the drawables (Constitution §III).
+  They mirror the brand seeds already defined in Color.kt — primary #0F766E and
+  tertiary #0891B2 — and brand_mark_on_surface equals window_background_light.
+  These are NOT general UI tokens: nothing in Compose may read them. Any new UI color
+  still belongs in Color.kt.
 -->
 <resources>
     <color name="window_background_light">#FAFAF9</color>
     <color name="window_background_dark">#0A0F0E</color>
+
+    <!-- Spec 017 — brand mark (specs/017-splash-screen/data-model.md "Colour references"). -->
+    <color name="brand_mark_primary">#0F766E</color>
+    <color name="brand_mark_accent">#0891B2</color>
+    <color name="brand_mark_on_surface">#FAFAF9</color>
 </resources>

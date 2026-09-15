@@ -5,4 +5,15 @@
         <item name="android:windowBackground">@color/window_background_dark</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
+
+    <!-- Spec 017 — dark launch screen. Identical to values/themes.xml except for the
+         background; kept in this same file pair as Theme.ThirtySix so the two themes
+         cannot diverge across a future edit (INV-9). The parent is deliberately NOT
+         AppCompat — see the rationale in values/themes.xml. -->
+    <style name="Theme.ThirtySix.Splash" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.ThirtySix</item>
+        <item name="windowSplashScreenBackground">@color/window_background_dark</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_brand_mark</item>
+        <item name="windowSplashScreenAnimationDuration">@integer/splash_icon_animation_duration</item>
+    </style>
 </resources>

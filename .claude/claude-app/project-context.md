@@ -1,6 +1,6 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-15 — **✅ Specs 001–016 done (013 PR #14, 014 PR #15, 015 PR #16, 016 PR #18 đều đã merge). Spec 016 `settings-screen` merged vào `main` 2026-09-12 (merge commit `3083941`, CI xanh), 112/113 tasks; TalkBack pass của T109 vẫn cần người thật. Tiếp theo: 017 `splash-screen`.**
+> Cập nhật lần cuối: 2026-09-15 — **🟢 Spec 017 `splash-screen` đã implement (35/35, PR #20 đang mở). ✅ Specs 001–016 done (013 PR #14, 014 PR #15, 015 PR #16, 016 PR #18 đều đã merge). Spec 016 `settings-screen` merged vào `main` 2026-09-12 (merge commit `3083941`, CI xanh), 112/113 tasks; TalkBack pass của T109 vẫn cần người thật. Tiếp theo: 017 `splash-screen`.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
@@ -17,7 +17,21 @@ Foundation phase tiến độ:
 
 **Phase 2 done** (6/6 ship-ready): 008 / 009 / 010 / 011 / 012 all merged into `main`.
 **Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
-**Phase 4** (1/3 merged): **Spec 016 `settings-screen`** đã merge vào `main` qua PR #18 (2026-09-12, merge commit `3083941`, CI xanh); tiếp theo là 017 `splash-screen`, rồi 018 `onboarding-flow` (phụ thuộc 017).
+**Phase 4** (1/3 merged, 017 đã implement): **Spec 016** merged qua PR #18 (2026-09-12, `3083941`). 🟢 **Spec 017 `splash-screen` implemented 2026-09-15** — 35/35 tasks, PR #20 đang mở. Tiếp theo: 018 `onboarding-flow`.
+
+### Spec 017 — Splash Screen (🟢 implemented 2026-09-15 — 35/35, PR #20 đang mở)
+
+Launch screen có branding + thay **toàn bộ** artwork template Android Studio còn sót (robot xanh `#3DDC84`) bằng mark ThirtySix. Một dependency, hai style, một bộ drawable, một lời gọi trong `MainActivity`. **Không có data layer, không ViewModel, không state mới.** Room vẫn v2.
+
+**⚠️ Phát hiện lật ngược giả định ban đầu.** Brief trước spec khẳng định theme splash *phải* có parent AppCompat nếu không app sập. **Sai.** `Theme.SplashScreen` kế thừa `android:Theme.DeviceDefault` đúng theo thiết kế thư viện. Thứ giữ `AppCompatActivity` sống là `postSplashScreenTheme` + gọi `installSplashScreen()` **trước** `super.onCreate()` — chứng minh ở research.md R3 bằng cách giải nén AAR và decompile bytecode. Nếu làm theo brief sẽ ra launch screen hỏng ngấm ngầm mà vẫn *trông như* đã tuân thủ.
+
+**Bẫy thứ hai**, bắt được lúc `/speckit-clarify`: adaptive icon chỉ áp dụng từ API 26, nhưng minSdk là 24 — nên trên API 24–25 chính 5 file `.webp` **là** icon. Chỉ thay adaptive icon thì robot template vẫn ship trên phiên bản thấp nhất trong khi mọi kiểm tra đều "đạt".
+
+**Dependency**: `androidx.core:core-splashscreen` **1.2.0** (tra 2026-09-15, `<release>` trỏ đúng stable, minSdk 21, **zero `.so`** verify bằng giải nén AAR rồi verify lại trên APK).
+
+**Gates**: unit ✅ 557/557 · instrumented ✅ 109/109 trên AVD 16 KB API 36 · lint/detekt/ktlint ✅ · 16 KB ✅ · APK **3,126,212 B** (+4,097 B, dùng 2% ngân sách) · cold start **−1,4%** (nhanh hơn) · Constitution **11/11 PASS**.
+
+**Deferred** (ghi rõ trong tasks.md, không lặng lẽ bỏ): G3 và vài phần G9/G10 — `screenrecord` lỗi `Encoder failed (err=-38)` trên AVD (đúng giới hạn Spec 016 gặp), TalkBack không script được, icon-mask cần thao tác launcher.
 
 ### Spec 016 — Settings Screen (✅ done 2026-09-12 — PR #18 merged vào `main`, merge commit `3083941`, 112/113; còn TalkBack pass của T109 cần người thật)
 

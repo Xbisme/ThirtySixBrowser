@@ -1,0 +1,46 @@
+<!--
+  ThirtySix Browser — brand mark. APPROVED by the product owner 2026-09-15 (Spec 017).
+
+  This file is the single approved source for every representation of the mark
+  (INV-1 in ../data-model.md). The static vector, the animated vector, the
+  monochrome variant and the five density bitmaps are ALL derived from this file.
+  Do not redraw any of them by hand.
+
+  Geometry — canvas 432×432dp, matching the launch-screen icon frame.
+  The visible area is the centred 288dp circle; the library paints over
+  everything outside it (research.md R5). The disc is Ø268dp, leaving 10dp
+  of clearance per side.
+
+  Colours are the app's existing brand seeds (Spec 003, A1):
+    #0F766E  Deep Teal   — gradient start  (theme primary, light)
+    #0891B2  Cyan        — gradient end    (theme tertiary, light)
+    #FAFAF9  Off-white   — numerals        (= window_background_light)
+
+  NOTE ON THE NUMERALS: they are filled SOLID and must never be cut out of the
+  disc (FR-003, INV-4). A cut-out takes its colour from whatever is behind it,
+  which turned the numerals near-black on a dark background — that version was
+  built, inspected and rejected.
+
+  NOTE FOR IMPLEMENTATION: the <text> element below is authoring convenience
+  only. Android VectorDrawable cannot render <text>, so the numerals MUST be
+  converted to outline <path> data when the drawable is authored (A9, R8).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="432" height="432" viewBox="0 0 432 432">
+  <defs>
+    <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#0891B2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Safe-zone reference, NOT part of the mark. Ø288dp visible area. -->
+  <!-- <circle cx="216" cy="216" r="144" fill="none" stroke="#FF00FF" stroke-width="1"/> -->
+
+  <g transform="translate(216,216)">
+    <circle r="134" fill="url(#brandGradient)"/>
+    <text x="0" y="4"
+          font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+          font-size="140" font-weight="700" fill="#FAFAF9"
+          text-anchor="middle" dominant-baseline="central" letter-spacing="-6">36</text>
+  </g>
+</svg>

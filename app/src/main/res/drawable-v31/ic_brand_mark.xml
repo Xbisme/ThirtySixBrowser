@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Spec 017 — ThirtySix brand mark, ANIMATED variant (Android 12 / API 31+ only).
+
+  Same resource name as res/drawable/ic_brand_mark.xml on purpose: Android selects this
+  file on API 31+ and the static one below, so FR-009 and FR-010 are satisfied by
+  resource qualifiers with NO runtime version check in Kotlin (INV-2, research.md R6).
+  Below API 31 the library's compat layer draws the icon into a layer-list as a plain
+  image, where an AnimatedVectorDrawable would render as a motionless first frame —
+  which is why this file must live in drawable-v31/ and not in drawable/.
+
+  Motion (A8): the disc scales in from 80%, the numerals fade in just behind it.
+  It is deliberately short and simple, and — importantly — it must look acceptable
+  TRUNCATED AT ANY POINT: the launch screen ends the moment the app can draw its first
+  frame and never waits for this to finish (FR-008, INV-12). Total motion is 440 ms,
+  well inside the ~583 ms this app's cold start measures, so the usual case plays out
+  fully. The disc starts at 80% opacity-free scale rather than at zero, so a frame cut
+  early still shows the whole mark slightly small rather than nothing; the numerals are
+  the only element that starts invisible, and they are legible from roughly 250 ms on.
+  If a future change made the app start dramatically faster, shorten the numeral
+  startOffset rather than holding the splash screen open.
+
+  Geometry and colours are identical to the static variant; both derive from
+  specs/017-splash-screen/assets/brand-mark-approved.svg (INV-1).
+-->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="108dp"
+            android:height="108dp"
+            android:viewportWidth="432"
+            android:viewportHeight="432">
+
+            <group
+                android:name="discGroup"
+                android:pivotX="216"
+                android:pivotY="216"
+                android:scaleX="0.8"
+                android:scaleY="0.8">
+                <path android:pathData="M216,82a134,134 0 1,0 0,268a134,134 0 1,0 0,-268z">
+                    <aapt:attr name="android:fillColor">
+                        <gradient
+                            android:startX="122"
+                            android:startY="122"
+                            android:endX="310"
+                            android:endY="310"
+                            android:type="linear">
+                            <item android:color="@color/brand_mark_primary" android:offset="0" />
+                            <item android:color="@color/brand_mark_accent" android:offset="1" />
+                        </gradient>
+                    </aapt:attr>
+                </path>
+            </group>
+
+            <group
+                android:name="numeralGroup"
+                android:pivotX="216"
+                android:pivotY="216">
+                <path
+                    android:name="numeralThree"
+                    android:fillColor="@color/brand_mark_on_surface"
+                    android:fillAlpha="0"
+                    android:pathData="M150,194c0,-13 11,-23 30,-23c19,0 30,10 30,24c0,9 -5,16 -13,19c9,3 15,11 15,21c0,16 -13,27 -32,27c-19,0 -32,-10 -33,-25l17,0c1,6 7,10 16,10c9,0 15,-5 15,-12c0,-8 -6,-12 -16,-12l-8,0l0,-14l8,0c9,0 14,-4 14,-11c0,-7 -5,-11 -13,-11c-8,0 -13,4 -14,10z" />
+                <path
+                    android:name="numeralSix"
+                    android:fillColor="@color/brand_mark_on_surface"
+                    android:fillAlpha="0"
+                    android:pathData="M252,171c18,0 30,9 32,24l-17,0c-2,-6 -7,-10 -15,-10c-12,0 -19,9 -19,26l0,3c4,-8 13,-13 24,-13c17,0 30,12 30,30c0,18 -14,31 -34,31c-23,0 -37,-15 -37,-43l0,-8c0,-26 14,-40 36,-40zM251,227c-9,0 -16,7 -16,16c0,9 7,16 16,16c10,0 16,-6 16,-16c0,-9 -6,-16 -16,-16z" />
+            </group>
+        </vector>
+    </aapt:attr>
+
+    <!-- Disc: 0.8 → 1.0 over 320 ms, decelerating. -->
+    <target android:name="discGroup">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:valueFrom="0.8"
+                    android:valueTo="1.0"
+                    android:duration="320"
+                    android:interpolator="@android:interpolator/decelerate_quint" />
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:valueFrom="0.8"
+                    android:valueTo="1.0"
+                    android:duration="320"
+                    android:interpolator="@android:interpolator/decelerate_quint" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Numerals: fade in over 260 ms, starting 180 ms in so the disc lands first. -->
+    <target android:name="numeralThree">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="fillAlpha"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:startOffset="180"
+                android:duration="260"
+                android:interpolator="@android:interpolator/decelerate_cubic" />
+        </aapt:attr>
+    </target>
+    <target android:name="numeralSix">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="fillAlpha"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:startOffset="180"
+                android:duration="260"
+                android:interpolator="@android:interpolator/decelerate_cubic" />
+        </aapt:attr>
+    </target>
+</animated-vector>

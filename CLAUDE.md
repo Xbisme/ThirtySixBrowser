@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 001–016 done. Spec 016 `settings-screen` merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 tasks; still open: T109's TalkBack pass (DEFERRED — needs a person, because scripted TalkBack is unreliable on emulators).** Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 001–016 done · 🟢 Spec 017 `splash-screen` implemented (35/35, [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) open).** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 00
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** ✅ **Specs 001–016 done (2026-09-12)** — Phase 1–3 hoàn tất (Foundation, Core Browser, Data Features); **Phase 4 là 1/3** — 016 `settings-screen` merged vào `main` qua PR #18 (112/113; T109's TalkBack pass deferred to a person). Next 017 `splash-screen`, then 018 `onboarding-flow` (018 depends on 017). Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** ✅ **Specs 001–016 done (2026-09-12)** — Phase 1–3 hoàn tất; **Phase 4: 016 merged, 🟢 017 `splash-screen` implemented 2026-09-15 (35/35, PR #20 open)**. Next: mở PR cho 017, rồi 018 `onboarding-flow`. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -259,7 +259,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 | 014 | `history-view` | ✅ Done 2026-09-10 (PR #15 merged into `main`, commit `2e7c633`; 111/113 tasks — T103b SC-005 perf gate deferred to real hardware) | Auto-record on page-finish (non-incognito only) + bottom-bar History entry + grouped list (Today/Yesterday/explicit-date) + tap-to-replace-active-tab + live search (≥2 chars, no debounce) + long-press action sheet (open in new tab / delete / copy URL) + confirmed clear-all + 4 use cases |
 | 015 | `downloads-manager` | ✅ Done 2026-09-11 (PR #16 merged into `main`, commit `e925f9d`; 121/121 tasks — SC-006 perf gate deferred to real hardware) | System DownloadManager + public Downloads folder + hybrid Room/platform source of truth + **first schema migration (v1→v2)** + overflow menu replacing the Bookmarks/History bottom-bar entries + 8 use cases |
 | 016 | `settings-screen` | ✅ Done 2026-09-12 (PR #18 merged into `main`, merge commit `3083941`; 112/113 — T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
-| 017 | `splash-screen` | ⬜ | SplashScreen API + branding |
+| 017 | `splash-screen` | 🟢 Implemented 2026-09-15 (35/35; G1–G10 đều PASS, chỉ TalkBack deferred; PR #20 open) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
 | 018 | `onboarding-flow` | ⬜ | 3–4 slides chọn ngôn ngữ/theme/search |
 | 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
 
@@ -274,6 +274,27 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 > No outstanding CI tooling tasks at the moment. Spec 008 surfaced + resolved the `Terminate Emulator` hang (set `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5` + removed redundant manual `adb emu kill` from script — see CI workflow note).
 
 ## Recent Changes
+
+- 2026-09-15 (Spec 017 implementation): 🟢 **Spec 017 `splash-screen` implemented — 35/35 tasks, [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) open.**
+
+  **Scope.** A branded launch screen, plus the replacement of the **last project-template artwork** in the repo. One dependency, two theme entries, a set of drawables, and one call in `MainActivity` — no data layer, no ViewModel, no new state. Room stays at v2.
+
+  **⚠️ The most important finding — the pre-spec brief was wrong.** It asserted the splash theme must have an AppCompat parent or the app crashes. It must **not**: `Theme.SplashScreen` descends from `android:Theme.DeviceDefault` by the library's own design. What keeps `AppCompatActivity` alive is `postSplashScreenTheme` plus calling `installSplashScreen()` **before** `super.onCreate()` — established in research.md R3 by unzipping the AAR and decompiling `SplashScreen$Impl` with `javap`, which shows `resolveAttribute(postSplashScreenTheme)` → `Activity.setTheme()`. Had the plan followed the brief, it would have fought the library and discarded its per-API-level wiring while appearing to comply.
+
+  **The other trap, caught during `/speckit-clarify`.** Adaptive icons apply only from API 26, but minSdk is 24 — so on API 24–25 the five `.webp` bitmaps **are** the icon. Replacing only the adaptive icon would have left the template robot shipping on the minimum supported version while every visible check passed. FR-004a exists for this; all 5 bitmaps were regenerated from the vector and visually inspected.
+
+  **Dependency**: `androidx.core:core-splashscreen` **1.2.0**, verified 2026-09-15 against Google Maven (`<release>` points at stable, unlike Spec 016's webkit), released 2025-11-05, library minSdk 21. **Zero `.so` confirmed by inspecting the AAR's 39 entries directly**, then re-verified against the built APK. Its only runtime deps (`appcompat-resources` 1.7.0, `annotation` 1.8.1) are already in the graph at newer versions, so Gradle adds no artifact.
+
+  **Artwork.** Brand mark = filled disc, gradient `#0F766E` → `#0891B2`, numerals "36" **solid** off-white. Four representations, all derived from one committed source (`specs/017-splash-screen/assets/brand-mark-approved.svg`): static vector, `drawable-v31/` animated vector (**same resource name** — selection is by qualifier, no runtime version check), monochrome (disc as an **outline ring**, because a silhouette of a filled disc flattens to a featureless circle), and 5 density bitmaps. The round-icon variant and `android:roundIcon` were **deleted** — the mark is already circular, so a second copy could only drift.
+
+  **Gates.** testDebugUnitTest ✅ **557/557** · instrumented ✅ **109/109** on the 16 KB API 36 AVD · lintDebug ✅ · detekt ✅ baseline unchanged · ktlintCheck ✅ · 16 KB ✅ 8 `.so`, zero new · **G6 10/10 launches on both API 24 and API 36, zero FATAL** (the theme handoff) · **G8** no template artwork anywhere · APK **3,126,212 B**, delta **+4,097 B** against a 204,800 B allowance (**2% used**) · cold start **575 ms vs 583 ms = −1.4%**, i.e. slightly *faster*.
+  - **SC-002 proven numerically**: numerals sample `#FAFAF9` on the light launch background and `#F9FAF9` on the dark one — identical within antialiasing, which is exactly what the solid-fill decision (FR-003) was made to guarantee after the cut-out version inverted on dark.
+
+  **🐞 Defect found and fixed**: the mark was first authored at `432dp` intrinsic size to match the launch-screen frame, and `lintDebug` rejected it — lint caps vector icons at 200×200dp (`VectorRaster`). Fixed by keeping the **432-unit viewport** (so path geometry is unchanged) and declaring intrinsic size at **108dp**; both consumers scale it to their own frame anyway.
+
+  **All ten gates G1–G10 pass on device.** Closed in a second pass on the API 36 AVD: **G3** — with the in-app theme set to Dark and the device light, the launch screen samples `#FAFAF9` and the first app frame's chrome `#1E1F25`, i.e. exactly one clean colour change (FR-012a, A3 confirmed); **G6** re-run on the **release** build for another 10/10; **SC-009** — the adaptive icon rendered under all four masks with numerals intact; **SC-011** — airplane-mode cold start identical. **One item stays DEFERRED to a person**: SC-012's TalkBack check, which is the *inverse* of the usual one — confirming the launch screen announces **nothing**, because FR-018 was reversed during clarification for contradicting Constitution §VIII. TalkBack is not scriptable on these emulators (Spec 016 T109).
+
+  **This spec adds nothing to the hardware-measurement backlog** — SC-004 is a *relative* bound (≤5% slower, same device and build), honest to measure on an emulator, unlike Spec 014's T103b and Spec 015's SC-006.
 
 - 2026-09-15 (Spec 016 post-merge sync): ✅ **Spec 016 merged — PR #18 (`016-settings-screen` → `main`, merge commit `3083941`, 2026-09-12), CI green on `main`.** Docs-only pass: `CLAUDE.md`, `sdd-roadmap.md` and `project-context.md` all still described Spec 016 as "implemented, PR open" three days after it landed, and `dev-workflow.md`'s progress table still listed 016 as "⬜ Next" with a note to discuss it before running `/speckit-specify`. All four now reflect the merged state. This is the same drift the Spec 015 pass had to correct in PR #17 — the pattern is that the merge happens outside the session that wrote the docs, so nothing updates them. **Spec 016 stays at 112/113**: T109's TalkBack pass is still DEFERRED to a person and is not closed by the merge. **Phase 4 is 1/3; next is Spec 017 `splash-screen`.** No code changed in this pass.
 
@@ -421,9 +442,19 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: ✅ [Spec 016 — Settings Screen](specs/016-settings-screen/) — **merged into `main` via [PR #18](https://github.com/Xbisme/ThirtySixBrowser/pull/18) (2026-09-12, merge commit `3083941`, CI green on `main`)**. **112/113 tasks.** Open: T109's TalkBack pass (DEFERRED — needs a person; the 8-locale sweep passed).
+**Current**: 🟢 [Spec 017 — Splash Screen](specs/017-splash-screen/) — **implemented 2026-09-15, 35/35 tasks — [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) open. All ten device gates G1–G10 pass; only the TalkBack silence check is deferred to a person.**
 
-> **Next up: Spec 017 `splash-screen`** — Phase 4 is 1/3. 017 depends only on 002, so nothing blocks it; 018 `onboarding-flow` depends on 017.
+- Artifacts: [spec.md](specs/017-splash-screen/spec.md) (21 FR · 13 SC · 10 assumptions) · [plan.md](specs/017-splash-screen/plan.md) · [research.md](specs/017-splash-screen/research.md) (R1–R10) · [data-model.md](specs/017-splash-screen/data-model.md) (14 invariants) · [quickstart.md](specs/017-splash-screen/quickstart.md) (G1–G10) · [tasks.md](specs/017-splash-screen/tasks.md) — see **Device Gate Results** · [contracts/](specs/017-splash-screen/contracts/README.md) · [assets/brand-mark-approved.svg](specs/017-splash-screen/assets/brand-mark-approved.svg).
+- **Gates**: unit ✅ 557/557 · instrumented ✅ 109/109 (16 KB API 36 AVD) · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero new · APK **3,126,212 B** (+4,097 B, 2% of budget) · cold start **−1.4%** · Constitution **11/11 PASS, zero deviations**.
+- **Facts to keep in mind**:
+  - **The splash theme must NOT have an AppCompat parent.** `Theme.SplashScreen` descends from `android:Theme.DeviceDefault` by design. Safety comes from `postSplashScreenTheme` plus calling `installSplashScreen()` **before** `super.onCreate()` — get either wrong and the app crashes at every launch (research.md R3).
+  - **Never call `setKeepOnScreenCondition`.** Its absence is what makes FR-008 true; adding one is the single way to reintroduce an artificial launch delay.
+  - **The 5 density bitmaps are load-bearing, not decorative.** Adaptive icons start at API 26 but minSdk is 24, so on API 24–25 those `.webp` files *are* the icon.
+  - **Static and animated marks share one resource name**; `drawable-v31/` selection is by qualifier, so there is no runtime API check to write or test.
+  - **Vector intrinsic size is 108dp, viewport is 432** — lint's `VectorRaster` caps icons at 200dp, and both consumers rescale anyway.
+  - **The launch screen is deliberately silent to screen readers** (FR-018, reversed during clarification to match Constitution §VIII). Its accessibility check confirms *nothing* is announced.
+
+**Previous**: ✅ [Spec 016 — Settings Screen](specs/016-settings-screen/) — **merged into `main` via [PR #18](https://github.com/Xbisme/ThirtySixBrowser/pull/18) (2026-09-12, merge commit `3083941`, CI green on `main`)**. **112/113 tasks.** Open: T109's TalkBack pass (DEFERRED — needs a person; the 8-locale sweep passed).
 
 - Artifacts: [spec.md](specs/016-settings-screen/spec.md) · [plan.md](specs/016-settings-screen/plan.md) · [research.md](specs/016-settings-screen/research.md) (R1–R15) · [data-model.md](specs/016-settings-screen/data-model.md) · [quickstart.md](specs/016-settings-screen/quickstart.md) (G1–G12) · [tasks.md](specs/016-settings-screen/tasks.md) — see **Implementation Notes** and **Device Gate Results** · [contracts/](specs/016-settings-screen/contracts/).
 - **Gates**:
