@@ -26,6 +26,25 @@ interface SettingsRepository {
 
     fun observeSettings(): Flow<UserSettings>
 
+    /**
+     * Spec 018 — the current settings, read once.
+     *
+     * Suspends until a real value is available and never returns [UserSettings.DEFAULT] as a
+     * placeholder. Added because the start-up decision has to know whether onboarding is
+     * complete BEFORE the navigation graph is built.
+     *
+     * Why [observeSettings] cannot serve that: collected with
+     * `collectAsStateWithLifecycle(initialValue = UserSettings.DEFAULT)`, the first emission
+     * carries `isOnboardingCompleted = false` (the documented default). `NavHost` captures its
+     * `startDestination` at first composition, so routing on that first emission sends EVERY
+     * launch to onboarding — not as a one-frame flash, but as the graph's actual start route
+     * (Spec 018 research.md R2).
+     *
+     * Callers that need to follow changes keep using [observeSettings]; this is only for
+     * deciding something before any UI exists.
+     */
+    suspend fun currentSettings(): UserSettings
+
     suspend fun setThemeMode(mode: ThemeMode): Result<Unit>
 
     /**

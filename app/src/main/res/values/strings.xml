@@ -6,7 +6,30 @@
     <!-- Per FR-007 naming convention: feature_section_purpose. -->
     <!-- Future feature specs (e.g., 011 tabs-management) MAY rename *_screen_placeholder → semantic key (*_screen_title) when they implement the real Screen — must update all 8 locale files in same change. -->
 
-    <string name="onboarding_screen_placeholder">Onboarding</string>
+    <!-- Spec 018 — Onboarding flow. The placeholder key onboarding_screen_placeholder was
+         removed here and in all 7 locale files: OnboardingScreen is a real screen now, and an
+         unused key is build-blocking under warningsAsErrors (the precedent Spec 014 set).
+
+         No privacy-statement string is declared: FR-004 reuses settings_about_privacy_statement
+         verbatim, so the app's central privacy claim has exactly one wording (A9).
+         No option labels either: those come from Spec 016's themeModeLabel / searchEngineLabel /
+         appLanguageLabel, which is what keeps Settings and onboarding from disagreeing. -->
+    <string name="onboarding_welcome_title">Welcome to ThirtySix</string>
+    <string name="onboarding_welcome_body">A quiet browser that keeps out of your way.</string>
+    <string name="onboarding_language_title">Choose your language</string>
+    <string name="onboarding_language_body">You can change this later in Settings.</string>
+    <string name="onboarding_theme_title">Light or dark?</string>
+    <string name="onboarding_theme_body">Follow your device, or pick one and stay with it.</string>
+    <string name="onboarding_search_title">Pick a search engine</string>
+    <string name="onboarding_search_body">Typing in the address bar searches with this.</string>
+    <!-- FR-002b: two separate resources, never one string with a placeholder — "Next" and
+         "Done" are different words, not a substitution, and a placeholder produces
+         untranslatable grammar across 8 locales. -->
+    <string name="onboarding_action_next">Next</string>
+    <string name="onboarding_action_done">Done</string>
+    <string name="onboarding_action_skip">Skip</string>
+    <!-- %1$d = current slide, %2$d = total. Positional so locales may reorder. -->
+    <string name="onboarding_progress_a11y">Step %1$d of %2$d</string>
 
     <!-- Spec 007 — WebView Compose Wrapper. Loading state + error UI strings. -->
     <string name="browser_loading_a11y">Loading page</string>

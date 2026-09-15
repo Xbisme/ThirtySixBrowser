@@ -75,6 +75,10 @@ private class FakeSettingsRepository : SettingsRepository {
 
     override fun observeSettings(): Flow<UserSettings> = observeFlow
 
+    // Spec 018 — the one-shot read; this fake is only exercised through the observer,
+    // so the documented defaults are the honest answer here.
+    override suspend fun currentSettings(): UserSettings = UserSettings.DEFAULT
+
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> {
         lastThemeMode = mode
         return Result.Success(Unit)

@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Simplified Chinese (zh). Single zh tag covers all Chinese variants per research.md R2. -->
     <string name="app_name">ThirtySix 浏览器</string>
-    <string name="onboarding_screen_placeholder">引导</string>
 
     <!-- Spec 007 — Simplified Chinese (zh) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">正在加载页面</string>
@@ -218,4 +217,18 @@
     <!-- Spec 016 US7 — About. -->
     <string name="settings_about_version">版本 %1$s</string>
     <string name="settings_about_privacy_statement">此应用不收集任何个人数据，也不会向 ThirtySix 运营的任何服务器发送任何内容。您的历史记录、书签、下载内容和设置仅保存在此设备上。</string>
+    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
+         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <string name="onboarding_welcome_title">欢迎使用 ThirtySix</string>
+    <string name="onboarding_welcome_body">一个安静、不打扰你的浏览器。</string>
+    <string name="onboarding_language_title">选择语言</string>
+    <string name="onboarding_language_body">之后可以在设置中更改。</string>
+    <string name="onboarding_theme_title">浅色还是深色？</string>
+    <string name="onboarding_theme_body">跟随设备，或选定一种。</string>
+    <string name="onboarding_search_title">选择搜索引擎</string>
+    <string name="onboarding_search_body">在地址栏输入时将用它搜索。</string>
+    <string name="onboarding_action_next">下一步</string>
+    <string name="onboarding_action_done">完成</string>
+    <string name="onboarding_action_skip">跳过</string>
+    <string name="onboarding_progress_a11y">第 %1$d 步，共 %2$d 步</string>
 </resources>

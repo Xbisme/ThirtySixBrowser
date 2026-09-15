@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Russian (ru) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">ThirtySix Браузер</string>
-    <string name="onboarding_screen_placeholder">Знакомство</string>
 
     <!-- Spec 007 — Russian (ru) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">Загрузка страницы</string>
@@ -227,4 +226,18 @@
     <!-- Spec 016 US7 — About. -->
     <string name="settings_about_version">Версия %1$s</string>
     <string name="settings_about_privacy_statement">Это приложение не собирает персональные данные и ничего не отправляет на серверы ThirtySix. История, закладки, загрузки и настройки хранятся только на этом устройстве.</string>
+    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
+         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <string name="onboarding_welcome_title">Добро пожаловать в ThirtySix</string>
+    <string name="onboarding_welcome_body">Тихий браузер, который не мешает.</string>
+    <string name="onboarding_language_title">Выберите язык</string>
+    <string name="onboarding_language_body">Это можно изменить позже в настройках.</string>
+    <string name="onboarding_theme_title">Светлая или тёмная?</string>
+    <string name="onboarding_theme_body">Следовать за устройством или выбрать одну тему.</string>
+    <string name="onboarding_search_title">Выберите поисковик</string>
+    <string name="onboarding_search_body">Ввод в адресной строке будет искать через него.</string>
+    <string name="onboarding_action_next">Далее</string>
+    <string name="onboarding_action_done">Готово</string>
+    <string name="onboarding_action_skip">Пропустить</string>
+    <string name="onboarding_progress_a11y">Шаг %1$d из %2$d</string>
 </resources>

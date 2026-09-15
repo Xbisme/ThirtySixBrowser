@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — French (fr) translation. Brand "ThirtySix" preserved per research.md R6. -->
     <string name="app_name">Navigateur ThirtySix</string>
-    <string name="onboarding_screen_placeholder">Présentation</string>
 
     <!-- Spec 007 — French (fr) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">Chargement de la page</string>
@@ -224,4 +223,18 @@
     <!-- Spec 016 US7 — About. -->
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_privacy_statement">Cette application ne collecte aucune donnée personnelle et n\'envoie rien à un serveur exploité par ThirtySix. Votre historique, vos favoris, vos téléchargements et vos paramètres restent sur cet appareil.</string>
+    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
+         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <string name="onboarding_welcome_title">Bienvenue dans ThirtySix</string>
+    <string name="onboarding_welcome_body">Un navigateur discret qui ne vous gêne pas.</string>
+    <string name="onboarding_language_title">Choisissez votre langue</string>
+    <string name="onboarding_language_body">Vous pourrez changer plus tard dans les Réglages.</string>
+    <string name="onboarding_theme_title">Clair ou sombre ?</string>
+    <string name="onboarding_theme_body">Suivre l\'appareil, ou en choisir un.</string>
+    <string name="onboarding_search_title">Choisissez un moteur de recherche</string>
+    <string name="onboarding_search_body">La saisie dans la barre d\'adresse cherchera avec lui.</string>
+    <string name="onboarding_action_next">Suivant</string>
+    <string name="onboarding_action_done">Terminé</string>
+    <string name="onboarding_action_skip">Ignorer</string>
+    <string name="onboarding_progress_a11y">Étape %1$d sur %2$d</string>
 </resources>

@@ -30,6 +30,8 @@ fun AppNavGraph(
         composable(AppDestination.History.route) { HistoryScreen(navController = navController) }
         composable(AppDestination.Downloads.route) { DownloadsScreen(navController = navController) }
         composable(AppDestination.Settings.route) { SettingsScreen(navController = navController) }
-        composable(AppDestination.Onboarding.route) { OnboardingScreen() }
+        // Spec 018 — receives the controller so finishing or skipping can navigate to the
+        // browser popping this route inclusively (FR-010a).
+        composable(AppDestination.Onboarding.route) { OnboardingScreen(navController = navController) }
     }
 }

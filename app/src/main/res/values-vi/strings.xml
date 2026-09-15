@@ -1,7 +1,6 @@
 <resources>
     <!-- Spec 004 — Vietnamese (vi) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
     <string name="app_name">Trình duyệt ThirtySix</string>
-    <string name="onboarding_screen_placeholder">Giới thiệu</string>
 
     <!-- Spec 007 — Vietnamese (vi) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">Đang tải trang</string>
@@ -218,4 +217,18 @@
     <!-- Spec 016 US7 — About. -->
     <string name="settings_about_version">Phiên bản %1$s</string>
     <string name="settings_about_privacy_statement">Ứng dụng này không thu thập dữ liệu cá nhân và không gửi bất cứ thứ gì đến máy chủ nào do ThirtySix vận hành. Lịch sử, dấu trang, tệp tải xuống và cài đặt của bạn chỉ lưu trên thiết bị này.</string>
+    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
+         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <string name="onboarding_welcome_title">Chào mừng đến ThirtySix</string>
+    <string name="onboarding_welcome_body">Một trình duyệt yên tĩnh, không cản đường bạn.</string>
+    <string name="onboarding_language_title">Chọn ngôn ngữ</string>
+    <string name="onboarding_language_body">Bạn có thể đổi lại trong Cài đặt.</string>
+    <string name="onboarding_theme_title">Sáng hay tối?</string>
+    <string name="onboarding_theme_body">Theo thiết bị, hoặc chọn một kiểu và giữ nguyên.</string>
+    <string name="onboarding_search_title">Chọn công cụ tìm kiếm</string>
+    <string name="onboarding_search_body">Gõ vào thanh địa chỉ sẽ tìm bằng công cụ này.</string>
+    <string name="onboarding_action_next">Tiếp</string>
+    <string name="onboarding_action_done">Xong</string>
+    <string name="onboarding_action_skip">Bỏ qua</string>
+    <string name="onboarding_progress_a11y">Bước %1$d trên %2$d</string>
 </resources>
