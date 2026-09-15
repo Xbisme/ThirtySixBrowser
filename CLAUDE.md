@@ -271,7 +271,13 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Pending CI / Tooling Tasks
 
-> No outstanding CI tooling tasks at the moment. Spec 008 surfaced + resolved the `Terminate Emulator` hang (set `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5` + removed redundant manual `adb emu kill` from script — see CI workflow note).
+> No outstanding CI tooling tasks at the moment.
+>
+> Two emulator-job hangs have been surfaced and fixed, and they are **different bugs with similar symptoms** — check both before assuming a new one:
+> 1. **Spec 008 — shutdown hang.** QEMU's `stop` emits `stop: Not implemented`, so the action's terminate phase never sees the process exit. Fixed by killing qemu at the end of `script` plus `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5`.
+> 2. **Spec 017 — stale AVD snapshot (PR #22, `d5ab63d`).** The cache key used `${{ env.ImageVersion }}`, which is **always empty** — `ImageVersion` belongs to the runner image, not the workflow's `env:` block, and the `env` context only exposes what the workflow, job or step declares. The key was therefore unversioned (`avd-api29-Linux-`), so a snapshot written by an older emulator binary was restored forever, giving a zombie boot: `sys.boot_completed=1` but `settings`/`input` never published, `adb` exits 1, Gradle never runs, job wedges until timeout. Now resolved through a step output, with a hard failure if the variable disappears.
+>
+> **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd` — a key without a version component is bug 2 returning.
 
 ## Recent Changes
 
@@ -281,7 +287,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
   **Root cause**: the AVD cache key is `avd-api${{ matrix.api-level }}-${{ runner.os }}-${{ env.ImageVersion }}`, but **`ImageVersion` is not available through `env.` in a workflow expression** — it is a runner-image variable, and the workflow's own `env:` block only declares `GRADLE_OPTS`. The interpolation therefore resolved to empty, which was visible in the cache listing as `avd-api29-Linux-` (trailing dash, no version). **Spec 015's fix was written correctly in its comment but never actually took effect**, so the stale snapshot from 2026-09-11 kept being restored even after the runner image upgraded the emulator binary — the zombie boot that comment describes.
 
-  **Resolved for now** by deleting the stale cache (`gh cache delete`) and re-running: the job then created a fresh AVD and passed, along with all five other jobs. **Not yet fixed at the root** — the key still interpolates to empty, so the next cached AVD will go stale the same way. A real fix reads `$ImageVersion` in a step and exposes it as a step output, or keys on something reachable from expressions. **Expect this to recur in Spec 018 unless the key is fixed.**
+  **Unblocked** by deleting the stale cache (`gh cache delete`) and re-running: the job then created a fresh AVD and passed, along with all five other jobs. **Fixed at the root in PR #22** (merge commit `d5ab63d`, before Spec 018 started, so its emulator job would not hit the same wall): a `Resolve runner image version` step reads `$ImageVersion` in a shell — where it *is* defined — and republishes it as a step output, which expressions can read. The step **fails loudly** if the variable is ever missing, because a silent fallback such as `${ImageVersion:-unknown}` would pin every run to one constant and quietly recreate this exact bug. `runner.os` was dropped from the key: the image version already identifies the OS, and carrying both invited the false sense of specificity that hid this for two specs. **Verified**: CI green 6/6 on PR #22, and the cache is now stored as `avd-api29-20260907.300.1` — a real version, no trailing dash.
 
 - 2026-09-15 (Spec 017 implementation): ✅ **Spec 017 `splash-screen` merged — [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20), merge commit `cca5c0c`, all 6 CI jobs green. 35/35 tasks.**
 
