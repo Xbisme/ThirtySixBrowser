@@ -1,6 +1,6 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-15 — **🟢 Spec 017 `splash-screen` đã implement (34/35, branch `017-splash-screen`, PR chưa mở). ✅ Specs 001–016 done (013 PR #14, 014 PR #15, 015 PR #16, 016 PR #18 đều đã merge). Spec 016 `settings-screen` merged vào `main` 2026-09-12 (merge commit `3083941`, CI xanh), 112/113 tasks; TalkBack pass của T109 vẫn cần người thật. Tiếp theo: 017 `splash-screen`.**
+> Cập nhật lần cuối: 2026-09-15 — **🟢 Spec 017 `splash-screen` đã implement (35/35, PR #20 đang mở). ✅ Specs 001–016 done (013 PR #14, 014 PR #15, 015 PR #16, 016 PR #18 đều đã merge). Spec 016 `settings-screen` merged vào `main` 2026-09-12 (merge commit `3083941`, CI xanh), 112/113 tasks; TalkBack pass của T109 vẫn cần người thật. Tiếp theo: 017 `splash-screen`.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
@@ -17,9 +17,9 @@ Foundation phase tiến độ:
 
 **Phase 2 done** (6/6 ship-ready): 008 / 009 / 010 / 011 / 012 all merged into `main`.
 **Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
-**Phase 4** (1/3 merged, 017 đã implement): **Spec 016** merged qua PR #18 (2026-09-12, `3083941`). 🟢 **Spec 017 `splash-screen` implemented 2026-09-15** — 34/35 tasks trên branch `017-splash-screen`, PR chưa mở. Tiếp theo: mở PR cho 017, rồi 018 `onboarding-flow`.
+**Phase 4** (1/3 merged, 017 đã implement): **Spec 016** merged qua PR #18 (2026-09-12, `3083941`). 🟢 **Spec 017 `splash-screen` implemented 2026-09-15** — 35/35 tasks, PR #20 đang mở. Tiếp theo: 018 `onboarding-flow`.
 
-### Spec 017 — Splash Screen (🟢 implemented 2026-09-15 — 34/35, branch `017-splash-screen`)
+### Spec 017 — Splash Screen (🟢 implemented 2026-09-15 — 35/35, PR #20 đang mở)
 
 Launch screen có branding + thay **toàn bộ** artwork template Android Studio còn sót (robot xanh `#3DDC84`) bằng mark ThirtySix. Một dependency, hai style, một bộ drawable, một lời gọi trong `MainActivity`. **Không có data layer, không ViewModel, không state mới.** Room vẫn v2.
 

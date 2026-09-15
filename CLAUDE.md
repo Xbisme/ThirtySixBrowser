@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 001–016 done · 🟢 Spec 017 `splash-screen` implemented (34/35, branch `017-splash-screen`, PR chưa mở).** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 001–016 done · 🟢 Spec 017 `splash-screen` implemented (35/35, [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) open).** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-09-15 — **✅ Specs 00
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** ✅ **Specs 001–016 done (2026-09-12)** — Phase 1–3 hoàn tất; **Phase 4: 016 merged, 🟢 017 `splash-screen` implemented 2026-09-15 (34/35, branch `017-splash-screen`, PR chưa mở)**. Next: mở PR cho 017, rồi 018 `onboarding-flow`. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** ✅ **Specs 001–016 done (2026-09-12)** — Phase 1–3 hoàn tất; **Phase 4: 016 merged, 🟢 017 `splash-screen` implemented 2026-09-15 (35/35, PR #20 open)**. Next: mở PR cho 017, rồi 018 `onboarding-flow`. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -259,7 +259,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 | 014 | `history-view` | ✅ Done 2026-09-10 (PR #15 merged into `main`, commit `2e7c633`; 111/113 tasks — T103b SC-005 perf gate deferred to real hardware) | Auto-record on page-finish (non-incognito only) + bottom-bar History entry + grouped list (Today/Yesterday/explicit-date) + tap-to-replace-active-tab + live search (≥2 chars, no debounce) + long-press action sheet (open in new tab / delete / copy URL) + confirmed clear-all + 4 use cases |
 | 015 | `downloads-manager` | ✅ Done 2026-09-11 (PR #16 merged into `main`, commit `e925f9d`; 121/121 tasks — SC-006 perf gate deferred to real hardware) | System DownloadManager + public Downloads folder + hybrid Room/platform source of truth + **first schema migration (v1→v2)** + overflow menu replacing the Bookmarks/History bottom-bar entries + 8 use cases |
 | 016 | `settings-screen` | ✅ Done 2026-09-12 (PR #18 merged into `main`, merge commit `3083941`; 112/113 — T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
-| 017 | `splash-screen` | 🟢 Implemented 2026-09-15 (34/35; G1–G10 đều PASS, chỉ TalkBack deferred; PR chưa mở) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
+| 017 | `splash-screen` | 🟢 Implemented 2026-09-15 (35/35; G1–G10 đều PASS, chỉ TalkBack deferred; PR #20 open) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
 | 018 | `onboarding-flow` | ⬜ | 3–4 slides chọn ngôn ngữ/theme/search |
 | 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
 
@@ -275,7 +275,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Recent Changes
 
-- 2026-09-15 (Spec 017 implementation): 🟢 **Spec 017 `splash-screen` implemented — 31/35 tasks on branch `017-splash-screen`, PR not yet opened.**
+- 2026-09-15 (Spec 017 implementation): 🟢 **Spec 017 `splash-screen` implemented — 35/35 tasks, [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) open.**
 
   **Scope.** A branded launch screen, plus the replacement of the **last project-template artwork** in the repo. One dependency, two theme entries, a set of drawables, and one call in `MainActivity` — no data layer, no ViewModel, no new state. Room stays at v2.
 
@@ -442,7 +442,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 017 — Splash Screen](specs/017-splash-screen/) — **implemented 2026-09-15, 34/35 tasks on branch `017-splash-screen`; PR not yet opened. All ten device gates G1–G10 pass; only the TalkBack silence check is deferred to a person.**
+**Current**: 🟢 [Spec 017 — Splash Screen](specs/017-splash-screen/) — **implemented 2026-09-15, 35/35 tasks — [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) open. All ten device gates G1–G10 pass; only the TalkBack silence check is deferred to a person.**
 
 - Artifacts: [spec.md](specs/017-splash-screen/spec.md) (21 FR · 13 SC · 10 assumptions) · [plan.md](specs/017-splash-screen/plan.md) · [research.md](specs/017-splash-screen/research.md) (R1–R10) · [data-model.md](specs/017-splash-screen/data-model.md) (14 invariants) · [quickstart.md](specs/017-splash-screen/quickstart.md) (G1–G10) · [tasks.md](specs/017-splash-screen/tasks.md) — see **Device Gate Results** · [contracts/](specs/017-splash-screen/contracts/README.md) · [assets/brand-mark-approved.svg](specs/017-splash-screen/assets/brand-mark-approved.svg).
 - **Gates**: unit ✅ 557/557 · instrumented ✅ 109/109 (16 KB API 36 AVD) · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero new · APK **3,126,212 B** (+4,097 B, 2% of budget) · cold start **−1.4%** · Constitution **11/11 PASS, zero deviations**.
