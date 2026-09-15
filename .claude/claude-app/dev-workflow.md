@@ -114,9 +114,9 @@ Các Spec theo thứ tự implement:
 | 013 | `bookmarks-crud` | 005, 007 | ✅ Done (PR #14) |
 | 014 | `history-view` | 005, 007 | ✅ Done (PR #15) |
 | 015 | `downloads-manager` | 007 | ✅ Done (PR #16) |
-| 016 | `settings-screen` | 003, 004, 006 | ⬜ Next |
-| 017 | `splash-screen` | 002 | ⬜ |
+| 016 | `settings-screen` | 003, 004, 006 | ✅ Done (PR #18) |
+| 017 | `splash-screen` | 002 | ⬜ Next |
 | 018 | `onboarding-flow` | 003, 004, 006, 017 | ⬜ |
 | 019 | `tracker-blocker-hostlist` | 011–018 | ⬜ Optional |
 
-> Cập nhật 2026-09-11: Specs 001–015 đã merge vào `main`. Bước tiếp theo: thảo luận chi tiết Spec 016 (`settings-screen`) trước khi chạy `/speckit-specify`. Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
+> Cập nhật 2026-09-15: Specs 001–016 đã merge vào `main` (016 qua PR #18, 2026-09-12). Phase 4 đang ở 1/3. Bước tiếp theo: thảo luận chi tiết Spec 017 (`splash-screen`) trước khi chạy `/speckit-specify`. Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.

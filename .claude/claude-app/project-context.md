@@ -1,10 +1,10 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-11 — **✅ Specs 001–015 done (013 PR #14, 014 PR #15, 015 PR #16 đều đã merge). 🟢 Spec 016 `settings-screen` đã implement — PR #18 đang mở, 112/113 tasks; TalkBack pass của T109 cần người thật.**
+> Cập nhật lần cuối: 2026-09-15 — **✅ Specs 001–016 done (013 PR #14, 014 PR #15, 015 PR #16, 016 PR #18 đều đã merge). Spec 016 `settings-screen` merged vào `main` 2026-09-12 (merge commit `3083941`, CI xanh), 112/113 tasks; TalkBack pass của T109 vẫn cần người thật. Tiếp theo: 017 `splash-screen`.**
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) + ✅ Spec 015 merged (PR #16, 2026-09-11, commit `e925f9d`) + 🟢 Spec 016 implemented (branch `016-settings-screen`, chưa commit) — 15/19 shipped
+## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) + ✅ Spec 015 merged (PR #16, 2026-09-11, commit `e925f9d`) + ✅ Spec 016 merged (PR #18, 2026-09-12, merge commit `3083941`) — 16/19 shipped
 
 Foundation phase tiến độ:
 - **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)
@@ -17,9 +17,9 @@ Foundation phase tiến độ:
 
 **Phase 2 done** (6/6 ship-ready): 008 / 009 / 010 / 011 / 012 all merged into `main`.
 **Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
-**Phase 4** (0/3 merged): **Spec 016 `settings-screen`** đã implement xong trên branch, còn chờ PR; tiếp theo là 017 `splash-screen`.
+**Phase 4** (1/3 merged): **Spec 016 `settings-screen`** đã merge vào `main` qua PR #18 (2026-09-12, merge commit `3083941`, CI xanh); tiếp theo là 017 `splash-screen`, rồi 018 `onboarding-flow` (phụ thuộc 017).
 
-### Spec 016 — Settings Screen (🟢 implemented 2026-09-11 — PR #18 đang mở, 112/113; còn TalkBack pass cần người thật)
+### Spec 016 — Settings Screen (✅ done 2026-09-12 — PR #18 merged vào `main`, merge commit `3083941`, 112/113; còn TalkBack pass của T109 cần người thật)
 
 Spec đầu tiên của Phase 4. Settings mở từ overflow menu, ở vị trí Spec 015 đã chừa sẵn, và thay cho placeholder của Spec 002. Gồm bảy phần:
 - **Theme**: Light / Dark / System.
