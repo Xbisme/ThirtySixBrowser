@@ -1,6 +1,6 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-15 — 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** 🟢 Spec 018 `onboarding-flow` implemented (41/41, PR #24 đang mở). ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
+> Cập nhật lần cuối: 2026-09-15 — 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** ✅ Spec 018 `onboarding-flow` đã merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41. ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
@@ -19,7 +19,7 @@ Foundation phase tiến độ:
 **Phase 3 done** (3/3 merged): Spec 013 via PR #14; Spec 014 via PR #15 (2026-09-10, commit `2e7c633`; **111/113** — T103b, tức SC-005 perf p99 ≤ 16 ms, vẫn chờ **release build trên máy thật cỡ Pixel 5**); **Spec 015 via PR #16** (2026-09-11, commit `e925f9d`; **121/121**; SC-006 perf DEFERRED cùng lý do với T103b).
 **Phase 4** (1/3 merged, 017 đã implement): **Spec 016** merged qua PR #18 (2026-09-12, `3083941`). 🟢 ✅ **Spec 017 `splash-screen` merged 2026-09-15** — PR #20, `cca5c0c`, CI xanh 6/6, 35/35 tasks. Tiếp theo: 018 `onboarding-flow`.
 
-### Spec 018 — Onboarding Flow (🟢 implemented 2026-09-15 — 41/41, PR #24 đang mở) — **SPEC CUỐI CỦA v1.0**
+### Spec 018 — Onboarding Flow (✅ done 2026-09-15 — PR #24 merged `492e4f3`, 41/41) — **SPEC CUỐI CỦA v1.0**
 
 Onboarding lần đầu mở app: 4 slide — chào (kèm cam kết riêng tư) · ngôn ngữ · theme · search engine. Skip hiện trên mọi slide. Lựa chọn lưu ngay và áp dụng tức thì. **Không lưu gì của riêng nó** — chỉ là cách trình bày thứ hai cho các setting đã có, cộng một cờ đã có. Room vẫn v2, **không thêm dependency**.
 
