@@ -43,10 +43,13 @@
         <!-- Spec 019 — the activity handles a language change itself (locale|layoutDirection), so
              applying a language no longer recreates it: no black frames, no WebView rebuild.
              AppCompat delivers onConfigurationChanged on every API level once the activity
-             declares these; Compose re-reads strings through LocalConfiguration. -->
+             declares these; Compose re-reads strings through LocalConfiguration.
+             screenLayout is needed too: the FIRST change away from "follow system" also reports
+             CONFIG_SCREEN_LAYOUT (seen on a Galaxy A55, Android 16), and leaving it out
+             recreated the activity on exactly that first choice. -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="locale|layoutDirection"
+            android:configChanges="locale|layoutDirection|screenLayout"
             android:exported="true"
             android:theme="@style/Theme.ThirtySix.Splash">
             <intent-filter>
