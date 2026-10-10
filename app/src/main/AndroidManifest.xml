@@ -40,8 +40,13 @@
         <!-- Spec 017 — the activity starts on the splash theme; installSplashScreen()
              swaps in Theme.ThirtySix (its postSplashScreenTheme) before AppCompat builds
              its delegate. The <application> theme above stays Theme.ThirtySix. -->
+        <!-- Spec 019 — the activity handles a language change itself (locale|layoutDirection), so
+             applying a language no longer recreates it: no black frames, no WebView rebuild.
+             AppCompat delivers onConfigurationChanged on every API level once the activity
+             declares these; Compose re-reads strings through LocalConfiguration. -->
         <activity
             android:name=".MainActivity"
+            android:configChanges="locale|layoutDirection"
             android:exported="true"
             android:theme="@style/Theme.ThirtySix.Splash">
             <intent-filter>
