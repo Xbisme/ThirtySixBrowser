@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
 
 /**
@@ -70,4 +71,12 @@ data class BrowserUiState(
      * SnackbarHost has shown the message.
      */
     val bookmarkSnackbarEvent: BookmarkSnackbarEvent? = null,
-)
+    /** Spec 019 (data-model §2) — Home pressed on a loaded page; Back clears it. */
+    val homeOverlay: Boolean = false,
+    /** Spec 019 — this tab left the Home page; Back without page history returns there. */
+    val cameFromHome: Boolean = false,
+) {
+    /** Spec 019 FR-010 — the tab shows the Home page (or, incognito, the incognito page). */
+    val isHomeContent: Boolean
+        get() = currentUrl == UrlConstants.HOME_PAGE_URL || homeOverlay
+}

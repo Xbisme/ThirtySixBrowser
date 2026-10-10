@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -67,7 +68,7 @@ class BrowserViewModelTest {
 
     @Suppress("LongParameterList")
     private fun newViewModel(
-        url: String = UrlConstants.DEFAULT_HOME_URL,
+        url: String = SAMPLE_PAGE_URL,
         buildSearchUrl: BuildSearchUrlUseCase = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),
         tabRepository: FakeTabRepository = FakeTabRepository(homeUrl = url),
         faviconCache: FaviconCache = NoopFaviconCache,
@@ -341,12 +342,6 @@ class BrowserViewModelTest {
         val failed = vm.uiState.value
         vm.onLoadStopped()
         assertEquals(failed, vm.uiState.value)
-    }
-
-    @Test
-    fun `homeUrl getter returns the injected default URL`() = runTest {
-        val vm = newViewModel("https://www.google.com/")
-        assertEquals("https://www.google.com/", vm.homeUrl)
     }
 
     // ---------- Spec 009 (T009) — Foundational address-bar default state ----------
@@ -762,6 +757,61 @@ class BrowserViewModelTest {
         assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
 
+    // ---------- Spec 019 (T055) — Home inside a tab, contracts C1 / data-model §2 ----------
+
+    @Test
+    fun `a tab at the Home address shows Home content`() = runTest {
+        val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
+        advanceUntilIdle()
+        assertTrue(vm.uiState.value.isHomeContent)
+    }
+
+    @Test
+    fun `Home pressed on a page overlays Home and Back returns to the page`() = runTest {
+        val vm = newViewModel("https://page.test/")
+        advanceUntilIdle()
+        vm.onHomePressed()
+        assertTrue(vm.uiState.value.isHomeContent)
+        assertEquals("https://page.test/", vm.uiState.value.currentUrl)
+        vm.onHomeOverlayDismissed()
+        assertFalse(vm.uiState.value.isHomeContent)
+    }
+
+    @Test
+    fun `Home submit loads the same URL as the address bar and marks cameFromHome`() = runTest {
+        val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
+        advanceUntilIdle()
+        var fromHome: String? = null
+        assertTrue(vm.onHomeSubmit("kotlinlang.org") { fromHome = it })
+        vm.onAddressBarTextChange("kotlinlang.org")
+        var fromBar: String? = null
+        vm.onAddressBarSubmit { fromBar = it }
+        assertEquals(fromBar, fromHome)
+        assertTrue(vm.uiState.value.cameFromHome)
+    }
+
+    @Test
+    fun `blank Home submit does nothing`() = runTest {
+        val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
+        advanceUntilIdle()
+        assertFalse(vm.onHomeSubmit("   ") { error("must not load") })
+        assertFalse(vm.uiState.value.cameFromHome)
+    }
+
+    @Test
+    fun `Back without history returns to Home only when the page came from Home`() = runTest {
+        val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
+        advanceUntilIdle()
+        assertFalse(vm.onBackWithoutHistory())
+
+        vm.onNavigateFromHome()
+        vm.onUrlChanged("https://page.test/")
+        assertFalse(vm.uiState.value.isHomeContent)
+        assertTrue(vm.onBackWithoutHistory())
+        assertTrue(vm.uiState.value.isHomeContent)
+        assertFalse(vm.uiState.value.cameFromHome)
+    }
+
     private companion object {
         const val ISOLATION_TICKS = 50
         const val EARLY_PROGRESS: Int = 25
@@ -773,3 +823,6 @@ class BrowserViewModelTest {
         const val FLOAT_TOLERANCE: Float = 0.0001f
     }
 }
+
+/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"

@@ -284,4 +284,24 @@
         <item quantity="one">Tabs, %1$d open</item>
         <item quantity="other">Tabs, %1$d open</item>
     </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_privacy_line">Everything you browse stays on this phone.</string>
+    <string name="home_recent_title">Recently visited</string>
+    <string name="home_recent_see_all">See all</string>
+    <string name="home_shortcut_tag_tab">Tab</string>
+    <string name="home_shortcut_tag_saved">Saved</string>
+    <string name="home_shortcut_tag_recent">Recent</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">You\'re browsing privately</string>
+    <string name="incognito_page_subtitle">Other people who use this phone won\'t see what you do here.</string>
+    <string name="incognito_page_section_title">When you close all incognito tabs</string>
+    <string name="incognito_page_point_history">The pages you visited are not kept in history</string>
+    <string name="incognito_page_point_cookies">Cookies and site data are cleared</string>
+    <string name="incognito_page_point_screenshots">Screenshots are blocked while a private tab is open</string>
+    <string name="incognito_page_footnote">Files you download and bookmarks you save are kept. Websites and your network can still see your visits.</string>
 </resources>

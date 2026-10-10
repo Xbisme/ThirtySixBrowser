@@ -243,4 +243,24 @@
     <plurals name="nav_tabs_count_cd">
         <item quantity="other">タブ、%1$d 個開いています</item>
     </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">おはようございます</string>
+    <string name="home_greeting_afternoon">こんにちは</string>
+    <string name="home_greeting_evening">こんばんは</string>
+    <string name="home_privacy_line">閲覧した内容はすべてこのスマートフォンに残ります。</string>
+    <string name="home_recent_title">最近アクセスしたページ</string>
+    <string name="home_recent_see_all">すべて表示</string>
+    <string name="home_shortcut_tag_tab">タブ</string>
+    <string name="home_shortcut_tag_saved">保存済み</string>
+    <string name="home_shortcut_tag_recent">最近</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">シークレットモードで閲覧中です</string>
+    <string name="incognito_page_subtitle">このスマートフォンを使う他の人には、ここでの操作は表示されません。</string>
+    <string name="incognito_page_section_title">シークレットタブをすべて閉じると</string>
+    <string name="incognito_page_point_history">アクセスしたページは履歴に残りません</string>
+    <string name="incognito_page_point_cookies">Cookie とサイトデータは削除されます</string>
+    <string name="incognito_page_point_screenshots">シークレットタブを開いている間はスクリーンショットを撮れません</string>
+    <string name="incognito_page_footnote">ダウンロードしたファイルと保存したブックマークは残ります。ウェブサイトやネットワークからはアクセスが見えます。</string>
 </resources>

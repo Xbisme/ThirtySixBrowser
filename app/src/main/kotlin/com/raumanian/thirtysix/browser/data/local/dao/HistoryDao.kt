@@ -9,6 +9,7 @@ import com.raumanian.thirtysix.browser.data.local.entity.HistoryEntryEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
+@Suppress("TooManyFunctions") // Spec 019 added observeRecent for the Home page on top of Specs 005/014.
 interface HistoryDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -39,6 +40,19 @@ interface HistoryDao {
         """,
     )
     fun observeAll(): Flow<List<HistoryEntryEntity>>
+
+    /**
+     * Spec 019 (data-model §4) — the newest [limit] visits for the Home page. Served by the
+     * existing `visited_at` index, so it never scans the whole table the way [observeAll] does.
+     */
+    @Query(
+        """
+        SELECT * FROM ${HistoryEntryEntity.TABLE_NAME}
+        ORDER BY ${HistoryEntryEntity.COL_VISITED_AT} DESC, ${HistoryEntryEntity.COL_ID} DESC
+        LIMIT :limit
+        """,
+    )
+    fun observeRecent(limit: Int): Flow<List<HistoryEntryEntity>>
 
     /**
      * Range delete (for "Clear last hour / today / all"). Pass MIN/MAX to clear all.

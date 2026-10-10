@@ -251,4 +251,24 @@
         <item quantity="many">Onglets, %1$d ouverts</item>
         <item quantity="other">Onglets, %1$d ouverts</item>
     </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Bonjour</string>
+    <string name="home_greeting_afternoon">Bon après-midi</string>
+    <string name="home_greeting_evening">Bonsoir</string>
+    <string name="home_privacy_line">Tout ce que vous consultez reste sur ce téléphone.</string>
+    <string name="home_recent_title">Visités récemment</string>
+    <string name="home_recent_see_all">Tout afficher</string>
+    <string name="home_shortcut_tag_tab">Onglet</string>
+    <string name="home_shortcut_tag_saved">Enregistré</string>
+    <string name="home_shortcut_tag_recent">Récent</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">Vous naviguez en privé</string>
+    <string name="incognito_page_subtitle">Les autres personnes qui utilisent ce téléphone ne verront pas ce que vous faites ici.</string>
+    <string name="incognito_page_section_title">Quand vous fermez tous les onglets privés</string>
+    <string name="incognito_page_point_history">Les pages visitées ne sont pas conservées dans l\'historique</string>
+    <string name="incognito_page_point_cookies">Les cookies et les données des sites sont effacés</string>
+    <string name="incognito_page_point_screenshots">Les captures d\'écran sont bloquées tant qu\'un onglet privé est ouvert</string>
+    <string name="incognito_page_footnote">Les fichiers téléchargés et les favoris enregistrés sont conservés. Les sites web et votre réseau peuvent toujours voir vos visites.</string>
 </resources>

@@ -255,4 +255,24 @@
         <item quantity="many">Вкладки, открыто %1$d</item>
         <item quantity="other">Вкладки, открыто %1$d</item>
     </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Доброе утро</string>
+    <string name="home_greeting_afternoon">Добрый день</string>
+    <string name="home_greeting_evening">Добрый вечер</string>
+    <string name="home_privacy_line">Всё, что вы просматриваете, остаётся на этом телефоне.</string>
+    <string name="home_recent_title">Недавно посещённые</string>
+    <string name="home_recent_see_all">Показать все</string>
+    <string name="home_shortcut_tag_tab">Вкладка</string>
+    <string name="home_shortcut_tag_saved">Сохранено</string>
+    <string name="home_shortcut_tag_recent">Недавнее</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">Вы в режиме инкогнито</string>
+    <string name="incognito_page_subtitle">Другие пользователи этого телефона не увидят, что вы здесь делаете.</string>
+    <string name="incognito_page_section_title">Когда вы закроете все вкладки инкогнито</string>
+    <string name="incognito_page_point_history">Посещённые страницы не сохраняются в истории</string>
+    <string name="incognito_page_point_cookies">Cookie и данные сайтов удаляются</string>
+    <string name="incognito_page_point_screenshots">Снимки экрана запрещены, пока открыта вкладка инкогнито</string>
+    <string name="incognito_page_footnote">Скачанные файлы и сохранённые закладки остаются. Сайты и ваша сеть по-прежнему видят ваши посещения.</string>
 </resources>

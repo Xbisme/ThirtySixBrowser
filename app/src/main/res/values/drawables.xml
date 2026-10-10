@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Spec 019 — `ic_brand_mark` below API 31 is an alias of the static mark; on API 31+
+      res/drawable-v31/ic_brand_mark.xml (the animated launch-screen mark) wins by qualifier,
+      exactly as Spec 017 INV-2 requires. In-app UI uses `ic_brand_mark_static` directly:
+      Compose's painterResource cannot load an animated-vector, so referencing `ic_brand_mark`
+      from a composable crashes on every API 31+ device.
+    -->
+    <drawable name="ic_brand_mark">@drawable/ic_brand_mark_static</drawable>
+</resources>

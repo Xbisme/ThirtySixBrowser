@@ -243,4 +243,24 @@
     <plurals name="nav_tabs_count_cd">
         <item quantity="other">标签页，已打开 %1$d 个</item>
     </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">早上好</string>
+    <string name="home_greeting_afternoon">下午好</string>
+    <string name="home_greeting_evening">晚上好</string>
+    <string name="home_privacy_line">您浏览的一切都只保留在这部手机上。</string>
+    <string name="home_recent_title">最近访问</string>
+    <string name="home_recent_see_all">查看全部</string>
+    <string name="home_shortcut_tag_tab">标签页</string>
+    <string name="home_shortcut_tag_saved">已保存</string>
+    <string name="home_shortcut_tag_recent">最近</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">您正在无痕浏览</string>
+    <string name="incognito_page_subtitle">使用这部手机的其他人看不到您在这里的操作。</string>
+    <string name="incognito_page_section_title">关闭所有无痕标签页后</string>
+    <string name="incognito_page_point_history">您访问过的页面不会保存在历史记录中</string>
+    <string name="incognito_page_point_cookies">Cookie 和网站数据会被清除</string>
+    <string name="incognito_page_point_screenshots">打开无痕标签页时无法截屏</string>
+    <string name="incognito_page_footnote">下载的文件和保存的书签会保留。网站和您的网络仍能看到您的访问。</string>
 </resources>

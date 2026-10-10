@@ -243,4 +243,24 @@
     <plurals name="nav_tabs_count_cd">
         <item quantity="other">Thẻ, %1$d thẻ đang mở</item>
     </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Chào buổi sáng</string>
+    <string name="home_greeting_afternoon">Chào buổi chiều</string>
+    <string name="home_greeting_evening">Chào buổi tối</string>
+    <string name="home_privacy_line">Mọi thứ bạn duyệt đều ở lại trên điện thoại này.</string>
+    <string name="home_recent_title">Đã truy cập gần đây</string>
+    <string name="home_recent_see_all">Xem tất cả</string>
+    <string name="home_shortcut_tag_tab">Thẻ</string>
+    <string name="home_shortcut_tag_saved">Đã lưu</string>
+    <string name="home_shortcut_tag_recent">Gần đây</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">Bạn đang duyệt web ẩn danh</string>
+    <string name="incognito_page_subtitle">Người khác dùng điện thoại này sẽ không thấy bạn làm gì ở đây.</string>
+    <string name="incognito_page_section_title">Khi bạn đóng tất cả thẻ ẩn danh</string>
+    <string name="incognito_page_point_history">Các trang bạn đã truy cập không được lưu vào lịch sử</string>
+    <string name="incognito_page_point_cookies">Cookie và dữ liệu trang web bị xoá</string>
+    <string name="incognito_page_point_screenshots">Không thể chụp màn hình khi đang mở thẻ ẩn danh</string>
+    <string name="incognito_page_footnote">Tệp bạn tải xuống và dấu trang bạn lưu vẫn được giữ lại. Các trang web và mạng của bạn vẫn có thể thấy bạn truy cập.</string>
 </resources>

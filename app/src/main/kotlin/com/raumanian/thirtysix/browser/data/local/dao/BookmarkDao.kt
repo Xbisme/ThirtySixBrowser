@@ -42,6 +42,16 @@ interface BookmarkDao {
     @Query("SELECT COUNT(*) FROM ${BookmarkEntity.TABLE_NAME}")
     suspend fun count(): Int
 
+    /** Spec 019 (data-model §4) — the [limit] most recently saved bookmarks, any folder. */
+    @Query(
+        """
+        SELECT * FROM ${BookmarkEntity.TABLE_NAME}
+        ORDER BY ${BookmarkEntity.COL_CREATED_AT} DESC, ${BookmarkEntity.COL_ID} DESC
+        LIMIT :limit
+        """,
+    )
+    fun observeRecent(limit: Int): Flow<List<BookmarkEntity>>
+
     /**
      * Spec 013 — bookmarks whose URL matches exactly. Powers
      * `IsUrlBookmarkedUseCase` (FR-002 star fill state) reactively.

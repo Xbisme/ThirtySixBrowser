@@ -247,4 +247,24 @@
         <item quantity="one">Tabs, %1$d geöffnet</item>
         <item quantity="other">Tabs, %1$d geöffnet</item>
     </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Guten Morgen</string>
+    <string name="home_greeting_afternoon">Guten Tag</string>
+    <string name="home_greeting_evening">Guten Abend</string>
+    <string name="home_privacy_line">Alles, was du surfst, bleibt auf diesem Telefon.</string>
+    <string name="home_recent_title">Kürzlich besucht</string>
+    <string name="home_recent_see_all">Alle anzeigen</string>
+    <string name="home_shortcut_tag_tab">Tab</string>
+    <string name="home_shortcut_tag_saved">Gespeichert</string>
+    <string name="home_shortcut_tag_recent">Kürzlich</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">Du surfst privat</string>
+    <string name="incognito_page_subtitle">Andere, die dieses Telefon nutzen, sehen nicht, was du hier tust.</string>
+    <string name="incognito_page_section_title">Wenn du alle Inkognito-Tabs schließt</string>
+    <string name="incognito_page_point_history">Die besuchten Seiten werden nicht im Verlauf gespeichert</string>
+    <string name="incognito_page_point_cookies">Cookies und Websitedaten werden gelöscht</string>
+    <string name="incognito_page_point_screenshots">Bildschirmfotos sind gesperrt, solange ein privater Tab offen ist</string>
+    <string name="incognito_page_footnote">Heruntergeladene Dateien und gespeicherte Lesezeichen bleiben erhalten. Websites und dein Netzwerk können deine Besuche weiterhin sehen.</string>
 </resources>

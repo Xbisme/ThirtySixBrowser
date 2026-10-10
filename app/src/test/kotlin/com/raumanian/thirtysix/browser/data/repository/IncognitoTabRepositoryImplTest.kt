@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
@@ -221,6 +222,27 @@ class IncognitoTabRepositoryImplTest {
             "no after.com row should have leaked into TabRepository",
             normalTabs.any { it.url == "https://after.com/" },
         )
+    }
+
+    @Test
+    fun `11 - a tab on the Home page contributes no cookie origin`() = runTest {
+        // Spec 019 T066a / contracts C1a — the reserved Home address has a scheme but no host,
+        // so the snapshot captures only the real page's origin.
+        val withHome = FakeTabRepository(
+            initialTabs = listOf(
+                com.raumanian.thirtysix.browser.domain.model.Tab(1, UrlConstants.HOME_PAGE_URL, "", 0, 0L, 2L),
+                com.raumanian.thirtysix.browser.domain.model.Tab(2, "https://real.example/", "R", 1, 0L, 1L),
+            ),
+        )
+        val repo = IncognitoTabRepositoryImpl(
+            cookieJarSnapshotManager = cookieManager,
+            tabRepository = withHome,
+            dispatchers = TestDispatcherProvider(),
+        )
+
+        repo.createTab(UrlConstants.HOME_PAGE_URL)
+
+        assertEquals(listOf("https://real.example"), cookieManager.lastCapturedOrigins)
     }
 
     private companion object {

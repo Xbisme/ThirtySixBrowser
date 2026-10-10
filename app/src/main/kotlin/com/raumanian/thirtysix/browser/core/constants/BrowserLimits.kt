@@ -138,4 +138,13 @@ object BrowserLimits {
      * polls zero times.
      */
     const val DOWNLOAD_STATUS_POLL_INTERVAL_MS: Long = 1_000L
+
+    /** Spec 019 FR-013 — at most this many shortcut cards on the Home page. */
+    const val HOME_SHORTCUT_LIMIT: Int = 8
+
+    /** Spec 019 FR-014 — at most this many "Recently visited" rows on the Home page. */
+    const val HOME_RECENT_LIMIT: Int = 5
+
+    /** Spec 019 FR-040 — a tab card swiped past this fraction of its width closes the tab. */
+    const val TAB_SWIPE_CLOSE_FRACTION: Float = 0.5f
 }

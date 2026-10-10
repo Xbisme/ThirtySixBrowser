@@ -28,7 +28,6 @@ internal class WebViewActionsHandle {
     var goForward: () -> Unit = {}
     var reload: () -> Unit = {}
     var stopLoading: () -> Unit = {}
-    var loadHome: () -> Unit = {}
 
     /**
      * Spec 009 — load an arbitrary URL (used by the address-bar omnibox submit
@@ -47,7 +46,6 @@ internal class WebViewActionsHandle {
         goForward = {}
         reload = {}
         stopLoading = {}
-        loadHome = {}
         loadUrl = {}
     }
 }

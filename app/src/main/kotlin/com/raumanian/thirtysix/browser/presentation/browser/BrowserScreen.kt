@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -41,6 +42,9 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTo
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
+import com.raumanian.thirtysix.browser.presentation.home.HomeCallbacks
+import com.raumanian.thirtysix.browser.presentation.home.HomePage
+import com.raumanian.thirtysix.browser.presentation.incognito.IncognitoPage
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
 
@@ -76,6 +80,7 @@ fun BrowserScreen(
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
     val addressFocus = remember { FocusRequester() }
+    val homeSearchFocus = remember { FocusRequester() }
     var topBarHeightPx by remember { mutableIntStateOf(0) }
     var bottomBarHeightPx by remember { mutableIntStateOf(0) }
     val chrome = rememberChromeScrollState(maxOffsetPx = topBarHeightPx.toFloat())
@@ -84,6 +89,7 @@ fun BrowserScreen(
     var quickSettingsUsed by remember { mutableStateOf(false) }
 
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
+    HomeBackHandlers(state = state, viewModel = viewModel)
     BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
     HubEventEffect(hubViewModel = hubViewModel, snackbarHostState = snackbarHostState)
 
@@ -117,34 +123,44 @@ fun BrowserScreen(
                 modifier = Modifier.fillMaxSize().padding(top = topInset, bottom = bottomInset),
             )
         }
-        BrowserTopBar(
-            state = state,
-            addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions),
-            onStarTapped = viewModel::onStarTapped,
-            onReloadOrStop = {
-                if (state.loadingState is LoadingState.Loading) {
-                    webViewActions.stopLoading()
-                    viewModel.onLoadStopped()
-                } else {
-                    webViewActions.reload()
-                }
-            },
-            progress = { progress.value },
-            focusRequester = addressFocus,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .onSizeChanged { topBarHeightPx = it.height }
-                .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
-        )
+        if (state.isHomeContent) {
+            HomeOverlay(
+                isIncognito = state.isIncognito,
+                callbacks = rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, navController),
+                searchFocus = homeSearchFocus,
+                bottomPadding = bottomInset,
+            )
+        }
+        if (!state.isHomeContent) {
+            BrowserTopBar(
+                state = state,
+                addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions),
+                onStarTapped = viewModel::onStarTapped,
+                onReloadOrStop = {
+                    if (state.loadingState is LoadingState.Loading) {
+                        webViewActions.stopLoading()
+                        viewModel.onLoadStopped()
+                    } else {
+                        webViewActions.reload()
+                    }
+                },
+                progress = { progress.value },
+                focusRequester = addressFocus,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .onSizeChanged { topBarHeightPx = it.height }
+                    .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
+            )
+        }
         BrowserBottomBar(
             tabCount = tabCount,
             isIncognito = state.isIncognito,
-            isHomeActive = false,
+            isHomeActive = state.isHomeContent,
             callbacks = BrowserBottomBarCallbacks(
-                onHome = { webViewActions.loadHome() },
+                onHome = viewModel::onHomePressed,
                 onSearch = {
                     chrome.show()
-                    addressFocus.requestFocus()
+                    if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
                 },
                 onNewTab = viewModel::onLongPressNewTab,
                 onTabs = { navController.navigate(AppDestination.Tabs.route) },
@@ -163,26 +179,16 @@ fun BrowserScreen(
     }
 
     if (hubOpen) {
-        HubSheet(
-            canGoBack = state.canGoBack,
-            canGoForward = state.canGoForward,
+        BrowserHub(
+            state = state,
+            hubViewModel = hubViewModel,
+            webViewActions = webViewActions,
+            navController = navController,
             onDismiss = { hubOpen = false },
-            hasActiveDownloadsFlow = hubViewModel.hasActiveDownloads,
-            callbacks = HubCallbacks(
-                onSettings = { navController.navigate(AppDestination.Settings.route) },
-                onBack = { webViewActions.goBack() },
-                onForward = { webViewActions.goForward() },
-                onDownloadsInProgress = { navController.navigate(AppDestination.Downloads.route) },
-                onPrivacy = { navController.navigate(AppDestination.Settings.route) },
-                onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
-                onDownloads = { navController.navigate(AppDestination.Downloads.route) },
-                onHistory = { navController.navigate(AppDestination.History.route) },
-                onBookmarks = { navController.navigate(AppDestination.Bookmarks.route) },
-                onQuickSetting = { setting ->
-                    quickSettingsUsed = true
-                    quickSettingRequest = setting
-                },
-            ),
+            onQuickSetting = { setting ->
+                quickSettingsUsed = true
+                quickSettingRequest = setting
+            },
         )
     }
     if (quickSettingsUsed) {
@@ -192,6 +198,55 @@ fun BrowserScreen(
             snackbarHostState = snackbarHostState,
         )
     }
+}
+
+/**
+ * Spec 019 FR-010 / FR-015 — the Home page in a normal tab, the incognito page in an incognito
+ * one. The WebView stays alive underneath (research R1).
+ */
+@Composable
+private fun HomeOverlay(
+    isIncognito: Boolean,
+    callbacks: HomeCallbacks,
+    searchFocus: FocusRequester,
+    bottomPadding: Dp,
+) {
+    if (isIncognito) {
+        IncognitoPage(bottomPadding = bottomPadding)
+    } else {
+        HomePage(callbacks = callbacks, searchFocus = searchFocus, bottomPadding = bottomPadding)
+    }
+}
+
+/** Spec 019 FR-030 — the hub sheet, wired to navigation, the WebView and the quick settings. */
+@Composable
+@Suppress("LongParameterList")
+private fun BrowserHub(
+    state: BrowserUiState,
+    hubViewModel: HubViewModel,
+    webViewActions: WebViewActionsHandle,
+    navController: NavHostController,
+    onDismiss: () -> Unit,
+    onQuickSetting: (QuickSetting) -> Unit,
+) {
+    HubSheet(
+        canGoBack = state.canGoBack,
+        canGoForward = state.canGoForward,
+        onDismiss = onDismiss,
+        hasActiveDownloadsFlow = hubViewModel.hasActiveDownloads,
+        callbacks = HubCallbacks(
+            onSettings = { navController.navigate(AppDestination.Settings.route) },
+            onBack = { webViewActions.goBack() },
+            onForward = { webViewActions.goForward() },
+            onDownloadsInProgress = { navController.navigate(AppDestination.Downloads.route) },
+            onPrivacy = { navController.navigate(AppDestination.Settings.route) },
+            onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
+            onDownloads = { navController.navigate(AppDestination.Downloads.route) },
+            onHistory = { navController.navigate(AppDestination.History.route) },
+            onBookmarks = { navController.navigate(AppDestination.Bookmarks.route) },
+            onQuickSetting = onQuickSetting,
+        ),
+    )
 }
 
 /**
@@ -214,6 +269,48 @@ private fun BrowserBackHandlers(
     PredictiveBackHandler(enabled = state.canGoBack && !state.isAddressBarFocused) { progress ->
         progress.collect { /* no-op — system renders preview on Android 14+ */ }
         webViewActions.goBack()
+    }
+}
+
+/**
+ * Spec 019 (data-model §2) — Back over the Home overlay returns to the page underneath; Back on
+ * a page opened from Home, with no page history left, returns to Home. Composed after
+ * [BrowserBackHandlers] so these take precedence when enabled.
+ */
+@Composable
+private fun HomeBackHandlers(state: BrowserUiState, viewModel: BrowserViewModel) {
+    BackHandler(enabled = state.homeOverlay) { viewModel.onHomeOverlayDismissed() }
+    BackHandler(
+        enabled = !state.canGoBack && state.cameFromHome && !state.isIncognito && !state.isHomeContent,
+    ) { viewModel.onBackWithoutHistory() }
+}
+
+/** Spec 019 contracts C1/C4 — what the Home page's search bar, cards and rows do. */
+@Composable
+private fun rememberHomeCallbacks(
+    viewModel: BrowserViewModel,
+    hubViewModel: HubViewModel,
+    webViewActions: WebViewActionsHandle,
+    navController: NavHostController,
+): HomeCallbacks {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    return remember(viewModel, hubViewModel, webViewActions, navController, keyboardController, focusManager) {
+        HomeCallbacks(
+            onSearchSubmit = { input ->
+                viewModel.onHomeSubmit(input) { url ->
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    webViewActions.loadUrl(url)
+                }
+            },
+            onOpenUrl = { url ->
+                viewModel.onNavigateFromHome()
+                webViewActions.loadUrl(url)
+            },
+            onSeeAllHistory = { navController.navigate(AppDestination.History.route) },
+            onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
+        )
     }
 }
 
@@ -302,7 +399,6 @@ private fun BrowserContent(
         androidx.compose.runtime.key(activeTabId) {
             BrowserWebView(
                 state = state,
-                homeUrl = viewModel.homeUrl,
                 actions = webViewActions,
                 callbacks = BrowserWebViewCallbacks(
                     onLoadStarted = viewModel::onLoadStarted,

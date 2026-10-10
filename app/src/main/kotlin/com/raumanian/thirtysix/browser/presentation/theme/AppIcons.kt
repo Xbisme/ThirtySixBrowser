@@ -22,7 +22,7 @@ object AppIcons {
 
     @DrawableRes val Bookmarks = R.drawable.ic_bookmarks
 
-    @DrawableRes val BrandMark = R.drawable.ic_brand_mark
+    @DrawableRes val BrandMark = R.drawable.ic_brand_mark_static
 
     @DrawableRes val Check = R.drawable.ic_check
 

@@ -31,6 +31,7 @@ import androidx.core.graphics.scale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 
 /**
  * Compose wrapper around [android.webkit.WebView] (Spec 007).
@@ -51,8 +52,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  * - [actions] `WebViewActionsHandle` populated inside the factory closure with
  *   thin wrappers around `WebView.goBack/goForward/reload/stopLoading/loadUrl`.
  *   Read by `NavigationBottomBar` click handlers + `PredictiveBackHandler`.
- * - [homeUrl] separate parameter from [state.currentUrl] so the Home affordance
- *   reloads a stable home URL even after the user has navigated elsewhere.
+ * - Spec 019 — the `homeUrl` parameter and `loadHome` action were removed: Home is now a
+ *   page drawn by the app over the WebView (research R1), never an address loaded into it.
  * - `WebViewClient.doUpdateVisitedHistory` override fires
  *   [callbacks.onCanGoBackChange] / [callbacks.onCanGoForwardChange] after
  *   every history-mutating commit, keeping `BrowserUiState.canGoBack` /
@@ -71,18 +72,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  *   After the system reclaimed the renderer, the page reloads straight away.
  * - The replacement starts with no back/forward history.
  */
-@Suppress("LongParameterList")
-// 6 params after Spec 009: state + homeUrl + actions + 2 callback bundles + modifier.
-// Spec 008's split of [BrowserWebViewCallbacks] (6 fields → 4) and the new
-// [BrowserNavigationCallbacks] (3 fields) was specifically structured to keep
-// each bundle's data-class constructor under detekt's `constructorThreshold = 7`.
-// Bundling the two callback objects further into a wrapper would defeat that
-// split (pushing the wrapper to 7 fields again) without semantic gain. The
-// 6th param here is intentional and tied to the spec design.
 @Composable
 internal fun BrowserWebView(
     state: BrowserUiState,
-    homeUrl: String,
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
@@ -126,7 +118,6 @@ internal fun BrowserWebView(
                 buildConfiguredWebView(
                     context = context,
                     state = state,
-                    homeUrl = homeUrl,
                     actions = actions,
                     callbacks = callbacks,
                     navigationCallbacks = navigationCallbacks,
@@ -161,7 +152,6 @@ internal fun BrowserWebView(
 private fun buildConfiguredWebView(
     context: android.content.Context,
     state: BrowserUiState,
-    homeUrl: String,
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
@@ -210,17 +200,23 @@ private fun buildConfiguredWebView(
     actions.goForward = { if (wv.canGoForward()) wv.goForward() }
     // A replacement built after a renderer crash has loaded nothing, and `reload()` on an
     // empty WebView does nothing — so Reload loads the tab's current address instead.
-    actions.reload = { if (wv.url == null) wv.loadUrl(host.currentUrl) else wv.reload() }
+    actions.reload = {
+        when {
+            wv.url != null -> wv.reload()
+            host.currentUrl != UrlConstants.HOME_PAGE_URL -> wv.loadUrl(host.currentUrl)
+        }
+    }
     actions.stopLoading = { wv.stopLoading() }
-    actions.loadHome = { wv.loadUrl(homeUrl) }
-    actions.loadUrl = { url -> wv.loadUrl(url) }
+    // Spec 019 R1 — the reserved Home address is never handed to the WebView.
+    actions.loadUrl = { url -> if (url != UrlConstants.HOME_PAGE_URL) wv.loadUrl(url) }
 
     // Spec 008 — conditional initial load. When state is seeded to Failed
     // (instrumented test pattern), skip the initial loadUrl so the test
     // assertion on the error UI is not overridden by a successful auto-load.
     // Renderer recovery — also skipped by the replacement for a crashed renderer, so a page
     // that crashes its renderer waits for Reload instead of crashing it again in a loop.
-    if (host.loadInitialUrl && state.loadingState !is LoadingState.Failed) {
+    val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
+    if (host.loadInitialUrl && state.loadingState !is LoadingState.Failed && !isHome) {
         wv.loadUrl(state.currentUrl)
     }
 }

@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.dao.inMemoryAppDatabase
@@ -45,6 +46,17 @@ class BookmarkRepositoryImplTest {
     }
 
     // ──────── Bookmark CRUD ────────
+
+    @Test
+    fun `observeRecentBookmarks returns the newest across folders`() = runTest {
+        // Spec 019 T058a — Home page "Saved" shortcuts.
+        repo.addBookmark(bookmark(url = "https://old.com", title = "Old", createdAt = 1L))
+        repo.addBookmark(bookmark(url = "https://new.com", title = "New", createdAt = 2L))
+        repo.observeRecentBookmarks(limit = 1).test {
+            assertEquals(listOf("https://new.com"), awaitItem().map { it.url })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 
     @Test
     fun `addBookmark returns Success with the new id`() = runTest {
