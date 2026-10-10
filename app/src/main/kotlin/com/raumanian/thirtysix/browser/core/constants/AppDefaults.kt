@@ -21,10 +21,11 @@ object AppDefaults {
     const val IS_ONBOARDING_COMPLETED: Boolean = false
 
     /**
-     * Spec 016 FR-009 — dynamic color stays on by default. It is already in effect for every
-     * Android 12+ user, so existing installs see no change (spec A11).
+     * Spec 016 FR-009 shipped dynamic color on by default. Spec 019 (owner decision 2026-10-10)
+     * turns the default OFF so new users see the ThirtySix violet; anyone who already chose a
+     * value keeps it, because only an unset key falls back to this default.
      */
-    const val DYNAMIC_COLOR_ENABLED: Boolean = true
+    const val DYNAMIC_COLOR_ENABLED: Boolean = false
 
     /** Spec 016 FR-020 — the window Spec 014 shipped as a fixed constant. */
     val HISTORY_RETENTION: HistoryRetention = HistoryRetention.Days90

@@ -91,13 +91,13 @@ class SettingsRepositoryImplTest {
         repository.observeSettings().test {
             awaitItem() // defaults
 
-            repository.setDynamicColorEnabled(false)
-            assertEquals(false, awaitItem().isDynamicColorEnabled)
+            repository.setDynamicColorEnabled(true)
+            assertEquals(true, awaitItem().isDynamicColorEnabled)
 
             repository.setHistoryRetention(HistoryRetention.Days180)
             val updated = awaitItem()
             assertEquals(HistoryRetention.Days180, updated.historyRetention)
-            assertEquals(false, updated.isDynamicColorEnabled)
+            assertEquals(true, updated.isDynamicColorEnabled)
 
             cancelAndConsumeRemainingEvents()
         }

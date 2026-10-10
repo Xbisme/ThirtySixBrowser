@@ -43,10 +43,11 @@ class SettingsScreenDynamicColorTest {
             }
         }
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).assertIsOn()
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).performClick()
-        composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { !repository.current.isDynamicColorEnabled }
-
+        // Spec 019 FR-005a — dynamic color now starts off, so the toggle turns it on.
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).assertIsOff()
+        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).performClick()
+        composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { repository.current.isDynamicColorEnabled }
+
+        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).assertIsOn()
     }
 }
