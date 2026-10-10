@@ -53,6 +53,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Закладки</string>
+    <string name="bookmarks_section_folders">Папки</string>
+    <string name="bookmarks_section_pages">Страницы</string>
     <string name="bookmarks_empty_title">Закладок пока нет</string>
     <string name="bookmarks_empty_body">Нажмите на значок сердца при просмотре страницы или используйте кнопку +, чтобы добавить.</string>
     <string name="bookmarks_action_back_to_parent_cd">К родительской папке</string>

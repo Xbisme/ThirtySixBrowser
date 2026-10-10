@@ -50,6 +50,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">북마크</string>
+    <string name="bookmarks_section_folders">폴더</string>
+    <string name="bookmarks_section_pages">페이지</string>
     <string name="bookmarks_empty_title">아직 북마크가 없습니다</string>
     <string name="bookmarks_empty_body">페이지를 보는 동안 하트 아이콘을 누르거나 + 버튼을 사용하여 추가하세요.</string>
     <string name="bookmarks_action_back_to_parent_cd">상위 폴더로</string>

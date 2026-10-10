@@ -50,6 +50,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">ブックマーク</string>
+    <string name="bookmarks_section_folders">フォルダ</string>
+    <string name="bookmarks_section_pages">ページ</string>
     <string name="bookmarks_empty_title">まだブックマークがありません</string>
     <string name="bookmarks_empty_body">ページを表示中にハートアイコンをタップするか、+ ボタンで追加してください。</string>
     <string name="bookmarks_action_back_to_parent_cd">親フォルダへ</string>

@@ -51,6 +51,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Lesezeichen</string>
+    <string name="bookmarks_section_folders">Ordner</string>
+    <string name="bookmarks_section_pages">Seiten</string>
     <string name="bookmarks_empty_title">Noch keine Lesezeichen</string>
     <string name="bookmarks_empty_body">Tippe beim Anzeigen einer Seite auf das Herz-Symbol oder verwende das +-Symbol, um eines hinzuzufügen.</string>
     <string name="bookmarks_action_back_to_parent_cd">Zum übergeordneten Ordner</string>

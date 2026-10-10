@@ -52,6 +52,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Favoris</string>
+    <string name="bookmarks_section_folders">Dossiers</string>
+    <string name="bookmarks_section_pages">Pages</string>
     <string name="bookmarks_empty_title">Aucun favori pour le moment</string>
     <string name="bookmarks_empty_body">Touchez l\'icône en forme de cœur pendant la consultation d\'une page, ou utilisez le bouton + pour en ajouter.</string>
     <string name="bookmarks_action_back_to_parent_cd">Vers le dossier parent</string>

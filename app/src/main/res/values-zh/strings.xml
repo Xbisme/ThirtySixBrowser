@@ -50,6 +50,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">书签</string>
+    <string name="bookmarks_section_folders">文件夹</string>
+    <string name="bookmarks_section_pages">网页</string>
     <string name="bookmarks_empty_title">尚无书签</string>
     <string name="bookmarks_empty_body">在浏览页面时点击心形图标，或使用 + 按钮来添加。</string>
     <string name="bookmarks_action_back_to_parent_cd">返回上级文件夹</string>

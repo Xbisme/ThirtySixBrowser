@@ -2,25 +2,17 @@
 
 package com.raumanian.thirtysix.browser.presentation.bookmarks.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.raumanian.thirtysix.browser.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.presentation.components.ListRow
+import com.raumanian.thirtysix.browser.presentation.components.ListRowLetter
 import java.net.URI
 
 /**
- * Spec 013 — leading icon `Icons.Filled.FavoriteBorder` (heart-outline) for
- * "saved" affordance — `material-icons-core` lacks `Bookmark` so the heart
- * pair stands in. Tinted `MaterialTheme.colorScheme.primary`.
+ * Spec 013 — a bookmark row; Spec 019 — an open [ListRow] led by the host's first letter,
+ * hostname as the secondary line. Tap opens, long-press opens the action sheet.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BookmarkRow(
     bookmark: Bookmark,
@@ -28,19 +20,22 @@ fun BookmarkRow(
     onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ListItem(
-        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = onLongPress),
-        leadingContent = {
-            Icon(
-                imageVector = Icons.Filled.FavoriteBorder,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        },
-        headlineContent = { Text(bookmark.title) },
-        supportingContent = { Text(extractHostname(bookmark.url)) },
+    val host = extractHostname(bookmark.url)
+    ListRow(
+        title = bookmark.title,
+        subtitle = host,
+        leading = { ListRowLetter(letter = hostLetter(host)) },
+        onClick = onClick,
+        onLongClick = onLongPress,
+        modifier = modifier,
     )
 }
 
 internal fun extractHostname(url: String): String =
     runCatching { URI(url).host ?: url }.getOrDefault(url)
+
+/** First letter of [host] without a leading `www.`, upper-cased. */
+internal fun hostLetter(host: String): String =
+    host.removePrefix(WWW_PREFIX).take(1).uppercase()
+
+private const val WWW_PREFIX = "www."

@@ -82,6 +82,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2: bookmarks screen list, breadcrumb, empty state. -->
     <string name="bookmarks_screen_title">Bookmarks</string>
+    <string name="bookmarks_section_folders">Folders</string>
+    <string name="bookmarks_section_pages">Pages</string>
     <string name="bookmarks_empty_title">No bookmarks yet</string>
     <string name="bookmarks_empty_body">Tap the heart icon while viewing a page, or use the + button to add one.</string>
     <string name="bookmarks_action_back_to_parent_cd">Up to parent folder</string>

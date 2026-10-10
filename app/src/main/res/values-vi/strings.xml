@@ -50,6 +50,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Dấu trang</string>
+    <string name="bookmarks_section_folders">Thư mục</string>
+    <string name="bookmarks_section_pages">Trang</string>
     <string name="bookmarks_empty_title">Chưa có dấu trang</string>
     <string name="bookmarks_empty_body">Nhấn biểu tượng trái tim khi xem trang, hoặc dùng nút + để thêm.</string>
     <string name="bookmarks_action_back_to_parent_cd">Lên thư mục cha</string>
