@@ -124,7 +124,7 @@ class BrowserViewModelStarToggleTest {
     }
 
     private fun newViewModel(
-        url: String = UrlConstants.DEFAULT_HOME_URL,
+        url: String = SAMPLE_PAGE_URL,
         bookmarkRepo: FakeBookmarkRepository = FakeBookmarkRepository(),
     ): BrowserViewModel {
         val tabRepository = FakeTabRepository(homeUrl = url)
@@ -183,3 +183,6 @@ class BrowserViewModelStarToggleTest {
         }
     }
 }
+
+/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"

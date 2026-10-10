@@ -2,26 +2,26 @@
 
 package com.raumanian.thirtysix.browser.presentation.downloads.components
 
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.presentation.components.ConfirmDialog
 
 internal const val TEST_TAG_DELETE_FILE_DIALOG: String = "download_delete_file_dialog"
-internal const val TEST_TAG_DELETE_FILE_CONFIRM: String = "download_delete_file_confirm"
 
 /**
- * Spec 015 FR-032 — deleting a file is irreversible, so it always goes through this.
+ * Spec 015 FR-032 · Spec 019 FR-045 — deleting a file is irreversible, so it always goes
+ * through this destructive [ConfirmDialog]: the body names the file (what is lost), and the
+ * full-width action names the action above Cancel.
  *
- * The body names the file, because "delete this file?" with three similarly-named downloads
- * on screen is not a question a user can answer confidently. Mirrors Spec 014's
- * `ClearAllHistoryConfirmDialog`, including the destructive tint on the confirm action.
+ * The body names the file because "delete this file?" with three similarly-named downloads on
+ * screen is not a question a user can answer confidently.
+ *
+ * The confirm button is found in tests by its label inside [TEST_TAG_DELETE_FILE_DIALOG]:
+ * the shared [ConfirmDialog] exposes no modifier for its action button.
  */
 @Composable
 fun DeleteDownloadedFileConfirmDialog(
@@ -30,23 +30,13 @@ fun DeleteDownloadedFileConfirmDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
+    ConfirmDialog(
+        title = stringResource(R.string.downloads_delete_dialog_title),
+        body = stringResource(R.string.downloads_delete_dialog_body, record.fileName),
+        confirmLabel = stringResource(R.string.downloads_delete_dialog_confirm),
+        cancelLabel = stringResource(R.string.downloads_delete_dialog_cancel),
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
         modifier = modifier.testTag(TEST_TAG_DELETE_FILE_DIALOG),
-        title = { Text(stringResource(R.string.downloads_delete_dialog_title)) },
-        text = { Text(stringResource(R.string.downloads_delete_dialog_body, record.fileName)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm, modifier = Modifier.testTag(TEST_TAG_DELETE_FILE_CONFIRM)) {
-                Text(
-                    text = stringResource(R.string.downloads_delete_dialog_confirm),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.downloads_delete_dialog_cancel))
-            }
-        },
     )
 }

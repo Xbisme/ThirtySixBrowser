@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import javax.inject.Inject
 
@@ -19,7 +20,9 @@ class RecordHistoryEntryUseCase @Inject constructor(
     private val repository: HistoryRepository,
 ) {
     suspend operator fun invoke(url: String, title: String, isIncognito: Boolean): Long {
-        if (isIncognito) return SUPPRESSED
+        // Spec 019 R1 — the reserved Home address is never loaded, so it never reaches here;
+        // the second condition keeps it out of history even if that ever changes.
+        if (isIncognito || url == UrlConstants.HOME_PAGE_URL) return SUPPRESSED
         return repository.recordVisit(url, title, System.currentTimeMillis())
     }
 

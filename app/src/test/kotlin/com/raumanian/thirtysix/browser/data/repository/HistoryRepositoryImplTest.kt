@@ -45,6 +45,18 @@ class HistoryRepositoryImplTest {
     }
 
     @Test
+    fun `observeRecent maps the newest rows to domain entries`() = runTest {
+        // Spec 019 T058a — the Room override of the interface default.
+        repo.recordVisit("https://a.example", "A", 1000L)
+        repo.recordVisit("https://b.example", "B", 2000L)
+        repo.recordVisit("https://c.example", "C", 3000L)
+        repo.observeRecent(limit = 2).test {
+            assertEquals(listOf("https://c.example", "https://b.example"), awaitItem().map { it.url })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `observeAll emits in reverse chronological order`() = runTest {
         repo.recordVisit("https://a.example", "A", 1000L)
         repo.recordVisit("https://b.example", "B", 2000L)

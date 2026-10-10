@@ -50,16 +50,18 @@ Constitution
                     ├── 017 splash-screen
                     └── 018 onboarding-flow
                           │
-                          └── Phase 5 (Optional)
+                          └── Phase 5
                                 │
-                                └── 019 tracker-blocker-hostlist
+                                ├── 019 ui-redesign (design system trước, rồi mới specify)
+                                │
+                                └── 020 tracker-blocker-hostlist (Optional)
 ```
 
 ## Spec List (v1.0)
 
 | # | Tên | User Story chính | Test được gì? | Dependencies | Status |
 |---|-----|-----------------|---------------|-------------|--------|
-| — | Constitution | Nguyên tắc nền tảng v1.3.0 (§II permissions khớp kết quả Spec 015) | — | — | ✅ Done 2026-05-01 · amended 2026-09-11 |
+| — | Constitution | Nguyên tắc nền tảng v1.4.0 (§V Compose Phase Discipline; §X Phase 5 = 019 redesign + 020 tracker) | — | — | ✅ Done 2026-05-01 · amended 2026-10-10 |
 | 001 | `project-init-build-config` | Setup Gradle Kotlin DSL + version catalog + 16KB-ready | `./gradlew assembleDebug` pass, lint clean, `.so` align 16KB | Constitution | ✅ Done 2026-05-01 |
 | 002 | `clean-architecture-skeleton-di` | Module structure + Hilt + base classes | App build + Hilt graph valid | 001 | ✅ Done 2026-05-01 |
 | 003 | `theme-typography-darkmode` | Material3 + light/dark/system | Toggle theme → app re-compose đúng | 002 | ✅ Done 2026-05-01 |
@@ -78,7 +80,16 @@ Constitution
 | 016 | `settings-screen` | Theme/language/search engine/clear data | Đổi setting → áp dụng ngay + persist | 003, 004, 006 | ✅ **Done 2026-09-12 — PR #18 đã merge vào `main`** (merge commit `3083941`, CI xanh), **112/113 tasks**. Theme · dynamic color · ngôn ngữ app qua AndroidX per-app API (`MainActivity` → `AppCompatActivity`) · search engine · retention 7/30/90/180 ngày · clear browsing data kiểu Chrome (androidx.webkit, nhánh Complete/fallback) · About. testDebugUnitTest ✅ 557/557 · instrumented ✅ 109/109 (API 29 + AVD 16 KB API 36) · lint/detekt/ktlint ✅ · 16KB ✅ · APK 3,122,115 B (≤ 3,258,091 B) · appcompat **1.8.0** + webkit **1.17.0**, zero `.so`. Gate G1–G10 và G12 đạt, gồm Constitution Gate 8 trên AVD 16 KB; G11 đạt phần 8 locale, **TalkBack pass DEFERRED** (cần người thật). Sửa thêm: mất renderer không còn làm sập app; `HistorySeeder` hết ANR. |
 | 017 | `splash-screen` | Splash API + branding | Cold start → splash → main | 002 | ✅ **Done 2026-09-15 — PR #20 merged (`cca5c0c`), 35/35 tasks.** `androidx.core:core-splashscreen` **1.2.0** (zero `.so`, verify bằng cách giải nén AAR). Thay **toàn bộ** artwork template Android Studio bằng mark ThirtySix (đĩa gradient + "36" tô đặc): vector tĩnh, vector động `drawable-v31/`, monochrome, 5 bitmap density, xoá hẳn biến thể round. testDebugUnitTest ✅ 557/557 · instrumented ✅ 109/109 trên AVD 16 KB API 36 · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero mới · APK **3,126,212 B** (+4,097 B, chỉ dùng 2% ngân sách 204,800 B) · cold start **−1,4%** (575 ms vs 583 ms). ⚠️ **Phát hiện quan trọng: theme splash KHÔNG được dùng parent AppCompat** — thư viện kế thừa `Theme.DeviceDefault` theo thiết kế; an toàn đến từ `postSplashScreenTheme` + thứ tự gọi `installSplashScreen()` trước `super.onCreate()` (research.md R3, chứng minh bằng bytecode). Còn lại: G3 + 3 phần gate deferred (screenrecord lỗi encoder trên AVD; TalkBack không script được) và PR. |
 | 018 | `onboarding-flow` | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine | Lần đầu mở → onboarding → main; Skip mọi slide; đổi ngôn ngữ vẫn giữ đúng slide | 003, 004, 006, 017 | ✅ **Done 2026-09-15 — PR #24 merged (`492e4f3`), 41/41 tasks.** Không thêm dependency; Room vẫn v2. unit ✅ 579/579 (+22) · instrumented ✅ 109/109 trên AVD 16 KB · lint/detekt/ktlint ✅ · 16KB ✅ · APK **3,134,976 B** (+8,764 B, dùng 4,3% ngân sách) · **G1–G12 đều PASS**, gồm 4 gate blocking. ⚠️ Hai bẫy kỹ thuật: đọc cờ từ settings *flow* trong `setContent` sẽ đưa **mọi** lần mở vào onboarding (vì `NavHost` chốt `startDestination` ở lần compose đầu); và giữ chỉ số slide trong field ViewModel thường thì **sống qua xoay, chết khi đổi ngôn ngữ**. Còn lại: screen-reader pass (cần người) + PR. |
-| 019 | `tracker-blocker-hostlist` | (Optional) Block request via host list | Toggle on → request đến host trong list bị block | 011–018 | ⬜ Optional |
+| 019 | `ui-redesign` | Đập đi xây lại toàn bộ giao diện theo [design system ThirtySix](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (tím thay teal) + Compose Phase Discipline (Constitution v1.4.0 §V) | Mọi màn theo design system; chrome không recompose theo từng frame khi cuộn/tải/kéo | 001–018, design đã duyệt | 🟢 Đã implement 2026-10-10 trên branch `019-ui-redesign` (US1–US6 + polish); chờ PR — còn hạng mục cần người: Layout Inspector, TalkBack, đo trên phần cứng |
+| 020 | `tracker-blocker-hostlist` | (Optional) Block request via host list | Toggle on → request đến host trong list bị block | 011–019 | ⬜ Optional |
+
+## Ý tưởng cho bản sau (chưa có spec)
+
+> Constitution v1.4.0 §X: tính năng mới nảy ra khi thiết kế được ghi ở đây, **không** gộp vào spec đang làm. Muốn làm thì phải thiết kế trong [design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) và được duyệt trước khi `/speckit-specify`.
+
+| Ý tưởng | Nguồn | Ghi chú |
+|---|---|---|
+| **Pin a site** — ghim trang lên dải shortcut card ở Home | Thiết kế Spec 019, 2026-10-10 | Thẻ "Pin a site" đã có trong component ShortcutCard nhưng ẩn cho đến khi có spec; cần bảng lưu trang ghim (Room migration) |
 
 ## Thứ tự Implement (Recommended)
 
@@ -89,7 +100,8 @@ Constitution → 001 → 002
              → 011 → 012
              → 013, 014, 015 (parallel sau 007)
              → 016, 017, 018
-             → [019 optional]
+             → 019 ui-redesign
+             → [020 optional]
 ```
 
 ### Test flow tích lũy
@@ -113,7 +125,8 @@ Sau 015: Download file qua DownloadManager
 Sau 016: Settings screen full options
 Sau 017: Branded splash screen
 Sau 018: Onboarding lần đầu mở app
-Sau 019 (optional): Tracker blocker toggle hoạt động
+Sau 019: Giao diện mới theo design system, đạt Compose Phase Discipline
+Sau 020 (optional): Tracker blocker toggle hoạt động
 ```
 
 ## Quy ước đặt tên branch + spec folder

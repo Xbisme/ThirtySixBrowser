@@ -35,4 +35,10 @@ internal data class BrowserNavigationCallbacks(
      * unbounded URL count; tab-id-keyed is bounded by `MAX_TABS`).
      */
     val onScreenshotReady: (Bitmap) -> Unit,
+    /**
+     * Spec 019 (contracts C3) — vertical scroll delta in px from `View.setOnScrollChangeListener`;
+     * positive when the page moved up (user scrolled down). Drives `ChromeScrollState`, which is
+     * read only in layout/draw lambdas, so a scroll never recomposes the browser.
+     */
+    val onScrollDelta: (Float) -> Unit = {},
 )

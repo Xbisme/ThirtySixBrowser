@@ -7,7 +7,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
@@ -91,13 +90,13 @@ class BrowserScreenOfflineErrorTest {
             val observeTabs = ObserveTabsUseCase(noopTabRepo)
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                defaultHomeUrl = UrlConstants.DEFAULT_HOME_URL,
+                defaultHomeUrl = SAMPLE_PAGE_URL,
                 buildSearchUrl = BuildSearchUrlUseCase(OfflineErrorNoopSearchEngineRepository),
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 observeTabs = observeTabs,
                 observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
                 updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
-                createTab = CreateTabUseCase(noopTabRepo, UrlConstants.DEFAULT_HOME_URL),
+                createTab = CreateTabUseCase(noopTabRepo, SAMPLE_PAGE_URL),
                 faviconCache = OfflineErrorNoopFaviconCache,
                 screenshotCache = OfflineErrorNoopScreenshotCache,
                 isUrlBookmarked = com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase(OfflineErrorNoopBookmarkRepository),
@@ -111,7 +110,7 @@ class BrowserScreenOfflineErrorTest {
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(OfflineErrorNoopHistoryRepository),
                 startDownload = instrumentedNoOpStartDownloadUseCase(),
             ).apply {
-                onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
+                onLoadStarted(SAMPLE_PAGE_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)
             }
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
@@ -204,6 +203,8 @@ private object OfflineErrorNoopBookmarkRepository :
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override fun observeBookmarksByUrl(url: String) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+    override fun observeRecentBookmarks(limit: Int) =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override fun searchBookmarks(query: String) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override suspend fun getBookmark(id: Long) = null
@@ -253,3 +254,6 @@ private object OfflineErrorNoopHistoryRepository :
     override suspend fun clearAll(): Int = 0
     override suspend fun count(): Int = 0
 }
+
+/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"

@@ -2,11 +2,6 @@
 
 package com.raumanian.thirtysix.browser.presentation.history.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -14,15 +9,15 @@ import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.DateFormats
 import com.raumanian.thirtysix.browser.domain.model.HistoryDayBucket
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.components.SectionHeader
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
  * Spec 014 FR-008 / FR-029 — section header rendered above each [HistoryDayBucket]
- * group. Discrete buckets render localized strings; [HistoryDayBucket.OnDate] uses
- * `DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)` against the current
- * configuration locale so the format follows user conventions.
+ * group, drawn as the shared [SectionHeader] (Spec 019). Discrete buckets render localized
+ * strings; [HistoryDayBucket.OnDate] uses `DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)`
+ * against the current configuration locale so the format follows user conventions.
  */
 @Composable
 fun HistoryDayHeader(
@@ -42,13 +37,5 @@ fun HistoryDayHeader(
                 .format(bucket.date)
         }
     }
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-    )
+    SectionHeader(text = label, modifier = modifier)
 }

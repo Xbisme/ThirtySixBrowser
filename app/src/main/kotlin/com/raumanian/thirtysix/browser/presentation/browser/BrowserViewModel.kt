@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
@@ -99,6 +100,15 @@ class BrowserViewModel @Inject constructor(
 
     val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
 
+    private val _loadProgress = MutableStateFlow(0f)
+
+    /**
+     * Spec 019 — page-load progress in `[0f, 1f]`, deliberately NOT part of [uiState]
+     * (research R8, contracts C1). A progress tick emits here and never produces a new
+     * [BrowserUiState]; the UI reads it only inside the progress line's draw phase.
+     */
+    val loadProgress: StateFlow<Float> = _loadProgress.asStateFlow()
+
     private val activeTabFlow: StateFlow<Tab?> = observeActiveTab()
         .stateIn(
             scope = viewModelScope,
@@ -144,12 +154,6 @@ class BrowserViewModel @Inject constructor(
 
     /** URL that [lastRecordedHistoryId] belongs to — guards against patching a stale row. */
     private var lastRecordedHistoryUrl: String? = null
-
-    /**
-     * Spec 008 — exposed for the Home affordance + `WebViewActionsHandle.loadHome`
-     * so the UI layer doesn't need its own Hilt injection of the URL constant.
-     */
-    val homeUrl: String get() = defaultHomeUrl
 
     init {
         // Seed currentUrl from the active tab when present; falls back to
@@ -289,8 +293,9 @@ class BrowserViewModel @Inject constructor(
         // both fall back to the hostname (FR-009), and [onTitleReceived] patches the
         // real title in as soon as the page announces one.
         currentTitleCache.value = ""
+        _loadProgress.value = 0f
         _uiState.update {
-            it.copy(loadingState = LoadingState.Loading(progress = 0f))
+            it.copy(loadingState = LoadingState.Loading)
         }
     }
 
@@ -298,18 +303,30 @@ class BrowserViewModel @Inject constructor(
      * Called from `BrowserChromeClient.onProgressChanged`. [newProgress] is
      * 0..100 from WebView; clamped defensively. Progress 100 transitions to
      * [LoadingState.Loaded] (idempotent with [onLoadFinished]).
+     *
+     * Spec 019 — the fraction goes to [loadProgress]. [uiState] changes only when the
+     * loading state itself changes (entering Loading, reaching Loaded), so a run of ticks
+     * during one load produces no [BrowserUiState] emissions at all.
      */
     fun onProgressChanged(newProgress: Int) {
         val clamped = newProgress.coerceIn(0, MAX_PROGRESS)
-        _uiState.update { current ->
-            if (clamped >= MAX_PROGRESS) {
+        if (clamped >= MAX_PROGRESS) {
+            _loadProgress.value = 0f
+            _uiState.update { current ->
                 if (current.loadingState is LoadingState.Loaded) {
                     current
                 } else {
                     current.copy(loadingState = LoadingState.Loaded)
                 }
-            } else {
-                current.copy(loadingState = LoadingState.Loading(progress = clamped / MAX_PROGRESS_F))
+            }
+        } else {
+            _loadProgress.value = clamped / MAX_PROGRESS_F
+            _uiState.update { current ->
+                if (current.loadingState is LoadingState.Loading) {
+                    current
+                } else {
+                    current.copy(loadingState = LoadingState.Loading)
+                }
             }
         }
     }
@@ -328,6 +345,7 @@ class BrowserViewModel @Inject constructor(
         // consumed; a genuine revisit re-arms it through [onLoadStarted].
         val shouldRecord = pendingHistoryUrl != null
         pendingHistoryUrl = null
+        _loadProgress.value = 0f
         _uiState.update { current ->
             if (current.loadingState is LoadingState.Loaded && current.currentUrl == url) {
                 current
@@ -357,6 +375,7 @@ class BrowserViewModel @Inject constructor(
         // Spec 014 FR-003 — a main-frame failure must never reach history, even though
         // the platform still delivers `onPageFinished` for the error page afterwards.
         pendingHistoryUrl = null
+        _loadProgress.value = 0f
         _uiState.update { it.copy(loadingState = LoadingState.Failed(reason)) }
     }
 
@@ -385,6 +404,7 @@ class BrowserViewModel @Inject constructor(
      * through unchanged.
      */
     fun onLoadStopped() {
+        _loadProgress.value = 0f
         _uiState.update { current ->
             if (current.loadingState is LoadingState.Loading) {
                 current.copy(loadingState = LoadingState.Loaded)
@@ -423,9 +443,53 @@ class BrowserViewModel @Inject constructor(
      * coroutine after the use case resolves the engine + encodes the query.
      * The URL branch (no settings read needed) stays fully synchronous.
      */
-    fun onAddressBarSubmit(loadUrl: (String) -> Unit): Boolean {
-        val raw = _uiState.value.addressBarText
-        return when (val classified = classifyAddressBarInput(raw)) {
+    fun onAddressBarSubmit(loadUrl: (String) -> Unit): Boolean = submit(_uiState.value.addressBarText, loadUrl)
+
+    // ---------- Spec 019 — Home page inside a tab (research R1, contracts C1) ----------
+
+    /** FR-010 — Home on a loaded page shows the Home page over it; on Home it does nothing. */
+    fun onHomePressed() {
+        _uiState.update { if (it.currentUrl == UrlConstants.HOME_PAGE_URL) it else it.copy(homeOverlay = true) }
+    }
+
+    /** Back while the Home page covers a loaded page returns to that page. */
+    fun onHomeOverlayDismissed() {
+        _uiState.update { it.copy(homeOverlay = false) }
+    }
+
+    /**
+     * FR-012 — the Home search bar submits exactly as the address bar does (same classifier,
+     * same engine), then remembers that this navigation started on Home.
+     */
+    fun onHomeSubmit(input: String, loadUrl: (String) -> Unit): Boolean {
+        val handled = submit(input, loadUrl)
+        if (handled) onNavigateFromHome()
+        return handled
+    }
+
+    /** A Saved or Recent shortcut, or a recent row, opened from Home in this tab. */
+    fun onNavigateFromHome() {
+        _uiState.update { it.copy(homeOverlay = false, cameFromHome = true) }
+    }
+
+    /**
+     * Back when the WebView has no history. Returns `true` and puts the tab back on the Home
+     * page when the page was opened from Home in a normal tab; otherwise `false` and the
+     * system handles Back as before (Spec 008).
+     */
+    fun onBackWithoutHistory(): Boolean {
+        val state = _uiState.value
+        if (!state.cameFromHome || state.isIncognito) return false
+        currentTitleCache.value = ""
+        _uiState.update {
+            it.copy(currentUrl = UrlConstants.HOME_PAGE_URL, cameFromHome = false, homeOverlay = false)
+        }
+        persistActiveTabState(UrlConstants.HOME_PAGE_URL)
+        return true
+    }
+
+    private fun submit(raw: String, loadUrl: (String) -> Unit): Boolean =
+        when (val classified = classifyAddressBarInput(raw)) {
             AddressBarSubmitResult.Empty -> false
             is AddressBarSubmitResult.Url -> {
                 loadUrl(classified.target)
@@ -439,7 +503,6 @@ class BrowserViewModel @Inject constructor(
                 true
             }
         }
-    }
 
     /** Empty the address-bar text while preserving focus (FR-021). */
     fun onAddressBarClear() {

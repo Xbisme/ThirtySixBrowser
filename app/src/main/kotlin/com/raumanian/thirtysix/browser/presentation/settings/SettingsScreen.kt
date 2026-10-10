@@ -8,14 +8,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -24,6 +28,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.presentation.settings.components.AboutSection
 import com.raumanian.thirtysix.browser.presentation.settings.components.AppLanguageChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.ClearBrowsingDataDialog
@@ -31,6 +37,7 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.ConfirmS
 import com.raumanian.thirtysix.browser.presentation.settings.components.HistoryRetentionChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.SearchEngineChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsActionRow
+import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsIconTone
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSectionHeader
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSwitchRow
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
@@ -40,14 +47,16 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.appLangu
 import com.raumanian.thirtysix.browser.presentation.settings.components.historyRetentionLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import kotlinx.coroutines.delay
 
 /**
  * Spec 016 — the Settings screen.
  *
- * Replaces the Spec 002 placeholder. One scrolling list in five sections — Appearance,
- * Language, Search, Privacy, About (FR-002) — with each user story adding its rows under its
- * section and its dialog to [SettingsDialogHost]. Back, from the top bar or the system,
- * returns to the browser.
+ * Replaces the Spec 002 placeholder. One scrolling list under a large title, in four
+ * hairline-separated groups — Appearance, Language and search, Privacy, About (Spec 019
+ * FR-044) — each row leading with an icon in its hub tile's colour. Dialogs live in
+ * [SettingsDialogHost]. Back, from the top bar or the system, returns to the browser.
  */
 @Composable
 fun SettingsScreen(
@@ -68,6 +77,7 @@ fun SettingsScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = { SettingsTopBar(onBackClick = navigateBack) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
@@ -78,8 +88,7 @@ fun SettingsScreen(
                 .testTag(TEST_TAG_SETTINGS_LIST),
         ) {
             appearanceSection(state = state, viewModel = viewModel)
-            languageSection(state = state, viewModel = viewModel)
-            searchSection(state = state, viewModel = viewModel)
+            languageAndSearchSection(state = state, viewModel = viewModel)
             privacySection(state = state, viewModel = viewModel)
             aboutSection(state = state)
         }
@@ -88,27 +97,33 @@ fun SettingsScreen(
     SettingsDialogHost(state = state, viewModel = viewModel)
 }
 
-private fun LazyListScope.sectionHeader(key: String, @StringRes titleRes: Int) {
-    item(key = key) { SettingsSectionHeader(title = stringResource(titleRes)) }
+private fun LazyListScope.sectionHeader(key: String, @StringRes titleRes: Int, showDivider: Boolean = true) {
+    item(key = key, contentType = CONTENT_TYPE_HEADER) {
+        SettingsSectionHeader(title = stringResource(titleRes), showDivider = showDivider)
+    }
 }
 
 private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: SettingsViewModel) {
-    sectionHeader(key = KEY_SECTION_APPEARANCE, titleRes = R.string.settings_section_appearance)
-    item(key = KEY_ROW_THEME) {
+    sectionHeader(key = KEY_SECTION_APPEARANCE, titleRes = R.string.settings_section_appearance, showDivider = false)
+    item(key = KEY_ROW_THEME, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_theme_title),
             value = themeModeLabel(state.themeMode),
+            icon = AppIcons.ContrastFilled,
+            tone = SettingsIconTone.Sky,
             onClick = viewModel::onThemeRowClick,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_THEME_ROW),
         )
     }
     // FR-010 — dynamic color does not exist below Android 12, so neither does its control.
     if (state.isDynamicColorSupported) {
-        item(key = KEY_ROW_DYNAMIC_COLOR) {
+        item(key = KEY_ROW_DYNAMIC_COLOR, contentType = CONTENT_TYPE_SWITCH_ROW) {
             SettingsSwitchRow(
                 title = stringResource(R.string.settings_dynamic_color_title),
                 summary = stringResource(R.string.settings_dynamic_color_summary),
                 checked = state.isDynamicColorEnabled,
+                icon = AppIcons.PaletteFilled,
+                tone = SettingsIconTone.Primary,
                 onCheckedChange = viewModel::onDynamicColorToggled,
                 modifier = Modifier.testTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW),
             )
@@ -116,24 +131,25 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
     }
 }
 
-private fun LazyListScope.languageSection(state: SettingsUiState, viewModel: SettingsViewModel) {
-    sectionHeader(key = KEY_SECTION_LANGUAGE, titleRes = R.string.settings_section_language)
-    item(key = KEY_ROW_LANGUAGE) {
+/** Spec 019 FR-044 — language and search engine share one group. */
+private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, viewModel: SettingsViewModel) {
+    sectionHeader(key = KEY_SECTION_LANGUAGE_AND_SEARCH, titleRes = R.string.settings_section_language_and_search)
+    item(key = KEY_ROW_LANGUAGE, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_language_title),
             value = appLanguageLabel(state.appLanguage),
+            icon = AppIcons.TranslateFilled,
+            tone = SettingsIconTone.Sun,
             onClick = viewModel::onLanguageRowClick,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_LANGUAGE_ROW),
         )
     }
-}
-
-private fun LazyListScope.searchSection(state: SettingsUiState, viewModel: SettingsViewModel) {
-    sectionHeader(key = KEY_SECTION_SEARCH, titleRes = R.string.settings_section_search)
-    item(key = KEY_ROW_SEARCH_ENGINE) {
+    item(key = KEY_ROW_SEARCH_ENGINE, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_search_engine_title),
             value = searchEngineLabel(state.searchEngine),
+            icon = AppIcons.SearchEngineFilled,
+            tone = SettingsIconTone.Mint,
             onClick = viewModel::onSearchEngineRowClick,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW),
         )
@@ -142,17 +158,21 @@ private fun LazyListScope.searchSection(state: SettingsUiState, viewModel: Setti
 
 private fun LazyListScope.privacySection(state: SettingsUiState, viewModel: SettingsViewModel) {
     sectionHeader(key = KEY_SECTION_PRIVACY, titleRes = R.string.settings_section_privacy)
-    item(key = KEY_ROW_RETENTION) {
+    item(key = KEY_ROW_RETENTION, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_history_retention_title),
             value = historyRetentionLabel(state.historyRetention),
+            icon = AppIcons.ScheduleFilled,
+            tone = SettingsIconTone.Primary,
             onClick = viewModel::onRetentionRowClick,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_RETENTION_ROW),
         )
     }
-    item(key = KEY_ROW_CLEAR_BROWSING_DATA) {
+    item(key = KEY_ROW_CLEAR_BROWSING_DATA, contentType = CONTENT_TYPE_ACTION_ROW) {
         SettingsActionRow(
             title = stringResource(R.string.settings_clear_browsing_data_title),
+            icon = AppIcons.MopFilled,
+            tone = SettingsIconTone.Peach,
             onClick = viewModel::onClearBrowsingDataRowClick,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_CLEAR_ROW),
         )
@@ -161,7 +181,7 @@ private fun LazyListScope.privacySection(state: SettingsUiState, viewModel: Sett
 
 private fun LazyListScope.aboutSection(state: SettingsUiState) {
     sectionHeader(key = KEY_SECTION_ABOUT, titleRes = R.string.settings_section_about)
-    item(key = KEY_ROW_ABOUT) {
+    item(key = KEY_ROW_ABOUT, contentType = CONTENT_TYPE_ABOUT) {
         AboutSection(
             appVersionName = state.appVersionName,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT),
@@ -169,9 +189,43 @@ private fun LazyListScope.aboutSection(state: SettingsUiState) {
     }
 }
 
+/**
+ * Spec 019 — keeps the language chooser on screen until the new configuration arrives, then
+ * closes it in that same frame, so the user sees one change: chooser → screen in the new
+ * language. The configuration is read in composition on purpose — it changes once per choice.
+ */
+@Composable
+private fun LanguageChooserHost(
+    selected: AppLanguage,
+    onSelect: (AppLanguage) -> Unit,
+    onApplied: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val locales = LocalConfiguration.current.locales
+    val localesWhenOpened = remember { locales }
+    var picked by remember { mutableStateOf(false) }
+    LaunchedEffect(locales, picked) {
+        if (picked && locales != localesWhenOpened) onApplied()
+    }
+    LaunchedEffect(picked) {
+        if (picked) {
+            delay(BrowserLimits.LANGUAGE_APPLY_TIMEOUT_MS)
+            onApplied()
+        }
+    }
+    AppLanguageChooserDialog(
+        selected = selected,
+        onSelect = { language ->
+            picked = true
+            onSelect(language)
+        },
+        onDismiss = onDismiss,
+    )
+}
+
 /** Renders whichever dialog [SettingsUiState.dialog] names — at most one at a time. */
 @Composable
-private fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewModel) {
+internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewModel) {
     when (val dialog = state.dialog) {
         SettingsDialog.ThemeChooser -> ThemeModeChooserDialog(
             selected = state.themeMode,
@@ -183,9 +237,10 @@ private fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewMo
             onSelect = viewModel::onSearchEngineSelected,
             onDismiss = viewModel::dismissDialog,
         )
-        SettingsDialog.LanguageChooser -> AppLanguageChooserDialog(
+        SettingsDialog.LanguageChooser -> LanguageChooserHost(
             selected = state.appLanguage,
             onSelect = viewModel::onLanguageSelected,
+            onApplied = viewModel::onLanguageApplied,
             onDismiss = viewModel::dismissDialog,
         )
         is SettingsDialog.ClearBrowsingData -> ClearBrowsingDataDialog(
@@ -214,7 +269,7 @@ private fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewMo
  * stays under detekt's `LongMethod` ceiling as the stories add events.
  */
 @Composable
-private fun SettingsSnackbarEffect(
+internal fun SettingsSnackbarEffect(
     viewModel: SettingsViewModel,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -240,8 +295,7 @@ private fun SettingsSnackbarEffect(
 
 // Stable LazyColumn keys — Constitution §V forbids index-only keys.
 private const val KEY_SECTION_APPEARANCE: String = "section_appearance"
-private const val KEY_SECTION_LANGUAGE: String = "section_language"
-private const val KEY_SECTION_SEARCH: String = "section_search"
+private const val KEY_SECTION_LANGUAGE_AND_SEARCH: String = "section_language_and_search"
 private const val KEY_SECTION_PRIVACY: String = "section_privacy"
 private const val KEY_SECTION_ABOUT: String = "section_about"
 private const val KEY_ROW_THEME: String = "row_theme"
@@ -251,6 +305,11 @@ private const val KEY_ROW_SEARCH_ENGINE: String = "row_search_engine"
 private const val KEY_ROW_RETENTION: String = "row_retention"
 private const val KEY_ROW_CLEAR_BROWSING_DATA: String = "row_clear_browsing_data"
 private const val KEY_ROW_ABOUT: String = "row_about"
+private const val CONTENT_TYPE_HEADER: String = "header"
+private const val CONTENT_TYPE_ROW: String = "value_row"
+private const val CONTENT_TYPE_SWITCH_ROW: String = "switch_row"
+private const val CONTENT_TYPE_ACTION_ROW: String = "action_row"
+private const val CONTENT_TYPE_ABOUT: String = "about"
 
 const val TEST_TAG_SETTINGS_LIST: String = "settings_list"
 const val TEST_TAG_SETTINGS_THEME_ROW: String = "settings_theme_row"

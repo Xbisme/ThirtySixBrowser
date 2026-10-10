@@ -46,7 +46,6 @@ class BrowserWebViewRendererRecoveryTest {
         composeRule.setContent {
             BrowserWebView(
                 state = BrowserUiState(currentUrl = PAGE_URL, loadingState = LoadingState.Idle),
-                homeUrl = PAGE_URL,
                 actions = actions,
                 callbacks = BrowserWebViewCallbacks(
                     onLoadStarted = { started += it },

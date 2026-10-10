@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols Rounded "add", weight 300, grade -25, 24px.
+     Source: google/material-design-icons @ 49d4db35, Apache-2.0. Spec 019 research R4. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <group android:translateY="960">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M454.04-454.54h-200q-11.03 0-18.5-7.41-7.46-7.41-7.46-18.56 0-11.14 7.46-18.55 7.47-7.4 18.5-7.4h200v-200q0-11.03 7.49-18.5 7.49-7.46 18.55-7.46 11.07 0 18.48 7.46 7.4 7.47 7.4 18.5v200h200q11.03 0 18.5 7.49 7.46 7.49 7.46 18.57 0 11.25-7.46 18.55-7.47 7.31-18.5 7.31h-200v200q0 11.2-7.49 18.58-7.49 7.38-18.55 7.38-11.07 0-18.48-7.38-7.4-7.38-7.4-18.58v-200Z" />
+    </group>
+</vector>

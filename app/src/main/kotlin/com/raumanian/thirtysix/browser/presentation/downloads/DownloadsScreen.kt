@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -28,11 +29,13 @@ import com.raumanian.thirtysix.browser.presentation.downloads.components.Downloa
 import com.raumanian.thirtysix.browser.presentation.downloads.components.DownloadsTopBar
 import com.raumanian.thirtysix.browser.presentation.downloads.components.EmptyDownloadsState
 
+private const val DOWNLOAD_ROW_CONTENT_TYPE = "download_row"
+
 /**
- * Spec 015 — the Downloads screen.
+ * Spec 015 · Spec 019 FR-041 / FR-043 — the Downloads screen.
  *
- * Replaces the Spec 002 placeholder. Renders the list or the empty state, hosts the
- * long-press action sheet and the delete confirmation, and surfaces one-shot events.
+ * A large title over open rows on the surface. Renders the list or the empty state, hosts
+ * the long-press action sheet and the delete confirmation, and surfaces one-shot events.
  */
 @Composable
 fun DownloadsScreen(
@@ -46,6 +49,7 @@ fun DownloadsScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = { DownloadsTopBar(onBackClick = { navController.popBackStack() }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
@@ -58,8 +62,13 @@ fun DownloadsScreen(
                     .padding(innerPadding),
             ) {
                 // Stable key — Constitution §V forbids index-only keys, which would make
-                // Compose animate a phantom move whenever a row is removed.
-                items(items = state.items, key = { it.record.id }) { item ->
+                // Compose animate a phantom move whenever a row is removed. One content type:
+                // every entry is the same row composable.
+                items(
+                    items = state.items,
+                    key = { it.record.id },
+                    contentType = { DOWNLOAD_ROW_CONTENT_TYPE },
+                ) { item ->
                     DownloadRow(
                         item = item,
                         onClick = { viewModel.onItemClicked(item) },

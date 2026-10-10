@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">Đóng tất cả thẻ? Không thể hoàn tác.</string>
     <string name="tabs_card_close">Đóng thẻ</string>
     <string name="tabs_default_title">Thẻ mới</string>
-    <string name="browser_action_tabs_switcher">Mở trình chuyển thẻ</string>
     <string name="browser_action_new_tab">Mở thẻ mới</string>
     <string name="browser_max_tabs_reached">Đã đạt số thẻ tối đa. Đóng một thẻ để mở thẻ mới.</string>
 
@@ -35,10 +34,8 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Thẻ ẩn danh mới</string>
-    <string name="tabs_a11y_new_incognito_tab">Mở thẻ ẩn danh mới</string>
     <string name="tabs_a11y_incognito_glyph">Thẻ ẩn danh</string>
     <string name="tabs_error_max_incognito_tabs_reached">Đã đạt giới hạn %d thẻ ẩn danh</string>
-    <string name="browser_a11y_incognito_indicator">Đang ở chế độ ẩn danh</string>
     <string name="tabs_a11y_incognito_card_placeholder">Thẻ ẩn danh — nội dung đã ẩn để bảo mật</string>
     <string name="tabs_card_incognito_label">Ẩn danh</string>
     <string name="tabs_action_close_all_incognito">Đóng tất cả thẻ ẩn danh</string>
@@ -52,6 +49,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Dấu trang</string>
+    <string name="bookmarks_section_folders">Thư mục</string>
+    <string name="bookmarks_section_pages">Trang</string>
     <string name="bookmarks_empty_title">Chưa có dấu trang</string>
     <string name="bookmarks_empty_body">Nhấn biểu tượng trái tim khi xem trang, hoặc dùng nút + để thêm.</string>
     <string name="bookmarks_action_back_to_parent_cd">Lên thư mục cha</string>
@@ -140,7 +139,6 @@
     <string name="downloads_failure_generic">Thất bại</string>
     <string name="downloads_size_unknown">Không rõ dung lượng</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">Thêm</string>
     <string name="downloads_no_app_can_open">Không có ứng dụng nào trên máy mở được tệp này.</string>
     <string name="downloads_file_missing">Tệp này không còn trên máy của bạn.</string>
     <string name="downloads_not_complete">Tệp này chưa tải xong.</string>
@@ -167,7 +165,7 @@
     <string name="settings_action_cancel">Huỷ</string>
     <string name="settings_section_appearance">Giao diện</string>
     <string name="settings_section_language">Ngôn ngữ</string>
-    <string name="settings_section_search">Tìm kiếm</string>
+    <string name="settings_section_language_and_search">Ngôn ngữ và tìm kiếm</string>
     <string name="settings_section_privacy">Quyền riêng tư</string>
     <string name="settings_section_about">Giới thiệu</string>
     <string name="settings_error_not_saved">Không thể lưu cài đặt. Vui lòng thử lại.</string>
@@ -228,7 +226,45 @@
     <string name="onboarding_search_title">Chọn công cụ tìm kiếm</string>
     <string name="onboarding_search_body">Gõ vào thanh địa chỉ sẽ tìm bằng công cụ này.</string>
     <string name="onboarding_action_next">Tiếp</string>
-    <string name="onboarding_action_done">Xong</string>
+    <string name="onboarding_action_start_browsing">Bắt đầu duyệt web</string>
     <string name="onboarding_action_skip">Bỏ qua</string>
     <string name="onboarding_progress_a11y">Bước %1$d trên %2$d</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Tìm kiếm</string>
+    <string name="nav_tabs">Thẻ</string>
+    <string name="nav_menu">Menu</string>
+    <string name="hub_privacy_banner">Mọi thứ bạn duyệt đều ở lại trên điện thoại này</string>
+    <string name="hub_incognito_banner_title">Duyệt web không để lại dấu vết</string>
+    <string name="hub_incognito_banner_body">Mở thẻ ẩn danh: không lưu lịch sử, cookie bị xoá khi bạn đóng thẻ.</string>
+    <string name="hub_quick_settings_title">Cài đặt nhanh</string>
+    <string name="hub_tile_clear_data">Xoá dữ liệu</string>
+    <string name="hub_downloads_in_progress_cd">Đang tải xuống</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="other">Thẻ, %1$d thẻ đang mở</item>
+    </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Chào buổi sáng</string>
+    <string name="home_greeting_afternoon">Chào buổi chiều</string>
+    <string name="home_greeting_evening">Chào buổi tối</string>
+    <string name="home_privacy_line">Mọi thứ bạn duyệt đều ở lại trên điện thoại này.</string>
+    <string name="home_recent_title">Đã truy cập gần đây</string>
+    <string name="home_recent_see_all">Xem tất cả</string>
+    <string name="home_shortcut_tag_tab">Thẻ</string>
+    <string name="home_shortcut_tag_saved">Đã lưu</string>
+    <string name="home_shortcut_tag_recent">Gần đây</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">Bạn đang duyệt web ẩn danh</string>
+    <string name="incognito_page_subtitle">Người khác dùng điện thoại này sẽ không thấy bạn làm gì ở đây.</string>
+    <string name="incognito_page_section_title">Khi bạn đóng tất cả thẻ ẩn danh</string>
+    <string name="incognito_page_point_history">Các trang bạn đã truy cập không được lưu vào lịch sử</string>
+    <string name="incognito_page_point_cookies">Cookie và dữ liệu trang web bị xoá</string>
+    <string name="incognito_page_point_screenshots">Không thể chụp màn hình khi đang mở thẻ ẩn danh</string>
+    <string name="incognito_page_footnote">Tệp bạn tải xuống và dấu trang bạn lưu vẫn được giữ lại. Các trang web và mạng của bạn vẫn có thể thấy bạn truy cập.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Đang mở</string>
+    <string name="tabs_chip_incognito">Ẩn danh</string>
 </resources>

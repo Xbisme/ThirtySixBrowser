@@ -15,13 +15,11 @@ package com.raumanian.thirtysix.browser.core.constants
  */
 object UrlConstants {
     /**
-     * Default page loaded by `BrowserScreen` on initial composition AND by tapping
-     * the Home affordance from any URL. Set to Google homepage in Spec 008 (clarified
-     * via `/speckit-clarify` Q2 2026-05-01) — matches the default search engine
-     * (Google) configured in Spec 006 and gives first-time users a ready-to-search
-     * page rather than an empty `about:blank`.
+     * Spec 019 (research R1, data-model §1) — reserved address of a tab whose content is the
+     * Home page (or, in an incognito tab, the incognito page). Persisted in `tabs.url`; never
+     * loaded into a WebView, never recorded in history, never shown in the address well.
      */
-    const val DEFAULT_HOME_URL: String = "https://www.google.com/"
+    const val HOME_PAGE_URL: String = "thirtysix:home"
 
     /**
      * Google search URL template. `%s` is substituted with the URL-encoded

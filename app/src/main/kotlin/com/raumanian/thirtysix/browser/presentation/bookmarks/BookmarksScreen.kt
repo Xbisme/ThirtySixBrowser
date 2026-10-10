@@ -3,15 +3,18 @@
 package com.raumanian.thirtysix.browser.presentation.bookmarks
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -19,8 +22,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -37,15 +47,34 @@ import com.raumanian.thirtysix.browser.presentation.bookmarks.components.CreateO
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.DeleteFolderConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.EmptyBookmarksState
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.FolderActionSheet
+import com.raumanian.thirtysix.browser.presentation.bookmarks.components.FolderChipsRow
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.FolderPickerSheet
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.FolderRow
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.NoSearchMatchesState
+import com.raumanian.thirtysix.browser.presentation.components.SectionHeader
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
+import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
+
+private const val KEY_FOLDER_CHIPS = "folder_chips"
+private const val KEY_HEADER_FOLDERS = "header_folders"
+private const val KEY_HEADER_PAGES = "header_pages"
+private const val CONTENT_TYPE_CHIPS = "chips"
+private const val CONTENT_TYPE_HEADER = "header"
+private const val CONTENT_TYPE_FOLDER = "folder"
+private const val CONTENT_TYPE_BOOKMARK = "bookmark"
+private const val CONTENT_TYPE_SEARCH_RESULT = "search_result"
 
 /**
  * Spec 013 — bookmarks screen replacing the Spec 002 placeholder. Renders a
  * Scaffold with topBar, breadcrumb, list (or search / empty / no-match
  * states), FAB, and a single active dialog driven by [BookmarksUiState.pendingDialog].
+ *
+ * Spec 019 — large title over a search well, open rows under "Folders" / "Pages" section
+ * headers, top-level folder chips at the root (FR-042), the breadcrumb inside folders, the
+ * brand-gradient add button. Behaviour is Spec 013's, unchanged.
  */
 @Composable
 @Suppress("LongMethod")
@@ -84,6 +113,7 @@ fun BookmarksScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             BookmarksTopBar(
                 state = state,
@@ -114,7 +144,11 @@ fun BookmarksScreen(
     BookmarksDialogs(state = state, viewModel = viewModel)
 }
 
+/** Room under the list so the last row clears the floating add button. */
+private val ListBottomPadding = Dimens.fab + Spacing.lg
+
 @Composable
+@Suppress("LongMethod")
 private fun BookmarksContent(
     state: BookmarksUiState,
     viewModel: BookmarksViewModel,
@@ -124,8 +158,15 @@ private fun BookmarksContent(
             if (state.searchResults.isEmpty() && state.searchQuery.isNotBlank()) {
                 NoSearchMatchesState(query = state.searchQuery)
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.searchResults, key = { it.bookmark.id }) { result ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = ListBottomPadding),
+                ) {
+                    items(
+                        state.searchResults,
+                        key = { it.bookmark.id },
+                        contentType = { CONTENT_TYPE_SEARCH_RESULT },
+                    ) { result ->
                         BookmarkSearchResultRow(
                             result = result,
                             onClick = { viewModel.onBookmarkTap(result.bookmark) },
@@ -139,15 +180,38 @@ private fun BookmarksContent(
             EmptyBookmarksState()
         }
         else -> {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(state.folders, key = { "folder_${it.id}" }) { folder ->
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = ListBottomPadding),
+            ) {
+                // Spec 019 FR-042 — top-level folders as chips, at the root only.
+                if (state.currentFolderId == null && state.folders.isNotEmpty()) {
+                    item(key = KEY_FOLDER_CHIPS, contentType = CONTENT_TYPE_CHIPS) {
+                        FolderChipsRow(folders = state.folders, onFolderClick = viewModel::onFolderTap)
+                    }
+                }
+                if (state.folders.isNotEmpty()) {
+                    item(key = KEY_HEADER_FOLDERS, contentType = CONTENT_TYPE_HEADER) {
+                        SectionHeader(text = stringResource(R.string.bookmarks_section_folders))
+                    }
+                }
+                items(state.folders, key = { "folder_${it.id}" }, contentType = { CONTENT_TYPE_FOLDER }) { folder ->
                     FolderRow(
                         folder = folder,
                         onClick = { viewModel.onFolderTap(folder) },
                         onLongPress = { viewModel.onLongPressFolder(folder) },
                     )
                 }
-                items(state.bookmarks, key = { "bookmark_${it.id}" }) { bookmark ->
+                if (state.bookmarks.isNotEmpty()) {
+                    item(key = KEY_HEADER_PAGES, contentType = CONTENT_TYPE_HEADER) {
+                        SectionHeader(text = stringResource(R.string.bookmarks_section_pages))
+                    }
+                }
+                items(
+                    state.bookmarks,
+                    key = { "bookmark_${it.id}" },
+                    contentType = { CONTENT_TYPE_BOOKMARK },
+                ) { bookmark ->
                     BookmarkRow(
                         bookmark = bookmark,
                         onClick = { viewModel.onBookmarkTap(bookmark) },
@@ -253,12 +317,26 @@ private fun BookmarksDialogs(
     }
 }
 
+/** Spec 019 — the add button in the brand gradient (the new-tab action's look). */
 @Composable
 private fun BookmarksFab(onClick: () -> Unit) {
-    FloatingActionButton(onClick = onClick) {
+    val colors = ThirtySixTheme.colors
+    val shape = ThirtySixTheme.shapes.full
+    val description = stringResource(R.string.bookmarks_action_add_cd)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(Dimens.fab)
+            .clip(shape)
+            .background(Brush.linearGradient(listOf(colors.fabStart, colors.fabEnd)))
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = description },
+    ) {
         Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(R.string.bookmarks_action_add_cd),
+            painter = painterResource(AppIcons.Add),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(Dimens.iconLarge),
         )
     }
 }

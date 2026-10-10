@@ -26,7 +26,7 @@
          "Done" are different words, not a substitution, and a placeholder produces
          untranslatable grammar across 8 locales. -->
     <string name="onboarding_action_next">Next</string>
-    <string name="onboarding_action_done">Done</string>
+    <string name="onboarding_action_start_browsing">Start browsing</string>
     <string name="onboarding_action_skip">Skip</string>
     <!-- %1$d = current slide, %2$d = total. Positional so locales may reorder. -->
     <string name="onboarding_progress_a11y">Step %1$d of %2$d</string>
@@ -54,7 +54,6 @@
     <string name="tabs_switcher_close_all_confirm">Close all tabs? This cannot be undone.</string>
     <string name="tabs_card_close">Close tab</string>
     <string name="tabs_default_title">New tab</string>
-    <string name="browser_action_tabs_switcher">Open tabs switcher</string>
     <string name="browser_action_new_tab">Open new tab</string>
     <string name="browser_max_tabs_reached">Maximum number of tabs reached. Close a tab to open a new one.</string>
 
@@ -65,11 +64,9 @@
 
     <!-- Spec 012 — Private / Incognito Mode. New strings: incognito affordances, indicator, dialog, errors, a11y. -->
     <string name="tabs_action_new_incognito_tab">New incognito tab</string>
-    <string name="tabs_a11y_new_incognito_tab">Open new incognito tab</string>
     <string name="tabs_a11y_incognito_glyph">Incognito tab</string>
     <!-- Spec 012 — cap is MAX_INCOGNITO_TABS = 50 (always > 1), so the singular case is unreachable. Plural form intentionally omitted. -->
     <string name="tabs_error_max_incognito_tabs_reached" tools:ignore="PluralsCandidate">You\'ve reached the maximum of %d incognito tabs</string>
-    <string name="browser_a11y_incognito_indicator">Incognito mode active</string>
     <string name="tabs_a11y_incognito_card_placeholder">Incognito tab — content hidden for privacy</string>
     <string name="tabs_card_incognito_label">Incognito</string>
     <string name="tabs_action_close_all_incognito">Close all incognito</string>
@@ -84,6 +81,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2: bookmarks screen list, breadcrumb, empty state. -->
     <string name="bookmarks_screen_title">Bookmarks</string>
+    <string name="bookmarks_section_folders">Folders</string>
+    <string name="bookmarks_section_pages">Pages</string>
     <string name="bookmarks_empty_title">No bookmarks yet</string>
     <string name="bookmarks_empty_body">Tap the heart icon while viewing a page, or use the + button to add one.</string>
     <string name="bookmarks_action_back_to_parent_cd">Up to parent folder</string>
@@ -181,7 +180,6 @@
     <string name="downloads_failure_generic">Failed</string>
     <string name="downloads_size_unknown">Unknown size</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">More</string>
     <string name="downloads_no_app_can_open">No app on this device can open this file.</string>
     <string name="downloads_file_missing">This file is no longer on your device.</string>
     <string name="downloads_not_complete">This download hasn\'t finished yet.</string>
@@ -208,7 +206,7 @@
     <string name="settings_action_cancel">Cancel</string>
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_section_language">Language</string>
-    <string name="settings_section_search">Search</string>
+    <string name="settings_section_language_and_search">Language and search</string>
     <string name="settings_section_privacy">Privacy</string>
     <string name="settings_section_about">About</string>
     <string name="settings_error_not_saved">Couldn\'t save the setting. Please try again.</string>
@@ -271,4 +269,43 @@
     <!-- Spec 016 US7 — About. The app name comes from app_name. -->
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_privacy_statement">This app collects no personal data and sends nothing to any server run by ThirtySix. Your history, bookmarks, downloads and settings stay on this device.</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Search</string>
+    <string name="nav_tabs">Tabs</string>
+    <string name="nav_menu">Menu</string>
+    <string name="hub_privacy_banner">Nothing you browse leaves this phone</string>
+    <string name="hub_incognito_banner_title">Browse without a trace</string>
+    <string name="hub_incognito_banner_body">Open an incognito tab: no history, cookies cleared when you close it.</string>
+    <string name="hub_quick_settings_title">Quick settings</string>
+    <string name="hub_tile_clear_data">Clear data</string>
+    <string name="hub_downloads_in_progress_cd">Downloads in progress</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="one">Tabs, %1$d open</item>
+        <item quantity="other">Tabs, %1$d open</item>
+    </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_privacy_line">Everything you browse stays on this phone.</string>
+    <string name="home_recent_title">Recently visited</string>
+    <string name="home_recent_see_all">See all</string>
+    <string name="home_shortcut_tag_tab">Tab</string>
+    <string name="home_shortcut_tag_saved">Saved</string>
+    <string name="home_shortcut_tag_recent">Recent</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">You\'re browsing privately</string>
+    <string name="incognito_page_subtitle">Other people who use this phone won\'t see what you do here.</string>
+    <string name="incognito_page_section_title">When you close all incognito tabs</string>
+    <string name="incognito_page_point_history">The pages you visited are not kept in history</string>
+    <string name="incognito_page_point_cookies">Cookies and site data are cleared</string>
+    <string name="incognito_page_point_screenshots">Screenshots are blocked while a private tab is open</string>
+    <string name="incognito_page_footnote">Files you download and bookmarks you save are kept. Websites and your network can still see your visits.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Open</string>
+    <string name="tabs_chip_incognito">Incognito</string>
 </resources>

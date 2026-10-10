@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.settings
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -14,8 +15,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CHOICE_OPTION
-import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_RETENTION_CANCEL
 import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_RETENTION_CONFIRM_DIALOG
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Rule
@@ -60,7 +59,7 @@ class SettingsScreenRetentionTest {
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_RETENTION_ROW).performClick()
 
-        composeRule.onAllNodesWithTag(TEST_TAG_SETTINGS_CHOICE_OPTION).assertCountEquals(HistoryRetention.entries.size)
+        composeRule.onAllNodes(isSettingsChoiceOption()).assertCountEquals(HistoryRetention.entries.size)
     }
 
     @Test(timeout = SETTINGS_TEST_TIMEOUT_MS)
@@ -69,11 +68,12 @@ class SettingsScreenRetentionTest {
         render(repository)
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_RETENTION_ROW).performClick()
-        composeRule.onNode(hasTestTag(TEST_TAG_SETTINGS_CHOICE_OPTION) and hasText(label(HistoryRetention.Days30)))
+        composeRule.onNode(isSettingsChoiceOption() and hasText(label(HistoryRetention.Days30)))
             .performClick()
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_RETENTION_CONFIRM_DIALOG).assertIsDisplayed()
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_RETENTION_CANCEL).performClick()
+        composeRule.onNode(hasText(resources.getString(R.string.settings_action_cancel)) and hasClickAction())
+            .performClick()
 
         composeRule.onAllNodesWithTag(TEST_TAG_SETTINGS_RETENTION_CONFIRM_DIALOG).assertCountEquals(0)
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_RETENTION_ROW).assertTextContains(label(HistoryRetention.Days90))

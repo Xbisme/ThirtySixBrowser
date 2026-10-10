@@ -24,11 +24,13 @@ import javax.inject.Singleton
  * (BrowserViewModel) still resolve the binding from the parent SingletonC
  * scope without any constructor change.
  */
+// Spec 019 R1 — new tabs open on the Home page: the default address is the reserved Home
+// address, replacing Spec 008 FR-016's https://www.google.com/.
 @Module
 @InstallIn(SingletonComponent::class)
 object UrlConfigModule {
     @Provides
     @Singleton
     @Named("default_home_url")
-    fun provideDefaultHomeUrl(): String = UrlConstants.DEFAULT_HOME_URL
+    fun provideDefaultHomeUrl(): String = UrlConstants.HOME_PAGE_URL
 }

@@ -54,8 +54,16 @@ class SettingsMapperTest {
     // ----------------------------- Spec 016: decoding rules --------------
 
     @Test
-    fun missingDynamicColor_isTrue() {
-        assertEquals(true, mapper.toDomain(mutablePreferencesOf()).isDynamicColorEnabled)
+    fun missingDynamicColor_isFalse() {
+        // Spec 019 FR-005a — the default flipped to off; only an unset key falls back to it.
+        assertEquals(false, mapper.toDomain(mutablePreferencesOf()).isDynamicColorEnabled)
+    }
+
+    @Test
+    fun storedDynamicColorTrue_isTrue() {
+        val prefs = mutablePreferencesOf().toMutablePreferences()
+        prefs[StorageKeys.DYNAMIC_COLOR_ENABLED] = true
+        assertEquals(true, mapper.toDomain(prefs).isDynamicColorEnabled)
     }
 
     @Test

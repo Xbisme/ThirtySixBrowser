@@ -47,7 +47,7 @@ import org.junit.runner.RunWith
  * - T021b asserts SC-004: configuration change preserves `currentUrl` in
  *   `BrowserUiState` (no URL revert across activity recreation).
  *
- * Spec 008 (T023a) — decoupled from the production [UrlConstants.DEFAULT_HOME_URL]
+ * Spec 008 (T023a) — decoupled from the production [SAMPLE_PAGE_URL]
  * value. Spec 008 changes that constant from `https://example.com` →
  * `https://www.google.com/`; this test continues to assert against the
  * `<h1>Example Domain</h1>` DOM element by constructing a [BrowserViewModel]
@@ -78,7 +78,7 @@ class BrowserScreenInstrumentedTest {
         composeRule.activity.runOnUiThread {
             // Spec 008 (T023a) — manual VM construction with the literal
             // example.com URL keeps assertions on `<h1>Example Domain</h1>`
-            // stable regardless of UrlConstants.DEFAULT_HOME_URL value
+            // stable regardless of SAMPLE_PAGE_URL value
             // (Spec 008 changed the production constant to Google). VM is
             // class-scoped so the rotation test can re-attach it after
             // activity recreate, preserving the same UiState.
@@ -124,8 +124,8 @@ class BrowserScreenInstrumentedTest {
     fun pageRenders_assertsDomContainsExampleDomain() {
         // T021 — Espresso-Web atom waits for JS-ready state, then checks <h1> text.
         onWebView(isAssignableFrom(WebView::class.java))
-            .withElement(findElement(Locator.TAG_NAME, "h1"))
-            .check(webMatches(getText(), containsString("Example Domain")))
+            .withElement(findElement(Locator.TAG_NAME, "body"))
+            .check(webMatches(getText(), containsString(PAGE_TEXT)))
     }
 
     @Test
@@ -144,15 +144,20 @@ class BrowserScreenInstrumentedTest {
         composeRule.waitForIdle()
 
         onWebView(isAssignableFrom(WebView::class.java))
-            .withElement(findElement(Locator.TAG_NAME, "h1"))
-            .check(webMatches(getText(), containsString("Example Domain")))
+            .withElement(findElement(Locator.TAG_NAME, "body"))
+            .check(webMatches(getText(), containsString(PAGE_TEXT)))
     }
 
     private companion object {
         // Spec 008 (T023a) — pinned to https://example.com for the "Example Domain"
-        // h1 assertion, decoupled from production UrlConstants.DEFAULT_HOME_URL
+        // h1 assertion, decoupled from production SAMPLE_PAGE_URL
         // which Spec 008 redirected to Google homepage.
         const val TEST_PAGE_URL: String = "https://example.com"
+
+        // example.com dropped its <h1>Example Domain</h1> in 2026 (the page is now a short
+        // multilingual notice with only <title>Example Domain), so the render check reads text
+        // that is in the body today.
+        const val PAGE_TEXT: String = "documentation examples"
 
         // CI emulator budget — NOT the user-facing SC-002 production target
         // (200 ms). See test method KDoc above.
@@ -250,6 +255,8 @@ private object InstrumentedNoopBookmarkRepository :
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override fun observeBookmarksByUrl(url: String) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+    override fun observeRecentBookmarks(limit: Int) =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override fun searchBookmarks(query: String) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override suspend fun getBookmark(id: Long) = null
@@ -286,3 +293,6 @@ private object InstrumentedNoopHistoryRepository :
     override suspend fun clearAll(): Int = 0
     override suspend fun count(): Int = 0
 }
+
+/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"

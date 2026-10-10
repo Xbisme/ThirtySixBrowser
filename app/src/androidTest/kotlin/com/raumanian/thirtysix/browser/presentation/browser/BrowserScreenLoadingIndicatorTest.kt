@@ -7,7 +7,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
@@ -27,7 +26,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
+import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_PAGE_LOAD_PROGRESS
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.io.File
@@ -92,7 +91,7 @@ class BrowserScreenLoadingIndicatorTest {
             val noopIncognitoRepo = LoadingIndicatorNoopIncognitoTabRepository
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                defaultHomeUrl = UrlConstants.DEFAULT_HOME_URL,
+                defaultHomeUrl = SAMPLE_PAGE_URL,
                 buildSearchUrl = BuildSearchUrlUseCase(LoadingIndicatorNoopSearchEngineRepository),
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 observeTabs = ObserveTabsUseCase(noopTabRepo),
@@ -101,7 +100,7 @@ class BrowserScreenLoadingIndicatorTest {
                     noopTabRepo,
                     noopIncognitoRepo,
                 ),
-                createTab = CreateTabUseCase(noopTabRepo, UrlConstants.DEFAULT_HOME_URL),
+                createTab = CreateTabUseCase(noopTabRepo, SAMPLE_PAGE_URL),
                 faviconCache = LoadingIndicatorNoopFaviconCache,
                 screenshotCache = LoadingIndicatorNoopScreenshotCache,
                 isUrlBookmarked = IsUrlBookmarkedUseCase(LoadingIndicatorNoopBookmarkRepository),
@@ -117,7 +116,7 @@ class BrowserScreenLoadingIndicatorTest {
             ).apply {
                 // Seeded BEFORE setContent so `BrowserWebView` skips its initial
                 // `loadUrl` — the WebView then never fires a single callback.
-                onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
+                onLoadStarted(SAMPLE_PAGE_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)
             }
             composeRule.activity.setContent { BrowserScreen(viewModel = viewModel) }
@@ -128,20 +127,20 @@ class BrowserScreenLoadingIndicatorTest {
     @Test
     fun loadingIndicator_appearsWhileLoadingAndHidesWhenLoaded() {
         composeRule.activity.runOnUiThread {
-            viewModel.onLoadStarted(UrlConstants.DEFAULT_HOME_URL)
+            viewModel.onLoadStarted(SAMPLE_PAGE_URL)
             viewModel.onProgressChanged(PROGRESS_MIDWAY)
         }
         composeRule.waitUntilExactlyOneExists(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
+            matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
             timeoutMillis = INDICATOR_TIMEOUT_MS,
         )
 
         composeRule.activity.runOnUiThread {
             viewModel.onProgressChanged(PROGRESS_COMPLETE)
-            viewModel.onLoadFinished(UrlConstants.DEFAULT_HOME_URL)
+            viewModel.onLoadFinished(SAMPLE_PAGE_URL)
         }
         composeRule.waitUntilDoesNotExist(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
+            matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
             timeoutMillis = INDICATOR_TIMEOUT_MS,
         )
     }
@@ -152,7 +151,7 @@ class BrowserScreenLoadingIndicatorTest {
         // The seeded state is Failed, which is neither Loading nor Loaded — the
         // indicator must not be rendered for it.
         composeRule.waitUntilDoesNotExist(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
+            matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
             timeoutMillis = INDICATOR_TIMEOUT_MS,
         )
     }
@@ -222,6 +221,8 @@ private object LoadingIndicatorNoopBookmarkRepository :
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override fun observeBookmarksByUrl(url: String) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+    override fun observeRecentBookmarks(limit: Int) =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override fun searchBookmarks(query: String) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override suspend fun getBookmark(id: Long) = null
@@ -261,3 +262,6 @@ private object LoadingIndicatorNoopHistoryRepository :
     override suspend fun clearAll(): Int = 0
     override suspend fun count(): Int = 0
 }
+
+/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"

@@ -49,6 +49,9 @@ class FakeBookmarkRepository : BookmarkRepository {
     override fun observeBookmarksByUrl(url: String): Flow<List<Bookmark>> =
         bookmarksFlow.asStateFlow().map { map -> map.values.filter { it.url == url } }
 
+    override fun observeRecentBookmarks(limit: Int): Flow<List<Bookmark>> =
+        bookmarksFlow.asStateFlow().map { map -> map.values.sortedByDescending { it.createdAt }.take(limit) }
+
     override fun searchBookmarks(query: String): Flow<List<Bookmark>> =
         bookmarksFlow.asStateFlow().map { map ->
             val q = query.lowercase()

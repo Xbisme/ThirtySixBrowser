@@ -2,28 +2,29 @@
 
 package com.raumanian.thirtysix.browser.presentation.bookmarks.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.presentation.components.ListRow
+import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
+import com.raumanian.thirtysix.browser.presentation.components.SheetFrame
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 
+private const val CONTENT_TYPE_ROOT = "picker_root"
+private const val CONTENT_TYPE_FOLDER = "picker_folder"
+private const val KEY_ROOT = "picker_root"
+
 /**
- * Spec 013 R10 — folder picker bottom sheet.
+ * Spec 013 R10 — folder picker bottom sheet; Spec 019 — on [SheetFrame] with open rows.
  *
  * Renders the synthetic "Root" entry plus all folders in [allFolders],
  * indented by depth (computed client-side from the parent chain).
@@ -44,7 +45,6 @@ fun FolderPickerSheet(
     modifier: Modifier = Modifier,
     excludeFolderIdAndDescendants: Long? = null,
 ) {
-    val sheetState = rememberModalBottomSheetState()
     val rootLabel = stringResource(R.string.bookmarks_breadcrumb_root_label)
 
     val excluded: Set<Long> = remember(allFolders, excludeFolderIdAndDescendants) {
@@ -58,41 +58,26 @@ fun FolderPickerSheet(
         flattenWithDepth(allFolders).filter { it.folder.id !in excluded }
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        modifier = modifier,
-    ) {
-        Column(modifier = Modifier.padding(Spacing.md)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = Spacing.sm),
-            )
-            // Synthetic Root entry pinned at index 0.
-            Text(
-                text = rootLabel,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onPick(null) }
-                    .padding(vertical = Spacing.sm, horizontal = Spacing.sm),
-            )
+    SheetFrame(onDismiss = onDismiss, modifier = modifier) {
+        Column(modifier = Modifier.padding(bottom = Spacing.md)) {
+            SheetTitle(text = title)
             LazyColumn {
-                items(entries, key = { it.folder.id }) { entry ->
-                    Text(
-                        text = entry.folder.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onPick(entry.folder.id) }
-                            .padding(
-                                start = (entry.depth * INDENT_DP).dp + Spacing.sm,
-                                end = Spacing.sm,
-                                top = Spacing.sm,
-                                bottom = Spacing.sm,
-                            ),
+                // Synthetic Root entry pinned at index 0.
+                item(key = KEY_ROOT, contentType = CONTENT_TYPE_ROOT) {
+                    ListRow(
+                        title = rootLabel,
+                        subtitle = "",
+                        leading = { ListRowIcon(icon = AppIcons.Bookmarks, accent = true) },
+                        onClick = { onPick(null) },
+                    )
+                }
+                items(entries, key = { it.folder.id }, contentType = { CONTENT_TYPE_FOLDER }) { entry ->
+                    ListRow(
+                        title = entry.folder.name,
+                        subtitle = "",
+                        leading = { ListRowIcon(icon = AppIcons.Folder, accent = true) },
+                        onClick = { onPick(entry.folder.id) },
+                        modifier = Modifier.padding(start = Spacing.md * (entry.depth + 1)),
                     )
                 }
             }
@@ -105,8 +90,6 @@ private data class FolderPickerEntry(
     val folder: BookmarkFolder,
     val depth: Int,
 )
-
-private const val INDENT_DP: Int = 16
 
 /**
  * Walks [folders] root-first, computing depth from the parent chain. Output

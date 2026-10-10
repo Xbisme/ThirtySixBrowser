@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">Закрыть все вкладки? Это действие необратимо.</string>
     <string name="tabs_card_close">Закрыть вкладку</string>
     <string name="tabs_default_title">Новая вкладка</string>
-    <string name="browser_action_tabs_switcher">Открыть переключатель вкладок</string>
     <string name="browser_action_new_tab">Открыть новую вкладку</string>
     <string name="browser_max_tabs_reached">Достигнуто максимальное количество вкладок. Закройте вкладку, чтобы открыть новую.</string>
 
@@ -38,10 +37,8 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Новая вкладка инкогнито</string>
-    <string name="tabs_a11y_new_incognito_tab">Открыть новую вкладку инкогнито</string>
     <string name="tabs_a11y_incognito_glyph">Вкладка инкогнито</string>
     <string name="tabs_error_max_incognito_tabs_reached">Достигнут максимум: %d вкладок инкогнито</string>
-    <string name="browser_a11y_incognito_indicator">Режим инкогнито активен</string>
     <string name="tabs_a11y_incognito_card_placeholder">Вкладка инкогнито — содержимое скрыто</string>
     <string name="tabs_card_incognito_label">Инкогнито</string>
     <string name="tabs_action_close_all_incognito">Закрыть все вкладки инкогнито</string>
@@ -55,6 +52,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Закладки</string>
+    <string name="bookmarks_section_folders">Папки</string>
+    <string name="bookmarks_section_pages">Страницы</string>
     <string name="bookmarks_empty_title">Закладок пока нет</string>
     <string name="bookmarks_empty_body">Нажмите на значок сердца при просмотре страницы или используйте кнопку +, чтобы добавить.</string>
     <string name="bookmarks_action_back_to_parent_cd">К родительской папке</string>
@@ -146,7 +145,6 @@
     <string name="downloads_failure_generic">Ошибка</string>
     <string name="downloads_size_unknown">Размер неизвестен</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">Ещё</string>
     <string name="downloads_no_app_can_open">На этом устройстве нет приложения для открытия файла.</string>
     <string name="downloads_file_missing">Этого файла больше нет на устройстве.</string>
     <string name="downloads_not_complete">Эта загрузка ещё не завершена.</string>
@@ -173,7 +171,7 @@
     <string name="settings_action_cancel">Отмена</string>
     <string name="settings_section_appearance">Оформление</string>
     <string name="settings_section_language">Язык</string>
-    <string name="settings_section_search">Поиск</string>
+    <string name="settings_section_language_and_search">Язык и поиск</string>
     <string name="settings_section_privacy">Конфиденциальность</string>
     <string name="settings_section_about">О приложении</string>
     <string name="settings_error_not_saved">Не удалось сохранить настройку. Попробуйте ещё раз.</string>
@@ -237,7 +235,48 @@
     <string name="onboarding_search_title">Выберите поисковик</string>
     <string name="onboarding_search_body">Ввод в адресной строке будет искать через него.</string>
     <string name="onboarding_action_next">Далее</string>
-    <string name="onboarding_action_done">Готово</string>
+    <string name="onboarding_action_start_browsing">Начать</string>
     <string name="onboarding_action_skip">Пропустить</string>
     <string name="onboarding_progress_a11y">Шаг %1$d из %2$d</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Поиск</string>
+    <string name="nav_tabs">Вкладки</string>
+    <string name="nav_menu">Меню</string>
+    <string name="hub_privacy_banner">Всё, что вы просматриваете, остаётся на этом телефоне</string>
+    <string name="hub_incognito_banner_title">Просмотр без следов</string>
+    <string name="hub_incognito_banner_body">Откройте вкладку инкогнито: без истории, cookie удаляются при закрытии.</string>
+    <string name="hub_quick_settings_title">Быстрые настройки</string>
+    <string name="hub_tile_clear_data">Очистить данные</string>
+    <string name="hub_downloads_in_progress_cd">Идут загрузки</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="one">Вкладки, открыта %1$d</item>
+        <item quantity="few">Вкладки, открыто %1$d</item>
+        <item quantity="many">Вкладки, открыто %1$d</item>
+        <item quantity="other">Вкладки, открыто %1$d</item>
+    </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Доброе утро</string>
+    <string name="home_greeting_afternoon">Добрый день</string>
+    <string name="home_greeting_evening">Добрый вечер</string>
+    <string name="home_privacy_line">Всё, что вы просматриваете, остаётся на этом телефоне.</string>
+    <string name="home_recent_title">Недавно посещённые</string>
+    <string name="home_recent_see_all">Показать все</string>
+    <string name="home_shortcut_tag_tab">Вкладка</string>
+    <string name="home_shortcut_tag_saved">Сохранено</string>
+    <string name="home_shortcut_tag_recent">Недавнее</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">Вы в режиме инкогнито</string>
+    <string name="incognito_page_subtitle">Другие пользователи этого телефона не увидят, что вы здесь делаете.</string>
+    <string name="incognito_page_section_title">Когда вы закроете все вкладки инкогнито</string>
+    <string name="incognito_page_point_history">Посещённые страницы не сохраняются в истории</string>
+    <string name="incognito_page_point_cookies">Cookie и данные сайтов удаляются</string>
+    <string name="incognito_page_point_screenshots">Снимки экрана запрещены, пока открыта вкладка инкогнито</string>
+    <string name="incognito_page_footnote">Скачанные файлы и сохранённые закладки остаются. Сайты и ваша сеть по-прежнему видят ваши посещения.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Открытые</string>
+    <string name="tabs_chip_incognito">Инкогнито</string>
 </resources>

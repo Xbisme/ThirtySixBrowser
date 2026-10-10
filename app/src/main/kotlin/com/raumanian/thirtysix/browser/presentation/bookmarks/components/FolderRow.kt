@@ -2,19 +2,19 @@
 
 package com.raumanian.thirtysix.browser.presentation.bookmarks.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.presentation.components.ListRow
+import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 
-@OptIn(ExperimentalFoundationApi::class)
+/** Spec 013 — a folder row; Spec 019 — an open [ListRow] with the accent folder lead and a chevron. */
 @Composable
 fun FolderRow(
     folder: BookmarkFolder,
@@ -22,15 +22,20 @@ fun FolderRow(
     onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ListItem(
-        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = onLongPress),
-        leadingContent = {
+    ListRow(
+        title = folder.name,
+        subtitle = "",
+        leading = { ListRowIcon(icon = AppIcons.Folder, accent = true) },
+        onClick = onClick,
+        onLongClick = onLongPress,
+        modifier = modifier,
+        trailing = {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.List,
+                painter = painterResource(AppIcons.ChevronRight),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(Dimens.iconSmall),
             )
         },
-        headlineContent = { Text(folder.name) },
     )
 }

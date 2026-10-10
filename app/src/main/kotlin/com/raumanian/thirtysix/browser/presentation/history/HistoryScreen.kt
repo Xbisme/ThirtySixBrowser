@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -31,9 +32,10 @@ import com.raumanian.thirtysix.browser.presentation.history.components.NoHistory
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 
 /**
- * Spec 014 — History screen: top bar (title · back · search · clear-all), the grouped
- * list with its two zero-result branches, the long-press action sheet, the clear-all
- * confirmation dialog, and a snackbar host for one-shot action feedback.
+ * Spec 014 / Spec 019 — History screen: top bar (back · clear-all · large title · search
+ * well, inset-aware), the grouped list of open rows under section headers with its two
+ * zero-result branches, the long-press action sheet, the clear-all confirmation dialog, and
+ * a snackbar host for one-shot action feedback.
  *
  * `FaviconCache` is exposed via the ViewModel (rather than via Hilt entry points
  * or a separate Composable parameter) so test seams stay simple — instrumented
@@ -71,6 +73,7 @@ fun HistoryScreen(
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.surface,
     ) { padding ->
         HistoryContent(
             state = state,
@@ -100,6 +103,10 @@ fun HistoryScreen(
     }
 }
 
+// Spec 019 FR-041 / Constitution §V — headers and rows recycle only among their own kind.
+private const val CONTENT_TYPE_DAY_HEADER = "history_day_header"
+private const val CONTENT_TYPE_ROW = "history_row"
+
 /**
  * Spec 014 FR-009 / FR-015 / FR-027 — three mutually-exclusive list branches:
  * nothing recorded at all, nothing matching an active query, or the grouped list.
@@ -119,10 +126,14 @@ private fun HistoryContent(
 
         else -> LazyColumn(modifier = modifier) {
             for (group in state.groupedEntries) {
-                item(key = "header_${group.bucket}") {
+                item(key = "header_${group.bucket}", contentType = CONTENT_TYPE_DAY_HEADER) {
                     HistoryDayHeader(bucket = group.bucket)
                 }
-                items(group.entries, key = { entry -> entry.id }) { entry ->
+                items(
+                    items = group.entries,
+                    key = { entry -> entry.id },
+                    contentType = { CONTENT_TYPE_ROW },
+                ) { entry ->
                     HistoryRow(
                         entry = entry,
                         faviconCache = viewModel.faviconCache,

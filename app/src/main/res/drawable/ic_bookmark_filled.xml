@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols Rounded "bookmark" (filled), weight 300, grade -25, 24px.
+     Source: google/material-design-icons @ 49d4db35, Apache-2.0. Spec 019 research R4. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <group android:translateY="960">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="m480-268-158.27 67.65q-34.23 14.66-64.75-5.62-30.52-20.27-30.52-57.22v-481.27q0-28.44 19.92-48.35 19.91-19.92 48.35-19.92h370.54q28.44 0 48.35 19.92 19.92 19.91 19.92 48.35v481.27q0 36.95-30.52 57.22-30.52 20.28-64.56 5.62L480-268Z" />
+    </group>
+</vector>

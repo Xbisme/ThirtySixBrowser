@@ -26,6 +26,9 @@ interface BookmarkRepository {
 
     fun observeBookmarksByUrl(url: String): Flow<List<Bookmark>>
 
+    /** Spec 019 — the [limit] most recently saved bookmarks across all folders, newest first. */
+    fun observeRecentBookmarks(limit: Int): Flow<List<Bookmark>>
+
     fun searchBookmarks(query: String): Flow<List<Bookmark>>
 
     suspend fun getBookmark(id: Long): Bookmark?

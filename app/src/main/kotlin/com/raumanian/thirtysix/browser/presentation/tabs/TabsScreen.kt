@@ -2,71 +2,64 @@
 
 package com.raumanian.thirtysix.browser.presentation.tabs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
+import com.raumanian.thirtysix.browser.presentation.components.ThirtySixChip
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.components.CloseAllIncognitoConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.tabs.components.CloseAllTabsConfirmDialog
+import com.raumanian.thirtysix.browser.presentation.tabs.components.TabCreateCard
 import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherCard
-import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherNewIncognitoTabCard
-import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherNewTabCard
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import java.io.File
 
 /**
- * Spec 011 — tab switcher screen (`AppDestination.Tabs` route — placeholder
- * route reserved by Spec 002, now hosting the real switcher).
+ * Spec 011 tab switcher, restyled by Spec 019 FR-040 (design system Tabs artboard): a large
+ * plural-aware title ("5 tabs"), Open / Incognito chips that switch the mode (clarification
+ * Q3 — the Incognito chip appears only while incognito tabs exist), one close-all action for
+ * the mode on screen, and an adaptive grid of image cards — two columns at 360dp, more when
+ * wider — ending with the mode's create card.
  *
- * Layout: [Scaffold] with a plural-aware count title ("5 tabs", "1 tab", etc.
- * per locale's CLDR plural rules — FR-015 / M4) + a "Close all tabs" action
- * button in the [TopAppBar] (FR-012) + [LazyVerticalGrid] body with adaptive
- * columns. Each `state.tabs` entry renders a [TabSwitcherCard]; the new-tab
- * affordance ([TabSwitcherNewTabCard]) is the last item in the grid (FR-011),
- * disabled at `MAX_TABS` (FR-016).
- *
- * NavController coupling (M3): the Composable collects [TabsViewModel.popBackEvent]
- * via a `LaunchedEffect(Unit)` and calls `navController.popBackStack(...)` on
- * each emission. NO `LaunchedEffect(activeTabId)` — that heuristic was
- * rejected for false-positives on initial composition (analyze M3 remediation).
- *
- * Spec 011 (T046 / T047 / US3):
- *  - Close × on each card wired to `viewModel.onCloseTab(tabId)`.
- *  - Close-all action triggers [CloseAllTabsConfirmDialog]; confirm dispatches
- *    [TabsViewModel.onCloseAllConfirmed], dismiss dispatches `onCloseAllDismissed`.
- *  - [TabsErrorEvent.MaxTabsReached] surfaces as a snackbar via
- *    [SnackbarHostState]; consumed via `viewModel.consumeErrorEvent()` after
- *    display (FR-016).
+ * NavController coupling (Spec 011 M3): [TabsViewModel.popBackEvent] pops back to the browser.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabsScreen(
     navController: NavHostController,
@@ -81,7 +74,7 @@ fun TabsScreen(
         BrowserLimits.MAX_INCOGNITO_TABS,
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel) {
         viewModel.popBackEvent.collect {
             navController.popBackStack(AppDestination.Browser.route, inclusive = false)
         }
@@ -94,31 +87,27 @@ fun TabsScreen(
         snackbarHostState = snackbarHostState,
         consumeErrorEvent = viewModel::consumeErrorEvent,
     )
-
     TabsConfirmDialogs(state = state, viewModel = viewModel)
 
-    // Spec 011 favicon amendment (2026-05-03) — re-read favicon files when
-    // a fresh icon arrives. `faviconVersion` bumps on every successful save;
-    // collectAsStateWithLifecycle pulls the latest counter so the grid
-    // re-composes (and TabSwitcherCard's `remember(faviconFile.length())`
-    // re-decodes the bitmap).
+    // Spec 011 — favicon / screenshot saves bump these counters so cards re-read their files.
     val faviconVersion by viewModel.faviconVersion.collectAsStateWithLifecycle()
-
-    // Spec 011 Q4 amendment (2026-05-03) — same pattern for screenshots.
-    // Bumps on save / delete / clearAll so the grid sees freshly-captured
-    // previews and falls back to the placeholder after a tab close.
     val screenshotVersion by viewModel.screenshotVersion.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .testTag(TEST_TAG_TABS_SCREEN),
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            TabsTopBar(
-                tabCount = state.tabs.size,
-                incognitoTabCount = state.incognitoTabCount,
-                onCloseAllRequested = viewModel::onCloseAllRequested,
-                onCloseAllIncognitoRequested = viewModel::onCloseAllIncognitoRequested,
+            TabsHeader(
+                state = state,
+                onBack = { navController.popBackStack() },
+                onModeSelected = viewModel::onModeSelected,
+                onCloseAll = if (state.mode == TabsMode.Incognito) {
+                    viewModel::onCloseAllIncognitoRequested
+                } else {
+                    viewModel::onCloseAllRequested
+                },
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -132,15 +121,15 @@ fun TabsScreen(
             screenshotFor = viewModel::screenshotFor,
             onTabClick = viewModel::onTabClick,
             onTabClose = viewModel::onCloseTab,
-            onNewTabClick = viewModel::onNewTabClick,
-            onNewIncognitoTabClick = viewModel::onNewIncognitoTabClick,
+            onCreate = if (state.mode == TabsMode.Incognito) {
+                viewModel::onNewIncognitoTabClick
+            } else {
+                viewModel::onNewTabClick
+            },
         )
     }
 }
 
-/**
- * Spec 012 — extracted to keep [TabsScreen] under detekt's `LongMethod = 60`.
- */
 @Composable
 private fun TabsErrorEventEffect(
     errorEvent: TabsErrorEvent?,
@@ -164,9 +153,6 @@ private fun TabsErrorEventEffect(
     }
 }
 
-/**
- * Spec 012 — extracted to keep [TabsScreen] under detekt's `LongMethod = 60`.
- */
 @Composable
 private fun TabsConfirmDialogs(state: TabsUiState, viewModel: TabsViewModel) {
     if (state.isCloseAllDialogVisible) {
@@ -184,51 +170,80 @@ private fun TabsConfirmDialogs(state: TabsUiState, viewModel: TabsViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Back, the close-all action for the current mode, the large title and the mode chips. */
 @Composable
-private fun TabsTopBar(
-    tabCount: Int,
-    incognitoTabCount: Int,
-    onCloseAllRequested: () -> Unit,
-    onCloseAllIncognitoRequested: () -> Unit,
+private fun TabsHeader(
+    state: TabsUiState,
+    onBack: () -> Unit,
+    onModeSelected: (TabsMode) -> Unit,
+    onCloseAll: () -> Unit,
 ) {
-    TopAppBar(
-        title = {
-            Text(
-                text = pluralStringResource(
-                    id = R.plurals.tabs_switcher_title_count,
-                    count = tabCount,
-                    tabCount,
+    val incognito = state.mode == TabsMode.Incognito
+    Column(
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(start = Spacing.xs, end = Spacing.xs, top = Spacing.xs, bottom = Spacing.sm),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            RoundIconButton(
+                icon = AppIcons.ArrowBack,
+                contentDescription = stringResource(R.string.browser_action_back),
+                onClick = onBack,
+                style = RoundIconStyle.Bare,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            RoundIconButton(
+                icon = AppIcons.DeleteSweep,
+                contentDescription = stringResource(
+                    if (incognito) R.string.tabs_action_close_all_incognito else R.string.tabs_switcher_close_all,
+                ),
+                onClick = onCloseAll,
+                style = RoundIconStyle.Bare,
+                enabled = state.visibleTabs.isNotEmpty(),
+                modifier = Modifier.testTag(
+                    if (incognito) TEST_TAG_CLOSE_ALL_INCOGNITO_ACTION else TEST_TAG_CLOSE_ALL_ACTION,
                 ),
             )
-        },
-        actions = {
-            // Spec 012 — "Close all incognito" affordance, visible iff
-            // incognitoTabCount > 0 (US5 acceptance scenarios 1+2).
-            if (incognitoTabCount > 0) {
-                IconButton(
-                    onClick = onCloseAllIncognitoRequested,
-                    modifier = Modifier.testTag(TEST_TAG_CLOSE_ALL_INCOGNITO_ACTION),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Lock,
-                        contentDescription = stringResource(
-                            R.string.tabs_action_close_all_incognito,
-                        ),
-                    )
-                }
-            }
-            IconButton(
-                onClick = onCloseAllRequested,
-                modifier = Modifier.testTag(TEST_TAG_CLOSE_ALL_ACTION),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.tabs_switcher_close_all),
-                )
-            }
-        },
-    )
+        }
+        Text(
+            text = pluralStringResource(R.plurals.tabs_switcher_title_count, state.tabs.size, state.tabs.size),
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .padding(horizontal = Spacing.sm)
+                .semantics { heading() },
+        )
+        ModeChips(incognito = incognito, showIncognito = state.incognitoTabCount > 0, onModeSelected = onModeSelected)
+    }
+}
+
+/** Open / Incognito chips; the Incognito chip appears only while incognito tabs exist (Q3). */
+@Composable
+private fun ModeChips(incognito: Boolean, showIncognito: Boolean, onModeSelected: (TabsMode) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        modifier = Modifier.padding(horizontal = Spacing.sm),
+    ) {
+        ThirtySixChip(
+            label = stringResource(R.string.tabs_chip_open),
+            selected = !incognito,
+            onClick = { onModeSelected(TabsMode.Open) },
+            leadingIcon = AppIcons.Tab,
+            modifier = Modifier.testTag(TEST_TAG_TABS_CHIP_OPEN),
+        )
+        if (showIncognito) {
+            ThirtySixChip(
+                label = stringResource(R.string.tabs_chip_incognito),
+                selected = incognito,
+                onClick = { onModeSelected(TabsMode.Incognito) },
+                leadingIcon = AppIcons.Incognito,
+                modifier = Modifier.testTag(TEST_TAG_TABS_CHIP_INCOGNITO),
+            )
+        }
+    }
 }
 
 @Suppress("LongParameterList")
@@ -238,58 +253,47 @@ private fun TabsGrid(
     padding: PaddingValues,
     faviconVersion: Long,
     screenshotVersion: Long,
-    faviconFor: (String) -> java.io.File?,
-    screenshotFor: (Long) -> java.io.File?,
+    faviconFor: (String) -> File?,
+    screenshotFor: (Long) -> File?,
     onTabClick: (Long) -> Unit,
     onTabClose: (Long) -> Unit,
-    onNewTabClick: () -> Unit,
-    onNewIncognitoTabClick: () -> Unit,
+    onCreate: () -> Unit,
 ) {
+    val createEnabled = if (state.mode == TabsMode.Incognito) {
+        state.incognitoTabCount < BrowserLimits.MAX_INCOGNITO_TABS
+    } else {
+        state.tabs.size - state.incognitoTabCount < BrowserLimits.MAX_TABS
+    }
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = TAB_CARD_MIN_WIDTH_DP),
-        contentPadding = PaddingValues(Spacing.md),
+        columns = GridCells.Adaptive(minSize = Dimens.tabCardMinWidth),
+        contentPadding = PaddingValues(
+            start = Spacing.md,
+            end = Spacing.md,
+            top = padding.calculateTopPadding() + Spacing.xs,
+            bottom = padding.calculateBottomPadding() + Spacing.md,
+        ),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding),
+        modifier = Modifier.fillMaxSize(),
     ) {
-        items(items = state.tabs, key = { tab -> tab.id }) { tab ->
-            // Re-derive favicon + screenshot paths per *Version bump so
-            // the `remember(file?.length())` cache keys inside
-            // TabSwitcherCard see new file mtime/size after a save.
-            @Suppress("UNUSED_EXPRESSION")
-            faviconVersion
-            @Suppress("UNUSED_EXPRESSION")
-            screenshotVersion
+        items(items = state.visibleTabs, key = { tab -> tab.id }, contentType = { CONTENT_TYPE_TAB }) { tab ->
+            // Incognito cards never read the caches (Spec 012); the version pair re-reads files
+            // after a save without recomposing anything else.
+            val files = remember(tab.id, tab.url, tab.isIncognito, faviconVersion, screenshotVersion) {
+                if (tab.isIncognito) null to null else faviconFor(tab.url) to screenshotFor(tab.id)
+            }
             TabSwitcherCard(
                 tab = tab,
                 isActive = tab.id == state.activeTabId,
-                // Spec 012 — incognito cards never read from caches; pass
-                // null so TabSwitcherCard's branch (T051) renders the
-                // placeholder regardless of any (theoretical) cache file.
-                faviconFile = if (tab.isIncognito) null else faviconFor(tab.url),
-                screenshotFile = if (tab.isIncognito) null else screenshotFor(tab.id),
+                faviconFile = files.first,
+                screenshotFile = files.second,
                 onClick = { onTabClick(tab.id) },
                 onCloseClick = { onTabClose(tab.id) },
+                modifier = Modifier.animateItem(),
             )
         }
-        // Normal new-tab card — disabled at MAX_TABS (existing Spec 011 logic).
-        // Counts only normal tabs against MAX_TABS per Q1 independent caps.
-        val normalTabCount = state.tabs.count { !it.isIncognito }
-        item(key = NEW_TAB_CARD_KEY) {
-            TabSwitcherNewTabCard(
-                enabled = normalTabCount < BrowserLimits.MAX_TABS,
-                onClick = onNewTabClick,
-            )
-        }
-        // Spec 012 — incognito new-tab card. Always rendered; disabled at
-        // MAX_INCOGNITO_TABS (FR-004).
-        item(key = NEW_INCOGNITO_TAB_CARD_KEY) {
-            TabSwitcherNewIncognitoTabCard(
-                enabled = state.incognitoTabCount < BrowserLimits.MAX_INCOGNITO_TABS,
-                onClick = onNewIncognitoTabClick,
-            )
+        item(key = state.mode, contentType = CONTENT_TYPE_CREATE) {
+            TabCreateCard(mode = state.mode, enabled = createEnabled, onClick = onCreate)
         }
     }
 }
@@ -297,7 +301,8 @@ private fun TabsGrid(
 const val TEST_TAG_TABS_SCREEN: String = "tabs_screen"
 const val TEST_TAG_CLOSE_ALL_ACTION: String = "tabs_close_all_action"
 const val TEST_TAG_CLOSE_ALL_INCOGNITO_ACTION: String = "tabs_close_all_incognito_action"
+const val TEST_TAG_TABS_CHIP_OPEN: String = "tabs_chip_open"
+const val TEST_TAG_TABS_CHIP_INCOGNITO: String = "tabs_chip_incognito"
 
-private val TAB_CARD_MIN_WIDTH_DP = 160.dp
-private const val NEW_TAB_CARD_KEY: String = "tabs_new_tab_card"
-private const val NEW_INCOGNITO_TAB_CARD_KEY: String = "tabs_new_incognito_tab_card"
+private const val CONTENT_TYPE_TAB = "tab"
+private const val CONTENT_TYPE_CREATE = "create"

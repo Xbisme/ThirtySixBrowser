@@ -165,6 +165,17 @@ kotlin {
     jvmToolchain(11)
 }
 
+// --- Compose compiler (Spec 019 R9, Constitution v1.4.0 §V rule 5) ------------
+// The stability file always applies. Reports and metrics are written only when the
+// build is run with `-PcomposeReports`, so ordinary builds pay nothing for them.
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))
+    if (project.hasProperty("composeReports")) {
+        reportsDestination = layout.buildDirectory.dir("compose_reports")
+        metricsDestination = layout.buildDirectory.dir("compose_reports")
+    }
+}
+
 // Print warning when release falls back to debug-signing (Constitution §XI v1.2.0 mandatory).
 // Use println so the message is visible at the default log level.
 gradle.taskGraph.whenReady {

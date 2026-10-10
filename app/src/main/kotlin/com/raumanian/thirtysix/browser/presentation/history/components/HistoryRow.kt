@@ -3,40 +3,31 @@
 
 package com.raumanian.thirtysix.browser.presentation.history.components
 
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.intl.Locale as ComposeLocale
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.DateFormats
 import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.components.ListRow
+import com.raumanian.thirtysix.browser.presentation.components.ListRowLead
+import com.raumanian.thirtysix.browser.presentation.components.ListRowLetter
+import com.raumanian.thirtysix.browser.presentation.components.rememberFileImage
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import java.io.File
 import java.time.Instant
 import java.time.ZoneId
@@ -44,15 +35,14 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
- * Spec 014 FR-009 / FR-010 — single history row.
- *
- * Layout: 32 dp favicon (or globe placeholder) · column[ title · hostname ] · time-of-visit.
+ * Spec 014 FR-009 / FR-010 — single history row, drawn as the shared open [ListRow]
+ * (Spec 019): favicon (or the host's first letter) · title over hostname · time of visit.
  * Title falls back to the URL's hostname when empty (FR-009 + edge-case handling).
- * Tap → [onClick] (replaces active tab); long-press → [onLongClick] (action sheet — wired in US3).
+ * Tap → [onClick] (replaces active tab); long-press → [onLongClick] (action sheet).
  *
- * Favicon path is read synchronously via [FaviconCache.fileFor]; the bitmap is decoded
- * once per `(path, length)` combination via `remember`. Cache miss falls back to the
- * generic globe icon.
+ * The click is attached here rather than through [ListRow]'s own `onClick` so the row keeps
+ * its spoken click label (title, host, time). The favicon is decoded off the main thread by
+ * [rememberFileImage]; until then, or on a cache miss, the letter shows.
  */
 @Composable
 fun HistoryRow(
@@ -74,36 +64,26 @@ fun HistoryRow(
         timeText,
     )
 
-    Row(
+    ListRow(
+        title = displayTitle,
+        subtitle = hostname,
+        leading = { FaviconOrLetter(file = file, hostname = hostname) },
         modifier = modifier
-            .fillMaxWidth()
             .testTag(TEST_TAG_HISTORY_ROW_PREFIX + entry.id)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
                 role = Role.Button,
                 onClickLabel = a11yLabel,
+            ),
+        trailing = {
+            Text(
+                text = timeText,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        FaviconOrGlobe(file = file)
-        TitleAndHostnameColumn(
-            displayTitle = displayTitle,
-            hostname = hostname,
-            modifier = Modifier
-                .padding(start = Spacing.md)
-                .weight(1f),
-        )
-        Text(
-            text = timeText,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(start = Spacing.sm)
-                .wrapContentWidth(),
-        )
-    }
+        },
+    )
 }
 
 @Composable
@@ -118,53 +98,17 @@ private fun formatTimeOfVisit(visitedAt: Long): String {
 }
 
 @Composable
-private fun TitleAndHostnameColumn(
-    displayTitle: String,
-    hostname: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = displayTitle,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = hostname,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
-private fun FaviconOrGlobe(file: File?) {
-    val bitmap = remember(file?.absolutePath, file?.length()) {
-        file?.takeIf { it.exists() && it.length() > 0L }
-            ?.let { BitmapFactory.decodeFile(it.absolutePath) }
-            ?.asImageBitmap()
-    }
-    if (bitmap != null) {
-        Image(
-            bitmap = bitmap,
-            contentDescription = null,
-            modifier = Modifier.size(FAVICON_DISPLAY_SIZE_DP),
-        )
+private fun FaviconOrLetter(file: File?, hostname: String) {
+    val bitmap by rememberFileImage(file)
+    val image = bitmap
+    if (image != null) {
+        ListRowLead {
+            Image(bitmap = image, contentDescription = null, modifier = Modifier.size(Dimens.icon))
+        }
     } else {
-        Icon(
-            imageVector = Icons.Filled.Search,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(FAVICON_DISPLAY_SIZE_DP),
-        )
+        ListRowLetter(letter = hostname.take(1).uppercase())
     }
 }
-
-private val FAVICON_DISPLAY_SIZE_DP = 24.dp
 
 /** Test-tag prefix exposed for instrumented tests asserting per-row presence. */
 const val TEST_TAG_HISTORY_ROW_PREFIX: String = "history_row_"

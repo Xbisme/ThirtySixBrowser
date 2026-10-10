@@ -108,10 +108,8 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-# Spec 007 — Material icons (core set: ~200 icons including Warning, used by
-# BrowserErrorState). Version managed by Compose BOM (no explicit version key).
-# Pure Kotlin / drawable resources, no .so → 16KB-safe.
-androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
+# Spec 019 R4 — material-icons-core removed: every icon is a Material Symbols Rounded
+# VectorDrawable in res/drawable, referenced through presentation/theme/AppIcons.kt.
 
 # Hilt (Spec 002)
 # IMPORTANT: artifact for KSP wiring is `hilt-compiler` — NOT `hilt-android-compiler`.
@@ -197,5 +195,4 @@ compose = [
     "androidx-compose-ui-graphics",
     "androidx-compose-ui-tooling-preview",
     "androidx-compose-material3",
-    "androidx-compose-material-icons-core",
 ]

@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">모든 탭을 닫으시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
     <string name="tabs_card_close">탭 닫기</string>
     <string name="tabs_default_title">새 탭</string>
-    <string name="browser_action_tabs_switcher">탭 전환기 열기</string>
     <string name="browser_action_new_tab">새 탭 열기</string>
     <string name="browser_max_tabs_reached">최대 탭 수에 도달했습니다. 새 탭을 열려면 탭을 닫으세요.</string>
 
@@ -35,10 +34,8 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">새 시크릿 탭</string>
-    <string name="tabs_a11y_new_incognito_tab">새 시크릿 탭 열기</string>
     <string name="tabs_a11y_incognito_glyph">시크릿 탭</string>
     <string name="tabs_error_max_incognito_tabs_reached">시크릿 탭 최대 %d개에 도달했습니다</string>
-    <string name="browser_a11y_incognito_indicator">시크릿 모드 활성화됨</string>
     <string name="tabs_a11y_incognito_card_placeholder">시크릿 탭 — 보안을 위해 콘텐츠 숨김</string>
     <string name="tabs_card_incognito_label">시크릿</string>
     <string name="tabs_action_close_all_incognito">모든 시크릿 탭 닫기</string>
@@ -52,6 +49,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">북마크</string>
+    <string name="bookmarks_section_folders">폴더</string>
+    <string name="bookmarks_section_pages">페이지</string>
     <string name="bookmarks_empty_title">아직 북마크가 없습니다</string>
     <string name="bookmarks_empty_body">페이지를 보는 동안 하트 아이콘을 누르거나 + 버튼을 사용하여 추가하세요.</string>
     <string name="bookmarks_action_back_to_parent_cd">상위 폴더로</string>
@@ -140,7 +139,6 @@
     <string name="downloads_failure_generic">실패</string>
     <string name="downloads_size_unknown">크기 알 수 없음</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">더보기</string>
     <string name="downloads_no_app_can_open">이 파일을 열 수 있는 앱이 없습니다.</string>
     <string name="downloads_file_missing">이 파일은 기기에 더 이상 없습니다.</string>
     <string name="downloads_not_complete">이 다운로드는 아직 완료되지 않았습니다.</string>
@@ -167,7 +165,7 @@
     <string name="settings_action_cancel">취소</string>
     <string name="settings_section_appearance">모양</string>
     <string name="settings_section_language">언어</string>
-    <string name="settings_section_search">검색</string>
+    <string name="settings_section_language_and_search">언어 및 검색</string>
     <string name="settings_section_privacy">개인정보 보호</string>
     <string name="settings_section_about">정보</string>
     <string name="settings_error_not_saved">설정을 저장하지 못했습니다. 다시 시도해 주세요.</string>
@@ -228,7 +226,45 @@
     <string name="onboarding_search_title">검색 엔진 선택</string>
     <string name="onboarding_search_body">주소창에 입력하면 이 엔진으로 검색합니다.</string>
     <string name="onboarding_action_next">다음</string>
-    <string name="onboarding_action_done">완료</string>
+    <string name="onboarding_action_start_browsing">탐색 시작</string>
     <string name="onboarding_action_skip">건너뛰기</string>
     <string name="onboarding_progress_a11y">%2$d단계 중 %1$d단계</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">검색</string>
+    <string name="nav_tabs">탭</string>
+    <string name="nav_menu">메뉴</string>
+    <string name="hub_privacy_banner">탐색한 내용은 이 휴대전화를 벗어나지 않습니다</string>
+    <string name="hub_incognito_banner_title">흔적 없이 탐색</string>
+    <string name="hub_incognito_banner_body">시크릿 탭 열기: 방문 기록이 남지 않고, 탭을 닫으면 쿠키가 삭제됩니다.</string>
+    <string name="hub_quick_settings_title">빠른 설정</string>
+    <string name="hub_tile_clear_data">데이터 삭제</string>
+    <string name="hub_downloads_in_progress_cd">다운로드 진행 중</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="other">탭, %1$d개 열림</item>
+    </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">좋은 아침이에요</string>
+    <string name="home_greeting_afternoon">좋은 오후예요</string>
+    <string name="home_greeting_evening">좋은 저녁이에요</string>
+    <string name="home_privacy_line">탐색한 모든 내용은 이 휴대전화에만 남습니다.</string>
+    <string name="home_recent_title">최근 방문</string>
+    <string name="home_recent_see_all">모두 보기</string>
+    <string name="home_shortcut_tag_tab">탭</string>
+    <string name="home_shortcut_tag_saved">저장됨</string>
+    <string name="home_shortcut_tag_recent">최근</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">시크릿 모드로 탐색 중입니다</string>
+    <string name="incognito_page_subtitle">이 휴대전화를 사용하는 다른 사람은 여기서 한 일을 볼 수 없습니다.</string>
+    <string name="incognito_page_section_title">시크릿 탭을 모두 닫으면</string>
+    <string name="incognito_page_point_history">방문한 페이지가 방문 기록에 남지 않습니다</string>
+    <string name="incognito_page_point_cookies">쿠키와 사이트 데이터가 삭제됩니다</string>
+    <string name="incognito_page_point_screenshots">시크릿 탭이 열려 있는 동안 스크린샷이 차단됩니다</string>
+    <string name="incognito_page_footnote">다운로드한 파일과 저장한 북마크는 유지됩니다. 웹사이트와 네트워크는 여전히 방문 사실을 볼 수 있습니다.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">열린 탭</string>
+    <string name="tabs_chip_incognito">시크릿</string>
 </resources>

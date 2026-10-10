@@ -279,6 +279,9 @@ class SettingsViewModelTest {
 
         assertEquals(listOf(AppLanguage.French), controller.applied)
         assertEquals(AppLanguage.French, viewModel.uiState.value.appLanguage)
+        // Spec 019 — the chooser stays until the screen reports the language has landed.
+        assertEquals(SettingsDialog.LanguageChooser, viewModel.uiState.value.dialog)
+        viewModel.onLanguageApplied()
         assertNull(viewModel.uiState.value.dialog)
     }
 
@@ -530,16 +533,17 @@ class SettingsViewModelTest {
     // ──────── US6 — dynamic color (T096) ────────
 
     @Test
-    fun `turning dynamic color off writes once`() = runTest {
+    fun `turning dynamic color on writes once`() = runTest {
+        // Spec 019 FR-005a — the default is off, so the first meaningful toggle turns it on.
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
 
-        viewModel.onDynamicColorToggled(false)
+        viewModel.onDynamicColorToggled(true)
         advanceUntilIdle()
 
         assertEquals(listOf(FakeSettingsRepository.CALL_SET_DYNAMIC_COLOR), repository.writes)
-        assertFalse(viewModel.uiState.value.isDynamicColorEnabled)
+        assertTrue(viewModel.uiState.value.isDynamicColorEnabled)
     }
 
     @Test
@@ -561,11 +565,11 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
-        viewModel.onDynamicColorToggled(false)
+        viewModel.onDynamicColorToggled(true)
         advanceUntilIdle()
 
         assertEquals(listOf(SettingsEvent.SettingNotSaved), events)
-        assertTrue(viewModel.uiState.value.isDynamicColorEnabled)
+        assertFalse(viewModel.uiState.value.isDynamicColorEnabled)
     }
 
     private fun clearDialog(viewModel: SettingsViewModel): SettingsDialog.ClearBrowsingData =

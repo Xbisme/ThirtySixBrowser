@@ -340,7 +340,8 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 7. Tabs + incognito (Specs 011, 012)
 8. Bookmarks + History + Downloads (Specs 013–015)
 9. Settings + Splash + Onboarding (Specs 016–018)
-10. (Optional) Tracker blocker (Spec 019)
+10. UI redesign theo design system (Spec 019)
+11. (Optional) Tracker blocker (Spec 020)
 
 ---
 
@@ -383,7 +384,7 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
   - `search_engine` — Google/DuckDuckGo/Bing (default Google)
   - `default_home_url`
   - `is_onboarding_completed`
-  - `tracker_blocker_enabled` (nếu làm Spec 019)
+  - `tracker_blocker_enabled` (nếu làm Spec 020)
 
 ### Không dùng
 - ❌ SharedPreferences (legacy)

@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">すべてのタブを閉じますか?この操作は取り消せません。</string>
     <string name="tabs_card_close">タブを閉じる</string>
     <string name="tabs_default_title">新しいタブ</string>
-    <string name="browser_action_tabs_switcher">タブスイッチャーを開く</string>
     <string name="browser_action_new_tab">新しいタブを開く</string>
     <string name="browser_max_tabs_reached">タブの最大数に達しました。新しいタブを開くにはタブを閉じてください。</string>
 
@@ -35,10 +34,8 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">新しいシークレットタブ</string>
-    <string name="tabs_a11y_new_incognito_tab">新しいシークレットタブを開く</string>
     <string name="tabs_a11y_incognito_glyph">シークレットタブ</string>
     <string name="tabs_error_max_incognito_tabs_reached">シークレットタブの上限 %d 個に達しました</string>
-    <string name="browser_a11y_incognito_indicator">シークレットモード有効</string>
     <string name="tabs_a11y_incognito_card_placeholder">シークレットタブ — プライバシー保護のため非表示</string>
     <string name="tabs_card_incognito_label">シークレット</string>
     <string name="tabs_action_close_all_incognito">すべてのシークレットタブを閉じる</string>
@@ -52,6 +49,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">ブックマーク</string>
+    <string name="bookmarks_section_folders">フォルダ</string>
+    <string name="bookmarks_section_pages">ページ</string>
     <string name="bookmarks_empty_title">まだブックマークがありません</string>
     <string name="bookmarks_empty_body">ページを表示中にハートアイコンをタップするか、+ ボタンで追加してください。</string>
     <string name="bookmarks_action_back_to_parent_cd">親フォルダへ</string>
@@ -140,7 +139,6 @@
     <string name="downloads_failure_generic">失敗</string>
     <string name="downloads_size_unknown">サイズ不明</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">その他</string>
     <string name="downloads_no_app_can_open">このファイルを開けるアプリが端末にありません。</string>
     <string name="downloads_file_missing">このファイルは端末に存在しません。</string>
     <string name="downloads_not_complete">このダウンロードはまだ完了していません。</string>
@@ -167,7 +165,7 @@
     <string name="settings_action_cancel">キャンセル</string>
     <string name="settings_section_appearance">外観</string>
     <string name="settings_section_language">言語</string>
-    <string name="settings_section_search">検索</string>
+    <string name="settings_section_language_and_search">言語と検索</string>
     <string name="settings_section_privacy">プライバシー</string>
     <string name="settings_section_about">このアプリについて</string>
     <string name="settings_error_not_saved">設定を保存できませんでした。もう一度お試しください。</string>
@@ -228,7 +226,45 @@
     <string name="onboarding_search_title">検索エンジンを選択</string>
     <string name="onboarding_search_body">アドレスバーへの入力はこれで検索します。</string>
     <string name="onboarding_action_next">次へ</string>
-    <string name="onboarding_action_done">完了</string>
+    <string name="onboarding_action_start_browsing">ブラウジングを始める</string>
     <string name="onboarding_action_skip">スキップ</string>
     <string name="onboarding_progress_a11y">%2$d 件中 %1$d 件目</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">検索</string>
+    <string name="nav_tabs">タブ</string>
+    <string name="nav_menu">メニュー</string>
+    <string name="hub_privacy_banner">閲覧した内容はこのスマートフォンの外に出ません</string>
+    <string name="hub_incognito_banner_title">痕跡を残さずに閲覧</string>
+    <string name="hub_incognito_banner_body">シークレットタブを開く：履歴は残らず、閉じると Cookie が削除されます。</string>
+    <string name="hub_quick_settings_title">クイック設定</string>
+    <string name="hub_tile_clear_data">データを消去</string>
+    <string name="hub_downloads_in_progress_cd">ダウンロード中</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="other">タブ、%1$d 個開いています</item>
+    </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">おはようございます</string>
+    <string name="home_greeting_afternoon">こんにちは</string>
+    <string name="home_greeting_evening">こんばんは</string>
+    <string name="home_privacy_line">閲覧した内容はすべてこのスマートフォンに残ります。</string>
+    <string name="home_recent_title">最近アクセスしたページ</string>
+    <string name="home_recent_see_all">すべて表示</string>
+    <string name="home_shortcut_tag_tab">タブ</string>
+    <string name="home_shortcut_tag_saved">保存済み</string>
+    <string name="home_shortcut_tag_recent">最近</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">シークレットモードで閲覧中です</string>
+    <string name="incognito_page_subtitle">このスマートフォンを使う他の人には、ここでの操作は表示されません。</string>
+    <string name="incognito_page_section_title">シークレットタブをすべて閉じると</string>
+    <string name="incognito_page_point_history">アクセスしたページは履歴に残りません</string>
+    <string name="incognito_page_point_cookies">Cookie とサイトデータは削除されます</string>
+    <string name="incognito_page_point_screenshots">シークレットタブを開いている間はスクリーンショットを撮れません</string>
+    <string name="incognito_page_footnote">ダウンロードしたファイルと保存したブックマークは残ります。ウェブサイトやネットワークからはアクセスが見えます。</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">開いているタブ</string>
+    <string name="tabs_chip_incognito">シークレット</string>
 </resources>

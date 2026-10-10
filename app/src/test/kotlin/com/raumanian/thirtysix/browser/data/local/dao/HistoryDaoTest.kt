@@ -46,6 +46,18 @@ class HistoryDaoTest {
     }
 
     @Test
+    fun `observeRecent emits the newest rows up to the limit`() = runTest {
+        // Spec 019 T058a — Home page "Recently visited" (data-model §4).
+        (1L..5L).forEach {
+            historyDao.insert(HistoryEntryEntity(url = "https://$it.com", title = "$it", visitedAt = it * 100))
+        }
+        historyDao.observeRecent(limit = 3).test {
+            assertEquals(listOf("https://5.com", "https://4.com", "https://3.com"), awaitItem().map { it.url })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `getRecent orders newest-first paginated`() = runTest {
         historyDao.insert(HistoryEntryEntity(url = "https://1.com", title = "1", visitedAt = 100L))
         historyDao.insert(HistoryEntryEntity(url = "https://2.com", title = "2", visitedAt = 200L))

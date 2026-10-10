@@ -145,15 +145,29 @@ class SettingsViewModel @Inject constructor(
 
     /**
      * FR-013 – FR-015. The use case skips the platform when [language] is already held
-     * (FR-006). On success the platform recreates the activity; the state is refreshed anyway,
-     * so it is right even where no recreation follows.
+     * (FR-006), and then the dialog closes at once.
+     *
+     * Spec 019 — otherwise the dialog stays open until the screen reports the new language has
+     * landed ([onLanguageApplied]). Closing it first showed the old language for a frame or
+     * three before the new one arrived, which read as a flicker.
      */
     fun onLanguageSelected(language: AppLanguage) {
-        dismissDialog()
+        if (language == _uiState.value.appLanguage) {
+            dismissDialog()
+            return
+        }
         viewModelScope.launch {
-            if (!setAppLanguage(language)) _events.tryEmit(SettingsEvent.LanguageNotApplied)
+            if (!setAppLanguage(language)) {
+                dismissDialog()
+                _events.tryEmit(SettingsEvent.LanguageNotApplied)
+            }
             refreshAppLanguage()
         }
+    }
+
+    /** Spec 019 — the new language is on screen (or the wait timed out): close the chooser. */
+    fun onLanguageApplied() {
+        dismissDialog()
     }
 
     // ──────── US4 — clear browsing data ────────

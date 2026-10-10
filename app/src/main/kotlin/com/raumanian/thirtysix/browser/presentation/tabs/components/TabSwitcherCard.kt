@@ -2,63 +2,79 @@
 
 package com.raumanian.thirtysix.browser.presentation.tabs.components
 
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.core.animate
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.domain.model.Tab
+import com.raumanian.thirtysix.browser.presentation.components.MeshArt
+import com.raumanian.thirtysix.browser.presentation.components.SeededMeshArt
+import com.raumanian.thirtysix.browser.presentation.components.rememberFileImage
+import com.raumanian.thirtysix.browser.presentation.home.seedColorFor
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import java.io.File
+import kotlin.math.abs
+import kotlin.math.sign
+
+private const val SCRIM_ALPHA = 0.55f
 
 /**
- * Spec 011 Q4 amendment (2026-05-03) — Chrome-style 3-zone tab card.
+ * Spec 019 FR-040 — an image tab card (design system TabCard): the page preview fills the card,
+ * the title and favicon sit over a dark fade at the bottom, and a glass close button sits top
+ * right. The active tab gets a 2dp `primary` ring with a 2dp gap.
  *
- * Layout (top → bottom):
- *  - 16:9 preview area: WebView screenshot (`screenshotFile`) when cached,
- *    falling back to a deterministic colored placeholder + first-letter
- *    glyph derived from the hostname.
- *  - Title row: 16dp favicon (or hostname-glyph fallback) + page title +
- *    close × `IconButton`. Title falls back to "New tab" when empty (R11).
- *  - Hostname row: URL hostname extracted via [extractHostnameOrSelf].
+ * - No screenshot yet → a mesh seeded from the host with its first letter.
+ * - A tab on the Home page → the hero mesh, "New tab" and the brand mark (data-model §3).
+ * - An incognito tab → the plum incognito surface, never a screenshot or its title (Spec 012).
  *
- * Active-tab visual indicator: `BorderStroke(2.dp, MaterialTheme.colorScheme.primary)`
- * on the [Card] when [isActive] is true.
- *
- * `Modifier.semantics { contentDescription = "${title}, ${hostname}" }`
- * exposes the tab identity to TalkBack as a single read.
+ * Swipe sideways to close (clarification Q1): the offset is a float state read **only in
+ * `graphicsLayer { }`**, so dragging a card never recomposes it or the grid (research R11, §V
+ * rule 1). Past [BrowserLimits.TAB_SWIPE_CLOSE_FRACTION] of the card's width it flies out and
+ * [onCloseClick] fires once; short of it, it springs back.
  */
 @Suppress("LongParameterList")
 @Composable
@@ -71,252 +87,248 @@ fun TabSwitcherCard(
     onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val displayTitle = tab.title.ifBlank { stringResource(R.string.tabs_default_title) }
-    val hostname = tab.url.extractHostnameOrSelf()
+    val isHome = tab.url == UrlConstants.HOME_PAGE_URL
+    val displayTitle = if (isHome) {
+        stringResource(R.string.tabs_default_title)
+    } else {
+        tab.title.ifBlank { stringResource(R.string.tabs_default_title) }
+    }
+    val hostname = if (isHome) "" else tab.url.extractHostnameOrSelf()
     val a11y = if (tab.isIncognito) {
-        // Spec 012 — incognito card semantics MUST NOT leak title/hostname
-        // (the tab is "private" — the very thing the user is hiding from a
-        // glancing observer). FR-025 dedicated a11y label.
+        // Spec 012 FR-025 — an incognito card never speaks its title or host.
         stringResource(R.string.tabs_a11y_incognito_card_placeholder)
     } else {
-        "$displayTitle, $hostname"
+        listOf(displayTitle, hostname).filter { it.isNotEmpty() }.joinToString(", ")
     }
-
-    Card(
-        onClick = onClick,
+    val shape = MaterialTheme.shapes.extraLarge
+    SwipeToClose(
+        onClose = onCloseClick,
         modifier = modifier
             .fillMaxWidth()
-            .testTag(TEST_TAG_TAB_CARD_PREFIX + tab.id)
-            .semantics { contentDescription = a11y },
-        border = if (isActive) {
-            BorderStroke(ACTIVE_BORDER_WIDTH_DP, MaterialTheme.colorScheme.primary)
-        } else {
-            null
-        },
-        elevation = CardDefaults.cardElevation(defaultElevation = Spacing.xs),
+            .height(Dimens.tabCardHeight),
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            TabPreviewArea(
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    if (isActive) {
+                        Modifier
+                            .border(Dimens.activeRing, MaterialTheme.colorScheme.primary, shape)
+                            .padding(Dimens.activeRing * 2)
+                    } else {
+                        Modifier
+                    },
+                ),
+        ) {
+            CardFace(
+                tab = tab,
+                isHome = isHome,
+                title = if (tab.isIncognito) stringResource(R.string.tabs_card_incognito_label) else displayTitle,
                 hostname = hostname,
-                screenshotFile = screenshotFile,
-                isIncognito = tab.isIncognito,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            TabTitleRow(
-                title = displayTitle,
-                hostname = hostname,
+                a11y = a11y,
                 faviconFile = faviconFile,
-                tabId = tab.id,
-                isIncognito = tab.isIncognito,
-                onCloseClick = onCloseClick,
+                screenshotFile = screenshotFile,
+                onClick = onClick,
+            )
+            GlassClose(
+                onClick = onCloseClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(Spacing.xs)
+                    .testTag(TEST_TAG_TAB_CARD_CLOSE_PREFIX + tab.id),
             )
         }
     }
 }
 
+/**
+ * Horizontal swipe-to-close. The offset is written by the gesture and read only in
+ * `graphicsLayer { }` (draw phase), so a drag never recomposes the card (research R11).
+ */
 @Composable
-private fun TabPreviewArea(
-    hostname: String,
-    screenshotFile: File?,
-    isIncognito: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    // Spec 012 (FR-014, R6) — incognito cards bypass screenshot read entirely
-    // and render a distinct surfaceVariant background + lock glyph. The
-    // upstream callsite already passes screenshotFile=null for incognito tabs;
-    // this branch is defence-in-depth in case of regressions.
-    if (isIncognito) {
-        Box(
-            modifier = modifier
-                .aspectRatio(PLACEHOLDER_ASPECT_RATIO)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .testTag(TEST_TAG_INCOGNITO_PLACEHOLDER),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Lock,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        return
-    }
-
-    val style = TabPlaceholderColor.forHostname(hostname)
-    val (background, foreground) = resolvePalette(style.paletteRoleIndex)
-    // Q4 amendment — load screenshot bitmap once per (path, length) so
-    // re-rendering for unrelated state (active-tab indicator toggle) does
-    // not re-decode. Falls back to colored placeholder when no screenshot.
-    val screenshotBitmap = remember(screenshotFile?.absolutePath, screenshotFile?.length()) {
-        screenshotFile?.takeIf { it.exists() && it.length() > 0L }
-            ?.let { BitmapFactory.decodeFile(it.absolutePath) }
-            ?.asImageBitmap()
-    }
+private fun SwipeToClose(onClose: () -> Unit, modifier: Modifier, content: @Composable () -> Unit) {
+    var offset by remember { mutableFloatStateOf(0f) }
+    var widthPx by remember { mutableIntStateOf(0) }
     Box(
         modifier = modifier
-            .aspectRatio(PLACEHOLDER_ASPECT_RATIO)
-            .background(background),
-        contentAlignment = Alignment.Center,
+            .onSizeChanged { widthPx = it.width }
+            .graphicsLayer {
+                translationX = offset
+                alpha = if (widthPx == 0) 1f else 1f - (abs(offset) / widthPx).coerceIn(0f, 1f)
+            }
+            .draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta -> offset += delta },
+                onDragStopped = {
+                    val closes = widthPx > 0 && abs(offset) > widthPx * BrowserLimits.TAB_SWIPE_CLOSE_FRACTION
+                    val target = if (closes) widthPx * sign(offset) else 0f
+                    animate(initialValue = offset, targetValue = target) { value, _ -> offset = value }
+                    if (closes) onClose()
+                },
+            ),
     ) {
-        if (screenshotBitmap != null) {
-            Image(
-                bitmap = screenshotBitmap,
-                contentDescription = null, // hostname already in card semantics
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
-        } else {
-            Text(
-                text = style.glyph.toString(),
-                style = MaterialTheme.typography.headlineMedium,
-                color = foreground,
-            )
-        }
+        content()
     }
 }
 
 @Suppress("LongParameterList")
 @Composable
-private fun TabTitleRow(
+private fun CardFace(
+    tab: Tab,
+    isHome: Boolean,
     title: String,
     hostname: String,
+    a11y: String,
     faviconFile: File?,
-    tabId: Long,
-    isIncognito: Boolean,
-    onCloseClick: () -> Unit,
+    screenshotFile: File?,
+    onClick: () -> Unit,
 ) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(MaterialTheme.shapes.extraLarge)
+            .clickable(role = Role.Button, onClick = onClick)
+            .testTag(TEST_TAG_TAB_CARD_PREFIX + tab.id)
+            .semantics { contentDescription = a11y },
+    ) {
+        when {
+            tab.isIncognito -> IncognitoPreview()
+            isHome -> HomePreview()
+            else -> PagePreview(hostname = hostname, screenshotFile = screenshotFile)
+        }
+        CardCaption(
+            title = title,
+            lead = {
+                when {
+                    tab.isIncognito -> Unit
+                    isHome -> Image(
+                        painter = painterResource(AppIcons.BrandMark),
+                        contentDescription = null,
+                        modifier = Modifier.size(Dimens.favicon),
+                    )
+                    else -> Favicon(faviconFile)
+                }
+            },
+            modifier = Modifier.align(Alignment.BottomStart),
+        )
+    }
+}
+
+@Composable
+private fun PagePreview(hostname: String, screenshotFile: File?) {
+    val screenshot by rememberFileImage(screenshotFile)
+    val image = screenshot
+    if (image != null) {
+        Image(
+            bitmap = image,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier.fillMaxSize(),
+        )
+    } else {
+        SeededMeshArt(
+            seed = seedColorFor(hostname),
+            letter = hostname.firstOrNull()?.uppercase(),
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+private fun HomePreview() {
+    val colors = ThirtySixTheme.colors
+    MeshArt(
+        base = colors.heroDeep,
+        glowA = colors.heroViolet,
+        glowB = colors.heroRose,
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+
+@Composable
+private fun IncognitoPreview() {
+    val colors = ThirtySixTheme.colors
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.surfaceIncognito)
+            .testTag(TEST_TAG_INCOGNITO_PLACEHOLDER),
+    ) {
+        Icon(
+            painter = painterResource(AppIcons.IncognitoFilled),
+            contentDescription = stringResource(R.string.tabs_a11y_incognito_glyph),
+            tint = colors.onIncognito,
+            modifier = Modifier.size(Dimens.iconLarge),
+        )
+    }
+}
+
+@Composable
+private fun CardCaption(title: String, lead: @Composable () -> Unit, modifier: Modifier = Modifier) {
+    val colors = ThirtySixTheme.colors
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            .background(Brush.verticalGradient(listOf(Color.Transparent, colors.heroDeep.copy(alpha = SCRIM_ALPHA))))
+            .padding(start = Spacing.sm, end = Spacing.sm, top = Spacing.lg, bottom = Spacing.sm),
     ) {
-        if (isIncognito) {
-            IncognitoLeadingGlyph()
-        } else {
-            FaviconOrPlaceholder(
-                faviconFile = faviconFile,
-                hostname = hostname,
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = if (isIncognito) {
-                    stringResource(R.string.tabs_card_incognito_label)
-                } else {
-                    title
-                },
-                style = MaterialTheme.typography.titleSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            // Spec 012 — incognito tabs do NOT show hostname (privacy).
-            // Render a single space to preserve row height parity.
-            Text(
-                text = if (isIncognito) " " else hostname,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        IconButton(
-            onClick = onCloseClick,
-            modifier = Modifier.testTag(TEST_TAG_TAB_CARD_CLOSE_PREFIX + tabId),
+        lead()
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.onGlass,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun Favicon(faviconFile: File?) {
+    val favicon by rememberFileImage(faviconFile)
+    val image = favicon ?: return
+    Image(
+        bitmap = image,
+        contentDescription = null,
+        modifier = Modifier.size(Dimens.favicon).clip(MaterialTheme.shapes.extraSmall),
+    )
+}
+
+/** The design system's small glass close button (28dp visual, 48dp touch target). */
+@Composable
+private fun GlassClose(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = ThirtySixTheme.colors
+    val shape = ThirtySixTheme.shapes.full
+    val label = stringResource(R.string.tabs_card_close)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label },
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(Dimens.tabCardClose)
+                .background(colors.glass, shape)
+                .border(Dimens.hairline, colors.glassStroke, shape),
         ) {
             Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = stringResource(R.string.tabs_card_close),
+                painter = painterResource(AppIcons.Close),
+                contentDescription = null,
+                tint = colors.onGlass,
+                modifier = Modifier.size(Dimens.iconSmall - Spacing.xs),
             )
         }
     }
 }
 
-@Composable
-private fun IncognitoLeadingGlyph() {
-    Box(
-        modifier = Modifier
-            .size(FAVICON_DISPLAY_SIZE_DP)
-            .background(
-                MaterialTheme.colorScheme.tertiaryContainer,
-                shape = androidx.compose.foundation.shape.CircleShape,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Lock,
-            contentDescription = stringResource(R.string.tabs_a11y_incognito_glyph),
-            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-            modifier = Modifier.size(INCOGNITO_GLYPH_INNER_SIZE_DP),
-        )
-    }
-}
-
-@Composable
-private fun FaviconOrPlaceholder(faviconFile: File?, hostname: String) {
-    // Decode favicon once per file path/length combination.
-    val faviconBitmap = remember(faviconFile?.absolutePath, faviconFile?.length()) {
-        faviconFile?.takeIf { it.exists() && it.length() > 0L }
-            ?.let { BitmapFactory.decodeFile(it.absolutePath) }
-            ?.asImageBitmap()
-    }
-    if (faviconBitmap != null) {
-        Image(
-            bitmap = faviconBitmap,
-            contentDescription = null,
-            modifier = Modifier.size(FAVICON_DISPLAY_SIZE_DP),
-        )
-    } else {
-        // Tiny colored circle with the first-letter glyph as a stand-in
-        // until the real favicon arrives. Same palette as the preview area
-        // for visual coherence within a single card.
-        val style = TabPlaceholderColor.forHostname(hostname)
-        val (background, foreground) = resolvePalette(style.paletteRoleIndex)
-        Box(
-            modifier = Modifier
-                .size(FAVICON_DISPLAY_SIZE_DP)
-                .background(background, shape = androidx.compose.foundation.shape.CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = style.glyph.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = foreground,
-            )
-        }
-    }
-}
-
-@Composable
-private fun resolvePalette(paletteRoleIndex: Int): Pair<Color, Color> {
-    val cs = MaterialTheme.colorScheme
-    return when (paletteRoleIndex) {
-        PALETTE_PRIMARY -> cs.primary to cs.onPrimary
-        PALETTE_SECONDARY -> cs.secondary to cs.onSecondary
-        PALETTE_TERTIARY -> cs.tertiary to cs.onTertiary
-        PALETTE_SURFACE_VARIANT -> cs.surfaceVariant to cs.onSurfaceVariant
-        PALETTE_PRIMARY_CONTAINER -> cs.primaryContainer to cs.onPrimaryContainer
-        PALETTE_SECONDARY_CONTAINER -> cs.secondaryContainer to cs.onSecondaryContainer
-        PALETTE_TERTIARY_CONTAINER -> cs.tertiaryContainer to cs.onTertiaryContainer
-        else -> cs.inversePrimary to cs.inverseOnSurface
-    }
-}
-
-// File-top constants per Constitution §III No-Hardcode Rule. Test tags are
-// per-tab to support `composeTestRule.onNodeWithTag(TEST_TAG_TAB_CARD_PREFIX + id)`.
+// Test tags are per-tab so tests can find `TEST_TAG_TAB_CARD_PREFIX + id`.
 const val TEST_TAG_TAB_CARD_PREFIX: String = "tabs_card_"
 const val TEST_TAG_TAB_CARD_CLOSE_PREFIX: String = "tabs_card_close_"
 const val TEST_TAG_INCOGNITO_PLACEHOLDER: String = "tabs_card_incognito_placeholder"
-
-private const val PLACEHOLDER_ASPECT_RATIO: Float = 16f / 9f
-private val ACTIVE_BORDER_WIDTH_DP = androidx.compose.ui.unit.Dp(2f)
-private val FAVICON_DISPLAY_SIZE_DP = 16.dp
-private val INCOGNITO_GLYPH_INNER_SIZE_DP = 12.dp
-private const val PALETTE_PRIMARY: Int = 0
-private const val PALETTE_SECONDARY: Int = 1
-private const val PALETTE_TERTIARY: Int = 2
-private const val PALETTE_SURFACE_VARIANT: Int = 3
-private const val PALETTE_PRIMARY_CONTAINER: Int = 4
-private const val PALETTE_SECONDARY_CONTAINER: Int = 5
-private const val PALETTE_TERTIARY_CONTAINER: Int = 6

@@ -2,32 +2,35 @@
 
 package com.raumanian.thirtysix.browser.presentation.settings.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
+import com.raumanian.thirtysix.browser.presentation.components.SectionHeader
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 
 /**
- * Spec 016 — a section title in the Settings list. Marked as a heading so TalkBack users can
- * jump between sections instead of stepping through every row (FR-039).
+ * Spec 016 / 019 FR-044 — a group title in the Settings list. Every group after the first is
+ * separated from the one above by a hairline. The title is the shared [SectionHeader], which is
+ * marked as a heading so TalkBack users can jump between groups (FR-039).
  */
 @Composable
 fun SettingsSectionHeader(
     title: String,
     modifier: Modifier = Modifier,
+    showDivider: Boolean = true,
 ) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = Spacing.md, end = Spacing.md, top = Spacing.lg, bottom = Spacing.sm)
-            .semantics { heading() },
-    )
+    Column(modifier = modifier) {
+        if (showDivider) {
+            HorizontalDivider(
+                thickness = Dimens.hairline,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                modifier = Modifier.padding(top = Spacing.sm, start = Spacing.md, end = Spacing.md),
+            )
+        }
+        SectionHeader(text = title)
+    }
 }

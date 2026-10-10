@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">Alle Tabs schließen? Dies kann nicht rückgängig gemacht werden.</string>
     <string name="tabs_card_close">Tab schließen</string>
     <string name="tabs_default_title">Neuer Tab</string>
-    <string name="browser_action_tabs_switcher">Tab-Wechsler öffnen</string>
     <string name="browser_action_new_tab">Neuen Tab öffnen</string>
     <string name="browser_max_tabs_reached">Maximale Anzahl an Tabs erreicht. Schließe einen Tab, um einen neuen zu öffnen.</string>
 
@@ -36,10 +35,8 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Neuer Inkognito-Tab</string>
-    <string name="tabs_a11y_new_incognito_tab">Neuen Inkognito-Tab öffnen</string>
     <string name="tabs_a11y_incognito_glyph">Inkognito-Tab</string>
     <string name="tabs_error_max_incognito_tabs_reached">Maximum von %d Inkognito-Tabs erreicht</string>
-    <string name="browser_a11y_incognito_indicator">Inkognito-Modus aktiv</string>
     <string name="tabs_a11y_incognito_card_placeholder">Inkognito-Tab — Inhalt zur Privatsphäre verborgen</string>
     <string name="tabs_card_incognito_label">Inkognito</string>
     <string name="tabs_action_close_all_incognito">Alle Inkognito-Tabs schließen</string>
@@ -53,6 +50,8 @@
 
     <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Lesezeichen</string>
+    <string name="bookmarks_section_folders">Ordner</string>
+    <string name="bookmarks_section_pages">Seiten</string>
     <string name="bookmarks_empty_title">Noch keine Lesezeichen</string>
     <string name="bookmarks_empty_body">Tippe beim Anzeigen einer Seite auf das Herz-Symbol oder verwende das +-Symbol, um eines hinzuzufügen.</string>
     <string name="bookmarks_action_back_to_parent_cd">Zum übergeordneten Ordner</string>
@@ -142,7 +141,6 @@
     <string name="downloads_failure_generic">Fehlgeschlagen</string>
     <string name="downloads_size_unknown">Größe unbekannt</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">Mehr</string>
     <string name="downloads_no_app_can_open">Keine App auf diesem Gerät kann diese Datei öffnen.</string>
     <string name="downloads_file_missing">Diese Datei ist nicht mehr auf deinem Gerät.</string>
     <string name="downloads_not_complete">Dieser Download ist noch nicht fertig.</string>
@@ -169,7 +167,7 @@
     <string name="settings_action_cancel">Abbrechen</string>
     <string name="settings_section_appearance">Darstellung</string>
     <string name="settings_section_language">Sprache</string>
-    <string name="settings_section_search">Suche</string>
+    <string name="settings_section_language_and_search">Sprache und Suche</string>
     <string name="settings_section_privacy">Datenschutz</string>
     <string name="settings_section_about">Über</string>
     <string name="settings_error_not_saved">Die Einstellung konnte nicht gespeichert werden. Bitte versuche es erneut.</string>
@@ -231,7 +229,46 @@
     <string name="onboarding_search_title">Suchmaschine wählen</string>
     <string name="onboarding_search_body">Eingaben in der Adressleiste suchen damit.</string>
     <string name="onboarding_action_next">Weiter</string>
-    <string name="onboarding_action_done">Fertig</string>
+    <string name="onboarding_action_start_browsing">Lossurfen</string>
     <string name="onboarding_action_skip">Überspringen</string>
     <string name="onboarding_progress_a11y">Schritt %1$d von %2$d</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Suchen</string>
+    <string name="nav_tabs">Tabs</string>
+    <string name="nav_menu">Menü</string>
+    <string name="hub_privacy_banner">Was du surfst, bleibt auf diesem Telefon</string>
+    <string name="hub_incognito_banner_title">Surfen ohne Spuren</string>
+    <string name="hub_incognito_banner_body">Inkognito-Tab öffnen: kein Verlauf, Cookies werden beim Schließen gelöscht.</string>
+    <string name="hub_quick_settings_title">Schnelleinstellungen</string>
+    <string name="hub_tile_clear_data">Daten löschen</string>
+    <string name="hub_downloads_in_progress_cd">Laufende Downloads</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="one">Tabs, %1$d geöffnet</item>
+        <item quantity="other">Tabs, %1$d geöffnet</item>
+    </plurals>
+
+    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <string name="home_greeting_morning">Guten Morgen</string>
+    <string name="home_greeting_afternoon">Guten Tag</string>
+    <string name="home_greeting_evening">Guten Abend</string>
+    <string name="home_privacy_line">Alles, was du surfst, bleibt auf diesem Telefon.</string>
+    <string name="home_recent_title">Kürzlich besucht</string>
+    <string name="home_recent_see_all">Alle anzeigen</string>
+    <string name="home_shortcut_tag_tab">Tab</string>
+    <string name="home_shortcut_tag_saved">Gespeichert</string>
+    <string name="home_shortcut_tag_recent">Kürzlich</string>
+
+    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <string name="incognito_page_title">Du surfst privat</string>
+    <string name="incognito_page_subtitle">Andere, die dieses Telefon nutzen, sehen nicht, was du hier tust.</string>
+    <string name="incognito_page_section_title">Wenn du alle Inkognito-Tabs schließt</string>
+    <string name="incognito_page_point_history">Die besuchten Seiten werden nicht im Verlauf gespeichert</string>
+    <string name="incognito_page_point_cookies">Cookies und Websitedaten werden gelöscht</string>
+    <string name="incognito_page_point_screenshots">Bildschirmfotos sind gesperrt, solange ein privater Tab offen ist</string>
+    <string name="incognito_page_footnote">Heruntergeladene Dateien und gespeicherte Lesezeichen bleiben erhalten. Websites und dein Netzwerk können deine Besuche weiterhin sehen.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Geöffnet</string>
+    <string name="tabs_chip_incognito">Inkognito</string>
 </resources>

@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.domain.repository
 
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Spec 014 — single source of truth for the persisted browsing-history slice.
@@ -32,6 +33,12 @@ interface HistoryRepository {
      * observer; emits a fresh list on every committed insert/delete.
      */
     fun observeAll(): Flow<List<HistoryEntry>>
+
+    /**
+     * Spec 019 — the newest [limit] entries, newest first (Home page). The default derives it
+     * from [observeAll]; the Room implementation overrides it with an indexed `LIMIT` query.
+     */
+    fun observeRecent(limit: Int): Flow<List<HistoryEntry>> = observeAll().map { it.take(limit) }
 
     /**
      * Spec 014 FR-001 (title backfill) — correct the title of an already-recorded row.

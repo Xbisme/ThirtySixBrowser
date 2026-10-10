@@ -95,6 +95,8 @@ class TabsViewModel @Inject constructor(
         val isCloseAllDialogVisible: Boolean = false,
         val isCloseAllIncognitoDialogVisible: Boolean = false,
         val errorEvent: TabsErrorEvent? = null,
+        /** The chip the user picked; `null` until they pick one (then the active tab decides). */
+        val modeOverride: TabsMode? = null,
     )
 
     private val localState: MutableStateFlow<LocalState> = MutableStateFlow(LocalState())
@@ -113,6 +115,7 @@ class TabsViewModel @Inject constructor(
         },
         localState,
     ) { (tabs, activeId, incognitoCount), local ->
+        val mode = resolveMode(tabs, activeId, incognitoCount, local.modeOverride)
         TabsUiState(
             tabs = tabs,
             activeTabId = activeId,
@@ -120,6 +123,8 @@ class TabsViewModel @Inject constructor(
             isCloseAllIncognitoDialogVisible = local.isCloseAllIncognitoDialogVisible,
             errorEvent = local.errorEvent,
             incognitoTabCount = incognitoCount,
+            mode = mode,
+            visibleTabs = tabs.filter { it.isIncognito == (mode == TabsMode.Incognito) },
         )
     }.stateIn(
         scope = viewModelScope,
@@ -234,11 +239,24 @@ class TabsViewModel @Inject constructor(
         }
     }
 
+    /** Spec 019 FR-040 — a chip was tapped; create and close-all now act on this kind only. */
+    fun onModeSelected(mode: TabsMode) {
+        localState.update { it.copy(modeOverride = mode) }
+    }
+
     fun consumeErrorEvent() {
         localState.update { it.copy(errorEvent = null) }
     }
 
     private companion object {
         const val SUBSCRIBE_TIMEOUT_MS: Long = 5_000L
+
+        fun resolveMode(tabs: List<Tab>, activeId: Long?, incognitoCount: Int, override: TabsMode?): TabsMode =
+            when {
+                incognitoCount == 0 -> TabsMode.Open
+                override != null -> override
+                tabs.firstOrNull { it.id == activeId }?.isIncognito == true -> TabsMode.Incognito
+                else -> TabsMode.Open
+            }
     }
 }
