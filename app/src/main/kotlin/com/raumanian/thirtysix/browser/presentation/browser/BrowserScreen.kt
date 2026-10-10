@@ -4,17 +4,10 @@ package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -27,25 +20,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserErrorState
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserLoadingIndicator
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserOverflowMenu
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserOverflowMenuCallbacks
-import com.raumanian.thirtysix.browser.presentation.browser.components.IncognitoIndicator
+import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTopBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 
 /**
  * Spec 007 + Spec 008 + Spec 009 + Spec 011 — top-level Browser screen.
@@ -148,11 +138,21 @@ fun BrowserScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        // Spec 019 R16 — the bars own their insets; the scaffold adds none of its own.
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             BrowserTopBar(
                 state = state,
-                callbacks = addressBarCallbacks,
+                addressBarCallbacks = addressBarCallbacks,
                 onStarTapped = viewModel::onStarTapped,
+                onReloadOrStop = {
+                    if (state.loadingState is LoadingState.Loading) {
+                        webViewActions.stopLoading()
+                        viewModel.onLoadStopped()
+                    } else {
+                        webViewActions.reload()
+                    }
+                },
             )
         },
         bottomBar = {
@@ -246,88 +246,6 @@ private fun BrowserBackHandlers(
  * disposes the prior WebView (Spec 007 `DisposableEffect` cleanup fires) and
  * instantiates a fresh one on every tab switch (R8 — single live WebView).
  */
-/**
- * Spec 012 — Scaffold topBar slot. When the active tab is incognito (FR-015),
- * the [IncognitoIndicator] precedes the [AddressBar] inside a Row; on normal
- * tabs the AddressBar renders alone (preserves Spec 009 visual treatment).
- *
- * Extracted to keep [BrowserScreen] under detekt's `LongMethod = 60`.
- */
-@Composable
-private fun BrowserTopBar(
-    state: BrowserUiState,
-    callbacks: com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks,
-    onStarTapped: () -> Unit,
-) {
-    val canBookmark = canBookmarkCurrentPage(state)
-    if (state.isIncognito || canBookmark) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.sm),
-        ) {
-            if (state.isIncognito) {
-                IncognitoIndicator()
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                AddressBar(state = state, callbacks = callbacks)
-            }
-            if (canBookmark) {
-                StarBookmarkButton(
-                    isBookmarked = state.isBookmarked,
-                    onClick = onStarTapped,
-                )
-            }
-        }
-    } else {
-        AddressBar(state = state, callbacks = callbacks)
-    }
-}
-
-/**
- * Spec 013 FR-004 — star icon is hidden (rather than disabled-grey) when the
- * current page cannot be bookmarked: incognito tab, error state, or non-http(s)
- * scheme. Per research.md R11.
- */
-private fun canBookmarkCurrentPage(state: BrowserUiState): Boolean {
-    val url = state.currentUrl
-    val isHttp = url.startsWith("http://", ignoreCase = true) ||
-        url.startsWith("https://", ignoreCase = true)
-    return !state.isIncognito &&
-        state.loadingState !is LoadingState.Failed &&
-        url.isNotBlank() &&
-        isHttp
-}
-
-/**
- * Spec 013 FR-001..003 — star icon rendered trailing the address bar. Tap
- * adds a bookmark for the current page; second tap removes the most recently
- * created bookmark for that URL (Q4 toggle semantic).
- */
-@Composable
-private fun StarBookmarkButton(
-    isBookmarked: Boolean,
-    onClick: () -> Unit,
-) {
-    val cd = if (isBookmarked) {
-        stringResource(R.string.bookmark_action_star_remove_cd)
-    } else {
-        stringResource(R.string.bookmark_action_star_add_cd)
-    }
-    IconButton(onClick = onClick, modifier = Modifier.testTag(TEST_TAG_BROWSER_STAR_ICON)) {
-        Icon(
-            // Spec 013 — `material-icons-core` lacks `Bookmark` / `BookmarkBorder`;
-            // use the Favorite / FavoriteBorder pair instead. Same filled-vs-outline
-            // affordance, no new package dependency (research.md R11 + R-icon-fallback).
-            imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-            contentDescription = cd,
-        )
-    }
-}
-
-internal const val TEST_TAG_BROWSER_STAR_ICON: String = "browser_star_icon"
 
 @Composable
 private fun BrowserScaffoldContent(

@@ -90,13 +90,13 @@ description: "Task list for Spec 019 — UI Redesign"
 
 **Independent Test**: Fresh install on 360dp, light then dark: launcher icon, launch screen, onboarding, a loaded page — no teal, nothing under a system bar (quickstart G1, G2).
 
-- [ ] T026 [P] [US1] Regenerate `RES/drawable/ic_brand_mark.xml` and `RES/drawable-v31/ic_brand_mark.xml` (same name, animated) from `specs/019-ui-redesign/assets/thirtysix-mark.svg` with gradient `#6C4CF1 → #8F6FFF`, numerals as solid outline paths, 432 viewport / 108dp intrinsic (Spec 017 R3, R8) (research R15)
-- [ ] T027 [P] [US1] Regenerate `RES/drawable/ic_brand_mark_mono.xml` from `thirtysix-mark-mono.svg` (outline ring, solid numerals)
-- [ ] T028 [P] [US1] Regenerate `RES/drawable/ic_launcher_foreground.xml` and `RES/drawable/ic_launcher_background.xml` from the violet mark
-- [ ] T029 [US1] Regenerate the five `RES/mipmap-*/ic_launcher.webp` bitmaps from the violet SVG (API 24–25 fallback, Spec 017 R7) and inspect each visually
-- [ ] T030 [US1] Create `MAIN/presentation/browser/components/BrowserTopBar.kt`: `windowInsetsPadding(WindowInsets.statusBars)`, compact address well (`surfaceContainer`, lock or mask + hostname, hint when empty), bookmark toggle, Reload/Stop; incognito variant on `surfaceIncognito` with the mask instead of the lock (FR-051); replace the current `topBar` content in `MAIN/presentation/browser/BrowserScreen.kt` with it (FR-008, FR-023)
-- [ ] T031 [US1] In `MAIN/presentation/browser/BrowserScreen.kt` set the `Scaffold`'s `contentWindowInsets = WindowInsets(0)` and give the current bottom bar `WindowInsets.navigationBars` padding until US3 replaces it (research R16)
-- [ ] T032 [US1] Run SC-003: `grep -rniE "0f766e|0891b2|5eead4|67e8f9" app/src/main` returns nothing; fix any hit
+- [X] T026 [P] [US1] Regenerate `RES/drawable/ic_brand_mark.xml` and `RES/drawable-v31/ic_brand_mark.xml` (same name, animated) from `specs/019-ui-redesign/assets/thirtysix-mark.svg` with gradient `#6C4CF1 → #8F6FFF`, numerals as solid outline paths, 432 viewport / 108dp intrinsic (Spec 017 R3, R8) (research R15)
+- [X] T027 [P] [US1] Regenerate `RES/drawable/ic_brand_mark_mono.xml` from `thirtysix-mark-mono.svg` (outline ring, solid numerals)
+- [X] T028 [P] [US1] Regenerate `RES/drawable/ic_launcher_foreground.xml` and `RES/drawable/ic_launcher_background.xml` from the violet mark
+- [X] T029 [US1] Regenerate the five `RES/mipmap-*/ic_launcher.webp` bitmaps from the violet SVG (API 24–25 fallback, Spec 017 R7) and inspect each visually
+- [X] T030 [US1] Create `MAIN/presentation/browser/components/BrowserTopBar.kt`: `windowInsetsPadding(WindowInsets.statusBars)`, compact address well (`surfaceContainer`, lock or mask + hostname, hint when empty), bookmark toggle, Reload/Stop; incognito variant on `surfaceIncognito` with the mask instead of the lock (FR-051); replace the current `topBar` content in `MAIN/presentation/browser/BrowserScreen.kt` with it (FR-008, FR-023)
+- [X] T031 [US1] In `MAIN/presentation/browser/BrowserScreen.kt` set the `Scaffold`'s `contentWindowInsets = WindowInsets(0)` and give the current bottom bar `WindowInsets.navigationBars` padding until US3 replaces it (research R16)
+- [X] T032 [US1] Run SC-003: `grep -rniE "0f766e|0891b2|5eead4|67e8f9" app/src/main` returns nothing; fix any hit
 - [ ] T033 [US1] Device gate G1 (brand) and G2 (insets on API 24, 29, 36; gesture and three-button navigation); record in "Device Gate Results"
 
 **Checkpoint**: US1 complete — the app is violet and nothing overlaps a system bar.
@@ -306,8 +306,8 @@ Each increment leaves every Spec 007–018 behaviour working and all tests green
 | Baseline T003 compiler report | ✅ 2026-10-10 | `assembleRelease -PcomposeReports --rerun-tasks` (without `--rerun-tasks` the up-to-date compile writes no report). 116 composables, 105 restartable, **0 restartable non-skippable** (strong skipping), 40 parameters inferred unstable (mostly ViewModels and lambdas) |
 | Baseline T004 Layout Inspector | ⏸ needs a person | Layout Inspector is GUI-only in Android Studio; not drivable from the CLI. To be recorded by a person on `main` before the redesign merges; JVM state-isolation tests (T034) stand in meanwhile |
 | Baseline T005 size / start | ✅ 2026-10-10, TA016_API36_16K, release | APK **3,134,976 B** (matches Spec 018). Cold start, onboarding state, 10 runs: 1981–4082 ms, median ~2.9 s — **emulator under heavy load, far above Spec 018's 331 ms on the same AVD**; the SC-010 comparison will be re-measured back-to-back with the redesign build under identical conditions |
-| G1 Brand | — | |
-| G2 Insets | — | |
+| G1 Brand | ✅ partial 2026-10-10, TA016_API36_16K debug | Adaptive launcher icon violet (beside the still-installed teal release build from `main`, confirming the change); top bar violet with dynamic color off. API 24 bitmap path and themed-icon check still to run |
+| G2 Insets | ✅ partial 2026-10-10, API 36 gesture nav | Address well sits fully below the status bar (the Spec 009–018 defect is gone). API 24/29 and three-button navigation still to run |
 | G3 Canvas match | — | |
 | G4 Home | — | |
 | G5 Home navigation | — | |

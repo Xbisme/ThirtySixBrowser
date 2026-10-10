@@ -2,14 +2,21 @@
 
 package com.raumanian.thirtysix.browser.presentation.browser.components
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,16 +24,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
+import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 
 /** Test tag — `AddressBarTest` and any future instrumented test driving the bar. */
 internal const val TEST_TAG_ADDRESS_BAR: String = "address_bar"
@@ -34,49 +54,33 @@ internal const val TEST_TAG_ADDRESS_BAR: String = "address_bar"
 /** Test tag — trailing clear button, visible iff focused + non-empty. */
 internal const val TEST_TAG_ADDRESS_BAR_CLEAR: String = "address_bar_clear"
 
+private const val HTTPS_PREFIX = "https://"
+private val FocusRing = 2.dp
+
 /**
- * Spec 009 — top-of-screen address bar / omnibox.
+ * Spec 009 — the address bar / omnibox; Spec 019 — restyled as the design system's compact
+ * search well (SearchBar component, "Browsing" and "Focused" states).
  *
- * Display rules (FR-014/15/16/17/18):
- *  - **Unfocused** + URL has a host → show only the hostname (compact).
- *  - **Unfocused** + URL is `about:blank` / `file://` → show the full URL as
- *    a fallback (`extractHostnameOrSelf`).
- *  - **Unfocused** + no URL loaded yet → empty `value`; placeholder hint
- *    renders.
- *  - **Focused** → show full URL with all text selected (FR-018), driven by
- *    `LaunchedEffect(isAddressBarFocused)` populating from `currentUrl`.
- *  - **Focused** + user typing → user's in-progress text replaces the URL.
+ * Display rules are Spec 009's, unchanged (FR-014–FR-018): unfocused shows only the hostname,
+ * focused shows the full URL with everything selected, typing replaces it; IME Go submits;
+ * the trailing clear button shows iff focused and non-empty and keeps focus.
  *
- * Submit (FR-011 / FR-013a / Q1+Q2 clarifications):
- *  - IME Go fires [callbacks.onSubmit] which the host wires to the
- *    ViewModel + URL-load chain. Empty input is a no-op (the host's lambda
- *    knows to skip dismiss/loadUrl in that case).
- *
- * Clear (FR-020/21/23/24 — Phase 6 US4):
- *  - Trailing clear icon visible iff focused + non-empty. Tap fires
- *    [callbacks.onClear] which empties the bound text and preserves focus.
+ * Leading glyph: the incognito mask in an incognito tab (FR-023), a lock for an `https` page,
+ * otherwise the search glyph. Incognito wells are glass on the plum bar (FR-051).
  */
 @Composable
+@Suppress("LongMethod")
 internal fun AddressBar(
     state: BrowserUiState,
     callbacks: AddressBarCallbacks,
     modifier: Modifier = Modifier,
 ) {
-    // Local TextFieldValue gives us cursor / selection control for the
-    // focus-acquired "select all" behavior. The State value is the source
-    // of truth for ViewModel mirroring while focused.
     var fieldValue by remember { mutableStateOf(TextFieldValue(text = state.addressBarText)) }
 
-    // On focus acquisition (false → true) populate from currentUrl + select all.
-    // On focus release (true → false) clear local text so the next render falls
-    // back to hostname-only display via state.currentUrl.
     LaunchedEffect(state.isAddressBarFocused) {
         if (state.isAddressBarFocused) {
             val url = state.currentUrl
-            fieldValue = TextFieldValue(
-                text = url,
-                selection = TextRange(0, url.length),
-            )
+            fieldValue = TextFieldValue(text = url, selection = TextRange(0, url.length))
             callbacks.onTextChange(url)
         } else {
             fieldValue = TextFieldValue(text = "")
@@ -84,9 +88,6 @@ internal fun AddressBar(
         }
     }
 
-    // Keep the local TextFieldValue in sync if the ViewModel's text changes
-    // for reasons other than focus acquisition (e.g., onAddressBarClear from
-    // the trailing icon).
     LaunchedEffect(state.addressBarText, state.isAddressBarFocused) {
         if (state.isAddressBarFocused && state.addressBarText != fieldValue.text) {
             fieldValue = fieldValue.copy(text = state.addressBarText)
@@ -99,7 +100,10 @@ internal fun AddressBar(
         TextFieldValue(text = state.currentUrl.extractHostnameOrSelf())
     }
 
-    OutlinedTextField(
+    val style = addressWellStyle(state)
+    val shape = ThirtySixTheme.shapes.full
+
+    BasicTextField(
         value = displayedValue,
         onValueChange = { newValue ->
             fieldValue = newValue
@@ -110,21 +114,85 @@ internal fun AddressBar(
             .testTag(TEST_TAG_ADDRESS_BAR)
             .onFocusChanged { focusState -> callbacks.onFocusChange(focusState.isFocused) },
         singleLine = true,
-        placeholder = { Text(text = stringResource(R.string.browser_address_bar_hint)) },
-        trailingIcon = {
-            if (state.isAddressBarFocused && state.addressBarText.isNotEmpty()) {
-                IconButton(
-                    onClick = callbacks.onClear,
-                    modifier = Modifier.testTag(TEST_TAG_ADDRESS_BAR_CLEAR),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Clear,
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = style.content),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+        keyboardActions = KeyboardActions(onGo = { callbacks.onSubmit() }),
+        decorationBox = { innerTextField ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                modifier = Modifier
+                    .height(Dimens.searchWell)
+                    .clip(shape)
+                    .background(style.fill)
+                    .border(if (state.isAddressBarFocused) FocusRing else Dimens.hairline, style.ring, shape)
+                    .padding(start = Spacing.md - Spacing.xs, end = Spacing.xs),
+            ) {
+                Icon(
+                    painter = painterResource(style.leading),
+                    contentDescription = null,
+                    tint = style.hint,
+                    modifier = Modifier.size(Dimens.iconSmall),
+                )
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    if (displayedValue.text.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.browser_address_bar_hint),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = style.hint,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    innerTextField()
+                }
+                if (state.isAddressBarFocused && state.addressBarText.isNotEmpty()) {
+                    RoundIconButton(
+                        icon = AppIcons.Close,
                         contentDescription = stringResource(R.string.browser_address_bar_clear_cd),
+                        onClick = callbacks.onClear,
+                        style = RoundIconStyle.Bare,
+                        tint = style.content,
+                        modifier = Modifier.testTag(TEST_TAG_ADDRESS_BAR_CLEAR),
                     )
                 }
             }
         },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-        keyboardActions = KeyboardActions(onGo = { callbacks.onSubmit() }),
+    )
+}
+
+private const val HINT_ALPHA = 0.7f
+
+/** Colours and glyph of the well for the current tab and focus state (FR-023, FR-051). */
+private data class AddressWellStyle(
+    val content: Color,
+    val hint: Color,
+    @param:DrawableRes val leading: Int,
+    val fill: Color,
+    val ring: Color,
+)
+
+@Composable
+private fun addressWellStyle(state: BrowserUiState): AddressWellStyle {
+    val scheme = MaterialTheme.colorScheme
+    val colors = ThirtySixTheme.colors
+    val incognito = state.isIncognito
+    val leading = when {
+        incognito -> AppIcons.Incognito
+        !state.isAddressBarFocused && state.currentUrl.startsWith(HTTPS_PREFIX, ignoreCase = true) -> AppIcons.Lock
+        else -> AppIcons.Search
+    }
+    val ring = when {
+        state.isAddressBarFocused -> scheme.primary
+        incognito -> colors.glassStroke
+        else -> Color.Transparent
+    }
+    return AddressWellStyle(
+        content = if (incognito) colors.onIncognito else scheme.onSurface,
+        hint = if (incognito) colors.onIncognito.copy(alpha = HINT_ALPHA) else scheme.onSurfaceVariant,
+        leading = leading,
+        fill = if (incognito) colors.glass else scheme.surfaceContainer,
+        ring = ring,
     )
 }
