@@ -1,10 +1,10 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-09-15 — 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** ✅ Spec 018 `onboarding-flow` đã merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41. ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
+> Cập nhật lần cuối: 2026-10-11 — ✅ **Spec 019 `ui-redesign` đã merged** qua [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, `54e090a`, CI 6/6); gate trên máy thật Galaxy A55 ghi trong `specs/019-ui-redesign/tasks.md`. 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** ✅ Spec 018 `onboarding-flow` đã merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41. ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
-## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) + ✅ Spec 015 merged (PR #16, 2026-09-11, commit `e925f9d`) + ✅ Spec 016 merged (PR #18, 2026-09-12, merge commit `3083941`) — 16/19 shipped
+## Trạng thái dự án: ✅ Phase 1 done + ✅ Specs 007–012 done (Spec 012 PR #13 merged into `main` 2026-05-03) + ✅ Spec 013 merged (PR #14, 2026-05-07) + ✅ Spec 014 merged (PR #15, 2026-09-10, commit `2e7c633`) + ✅ Spec 015 merged (PR #16, 2026-09-11, commit `e925f9d`) + ✅ Spec 016 merged (PR #18, 2026-09-12, merge commit `3083941`) — 16/19 shipped *(dòng lịch sử; hiện tại Specs 001–019 đã merged, xem dòng "Cập nhật lần cuối" ở trên)*
 
 Foundation phase tiến độ:
 - **Spec 001** ✅ — Gradle Kotlin DSL + version catalog + 16KB-ready build (AGP 9.1.1, Kotlin 2.3.21, Gradle 9.5.0, Compose BOM 2026.04.01)

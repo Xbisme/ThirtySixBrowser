@@ -246,17 +246,17 @@ description: "Task list for Spec 019 — UI Redesign"
 
 - [X] T088 Remove every remaining `androidx.compose.material.icons.*` import; delete `material-icons-core` from `gradle/libs.versions.toml` and `app/build.gradle.kts`; build green (research R4) — *The last user was `BrowserErrorState` (`Icons.Filled.Warning` → `AppIcons.Warning`). Removed from the catalog and the `compose` bundle; `:app:dependencies --configuration releaseRuntimeClasspath` no longer lists any `material-icons` artifact.*
 - [X] T089 [P] Run `./gradlew lintDebug` — 8-locale parity at error severity; remove any orphaned keys (FR-055, research R17) — *Green. Orphans removed along the way: `tabs_a11y_new_incognito_tab`, `browser_a11y_incognito_indicator`, `settings_section_search`; `onboarding_action_done` renamed.*
-- [ ] T090 [P] Locale sweep G11: every screen in German and Russian at 360dp, all 8 locales spot-checked; record
+- [ ] T090 [P] Locale sweep G11: every screen in German and Russian at 360dp, all 8 locales spot-checked; record — *DE/RU done on a Galaxy A55 at 360dp; one defect found and fixed (see G11). KO/JA/ZH not visually spot-checked.*
 - [ ] T091 [P] Dynamic color gate G12 on Android 12+ with three contrasting wallpapers; record
 - [ ] T092 Canvas comparison G3: each of the 15 artboards against the built screen, light + dark, 360dp; fix or list differences until 0 open (SC-001)
 - [X] T093 Final `-PcomposeReports` run: compare with T003 baseline; every non-skippable restartable composable in touched files explained in "Device Gate Results" (Testing Gate 9) — *2026-10-10, `compileReleaseKotlin -PcomposeReports --rerun-tasks`: 157 restartable composables, **0 non-skippable** — including HomeHero, ShortcutCard, TabSwitcherCard, TabCreateCard, OnboardingOptionRow.*
 - [ ] T094 Layout Inspector roll-up G13: before/after table for all six hot interactions (Testing Gate 10, SC-004); quickstart G17 — with *Remove animations* on, tab swipe release, bar show and hero collapse jump to their end states (analysis G1)
 - [X] T095 [P] G15: release APK ≤ 3,544,576 B, cold start ≤ +5% vs T005, new tab → Home ≤ 300 ms; 16 KB script green, zero new `.so` — *Release APK **3,234,632 B** (budget 3,544,576 B; +99,656 B vs Spec 018's 3,134,976 B). 16 KB script green, same 2 libraries (`libandroidx.graphics.path.so`, `libdatastore_shared_counter.so`), zero new `.so`. Cold start and new-tab→Home timings: emulator figures too noisy to report (T005 note) — DEFERRED with T096.*
-- [X] T096 G14 / SC-005: release build on Pixel 5-class hardware, or record **DEFERRED** with the release-seeding blocker named (never an emulator figure) — ***DEFERRED**: needs a release build on Pixel 5-class hardware, and release builds still cannot be seeded (debug-only seeders, `run-as` refused). No emulator figure is reported against SC-005.*
+- [X] T096 G14 / SC-005: release build on Pixel 5-class hardware, or record **DEFERRED** with the release-seeding blocker named (never an emulator figure) — *~~DEFERRED~~ → **measured 2026-10-11 on a Galaxy A55, release build: PASS** (p95 14 / 14 / 15 / 10 ms — see G14). The four SC-005 interactions need no seeded data, so the seeding blocker never applied to this spec.*
 - [X] T097 Full suite: force-stop the app, then `testDebugUnitTest`, `lintDebug`, `detekt`, `ktlintCheck`, `assembleRelease`, `connectedDebugAndroidTest` on TA016_API29_CI and TA016_API36_16K; record counts — *2026-10-10 on `TA016_API36_16K`: unit 612/612, lint/detekt/ktlint green, `assembleRelease` green, `connectedDebugAndroidTest` **103/103**. API 29 is covered by CI's emulator job on the PR, not run locally. `rendererCrash_…` is intermittent on this AVD and failed once on `main` too.*
 - [X] T098 TalkBack pass: record **DEFERRED** to a person (as Specs 016–018); confirm every icon-only control has a label by code review — ***DEFERRED** to a person (TalkBack is not scriptable on these emulators — Specs 016–018). Code review: every icon-only control goes through `RoundIconButton` (non-null `contentDescription` parameter) or carries an explicit label (`GlassClose` → `tabs_card_close`); decorative icons pass `null`; onboarding page dots are hidden from TalkBack because the step text carries the position.*
 - [X] T099 Update `CLAUDE.md` (Active Spec, Recent Changes, carry-forward facts), `.claude/claude-app/sdd-roadmap.md`, `project-context.md`, `dev-workflow.md` to the delivered state — *CLAUDE.md (header, roadmap row, Active Spec, Recent Changes), sdd-roadmap.md, dev-workflow.md updated to "implemented, PR pending".*
-- [ ] T100 Open the PR `019-ui-redesign` → `main` with the gate table, Constitution Check line, SC-005 status, before/after recomposition table and APK delta
+- [X] T100 Open the PR `019-ui-redesign` → `main` with the gate table, Constitution Check line, SC-005 status, before/after recomposition table and APK delta — *PR #27, merged 2026-10-10 (merge commit `54e090a`), CI 6/6 green.*
 
 ---
 
@@ -317,24 +317,26 @@ Each increment leaves every Spec 007–018 behaviour working and all tests green
 | Baseline T005 size / start | ✅ 2026-10-10, TA016_API36_16K, release | APK **3,134,976 B** (matches Spec 018). Cold start, onboarding state, 10 runs: 1981–4082 ms, median ~2.9 s — **emulator under heavy load, far above Spec 018's 331 ms on the same AVD**; the SC-010 comparison will be re-measured back-to-back with the redesign build under identical conditions |
 | G1 Brand | ✅ partial 2026-10-10, TA016_API36_16K debug | Adaptive launcher icon violet (beside the still-installed teal release build from `main`, confirming the change); top bar violet with dynamic color off. API 24 bitmap path and themed-icon check still to run |
 | G2 Insets | ✅ partial 2026-10-10, API 36 gesture nav | Address well sits fully below the status bar (the Spec 009–018 defect is gone). API 24/29 and three-button navigation still to run |
-| G3 Canvas match | — | |
-| G4 Home | — | |
-| G5 Home navigation | — | |
+| G3 Canvas match | ⏸ owner-accepted, not itemised | Owner ran the merged build on the Galaxy A55 and accepted it (2026-10-11) — an overall acceptance, not an item-by-item gate run. The 15-artboard side-by-side comparison (T092) has not been done. |
+| G4 Home | ✅ partial 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | Evening greeting after midnight in VI/DE/RU ("Chào buổi tối", "Guten Abend", "Добрый вечер"); with open tabs and history the cards show Tab entries, then "Recently visited"; an empty install shows only greeting + search. The 08:00 / 14:00 clock check was not run — a non-rooted phone cannot set its time over adb. |
+| G5 Home navigation | ✅ owner-accepted | Owner ran the merged build on the Galaxy A55 and accepted it (2026-10-11) — an overall acceptance, not an item-by-item gate run. New tab → Home → submit → page was also exercised ~25 times while preparing the measurements below. |
 | G6 Chrome | ✅ partial 2026-10-10, API 36 | Progress line grows on the well's bottom edge, Reload becomes Stop while loading; bars slide on scroll pending a long-page manual check |
 | G7 Hub | ✅ partial 2026-10-10, API 36 | Hub matches the canvas; Clear data tile opened Spec 016's chooser over the browser; HubSheetTest 7/7, BrowserBottomBarTest 5/5 |
-| G8 Tabs | — | |
-| G9 Libraries & settings | — | |
-| G10 Incognito & onboarding | — | |
-| G11 Locales | — | |
-| G12 Dynamic color | — | |
-| G13 Recomposition | — | |
-| G14 Frame time | — | |
-| G15 Size & start | — | |
-| G16 Tab switcher ≤ 200 ms | — | |
-| G17 Reduced motion | — | |
-| TalkBack | — | |
+| G8 Tabs | ✅ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | Five short swipes (170 px) sprang back; five long swipes closed exactly five tabs (9 → 4). Open chip, image cards and active-tab ring as designed. |
+| G9 Libraries & settings | ✅ owner-accepted | Owner ran the merged build on the Galaxy A55 and accepted it (2026-10-11) — an overall acceptance, not an item-by-item gate run. Settings reached from the hub in DE/RU/FR. |
+| G10 Incognito & onboarding | ✅ owner-accepted | Owner ran the merged build on the Galaxy A55 and accepted it (2026-10-11) — an overall acceptance, not an item-by-item gate run. Onboarding on the hero rendered and Skip worked in VI/DE/RU on the release build. |
+| G11 Locales | ✅ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release, density forced to 360dp | DE + RU: onboarding, Home, hub, Settings, Tabs. **🐞 Defect found and fixed**: the hub's German "Suchmaschine" tile broke mid-word ("Suchmaschin / e"). `QuickTile` now hyphenates (`Hyphens.Auto`) and the tile uses a new `hub_tile_search_engine` key (DE "Suche", other locales unchanged); verified on device. FR and VI spot-checked; KO/JA/ZH covered by lint parity only. |
+| G12 Dynamic color | — not run | Needs three wallpapers changed by hand; dynamic color is off by default (FR-005a). |
+| G13 Recomposition | ⏸ needs a person | Layout Inspector is GUI-only. ⚠️ The **before** baseline (T004) now has to be taken by checking out `25cad6b`, the last `main` before PR #27. |
+| G14 Frame time | ✅ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | **SC-005 PASS** via `dumpsys gfxinfo`, app rendering at 60 Hz (FrameInterval 16.6 ms): page scroll (Wikipedia, 20 flings) **p95 14 ms**; Home scroll (vertical + card row) **p95 14 ms**; hub drag only (12 cycles, sheet opened outside the window) **p95 15 ms**, p99 19 ms; tab swipe (10 swipes) **p95 10 ms**. None of the four needs seeded data, so the release-seeding blocker does not apply. Caveat: the A55 (Exynos 1480) is faster than a Pixel 5 — this is Pixel-5-class-or-better evidence. |
+| G15 Size & start | ⚠️ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | APK **3,235,164 B** after the hub-string fix (+100,188 B, budget 3,544,576 B). Cold start, Spec 018 vs 019 release built from `492e4f3` / `54e090a`, interleaved rounds of 10: **returning user 433.5 → 451.5 ms (+4.2%, inside +5%)**; **first run (onboarding) ≈265 → ≈345 ms (≈+30%, FAILS the +5% of SC-010)** — happens once per install; open. New tab → Home: 1–2 frames, **median ≈57 ms, max 84 ms** (≤ 300 ms). |
+| G16 Tab switcher ≤ 200 ms | ✅ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | 10 tabs, 10 opens: **median 104 ms**, max 131 ms (framestats: tap-frame vsync → completion of the heaviest following frame). |
+| G17 Reduced motion | — not run | |
+| TalkBack | ⏸ DEFERRED to a person | As Specs 016–018. |
 
 ## Notes
+
+- **2026-10-11 real-device pass (Galaxy A55)**: `connectedDebugAndroidTest` 103/103 on a clean install. ⚠️ `SettingsScreenThemeTest` fails 3/3 when the app carries a **per-app language different from the device language** (left over from manual use): the test resolves strings through `targetContext` while the UI renders in the app locale. Reproduced with `cmd locale set-app-locales … --locales en-US` on a `vi-VN` phone. Clear the app locale (or uninstall) before a device run.
 
 - `[P]` = different files, no dependency on an incomplete task.
 - Commit after each task or logical group; never commit with a red gate.

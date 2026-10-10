@@ -117,7 +117,7 @@ Các Spec theo thứ tự implement:
 | 016 | `settings-screen` | 003, 004, 006 | ✅ Done (PR #18) |
 | 017 | `splash-screen` | 002 | ✅ Done (PR #20) |
 | 018 | `onboarding-flow` | 003, 004, 006, 017 | ✅ Done (PR #24) |
-| 019 | `ui-redesign` | 001–018 | 🟢 Implemented 2026-10-10, PR pending (Phase 5) |
+| 019 | `ui-redesign` | 001–018 | ✅ Done (PR #27, Phase 5) |
 | 020 | `tracker-blocker-hostlist` | 011–019 | ⬜ Optional (Phase 5) |
 
-> Cập nhật 2026-09-15: Specs 001–016 đã merge vào `main` (016 qua PR #18, 2026-09-12). ✅ Spec 017 `splash-screen` đã merge (PR #20, `cca5c0c`, 35/35) — G1–G10 đều PASS, chỉ còn TalkBack cần người thật. Phase 4 giờ 2/3; bước tiếp theo là thảo luận Spec 018 (`onboarding-flow`). Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
+> Cập nhật 2026-10-11: Specs 001–019 đã merge vào `main` (019 `ui-redesign` qua PR #27, `54e090a`, 2026-10-10; đã chạy gate trên máy thật Galaxy A55 ngày 2026-10-11). Bước tiếp theo: thảo luận với owner về spec kế tiếp (020 tracker blocker vẫn optional). Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
