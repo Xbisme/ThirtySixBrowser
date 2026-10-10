@@ -39,7 +39,6 @@
     <string name="tabs_action_new_incognito_tab">Новая вкладка инкогнито</string>
     <string name="tabs_a11y_incognito_glyph">Вкладка инкогнито</string>
     <string name="tabs_error_max_incognito_tabs_reached">Достигнут максимум: %d вкладок инкогнито</string>
-    <string name="browser_a11y_incognito_indicator">Режим инкогнито активен</string>
     <string name="tabs_a11y_incognito_card_placeholder">Вкладка инкогнито — содержимое скрыто</string>
     <string name="tabs_card_incognito_label">Инкогнито</string>
     <string name="tabs_action_close_all_incognito">Закрыть все вкладки инкогнито</string>
@@ -236,7 +235,7 @@
     <string name="onboarding_search_title">Выберите поисковик</string>
     <string name="onboarding_search_body">Ввод в адресной строке будет искать через него.</string>
     <string name="onboarding_action_next">Далее</string>
-    <string name="onboarding_action_done">Готово</string>
+    <string name="onboarding_action_start_browsing">Начать</string>
     <string name="onboarding_action_skip">Пропустить</string>
     <string name="onboarding_progress_a11y">Шаг %1$d из %2$d</string>
 

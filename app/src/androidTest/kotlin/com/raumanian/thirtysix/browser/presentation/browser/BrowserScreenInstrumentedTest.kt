@@ -124,8 +124,8 @@ class BrowserScreenInstrumentedTest {
     fun pageRenders_assertsDomContainsExampleDomain() {
         // T021 — Espresso-Web atom waits for JS-ready state, then checks <h1> text.
         onWebView(isAssignableFrom(WebView::class.java))
-            .withElement(findElement(Locator.TAG_NAME, "h1"))
-            .check(webMatches(getText(), containsString("Example Domain")))
+            .withElement(findElement(Locator.TAG_NAME, "body"))
+            .check(webMatches(getText(), containsString(PAGE_TEXT)))
     }
 
     @Test
@@ -144,8 +144,8 @@ class BrowserScreenInstrumentedTest {
         composeRule.waitForIdle()
 
         onWebView(isAssignableFrom(WebView::class.java))
-            .withElement(findElement(Locator.TAG_NAME, "h1"))
-            .check(webMatches(getText(), containsString("Example Domain")))
+            .withElement(findElement(Locator.TAG_NAME, "body"))
+            .check(webMatches(getText(), containsString(PAGE_TEXT)))
     }
 
     private companion object {
@@ -153,6 +153,11 @@ class BrowserScreenInstrumentedTest {
         // h1 assertion, decoupled from production SAMPLE_PAGE_URL
         // which Spec 008 redirected to Google homepage.
         const val TEST_PAGE_URL: String = "https://example.com"
+
+        // example.com dropped its <h1>Example Domain</h1> in 2026 (the page is now a short
+        // multilingual notice with only <title>Example Domain), so the render check reads text
+        // that is in the body today.
+        const val PAGE_TEXT: String = "documentation examples"
 
         // CI emulator budget — NOT the user-facing SC-002 production target
         // (200 ms). See test method KDoc above.

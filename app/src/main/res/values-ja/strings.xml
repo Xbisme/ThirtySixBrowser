@@ -36,7 +36,6 @@
     <string name="tabs_action_new_incognito_tab">新しいシークレットタブ</string>
     <string name="tabs_a11y_incognito_glyph">シークレットタブ</string>
     <string name="tabs_error_max_incognito_tabs_reached">シークレットタブの上限 %d 個に達しました</string>
-    <string name="browser_a11y_incognito_indicator">シークレットモード有効</string>
     <string name="tabs_a11y_incognito_card_placeholder">シークレットタブ — プライバシー保護のため非表示</string>
     <string name="tabs_card_incognito_label">シークレット</string>
     <string name="tabs_action_close_all_incognito">すべてのシークレットタブを閉じる</string>
@@ -227,7 +226,7 @@
     <string name="onboarding_search_title">検索エンジンを選択</string>
     <string name="onboarding_search_body">アドレスバーへの入力はこれで検索します。</string>
     <string name="onboarding_action_next">次へ</string>
-    <string name="onboarding_action_done">完了</string>
+    <string name="onboarding_action_start_browsing">ブラウジングを始める</string>
     <string name="onboarding_action_skip">スキップ</string>
     <string name="onboarding_progress_a11y">%2$d 件中 %1$d 件目</string>
 

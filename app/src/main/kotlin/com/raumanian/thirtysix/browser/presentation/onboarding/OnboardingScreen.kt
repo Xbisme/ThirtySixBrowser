@@ -6,37 +6,51 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
+import com.raumanian.thirtysix.browser.presentation.components.MeshArt
+import com.raumanian.thirtysix.browser.presentation.components.PillButton
+import com.raumanian.thirtysix.browser.presentation.components.PillStyle
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.LanguageSlide
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.SearchEngineSlide
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.ThemeSlide
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.WelcomeSlide
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -71,18 +85,27 @@ fun OnboardingScreen(
         if (!viewModel.onBack()) context.findHostActivity()?.finish()
     }
 
-    Scaffold { innerPadding ->
+    val colors = ThirtySixTheme.colors
+    // Spec 019 FR-052 — the flow sits on the hero mesh in both themes.
+    Box(modifier = Modifier.fillMaxSize().background(colors.heroDeep)) {
+        MeshArt(
+            base = colors.heroDeep,
+            glowA = colors.heroViolet,
+            glowB = colors.heroRose,
+            modifier = Modifier.matchParentSize(),
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .windowInsetsPadding(WindowInsets.safeDrawing),
         ) {
+            OnboardingTopBar(state = state, onBack = { viewModel.onBack() }, onSkip = viewModel::onSkip)
             SlideBody(
                 state = state,
                 viewModel = viewModel,
                 modifier = Modifier.weight(1f),
             )
-            OnboardingControls(state = state, viewModel = viewModel)
+            OnboardingControls(state = state, onForward = viewModel::onForward)
         }
     }
 }
@@ -114,54 +137,105 @@ private fun SlideBody(
 }
 
 /**
- * Skip, the position indicator and the forward control.
- *
- * ⚠️ ONE forward control in ONE position across all four slides, relabelled on the last
- * (FR-002b, INV-12). Not two controls with one hidden: that moves focus order and breaks the
- * predictability a screen-reader user depends on. The two labels are separate string resources
- * rather than one string with a placeholder — "Next" and "Done" are different words, not a
- * substitution, and a placeholder produces untranslatable grammar across 8 locales (INV-13).
+ * Back (from the second slide on), the step text and Skip — on EVERY slide, including the
+ * first and the last (FR-014a).
  */
 @Composable
-private fun OnboardingControls(
-    state: OnboardingUiState,
-    viewModel: OnboardingViewModel,
-) {
+private fun OnboardingTopBar(state: OnboardingUiState, onBack: () -> Unit, onSkip: () -> Unit) {
     val progress = stringResource(
         R.string.onboarding_progress_a11y,
         state.displayPosition,
         OnboardingSlides.COUNT,
     )
     Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
     ) {
-        // FR-014a — Skip is available on EVERY slide, including the first and the last.
-        TextButton(
-            onClick = viewModel::onSkip,
-            modifier = Modifier.testTag(TEST_TAG_ONBOARDING_SKIP),
-        ) {
-            Text(text = stringResource(R.string.onboarding_action_skip))
+        if (state.isFirstSlide) {
+            Image(
+                painter = painterResource(AppIcons.BrandMark),
+                contentDescription = null,
+                modifier = Modifier.size(Dimens.brandMark),
+            )
+        } else {
+            RoundIconButton(
+                icon = AppIcons.ArrowBack,
+                contentDescription = stringResource(R.string.browser_action_back),
+                onClick = onBack,
+                style = RoundIconStyle.Glass,
+            )
         }
-
         // FR-003 — where the user is in the sequence, and how long it is.
         Text(
             text = progress,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.semantics { contentDescription = progress },
+            style = MaterialTheme.typography.labelLarge,
+            color = ThirtySixTheme.colors.onGlassMuted,
+            modifier = Modifier
+                .weight(1f)
+                .semantics { contentDescription = progress },
         )
+        PillButton(
+            label = stringResource(R.string.onboarding_action_skip),
+            onClick = onSkip,
+            style = PillStyle.Glass,
+            modifier = Modifier.testTag(TEST_TAG_ONBOARDING_SKIP),
+        )
+    }
+}
 
-        Button(
-            onClick = viewModel::onForward,
-            modifier = Modifier.testTag(TEST_TAG_ONBOARDING_FORWARD),
-        ) {
-            Text(
-                text = stringResource(
-                    if (state.isLastSlide) R.string.onboarding_action_done else R.string.onboarding_action_next,
-                ),
+/**
+ * Page dots and the forward control.
+ *
+ * ⚠️ ONE forward control in ONE position across all four slides, relabelled on the last
+ * (FR-002b, INV-12) — not two controls with one hidden, which would move focus order. The two
+ * labels are separate strings: "Next" and "Start browsing" are different words, not a
+ * substitution (INV-13).
+ */
+@Composable
+private fun OnboardingControls(state: OnboardingUiState, onForward: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(Spacing.md),
+    ) {
+        PageDots(current = state.currentSlide)
+        PillButton(
+            label = stringResource(
+                if (state.isLastSlide) R.string.onboarding_action_start_browsing else R.string.onboarding_action_next,
+            ),
+            onClick = onForward,
+            style = PillStyle.Gradient,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(TEST_TAG_ONBOARDING_FORWARD),
+        )
+    }
+}
+
+/** Decorative: the step text already says where the user is, so the dots are hidden from TalkBack. */
+@Composable
+private fun PageDots(current: Int) {
+    val colors = ThirtySixTheme.colors
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        modifier = Modifier.clearAndSetSemantics { },
+    ) {
+        repeat(OnboardingSlides.COUNT) { index ->
+            Box(
+                modifier = Modifier
+                    .size(
+                        width = if (index == current) Dimens.pageDotActive else Dimens.pageDot,
+                        height = Dimens.pageDot,
+                    )
+                    .background(
+                        if (index == current) colors.onGlass else colors.glassStroke,
+                        ThirtySixTheme.shapes.full,
+                    ),
             )
         }
     }

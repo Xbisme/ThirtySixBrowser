@@ -26,7 +26,7 @@
          "Done" are different words, not a substitution, and a placeholder produces
          untranslatable grammar across 8 locales. -->
     <string name="onboarding_action_next">Next</string>
-    <string name="onboarding_action_done">Done</string>
+    <string name="onboarding_action_start_browsing">Start browsing</string>
     <string name="onboarding_action_skip">Skip</string>
     <!-- %1$d = current slide, %2$d = total. Positional so locales may reorder. -->
     <string name="onboarding_progress_a11y">Step %1$d of %2$d</string>
@@ -67,7 +67,6 @@
     <string name="tabs_a11y_incognito_glyph">Incognito tab</string>
     <!-- Spec 012 — cap is MAX_INCOGNITO_TABS = 50 (always > 1), so the singular case is unreachable. Plural form intentionally omitted. -->
     <string name="tabs_error_max_incognito_tabs_reached" tools:ignore="PluralsCandidate">You\'ve reached the maximum of %d incognito tabs</string>
-    <string name="browser_a11y_incognito_indicator">Incognito mode active</string>
     <string name="tabs_a11y_incognito_card_placeholder">Incognito tab — content hidden for privacy</string>
     <string name="tabs_card_incognito_label">Incognito</string>
     <string name="tabs_action_close_all_incognito">Close all incognito</string>

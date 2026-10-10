@@ -37,7 +37,6 @@
     <string name="tabs_action_new_incognito_tab">Neuer Inkognito-Tab</string>
     <string name="tabs_a11y_incognito_glyph">Inkognito-Tab</string>
     <string name="tabs_error_max_incognito_tabs_reached">Maximum von %d Inkognito-Tabs erreicht</string>
-    <string name="browser_a11y_incognito_indicator">Inkognito-Modus aktiv</string>
     <string name="tabs_a11y_incognito_card_placeholder">Inkognito-Tab — Inhalt zur Privatsphäre verborgen</string>
     <string name="tabs_card_incognito_label">Inkognito</string>
     <string name="tabs_action_close_all_incognito">Alle Inkognito-Tabs schließen</string>
@@ -230,7 +229,7 @@
     <string name="onboarding_search_title">Suchmaschine wählen</string>
     <string name="onboarding_search_body">Eingaben in der Adressleiste suchen damit.</string>
     <string name="onboarding_action_next">Weiter</string>
-    <string name="onboarding_action_done">Fertig</string>
+    <string name="onboarding_action_start_browsing">Lossurfen</string>
     <string name="onboarding_action_skip">Überspringen</string>
     <string name="onboarding_progress_a11y">Schritt %1$d von %2$d</string>
 
