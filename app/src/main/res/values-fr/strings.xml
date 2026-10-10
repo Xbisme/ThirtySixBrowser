@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">Fermer tous les onglets ? Cette action est irréversible.</string>
     <string name="tabs_card_close">Fermer l\'onglet</string>
     <string name="tabs_default_title">Nouvel onglet</string>
-    <string name="browser_action_tabs_switcher">Ouvrir le sélecteur d\'onglets</string>
     <string name="browser_action_new_tab">Ouvrir un nouvel onglet</string>
     <string name="browser_max_tabs_reached">Nombre maximum d\'onglets atteint. Fermez un onglet pour en ouvrir un nouveau.</string>
 
@@ -144,7 +143,6 @@
     <string name="downloads_failure_generic">Échec</string>
     <string name="downloads_size_unknown">Taille inconnue</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">Plus</string>
     <string name="downloads_no_app_can_open">Aucune application de cet appareil ne peut ouvrir ce fichier.</string>
     <string name="downloads_file_missing">Ce fichier n\'est plus sur votre appareil.</string>
     <string name="downloads_not_complete">Ce téléchargement n\'est pas encore terminé.</string>
@@ -237,4 +235,20 @@
     <string name="onboarding_action_done">Terminé</string>
     <string name="onboarding_action_skip">Ignorer</string>
     <string name="onboarding_progress_a11y">Étape %1$d sur %2$d</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Rechercher</string>
+    <string name="nav_tabs">Onglets</string>
+    <string name="nav_menu">Menu</string>
+    <string name="hub_privacy_banner">Rien de ce que vous consultez ne quitte ce téléphone</string>
+    <string name="hub_incognito_banner_title">Naviguer sans laisser de trace</string>
+    <string name="hub_incognito_banner_body">Ouvrir un onglet privé : aucun historique, cookies effacés à la fermeture.</string>
+    <string name="hub_quick_settings_title">Réglages rapides</string>
+    <string name="hub_tile_clear_data">Effacer les données</string>
+    <string name="hub_downloads_in_progress_cd">Téléchargements en cours</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="one">Onglets, %1$d ouvert</item>
+        <item quantity="many">Onglets, %1$d ouverts</item>
+        <item quantity="other">Onglets, %1$d ouverts</item>
+    </plurals>
 </resources>

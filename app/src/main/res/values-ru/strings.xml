@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">Закрыть все вкладки? Это действие необратимо.</string>
     <string name="tabs_card_close">Закрыть вкладку</string>
     <string name="tabs_default_title">Новая вкладка</string>
-    <string name="browser_action_tabs_switcher">Открыть переключатель вкладок</string>
     <string name="browser_action_new_tab">Открыть новую вкладку</string>
     <string name="browser_max_tabs_reached">Достигнуто максимальное количество вкладок. Закройте вкладку, чтобы открыть новую.</string>
 
@@ -146,7 +145,6 @@
     <string name="downloads_failure_generic">Ошибка</string>
     <string name="downloads_size_unknown">Размер неизвестен</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">Ещё</string>
     <string name="downloads_no_app_can_open">На этом устройстве нет приложения для открытия файла.</string>
     <string name="downloads_file_missing">Этого файла больше нет на устройстве.</string>
     <string name="downloads_not_complete">Эта загрузка ещё не завершена.</string>
@@ -240,4 +238,21 @@
     <string name="onboarding_action_done">Готово</string>
     <string name="onboarding_action_skip">Пропустить</string>
     <string name="onboarding_progress_a11y">Шаг %1$d из %2$d</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Поиск</string>
+    <string name="nav_tabs">Вкладки</string>
+    <string name="nav_menu">Меню</string>
+    <string name="hub_privacy_banner">Всё, что вы просматриваете, остаётся на этом телефоне</string>
+    <string name="hub_incognito_banner_title">Просмотр без следов</string>
+    <string name="hub_incognito_banner_body">Откройте вкладку инкогнито: без истории, cookie удаляются при закрытии.</string>
+    <string name="hub_quick_settings_title">Быстрые настройки</string>
+    <string name="hub_tile_clear_data">Очистить данные</string>
+    <string name="hub_downloads_in_progress_cd">Идут загрузки</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="one">Вкладки, открыта %1$d</item>
+        <item quantity="few">Вкладки, открыто %1$d</item>
+        <item quantity="many">Вкладки, открыто %1$d</item>
+        <item quantity="other">Вкладки, открыто %1$d</item>
+    </plurals>
 </resources>

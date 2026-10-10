@@ -99,6 +99,15 @@ class BrowserViewModel @Inject constructor(
 
     val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
 
+    private val _loadProgress = MutableStateFlow(0f)
+
+    /**
+     * Spec 019 — page-load progress in `[0f, 1f]`, deliberately NOT part of [uiState]
+     * (research R8, contracts C1). A progress tick emits here and never produces a new
+     * [BrowserUiState]; the UI reads it only inside the progress line's draw phase.
+     */
+    val loadProgress: StateFlow<Float> = _loadProgress.asStateFlow()
+
     private val activeTabFlow: StateFlow<Tab?> = observeActiveTab()
         .stateIn(
             scope = viewModelScope,
@@ -289,8 +298,9 @@ class BrowserViewModel @Inject constructor(
         // both fall back to the hostname (FR-009), and [onTitleReceived] patches the
         // real title in as soon as the page announces one.
         currentTitleCache.value = ""
+        _loadProgress.value = 0f
         _uiState.update {
-            it.copy(loadingState = LoadingState.Loading(progress = 0f))
+            it.copy(loadingState = LoadingState.Loading)
         }
     }
 
@@ -298,18 +308,30 @@ class BrowserViewModel @Inject constructor(
      * Called from `BrowserChromeClient.onProgressChanged`. [newProgress] is
      * 0..100 from WebView; clamped defensively. Progress 100 transitions to
      * [LoadingState.Loaded] (idempotent with [onLoadFinished]).
+     *
+     * Spec 019 — the fraction goes to [loadProgress]. [uiState] changes only when the
+     * loading state itself changes (entering Loading, reaching Loaded), so a run of ticks
+     * during one load produces no [BrowserUiState] emissions at all.
      */
     fun onProgressChanged(newProgress: Int) {
         val clamped = newProgress.coerceIn(0, MAX_PROGRESS)
-        _uiState.update { current ->
-            if (clamped >= MAX_PROGRESS) {
+        if (clamped >= MAX_PROGRESS) {
+            _loadProgress.value = 0f
+            _uiState.update { current ->
                 if (current.loadingState is LoadingState.Loaded) {
                     current
                 } else {
                     current.copy(loadingState = LoadingState.Loaded)
                 }
-            } else {
-                current.copy(loadingState = LoadingState.Loading(progress = clamped / MAX_PROGRESS_F))
+            }
+        } else {
+            _loadProgress.value = clamped / MAX_PROGRESS_F
+            _uiState.update { current ->
+                if (current.loadingState is LoadingState.Loading) {
+                    current
+                } else {
+                    current.copy(loadingState = LoadingState.Loading)
+                }
             }
         }
     }
@@ -328,6 +350,7 @@ class BrowserViewModel @Inject constructor(
         // consumed; a genuine revisit re-arms it through [onLoadStarted].
         val shouldRecord = pendingHistoryUrl != null
         pendingHistoryUrl = null
+        _loadProgress.value = 0f
         _uiState.update { current ->
             if (current.loadingState is LoadingState.Loaded && current.currentUrl == url) {
                 current
@@ -357,6 +380,7 @@ class BrowserViewModel @Inject constructor(
         // Spec 014 FR-003 — a main-frame failure must never reach history, even though
         // the platform still delivers `onPageFinished` for the error page afterwards.
         pendingHistoryUrl = null
+        _loadProgress.value = 0f
         _uiState.update { it.copy(loadingState = LoadingState.Failed(reason)) }
     }
 
@@ -385,6 +409,7 @@ class BrowserViewModel @Inject constructor(
      * through unchanged.
      */
     fun onLoadStopped() {
+        _loadProgress.value = 0f
         _uiState.update { current ->
             if (current.loadingState is LoadingState.Loading) {
                 current.copy(loadingState = LoadingState.Loaded)

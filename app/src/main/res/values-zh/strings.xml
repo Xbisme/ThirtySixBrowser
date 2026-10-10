@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">关闭所有标签页？此操作无法撤消。</string>
     <string name="tabs_card_close">关闭标签页</string>
     <string name="tabs_default_title">新标签页</string>
-    <string name="browser_action_tabs_switcher">打开标签页切换器</string>
     <string name="browser_action_new_tab">打开新标签页</string>
     <string name="browser_max_tabs_reached">已达到最大标签页数。请关闭一个标签页以打开新标签页。</string>
 
@@ -140,7 +139,6 @@
     <string name="downloads_failure_generic">失败</string>
     <string name="downloads_size_unknown">大小未知</string>
     <string name="downloads_row_content_description">%1$s，%2$s，%3$s</string>
-    <string name="browser_action_more">更多</string>
     <string name="downloads_no_app_can_open">此设备上没有可打开该文件的应用。</string>
     <string name="downloads_file_missing">该文件已不在您的设备上。</string>
     <string name="downloads_not_complete">此下载尚未完成。</string>
@@ -231,4 +229,18 @@
     <string name="onboarding_action_done">完成</string>
     <string name="onboarding_action_skip">跳过</string>
     <string name="onboarding_progress_a11y">第 %1$d 步，共 %2$d 步</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">搜索</string>
+    <string name="nav_tabs">标签页</string>
+    <string name="nav_menu">菜单</string>
+    <string name="hub_privacy_banner">您浏览的内容不会离开这部手机</string>
+    <string name="hub_incognito_banner_title">无痕浏览</string>
+    <string name="hub_incognito_banner_body">打开无痕标签页：不留历史记录，关闭时清除 Cookie。</string>
+    <string name="hub_quick_settings_title">快捷设置</string>
+    <string name="hub_tile_clear_data">清除数据</string>
+    <string name="hub_downloads_in_progress_cd">正在下载</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="other">标签页，已打开 %1$d 个</item>
+    </plurals>
 </resources>

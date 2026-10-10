@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">すべてのタブを閉じますか?この操作は取り消せません。</string>
     <string name="tabs_card_close">タブを閉じる</string>
     <string name="tabs_default_title">新しいタブ</string>
-    <string name="browser_action_tabs_switcher">タブスイッチャーを開く</string>
     <string name="browser_action_new_tab">新しいタブを開く</string>
     <string name="browser_max_tabs_reached">タブの最大数に達しました。新しいタブを開くにはタブを閉じてください。</string>
 
@@ -140,7 +139,6 @@
     <string name="downloads_failure_generic">失敗</string>
     <string name="downloads_size_unknown">サイズ不明</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">その他</string>
     <string name="downloads_no_app_can_open">このファイルを開けるアプリが端末にありません。</string>
     <string name="downloads_file_missing">このファイルは端末に存在しません。</string>
     <string name="downloads_not_complete">このダウンロードはまだ完了していません。</string>
@@ -231,4 +229,18 @@
     <string name="onboarding_action_done">完了</string>
     <string name="onboarding_action_skip">スキップ</string>
     <string name="onboarding_progress_a11y">%2$d 件中 %1$d 件目</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">検索</string>
+    <string name="nav_tabs">タブ</string>
+    <string name="nav_menu">メニュー</string>
+    <string name="hub_privacy_banner">閲覧した内容はこのスマートフォンの外に出ません</string>
+    <string name="hub_incognito_banner_title">痕跡を残さずに閲覧</string>
+    <string name="hub_incognito_banner_body">シークレットタブを開く：履歴は残らず、閉じると Cookie が削除されます。</string>
+    <string name="hub_quick_settings_title">クイック設定</string>
+    <string name="hub_tile_clear_data">データを消去</string>
+    <string name="hub_downloads_in_progress_cd">ダウンロード中</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="other">タブ、%1$d 個開いています</item>
+    </plurals>
 </resources>

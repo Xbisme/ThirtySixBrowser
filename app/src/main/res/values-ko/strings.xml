@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">모든 탭을 닫으시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
     <string name="tabs_card_close">탭 닫기</string>
     <string name="tabs_default_title">새 탭</string>
-    <string name="browser_action_tabs_switcher">탭 전환기 열기</string>
     <string name="browser_action_new_tab">새 탭 열기</string>
     <string name="browser_max_tabs_reached">최대 탭 수에 도달했습니다. 새 탭을 열려면 탭을 닫으세요.</string>
 
@@ -140,7 +139,6 @@
     <string name="downloads_failure_generic">실패</string>
     <string name="downloads_size_unknown">크기 알 수 없음</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">더보기</string>
     <string name="downloads_no_app_can_open">이 파일을 열 수 있는 앱이 없습니다.</string>
     <string name="downloads_file_missing">이 파일은 기기에 더 이상 없습니다.</string>
     <string name="downloads_not_complete">이 다운로드는 아직 완료되지 않았습니다.</string>
@@ -231,4 +229,18 @@
     <string name="onboarding_action_done">완료</string>
     <string name="onboarding_action_skip">건너뛰기</string>
     <string name="onboarding_progress_a11y">%2$d단계 중 %1$d단계</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">검색</string>
+    <string name="nav_tabs">탭</string>
+    <string name="nav_menu">메뉴</string>
+    <string name="hub_privacy_banner">탐색한 내용은 이 휴대전화를 벗어나지 않습니다</string>
+    <string name="hub_incognito_banner_title">흔적 없이 탐색</string>
+    <string name="hub_incognito_banner_body">시크릿 탭 열기: 방문 기록이 남지 않고, 탭을 닫으면 쿠키가 삭제됩니다.</string>
+    <string name="hub_quick_settings_title">빠른 설정</string>
+    <string name="hub_tile_clear_data">데이터 삭제</string>
+    <string name="hub_downloads_in_progress_cd">다운로드 진행 중</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="other">탭, %1$d개 열림</item>
+    </plurals>
 </resources>

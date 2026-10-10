@@ -27,7 +27,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_LOADING_INDICATOR
+import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_PAGE_LOAD_PROGRESS
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.io.File
@@ -132,7 +132,7 @@ class BrowserScreenLoadingIndicatorTest {
             viewModel.onProgressChanged(PROGRESS_MIDWAY)
         }
         composeRule.waitUntilExactlyOneExists(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
+            matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
             timeoutMillis = INDICATOR_TIMEOUT_MS,
         )
 
@@ -141,7 +141,7 @@ class BrowserScreenLoadingIndicatorTest {
             viewModel.onLoadFinished(UrlConstants.DEFAULT_HOME_URL)
         }
         composeRule.waitUntilDoesNotExist(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
+            matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
             timeoutMillis = INDICATOR_TIMEOUT_MS,
         )
     }
@@ -152,7 +152,7 @@ class BrowserScreenLoadingIndicatorTest {
         // The seeded state is Failed, which is neither Loading nor Loaded — the
         // indicator must not be rendered for it.
         composeRule.waitUntilDoesNotExist(
-            matcher = hasTestTag(TEST_TAG_BROWSER_LOADING_INDICATOR),
+            matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
             timeoutMillis = INDICATOR_TIMEOUT_MS,
         )
     }

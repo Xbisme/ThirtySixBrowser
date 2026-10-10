@@ -111,25 +111,32 @@ description: "Task list for Spec 019 — UI Redesign"
 
 ### Tests for User Story 3
 
-- [ ] T034 [P] [US3] `TEST/presentation/browser/BrowserViewModelProgressIsolationTest.kt`: 50 `onProgressChanged` calls → 50 `loadProgress` values and **0** new `uiState` emissions (Turbine); progress resets to 0 on load start and finish (contracts C1)
-- [ ] T035 [P] [US3] `TEST/presentation/browser/ChromeScrollStateTest.kt`: offset clamps to `[0, max]`, positive dy hides, negative shows, `show()` returns 0 (contracts C2)
-- [ ] T036 [P] [US3] `ATEST/presentation/browser/HubSheetTest.kt`: every tile and button invokes its callback; Back/Forward enabled flags respected; downloads button absent when `hasActiveDownloads = false`; replaces `ATEST/presentation/browser/BrowserOverflowMenuTest.kt` (delete it)
+- [X] T034 [P] [US3] `TEST/presentation/browser/BrowserViewModelProgressIsolationTest.kt`: 50 `onProgressChanged` calls → 50 `loadProgress` values and **0** new `uiState` emissions (Turbine); progress resets to 0 on load start and finish (contracts C1)
+- [X] T035 [P] [US3] `TEST/presentation/browser/ChromeScrollStateTest.kt`: offset clamps to `[0, max]`, positive dy hides, negative shows, `show()` returns 0 (contracts C2)
+- [X] T036 [P] [US3] `ATEST/presentation/browser/HubSheetTest.kt`: every tile and button invokes its callback; Back/Forward enabled flags respected; downloads button absent when `hasActiveDownloads = false`; replaces `ATEST/presentation/browser/BrowserOverflowMenuTest.kt` (delete it)
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] In `MAIN/presentation/browser/LoadingState.kt` remove `progress` from `Loading`; in `MAIN/presentation/browser/BrowserViewModel.kt` add `loadProgress: StateFlow<Float>` updated by `onProgressChanged` and reset on start/finish, and stop copying progress into `uiState` (research R8, contracts C1)
-- [ ] T038 [US3] Create `MAIN/presentation/browser/ChromeScrollState.kt` with `rememberChromeScrollState(maxOffsetPx)` per contracts C2 (`@Stable`, one `mutableFloatStateOf`, no per-delta allocation)
-- [ ] T039 [US3] In `MAIN/presentation/browser/BrowserWebView.kt` add `onScrollDelta` to `BrowserNavigationCallbacks` and report deltas from `View.setOnScrollChangeListener` (contracts C3)
-- [ ] T040 [US3] Create `MAIN/presentation/browser/components/PageLoadProgressLine.kt` using `ProgressLine(progress = …)`; in `BrowserScreen.kt` collect `loadProgress` with `collectAsStateWithLifecycle()` into a held `State<Float>` (**no `by`**) and pass `{ progress.value }`; delete `MAIN/presentation/browser/components/BrowserLoadingIndicator.kt` and update `ATEST/presentation/browser/BrowserScreenLoadingIndicatorTest.kt` to the new test tag
-- [ ] T041 [US3] Create `MAIN/presentation/browser/components/BrowserBottomBar.kt`: Home · Search · raised gradient New tab (`fabGlow`) · Tabs (count in rounded square) · Menu; 76dp, top corners `radius-lg`, `barShadow`, navigation-bar insets, incognito variant on `surfaceIncognito`; **no Back** (FR-020); delete `MAIN/presentation/browser/components/NavigationBottomBar.kt`, `NavigationBottomBarCallbacks.kt` and their tests under `ATEST/presentation/browser/components/`, replacing them with `BrowserBottomBarTest.kt`
-- [ ] T042 [US3] Apply `ChromeScrollState` in `BrowserScreen.kt`: top and bottom bars use `Modifier.offset { IntOffset(0, …) }` reading the state inside the lambda; the WebView host fills the screen and is shifted with `graphicsLayer { translationY = topBarVisiblePx }`; call `show()` on load start, on error, when `WindowInsets.ime` is visible, and when the page is not scrollable (FR-025, research R7)
-- [ ] T043 [US3] Wire Search on the bottom bar to focus the address field and open the keyboard — or, while the Home page is shown, the Home search bar (FR-022)
-- [ ] T044 [US3] Create `MAIN/presentation/browser/components/HubSheet.kt` on `SheetFrame`: Settings ring button; Back and Forward ring buttons (enabled from `canGoBack`/`canGoForward`); downloads-in-progress button only while `hasActiveDownloads`; privacy stage banner → About; incognito row banner → new incognito tab; Downloads/History/Bookmarks place tiles; Theme/Language/Search/Clear data pastel tiles opening the existing choosers from `MAIN/presentation/settings/components/`; closes on drag, back, scrim tap or any choice (FR-030–FR-032, research R12)
-- [ ] T045 [US3] Expose `hasActiveDownloads: StateFlow<Boolean>` on `BrowserViewModel`, derived from the existing Spec 015 downloads observation and built with `stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)`; collect it **only inside `HubSheet`** so the platform status is polled only while the hub is open (contracts C1, analysis U2)
-- [ ] T046 [US3] Delete `MAIN/presentation/browser/components/BrowserOverflowMenu.kt`; route Menu to `HubSheet`; remove orphaned strings (`browser_action_more`, overflow labels) from all 8 `RES/values*/strings.xml`
-- [ ] T047 [US3] Add strings `nav_search`, `nav_menu`, `hub_privacy_banner`, `hub_incognito_banner_title`, `hub_incognito_banner_body`, `hub_quick_settings_title`, `hub_tile_theme`, `hub_tile_language`, `hub_tile_search`, `hub_tile_clear_data`, `hub_downloads_in_progress_cd` to all 8 `RES/values*/strings.xml`
+- [X] T037 [US3] In `MAIN/presentation/browser/LoadingState.kt` remove `progress` from `Loading`; in `MAIN/presentation/browser/BrowserViewModel.kt` add `loadProgress: StateFlow<Float>` updated by `onProgressChanged` and reset on start/finish, and stop copying progress into `uiState` (research R8, contracts C1)
+- [X] T038 [US3] Create `MAIN/presentation/browser/ChromeScrollState.kt` with `rememberChromeScrollState(maxOffsetPx)` per contracts C2 (`@Stable`, one `mutableFloatStateOf`, no per-delta allocation)
+- [X] T039 [US3] In `MAIN/presentation/browser/BrowserWebView.kt` add `onScrollDelta` to `BrowserNavigationCallbacks` and report deltas from `View.setOnScrollChangeListener` (contracts C3)
+- [X] T040 [US3] Create `MAIN/presentation/browser/components/PageLoadProgressLine.kt` using `ProgressLine(progress = …)`; in `BrowserScreen.kt` collect `loadProgress` with `collectAsStateWithLifecycle()` into a held `State<Float>` (**no `by`**) and pass `{ progress.value }`; delete `MAIN/presentation/browser/components/BrowserLoadingIndicator.kt` and update `ATEST/presentation/browser/BrowserScreenLoadingIndicatorTest.kt` to the new test tag
+- [X] T041 [US3] Create `MAIN/presentation/browser/components/BrowserBottomBar.kt`: Home · Search · raised gradient New tab (`fabGlow`) · Tabs (count in rounded square) · Menu; 76dp, top corners `radius-lg`, `barShadow`, navigation-bar insets, incognito variant on `surfaceIncognito`; **no Back** (FR-020); delete `MAIN/presentation/browser/components/NavigationBottomBar.kt`, `NavigationBottomBarCallbacks.kt` and their tests under `ATEST/presentation/browser/components/`, replacing them with `BrowserBottomBarTest.kt`
+- [X] T042 [US3] Apply `ChromeScrollState` in `BrowserScreen.kt`: top and bottom bars use `Modifier.offset { IntOffset(0, …) }` reading the state inside the lambda; the WebView host fills the screen and is shifted with `graphicsLayer { translationY = topBarVisiblePx }`; call `show()` on load start, on error, when `WindowInsets.ime` is visible, and when the page is not scrollable (FR-025, research R7)
+- [X] T043 [US3] Wire Search on the bottom bar to focus the address field and open the keyboard — or, while the Home page is shown, the Home search bar (FR-022)
+- [X] T044 [US3] Create `MAIN/presentation/browser/components/HubSheet.kt` on `SheetFrame`: Settings ring button; Back and Forward ring buttons (enabled from `canGoBack`/`canGoForward`); downloads-in-progress button only while `hasActiveDownloads`; privacy stage banner → About; incognito row banner → new incognito tab; Downloads/History/Bookmarks place tiles; Theme/Language/Search/Clear data pastel tiles opening the existing choosers from `MAIN/presentation/settings/components/`; closes on drag, back, scrim tap or any choice (FR-030–FR-032, research R12)
+- [X] T045 [US3] Expose `hasActiveDownloads: StateFlow<Boolean>` on `BrowserViewModel`, derived from the existing Spec 015 downloads observation and built with `stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)`; collect it **only inside `HubSheet`** so the platform status is polled only while the hub is open (contracts C1, analysis U2)
+- [X] T046 [US3] Delete `MAIN/presentation/browser/components/BrowserOverflowMenu.kt`; route Menu to `HubSheet`; remove orphaned strings (`browser_action_more`, overflow labels) from all 8 `RES/values*/strings.xml`
+- [X] T047 [US3] Add strings `nav_search`, `nav_menu`, `hub_privacy_banner`, `hub_incognito_banner_title`, `hub_incognito_banner_body`, `hub_quick_settings_title`, `hub_tile_theme`, `hub_tile_language`, `hub_tile_search`, `hub_tile_clear_data`, `hub_downloads_in_progress_cd` to all 8 `RES/values*/strings.xml`
 - [ ] T048 [US3] Update `ATEST/presentation/browser/BrowserScreenInstrumentedTest.kt` and `BrowserScreenOfflineErrorTest.kt` for the new bars (test tags, no Back button); behaviour assertions unchanged
 - [ ] T049 [US3] Device gates G6 and G7; record
+
+**Implementation notes (US3)**:
+- T034 tests live in `BrowserViewModelTest` (its `newViewModel` builder is private) rather than a new file; T040's progress line is drawn by `AddressBar` itself via the shared `ProgressLine` — no separate `PageLoadProgressLine` file. It sits **outside** the text field: inside `decorationBox` the field merged its tag and its TalkBack label away (caught by `BrowserScreenLoadingIndicatorTest`). `browser_loading_a11y` is reused as its spoken label.
+- T045: `hasActiveDownloads` comes from a new `ObserveHasActiveDownloadsUseCase` (+ test) exposed by a small `HubViewModel` (`WhileSubscribed`, collected only inside `HubSheet`), not from `BrowserViewModel` — that kept `BrowserViewModel`'s constructor, and every test that builds it, unchanged. `HubViewModel` also owns "Browse without a trace" (CreateIncognitoTabUseCase) and reports the Spec 012 incognito cap as a snackbar event.
+- Quick-setting tiles open Spec 016's choosers through `QuickSettingsHost`, which reuses `SettingsDialogHost` / `SettingsSnackbarEffect` (now `internal`) and a lazily created `SettingsViewModel`.
+- Found on device: the hub did not scroll — on a 640dp screen it would have been cut off (now `verticalScroll`); the "Search engine" tile label clipped instead of wrapping (label now fills the tile).
+- Strings: 10 new keys ×8 (`nav_tabs_count_cd` as plurals per lint `PluralsCandidate`); `browser_action_more` and `browser_action_tabs_switcher` removed ×8.
 
 **Checkpoint**: Browsing works with the new chrome; overflow menu gone; progress isolated.
 
@@ -311,8 +318,8 @@ Each increment leaves every Spec 007–018 behaviour working and all tests green
 | G3 Canvas match | — | |
 | G4 Home | — | |
 | G5 Home navigation | — | |
-| G6 Chrome | — | |
-| G7 Hub | — | |
+| G6 Chrome | ✅ partial 2026-10-10, API 36 | Progress line grows on the well's bottom edge, Reload becomes Stop while loading; bars slide on scroll pending a long-page manual check |
+| G7 Hub | ✅ partial 2026-10-10, API 36 | Hub matches the canvas; Clear data tile opened Spec 016's chooser over the browser; HubSheetTest 7/7, BrowserBottomBarTest 5/5 |
 | G8 Tabs | — | |
 | G9 Libraries & settings | — | |
 | G10 Incognito & onboarding | — | |

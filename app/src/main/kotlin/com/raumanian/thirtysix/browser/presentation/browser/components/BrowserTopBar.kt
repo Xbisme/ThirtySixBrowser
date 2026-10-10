@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
@@ -45,12 +46,15 @@ private const val HTTPS_PREFIX = "https://"
  * themes (FR-051).
  */
 @Composable
+@Suppress("LongParameterList")
 internal fun BrowserTopBar(
     state: BrowserUiState,
     addressBarCallbacks: AddressBarCallbacks,
     onStarTapped: () -> Unit,
     onReloadOrStop: () -> Unit,
     modifier: Modifier = Modifier,
+    progress: () -> Float = { 0f },
+    focusRequester: FocusRequester? = null,
 ) {
     val colors = ThirtySixTheme.colors
     val background = if (state.isIncognito) colors.surfaceIncognito else MaterialTheme.colorScheme.surface
@@ -75,36 +79,59 @@ internal fun BrowserTopBar(
                 ),
             ) {
                 Box(modifier = Modifier.weight(1f)) {
-                    AddressBar(state = state, callbacks = addressBarCallbacks)
-                }
-                if (canBookmarkCurrentPage(state)) {
-                    RoundIconButton(
-                        icon = if (state.isBookmarked) AppIcons.BookmarkFilled else AppIcons.Bookmark,
-                        contentDescription = stringResource(
-                            if (state.isBookmarked) {
-                                R.string.bookmark_action_star_remove_cd
-                            } else {
-                                R.string.bookmark_action_star_add_cd
-                            },
-                        ),
-                        onClick = onStarTapped,
-                        style = RoundIconStyle.Bare,
-                        tint = if (state.isBookmarked) MaterialTheme.colorScheme.primary else content,
-                        modifier = Modifier.testTag(TEST_TAG_BROWSER_STAR_ICON),
+                    AddressBar(
+                        state = state,
+                        callbacks = addressBarCallbacks,
+                        isLoading = isLoading,
+                        progress = progress,
+                        focusRequester = focusRequester,
                     )
                 }
-                RoundIconButton(
-                    icon = if (isLoading) AppIcons.Close else AppIcons.Refresh,
-                    contentDescription = stringResource(
-                        if (isLoading) R.string.browser_action_stop else R.string.browser_action_reload,
-                    ),
-                    onClick = onReloadOrStop,
-                    style = RoundIconStyle.Bare,
-                    modifier = Modifier.testTag(TEST_TAG_BROWSER_RELOAD_STOP),
+                TopBarActions(
+                    state = state,
+                    isLoading = isLoading,
+                    onStarTapped = onStarTapped,
+                    onReloadOrStop = onReloadOrStop,
                 )
             }
         }
     }
+}
+
+/** The bookmark toggle (when the page can be bookmarked) and Reload/Stop (FR-023). */
+@Composable
+private fun TopBarActions(
+    state: BrowserUiState,
+    isLoading: Boolean,
+    onStarTapped: () -> Unit,
+    onReloadOrStop: () -> Unit,
+) {
+    val content = LocalContentColor.current
+    if (canBookmarkCurrentPage(state)) {
+        RoundIconButton(
+            icon = if (state.isBookmarked) AppIcons.BookmarkFilled else AppIcons.Bookmark,
+            contentDescription = stringResource(
+                if (state.isBookmarked) {
+                    R.string.bookmark_action_star_remove_cd
+                } else {
+                    R.string.bookmark_action_star_add_cd
+                },
+            ),
+            onClick = onStarTapped,
+            style = RoundIconStyle.Bare,
+            tint = if (state.isBookmarked) MaterialTheme.colorScheme.primary else content,
+            modifier = Modifier.testTag(TEST_TAG_BROWSER_STAR_ICON),
+        )
+    }
+    RoundIconButton(
+        icon = if (isLoading) AppIcons.Close else AppIcons.Refresh,
+        contentDescription = stringResource(
+            if (isLoading) R.string.browser_action_stop else R.string.browser_action_reload,
+        ),
+        onClick = onReloadOrStop,
+        style = RoundIconStyle.Bare,
+        modifier = Modifier.testTag(TEST_TAG_BROWSER_RELOAD_STOP),
+    )
 }
 
 /**

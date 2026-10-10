@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">Đóng tất cả thẻ? Không thể hoàn tác.</string>
     <string name="tabs_card_close">Đóng thẻ</string>
     <string name="tabs_default_title">Thẻ mới</string>
-    <string name="browser_action_tabs_switcher">Mở trình chuyển thẻ</string>
     <string name="browser_action_new_tab">Mở thẻ mới</string>
     <string name="browser_max_tabs_reached">Đã đạt số thẻ tối đa. Đóng một thẻ để mở thẻ mới.</string>
 
@@ -140,7 +139,6 @@
     <string name="downloads_failure_generic">Thất bại</string>
     <string name="downloads_size_unknown">Không rõ dung lượng</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">Thêm</string>
     <string name="downloads_no_app_can_open">Không có ứng dụng nào trên máy mở được tệp này.</string>
     <string name="downloads_file_missing">Tệp này không còn trên máy của bạn.</string>
     <string name="downloads_not_complete">Tệp này chưa tải xong.</string>
@@ -231,4 +229,18 @@
     <string name="onboarding_action_done">Xong</string>
     <string name="onboarding_action_skip">Bỏ qua</string>
     <string name="onboarding_progress_a11y">Bước %1$d trên %2$d</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Tìm kiếm</string>
+    <string name="nav_tabs">Thẻ</string>
+    <string name="nav_menu">Menu</string>
+    <string name="hub_privacy_banner">Mọi thứ bạn duyệt đều ở lại trên điện thoại này</string>
+    <string name="hub_incognito_banner_title">Duyệt web không để lại dấu vết</string>
+    <string name="hub_incognito_banner_body">Mở thẻ ẩn danh: không lưu lịch sử, cookie bị xoá khi bạn đóng thẻ.</string>
+    <string name="hub_quick_settings_title">Cài đặt nhanh</string>
+    <string name="hub_tile_clear_data">Xoá dữ liệu</string>
+    <string name="hub_downloads_in_progress_cd">Đang tải xuống</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="other">Thẻ, %1$d thẻ đang mở</item>
+    </plurals>
 </resources>

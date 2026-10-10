@@ -4,20 +4,27 @@ package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -27,186 +34,162 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
+import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBar
+import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserErrorState
-import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserLoadingIndicator
-import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserOverflowMenu
-import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserOverflowMenuCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTopBar
-import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBar
-import com.raumanian.thirtysix.browser.presentation.browser.components.NavigationBottomBarCallbacks
+import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
+import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
+import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
 
 /**
- * Spec 007 + Spec 008 + Spec 009 + Spec 011 — top-level Browser screen.
+ * Spec 007–018 browser screen; Spec 019 rebuilt its chrome (research R7, R8, R12, R16).
  *
- * Layout (Spec 008): Material 3 [Scaffold] with always-visible
- * [NavigationBottomBar] in the `bottomBar` slot (FR-018) and the WebView
- * surface in the content slot.
+ * Layout: the WebView fills the screen; the top bar and the bottom bar float over it and each
+ * pads itself by its system-bar inset (FR-008). As the page scrolls, [ChromeScrollState] slides
+ * both bars away and shifts the WebView up to meet them. **Every one of those movements is read
+ * inside a `graphicsLayer { }` lambda**, so a scroll frame redraws layers and recomposes nothing
+ * (Constitution v1.4.0 §V rule 1).
  *
- * Spec 009 — adds the [AddressBar] in the [Scaffold] `topBar` slot. Always
- * visible (FR-001/02/03), even during error overlay.
+ * Page-load progress comes from [BrowserViewModel.loadProgress], collected into a [State] that
+ * is **held, never delegated with `by`**, and handed down as `{ progress.value }` — so a progress
+ * tick reaches only the progress line's draw phase (§V rules 2–3, research R8).
  *
- * Spec 011:
- * - Receives [navController] so the 5th BottomAppBar button (single-tap)
- *   navigates to the tab switcher route.
- * - Long-press on that same button dispatches [BrowserViewModel.onLongPressNewTab]
- *   for the inline new-tab path (Q2 / R6).
- * - Reads `tabCount` + `activeTab` StateFlows from the ViewModel — `tabCount`
- *   drives the bottom-bar `BadgedBox`, and `activeTab.id` drives a
- *   `LaunchedEffect` that issues `webViewActions.loadUrl(activeTab.url)` on
- *   every tab switch (R8 — single live WebView, recreate on switch).
- * - The WebView is wrapped in `key(activeTab.id)` so Compose disposes the
- *   prior instance and instantiates a fresh one on activation, re-applying
- *   Spec 007's lockdown settings (FR-028).
- * - Surfaces a snackbar for [BrowserUiState.tabsEvent] (FR-016 cap-reached)
- *   then calls [BrowserViewModel.consumeTabsEvent].
+ * Menu opens the hub ([HubSheet], FR-030); its quick-setting tiles open Spec 016's choosers via
+ * [QuickSettingsHost]. Back is the system gesture (FR-021); there is no Back button on the bar.
  */
 @Composable
-@Suppress("LongMethod") // Top-level Compose host wires Scaffold, snackbar, three LaunchedEffects.
+@Suppress("LongMethod") // Top-level host: wires bars, overlays, hub, effects and snackbars.
 fun BrowserScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: BrowserViewModel = hiltViewModel(),
+    hubViewModel: HubViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
+    // Held as State, NOT delegated: reading `.value` here would recompose on every tick.
+    val progress: State<Float> = viewModel.loadProgress.collectAsStateWithLifecycle()
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
-    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
-    val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
-    // Spec 015 — resolved here rather than inside the effect because `stringResource` is a
-    // Composable call and cannot be made from a coroutine body.
-    val downloadStartedTemplate = stringResource(R.string.downloads_started_snackbar)
-    val downloadServiceUnavailableMessage = stringResource(R.string.downloads_service_unavailable)
-    val storagePermissionDeniedMessage = stringResource(R.string.downloads_storage_permission_denied)
-    val storagePermissionSettingsMessage =
-        stringResource(R.string.downloads_storage_permission_denied_permanently)
-    val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
+    val addressFocus = remember { FocusRequester() }
+    var topBarHeightPx by remember { mutableIntStateOf(0) }
+    var bottomBarHeightPx by remember { mutableIntStateOf(0) }
+    val chrome = rememberChromeScrollState(maxOffsetPx = topBarHeightPx.toFloat())
+    var hubOpen by remember { mutableStateOf(false) }
+    var quickSettingRequest by remember { mutableStateOf<QuickSetting?>(null) }
+    var quickSettingsUsed by remember { mutableStateOf(false) }
 
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
+    BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
+    HubEventEffect(hubViewModel = hubViewModel, snackbarHostState = snackbarHostState)
 
     LaunchedEffect(activeTab?.id) {
-        // Spec 011 — tab-switch driver. On every activeTab.id change, issue
-        // a fresh URL load on the (key-recomposed) WebView.
+        // Spec 011 — tab-switch driver: a fresh load on the key-recreated WebView.
         activeTab?.let { webViewActions.loadUrl(it.url) }
     }
-
-    LaunchedEffect(state.tabsEvent) {
-        // Spec 011 — surface MaxTabsReached snackbar from BrowserScreen long-press.
-        if (state.tabsEvent is TabsErrorEvent.MaxTabsReached) {
-            snackbarHostState.showSnackbar(maxTabsMessage)
-            viewModel.consumeTabsEvent()
-        }
+    LaunchedEffect(state.loadingState, state.isAddressBarFocused) {
+        // FR-025 — the bars come back for a new load, an error and while typing.
+        if (state.loadingState !is LoadingState.Loaded || state.isAddressBarFocused) chrome.show()
     }
 
-    LaunchedEffect(state.bookmarkSnackbarEvent) {
-        // Spec 013 — surface star toggle confirmation snackbar (FR-001 / FR-003).
-        when (state.bookmarkSnackbarEvent) {
-            BookmarkSnackbarEvent.Added -> {
-                snackbarHostState.showSnackbar(bookmarkAddedMessage)
-                viewModel.consumeBookmarkSnackbarEvent()
-            }
-            BookmarkSnackbarEvent.Removed -> {
-                snackbarHostState.showSnackbar(bookmarkRemovedMessage)
-                viewModel.consumeBookmarkSnackbarEvent()
-            }
-            null -> Unit
-        }
-    }
+    val density = LocalDensity.current
+    val topInset = with(density) { topBarHeightPx.toDp() }
+    val bottomInset = with(density) { bottomBarHeightPx.toDp() }
 
-    LaunchedEffect(state.downloadSnackbarEvent) {
-        // Spec 015 FR-002 / FR-008a / FR-012 — confirm or explain, over the page the user
-        // is still on, without blocking it.
-        val message = when (val event = state.downloadSnackbarEvent) {
-            is DownloadSnackbarEvent.Started -> downloadStartedTemplate.format(event.fileName)
-            DownloadSnackbarEvent.ServiceUnavailable -> downloadServiceUnavailableMessage
-            DownloadSnackbarEvent.StoragePermissionDenied -> storagePermissionDeniedMessage
-            DownloadSnackbarEvent.StoragePermissionPermanentlyDenied -> storagePermissionSettingsMessage
-            null -> null
-        }
-        if (message != null) {
-            snackbarHostState.showSnackbar(message)
-            viewModel.consumeDownloadSnackbarEvent()
-        }
-    }
-
-    val overflowExpanded = remember { mutableStateOf(false) }
-
-    val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions)
-
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        // Spec 019 R16 — the bars own their insets; the scaffold adds none of its own.
-        contentWindowInsets = WindowInsets(0),
-        topBar = {
-            BrowserTopBar(
-                state = state,
-                addressBarCallbacks = addressBarCallbacks,
-                onStarTapped = viewModel::onStarTapped,
-                onReloadOrStop = {
-                    if (state.loadingState is LoadingState.Loading) {
-                        webViewActions.stopLoading()
-                        viewModel.onLoadStopped()
-                    } else {
-                        webViewActions.reload()
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            NavigationBottomBar(
-                canGoBack = state.canGoBack,
-                canGoForward = state.canGoForward,
-                isLoading = state.loadingState is LoadingState.Loading,
-                tabCount = tabCount,
-                callbacks = rememberBottomBarCallbacks(
-                    state = state,
-                    webViewActions = webViewActions,
-                    onStopRequested = viewModel::onLoadStopped,
-                    onOverflowClick = { overflowExpanded.value = true },
-                    onTabsSwitcherClick = {
-                        navController.navigate(AppDestination.Tabs.route)
-                    },
-                    onTabsSwitcherLongClick = viewModel::onLongPressNewTab,
-                ),
-            )
-            // Spec 015 FR-042 — anchored to the bar so it opens over the overflow control.
-            BrowserOverflowMenu(
-                expanded = overflowExpanded.value,
-                onDismiss = { overflowExpanded.value = false },
-                callbacks = BrowserOverflowMenuCallbacks(
-                    onBookmarksClick = {
-                        overflowExpanded.value = false
-                        navController.navigate(AppDestination.Bookmarks.route)
-                    },
-                    onHistoryClick = {
-                        overflowExpanded.value = false
-                        navController.navigate(AppDestination.History.route)
-                    },
-                    onDownloadsClick = {
-                        overflowExpanded.value = false
-                        navController.navigate(AppDestination.Downloads.route)
-                    },
-                    // Spec 016 FR-001 — the slot Spec 015 reserved.
-                    onSettingsClick = {
-                        overflowExpanded.value = false
-                        navController.navigate(AppDestination.Settings.route)
-                    },
-                ),
-            )
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-    ) { padding ->
-        BrowserScaffoldContent(
+    Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+        BrowserContent(
             state = state,
             viewModel = viewModel,
             webViewActions = webViewActions,
             activeTabId = activeTab?.id ?: 0L,
+            onScrollDelta = chrome::onScrollDelta,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
+        )
+        (state.loadingState as? LoadingState.Failed)?.let { failed ->
+            BrowserErrorState(
+                reason = failed.reason,
+                modifier = Modifier.fillMaxSize().padding(top = topInset, bottom = bottomInset),
+            )
+        }
+        BrowserTopBar(
+            state = state,
+            addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions),
+            onStarTapped = viewModel::onStarTapped,
+            onReloadOrStop = {
+                if (state.loadingState is LoadingState.Loading) {
+                    webViewActions.stopLoading()
+                    viewModel.onLoadStopped()
+                } else {
+                    webViewActions.reload()
+                }
+            },
+            progress = { progress.value },
+            focusRequester = addressFocus,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .onSizeChanged { topBarHeightPx = it.height }
+                .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
+        )
+        BrowserBottomBar(
+            tabCount = tabCount,
+            isIncognito = state.isIncognito,
+            isHomeActive = false,
+            callbacks = BrowserBottomBarCallbacks(
+                onHome = { webViewActions.loadHome() },
+                onSearch = {
+                    chrome.show()
+                    addressFocus.requestFocus()
+                },
+                onNewTab = viewModel::onLongPressNewTab,
+                onTabs = { navController.navigate(AppDestination.Tabs.route) },
+                onTabsLongPress = viewModel::onLongPressNewTab,
+                onMenu = { hubOpen = true },
+            ),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .onSizeChanged { bottomBarHeightPx = it.height }
+                .graphicsLayer { translationY = chrome.hiddenFraction * size.height },
+        )
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomInset),
+        )
+    }
+
+    if (hubOpen) {
+        HubSheet(
+            canGoBack = state.canGoBack,
+            canGoForward = state.canGoForward,
+            onDismiss = { hubOpen = false },
+            hasActiveDownloadsFlow = hubViewModel.hasActiveDownloads,
+            callbacks = HubCallbacks(
+                onSettings = { navController.navigate(AppDestination.Settings.route) },
+                onBack = { webViewActions.goBack() },
+                onForward = { webViewActions.goForward() },
+                onDownloadsInProgress = { navController.navigate(AppDestination.Downloads.route) },
+                onPrivacy = { navController.navigate(AppDestination.Settings.route) },
+                onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
+                onDownloads = { navController.navigate(AppDestination.Downloads.route) },
+                onHistory = { navController.navigate(AppDestination.History.route) },
+                onBookmarks = { navController.navigate(AppDestination.Bookmarks.route) },
+                onQuickSetting = { setting ->
+                    quickSettingsUsed = true
+                    quickSettingRequest = setting
+                },
+            ),
+        )
+    }
+    if (quickSettingsUsed) {
+        QuickSettingsHost(
+            request = quickSettingRequest,
+            onRequestHandled = { quickSettingRequest = null },
+            snackbarHostState = snackbarHostState,
         )
     }
 }
@@ -234,35 +217,87 @@ private fun BrowserBackHandlers(
     }
 }
 
-/**
- * Spec 009 — extracted from [BrowserScreen]'s `content` slot to keep the host
- * function under detekt's `LongMethod` threshold (60 lines). Renders the
- * always-mounted [BrowserWebView] plus the conditional loading-indicator and
- * error-state overlays. Spec 008 ordering preserved: WebView at the back,
- * loading on top, error fully covers (FR-001/02/03 — bar always visible
- * because it lives in the Scaffold's `topBar` slot, not here).
- *
- * Spec 011 — wraps `BrowserWebView` in `key(activeTabId)` so Compose
- * disposes the prior WebView (Spec 007 `DisposableEffect` cleanup fires) and
- * instantiates a fresh one on every tab switch (R8 — single live WebView).
- */
-
+/** Spec 011 / 013 / 015 — one-shot snackbars from [BrowserUiState]; extracted from the host. */
 @Composable
-private fun BrowserScaffoldContent(
+private fun BrowserSnackbarEffects(
+    state: BrowserUiState,
+    viewModel: BrowserViewModel,
+    snackbarHostState: SnackbarHostState,
+) {
+    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
+    val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
+    val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
+    val downloadStartedTemplate = stringResource(R.string.downloads_started_snackbar)
+    val downloadServiceUnavailableMessage = stringResource(R.string.downloads_service_unavailable)
+    val storagePermissionDeniedMessage = stringResource(R.string.downloads_storage_permission_denied)
+    val storagePermissionSettingsMessage = stringResource(R.string.downloads_storage_permission_denied_permanently)
+
+    LaunchedEffect(state.tabsEvent) {
+        if (state.tabsEvent is TabsErrorEvent.MaxTabsReached) {
+            snackbarHostState.showSnackbar(maxTabsMessage)
+            viewModel.consumeTabsEvent()
+        }
+    }
+    LaunchedEffect(state.bookmarkSnackbarEvent) {
+        val message = when (state.bookmarkSnackbarEvent) {
+            BookmarkSnackbarEvent.Added -> bookmarkAddedMessage
+            BookmarkSnackbarEvent.Removed -> bookmarkRemovedMessage
+            null -> null
+        }
+        if (message != null) {
+            snackbarHostState.showSnackbar(message)
+            viewModel.consumeBookmarkSnackbarEvent()
+        }
+    }
+    LaunchedEffect(state.downloadSnackbarEvent) {
+        val message = when (val event = state.downloadSnackbarEvent) {
+            is DownloadSnackbarEvent.Started -> downloadStartedTemplate.format(event.fileName)
+            DownloadSnackbarEvent.ServiceUnavailable -> downloadServiceUnavailableMessage
+            DownloadSnackbarEvent.StoragePermissionDenied -> storagePermissionDeniedMessage
+            DownloadSnackbarEvent.StoragePermissionPermanentlyDenied -> storagePermissionSettingsMessage
+            null -> null
+        }
+        if (message != null) {
+            snackbarHostState.showSnackbar(message)
+            viewModel.consumeDownloadSnackbarEvent()
+        }
+    }
+}
+
+/** Spec 019 — snackbars for hub actions that finish after the sheet has closed. */
+@Composable
+private fun HubEventEffect(hubViewModel: HubViewModel, snackbarHostState: SnackbarHostState) {
+    val maxIncognitoMessage = stringResource(R.string.tabs_error_max_incognito_tabs_reached)
+    LaunchedEffect(hubViewModel) {
+        hubViewModel.events.collect { event ->
+            when (event) {
+                HubEvent.MaxIncognitoTabsReached -> snackbarHostState.showSnackbar(maxIncognitoMessage)
+            }
+        }
+    }
+}
+
+/**
+ * Spec 007 / 011 / 015 — the always-mounted WebView, keyed by the active tab so Compose
+ * disposes the previous instance on a switch (R8 of Spec 011). The error overlay and the bars
+ * live in [BrowserScreen], not here.
+ */
+@Composable
+@Suppress("LongParameterList")
+private fun BrowserContent(
     state: BrowserUiState,
     viewModel: BrowserViewModel,
     webViewActions: WebViewActionsHandle,
     activeTabId: Long,
+    onScrollDelta: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
-    // reaching the ViewModel. On API 29+ the gate is a straight pass-through and no
-    // permission is ever requested.
+    // reaching the ViewModel. On API 29+ the gate is a straight pass-through.
     val onDownloadRequested = rememberDownloadRequestHandler(
         onGranted = viewModel::onDownloadRequested,
         onDenied = viewModel::onStoragePermissionDenied,
     )
-
     Box(modifier = modifier) {
         androidx.compose.runtime.key(activeTabId) {
             BrowserWebView(
@@ -283,19 +318,8 @@ private fun BrowserScaffoldContent(
                     onTitleChange = viewModel::onTitleReceived,
                     onIconReceived = viewModel::onIconReceived,
                     onScreenshotReady = viewModel::onScreenshotReady,
+                    onScrollDelta = onScrollDelta,
                 ),
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-        (state.loadingState as? LoadingState.Loading)?.let { loading ->
-            BrowserLoadingIndicator(
-                progress = loading.progress,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
-        (state.loadingState as? LoadingState.Failed)?.let { failed ->
-            BrowserErrorState(
-                reason = failed.reason,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -303,51 +327,9 @@ private fun BrowserScaffoldContent(
 }
 
 /**
- * Spec 008 — extracted to keep [BrowserScreen] under detekt's `LongMethod`
- * threshold. Builds the click lambdas the bottom bar dispatches:
- * Back/Forward route directly through [WebViewActionsHandle]; Reload/Stop
- * dispatches conditionally on [BrowserUiState.loadingState] (Stop semantic
- * during Loading also flips state via [onStopRequested] so the loading
- * indicator hides immediately per FR-006); Home calls
- * [WebViewActionsHandle.loadHome] which the WebView factory wired to
- * `loadUrl(homeUrl)`.
- *
- * Spec 011 — adds the 5th-button single-tap (switcher navigate) and
- * long-press (inline new tab) callbacks. Both lambdas hoisted from
- * `BrowserScreen` so the bar stays purely presentational.
- */
-@Composable
-@Suppress("LongParameterList")
-private fun rememberBottomBarCallbacks(
-    state: BrowserUiState,
-    webViewActions: WebViewActionsHandle,
-    onStopRequested: () -> Unit,
-    onOverflowClick: () -> Unit,
-    onTabsSwitcherClick: () -> Unit,
-    onTabsSwitcherLongClick: () -> Unit,
-): NavigationBottomBarCallbacks = NavigationBottomBarCallbacks(
-    onBack = { webViewActions.goBack() },
-    onForward = { webViewActions.goForward() },
-    onReloadOrStop = {
-        if (state.loadingState is LoadingState.Loading) {
-            webViewActions.stopLoading()
-            onStopRequested()
-        } else {
-            webViewActions.reload()
-        }
-    },
-    onHome = { webViewActions.loadHome() },
-    onOverflowClick = onOverflowClick,
-    onTabsSwitcherClick = onTabsSwitcherClick,
-    onTabsSwitcherLongClick = onTabsSwitcherLongClick,
-)
-
-/**
  * Spec 009 — wires the address-bar callbacks. The `onSubmit` lambda chain
  * implements FR-013a: dismiss keyboard → clear focus → load URL, in that
- * order. The dismiss + clear happen inside the URL-consumer lambda passed
- * to [BrowserViewModel.onAddressBarSubmit] so they only execute on
- * non-empty submits (the ViewModel skips invocation on `Empty`).
+ * order, and only on non-empty submits.
  */
 @Composable
 private fun rememberAddressBarCallbacks(
@@ -356,16 +338,18 @@ private fun rememberAddressBarCallbacks(
 ): AddressBarCallbacks {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    return AddressBarCallbacks(
-        onTextChange = viewModel::onAddressBarTextChange,
-        onFocusChange = viewModel::onAddressBarFocusChange,
-        onSubmit = {
-            viewModel.onAddressBarSubmit { url ->
-                keyboardController?.hide()
-                focusManager.clearFocus()
-                webViewActions.loadUrl(url)
-            }
-        },
-        onClear = viewModel::onAddressBarClear,
-    )
+    return remember(viewModel, webViewActions, keyboardController, focusManager) {
+        AddressBarCallbacks(
+            onTextChange = viewModel::onAddressBarTextChange,
+            onFocusChange = viewModel::onAddressBarFocusChange,
+            onSubmit = {
+                viewModel.onAddressBarSubmit { url ->
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    webViewActions.loadUrl(url)
+                }
+            },
+            onClear = viewModel::onAddressBarClear,
+        )
+    }
 }

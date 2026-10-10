@@ -25,7 +25,6 @@
     <string name="tabs_switcher_close_all_confirm">Alle Tabs schließen? Dies kann nicht rückgängig gemacht werden.</string>
     <string name="tabs_card_close">Tab schließen</string>
     <string name="tabs_default_title">Neuer Tab</string>
-    <string name="browser_action_tabs_switcher">Tab-Wechsler öffnen</string>
     <string name="browser_action_new_tab">Neuen Tab öffnen</string>
     <string name="browser_max_tabs_reached">Maximale Anzahl an Tabs erreicht. Schließe einen Tab, um einen neuen zu öffnen.</string>
 
@@ -142,7 +141,6 @@
     <string name="downloads_failure_generic">Fehlgeschlagen</string>
     <string name="downloads_size_unknown">Größe unbekannt</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">Mehr</string>
     <string name="downloads_no_app_can_open">Keine App auf diesem Gerät kann diese Datei öffnen.</string>
     <string name="downloads_file_missing">Diese Datei ist nicht mehr auf deinem Gerät.</string>
     <string name="downloads_not_complete">Dieser Download ist noch nicht fertig.</string>
@@ -234,4 +232,19 @@
     <string name="onboarding_action_done">Fertig</string>
     <string name="onboarding_action_skip">Überspringen</string>
     <string name="onboarding_progress_a11y">Schritt %1$d von %2$d</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Suchen</string>
+    <string name="nav_tabs">Tabs</string>
+    <string name="nav_menu">Menü</string>
+    <string name="hub_privacy_banner">Was du surfst, bleibt auf diesem Telefon</string>
+    <string name="hub_incognito_banner_title">Surfen ohne Spuren</string>
+    <string name="hub_incognito_banner_body">Inkognito-Tab öffnen: kein Verlauf, Cookies werden beim Schließen gelöscht.</string>
+    <string name="hub_quick_settings_title">Schnelleinstellungen</string>
+    <string name="hub_tile_clear_data">Daten löschen</string>
+    <string name="hub_downloads_in_progress_cd">Laufende Downloads</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="one">Tabs, %1$d geöffnet</item>
+        <item quantity="other">Tabs, %1$d geöffnet</item>
+    </plurals>
 </resources>

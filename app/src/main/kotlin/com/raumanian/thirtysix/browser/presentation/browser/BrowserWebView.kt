@@ -195,6 +195,10 @@ private fun buildConfiguredWebView(
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
+    // Spec 019 R7 — feed the sliding bars. API 23+, below minSdk 24.
+    wv.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+        navigationCallbacks.onScrollDelta((scrollY - oldScrollY).toFloat())
+    }
     wv.webChromeClient = BrowserChromeClient(
         onProgressChanged = callbacks.onProgressChanged,
         onReceivedTitle = navigationCallbacks.onTitleChange,

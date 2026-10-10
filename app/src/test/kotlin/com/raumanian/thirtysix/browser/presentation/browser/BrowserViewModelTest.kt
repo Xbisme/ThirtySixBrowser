@@ -209,7 +209,7 @@ class BrowserViewModelTest {
         vm.onProgressChanged(NEGATIVE_PROGRESS) // defensive: -5
         val state = vm.uiState.value
         assertTrue(state.loadingState is LoadingState.Loading)
-        assertEquals(0f, (state.loadingState as LoadingState.Loading).progress, FLOAT_TOLERANCE)
+        assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
 
     @Test
@@ -243,7 +243,7 @@ class BrowserViewModelTest {
         vm.onLoadStarted("https://example.com")
         val state = vm.uiState.value
         assertTrue(state.loadingState is LoadingState.Loading)
-        assertEquals(0f, (state.loadingState as LoadingState.Loading).progress, FLOAT_TOLERANCE)
+        assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
 
     @Test
@@ -251,13 +251,13 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onLoadStarted("https://example.com")
         vm.onProgressChanged(0)
-        assertEquals(0f, (vm.uiState.value.loadingState as LoadingState.Loading).progress, FLOAT_TOLERANCE)
+        assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
         vm.onProgressChanged(EARLY_PROGRESS) // 25
-        assertEquals(0.25f, (vm.uiState.value.loadingState as LoadingState.Loading).progress, FLOAT_TOLERANCE)
+        assertEquals(0.25f, vm.loadProgress.value, FLOAT_TOLERANCE)
         vm.onProgressChanged(MID_PROGRESS) // 50
-        assertEquals(0.5f, (vm.uiState.value.loadingState as LoadingState.Loading).progress, FLOAT_TOLERANCE)
+        assertEquals(0.5f, vm.loadProgress.value, FLOAT_TOLERANCE)
         vm.onProgressChanged(NEAR_PROGRESS) // 99
-        assertEquals(0.99f, (vm.uiState.value.loadingState as LoadingState.Loading).progress, FLOAT_TOLERANCE)
+        assertEquals(0.99f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
 
     // ---------- Spec 008 (T026) — canGoBack / canGoForward state mutators ----------
@@ -717,7 +717,53 @@ class BrowserViewModelTest {
             assertEquals(0, historyRepo.recorded.size)
         }
 
+    // ---------- Spec 019 (T034) — progress isolation, Constitution v1.4.0 §V rule 3 ----------
+
+    @Test
+    fun `fifty progress ticks emit fifty progress values and no uiState`() = runTest {
+        val vm = newViewModel()
+        vm.onLoadStarted("https://example.com")
+        vm.onProgressChanged(1) // enters Loading once; isolation is about what follows
+        vm.uiState.test {
+            awaitItem()
+            val seen = mutableListOf<Float>()
+            vm.loadProgress.test {
+                awaitItem()
+                for (tick in 2..ISOLATION_TICKS + 1) {
+                    vm.onProgressChanged(tick)
+                    seen += awaitItem()
+                }
+            }
+            assertEquals(ISOLATION_TICKS, seen.size)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `progress resets to zero on start, finish, failure and stop`() = runTest {
+        val vm = newViewModel()
+        vm.onLoadStarted("https://example.com")
+        vm.onProgressChanged(MID_PROGRESS)
+        vm.onLoadFinished("https://example.com")
+        assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
+
+        vm.onLoadStarted("https://example.com")
+        vm.onProgressChanged(MID_PROGRESS)
+        vm.onLoadFailed(ErrorReason.NetworkUnavailable)
+        assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
+
+        vm.onLoadStarted("https://example.com")
+        vm.onProgressChanged(MID_PROGRESS)
+        vm.onLoadStopped()
+        assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
+
+        vm.onProgressChanged(MID_PROGRESS)
+        vm.onLoadStarted("https://example.com")
+        assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
+    }
+
     private companion object {
+        const val ISOLATION_TICKS = 50
         const val EARLY_PROGRESS: Int = 25
         const val MID_PROGRESS: Int = 50
         const val NEAR_PROGRESS: Int = 99

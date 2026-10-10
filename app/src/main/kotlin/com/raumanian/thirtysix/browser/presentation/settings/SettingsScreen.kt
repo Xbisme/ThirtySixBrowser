@@ -171,7 +171,7 @@ private fun LazyListScope.aboutSection(state: SettingsUiState) {
 
 /** Renders whichever dialog [SettingsUiState.dialog] names — at most one at a time. */
 @Composable
-private fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewModel) {
+internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewModel) {
     when (val dialog = state.dialog) {
         SettingsDialog.ThemeChooser -> ThemeModeChooserDialog(
             selected = state.themeMode,
@@ -214,7 +214,7 @@ private fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewMo
  * stays under detekt's `LongMethod` ceiling as the stories add events.
  */
 @Composable
-private fun SettingsSnackbarEffect(
+internal fun SettingsSnackbarEffect(
     viewModel: SettingsViewModel,
     snackbarHostState: SnackbarHostState,
 ) {

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
@@ -83,6 +84,9 @@ fun QuickTile(
             color = scheme.onSurface,
             textAlign = TextAlign.Center,
             maxLines = LABEL_MAX_LINES,
+            overflow = TextOverflow.Ellipsis,
+            // Fill the tile so a long label wraps instead of being clipped (FR-055).
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

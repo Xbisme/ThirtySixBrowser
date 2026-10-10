@@ -54,7 +54,6 @@
     <string name="tabs_switcher_close_all_confirm">Close all tabs? This cannot be undone.</string>
     <string name="tabs_card_close">Close tab</string>
     <string name="tabs_default_title">New tab</string>
-    <string name="browser_action_tabs_switcher">Open tabs switcher</string>
     <string name="browser_action_new_tab">Open new tab</string>
     <string name="browser_max_tabs_reached">Maximum number of tabs reached. Close a tab to open a new one.</string>
 
@@ -181,7 +180,6 @@
     <string name="downloads_failure_generic">Failed</string>
     <string name="downloads_size_unknown">Unknown size</string>
     <string name="downloads_row_content_description">%1$s, %2$s, %3$s</string>
-    <string name="browser_action_more">More</string>
     <string name="downloads_no_app_can_open">No app on this device can open this file.</string>
     <string name="downloads_file_missing">This file is no longer on your device.</string>
     <string name="downloads_not_complete">This download hasn\'t finished yet.</string>
@@ -271,4 +269,19 @@
     <!-- Spec 016 US7 — About. The app name comes from app_name. -->
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_privacy_statement">This app collects no personal data and sends nothing to any server run by ThirtySix. Your history, bookmarks, downloads and settings stay on this device.</string>
+
+    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <string name="nav_search">Search</string>
+    <string name="nav_tabs">Tabs</string>
+    <string name="nav_menu">Menu</string>
+    <string name="hub_privacy_banner">Nothing you browse leaves this phone</string>
+    <string name="hub_incognito_banner_title">Browse without a trace</string>
+    <string name="hub_incognito_banner_body">Open an incognito tab: no history, cookies cleared when you close it.</string>
+    <string name="hub_quick_settings_title">Quick settings</string>
+    <string name="hub_tile_clear_data">Clear data</string>
+    <string name="hub_downloads_in_progress_cd">Downloads in progress</string>
+    <plurals name="nav_tabs_count_cd">
+        <item quantity="one">Tabs, %1$d open</item>
+        <item quantity="other">Tabs, %1$d open</item>
+    </plurals>
 </resources>
