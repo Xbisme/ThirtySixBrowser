@@ -2,16 +2,19 @@
 
 package com.raumanian.thirtysix.browser.presentation.settings.components
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -19,34 +22,42 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 
 /**
  * Spec 016 FR-003 — a setting whose current value is shown under its title. The whole row is
  * the touch target, at least the platform's minimum interactive size tall (FR-039), and
  * TalkBack reads title and value together because they share one clickable node.
+ * Spec 019 adds the pastel icon lead and a trailing chevron (FR-044).
  */
 @Composable
+@Suppress("LongParameterList")
 fun SettingsValueRow(
     title: String,
     value: String,
+    @DrawableRes icon: Int,
+    tone: SettingsIconTone,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .minimumInteractiveComponentSize()
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        verticalArrangement = Arrangement.Center,
+    SettingsRowLayout(
+        icon = icon,
+        tone = tone,
+        title = title,
+        summary = value,
+        modifier = modifier.clickable(onClick = onClick),
     ) {
-        Text(text = title, style = MaterialTheme.typography.bodyLarge)
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Icon(
+            painter = painterResource(AppIcons.ChevronRight),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(Dimens.icon),
         )
     }
 }
@@ -59,18 +70,24 @@ fun SettingsValueRow(
 @Composable
 fun SettingsActionRow(
     title: String,
+    @DrawableRes icon: Int,
+    tone: SettingsIconTone,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .minimumInteractiveComponentSize()
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = Spacing.md, vertical = Spacing.md),
-        contentAlignment = Alignment.CenterStart,
+    SettingsRowLayout(
+        icon = icon,
+        tone = tone,
+        title = title,
+        summary = null,
+        modifier = modifier.clickable(role = Role.Button, onClick = onClick),
     ) {
-        Text(text = title, style = MaterialTheme.typography.bodyLarge)
+        Icon(
+            painter = painterResource(AppIcons.ChevronRight),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(Dimens.icon),
+        )
     }
 }
 
@@ -80,30 +97,94 @@ fun SettingsActionRow(
  * only (`onCheckedChange = null`) to avoid a second, smaller focus target (FR-039).
  */
 @Composable
+@Suppress("LongParameterList")
 fun SettingsSwitchRow(
     title: String,
     summary: String,
     checked: Boolean,
+    @DrawableRes icon: Int,
+    tone: SettingsIconTone,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    SettingsRowLayout(
+        icon = icon,
+        tone = tone,
+        title = title,
+        summary = summary,
+        modifier = modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
+    ) {
+        Switch(checked = checked, onCheckedChange = null)
+    }
+}
+
+/** The shared row anatomy: icon square, title over an optional summary, trailing slot. */
+@Composable
+@Suppress("LongParameterList")
+private fun SettingsRowLayout(
+    @DrawableRes icon: Int,
+    tone: SettingsIconTone,
+    title: String,
+    summary: String?,
+    modifier: Modifier,
+    trailing: @Composable RowScope.() -> Unit,
+) {
     Row(
-        modifier = modifier
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        modifier = Modifier
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .then(modifier)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+        SettingsIcon(icon = icon, tone = tone)
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
             Text(
-                text = summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
             )
+            if (summary != null) {
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
-        Spacer(modifier = Modifier.width(Spacing.md))
-        Switch(checked = checked, onCheckedChange = null)
+        trailing()
+    }
+}
+
+/** A Settings row's 40dp rounded icon square in its [tone] (FR-044). */
+@Composable
+fun SettingsIcon(
+    @DrawableRes icon: Int,
+    tone: SettingsIconTone,
+    modifier: Modifier = Modifier,
+) {
+    val colors = ThirtySixTheme.colors
+    val scheme = MaterialTheme.colorScheme
+    val (fill, ink) = when (tone) {
+        SettingsIconTone.Sky -> colors.tileSky to colors.tileSkyInk
+        SettingsIconTone.Sun -> colors.tileSun to colors.tileSunInk
+        SettingsIconTone.Mint -> colors.tileMint to colors.tileMintInk
+        SettingsIconTone.Peach -> colors.tilePeach to colors.tilePeachInk
+        SettingsIconTone.Primary -> scheme.primaryContainer to scheme.primary
+    }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(Dimens.settingIcon)
+            .clip(MaterialTheme.shapes.medium)
+            .background(fill),
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = ink,
+            modifier = Modifier.size(Dimens.iconSmall),
+        )
     }
 }

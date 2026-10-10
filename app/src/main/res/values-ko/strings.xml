@@ -166,7 +166,7 @@
     <string name="settings_action_cancel">취소</string>
     <string name="settings_section_appearance">모양</string>
     <string name="settings_section_language">언어</string>
-    <string name="settings_section_search">검색</string>
+    <string name="settings_section_language_and_search">언어 및 검색</string>
     <string name="settings_section_privacy">개인정보 보호</string>
     <string name="settings_section_about">정보</string>
     <string name="settings_error_not_saved">설정을 저장하지 못했습니다. 다시 시도해 주세요.</string>

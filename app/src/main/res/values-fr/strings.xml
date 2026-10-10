@@ -170,7 +170,7 @@
     <string name="settings_action_cancel">Annuler</string>
     <string name="settings_section_appearance">Apparence</string>
     <string name="settings_section_language">Langue</string>
-    <string name="settings_section_search">Recherche</string>
+    <string name="settings_section_language_and_search">Langue et recherche</string>
     <string name="settings_section_privacy">Confidentialité</string>
     <string name="settings_section_about">À propos</string>
     <string name="settings_error_not_saved">Impossible d\'enregistrer le paramètre. Veuillez réessayer.</string>

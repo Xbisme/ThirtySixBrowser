@@ -3,18 +3,15 @@ package com.raumanian.thirtysix.browser.presentation.settings
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CHOICE_OPTION
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Rule
 import org.junit.Test
@@ -55,10 +52,10 @@ class SettingsScreenSearchEngineTest {
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW).performClick()
 
-        val options = composeRule.onAllNodesWithTag(TEST_TAG_SETTINGS_CHOICE_OPTION)
+        val options = composeRule.onAllNodes(isSettingsChoiceOption())
         options.assertCountEquals(SearchEngine.entries.size)
         options.filter(isSelected()).assertCountEquals(1)
-        composeRule.onNode(hasTestTag(TEST_TAG_SETTINGS_CHOICE_OPTION) and isSelected()).assertTextContains(google)
+        composeRule.onNode(isSettingsChoiceOption() and isSelected()).assertTextContains(google)
     }
 
     @Test(timeout = SETTINGS_TEST_TIMEOUT_MS)
@@ -67,7 +64,7 @@ class SettingsScreenSearchEngineTest {
         render(repository)
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW).performClick()
-        composeRule.onNode(hasTestTag(TEST_TAG_SETTINGS_CHOICE_OPTION) and hasText(bing)).performClick()
+        composeRule.onNode(isSettingsChoiceOption() and hasText(bing)).performClick()
         composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { repository.current.searchEngine == SearchEngine.Bing }
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW).assertTextContains(bing)

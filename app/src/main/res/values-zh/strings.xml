@@ -166,7 +166,7 @@
     <string name="settings_action_cancel">取消</string>
     <string name="settings_section_appearance">外观</string>
     <string name="settings_section_language">语言</string>
-    <string name="settings_section_search">搜索</string>
+    <string name="settings_section_language_and_search">语言和搜索</string>
     <string name="settings_section_privacy">隐私</string>
     <string name="settings_section_about">关于</string>
     <string name="settings_error_not_saved">无法保存设置，请重试。</string>

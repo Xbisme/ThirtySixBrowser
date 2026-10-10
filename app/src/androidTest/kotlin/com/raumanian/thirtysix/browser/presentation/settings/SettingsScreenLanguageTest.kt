@@ -3,16 +3,13 @@ package com.raumanian.thirtysix.browser.presentation.settings
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CHOICE_OPTION
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Rule
 import org.junit.Test
@@ -50,9 +47,9 @@ class SettingsScreenLanguageTest {
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW).performClick()
 
-        composeRule.onAllNodesWithTag(TEST_TAG_SETTINGS_CHOICE_OPTION).assertCountEquals(AppLanguage.entries.size)
+        composeRule.onAllNodes(isSettingsChoiceOption()).assertCountEquals(AppLanguage.entries.size)
         EXPECTED_ENDONYMS.forEach { endonym ->
-            composeRule.onNode(hasTestTag(TEST_TAG_SETTINGS_CHOICE_OPTION) and hasText(endonym))
+            composeRule.onNode(isSettingsChoiceOption() and hasText(endonym))
                 .performScrollTo()
                 .assertIsDisplayed()
         }
@@ -64,7 +61,7 @@ class SettingsScreenLanguageTest {
         render(controller)
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW).performClick()
-        composeRule.onNode(hasTestTag(TEST_TAG_SETTINGS_CHOICE_OPTION) and hasText(GERMAN_ENDONYM))
+        composeRule.onNode(isSettingsChoiceOption() and hasText(GERMAN_ENDONYM))
             .performScrollTo()
             .performClick()
         composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { controller.applied.toList() == listOf(AppLanguage.German) }

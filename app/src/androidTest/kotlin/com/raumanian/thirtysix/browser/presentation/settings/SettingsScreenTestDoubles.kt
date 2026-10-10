@@ -1,6 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.settings
 
 import android.graphics.Bitmap
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.isSelectable
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
@@ -188,3 +190,10 @@ internal fun settingsViewModel(
 internal const val INSTRUMENTED_APP_VERSION_NAME: String = "9.9.9-instrumented"
 
 internal const val SETTINGS_TEST_TIMEOUT_MS: Long = 10_000L
+
+/**
+ * Spec 019 — an option row in any Settings chooser. The choosers are drawn with the shared
+ * `ChoiceDialog`, whose rows carry no test tag, so an option is matched by what it is: a
+ * selectable (radio) node. Nothing else on the Settings screen is selectable.
+ */
+fun isSettingsChoiceOption(): SemanticsMatcher = isSelectable()

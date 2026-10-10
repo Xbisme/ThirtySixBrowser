@@ -3,33 +3,44 @@
 package com.raumanian.thirtysix.browser.presentation.settings.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
+import com.raumanian.thirtysix.browser.presentation.components.PillButton
+import com.raumanian.thirtysix.browser.presentation.components.PillStyle
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 
 /**
  * Spec 016 US4 — choose what to clear, then confirm.
@@ -40,9 +51,14 @@ import com.raumanian.thirtysix.browser.presentation.theme.Spacing
  *  - While [inProgress], a progress indicator shows, every control is disabled, and neither an
  *    outside tap nor system back closes the dialog, so a clear can be neither re-submitted nor
  *    abandoned midway (FR-032).
+ *
+ * Spec 019 FR-045 — styled as the design system's confirm dialog (peach glyph, title, then a
+ * full-width danger button above Cancel). It keeps its own layout rather than wrapping
+ * `ConfirmDialog` because that component cannot disable its buttons, tag them, or refuse
+ * dismissal, all of which FR-026 and FR-032 need.
  */
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 fun ClearBrowsingDataDialog(
     selection: Set<ClearBrowsingDataCategory>,
     inProgress: Boolean,
@@ -51,40 +67,76 @@ fun ClearBrowsingDataDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AlertDialog(
-        modifier = modifier.testTag(TEST_TAG_SETTINGS_CLEAR_DIALOG),
+    val colors = ThirtySixTheme.colors
+    Dialog(
         onDismissRequest = { if (!inProgress) onDismiss() },
         properties = DialogProperties(dismissOnBackPress = !inProgress, dismissOnClickOutside = !inProgress),
-        title = { Text(text = stringResource(R.string.settings_clear_dialog_title)) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                ClearBrowsingDataCategory.entries.forEach { category ->
-                    CategoryRow(
-                        category = category,
-                        checked = category in selection,
-                        enabled = !inProgress,
-                        onToggle = onToggle,
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            modifier = modifier
+                .widthIn(max = Dimens.dialogMaxWidth)
+                .testTag(TEST_TAG_SETTINGS_CLEAR_DIALOG),
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                modifier = Modifier.padding(Spacing.lg),
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(Dimens.dialogGlyph)
+                        .background(colors.tilePeach, MaterialTheme.shapes.large),
+                ) {
+                    Icon(
+                        painter = painterResource(AppIcons.MopFilled),
+                        contentDescription = null,
+                        tint = colors.tilePeachInk,
+                        modifier = Modifier.size(Dimens.icon),
                     )
                 }
-                if (inProgress) ClearInProgressRow()
+                Text(
+                    text = stringResource(R.string.settings_clear_dialog_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    ClearBrowsingDataCategory.entries.forEach { category ->
+                        CategoryRow(
+                            category = category,
+                            checked = category in selection,
+                            enabled = !inProgress,
+                            onToggle = onToggle,
+                        )
+                    }
+                    if (inProgress) ClearInProgressRow()
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    PillButton(
+                        label = stringResource(R.string.settings_clear_confirm),
+                        onClick = onConfirm,
+                        style = PillStyle.DangerFilled,
+                        enabled = selection.isNotEmpty() && !inProgress,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(TEST_TAG_SETTINGS_CLEAR_CONFIRM),
+                    )
+                    PillButton(
+                        label = stringResource(R.string.settings_action_cancel),
+                        onClick = onDismiss,
+                        style = PillStyle.Text,
+                        enabled = !inProgress,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onConfirm,
-                enabled = selection.isNotEmpty() && !inProgress,
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                modifier = Modifier.testTag(TEST_TAG_SETTINGS_CLEAR_CONFIRM),
-            ) {
-                Text(text = stringResource(R.string.settings_clear_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !inProgress) {
-                Text(text = stringResource(R.string.settings_action_cancel))
-            }
-        },
-    )
+        }
+    }
 }
 
 @Composable
@@ -112,7 +164,11 @@ private fun CategoryRow(
         Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
         Spacer(modifier = Modifier.width(Spacing.md))
         Column {
-            Text(text = stringResource(category.labelRes), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = stringResource(category.labelRes),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
             Text(
                 text = stringResource(category.descriptionRes),
                 style = MaterialTheme.typography.bodyMedium,
@@ -131,9 +187,13 @@ private fun ClearInProgressRow() {
             .testTag(TEST_TAG_SETTINGS_CLEAR_PROGRESS),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(modifier = Modifier.size(Dimens.icon))
         Spacer(modifier = Modifier.width(Spacing.md))
-        Text(text = stringResource(R.string.settings_clear_in_progress))
+        Text(
+            text = stringResource(R.string.settings_clear_in_progress),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

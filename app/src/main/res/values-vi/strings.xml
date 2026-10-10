@@ -166,7 +166,7 @@
     <string name="settings_action_cancel">Huỷ</string>
     <string name="settings_section_appearance">Giao diện</string>
     <string name="settings_section_language">Ngôn ngữ</string>
-    <string name="settings_section_search">Tìm kiếm</string>
+    <string name="settings_section_language_and_search">Ngôn ngữ và tìm kiếm</string>
     <string name="settings_section_privacy">Quyền riêng tư</string>
     <string name="settings_section_about">Giới thiệu</string>
     <string name="settings_error_not_saved">Không thể lưu cài đặt. Vui lòng thử lại.</string>

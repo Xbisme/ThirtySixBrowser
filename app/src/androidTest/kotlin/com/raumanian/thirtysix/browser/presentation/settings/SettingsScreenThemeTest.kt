@@ -3,11 +3,9 @@ package com.raumanian.thirtysix.browser.presentation.settings
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -15,7 +13,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
-import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CHOICE_OPTION
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Rule
 import org.junit.Test
@@ -56,10 +53,10 @@ class SettingsScreenThemeTest {
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_THEME_ROW).performClick()
 
-        val options = composeRule.onAllNodesWithTag(TEST_TAG_SETTINGS_CHOICE_OPTION)
+        val options = composeRule.onAllNodes(isSettingsChoiceOption())
         options.assertCountEquals(ThemeMode.entries.size)
         options.filter(isSelected()).assertCountEquals(1)
-        composeRule.onNode(hasTestTag(TEST_TAG_SETTINGS_CHOICE_OPTION) and isSelected()).assertTextContains(light)
+        composeRule.onNode(isSettingsChoiceOption() and isSelected()).assertTextContains(light)
     }
 
     @Test(timeout = SETTINGS_TEST_TIMEOUT_MS)
@@ -68,10 +65,10 @@ class SettingsScreenThemeTest {
         render(repository)
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_THEME_ROW).performClick()
-        composeRule.onNode(hasTestTag(TEST_TAG_SETTINGS_CHOICE_OPTION) and hasText(dark)).performClick()
+        composeRule.onNode(isSettingsChoiceOption() and hasText(dark)).performClick()
         composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { repository.current.themeMode == ThemeMode.Dark }
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_THEME_ROW).assertTextContains(dark)
-        composeRule.onAllNodesWithTag(TEST_TAG_SETTINGS_CHOICE_OPTION).assertCountEquals(0)
+        composeRule.onAllNodes(isSettingsChoiceOption()).assertCountEquals(0)
     }
 }

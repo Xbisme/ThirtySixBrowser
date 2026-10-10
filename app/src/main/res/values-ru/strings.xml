@@ -172,7 +172,7 @@
     <string name="settings_action_cancel">Отмена</string>
     <string name="settings_section_appearance">Оформление</string>
     <string name="settings_section_language">Язык</string>
-    <string name="settings_section_search">Поиск</string>
+    <string name="settings_section_language_and_search">Язык и поиск</string>
     <string name="settings_section_privacy">Конфиденциальность</string>
     <string name="settings_section_about">О приложении</string>
     <string name="settings_error_not_saved">Не удалось сохранить настройку. Попробуйте ещё раз.</string>

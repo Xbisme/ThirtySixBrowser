@@ -166,7 +166,7 @@
     <string name="settings_action_cancel">キャンセル</string>
     <string name="settings_section_appearance">外観</string>
     <string name="settings_section_language">言語</string>
-    <string name="settings_section_search">検索</string>
+    <string name="settings_section_language_and_search">言語と検索</string>
     <string name="settings_section_privacy">プライバシー</string>
     <string name="settings_section_about">このアプリについて</string>
     <string name="settings_error_not_saved">設定を保存できませんでした。もう一度お試しください。</string>
