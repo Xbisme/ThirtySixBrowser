@@ -3,30 +3,33 @@
 
 package com.raumanian.thirtysix.browser.presentation.downloads.components
 
-import androidx.compose.foundation.clickable
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.DownloadActionAvailability
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
 import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
+import com.raumanian.thirtysix.browser.presentation.components.ListRow
+import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
+import com.raumanian.thirtysix.browser.presentation.components.ListRowLead
+import com.raumanian.thirtysix.browser.presentation.components.SheetFrame
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 
 internal const val TEST_TAG_DOWNLOAD_ACTION_SHEET: String = "download_action_sheet"
 internal const val TEST_TAG_ACTION_OPEN: String = "download_action_open"
@@ -35,20 +38,16 @@ internal const val TEST_TAG_ACTION_REMOVE: String = "download_action_remove"
 internal const val TEST_TAG_ACTION_DELETE_FILE: String = "download_action_delete_file"
 
 /**
- * Spec 015 FR-030 / FR-034a — long-press action sheet.
+ * Spec 015 FR-030 / FR-034a · Spec 019 — long-press action sheet on the shared [SheetFrame].
  *
  * Renders in the fixed FR-030 order — open · copy link · remove from list · delete file —
  * but shows only the entries the [DownloadActionAvailability] matrix allows for this entry's
  * current state. The matrix is a pure domain function with its own tests, so what the sheet
- * offers and what the tests assert cannot drift apart.
+ * offers and what the tests assert cannot drift apart. "Delete file" carries the destructive
+ * peach well, matching the confirmation dialog it opens.
  *
- * Icons follow A12: `material-icons-core` has no honest glyph for "open", "copy" or
- * "remove", so those rows carry **no** icon rather than a misleading one — the precedent
- * Spec 013's `BookmarkActionSheet` and Spec 014's history sheet both set. Only "delete file"
- * gets one, because `Delete` genuinely means delete.
- *
- * `ModalBottomSheet` dismisses natively on outside-tap and system back (FR-035), so no
- * dismiss affordance — and therefore no dismiss string — is added.
+ * The sheet dismisses natively on outside-tap and system back (FR-035), so no dismiss
+ * affordance — and therefore no dismiss string — is added.
  */
 @Composable
 fun DownloadActionSheet(
@@ -63,35 +62,51 @@ fun DownloadActionSheet(
         fileIsPresent = item.status is DownloadStatus.Complete,
     )
 
-    ModalBottomSheet(
-        onDismissRequest = callbacks.onDismiss,
+    SheetFrame(
+        onDismiss = callbacks.onDismiss,
         modifier = modifier.testTag(TEST_TAG_DOWNLOAD_ACTION_SHEET),
     ) {
         Column(modifier = Modifier.padding(bottom = Spacing.lg)) {
             Text(
                 text = item.record.fileName,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
             )
 
             if (availability.canOpen) {
-                ActionRow(R.string.downloads_action_open, TEST_TAG_ACTION_OPEN, callbacks.onOpen)
+                ActionRow(
+                    R.string.downloads_action_open,
+                    AppIcons.OpenInNew,
+                    TEST_TAG_ACTION_OPEN,
+                    callbacks.onOpen,
+                )
             }
             if (availability.canCopyLink) {
-                ActionRow(R.string.downloads_action_copy_link, TEST_TAG_ACTION_COPY_LINK, callbacks.onCopyLink)
+                ActionRow(
+                    R.string.downloads_action_copy_link,
+                    AppIcons.ContentCopy,
+                    TEST_TAG_ACTION_COPY_LINK,
+                    callbacks.onCopyLink,
+                )
             }
             if (availability.canRemoveFromList) {
-                ActionRow(R.string.downloads_action_remove, TEST_TAG_ACTION_REMOVE, callbacks.onRemoveFromList)
+                ActionRow(
+                    R.string.downloads_action_remove,
+                    AppIcons.Close,
+                    TEST_TAG_ACTION_REMOVE,
+                    callbacks.onRemoveFromList,
+                )
             }
             if (availability.canDeleteFile) {
                 ActionRow(
                     labelRes = R.string.downloads_action_delete_file,
+                    icon = AppIcons.DeleteFilled,
                     testTag = TEST_TAG_ACTION_DELETE_FILE,
                     onClick = callbacks.onDeleteFile,
-                    icon = Icons.Filled.Delete,
-                    tint = MaterialTheme.colorScheme.error,
+                    destructive = true,
                 )
             }
         }
@@ -100,32 +115,31 @@ fun DownloadActionSheet(
 
 @Composable
 private fun ActionRow(
-    labelRes: Int,
+    @StringRes labelRes: Int,
+    @DrawableRes icon: Int,
     testTag: String,
     onClick: () -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    tint: Color = Color.Unspecified,
+    destructive: Boolean = false,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.lg, vertical = Spacing.md)
-            .testTag(testTag),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = tint,
-                modifier = Modifier.padding(end = Spacing.md),
-            )
-        }
-        Text(
-            text = stringResource(labelRes),
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onSurface else tint,
-        )
-    }
+    ListRow(
+        title = stringResource(labelRes),
+        subtitle = "",
+        onClick = onClick,
+        modifier = Modifier.testTag(testTag),
+        leading = {
+            if (destructive) {
+                val colors = ThirtySixTheme.colors
+                ListRowLead(fill = colors.tilePeach) {
+                    Icon(
+                        painter = painterResource(icon),
+                        contentDescription = null,
+                        tint = colors.tilePeachInk,
+                        modifier = Modifier.size(Dimens.icon),
+                    )
+                }
+            } else {
+                ListRowIcon(icon = icon)
+            }
+        },
+    )
 }

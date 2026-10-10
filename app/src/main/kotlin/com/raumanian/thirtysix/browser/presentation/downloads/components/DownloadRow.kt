@@ -1,41 +1,46 @@
 @file:Suppress("ktlint:standard:function-naming") // Composables are PascalCase by Compose convention.
-@file:OptIn(ExperimentalFoundationApi::class)
 
 package com.raumanian.thirtysix.browser.presentation.downloads.components
 
 import android.text.format.Formatter
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
 import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
+import com.raumanian.thirtysix.browser.presentation.components.ListRow
+import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
+import com.raumanian.thirtysix.browser.presentation.components.ProgressLine
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
+import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
 import com.raumanian.thirtysix.browser.presentation.downloads.bytesSoFarOrNull
 import com.raumanian.thirtysix.browser.presentation.downloads.progressFractionOrNull
 import com.raumanian.thirtysix.browser.presentation.downloads.toLabelRes
 import com.raumanian.thirtysix.browser.presentation.downloads.totalBytesOrNull
+import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
+import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -46,13 +51,22 @@ internal const val TEST_TAG_DOWNLOAD_ROW: String = "download_row"
 internal const val TEST_TAG_DOWNLOAD_CANCEL: String = "download_cancel"
 internal const val TEST_TAG_DOWNLOAD_PROGRESS: String = "download_progress"
 
+/** One sweep of the indeterminate line when the server declared no length. */
+private const val INDETERMINATE_SWEEP_MS: Int = 1_200
+
+private const val MIME_IMAGE = "image/"
+private const val MIME_VIDEO = "video/"
+private val ARCHIVE_MIME_MARKERS = listOf("zip", "compressed", "x-tar", "x-7z", "x-rar", "gzip")
+
 /**
- * Spec 015 FR-020 – FR-022, FR-036 — one row of the Downloads list.
+ * Spec 015 FR-020 – FR-022, FR-036 · Spec 019 FR-043 — one open row of the Downloads list.
  *
- * Shows filename, size, state and start time. A transfer still in flight also shows live
- * progress and a **one-tap cancel control** (FR-036); that control is absent on every
- * terminal state (FR-036a), which it derives from the single `isTerminal` definition rather
- * than re-deciding for itself.
+ * Shows filename, then the state **as a word** coloured as a secondary cue (complete →
+ * `positive`, failed / missing → `error`, in flight → neutral), size and start time. A
+ * transfer still in flight also shows live progress and a **one-tap cancel control**
+ * (FR-036); that control is absent on every terminal state (FR-036a), which it derives from
+ * the single `isTerminal` definition rather than re-deciding for itself. There is no retry
+ * action (FR-001).
  */
 @Composable
 fun DownloadRow(
@@ -73,100 +87,108 @@ fun DownloadRow(
         stateLabel,
         timeLabel,
     )
+    val stateColor = status.stateColor()
+    val neutral = MaterialTheme.colorScheme.onSurfaceVariant
+    val summary = buildAnnotatedString {
+        withStyle(SpanStyle(color = stateColor)) { append(stateLabel) }
+        append(" · $sizeLabel · $timeLabel")
+    }
 
-    Row(
+    ListRow(
+        title = item.record.fileName,
+        // The summary is rendered in [below] so the state word can carry its own colour.
+        subtitle = "",
+        leading = { ListRowIcon(icon = fileTypeIcon(item.record.mimeType)) },
+        onClick = onClick,
+        onLongClick = onLongClick,
         modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = Spacing.md, vertical = Spacing.sm)
             .testTag(TEST_TAG_DOWNLOAD_ROW)
             .semantics { contentDescription = rowDescription },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            // material-icons-core carries no download glyph (research.md R9); the downward
-            // arrow is the closest honest substitute in the 48 available.
-            imageVector = if (status is DownloadStatus.Failed || status == DownloadStatus.Missing) {
-                Icons.Filled.Warning
-            } else {
-                Icons.Filled.KeyboardArrowDown
-            },
-            contentDescription = null,
-            tint = if (status is DownloadStatus.Failed || status == DownloadStatus.Missing) {
-                MaterialTheme.colorScheme.error
-            } else {
-                MaterialTheme.colorScheme.primary
-            },
-        )
-
-        DownloadRowDetails(
-            fileName = item.record.fileName,
-            summary = "$stateLabel · $sizeLabel · $timeLabel",
-            status = status,
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = Spacing.md),
-        )
-
-        // FR-036 / FR-036a — present only while in flight, gone on every terminal state.
-        if (status.isInFlight) {
-            IconButton(onClick = onCancelClick, modifier = Modifier.testTag(TEST_TAG_DOWNLOAD_CANCEL)) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
+        below = {
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = neutral,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (status.isInFlight) {
+                DownloadProgress(status = status, modifier = Modifier.padding(top = Spacing.xs))
+            }
+        },
+        trailing = if (status.isInFlight) {
+            // FR-036 / FR-036a — present only while in flight, gone on every terminal state.
+            {
+                RoundIconButton(
+                    icon = AppIcons.Close,
                     contentDescription = stringResource(R.string.downloads_action_cancel),
+                    onClick = onCancelClick,
+                    style = RoundIconStyle.Bare,
+                    tint = neutral,
+                    modifier = Modifier.testTag(TEST_TAG_DOWNLOAD_CANCEL),
                 )
             }
-        }
-    }
+        } else {
+            null
+        },
+    )
 }
 
+/** FR-043 — colour is the secondary cue; the word always carries the meaning. */
 @Composable
-private fun DownloadRowDetails(
-    fileName: String,
-    summary: String,
-    status: DownloadStatus,
-    modifier: Modifier = Modifier,
-) {
-    val isProblem = status is DownloadStatus.Failed || status == DownloadStatus.Missing
-    Column(modifier = modifier) {
-        Text(
-            text = fileName,
-            style = MaterialTheme.typography.bodyLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = summary,
-            style = MaterialTheme.typography.bodySmall,
-            color = if (isProblem) {
-                MaterialTheme.colorScheme.error
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        if (status.isInFlight) {
-            DownloadProgress(status = status, modifier = Modifier.padding(top = Spacing.xs))
-        }
+private fun DownloadStatus.stateColor(): Color = when (this) {
+    is DownloadStatus.Complete -> ThirtySixTheme.colors.positive
+    is DownloadStatus.Failed, DownloadStatus.Missing -> MaterialTheme.colorScheme.error
+    else -> MaterialTheme.colorScheme.onSurfaceVariant
+}
+
+@DrawableRes
+private fun fileTypeIcon(mimeType: String): Int {
+    val type = mimeType.lowercase(Locale.ROOT)
+    return when {
+        type.startsWith(MIME_IMAGE) -> AppIcons.Image
+        type.startsWith(MIME_VIDEO) -> AppIcons.Movie
+        ARCHIVE_MIME_MARKERS.any { type.contains(it) } -> AppIcons.FolderZip
+        else -> AppIcons.Description
     }
 }
 
 /**
- * Determinate when the server declared a length, indeterminate otherwise — never a
+ * Determinate when the server declared a length, an indeterminate sweep otherwise — never a
  * fabricated percentage against an unknown total.
+ *
+ * Phase discipline (Constitution §V, contracts C6): [ProgressLine] invokes the lambda only in
+ * `drawBehind`. The sweep is a held `State` read inside that lambda, so animating it redraws
+ * one line and recomposes nothing.
  */
 @Composable
 private fun DownloadProgress(status: DownloadStatus, modifier: Modifier = Modifier) {
-    val fraction = status.progressFractionOrNull
-    val progressModifier = modifier
-        .fillMaxWidth()
-        .testTag(TEST_TAG_DOWNLOAD_PROGRESS)
+    val progressModifier = modifier.testTag(TEST_TAG_DOWNLOAD_PROGRESS)
+    val trackColor = MaterialTheme.colorScheme.surfaceContainerHigh
 
-    if (fraction == null) {
-        LinearProgressIndicator(modifier = progressModifier)
+    if (status.progressFractionOrNull == null) {
+        val sweep = rememberInfiniteTransition(label = "download-sweep").animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = INDETERMINATE_SWEEP_MS, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "download-sweep-fraction",
+        )
+        ProgressLine(
+            progress = { sweep.value },
+            thickness = Dimens.progressBar,
+            trackColor = trackColor,
+            modifier = progressModifier,
+        )
     } else {
-        LinearProgressIndicator(progress = { fraction }, modifier = progressModifier)
+        ProgressLine(
+            progress = { status.progressFractionOrNull ?: 0f },
+            thickness = Dimens.progressBar,
+            trackColor = trackColor,
+            modifier = progressModifier,
+        )
     }
 }
 

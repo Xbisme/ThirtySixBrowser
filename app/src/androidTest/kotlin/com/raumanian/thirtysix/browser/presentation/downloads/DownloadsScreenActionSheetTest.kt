@@ -1,17 +1,24 @@
 package com.raumanian.thirtysix.browser.presentation.downloads
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.DownloadFailureCause
 import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_ACTION_COPY_LINK
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_ACTION_DELETE_FILE
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_ACTION_OPEN
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_ACTION_REMOVE
-import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_DELETE_FILE_CONFIRM
+import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_DELETE_FILE_DIALOG
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_DOWNLOAD_ACTION_SHEET
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
@@ -32,6 +39,18 @@ class DownloadsScreenActionSheetTest {
     val composeRule = createComposeRule()
 
     private val completeRecord = instrumentedRecord(1L, "done.pdf")
+
+    /**
+     * Spec 019 — the dialog is the shared `ConfirmDialog`, which exposes no modifier for its
+     * action button, so the button is found by its label inside the tagged dialog.
+     */
+    private fun deleteConfirmButton(): SemanticsNodeInteraction {
+        val label = InstrumentationRegistry.getInstrumentation().targetContext
+            .getString(R.string.downloads_delete_dialog_confirm)
+        return composeRule.onNode(
+            hasText(label) and hasClickAction() and hasAnyAncestor(hasTestTag(TEST_TAG_DELETE_FILE_DIALOG)),
+        )
+    }
 
     private fun show(status: DownloadStatus, filePresent: Boolean) {
         val vm = instrumentedViewModel(
@@ -103,10 +122,10 @@ class DownloadsScreenActionSheetTest {
         composeRule.waitForIdle()
 
         // The sheet has closed and the dialog is up, but nothing is gone yet.
-        composeRule.onNodeWithTag(TEST_TAG_DELETE_FILE_CONFIRM).assertIsDisplayed()
+        deleteConfirmButton().assertIsDisplayed()
         assertEquals(1, vm.uiState.value.items.size)
 
-        composeRule.onNodeWithTag(TEST_TAG_DELETE_FILE_CONFIRM).performClick()
+        deleteConfirmButton().performClick()
         composeRule.waitForIdle()
         assertEquals(0, vm.uiState.value.items.size)
     }
