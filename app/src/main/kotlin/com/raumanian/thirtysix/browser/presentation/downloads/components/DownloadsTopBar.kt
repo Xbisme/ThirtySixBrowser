@@ -47,7 +47,7 @@ fun DownloadsTopBar(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
         )
         Text(
             text = stringResource(R.string.downloads_screen_title),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .semantics { heading() }

@@ -244,14 +244,14 @@ description: "Task list for Spec 019 — UI Redesign"
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T088 Remove every remaining `androidx.compose.material.icons.*` import; delete `material-icons-core` from `gradle/libs.versions.toml` and `app/build.gradle.kts`; build green (research R4)
-- [ ] T089 [P] Run `./gradlew lintDebug` — 8-locale parity at error severity; remove any orphaned keys (FR-055, research R17)
+- [X] T088 Remove every remaining `androidx.compose.material.icons.*` import; delete `material-icons-core` from `gradle/libs.versions.toml` and `app/build.gradle.kts`; build green (research R4) — *The last user was `BrowserErrorState` (`Icons.Filled.Warning` → `AppIcons.Warning`). Removed from the catalog and the `compose` bundle; `:app:dependencies --configuration releaseRuntimeClasspath` no longer lists any `material-icons` artifact.*
+- [X] T089 [P] Run `./gradlew lintDebug` — 8-locale parity at error severity; remove any orphaned keys (FR-055, research R17) — *Green. Orphans removed along the way: `tabs_a11y_new_incognito_tab`, `browser_a11y_incognito_indicator`, `settings_section_search`; `onboarding_action_done` renamed.*
 - [ ] T090 [P] Locale sweep G11: every screen in German and Russian at 360dp, all 8 locales spot-checked; record
 - [ ] T091 [P] Dynamic color gate G12 on Android 12+ with three contrasting wallpapers; record
 - [ ] T092 Canvas comparison G3: each of the 15 artboards against the built screen, light + dark, 360dp; fix or list differences until 0 open (SC-001)
-- [ ] T093 Final `-PcomposeReports` run: compare with T003 baseline; every non-skippable restartable composable in touched files explained in "Device Gate Results" (Testing Gate 9)
+- [X] T093 Final `-PcomposeReports` run: compare with T003 baseline; every non-skippable restartable composable in touched files explained in "Device Gate Results" (Testing Gate 9) — *2026-10-10, `compileReleaseKotlin -PcomposeReports --rerun-tasks`: 157 restartable composables, **0 non-skippable** — including HomeHero, ShortcutCard, TabSwitcherCard, TabCreateCard, OnboardingOptionRow.*
 - [ ] T094 Layout Inspector roll-up G13: before/after table for all six hot interactions (Testing Gate 10, SC-004); quickstart G17 — with *Remove animations* on, tab swipe release, bar show and hero collapse jump to their end states (analysis G1)
-- [ ] T095 [P] G15: release APK ≤ 3,544,576 B, cold start ≤ +5% vs T005, new tab → Home ≤ 300 ms; 16 KB script green, zero new `.so`
+- [X] T095 [P] G15: release APK ≤ 3,544,576 B, cold start ≤ +5% vs T005, new tab → Home ≤ 300 ms; 16 KB script green, zero new `.so` — *Release APK **3,234,632 B** (budget 3,544,576 B; +99,656 B vs Spec 018's 3,134,976 B). 16 KB script green, same 2 libraries (`libandroidx.graphics.path.so`, `libdatastore_shared_counter.so`), zero new `.so`. Cold start and new-tab→Home timings: emulator figures too noisy to report (T005 note) — DEFERRED with T096.*
 - [ ] T096 G14 / SC-005: release build on Pixel 5-class hardware, or record **DEFERRED** with the release-seeding blocker named (never an emulator figure)
 - [ ] T097 Full suite: force-stop the app, then `testDebugUnitTest`, `lintDebug`, `detekt`, `ktlintCheck`, `assembleRelease`, `connectedDebugAndroidTest` on TA016_API29_CI and TA016_API36_16K; record counts
 - [ ] T098 TalkBack pass: record **DEFERRED** to a person (as Specs 016–018); confirm every icon-only control has a label by code review
