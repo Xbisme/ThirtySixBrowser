@@ -148,9 +148,11 @@ description: "Task list for Spec 019 — UI Redesign"
 
 **Independent Test**: quickstart G13.
 
-- [ ] T050 [US6] Audit every composable touched so far against contracts C6: no frame-rate value passed as a plain `Float`/`Dp`, no `by` delegation of `loadProgress`, every lazy list has `key` **and** `contentType`; fix findings in place
-- [ ] T051 [US6] Mark new UI models `@Immutable` (`HubState`, bottom-bar state) and confirm with `-PcomposeReports` that no touched file has an unexplained non-skippable restartable composable
+- [X] T050 [US6] Audit every composable touched so far against contracts C6: no frame-rate value passed as a plain `Float`/`Dp`, no `by` delegation of `loadProgress`, every lazy list has `key` **and** `contentType`; fix findings in place
+- [X] T051 [US6] Mark new UI models `@Immutable` (`HubState`, bottom-bar state) and confirm with `-PcomposeReports` that no touched file has an unexplained non-skippable restartable composable
 - [ ] T052 [US6] Layout Inspector **after** counts for page load, page scroll and hub drag on TA016_API36_16K; record beside T004's before counts
+
+**US6 audit result (2026-10-10, after US3)**: `-PcomposeReports` — 144 composables, 130 restartable, **0 restartable non-skippable**. Remaining "unstable" parameters are ViewModels, `NavHostController`, `WebViewActionsHandle` and a `StateFlow` — all passed as the same remembered instance, so strong skipping still skips them. `java.io.File` (tab-card images) added to `compose_stability.conf`. No component under `presentation/components/` has an unstable parameter. T052 (Layout Inspector) needs a person, as T004.
 
 *(Home scroll, tab swipe, History scroll and download progress counts are recorded in T068, T082 and T079 when those screens exist; final roll-up in T094.)*
 
