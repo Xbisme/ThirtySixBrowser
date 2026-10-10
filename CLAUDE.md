@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** ✅ Spec 018 `onboarding-flow` done — merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41 · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.3.0.
+Auto-generated from project context. Last updated: 2026-09-15 — **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** ✅ Spec 018 `onboarding-flow` done — merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41 · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.4.0 (2026-10-10: §V Compose Phase Discipline; Phase 5 = 019 ui-redesign, then optional 020 tracker blocker).
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -231,7 +231,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 - **Pricing**: Free (no Pro tier in v1.0)
 
 ### Critical Rules
-- v1.0 phải ship đầy đủ Phase 1–4 (Specs 001–018) trước Phase 5 (optional 019)
+- v1.0 phải ship đầy đủ Phase 1–4 (Specs 001–018) trước Phase 5 (019 ui-redesign, rồi optional 020)
 - Phase order is MANDATORY (Constitution §X) — no spec may be skipped or reordered
 - Permissions giữ tối thiểu — `INTERNET`, `ACCESS_NETWORK_STATE`, plus `WRITE_EXTERNAL_STORAGE` capped at `maxSdkVersion="28"` (Spec 015's single documented deviation). `POST_NOTIFICATIONS` is deliberately **not** declared — the system download service notifies under its own UID (Spec 015 G9, Constitution v1.3.0 §II)
 - `addJavascriptInterface` FORBIDDEN unless allow-listed origin gating + spec justification
@@ -258,7 +258,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 | # | Spec | Status | Description |
 |---|------|--------|-------------|
-| — | Constitution | ✅ Done v1.3.0 (amended 2026-09-11) | Project governing principles |
+| — | Constitution | ✅ Done v1.4.0 (amended 2026-10-10) | Project governing principles |
 | 001 | `project-init-build-config` | ✅ Done 2026-05-01 | Gradle Kotlin DSL + version catalog + 16KB-ready build |
 | 002 | `clean-architecture-skeleton-di` | ✅ Done 2026-05-01 | Module structure + Hilt + base classes |
 | 003 | `theme-typography-darkmode` | ✅ Done 2026-05-01 | Material3 + light/dark/system |
@@ -277,7 +277,8 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 016 | `settings-screen` | ✅ Done 2026-09-12 (PR #18 merged into `main`, merge commit `3083941`; 112/113 — T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
 | 017 | `splash-screen` | ✅ Done 2026-09-15 (PR #20 merged, `cca5c0c`; 35/35; G1–G10 PASS, chỉ TalkBack deferred) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
 | 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
-| 019 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–018 done) |
+| 019 | `ui-redesign` | 🎨 Designing | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
+| 020 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–019 done) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
 

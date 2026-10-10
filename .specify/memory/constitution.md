@@ -15,6 +15,48 @@ Version Change: (none) → 1.0.0 (INITIAL — project constitution created)
                                 WRITE_EXTERNAL_STORAGE capped at maxSdkVersion 28
                                 admitted as the single documented legacy-storage
                                 exception)
+                1.3.0 → 1.4.0 (MINOR — §V gains the NON-NEGOTIABLE "Compose Phase
+                                Discipline" subsection; §X Phase 5 becomes 019
+                                ui-redesign + 020 optional tracker blocker, with a
+                                design-before-spec rule)
+
+Modified Principles (1.4.0, 2026-10-10, decided by the project lead):
+- V. Performance Excellence — new subsection "Compose Phase Discipline (NON-NEGOTIABLE)",
+       nine review-checkable rules: read frame-rate state in the latest phase (offset /
+       graphicsLayer / drawBehind lambdas); pass it as `() -> T`; isolate high-frequency
+       state from screen state (precedent: BrowserScreen recomposing on every progress
+       tick); derivedStateOf / remember; stable parameters + compiler reports; lazy `key`
+       + `contentType`, no same-direction nesting; window insets on every bar (precedent:
+       address bar under the status bar, Specs 009–018); honest effect keys, no backwards
+       writes; recomposition counts measured per UI spec. The lazy-key bullet now points
+       at rule 6.
+- VI. Testing Discipline — host blocklist matcher reference renumbered Spec 019 → 020.
+- X. Simplicity & Build Order — Phase 5 is now 019 `ui-redesign` (from the approved
+       ThirtySix design system, violet brand replacing Deep Teal) then 020
+       `tracker-blocker-hostlist` (optional, renumbered). New "Design before spec" rule:
+       UI not yet in the design system is designed and approved before /speckit-specify;
+       features proposed while designing go to sdd-roadmap.md for a later version.
+- Development Workflow → Testing Gates — gates 9 (compiler report) and 10
+       (recomposition counts) added, UI specs only.
+- Development Workflow → Review Requirements — composable changes reviewed against
+       Compose Phase Discipline; UI changes must match the design system.
+- Bump rationale: MINOR — material expansion of §V and §X; no principle removed. Code
+       merged under 1.3.0 that violates the new rules (BrowserScreen progress read, the
+       address-bar insets) is not grandfathered: Spec 019 rebuilds those screens and
+       MUST comply.
+
+Follow-up TODOs (1.4.0):
+- TODO(COMPOSE_REPORTS): wire Compose compiler reports/metrics behind a Gradle property
+       and add a stability configuration file — first task of Spec 019.
+- TODO(COMPOSE_LINT): evaluate the detekt `compose-rules` ruleset (io.nlopez.compose.rules)
+       during Spec 019; version looked up at adoption per §IX. Not added by this amendment.
+- TODO(SDD_ROADMAP): sdd-roadmap.md, dev-workflow.md, project-context.md and CLAUDE.md
+       still list 019 as the tracker blocker — renumber in the same change as this
+       amendment.
+
+Templates (1.4.0 re-check): plan-template.md, spec-template.md, tasks-template.md ✅ —
+       the Constitution Check loads principles at runtime; no template names Spec 019
+       or the Phase 5 contents.
 
 Modified Principles (1.3.0):
 - II. Google Play Compliance — permission bullet: the minimum set is now `INTERNET` +
@@ -305,6 +347,7 @@ are the primary performance-critical surfaces.
 - Tab switcher grid MUST render ≤ 200ms for 10 tabs (snapshot bitmap-cached, not
   re-rendered)
 - Compose `LazyColumn` / `LazyVerticalGrid` MUST use stable `key`s — never index-only
+  (and a `contentType`; see Compose Phase Discipline rule 6)
 - Main APK release size MUST remain ≤ 10MB (after R8); AAB upload ≤ 8MB
 - Performance benchmark device: Pixel 5 (minimum target for all 60fps validations);
   also test on a low-end device (e.g., Pixel 3a or emulator with `--memory=2048`)
@@ -315,13 +358,78 @@ are the primary performance-critical surfaces.
 process death feels broken. 60fps on Pixel 5 ensures the experience holds across the
 typical Android user base.
 
+#### Compose Phase Discipline (NON-NEGOTIABLE)
+
+Compose runs three phases — composition, layout, draw — and re-runs from the phase in
+which a changed state was **read**. A state read in a composable body re-runs all three;
+a read inside a layout lambda skips composition; a read inside a draw lambda only redraws.
+Every rule below is checkable in code review.
+
+1. **Frame-rate state is read in the latest phase that needs it.** Frame-rate state is
+   anything that changes per frame or per tick: scroll position, drag or sheet offset,
+   page-load or download progress, and every running animation value
+   (`animate*AsState`, `Animatable`, `Transition`, `InfiniteTransition`).
+   - position → `Modifier.offset { }` lambda (layout phase)
+   - alpha, scale, rotation, translation → `Modifier.graphicsLayer { }` lambda (draw
+     phase, own layer)
+   - color, progress, drawn shapes → `Modifier.drawBehind { }` /
+     `drawWithContent { }` / `Canvas` (draw phase)
+   - It MUST NOT be read in a composable body, and MUST NOT be passed to the value
+     overloads `Modifier.alpha(…)`, `scale(…)`, `offset(x = …dp)`, `background(color)`,
+     `fillMaxWidth(fraction)` or `size(…)`.
+2. **Frequently-changing values travel as lambdas.** A parameter carrying frame-rate
+   state is typed `() -> T`, and the lambda is invoked only inside a layout or draw
+   lambda. A lambda that wraps a value already read in the caller (`progress = { p }`
+   after `val p = state.progress`) does not satisfy this rule.
+3. **High-frequency state is isolated from screen state.** A screen collects its
+   `UiState` once, at the screen root, and hands each child only the fields it needs. A
+   high-frequency field (e.g. `LoadingState.Loading.progress`) MUST NOT live in the
+   state object a whole screen reads in composition: expose it as its own `StateFlow`
+   collected by the one consumer, or read it through a lambda. *Precedent*: through
+   Spec 018, `BrowserScreen` read `state.loadingState` in its body, so every WebView
+   progress tick recomposed the entire browser chrome.
+4. **Derived and expensive values are remembered.** State computed from frequently
+   changing state uses `derivedStateOf` (e.g. `firstVisibleItemIndex > 0` → show a
+   button). Expensive computations use `remember(keys)`. List item bodies MUST NOT
+   allocate lambdas, objects or `Modifier` chains that break skipping without
+   `remember`; ViewModel callbacks are passed as method references or remembered lambdas.
+5. **Composable parameters are stable.** UI models passed to composables are
+   `@Immutable` / `@Stable` data classes, use `kotlinx.collections.immutable`, or are
+   listed in the Compose compiler stability configuration file. A bare `List<T>`,
+   `Map<K, V>` or a domain class from another module is unstable unless so configured.
+   Compose compiler reports and metrics MUST be available behind a Gradle property;
+   every spec that touches UI attaches the report for its files, with zero
+   unexplained non-skippable restartable composables.
+6. **Lazy containers are keyed and typed.** `LazyColumn` / `LazyRow` /
+   `LazyVerticalGrid` items MUST declare a stable `key` **and** a `contentType`. Lazy
+   containers MUST NOT nest in the same scroll direction. Item composables take ids or
+   stable item models, never the whole `UiState`.
+7. **Every bar consumes window insets.** The app runs edge-to-edge
+   (`enableEdgeToEdge()`), so every top bar, bottom bar, sheet and floating control MUST
+   consume the relevant `WindowInsets` (`statusBars`, `navigationBars`, `ime`,
+   `displayCutout`). *Precedent*: from Spec 009 to Spec 018 the address bar was drawn
+   under the status bar.
+8. **Effects are keyed honestly and composition stays read-only.** `LaunchedEffect` /
+   `DisposableEffect` keys are exactly the values the effect depends on — never `Unit`
+   when the effect reads changing state; callbacks captured by long-lived effects go
+   through `rememberUpdatedState`. Composition MUST NOT write state it has already read
+   (no backwards writes).
+9. **Measured, not assumed.** Every spec that touches UI records, for each screen's hot
+   interaction (scroll, page load, drag), a Layout Inspector recomposition count showing
+   that the chrome around the moving part does not recompose per frame. The numbers go
+   in the spec's tasks.md device-gate results, beside the compiler report from rule 5.
+
+**Rationale**: Each of these mistakes looks harmless in a diff and costs frames on every
+scroll, drag and page load. Rules that name the phase, the API and the precedent turn a
+taste judgement into a review check.
+
 ### VI. Testing Discipline
 
 Unit tests are REQUIRED for all business logic. Compose UI tests are REQUIRED for
 critical user flows. Integration tests for Room and DataStore are REQUIRED.
 
 - Unit tests MUST cover: repositories, ViewModels, use cases, mappers, URL parsing,
-  search engine URL builders, host blocklist matcher (if Spec 019)
+  search engine URL builders, host blocklist matcher (if Spec 020)
 - Compose UI tests MUST cover: address bar input flow, tab switcher tap, bookmark
   add/delete, settings toggles, onboarding flow
 - Instrumented tests MUST cover: Room DAOs, DataStore read/write, WebView basic load
@@ -460,7 +568,14 @@ MUST follow the spec roadmap. No speculative code is permitted.
     incognito
   - Phase 3 (Data Features): 013–015 — bookmarks, history, downloads
   - Phase 4 (Settings & Polish): 016–018 — settings, splash, onboarding
-  - Phase 5 (Optional): 019 — tracker blocker host list (only after 001–018 complete)
+  - Phase 5 (only after 001–018 complete): 019 — UI redesign, a full rebuild of every
+    screen from the approved ThirtySix design system
+    (https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys; violet brand replacing Deep
+    Teal); then 020 (Optional) — tracker blocker host list
+- **Design before spec**: a screen or feature whose UI is not yet in the design system
+  MUST be designed there and approved by the project lead before `/speckit-specify`
+  runs for it. New features proposed while designing are added to `sdd-roadmap.md` for
+  a later version; they MUST NOT be folded into the spec in progress.
 - **Implementation sequence within Phase 1 is MANDATORY**: 001 → 002 → (003, 004,
   005, 006 parallel)
 - YAGNI applies to all implementation decisions: no speculative code, no future-use
@@ -609,6 +724,10 @@ All specs MUST pass before marking complete:
 6. No hardcoded colors / typography / magic numbers in feature code
 7. **Release APK builds and `.so` files are 16KB-aligned** (when applicable)
 8. App runs without crash on emulator API 35 with 16KB page size enabled
+9. **UI specs only** — Compose compiler report attached, with zero unexplained
+   non-skippable restartable composables in the spec's files (§V rule 5)
+10. **UI specs only** — Layout Inspector recomposition counts recorded for each changed
+    screen's hot interaction, showing no per-frame recomposition of its chrome (§V rule 9)
 
 ### Review Requirements
 
@@ -616,6 +735,11 @@ All specs MUST pass before marking complete:
 - Performance-sensitive changes MUST include before/after measurements (60fps,
   cold start timing, APK size)
 - New permission additions MUST be justified in the spec
+- Every composable change MUST be reviewed against §V Compose Phase Discipline: where
+  each frame-rate state is read, whether it travels as a lambda, parameter stability,
+  lazy `key` + `contentType`, insets, and effect keys
+- UI changes MUST match the approved design system; a deviation is either fixed or
+  designed and approved first (§X)
 - Any new package addition MUST have version + 16KB compliance lookup documented
   inline in `research.md` and `project-context.md`
 
@@ -655,4 +779,4 @@ All implementation decisions MUST align with these principles.
   red 16KB CI gate
 - Constitution supersedes all other practices; in case of conflict, the constitution wins
 
-**Version**: 1.3.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-09-11
+**Version**: 1.4.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-10
