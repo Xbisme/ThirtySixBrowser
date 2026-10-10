@@ -15,8 +15,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -25,6 +28,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.presentation.settings.components.AboutSection
 import com.raumanian.thirtysix.browser.presentation.settings.components.AppLanguageChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.ClearBrowsingDataDialog
@@ -43,6 +48,7 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.historyR
 import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
 import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
+import kotlinx.coroutines.delay
 
 /**
  * Spec 016 — the Settings screen.
@@ -183,6 +189,40 @@ private fun LazyListScope.aboutSection(state: SettingsUiState) {
     }
 }
 
+/**
+ * Spec 019 — keeps the language chooser on screen until the new configuration arrives, then
+ * closes it in that same frame, so the user sees one change: chooser → screen in the new
+ * language. The configuration is read in composition on purpose — it changes once per choice.
+ */
+@Composable
+private fun LanguageChooserHost(
+    selected: AppLanguage,
+    onSelect: (AppLanguage) -> Unit,
+    onApplied: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val locales = LocalConfiguration.current.locales
+    val localesWhenOpened = remember { locales }
+    var picked by remember { mutableStateOf(false) }
+    LaunchedEffect(locales, picked) {
+        if (picked && locales != localesWhenOpened) onApplied()
+    }
+    LaunchedEffect(picked) {
+        if (picked) {
+            delay(BrowserLimits.LANGUAGE_APPLY_TIMEOUT_MS)
+            onApplied()
+        }
+    }
+    AppLanguageChooserDialog(
+        selected = selected,
+        onSelect = { language ->
+            picked = true
+            onSelect(language)
+        },
+        onDismiss = onDismiss,
+    )
+}
+
 /** Renders whichever dialog [SettingsUiState.dialog] names — at most one at a time. */
 @Composable
 internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewModel) {
@@ -197,9 +237,10 @@ internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewM
             onSelect = viewModel::onSearchEngineSelected,
             onDismiss = viewModel::dismissDialog,
         )
-        SettingsDialog.LanguageChooser -> AppLanguageChooserDialog(
+        SettingsDialog.LanguageChooser -> LanguageChooserHost(
             selected = state.appLanguage,
             onSelect = viewModel::onLanguageSelected,
+            onApplied = viewModel::onLanguageApplied,
             onDismiss = viewModel::dismissDialog,
         )
         is SettingsDialog.ClearBrowsingData -> ClearBrowsingDataDialog(

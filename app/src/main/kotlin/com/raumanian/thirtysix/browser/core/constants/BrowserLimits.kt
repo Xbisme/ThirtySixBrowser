@@ -117,6 +117,13 @@ object BrowserLimits {
     const val WEB_DATA_CLEAR_TIMEOUT_MS: Long = 15_000L
 
     /**
+     * Spec 019 — how long the language chooser waits for the new configuration before closing
+     * anyway. It normally closes the moment the language lands (~70 ms on the API 36 AVD); this
+     * only covers a choice that changes nothing on screen, such as English on an English device.
+     */
+    const val LANGUAGE_APPLY_TIMEOUT_MS: Long = 600L
+
+    /**
      * Spec 015 FR-005 — hard upper bound on a downloaded file's name, in characters.
      *
      * The name reaching this bound has already been derived from a server-supplied

@@ -279,6 +279,9 @@ class SettingsViewModelTest {
 
         assertEquals(listOf(AppLanguage.French), controller.applied)
         assertEquals(AppLanguage.French, viewModel.uiState.value.appLanguage)
+        // Spec 019 — the chooser stays until the screen reports the language has landed.
+        assertEquals(SettingsDialog.LanguageChooser, viewModel.uiState.value.dialog)
+        viewModel.onLanguageApplied()
         assertNull(viewModel.uiState.value.dialog)
     }
 
