@@ -239,6 +239,7 @@
     <string name="hub_incognito_banner_body">시크릿 탭 열기: 방문 기록이 남지 않고, 탭을 닫으면 쿠키가 삭제됩니다.</string>
     <string name="hub_quick_settings_title">빠른 설정</string>
     <string name="hub_tile_clear_data">데이터 삭제</string>
+    <string name="hub_tile_search_engine">검색엔진</string>
     <string name="hub_downloads_in_progress_cd">다운로드 진행 중</string>
     <plurals name="nav_tabs_count_cd">
         <item quantity="other">탭, %1$d개 열림</item>

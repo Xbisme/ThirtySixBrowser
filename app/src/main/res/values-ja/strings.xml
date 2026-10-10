@@ -239,6 +239,7 @@
     <string name="hub_incognito_banner_body">シークレットタブを開く：履歴は残らず、閉じると Cookie が削除されます。</string>
     <string name="hub_quick_settings_title">クイック設定</string>
     <string name="hub_tile_clear_data">データを消去</string>
+    <string name="hub_tile_search_engine">検索エンジン</string>
     <string name="hub_downloads_in_progress_cd">ダウンロード中</string>
     <plurals name="nav_tabs_count_cd">
         <item quantity="other">タブ、%1$d 個開いています</item>

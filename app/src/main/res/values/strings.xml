@@ -278,7 +278,9 @@
     <string name="hub_incognito_banner_title">Browse without a trace</string>
     <string name="hub_incognito_banner_body">Open an incognito tab: no history, cookies cleared when you close it.</string>
     <string name="hub_quick_settings_title">Quick settings</string>
+    <!-- Shorter than settings_search_engine_title where a quarter-width hub tile needs it (DE "Suchmaschine" broke mid-word at 360dp). -->
     <string name="hub_tile_clear_data">Clear data</string>
+    <string name="hub_tile_search_engine">Search engine</string>
     <string name="hub_downloads_in_progress_cd">Downloads in progress</string>
     <plurals name="nav_tabs_count_cd">
         <item quantity="one">Tabs, %1$d open</item>

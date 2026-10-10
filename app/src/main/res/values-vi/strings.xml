@@ -239,6 +239,7 @@
     <string name="hub_incognito_banner_body">Mở thẻ ẩn danh: không lưu lịch sử, cookie bị xoá khi bạn đóng thẻ.</string>
     <string name="hub_quick_settings_title">Cài đặt nhanh</string>
     <string name="hub_tile_clear_data">Xoá dữ liệu</string>
+    <string name="hub_tile_search_engine">Công cụ tìm kiếm</string>
     <string name="hub_downloads_in_progress_cd">Đang tải xuống</string>
     <plurals name="nav_tabs_count_cd">
         <item quantity="other">Thẻ, %1$d thẻ đang mở</item>
