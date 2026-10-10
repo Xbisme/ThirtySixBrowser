@@ -83,6 +83,14 @@ Constitution
 | 019 | `ui-redesign` | Đập đi xây lại toàn bộ giao diện theo [design system ThirtySix](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (tím thay teal) + Compose Phase Discipline (Constitution v1.4.0 §V) | Mọi màn theo design system; chrome không recompose theo từng frame khi cuộn/tải/kéo | 001–018, design đã duyệt | 🎨 Đang thiết kế — design system v1 xong 2026-10-10, chờ thiết kế màn |
 | 020 | `tracker-blocker-hostlist` | (Optional) Block request via host list | Toggle on → request đến host trong list bị block | 011–019 | ⬜ Optional |
 
+## Ý tưởng cho bản sau (chưa có spec)
+
+> Constitution v1.4.0 §X: tính năng mới nảy ra khi thiết kế được ghi ở đây, **không** gộp vào spec đang làm. Muốn làm thì phải thiết kế trong [design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) và được duyệt trước khi `/speckit-specify`.
+
+| Ý tưởng | Nguồn | Ghi chú |
+|---|---|---|
+| **Pin a site** — ghim trang lên dải shortcut card ở Home | Thiết kế Spec 019, 2026-10-10 | Thẻ "Pin a site" đã có trong component ShortcutCard nhưng ẩn cho đến khi có spec; cần bảng lưu trang ghim (Room migration) |
+
 ## Thứ tự Implement (Recommended)
 
 ```
