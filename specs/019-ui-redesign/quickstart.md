@@ -16,7 +16,7 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 ./gradlew lintDebug                    # 8-locale parity at error severity
 ./gradlew detekt ktlintCheck
 ./gradlew assembleRelease              # then the 16 KB script; no new .so
-./gradlew assembleRelease -PcomposeReports   # compiler reports in app/build/compose_reports
+./gradlew assembleRelease -PcomposeReports --rerun-tasks   # reports in app/build/compose_reports; --rerun-tasks forces the compile that writes them
 ./gradlew connectedDebugAndroidTest
 grep -rniE "0f766e|0891b2|5eead4|67e8f9" app/src/main   # SC-003: expect no output
 ```

@@ -13,17 +13,19 @@
   XML (the launcher icon and the launch-screen mark), which is resolved by the resource
   system and cannot reference Kotlin values in Color.kt. Declaring them here keeps them
   named constants rather than literals inside the drawables (Constitution §III).
-  They mirror the brand seeds already defined in Color.kt — primary #0F766E and
-  tertiary #0891B2 — and brand_mark_on_surface equals window_background_light.
+  Spec 019 — they mirror the violet brand in Color.kt / ThirtySixColors.kt: primary #6C4CF1
+  and the action-gradient end #8F6FFF (design system mark). brand_mark_on_surface stays the
+  numerals' off-white #FAFAF9 from Spec 017; the window backgrounds now equal the new
+  surface tokens (#FFFFFF light, #0E0D12 dark).
   These are NOT general UI tokens: nothing in Compose may read them. Any new UI color
   still belongs in Color.kt.
 -->
 <resources>
-    <color name="window_background_light">#FAFAF9</color>
-    <color name="window_background_dark">#0A0F0E</color>
+    <color name="window_background_light">#FFFFFF</color>
+    <color name="window_background_dark">#0E0D12</color>
 
     <!-- Spec 017 — brand mark (specs/017-splash-screen/data-model.md "Colour references"). -->
-    <color name="brand_mark_primary">#0F766E</color>
-    <color name="brand_mark_accent">#0891B2</color>
+    <color name="brand_mark_primary">#6C4CF1</color>
+    <color name="brand_mark_accent">#8F6FFF</color>
     <color name="brand_mark_on_surface">#FAFAF9</color>
 </resources>

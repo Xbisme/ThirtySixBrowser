@@ -7,6 +7,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.raumanian.thirtysix.browser.R
 
 val Poppins = FontFamily(
@@ -21,14 +22,31 @@ val Inter = FontFamily(
 
 private val Default = Typography()
 
+private const val HEADLINE_LARGE_TRACKING_SP = -0.5f
+private const val HEADLINE_SMALL_TRACKING_SP = -0.3f
+private const val TITLE_LARGE_TRACKING_SP = -0.2f
+
 internal val ThirtySixTypography = Typography(
     displayLarge = Default.displayLarge.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
     displayMedium = Default.displayMedium.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
     displaySmall = Default.displaySmall.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
-    headlineLarge = Default.headlineLarge.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
+    // Spec 019 — tighter tracking on display-face headings, per the design system's type group.
+    headlineLarge = Default.headlineLarge.copy(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = HEADLINE_LARGE_TRACKING_SP.sp,
+    ),
     headlineMedium = Default.headlineMedium.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
-    headlineSmall = Default.headlineSmall.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
-    titleLarge = Default.titleLarge.copy(fontFamily = Poppins, fontWeight = FontWeight.Medium),
+    headlineSmall = Default.headlineSmall.copy(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = HEADLINE_SMALL_TRACKING_SP.sp,
+    ),
+    titleLarge = Default.titleLarge.copy(
+        fontFamily = Poppins,
+        fontWeight = FontWeight.Medium,
+        letterSpacing = TITLE_LARGE_TRACKING_SP.sp,
+    ),
     titleMedium = Default.titleMedium.copy(fontFamily = Inter, fontWeight = FontWeight.Medium),
     titleSmall = Default.titleSmall.copy(fontFamily = Inter, fontWeight = FontWeight.Medium),
     bodyLarge = Default.bodyLarge.copy(fontFamily = Inter, fontWeight = FontWeight.Normal),

@@ -32,11 +32,11 @@ description: "Task list for Spec 019 — UI Redesign"
 
 **Purpose**: Build plumbing and the "before" measurements.
 
-- [ ] T001 Add `compose_stability.conf` at the repository root listing `kotlin.collections.*`, `java.time.*` and `com.raumanian.thirtysix.browser.domain.model.*` (research R9)
-- [ ] T002 In `app/build.gradle.kts` add a `composeCompiler { }` block: always `stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))`; `reportsDestination` / `metricsDestination` = `layout.buildDirectory.dir("compose_reports")` **only** when `project.hasProperty("composeReports")` (research R9)
-- [ ] T003 Verify `./gradlew assembleRelease -PcomposeReports` writes `app/build/compose_reports/*-composables.txt` and that a plain `assembleRelease` writes nothing there; record the baseline count of non-skippable restartable composables per file in "Device Gate Results" below
+- [X] T001 Add `compose_stability.conf` at the repository root listing `kotlin.collections.*`, `java.time.*` and `com.raumanian.thirtysix.browser.domain.model.*` (research R9)
+- [X] T002 In `app/build.gradle.kts` add a `composeCompiler { }` block: always `stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))`; `reportsDestination` / `metricsDestination` = `layout.buildDirectory.dir("compose_reports")` **only** when `project.hasProperty("composeReports")` (research R9)
+- [X] T003 Verify `./gradlew assembleRelease -PcomposeReports` writes `app/build/compose_reports/*-composables.txt` and that a plain `assembleRelease` writes nothing there; record the baseline count of non-skippable restartable composables per file in "Device Gate Results" below
 - [ ] T004 Record the **before** Layout Inspector recomposition counts on `main` (TA016_API36_16K, debug) for the six hot interactions of quickstart G13 (page load, page scroll, new-tab load as the Home baseline, overflow-menu open as the hub baseline, tab grid scroll, download progress) — the hub and Home do not exist yet, so these are the stated stand-ins (analysis A2) in "Device Gate Results"
-- [ ] T005 [P] Record baseline release APK size and cold-start median (10 launches) on TA016_API36_16K for SC-010/SC-011 in "Device Gate Results"
+- [X] T005 [P] Record baseline release APK size and cold-start median (10 launches) on TA016_API36_16K for SC-010/SC-011 in "Device Gate Results"
 
 ---
 
@@ -48,32 +48,37 @@ description: "Task list for Spec 019 — UI Redesign"
 
 ### Theme
 
-- [ ] T006 Rewrite `MAIN/presentation/theme/Color.kt` with the light and dark values of every M3-mapped token from `specs/019-ui-redesign/assets/tokens.json` per the mapping table in research R2 (primary `#6c4cf1`/`#b6a3ff`, surface `#ffffff`/`#0e0d12`, …); remove every Deep Teal / Cyan value
-- [ ] T007 [P] Create `MAIN/presentation/theme/ThirtySixColors.kt`: `@Immutable data class ThirtySixColors` with fabStart, fabEnd, heroDeep, heroViolet, heroRose, glass, glassStroke, onGlass, onGlassMuted, surfaceIncognito, onIncognito, positive, tileSky/tileSkyInk, tileSun/tileSunInk, tileMint/tileMintInk, tilePeach/tilePeachInk; light and dark instances; `LocalThirtySixColors = staticCompositionLocalOf` (data-model §5; INV-3: `surfaceIncognito` identical in both themes)
-- [ ] T008 [P] Rewrite `MAIN/presentation/theme/Shape.kt`: `Shapes(extraSmall = 6.dp, small = 10.dp, medium = 14.dp, large = 20.dp, extraLarge = 28.dp)` plus `ThirtySixShapes(sheet = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp), full = CircleShape)` (research R3)
-- [ ] T009 [P] Update `MAIN/presentation/theme/Type.kt`: keep Poppins/Inter; set letterSpacing −0.5sp on headlineLarge, −0.3sp on headlineSmall, −0.2sp on titleLarge (tokens.json type group)
-- [ ] T010 [P] Create `MAIN/presentation/theme/Elevation.kt`: `Modifier.softShadow()`, `Modifier.barShadow()`, `Modifier.fabGlow()` drawn in `drawBehind` with a `setShadowLayer` paint on API 28+ and `Modifier.shadow` fallback on 24–27 (research R3)
-- [ ] T011 Update `MAIN/presentation/theme/Theme.kt` (`ThirtySixTheme`): provide `LocalThirtySixColors` and the shapes object; under dynamic color take primary, primaryContainer and surface roles from the dynamic scheme and derive `heroViolet`, `fabStart`, `fabEnd` from dynamic `primary`, keeping heroDeep/heroRose/tiles/positive/incognito fixed (FR-005, INV-2); expose `object ThirtySixTheme { colors; shapes }` (contracts C7)
-- [ ] T012 [P] Update `RES/values/colors.xml`, `RES/values/themes.xml`, `RES/values-night/themes.xml`: window and launch backgrounds to the new `surface` values (`#ffffff` / `#0e0d12`); keep AppCompat NoActionBar parents and the splash theme as Spec 017 left them
-- [ ] T013 [P] Unit test `TEST/presentation/theme/ThirtySixColorsTest.kt`: light/dark instances differ where tokens differ, `surfaceIncognito` equal in both (INV-3), and a WCAG contrast helper asserts the text/surface pairs of SC-009 ≥ 4.5:1 in both themes
+- [X] T006 Rewrite `MAIN/presentation/theme/Color.kt` with the light and dark values of every M3-mapped token from `specs/019-ui-redesign/assets/tokens.json` per the mapping table in research R2 (primary `#6c4cf1`/`#b6a3ff`, surface `#ffffff`/`#0e0d12`, …); remove every Deep Teal / Cyan value
+- [X] T007 [P] Create `MAIN/presentation/theme/ThirtySixColors.kt`: `@Immutable data class ThirtySixColors` with fabStart, fabEnd, heroDeep, heroViolet, heroRose, glass, glassStroke, onGlass, onGlassMuted, surfaceIncognito, onIncognito, positive, tileSky/tileSkyInk, tileSun/tileSunInk, tileMint/tileMintInk, tilePeach/tilePeachInk; light and dark instances; `LocalThirtySixColors = staticCompositionLocalOf` (data-model §5; INV-3: `surfaceIncognito` identical in both themes)
+- [X] T008 [P] Rewrite `MAIN/presentation/theme/Shape.kt`: `Shapes(extraSmall = 6.dp, small = 10.dp, medium = 14.dp, large = 20.dp, extraLarge = 28.dp)` plus `ThirtySixShapes(sheet = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp), full = CircleShape)` (research R3)
+- [X] T009 [P] Update `MAIN/presentation/theme/Type.kt`: keep Poppins/Inter; set letterSpacing −0.5sp on headlineLarge, −0.3sp on headlineSmall, −0.2sp on titleLarge (tokens.json type group)
+- [X] T010 [P] Create `MAIN/presentation/theme/Elevation.kt`: `Modifier.softShadow()`, `Modifier.barShadow()`, `Modifier.fabGlow()` drawn in `drawBehind` with a `setShadowLayer` paint on API 28+ and `Modifier.shadow` fallback on 24–27 (research R3)
+- [X] T011 Update `MAIN/presentation/theme/Theme.kt` (`ThirtySixTheme`): provide `LocalThirtySixColors` and the shapes object; under dynamic color take primary, primaryContainer and surface roles from the dynamic scheme and derive `heroViolet`, `fabStart`, `fabEnd` from dynamic `primary`, keeping heroDeep/heroRose/tiles/positive/incognito fixed (FR-005, INV-2); expose `object ThirtySixTheme { colors; shapes }` (contracts C7)
+- [X] T012 [P] Update `RES/values/colors.xml`, `RES/values/themes.xml`, `RES/values-night/themes.xml`: window and launch backgrounds to the new `surface` values (`#ffffff` / `#0e0d12`); keep AppCompat NoActionBar parents and the splash theme as Spec 017 left them
+- [X] T013 [P] Unit test `TEST/presentation/theme/ThirtySixColorsTest.kt`: light/dark instances differ where tokens differ, `surfaceIncognito` equal in both (INV-3), and a WCAG contrast helper asserts the text/surface pairs of SC-009 ≥ 4.5:1 in both themes
 
 ### Icons
 
-- [ ] T014 Import the Material Symbols in data-model §6 from `google/material-design-icons` (pin the commit hash in this task when done; Apache-2.0) — Rounded, weight 300, grade −25, 24px, outlined plus listed `F` filled variants — as `RES/drawable/ic_<name>.xml` / `ic_<name>_filled.xml`; set `android:autoMirrored="true"` on `arrow_back`, `arrow_forward`, `chevron_right` (research R4)
-- [ ] T015 [P] Create `MAIN/presentation/theme/AppIcons.kt`: one `@DrawableRes` constant per imported icon so feature code never spells resource names twice
+- [X] T014 Import the Material Symbols in data-model §6 from `google/material-design-icons` (pin the commit hash in this task when done; Apache-2.0) — Rounded, weight 300, grade −25, 24px, outlined plus listed `F` filled variants — as `RES/drawable/ic_<name>.xml` / `ic_<name>_filled.xml`; set `android:autoMirrored="true"` on `arrow_back`, `arrow_forward`, `chevron_right` (research R4)
+- [X] T015 [P] Create `MAIN/presentation/theme/AppIcons.kt`: one `@DrawableRes` constant per imported icon so feature code never spells resource names twice
 
 ### Shared components (`MAIN/presentation/components/`)
 
-- [ ] T016 [P] `GlassIconButton.kt` and `RingIconButton.kt` — 44dp visual / 48dp touch target, glass = `glass` fill + 1dp `glassStroke` ring, no blur (research R5); mandatory `contentDescription`
-- [ ] T017 [P] `PillButton.kt` — filled, tonal, outline, text, danger-filled variants, 44dp, `ThirtySixShapes.full`, no fixed width
-- [ ] T018 [P] `ThirtySixChip.kt` — 34dp pill, hairline ring, selected = `primaryContainer` with leading icon
-- [ ] T019 [P] `QuickTile.kt` — places (white well + hairline + outline icon) and pastel (sky/sun/mint/peach, square well, filled icon); label wraps to two lines
-- [ ] T020 [P] `FeatureBanner.kt` — stage banner (chiplets around a hero chip + `primaryContainer` strip) and row banner (kicker, note, gradient coin)
-- [ ] T021 [P] `ListRow.kt` + `SectionHeader.kt` — 44dp leading square (`radius-md`), title 15sp medium one line ellipsized, secondary line `onSurfaceVariant`, trailing slot; no card, no divider
-- [ ] T022 [P] `ProgressLine.kt` — `ProgressLine(progress: () -> Float, thickness)` drawing the `fabStart→fabEnd` gradient and reading `progress()` **only inside `drawBehind`** (contracts C6)
-- [ ] T023 [P] `ChoiceDialog.kt` and `ConfirmDialog.kt` — `radius-xl`; choice rows tinted `primaryContainer` when selected, apply-on-tap, no OK; confirm = pastel glyph, title, one sentence, full-width danger button above Cancel (FR-045)
-- [ ] T024 [P] `SheetFrame.kt` — wraps M3 `ModalBottomSheet` with `ThirtySixShapes.sheet`, `surfaceContainerLow`, a 36×4dp `outlineVariant` handle and navigation-bar insets; used by the hub and every action sheet
-- [ ] T025 [P] `ShortcutArt.kt` — mesh background from a colour seed (three radial gradients) drawn in one `drawBehind`; used by shortcut cards and tab cards without a screenshot
+- [X] T016 [P] `GlassIconButton.kt` and `RingIconButton.kt` — 44dp visual / 48dp touch target, glass = `glass` fill + 1dp `glassStroke` ring, no blur (research R5); mandatory `contentDescription`
+- [X] T017 [P] `PillButton.kt` — filled, tonal, outline, text, danger-filled variants, 44dp, `ThirtySixShapes.full`, no fixed width
+- [X] T018 [P] `ThirtySixChip.kt` — 34dp pill, hairline ring, selected = `primaryContainer` with leading icon
+- [X] T019 [P] `QuickTile.kt` — places (white well + hairline + outline icon) and pastel (sky/sun/mint/peach, square well, filled icon); label wraps to two lines
+- [X] T020 [P] `FeatureBanner.kt` — stage banner (chiplets around a hero chip + `primaryContainer` strip) and row banner (kicker, note, gradient coin)
+- [X] T021 [P] `ListRow.kt` + `SectionHeader.kt` — 44dp leading square (`radius-md`), title 15sp medium one line ellipsized, secondary line `onSurfaceVariant`, trailing slot; no card, no divider
+- [X] T022 [P] `ProgressLine.kt` — `ProgressLine(progress: () -> Float, thickness)` drawing the `fabStart→fabEnd` gradient and reading `progress()` **only inside `drawBehind`** (contracts C6)
+- [X] T023 [P] `ChoiceDialog.kt` and `ConfirmDialog.kt` — `radius-xl`; choice rows tinted `primaryContainer` when selected, apply-on-tap, no OK; confirm = pastel glyph, title, one sentence, full-width danger button above Cancel (FR-045)
+- [X] T024 [P] `SheetFrame.kt` — wraps M3 `ModalBottomSheet` with `ThirtySixShapes.sheet`, `surfaceContainerLow`, a 36×4dp `outlineVariant` handle and navigation-bar insets; used by the hub and every action sheet
+- [X] T025 [P] `ShortcutArt.kt` — mesh background from a colour seed (three radial gradients) drawn in one `drawBehind`; used by shortcut cards and tab cards without a screenshot
+
+**Implementation notes (Phase 2)**:
+- T014 pinned commit: `google/material-design-icons@49d4db35df873165d6bd6ba09b063c7dafbac2f4`. 53 vectors (41 outlined + 12 filled) converted by a one-off script; `auto_awesome` exists only in the legacy 24-viewport format and is imported as such.
+- T016 shipped as one `RoundIconButton` with `RoundIconStyle.{Ringed, Bare, Glass}` rather than two files; T025 `ShortcutArt` shipped as `MeshArt` / `SeededMeshArt`, reused by the Home hero. Component sizes live in a new `presentation/theme/Dimens.kt` (Constitution §III) and shadow colours in `ThirtySixColors.shadow` / `glow`.
+- T012/T026–T028 overlap: the brand vectors read `@color/brand_mark_*`, so recolouring `colors.xml` recoloured them with geometry untouched.
 
 **Checkpoint**: theme, icons and components compile; `./gradlew testDebugUnitTest lintDebug detekt ktlintCheck` green; screens still the old layout but recoloured.
 
@@ -298,7 +303,9 @@ Each increment leaves every Spec 007–018 behaviour working and all tests green
 
 | Gate | Result | Notes |
 |---|---|---|
-| Baseline (T003–T005) | — | |
+| Baseline T003 compiler report | ✅ 2026-10-10 | `assembleRelease -PcomposeReports --rerun-tasks` (without `--rerun-tasks` the up-to-date compile writes no report). 116 composables, 105 restartable, **0 restartable non-skippable** (strong skipping), 40 parameters inferred unstable (mostly ViewModels and lambdas) |
+| Baseline T004 Layout Inspector | ⏸ needs a person | Layout Inspector is GUI-only in Android Studio; not drivable from the CLI. To be recorded by a person on `main` before the redesign merges; JVM state-isolation tests (T034) stand in meanwhile |
+| Baseline T005 size / start | ✅ 2026-10-10, TA016_API36_16K, release | APK **3,134,976 B** (matches Spec 018). Cold start, onboarding state, 10 runs: 1981–4082 ms, median ~2.9 s — **emulator under heavy load, far above Spec 018's 331 ms on the same AVD**; the SC-010 comparison will be re-measured back-to-back with the redesign build under identical conditions |
 | G1 Brand | — | |
 | G2 Insets | — | |
 | G3 Canvas match | — | |
