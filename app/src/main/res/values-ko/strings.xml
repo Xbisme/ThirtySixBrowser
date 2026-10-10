@@ -34,7 +34,6 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">새 시크릿 탭</string>
-    <string name="tabs_a11y_new_incognito_tab">새 시크릿 탭 열기</string>
     <string name="tabs_a11y_incognito_glyph">시크릿 탭</string>
     <string name="tabs_error_max_incognito_tabs_reached">시크릿 탭 최대 %d개에 도달했습니다</string>
     <string name="browser_a11y_incognito_indicator">시크릿 모드 활성화됨</string>
@@ -263,4 +262,8 @@
     <string name="incognito_page_point_cookies">쿠키와 사이트 데이터가 삭제됩니다</string>
     <string name="incognito_page_point_screenshots">시크릿 탭이 열려 있는 동안 스크린샷이 차단됩니다</string>
     <string name="incognito_page_footnote">다운로드한 파일과 저장한 북마크는 유지됩니다. 웹사이트와 네트워크는 여전히 방문 사실을 볼 수 있습니다.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">열린 탭</string>
+    <string name="tabs_chip_incognito">시크릿</string>
 </resources>

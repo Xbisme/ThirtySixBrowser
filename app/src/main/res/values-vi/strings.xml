@@ -34,7 +34,6 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Thẻ ẩn danh mới</string>
-    <string name="tabs_a11y_new_incognito_tab">Mở thẻ ẩn danh mới</string>
     <string name="tabs_a11y_incognito_glyph">Thẻ ẩn danh</string>
     <string name="tabs_error_max_incognito_tabs_reached">Đã đạt giới hạn %d thẻ ẩn danh</string>
     <string name="browser_a11y_incognito_indicator">Đang ở chế độ ẩn danh</string>
@@ -263,4 +262,8 @@
     <string name="incognito_page_point_cookies">Cookie và dữ liệu trang web bị xoá</string>
     <string name="incognito_page_point_screenshots">Không thể chụp màn hình khi đang mở thẻ ẩn danh</string>
     <string name="incognito_page_footnote">Tệp bạn tải xuống và dấu trang bạn lưu vẫn được giữ lại. Các trang web và mạng của bạn vẫn có thể thấy bạn truy cập.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Đang mở</string>
+    <string name="tabs_chip_incognito">Ẩn danh</string>
 </resources>

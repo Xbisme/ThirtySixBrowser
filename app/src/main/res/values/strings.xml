@@ -64,7 +64,6 @@
 
     <!-- Spec 012 — Private / Incognito Mode. New strings: incognito affordances, indicator, dialog, errors, a11y. -->
     <string name="tabs_action_new_incognito_tab">New incognito tab</string>
-    <string name="tabs_a11y_new_incognito_tab">Open new incognito tab</string>
     <string name="tabs_a11y_incognito_glyph">Incognito tab</string>
     <!-- Spec 012 — cap is MAX_INCOGNITO_TABS = 50 (always > 1), so the singular case is unreachable. Plural form intentionally omitted. -->
     <string name="tabs_error_max_incognito_tabs_reached" tools:ignore="PluralsCandidate">You\'ve reached the maximum of %d incognito tabs</string>
@@ -304,4 +303,8 @@
     <string name="incognito_page_point_cookies">Cookies and site data are cleared</string>
     <string name="incognito_page_point_screenshots">Screenshots are blocked while a private tab is open</string>
     <string name="incognito_page_footnote">Files you download and bookmarks you save are kept. Websites and your network can still see your visits.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Open</string>
+    <string name="tabs_chip_incognito">Incognito</string>
 </resources>

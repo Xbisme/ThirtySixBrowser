@@ -37,7 +37,6 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Новая вкладка инкогнито</string>
-    <string name="tabs_a11y_new_incognito_tab">Открыть новую вкладку инкогнито</string>
     <string name="tabs_a11y_incognito_glyph">Вкладка инкогнито</string>
     <string name="tabs_error_max_incognito_tabs_reached">Достигнут максимум: %d вкладок инкогнито</string>
     <string name="browser_a11y_incognito_indicator">Режим инкогнито активен</string>
@@ -275,4 +274,8 @@
     <string name="incognito_page_point_cookies">Cookie и данные сайтов удаляются</string>
     <string name="incognito_page_point_screenshots">Снимки экрана запрещены, пока открыта вкладка инкогнито</string>
     <string name="incognito_page_footnote">Скачанные файлы и сохранённые закладки остаются. Сайты и ваша сеть по-прежнему видят ваши посещения.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Открытые</string>
+    <string name="tabs_chip_incognito">Инкогнито</string>
 </resources>

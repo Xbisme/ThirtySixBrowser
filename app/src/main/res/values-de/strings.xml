@@ -35,7 +35,6 @@
 
     <!-- Spec 012 — Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Neuer Inkognito-Tab</string>
-    <string name="tabs_a11y_new_incognito_tab">Neuen Inkognito-Tab öffnen</string>
     <string name="tabs_a11y_incognito_glyph">Inkognito-Tab</string>
     <string name="tabs_error_max_incognito_tabs_reached">Maximum von %d Inkognito-Tabs erreicht</string>
     <string name="browser_a11y_incognito_indicator">Inkognito-Modus aktiv</string>
@@ -267,4 +266,8 @@
     <string name="incognito_page_point_cookies">Cookies und Websitedaten werden gelöscht</string>
     <string name="incognito_page_point_screenshots">Bildschirmfotos sind gesperrt, solange ein privater Tab offen ist</string>
     <string name="incognito_page_footnote">Heruntergeladene Dateien und gespeicherte Lesezeichen bleiben erhalten. Websites und dein Netzwerk können deine Besuche weiterhin sehen.</string>
+
+    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <string name="tabs_chip_open">Geöffnet</string>
+    <string name="tabs_chip_incognito">Inkognito</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.tabs
 
+import androidx.compose.runtime.Immutable
 import com.raumanian.thirtysix.browser.domain.model.Tab
 
 /**
@@ -16,6 +17,7 @@ import com.raumanian.thirtysix.browser.domain.model.Tab
  * - [errorEvent] — one-shot transient surface for the cap-reached snackbar
  *   (FR-016). Cleared by `TabsViewModel.consumeErrorEvent()` after display.
  */
+@Immutable
 data class TabsUiState(
     val tabs: List<Tab> = emptyList(),
     val activeTabId: Long? = null,
@@ -33,8 +35,19 @@ data class TabsUiState(
      * Drives the "Close all incognito" confirmation dialog visibility.
      */
     val isCloseAllIncognitoDialogVisible: Boolean = false,
+    /**
+     * Spec 019 FR-040 / clarification Q3 — which kind of tab the switcher shows. Starts at the
+     * active tab's kind; forced to [TabsMode.Open] when there are no incognito tabs (the
+     * Incognito chip is then hidden).
+     */
+    val mode: TabsMode = TabsMode.Open,
+    /** Spec 019 — [tabs] filtered to [mode]; the grid renders only these. */
+    val visibleTabs: List<Tab> = emptyList(),
 ) {
     companion object {
         val EMPTY: TabsUiState = TabsUiState()
     }
 }
+
+/** Spec 019 FR-040 — the two switcher modes, chosen by the Open / Incognito chips. */
+enum class TabsMode { Open, Incognito }
