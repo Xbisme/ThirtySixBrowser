@@ -71,7 +71,7 @@ A person taps a video's fullscreen button. The video fills the screen, edge to e
 **Acceptance Scenarios**:
 
 1. **Given** a playing video, **When** the person taps its fullscreen button, **Then** the video fills the whole screen and the browser bars and system bars are hidden.
-2. **Given** the video is wider than it is tall, **When** it enters fullscreen, **Then** the screen turns to landscape; on leaving fullscreen it returns to the orientation the person had.
+2. **Given** fullscreen, **When** the person turns the phone sideways — even with auto-rotate off — **Then** the video turns to landscape; turning it back returns to portrait; on leaving fullscreen the app returns to the orientation behaviour it had.
 3. **Given** fullscreen, **When** the person presses Back or the page's exit button, **Then** fullscreen ends and the browser returns as it was: same tab, same scroll position, bars back, video continuing.
 4. **Given** fullscreen, **When** the person swipes from the screen edge, **Then** the system bars appear temporarily and hide again, without leaving fullscreen.
 5. **Given** fullscreen in an incognito tab, **When** it is shown, **Then** screenshots stay blocked as for any incognito content.
@@ -145,7 +145,7 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 - **Site permission for an address that is not https**: sites that are not secure (plain http) are refused camera, microphone and location without asking, as the web platform itself requires.
 - **File picker returns nothing usable** (no app, empty result): the page receives no file; no error is shown beyond the page's own handling.
 - **Fullscreen and the app going to the background**: leaving the app while fullscreen and returning keeps fullscreen; a phone call or other interruption does not crash or leave the bars hidden after fullscreen ends.
-- **Fullscreen and rotation lock**: when the person has auto-rotate off, landscape videos still turn to landscape while fullscreen (as video apps do) and return afterwards.
+- **Fullscreen and rotation lock**: when the person has auto-rotate off, fullscreen still follows the phone's physical orientation, so turning the phone shows a landscape video sideways; the lock applies again after fullscreen.
 - **Long-press on something that is neither a link nor an image** (plain text, a video, an input): no menu; the page's normal behaviour applies (text selection still works).
 - **Long-press with an unsafe address** (`javascript:`, `data:` …): the menu offers only Copy; it never opens or downloads such an address.
 - **Popup with an unsafe address** (`javascript:` …): blocked like a non-tap popup.
@@ -181,7 +181,7 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 **Fullscreen (Story 3)**
 
 - **FR-014**: A page's fullscreen request MUST show its content over the whole screen with the browser bars and the system bars hidden; edge swipes may reveal the system bars temporarily.
-- **FR-015**: Content wider than it is tall MUST be shown in landscape while fullscreen, even with auto-rotate off; the previous orientation MUST be restored when fullscreen ends.
+- **FR-015**: While fullscreen, the screen MUST follow the phone's physical orientation even when auto-rotate is off, so a wide video can be watched in landscape by turning the phone; the app's previous orientation behaviour MUST be restored when fullscreen ends. (Amended at planning, research R4: the app cannot read a video's shape without running script in the page, which the Constitution forbids.)
 - **FR-016**: Back MUST end fullscreen before doing anything else; ending fullscreen by any means MUST restore the same tab, scroll position and bars, without reloading the page.
 - **FR-017**: Fullscreen content of an incognito tab MUST stay protected from screenshots like any incognito content (Spec 012).
 
@@ -252,7 +252,7 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 - **"Origin"** means scheme + host + port of the page that asks, shown to the person as the site's address.
 - **Not secure (http) sites are refused** capabilities without asking (FR-007), as the web platform restricts these capabilities to secure pages anyway.
 - **Capture uses the phone's camera app** (FR-013); ThirtySix does not include its own camera screen.
-- **Landscape for wide fullscreen content** (FR-015) follows what video apps do even with auto-rotate off.
+- **Fullscreen follows the phone's physical orientation** (FR-015, amended at planning) instead of guessing the video's shape.
 - **Reference device**: the owner's Galaxy A55 (Android 16) with release builds; Android 7 behaviour is checked on the API 24 emulator (Android 7–9 grant runtime permissions the same way from API 23, so the flow is identical).
 - **Out of scope**: find in page, sharing the current page from the app menu, desktop mode, text zoom, print, autocomplete (Spec 022); tracker blocking and other protections (Spec 023); password saving and autofill (not in v1 by the Constitution); protected (DRM) media; web notifications; per-site pop-up exceptions; clipboard reading and other permissions listed in FR-008.
 
