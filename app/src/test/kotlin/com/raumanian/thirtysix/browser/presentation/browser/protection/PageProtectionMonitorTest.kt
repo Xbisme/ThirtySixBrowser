@@ -115,8 +115,20 @@ class PageProtectionMonitorTest {
     @Test
     fun `finishing the upgraded page clears the pending attempt`() {
         monitor.beginUpgrade(NavigationPreparer.Prepared("https://new.org/", upgradedFrom = "http://new.org/"))
+        monitor.onPageStarted("https://new.org/")
         monitor.onPageFinished("https://new.org/")
 
         assertNull(monitor.onMainFrameFailure("https://new.org/"))
+    }
+
+    @Test
+    fun `a cancelled load that never started does not end the attempt`() {
+        // Regression (16 KB AVD, neverssl.com): two loads in a row; the first, cancelled, still
+        // reports onPageFinished before the real attempt fails.
+        monitor.beginUpgrade(NavigationPreparer.Prepared("https://old.org/", upgradedFrom = "http://old.org/"))
+        monitor.onPageFinished("https://old.org/")
+        monitor.onPageStarted("https://old.org/")
+
+        assertEquals("http://old.org/", monitor.onMainFrameFailure("https://old.org/"))
     }
 }

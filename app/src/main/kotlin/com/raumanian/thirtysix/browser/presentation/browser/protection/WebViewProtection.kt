@@ -74,7 +74,9 @@ class WebViewProtection(
      */
     fun fallBackIfUpgrade(webView: WebView, failedUrl: String?): Boolean {
         val http = monitor.onMainFrameFailure(failedUrl) ?: return false
-        webView.loadUrl(http, GpcHeaderInstaller.headersForLoad())
+        // Posted, not called here: a load started inside the error callback is replaced by the
+        // error page the engine is committing (found on the 16 KB AVD with neverssl.com).
+        webView.post { if (!released) webView.loadUrl(http, GpcHeaderInstaller.headersForLoad()) }
         return true
     }
 

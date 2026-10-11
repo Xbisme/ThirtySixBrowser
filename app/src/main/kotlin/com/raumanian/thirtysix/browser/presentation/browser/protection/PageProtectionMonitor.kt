@@ -27,7 +27,8 @@ class PageProtectionMonitor internal constructor(
     private val engine: ProtectionEngine,
     val isIncognito: Boolean,
 ) {
-    private data class PendingUpgrade(val host: String, val httpUrl: String)
+    /** @property started the attempt's page has started (`onPageStarted`); only then can it finish. */
+    private data class PendingUpgrade(val host: String, val httpUrl: String, val started: Boolean = false)
 
     private val blocked: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
@@ -67,6 +68,9 @@ class PageProtectionMonitor internal constructor(
      * that issued no request starts a fresh count.
      */
     fun onPageStarted(url: String) {
+        pending?.let { upgrade ->
+            if (HttpsUpgradePolicy.hostOf(url) == upgrade.host) pending = upgrade.copy(started = true)
+        }
         if (url == topUrl) {
             awaitingCommit = false
             publish(url)
@@ -129,10 +133,14 @@ class PageProtectionMonitor internal constructor(
         return upgrade != null
     }
 
-    /** `onPageFinished` for [url]: if it is the pending attempt's host, the attempt succeeded. */
+    /**
+     * `onPageFinished` for [url]: the pending attempt succeeded if its page had started and no
+     * error took it first. A load cancelled by a newer one also reports `onPageFinished`, but
+     * never started, so it does not end the attempt (found on the 16 KB AVD).
+     */
     fun onPageFinished(url: String?) {
         val upgrade = pending ?: return
-        if (url != null && HttpsUpgradePolicy.hostOf(url) == upgrade.host) pending = null
+        if (upgrade.started && url != null && HttpsUpgradePolicy.hostOf(url) == upgrade.host) pending = null
     }
 
     /** Test hook. */

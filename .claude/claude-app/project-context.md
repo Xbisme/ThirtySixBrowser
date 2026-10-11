@@ -1,6 +1,6 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-10-11 — ✅ **Spec 022 `page-tools` đã merged** ([PR #35](https://github.com/Xbisme/ThirtySixBrowser/pull/35), `d0908a1`, CI 6/6, 68/68); tiếp theo: **Spec 023 `privacy-protection`**: tìm trong trang, chia sẻ, chế độ máy tính theo tab, cỡ chữ toàn app (DataStore `text_zoom_percent`), in/lưu PDF, gợi ý offline từ bookmark + lịch sử; sửa lỗi mất phím khi gõ nhanh ở address bar (Spec 009); xem `specs/022-page-tools/tasks.md`. ✅ **Spec 021 `web-capabilities` đã merged** (PR #32, `ef9ae68`) (quyền camera/mic/vị trí theo trang, upload file, video toàn màn hình, pop-up, hộp thoại JS + HTTP auth, menu nhấn giữ; xem `specs/021-web-capabilities/tasks.md`). ✅ **Spec 020 `default-browser-entry-points` đã merged** (PR #30, `1bb8c6a`; xem `specs/020-default-browser-entry-points/tasks.md`). ✅ **Spec 019 `ui-redesign` đã merged** qua [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, `54e090a`, CI 6/6); gate trên máy thật Galaxy A55 ghi trong `specs/019-ui-redesign/tasks.md`. 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** ✅ Spec 018 `onboarding-flow` đã merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41. ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
+> Cập nhật lần cuối: 2026-10-12 — 🟢 **Spec 023 `privacy-protection` đã implement** (branch `023-privacy-protection`): chặn tracker từ list đóng gói (EasyPrivacy+EasyList, 11.012 host), tự nâng HTTPS + lùi về http, xoá tham số theo dõi, GPC, công tắc theo trang, Settings → Sites without protection; Room v4; xem `specs/023-privacy-protection/tasks.md`. ✅ **Spec 022 `page-tools` đã merged** ([PR #35](https://github.com/Xbisme/ThirtySixBrowser/pull/35), `d0908a1`, CI 6/6, 68/68); tiếp theo: **Spec 023 `privacy-protection`**: tìm trong trang, chia sẻ, chế độ máy tính theo tab, cỡ chữ toàn app (DataStore `text_zoom_percent`), in/lưu PDF, gợi ý offline từ bookmark + lịch sử; sửa lỗi mất phím khi gõ nhanh ở address bar (Spec 009); xem `specs/022-page-tools/tasks.md`. ✅ **Spec 021 `web-capabilities` đã merged** (PR #32, `ef9ae68`) (quyền camera/mic/vị trí theo trang, upload file, video toàn màn hình, pop-up, hộp thoại JS + HTTP auth, menu nhấn giữ; xem `specs/021-web-capabilities/tasks.md`). ✅ **Spec 020 `default-browser-entry-points` đã merged** (PR #30, `1bb8c6a`; xem `specs/020-default-browser-entry-points/tasks.md`). ✅ **Spec 019 `ui-redesign` đã merged** qua [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, `54e090a`, CI 6/6); gate trên máy thật Galaxy A55 ghi trong `specs/019-ui-redesign/tasks.md`. 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** ✅ Spec 018 `onboarding-flow` đã merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41. ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
@@ -438,6 +438,14 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 ---
 
 ## Key Decisions Log
+
+### 2026-10-12 — Spec 023 `privacy-protection`
+
+- **Dữ liệu bảo vệ là 3 asset trong APK**, không tải về lúc chạy (§I). Tracker list do script `tools/protection-lists/build_tracker_hosts.py` tạo bằng tay (CC BY-SA 3.0; phần ad-server của EasyList chỉ giữ domain trong Tranco top-1M để vừa ngân sách); PSL (MPL-2.0); list tham số tự viết.
+- **Mọi `loadUrl` của app đi qua `loadProtected`**; điều hướng do trang tự mở được viết lại trong `shouldOverrideUrlLoading`.
+- **Bẫy đã gặp**: mở tab gọi 2 lần `loadUrl`, lần bị huỷ vẫn báo `onPageFinished` → lần thử HTTPS chỉ kết thúc khi trang đã *bắt đầu*; lần tải fallback phải `post`.
+- **GPC cho mọi request** chỉ khi WebView có `CUSTOM_REQUEST_HEADERS` (AVD WebView 133 không có).
+- Room **v4**, bảng `site_protection_exceptions` (thêm mới, `MIGRATION_3_4`).
 
 ### 2026-10-11 — Spec 022 `page-tools`
 

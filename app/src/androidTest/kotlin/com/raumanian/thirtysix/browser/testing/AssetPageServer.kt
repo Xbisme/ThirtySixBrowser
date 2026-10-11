@@ -22,6 +22,16 @@ class AssetPageServer : AutoCloseable {
     /** Every request so far as (path without query, `User-Agent`), in order. */
     val requests: MutableList<Pair<String, String>> = CopyOnWriteArrayList()
 
+    /** Spec 023 — every request so far: raw path with its query, and its headers (lower-case names). */
+    val fullRequests: MutableList<Pair<String, Map<String, String>>> = CopyOnWriteArrayList()
+
+    /** Spec 023 — the raw paths (with query) of every request so far. */
+    fun paths(): List<String> = fullRequests.map { it.first }
+
+    /** Spec 023 — the headers of each request whose path (without query) is [name]. */
+    fun headersFor(name: String): List<Map<String, String>> =
+        fullRequests.filter { it.first.trimStart('/').substringBefore('?') == name }.map { it.second }
+
     /** The `User-Agent` of each request for the asset [name], in order. */
     fun userAgentsFor(name: String): List<String> = requests.filter { it.first == name }.map { it.second }
 
@@ -30,6 +40,11 @@ class AssetPageServer : AutoCloseable {
     }
 
     fun url(name: String): String = "http://127.0.0.1:${socket.localPort}/$name"
+
+    /** Spec 023 — the same server under another host name (a different site to the matcher). */
+    fun url(name: String, host: String): String = "http://$host:${socket.localPort}/$name"
+
+    val port: Int get() = socket.localPort
 
     override fun close() = socket.close()
 
@@ -43,7 +58,11 @@ class AssetPageServer : AutoCloseable {
                     val path = reader.readLine().orEmpty().split(' ').getOrNull(1).orEmpty()
                     var line = reader.readLine()
                     var userAgent = ""
+                    val headers = mutableMapOf<String, String>()
                     while (!line.isNullOrEmpty()) {
+                        line.split(':', limit = 2).takeIf { parts -> parts.size == 2 }?.let { parts ->
+                            headers[parts[0].trim().lowercase()] = parts[1].trim()
+                        }
                         if (line.startsWith(USER_AGENT_HEADER, ignoreCase = true)) {
                             userAgent = line.substring(USER_AGENT_HEADER.length).trim()
                             userAgents += userAgent
@@ -52,6 +71,7 @@ class AssetPageServer : AutoCloseable {
                     }
                     val name = path.trimStart('/').substringBefore('?')
                     requests += name to userAgent
+                    fullRequests += path to headers
                     val body = runCatching { assets.open(name).use { input -> input.readBytes() } }.getOrNull()
                     val head = if (body != null) {
                         "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: ${body.size}\r\n"
