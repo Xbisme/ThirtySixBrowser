@@ -9,6 +9,15 @@
 
 ThirtySix renders pages, but much of what a page asks the browser to do goes unanswered. A "Upload photo" button does nothing, YouTube's fullscreen button does nothing, "Sign in with Google" popups fail, Google Meet cannot reach the camera, maps cannot find the person's location, sites behind a password prompt cannot be reached, and long-pressing a link or picture does nothing. Every one of these works in a mainstream browser; their absence makes ThirtySix feel broken on ordinary sites. This spec answers those requests, while keeping the app's privacy promise: nothing about the sites visited or the choices made leaves the phone, and no password is ever stored.
 
+## Clarifications
+
+### Session 2026-10-11
+
+- Q: When a site asks for camera, microphone or location, which choices should the dialog offer? → A: Three: "Always allow" (remembered), "Allow this time" (not remembered; ends when the person leaves the page) and "Don't allow" (remembered).
+- Q: When "Open in new tab" is chosen from a link's long-press menu, how should the new tab open? → A: In the background; the current page stays, and a short notice offers "Switch" (FR-020 as written).
+- Q: Should Clear browsing data also remove remembered site permissions? → A: Add a "Site permissions" category to the Clear browsing data dialog, unticked by default.
+- Q: When a pop-up a page opened on its own is blocked, should the notice let the person open it? → A: Yes — the notice has an "Open" action that opens that blocked pop-up's address once in a new tab; nothing is remembered.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Use a site's camera, microphone or location (Priority: P1)
@@ -21,13 +30,14 @@ A person joins a video call, uses a map or a voice search. The site asks for the
 
 **Acceptance Scenarios**:
 
-1. **Given** a site asks for the camera for the first time, **When** the request arrives, **Then** ThirtySix shows a dialog naming the site (its address) and "camera", with **Allow** and **Don't allow**.
-2. **Given** the person taps Allow and the app does not yet have Android's camera permission, **When** the dialog closes, **Then** Android's own permission prompt appears; if granted there too, the site gets the camera.
-3. **Given** the person tapped Allow for a site earlier, **When** the same site asks again (same or a later visit), **Then** it gets the camera without any question.
+1. **Given** a site asks for the camera for the first time, **When** the request arrives, **Then** ThirtySix shows a dialog naming the site (its address) and "camera", with **Always allow**, **Allow this time** and **Don't allow**.
+2. **Given** the person taps Always allow or Allow this time and the app does not yet have Android's camera permission, **When** the dialog closes, **Then** Android's own permission prompt appears; if granted there too, the site gets the camera.
+3. **Given** the person tapped Always allow for a site earlier, **When** the same site asks again (same or a later visit), **Then** it gets the camera without any question.
+3a. **Given** the person tapped Allow this time, **When** the same page asks again before they leave it, **Then** it gets the camera without a question; **When** they come back to the site later, **Then** they are asked again.
 4. **Given** the person tapped Don't allow for a site earlier, **When** the site asks again, **Then** it is refused without any question.
-5. **Given** the request comes from an incognito tab, **When** the person answers, **Then** the answer applies to that tab's visit only and is never remembered.
-6. **Given** Android's permission was permanently denied for the app, **When** the person taps Allow, **Then** ThirtySix explains that the permission is off for the app and offers to open the app's system settings; the site is refused for now.
-7. **Given** remembered choices exist, **When** the person opens Settings → Site permissions, **Then** each site is listed with its choices for camera, microphone and location, and each can be changed to Allow or Don't allow, or removed so the site is asked again.
+5. **Given** the request comes from an incognito tab, **When** the dialog appears, **Then** it offers only **Allow this time** and **Don't allow**, and the answer applies to that tab's current page only and is never remembered.
+6. **Given** Android's permission was permanently denied for the app, **When** the person taps Always allow or Allow this time, **Then** ThirtySix explains that the permission is off for the app and offers to open the app's system settings; the site is refused for now.
+7. **Given** remembered choices exist, **When** the person opens Settings → Site permissions, **Then** each site is listed with its choices for camera, microphone and location, and each can be changed to Always allow or Don't allow, or removed so the site is asked again. ("Allow this time" choices are never listed — they are not remembered.)
 8. **Given** a site asks for both camera and microphone at once, **When** the request arrives, **Then** one dialog names both, and the answer applies to both.
 
 ---
@@ -100,7 +110,8 @@ A person clicks "Sign in with Google" or a link that opens in a new window. The 
 **Acceptance Scenarios**:
 
 1. **Given** a link or button that opens a new window after the person's tap, **When** tapped, **Then** a new tab opens with it and becomes active; it is incognito if, and only if, the page that opened it is incognito.
-2. **Given** a page tries to open a window without any tap from the person, **When** it tries, **Then** no tab is created and a short notice says a pop-up was blocked.
+2. **Given** a page tries to open a window without any tap from the person, **When** it tries, **Then** no tab is created and a short notice says a pop-up was blocked, with an **Open** action.
+2a. **Given** that notice, **When** the person taps Open, **Then** the blocked pop-up's address opens once in a new active tab (incognito exactly when the page is); the next blocked pop-up is blocked again.
 3. **Given** a tab that a page opened, **When** that page closes itself, **Then** its tab closes and the person returns to the tab that opened it.
 4. **Given** a tab the person opened themselves, **When** its page tries to close itself, **Then** nothing happens.
 5. **Given** the tab limit is reached (Spec 011 normal, Spec 012 incognito), **When** a page opens a new window after a tap, **Then** the existing tab-limit message is shown and no tab is created.
@@ -141,7 +152,7 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 - **Dialog flood across pages**: the "don't show more" choice ends when the page changes, so a later page from the same site can show dialogs again.
 - **HTTP auth repeated failures**: wrong credentials ask again; after the person cancels, the page shows whatever the site returns for a refused sign-in.
 - **Removing a site from Site permissions while it is open**: the next request from that site asks again; access already granted to the open page continues until it is reloaded.
-- **Clearing browsing data** (Spec 016) does not remove site permissions; they are managed in Site permissions only.
+- **Clearing browsing data** (Spec 016) removes remembered site permissions only when its new "Site permissions" category is ticked (unticked by default); otherwise they stay and are managed in Site permissions.
 
 ## Requirements *(mandatory)*
 
@@ -149,16 +160,17 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 
 **Site permissions (Story 1)**
 
-- **FR-001**: When a page asks for camera, microphone or location, the app MUST ask the person with an app dialog that names the site (its origin as an address) and the capability, offering **Allow** and **Don't allow**, unless a remembered decision exists for that site and capability.
-- **FR-002**: Only after the person taps Allow, and only if the app does not already hold the matching Android permission, the app MUST request that Android permission; it MUST NEVER request these permissions at launch or for any other reason.
-- **FR-003**: In normal tabs, the person's decision MUST be remembered per site and per capability (camera, microphone, location) and applied silently to later requests from that site, until the person changes or removes it.
+- **FR-001**: When a page asks for camera, microphone or location, the app MUST ask the person with an app dialog that names the site (its origin as an address) and the capability, offering **Always allow**, **Allow this time** and **Don't allow** (in incognito tabs only Allow this time and Don't allow), unless a remembered or current-page decision exists for that site and capability.
+- **FR-002**: Only after the person taps Always allow or Allow this time, and only if the app does not already hold the matching Android permission, the app MUST request that Android permission; it MUST NEVER request these permissions at launch or for any other reason.
+- **FR-003**: In normal tabs, **Always allow** and **Don't allow** MUST be remembered per site and per capability (camera, microphone, location) and applied silently to later requests from that site, until the person changes or removes them. **Allow this time** MUST apply only to the current page in that tab and end when the tab navigates to another page, is closed, or the app's process ends; it is never remembered.
 - **FR-004**: In incognito tabs, a decision MUST apply only to that tab's current visit and MUST NOT be remembered or read from remembered decisions made in normal tabs.
 - **FR-005**: A combined request (for example camera and microphone together) MUST be presented as one dialog and its answer applied to every capability in it.
-- **FR-006**: If the Android permission is permanently denied, tapping Allow MUST explain this and offer to open the app's system settings; the current request MUST be refused.
+- **FR-006**: If the Android permission is permanently denied, tapping Always allow or Allow this time MUST explain this and offer to open the app's system settings; the current request MUST be refused.
 - **FR-007**: Requests from pages that are not secure (not https) MUST be refused without asking.
 - **FR-008**: Every other permission a page may ask for (notifications, clipboard reading, MIDI, sensors, protected media, …) MUST continue to be refused without asking.
-- **FR-009**: Settings MUST offer a **Site permissions** screen listing every site with a remembered decision, showing per capability whether it is allowed or not; the person MUST be able to change each to Allow or Don't allow, remove a site (so it is asked again), and remove all.
-- **FR-010**: Remembered decisions MUST be kept on the device only and survive app restarts and updates; they are not removed by Clear browsing data.
+- **FR-009**: Settings MUST offer a **Site permissions** screen listing every site with a remembered decision, showing per capability whether it is allowed or not; the person MUST be able to change each to Always allow or Don't allow, remove a site (so it is asked again), and remove all.
+- **FR-010**: Remembered decisions MUST be kept on the device only and survive app restarts and updates.
+- **FR-010a**: The Clear browsing data dialog (Spec 016) MUST gain a **Site permissions** category, **unticked by default**; when ticked and confirmed, every remembered decision is removed (and any current one-time grants end). When unticked, clearing leaves them untouched.
 
 **File upload (Story 2)**
 
@@ -187,6 +199,7 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 
 - **FR-025**: A new window opened after the person's tap MUST open as a new tab that becomes active, incognito exactly when its opener is incognito.
 - **FR-026**: A window a page tries to open without the person's tap MUST be blocked, with a short notice that a pop-up was blocked; no tab is created.
+- **FR-026a**: When the blocked pop-up has a web address, the notice MUST offer **Open**, which opens that address once in a new active tab (incognito exactly when the page is), subject to tab limits. The tab is a plain new tab: it is not connected to the page that tried to open it and cannot be closed by that page. Nothing is remembered; later pop-ups are blocked again. A pop-up without a web address (blank or unsafe) gets the notice without Open.
 - **FR-027**: When a page in a tab that a page opened closes itself, that tab MUST close and the person MUST return to the opener tab if it still exists; a page in a tab the person opened MUST NOT be able to close its tab.
 - **FR-028**: Tab limits MUST apply to new windows, using the existing tab-limit message; no tab is created beyond the limit.
 
@@ -208,7 +221,8 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 
 ### Key Entities
 
-- **Site permission decision**: for one site (origin) and one capability (camera, microphone, location), whether it is allowed or not, and when it was decided. Kept on the device for normal tabs only; listed and edited in Site permissions.
+- **Site permission decision**: for one site (origin) and one capability (camera, microphone, location), whether it is always allowed or never allowed, and when it was decided. Kept on the device for normal tabs only; listed and edited in Site permissions.
+- **One-time grant**: an "Allow this time" answer for one site and capability, tied to one tab's current page; held in memory only and dropped when that page changes, the tab closes or the process ends.
 - **Pending site request**: a request from a page (permission, file chooser, dialog, sign-in prompt, new window) waiting for the person or the system; tied to the tab and page that made it, and dropped if either changes.
 - **Visit dialog suppression**: per tab, whether the person chose "Don't let this site show more dialogs" for the current page; reset when the page changes. Not stored.
 - **Page-opened tab marker**: whether a tab was opened by a page (new window), and by which tab, so the page may close it and the person returns to the opener. Not stored beyond the tab's life.
@@ -218,22 +232,23 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 ### Measurable Outcomes
 
 - **SC-001**: On a set of 10 common sites that need these capabilities (video call, map, file upload form, video site, Google sign-in popup, password-protected test address, and similar), each task completes in ThirtySix as it does in a mainstream browser: 10/10.
-- **SC-002**: A site that was allowed or refused once is never asked again in a normal tab across 10 later visits; an incognito tab asks every visit.
+- **SC-002**: A site given Always allow or Don't allow is never asked again in a normal tab across 10 later visits; a site given Allow this time, and any incognito tab, is asked again on every new visit.
 - **SC-003**: The app's camera, microphone and location permissions are never requested at launch or without the person first tapping Allow for a site: 0 occurrences across all test runs.
 - **SC-004**: Entering and leaving fullscreen 10 times returns to the same tab and scroll position without a reload in 10/10 trials.
 - **SC-005**: From long-press to a new background tab takes at most 2 taps (long-press, Open in new tab), and the page on screen does not change.
 - **SC-006**: Popups opened without a tap are blocked in 100% of tested cases; popups after a tap open as tabs in 100% of tested cases.
 - **SC-007**: HTTP-auth credentials are found nowhere on the device after use (no stored value, no log line) in 100% of checks.
 - **SC-008**: Changing a site's decision in Site permissions takes effect on the site's next request in 10/10 trials.
+- **SC-008a**: Clear browsing data with the Site permissions category unticked leaves 100% of remembered decisions; with it ticked, removes 100% of them.
 - **SC-009**: The release app grows by no more than 150 KB and adds no native library (16 KB gate stays green).
 
 ## Assumptions
 
 - **Design waiver (owner decision, 2026-10-11, as for Spec 020)**: Constitution §X's "Design before spec" rule is waived because Claude Design is unavailable on the owner's account. The permission dialog, the site dialogs, the sign-in dialog, the long-press menu and the Site permissions screen are built from existing Spec 019 design-system components (the shared confirm/choice dialogs, bottom sheets, Settings rows) and tokens. The owner will supply designs later; a later visual change MUST NOT change the behaviour specified here.
-- **Allow and Don't allow are both remembered** (FR-003). There is no "only this time" choice for normal tabs; incognito is the "only this time" mode. Candidate for clarification.
-- **Open in new tab opens in the background** (FR-020), as in mainstream mobile browsers; the notice offers to switch.
-- **A blocked pop-up shows a notice without an "always allow" option** (FR-026); per-site pop-up exceptions are out of scope.
-- **Site permissions are not cleared by Clear browsing data** (FR-010), matching mainstream browsers' separate "site settings".
+- **Three choices** (clarified 2026-10-11): Always allow and Don't allow are remembered; Allow this time lasts for the current page only (FR-001, FR-003).
+- **Open in new tab opens in the background** (FR-020, confirmed 2026-10-11), as in mainstream mobile browsers; the notice offers to switch.
+- **A blocked pop-up can be opened once from its notice** (FR-026a, clarified 2026-10-11); per-site "always allow pop-ups" exceptions remain out of scope. A pop-up opened this way is a plain tab, so a sign-in flow that relies on the pop-up talking back to its opener may still need the person to retry by tapping the site's button.
+- **Site permissions in Clear browsing data are an opt-in category** (FR-010a, clarified 2026-10-11), unticked by default so a routine clear does not make every site ask again.
 - **"Origin"** means scheme + host + port of the page that asks, shown to the person as the site's address.
 - **Not secure (http) sites are refused** capabilities without asking (FR-007), as the web platform restricts these capabilities to secure pages anyway.
 - **Capture uses the phone's camera app** (FR-013); ThirtySix does not include its own camera screen.
@@ -246,6 +261,6 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 - **Spec 007** — the page view this spec extends.
 - **Spec 011 / Spec 012** — tabs, incognito tabs, tab limits and screenshot protection (FR-017, FR-020, FR-024, FR-025, FR-028).
 - **Spec 015** — downloads, reused by the long-press menu (FR-021).
-- **Spec 016** — the Settings screen that hosts Site permissions (FR-009) and Clear browsing data (FR-010).
+- **Spec 016** — the Settings screen that hosts Site permissions (FR-009) and the Clear browsing data dialog, which gains a category (FR-010a).
 - **Spec 019** — design-system components and Compose Phase Discipline for all new UI.
 - **Spec 020** — new-tab and tab-limit handling patterns reused for new windows and background tabs.
