@@ -43,6 +43,7 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallba
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
 import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
+import com.raumanian.thirtysix.browser.presentation.browser.page.FullscreenOverlay
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
@@ -190,6 +191,8 @@ fun BrowserScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomInset),
         )
+        // Spec 021 US3 — above everything, bars included.
+        FullscreenOverlay(controller = pageSession.fullscreen)
     }
 
     if (hubOpen) {

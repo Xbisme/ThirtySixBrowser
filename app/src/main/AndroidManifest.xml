@@ -70,9 +70,12 @@
              sender's task (one recents entry and one WebView per link, FR-004). New links arrive
              in onNewIntent; Back on an untouched external tab uses moveTaskToBack to return to the
              sender (FR-006). -->
+        <!-- Spec 021 research R4 — rotation and size changes are handled in place too, so a
+             fullscreen video (and every page) keeps playing and scrolling through a rotation
+             instead of the activity, and its WebView, being rebuilt. -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="locale|layoutDirection|screenLayout"
+            android:configChanges="locale|layoutDirection|screenLayout|orientation|screenSize|smallestScreenSize|keyboardHidden"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.ThirtySix.Splash">

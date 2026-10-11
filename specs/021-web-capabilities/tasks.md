@@ -99,10 +99,10 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 **Independent Test**: quickstart G10–G11.
 
-- [ ] T034 [US3] Widen `MainActivity` `android:configChanges` in `app/src/main/AndroidManifest.xml` to `locale|layoutDirection|screenLayout|orientation|screenSize|smallestScreenSize|keyboardHidden` with a comment citing research R4; extend the manifest test (T022) to assert it
-- [ ] T035 [US3] Create `MAIN/presentation/browser/page/FullscreenController.kt` (holds the custom view + callback; `enter`, `exit`) and render it in `MAIN/presentation/browser/BrowserScreen.kt` as a full-window `AndroidView` above all content, hiding system bars with `WindowInsetsControllerCompat` (transient swipe behaviour), setting `requestedOrientation = SCREEN_ORIENTATION_FULL_SENSOR`, and a `BackHandler` that exits first (FR-014–FR-016); restoring bars and `SCREEN_ORIENTATION_UNSPECIFIED` on exit
-- [ ] T036 [US3] Implement `onShowCustomView` / `onHideCustomView` in `MAIN/presentation/browser/BrowserWebView.kt` → `FullscreenController`
-- [ ] T037 [P] [US3] Write `TEST/presentation/browser/page/FullscreenControllerTest.kt` (enter/exit state, callback answered once, exit on tab change)
+- [X] T034 [US3] Widen `MainActivity` `android:configChanges` in `app/src/main/AndroidManifest.xml` to `locale|layoutDirection|screenLayout|orientation|screenSize|smallestScreenSize|keyboardHidden` with a comment citing research R4; extend the manifest test (T022) to assert it
+- [X] T035 [US3] Create `MAIN/presentation/browser/page/FullscreenController.kt` (holds the custom view + callback; `enter`, `exit`) and render it in `MAIN/presentation/browser/BrowserScreen.kt` as a full-window `AndroidView` above all content, hiding system bars with `WindowInsetsControllerCompat` (transient swipe behaviour), setting `requestedOrientation = SCREEN_ORIENTATION_FULL_SENSOR`, and a `BackHandler` that exits first (FR-014–FR-016); restoring bars and `SCREEN_ORIENTATION_UNSPECIFIED` on exit
+- [X] T036 [US3] Implement `onShowCustomView` / `onHideCustomView` in `MAIN/presentation/browser/BrowserWebView.kt` → `FullscreenController`
+- [X] T037 [P] [US3] Write `TEST/presentation/browser/page/FullscreenControllerTest.kt` (enter/exit state, callback answered once, exit on tab change)
 - [ ] T038 [US3] Re-run the full instrumented suite to confirm the `configChanges` change breaks no rotation/recreation test (Spec 018 onboarding, Spec 020 saved request); device gates G10–G11; record
 
 ---
@@ -251,6 +251,12 @@ Deviations from the task text, recorded as they happened:
 - **Spec 012's `IncognitoPermissionDenialInstrumentedTest` rewritten**: it mirrored the old
   deny-everything client in a copy. It now drives the real `BrowserChromeClient` and checks
   what still holds — no page → refused, incognito requests marked incognito, `retain = false`.
+- **Fullscreen lives in `PageSession.fullscreen`** and reaches the chrome client through
+  `PageRequestSink.onShowCustomView/onHideCustomView` (default bodies refuse), so
+  `BrowserWebViewCallbacks` gains nothing. A tab switch ends fullscreen; a navigation in the same
+  tab does not. Background is `colorScheme.scrim` (no inline colour, §III).
+- **T038 suite part**: full `connectedDebugAndroidTest` 120/120 on `TA016_API36_16K` after the
+  `configChanges` widening (2026-10-11). Device gates G10–G11 still to run.
 - **WebChromeClient moved** to its own `BrowserChromeClient.kt` (internal), since every story adds
   hooks to it.
 

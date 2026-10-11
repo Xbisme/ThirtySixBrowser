@@ -1,5 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
+import android.view.View
+import android.webkit.WebChromeClient.CustomViewCallback
 import com.raumanian.thirtysix.browser.domain.usecase.SitePermissionOutcome
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -17,6 +19,9 @@ class PageSession(
     private val scope: CoroutineScope? = null,
     private val permissionGate: SitePermissionGate? = null,
 ) : PageRequestSink {
+    /** Spec 021 research R4 — the page's fullscreen view, ended by a tab switch. */
+    val fullscreen = FullscreenController()
+
     private var tabId: Long? = null
     private var isIncognito: Boolean = false
     private var generation: Long = 0L
@@ -26,6 +31,7 @@ class PageSession(
     /** The screen now shows [newTabId]. */
     fun onTabChanged(newTabId: Long?, incognito: Boolean) {
         val previous = context()
+        if (newTabId != tabId) fullscreen.exit()
         tabId = newTabId
         isIncognito = incognito
         advance(previous)
@@ -66,6 +72,10 @@ class PageSession(
             }
         }
     }
+
+    override fun onShowCustomView(view: View, callback: CustomViewCallback) = fullscreen.enter(view, callback)
+
+    override fun onHideCustomView() = fullscreen.onHiddenByPage()
 
     override fun onPermissionWithdrawn(match: (PageRequest.Permission) -> Boolean) = queue.withdraw(match)
 

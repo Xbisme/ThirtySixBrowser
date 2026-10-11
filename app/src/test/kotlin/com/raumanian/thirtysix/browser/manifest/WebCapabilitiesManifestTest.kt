@@ -64,4 +64,19 @@ class WebCapabilitiesManifestTest {
             assertEquals("$name optional", 0, feature!!.flags and android.content.pm.FeatureInfo.FLAG_REQUIRED)
         }
     }
+
+    @Test
+    fun `rotation and size changes do not recreate the browser`() {
+        val info = context.packageManager.getActivityInfo(
+            android.content.ComponentName(context, com.raumanian.thirtysix.browser.MainActivity::class.java),
+            0,
+        )
+        val handled = android.content.pm.ActivityInfo.CONFIG_ORIENTATION or
+            android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE or
+            android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE or
+            android.content.pm.ActivityInfo.CONFIG_KEYBOARD_HIDDEN or
+            android.content.pm.ActivityInfo.CONFIG_LOCALE or
+            android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT
+        assertEquals(handled, info.configChanges and handled)
+    }
 }

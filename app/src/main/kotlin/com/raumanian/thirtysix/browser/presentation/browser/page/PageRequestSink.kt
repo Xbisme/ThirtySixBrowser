@@ -1,5 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
+import android.view.View
+import android.webkit.WebChromeClient.CustomViewCallback
+
 /** Spec 021 — which page a request belongs to (data-model §3, §4). */
 data class PageContext(val tabId: Long, val generation: Long, val isIncognito: Boolean)
 
@@ -26,6 +29,12 @@ interface PageRequestSink {
 
     /** The page withdrew permission requests matching [match] before they were answered. */
     fun onPermissionWithdrawn(match: (PageRequest.Permission) -> Boolean) = Unit
+
+    /** Spec 021 research R4 — the page's fullscreen view; inert sinks refuse it. */
+    fun onShowCustomView(view: View, callback: CustomViewCallback) = callback.onCustomViewHidden()
+
+    /** The page left fullscreen itself. */
+    fun onHideCustomView() = Unit
 
     object None : PageRequestSink {
         override fun context(): PageContext? = null

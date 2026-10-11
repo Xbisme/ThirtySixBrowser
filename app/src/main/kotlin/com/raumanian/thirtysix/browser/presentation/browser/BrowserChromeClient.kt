@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.presentation.browser
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.view.View
 import android.webkit.GeolocationPermissions
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
@@ -18,6 +19,7 @@ import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
  * Forwards progress, page title (Spec 011 / M1) and favicon (Spec 011 favicon amendment), and
  * translates the page's requests into [PageRequest]s for the browser screen (Spec 021 C3.1).
  */
+@Suppress("TooManyFunctions") // One override per platform hook (Spec 021 C3.1); each only translates.
 internal class BrowserChromeClient(
     private val onProgressChanged: (Int) -> Unit,
     private val onReceivedTitle: (String) -> Unit,
@@ -133,6 +135,14 @@ internal class BrowserChromeClient(
             ),
         )
     }
+
+    /** Spec 021 FR-014 — the page asked for fullscreen (a video, usually). */
+    override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+        callback ?: return
+        if (view == null) callback.onCustomViewHidden() else pageRequests.onShowCustomView(view, callback)
+    }
+
+    override fun onHideCustomView() = pageRequests.onHideCustomView()
 
     private fun capabilityOf(resource: String): SiteCapability? = when (resource) {
         PermissionRequest.RESOURCE_VIDEO_CAPTURE -> SiteCapability.Camera
