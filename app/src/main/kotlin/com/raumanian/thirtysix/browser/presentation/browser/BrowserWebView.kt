@@ -297,6 +297,12 @@ private fun applySecuritySettings(webView: WebView) {
         // FR-018 — block all HTTP sub-resources on HTTPS pages.
         mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
 
+        // Spec 021 FR-001 (found at G1 on a Galaxy A55) — with the WebView default, a camera
+        // stream attached to a <video> never starts: autoplay needs a fresh tap, and the
+        // permission dialog outlives the tap. Video calls would show nothing. Mainstream
+        // browsers let such media start on their own; so does this one.
+        mediaPlaybackRequiresUserGesture = false
+
         // Spec 021 research R5 — every window request reaches onCreateWindow, which decides.
         setSupportMultipleWindows(true)
         javaScriptCanOpenWindowsAutomatically = true

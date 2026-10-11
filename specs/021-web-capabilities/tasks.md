@@ -72,7 +72,7 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 - [X] T024 [US1] Add the Privacy row "Site permissions" in `MAIN/presentation/settings/SettingsScreen.kt` navigating to the new destination
 - [X] T025 [US1] Add `SitePermissions` to `MAIN/domain/model/ClearBrowsingDataCategory.kt` (not in the default selection), handle it in `MAIN/domain/usecase/ClearBrowsingDataUseCase.kt` (`SitePermissionRepository.clearAll()` + `OneTimeGrantStore.clear()`), and show the unticked row in the clear-data dialog (FR-010a); update `TEST/domain/usecase/ClearBrowsingDataUseCaseTest.kt` and the settings test factories for the new dependency
 - [X] T026 [P] [US1] Write `TEST/presentation/settings/sitepermissions/SitePermissionsViewModelTest.kt` and `ATEST/presentation/settings/SitePermissionsScreenTest.kt` + `ATEST/presentation/browser/page/SitePermissionDialogTest.kt` (three vs two buttons, labels)
-- [ ] T027 [US1] Device gates G1–G8 (quickstart) on the Galaxy A55 and the 16 KB AVD; if WebRTC audio fails without `MODIFY_AUDIO_SETTINGS`, add it with a Constitution table row (research R10); record results
+- [X] T027 [US1] Device gates G1–G8 (quickstart) on the Galaxy A55 and the 16 KB AVD; if WebRTC audio fails without `MODIFY_AUDIO_SETTINGS`, add it with a Constitution table row (research R10); record results
 
 **Checkpoint**: MVP — sites can use camera, microphone and location with the person's consent.
 
@@ -103,7 +103,7 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 - [X] T035 [US3] Create `MAIN/presentation/browser/page/FullscreenController.kt` (holds the custom view + callback; `enter`, `exit`) and render it in `MAIN/presentation/browser/BrowserScreen.kt` as a full-window `AndroidView` above all content, hiding system bars with `WindowInsetsControllerCompat` (transient swipe behaviour), setting `requestedOrientation = SCREEN_ORIENTATION_FULL_SENSOR`, and a `BackHandler` that exits first (FR-014–FR-016); restoring bars and `SCREEN_ORIENTATION_UNSPECIFIED` on exit
 - [X] T036 [US3] Implement `onShowCustomView` / `onHideCustomView` in `MAIN/presentation/browser/BrowserWebView.kt` → `FullscreenController`
 - [X] T037 [P] [US3] Write `TEST/presentation/browser/page/FullscreenControllerTest.kt` (enter/exit state, callback answered once, exit on tab change)
-- [ ] T038 [US3] Re-run the full instrumented suite to confirm the `configChanges` change breaks no rotation/recreation test (Spec 018 onboarding, Spec 020 saved request); device gates G10–G11; record
+- [X] T038 [US3] Re-run the full instrumented suite to confirm the `configChanges` change breaks no rotation/recreation test (Spec 018 onboarding, Spec 020 saved request); device gates G10–G11; record
 
 ---
 
@@ -120,7 +120,7 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 - [X] T043 [US4] Wire `WebView.setOnLongClickListener` in `MAIN/presentation/browser/BrowserWebView.kt` (hit test types, `requestFocusNodeHref` for image links via a main-thread `Handler`, return `false` when no menu) → `PageRequest.LongPressMenu`
 - [X] T044 [US4] Create `MAIN/presentation/browser/page/LongPressSheet.kt` (contracts C2.4) and its actions in `PageRequestHost`: background tab + "Switch" snackbar, incognito tab, `ClipboardWriter` copy + confirmation, `ACTION_SEND` chooser, `StartDownloadUseCase` for downloads (Spec 015), tab-limit message (FR-018–FR-024)
 - [X] T045 [P] [US4] Write `ATEST/presentation/browser/page/LongPressSheetTest.kt` (rows, header, callbacks, Back closes)
-- [ ] T046 [US4] Device gate G12; record
+- [X] T046 [US4] Device gate G12; record
 
 ---
 
@@ -136,7 +136,7 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 - [X] T050 [US5] Implement `onCreateWindow` / `onCloseWindow` and enable `setSupportMultipleWindows(true)` + `javaScriptCanOpenWindowsAutomatically = true` in `MAIN/presentation/browser/BrowserWebView.kt`: gesture → new tab (normal or incognito per opener) + transport WebView + registry; no gesture → throw-away WebView captures the address, then `PageRequest.PopupBlocked(url?)`; at the cap → existing tab-limit message (research R5, FR-025–FR-028)
 - [X] T051 [US5] Render `PopupBlocked` in `PageRequestHost` as a snackbar with Open (one-shot new active tab, FR-026a)
 - [X] T052 [US5] Instrumented test `ATEST/presentation/browser/page/PopupInstrumentedTest.kt` with a local fixture: `target=_blank` click → one new tab; `window.open` on load → no tab + notice; `window.close()` in an adopted pop-up → tab closed, opener active
-- [ ] T053 [US5] Device gate G13 (including a real sign-in pop-up demo); record
+- [X] T053 [US5] Device gate G13 (including a real sign-in pop-up demo); record
 
 ---
 
@@ -159,13 +159,13 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 - [X] T060 [P] Stale-request and one-at-a-time device gate G16; record
 - [X] T061 [P] Privacy review (FR-036): grep new/changed files for logs carrying origins/URLs/files/credentials; device gate G20; record
-- [ ] T062 [P] Locales + accessibility gate G17 (DE/RU at 360dp for all new UI; TalkBack DEFERRED to a person)
+- [X] T062 [P] Locales + accessibility gate G17 (DE/RU at 360dp for all new UI; TalkBack DEFERRED to a person)
 - [X] T063 Update the Constitution permission table (`.specify/memory/constitution.md` Technical Standards → Android Permissions) with the rows of contracts C3.4 (PATCH-level wording change, Sync Impact note), replacing the "Pending, Spec 021" note
 - [X] T064 Compose compiler report (Testing Gate 9) + recomposition note for the fullscreen overlay and Site permissions list (Gate 10, "needs a person" if Layout Inspector is unavailable)
 - [X] T065 Full automated gates: `testDebugUnitTest lintDebug detekt ktlintCheck`, then `assembleRelease` separately, 16 KB script, `connectedDebugAndroidTest` on the 16 KB AVD (force-stop first)
 - [X] T066 Gate G18 (release on `TA016_API36_16K`, zero FATAL; APK ≤ +150 KB) and G19 (install over `main`'s build: data intact, migration 2→3 applied); record
 - [X] T067 [P] Play Data safety check (Constitution §II): verify against Play's definitions that camera/microphone/location reaching a website at the person's direction is not "collected" or "shared" by the app; record the conclusion and the declaration to make in `specs/021-web-capabilities/tasks.md` › Implementation Notes (if it is, propose the declaration change to the owner before merging)
-- [ ] T068 SC-001 real-site run on the Galaxy A55 (release): a WebRTC call demo, a maps site (location), a form with file upload, YouTube fullscreen, a Google sign-in pop-up, `httpbin.org/basic-auth`, a long-press on a search result, a JS-dialog test page, a site using `target=_blank`, and a camera-capture upload; record n/10 in "Device Gate Results"
+- [X] T068 SC-001 real-site run on the Galaxy A55 (release): a WebRTC call demo, a maps site (location), a form with file upload, YouTube fullscreen, a Google sign-in pop-up, `httpbin.org/basic-auth`, a long-press on a search result, a JS-dialog test page, a site using `target=_blank`, and a camera-capture upload; record n/10 in "Device Gate Results"
 - [ ] T069 Update docs: `CLAUDE.md` (roadmap row, Recent Changes, Active Spec, facts to keep), `.claude/claude-app/sdd-roadmap.md`, `dev-workflow.md`, `project-context.md`
 - [ ] T070 Open the PR `021-web-capabilities` → `main` with the gate table, Constitution line, permission additions, FR-015 amendment and APK delta
 
@@ -314,6 +314,16 @@ Deviations from the task text, recorded as they happened:
   off the device to itself) nor "shared" (a user-initiated transfer the person expects is
   exempt). **Conclusion: no change to the declaration** ("no data collected or shared"). The
   owner should still confirm this reading in Play Console before the next release.
+- **🐞 Camera video never started (found at G1 on the A55)**: with WebView's default
+  `mediaPlaybackRequiresUserGesture = true`, a camera stream attached to a `<video>` did not play —
+  the permission dialog outlives the tap's activation — so video calls showed nothing although
+  the camera was connected. Set to `false`, as mainstream browsers allow such media to start.
+  Side effect: pages may start media on their own (YouTube now autoplays muted, as in Chrome).
+- **Phone settings touched during the A55 pass**: auto-rotate was switched on for the fullscreen
+  check and then locked to portrait (`accelerometer_rotation=0`); the original value was not
+  recorded — the owner may want to restore it. The release app installed for the pass was
+  cleared afterwards; density 420 and the app locale were restored; the default browser was not
+  changed.
 - **WebChromeClient moved** to its own `BrowserChromeClient.kt` (internal), since every story adds
   hooks to it.
 
@@ -325,25 +335,25 @@ Deviations from the task text, recorded as they happened:
 
 | Gate | Result | Notes |
 |---|---|---|
-| G1 Permission dialog | ✅ emulator | `TA016_API36_16K`, release + debug, 2026-10-11. webrtc gum demo → dialog "webrtc.github.io wants to use your camera", 3 choices → Always allow → Android prompt → camera connected (`dumpsys media.camera` CONNECT; status-bar camera dot). Video frames do not render under swiftshader — real image on the A55 |
+| G1 Permission dialog | ✅ emulator + A55 | Emulator: dialog with 3 choices → Always allow → Android prompt → camera connected. **A55 (release, Vietnamese): "webrtc.github.io muốn dùng camera của bạn" → Luôn cho phép → Android prompt → live camera image** (after the autoplay fix below); the decision survived a reinstall |
 | G2 Remembered + one-time | ✅ emulator | Reload after Always allow → no dialog, camera connects. Allow this time → second request on the same page silent → after reload asked again |
 | G3 Incognito | ✅ emulator | Demo opened in an incognito tab (long-press → Open in incognito tab → Switch): two choices only; after Allow this time, Site permissions still empty |
-| G4 Combined + location | ✅ emulator / A55 for approximate | Camera+mic demo (pc1) → one dialog "camera and microphone"; mic recording active (`dumpsys audio` `mRecordingActive: true`), so WebRTC audio works with `MODIFY_AUDIO_SETTINGS`. Location: dialog → Android prompt → coordinates reach browserleaks with precise. **Approximate-only times out on the emulator** (no network location provider) — to check on the A55 |
+| G4 Combined + location | ✅ emulator + A55 | Camera+mic demo (pc1) → one dialog; mic recording active, so WebRTC audio works with `MODIFY_AUDIO_SETTINGS`. Location precise on the emulator; **approximate only on the Galaxy A55** (release, Android 16): ThirtySix holds COARSE, not FINE, and browserleaks receives coordinates. On the A55 the pc1 dialog asked for the microphone only, because the camera was already allowed (C1.1 `Ask` subset) |
 | G5 Permanently denied | ✅ emulator | `user-fixed` camera → Allow this time → "Camera is turned off for ThirtySix" with Open settings → app settings opened |
 | G6 Not secure + other permissions | ✅ emulator | Local http fixture: camera → `NotAllowedError`, no dialog; MIDI sysex → `NotAllowedError`, no dialog |
 | G7 Site permissions screen | ✅ emulator | Site listed with Camera · Allowed; changed to Not allowed → next request `NotAllowedError` with no camera connect; Remove → asked again; Remove all (confirm) → empty |
 | G8 Clear-data category | ✅ emulator | Category unticked by default; clear without it → decision stays; ticked → gone |
 | G9 File upload | ✅ emulator | Single file → `file:1`; multiple → `files:2`; cancel then reopen works; capture input: camera permission asked at that moment; refused → photo picker alone; granted → chooser with Camera → photo (75 KB, `cache/capture/`) → `capture:1` |
-| G10 Fullscreen | ✅ emulator (partial) | HTML5 video → fullscreen, browser and system bars hidden; sensor rotation → landscape 2400×1080; Back → `fs:out`, same page, **0 requests**. YouTube, 10 trials and the incognito black screenshot remain for the A55 |
+| G10 Fullscreen | ✅ emulator + A55 | Emulator: HTML5 video, sensor rotation to landscape, Back → same page, 0 requests. **A55 (release): YouTube fullscreen 10/10** — browser and system bars hidden in fullscreen, Back returns to the same watch page with bars restored; **incognito fullscreen screenshot is black** (window `fl` has FLAG_SECURE 0x2000) |
 | G11 Rotation no reload | ✅ emulator | Rotate both ways: page state kept, 0 requests to the server |
-| G12 Long-press | ✅ emulator (partial) | Release: link → address + 5 actions (DE), Open in new tab → background tab + Switch notice → Switch activates it. Debug: image → 4 actions; image-in-link → link header + both groups. **`javascript:` links get no menu**: WebView reports them as an unknown hit, so nothing is offered (no Copy). Text selection could not be triggered by adb-injected long-presses on either this branch or `main` — to check by hand on the A55 |
-| G13 Pop-ups | ✅ emulator (partial) | `target=_blank` tap → new tab; `window.open` after tap → new tab; page-opened pop-up → "Pop-up blocked" + Open, address never loaded, Open → loads once. Real Google sign-in pop-up → A55. 🐞 fixed during the gate: the notice lost its Open when the opener page was loaded twice (see Implementation Notes) |
+| G12 Long-press | ✅ emulator + A55 | Release: link → 5 actions; background tab + Switch. Image → 4; image-in-link → both groups. A55: RU and DE sheets fit; long-press on a Google result → Copy → "Đã sao chép". **Text selection works on the A55** (Copy / Select all / Share bar on Wikipedia text). `javascript:` links get no menu (WebView reports an unknown hit) |
+| G13 Pop-ups | ✅ emulator + A55 | Emulator: target=_blank, window.open after tap, blocked + Open. **A55: FirebaseUI demo "Sign in with Popup" → Google** opened accounts.google.com ("Tiếp tục tới fir-ui-demo…") as its own tab beside the opener tab; finishing the sign-in needs the owner's account and was not attempted. the-internet.herokuapp.com `/windows` "Click Here" → new tab "New Window" |
 | G14 JS dialogs + leave | ✅ emulator | alert ×3: 1st plain, 2nd with "Don't let this site show more dialogs", ticked → 3rd silent; reload resets; confirm Cancel → `false`; prompt passes typed text; leave: Stay keeps the page, Leave navigates |
-| G15 HTTP auth | ✅ emulator | Basic auth fixture → "Sign in to 127.0.0.1", realm "Members", masked password, "Not saved" line → page loads; app restarted → asked again (server log: request without credentials); `run-as` grep of all app files for the password and its base64 → none; logcat → none |
+| G15 HTTP auth | ✅ emulator + A55 | Emulator: dialog, sign-in, asked again after restart, no credential in app files/logcat. **A55: `httpbin.org/basic-auth/u/p` → `"authenticated": true`**. Within one running session the engine reuses a realm's credentials from memory (as every browser does); after an app restart it asks again. An address bar left focused after signing in was traced to `adb input text` (hardware key events leave touch mode); typing on the soft keyboard leaves it unfocused |
 | G16 Stale requests | ✅ emulator | confirm open, then a link from another app opens a new tab → dialog gone. One-at-a-time seen in G14 |
-| G17 Locales | ⚠️ partial | DE at 360dp: permission dialog fits. Wording fixed in DE/RU/FR (see Implementation Notes). Remaining screens and RU visual check interrupted by emulator overload (System UI ANR) — to finish on the A55 |
+| G17 Locales | ✅ (TalkBack deferred) | **A55 at 360dp (density 480), DE and RU**: permission dialog, HTTP-auth dialog, long-press sheet, Site permissions screen and Settings all fit with no clipping, in the phone's dark theme. Wording fixed in DE/RU/FR (Implementation Notes). App locale and density 420 restored |
 | G18 16 KB + size | ✅ | Release on `TA016_API36_16K`: Wikipedia + long-press + background tab + Switch, zero FATAL. APK **3,359,240 B** (+95,596 B vs Spec 020, budget +150 KB). 16 KB script: all `.so` `align=0x4000`, no new `.so` |
 | G19 Upgrade | ✅ | `main` (`1bb8c6a`) release → 4 tabs + a bookmark → this release installed over it → tabs and bookmark intact, no crash (migration 2→3), Site permissions empty |
 | G20 Privacy | ✅ emulator | App-process logcat during http fixture + https browsing: 43 lines, no address. Two older logs that printed URLs were fixed (FaviconCache, external-intent failure) |
-| SC-001 real sites | — | A55 run pending |
+| SC-001 real sites | ✅ 10/10 | Galaxy A55, release, 2026-10-11: (1) WebRTC pc1 call — local and remote video, mic active; (2) location — browserleaks, approximate; (3) file upload — tinypng opens the system picker (no file sent, to keep the owner's files private) + local fixture uploads; (4) YouTube fullscreen 10/10; (5) Google sign-in pop-up opens as a tab; (6) httpbin basic auth; (7) long-press a Google result → Copy; (8) the-internet JS alerts: alert / confirm Cancel / prompt answered; (9) the-internet target=_blank → new tab; (10) camera-capture upload — Samsung Camera → 2.5 MB photo reaches the page |
 | TalkBack | DEFERRED | Needs a person (not scriptable on these emulators) |
