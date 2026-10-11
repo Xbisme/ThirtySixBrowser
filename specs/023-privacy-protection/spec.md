@@ -22,6 +22,7 @@
 - Q: How broad should the block list be? → A: Trackers and advertising networks that follow people across sites; hosts that serve content the person chose to see (embedded video, maps, sign-in buttons, CDNs) are not on the list.
 - Q: Does Clear browsing data also clear the list of sites without protection? → A: Yes, as a new opt-in category, unticked by default, like Spec 021's Site permissions.
 - Q: What does the blocked count on the hub count? → A: Distinct tracker hosts blocked on the page, not individual requests and not companies.
+- Research amendment (plan, 2026-10-11): FR-028–FR-030 and SC-009 narrowed to what the web engine allows — the app cannot override a page's own looser referrer policy, and on older web engines GPC reaches only the page loads the app starts itself (research R5, R6).
 - Q: When a page ends up on `http://` (not encrypted), is the person told? → A: Yes, quietly: the hub shows a "Connection not secure" line for any `http://` page, including sites with protection off; no pop-up or notice while browsing.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -124,11 +125,11 @@ When a page links to or loads something from another site, the other site learns
 
 **Why this priority**: Full referrers leak what the person was reading to every third party. Modern web defaults already trim most of them, so this mostly closes the gaps where pages ask for full referrers.
 
-**Independent Test**: From a local page that asks to send its full address as referrer, open a link to and load an image from a second local site; confirm the second site receives only the origin. A same-site link receives the full address.
+**Independent Test**: From a local page with no referrer policy of its own, open a link to and load an image from a second local site; confirm the second site receives at most the origin. A same-site link receives the full address.
 
 **Acceptance Scenarios**:
 
-1. **Given** a page on site A, **When** it navigates to or loads a resource from site B, **Then** site B receives at most A's origin as the referrer, even if the page asked to send more.
+1. **Given** a page on site A, **When** it navigates to or loads a resource from site B, **Then** site B receives at most A's origin as the referrer, unless the page itself explicitly asked to send more (a limit of the web engine, see FR-029).
 2. **Given** a page on site A, **When** it navigates within site A, **Then** the referrer behaves as the web normally does.
 3. **Given** protection is off for site A, **When** its pages make cross-site requests, **Then** referrers are not trimmed.
 
@@ -206,12 +207,12 @@ When a page links to or loads something from another site, the other site learns
 
 **Referrer trimming**
 
-- **FR-028**: For a request from a page on one site to a different site, the referrer sent MUST be at most the origin of the page, regardless of the page's own referrer settings. Same-site requests MUST keep the web's normal referrer behaviour.
-- **FR-029**: FR-028 MUST hold for cross-site main-frame navigations; for page resources it MUST hold wherever the web engine allows, and research MUST document any request type it cannot cover.
+- **FR-028**: For a request from a page on one site to a different site, the referrer sent MUST be at most the origin of the page whenever the page has not set its own referrer policy. Same-site requests MUST keep the web's normal referrer behaviour. The app MUST NOT loosen the web engine's default referrer policy, and any navigation the app re-issues itself (HTTPS upgrade, parameter stripping) MUST send no more than the origin.
+- **FR-029**: A page that explicitly sets a looser referrer policy cannot be overridden by the app (research R6); this is a documented limitation, not a failure of FR-028.
 
 **Global Privacy Control**
 
-- **FR-030**: Every page request MUST carry the Global Privacy Control signal (`Sec-GPC: 1`), in normal and incognito tabs, including sites with protection off. Page resources MUST carry it wherever the web engine allows; research MUST document gaps.
+- **FR-030**: Where the web engine supports app-wide request headers, every request (pages, page resources, service workers; not WebSockets) MUST carry the Global Privacy Control signal (`Sec-GPC: 1`), in normal and incognito tabs, including sites with protection off. On older web engines, every page load the app starts itself (typed address, bookmark, history, link from another app, tab switch, re-issued navigation) MUST carry it; links the page opens on its own are a documented gap (research R5).
 - **FR-031**: The script-visible form of the signal is out of scope unless the web engine exposes it without injecting a script (script injection belongs to Spec 024, Constitution §II).
 
 **General**
@@ -242,7 +243,7 @@ When a page links to or loads something from another site, the other site learns
 - **SC-006**: App cold start, both first run and returning, is no more than 5% slower than before this spec on the same device and build type.
 - **SC-007**: Turning protection off for a site from the hub takes at most 2 taps from the page, and the choice survives 3 app restarts; removing it from Settings restores protection on the next load.
 - **SC-008**: A site turned off in an incognito tab is protected again in a new incognito tab after all incognito tabs were closed, and was never protected-off in normal tabs.
-- **SC-009**: A header-recording test page receives the Global Privacy Control signal on 100% of page loads, in normal tabs, incognito tabs and sites with protection off.
+- **SC-009**: On a device whose web engine supports app-wide headers, a header-recording test page receives the Global Privacy Control signal on 100% of page and resource requests, in normal tabs, incognito tabs and sites with protection off; on an older engine (API 24 AVD) it receives it on 100% of page loads the app starts itself.
 - **SC-010**: The release app grows by at most 500 KB.
 - **SC-011**: With the phone in airplane mode, the local test page of SC-001 gives the same result.
 - **SC-012**: A network capture during SC-001 and SC-002 shows no request made by the protections themselves.

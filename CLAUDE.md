@@ -26,6 +26,8 @@ ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckD
   - Test: `junit`, `androidx.test.ext:junit`, `androidx.test.espresso:espresso-core`, `androidx.compose.ui:ui-test-junit4`, `androidx.compose.ui:ui-tooling`, `androidx.compose.ui:ui-test-manifest`
 - **Spec 016 (`settings-screen`, planned 2026-09-11)**: `androidx.appcompat:appcompat` **1.8.0** (per-app language on Android 7–12) · `androidx.webkit:webkit` **1.17.0** (complete site-data removal) — both latest stable at lookup, zero `.so` in real release builds; re-verify at the moment of addition (§IX)
 
+- **Spec 023 (`privacy-protection`, planned 2026-10-11)**: **no new dependency** — `androidx.webkit` 1.17.0 `Profile.addCustomHeader` for GPC (feature-detected). New bundled data assets: EasyPrivacy + EasyList host subset (**CC BY-SA 3.0** option), Public Suffix List (**MPL-2.0**), own tracking-parameter list; Room v3 → v4 (`site_protection_exceptions`)
+
 ### Dependencies (final versions looked up at implementation time per Constitution §IX)
 
 - All versions MUST be fetched from `central.sonatype.com` / official release notes at moment of `libs.versions.toml` addition
