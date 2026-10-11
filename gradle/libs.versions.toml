@@ -176,6 +176,8 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 # Pure Java JAR, ZERO native (.so) → 16KB CI gate auto-passes.
 # androidTestImplementation only — never bundled into release APK.
 androidx-espresso-web = { group = "androidx.test.espresso", name = "espresso-web", version.ref = "espressoCore" }
+# Spec 021 T032 — stubs the system file picker in instrumented tests. Same Espresso train, test-only.
+androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoCore" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
 [plugins]

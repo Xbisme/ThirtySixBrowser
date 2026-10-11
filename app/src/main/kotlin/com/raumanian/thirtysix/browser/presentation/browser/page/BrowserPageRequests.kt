@@ -7,6 +7,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 /**
@@ -23,7 +24,13 @@ fun rememberPageSession(
     val scope = rememberCoroutineScope()
     val session = remember(permissionGate) { PageSession(PageRequestQueue(), scope, permissionGate) }
     LaunchedEffect(activeTabId, isIncognito) { session.onTabChanged(activeTabId, isIncognito) }
-    DisposableEffect(session) { onDispose { session.queue.dispose() } }
+    val context = LocalContext.current
+    DisposableEffect(session) {
+        onDispose {
+            session.queue.dispose()
+            CaptureFiles.clear(context)
+        }
+    }
     return session
 }
 
@@ -40,6 +47,10 @@ private fun rememberPageRequestRenderers(permissionGate: SitePermissionGate): Pa
             when (request) {
                 is PageRequest.Permission -> {
                     SitePermissionDialog(request, permissionGate, done)
+                    true
+                }
+                is PageRequest.FileChooser -> {
+                    FileChooserLauncher(request, done)
                     true
                 }
                 else -> false

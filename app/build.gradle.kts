@@ -240,6 +240,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     // Spec 007 — Espresso-Web for asserting WebView DOM in instrumented tests.
     androidTestImplementation(libs.androidx.espresso.web)
+    androidTestImplementation(libs.androidx.espresso.intents)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     // Spec 007 — Hilt instrumented-test runtime. Required by @HiltAndroidTest +

@@ -1,12 +1,16 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.webkit.GeolocationPermissions
 import android.webkit.PermissionRequest
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.presentation.browser.page.FileChooserRequest
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageContext
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 
@@ -90,6 +94,44 @@ internal class BrowserChromeClient(
 
     override fun onGeolocationPermissionsHidePrompt() {
         pageRequests.onPermissionWithdrawn { it.capabilities == setOf(SiteCapability.Location) }
+    }
+
+    /** Spec 021 FR-011 — a page's file input; the page is answered once, with files or `null`. */
+    override fun onShowFileChooser(
+        webView: WebView?,
+        filePathCallback: ValueCallback<Array<Uri>>?,
+        fileChooserParams: FileChooserParams?,
+    ): Boolean {
+        val callback = filePathCallback ?: return false
+        val context = pageRequests.context()
+        val origin = webView?.url?.let(SiteOrigin::of)
+        if (context == null || origin == null) {
+            callback.onReceiveValue(null)
+        } else {
+            enqueueFileChooser(context, origin, fileChooserParams, callback)
+        }
+        return true
+    }
+
+    private fun enqueueFileChooser(
+        context: PageContext,
+        origin: String,
+        fileChooserParams: FileChooserParams?,
+        callback: ValueCallback<Array<Uri>>,
+    ) {
+        pageRequests.enqueue(
+            PageRequest.FileChooser(
+                tabId = context.tabId,
+                generation = context.generation,
+                origin = origin,
+                request = FileChooserRequest(
+                    acceptTypes = fileChooserParams?.acceptTypes?.toList().orEmpty(),
+                    allowMultiple = fileChooserParams?.mode == FileChooserParams.MODE_OPEN_MULTIPLE,
+                    captureRequested = fileChooserParams?.isCaptureEnabled == true,
+                ),
+                onResult = { callback.onReceiveValue(it) },
+            ),
+        )
     }
 
     private fun capabilityOf(resource: String): SiteCapability? = when (resource) {

@@ -129,6 +129,18 @@
             </intent-filter>
         </activity>
 
+        <!-- Spec 021 research R3 — hands the camera app a place to write a photo for a page's file
+             upload. Not exported; only cache/capture/ is exposed (res/xml/file_paths.xml). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- Spec 016 research R1 — lets AndroidX persist the in-app language on Android 7.0–12.
              With autoStoreLocales, AppCompat saves the user's choice and re-applies it at start-up;
              on Android 13+ the framework stores it instead. Disabled and not exported: the service

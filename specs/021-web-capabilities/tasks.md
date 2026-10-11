@@ -84,11 +84,11 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 **Independent Test**: quickstart G9.
 
-- [ ] T028 [P] [US2] Write `TEST/presentation/browser/page/FileChooserIntentsTest.kt` (Robolectric): picker intent honours accept types and multiple; capture intents added only when capture is requested/only media accepted; capture omitted when camera permission is not granted
-- [ ] T029 [US2] Add the `FileProvider` and `RES/xml/file_paths.xml` (`cache/capture/` only) per contracts C3.3
-- [ ] T030 [US2] Create `MAIN/presentation/browser/page/FileChooserLauncher.kt`: builds the picker/chooser (research R3), launches with `StartActivityForResult`, answers the callback with `FileChooserParams.parseResult` / the capture URI / `null`, always answering even on `ActivityNotFoundException`; requests `CAMERA` at that moment when capture is wanted and falls back to the picker on refusal (FR-013); deletes `cacheDir/capture/` files when the page generation changes
-- [ ] T031 [US2] Implement `onShowFileChooser` in `MAIN/presentation/browser/BrowserWebView.kt` → `PageRequest.FileChooser` (returns `true`) and render it in `PageRequestHost` via `FileChooserLauncher`
-- [ ] T032 [US2] Instrumented test `ATEST/presentation/browser/page/FileChooserInstrumentedTest.kt` with a local fixture page and `Intents` stubbing a picker result (one file, several files, cancel → page receives none)
+- [X] T028 [P] [US2] Write `TEST/presentation/browser/page/FileChooserIntentsTest.kt` (Robolectric): picker intent honours accept types and multiple; capture intents added only when capture is requested/only media accepted; capture omitted when camera permission is not granted
+- [X] T029 [US2] Add the `FileProvider` and `RES/xml/file_paths.xml` (`cache/capture/` only) per contracts C3.3
+- [X] T030 [US2] Create `MAIN/presentation/browser/page/FileChooserLauncher.kt`: builds the picker/chooser (research R3), launches with `StartActivityForResult`, answers the callback with `FileChooserParams.parseResult` / the capture URI / `null`, always answering even on `ActivityNotFoundException`; requests `CAMERA` at that moment when capture is wanted and falls back to the picker on refusal (FR-013); deletes `cacheDir/capture/` files when the page generation changes
+- [X] T031 [US2] Implement `onShowFileChooser` in `MAIN/presentation/browser/BrowserWebView.kt` → `PageRequest.FileChooser` (returns `true`) and render it in `PageRequestHost` via `FileChooserLauncher`
+- [X] T032 [US2] Instrumented test `ATEST/presentation/browser/page/FileChooserInstrumentedTest.kt` with a local fixture page and `Intents` stubbing a picker result (one file, several files, cancel → page receives none)
 - [ ] T033 [US2] Device gate G9; record
 
 ---
@@ -243,6 +243,14 @@ Deviations from the task text, recorded as they happened:
   vectors were not added rather than drawn from memory.
 - **Manifest test** checks an exact permission allow-list: Robolectric has no framework permission
   metadata, so "no other dangerous permission" cannot be read from protection levels.
+- **Capture files are deleted when the next capture starts and when the browser screen goes
+  away**, not on every page change (T030 said "when the page generation changes"): a form submit
+  starts a navigation while the upload may still be reading the photo.
+- **`espresso-intents` 3.7.0 added** (androidTest only, same Espresso train as core/web, no `.so`;
+  3.7.0 confirmed on Google Maven 2026-10-11) to stub the picker in T032.
+- **Spec 012's `IncognitoPermissionDenialInstrumentedTest` rewritten**: it mirrored the old
+  deny-everything client in a copy. It now drives the real `BrowserChromeClient` and checks
+  what still holds — no page → refused, incognito requests marked incognito, `retain = false`.
 - **WebChromeClient moved** to its own `BrowserChromeClient.kt` (internal), since every story adds
   hooks to it.
 

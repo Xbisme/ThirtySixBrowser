@@ -1,64 +1,70 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
-import android.webkit.GeolocationPermissions
-import android.webkit.WebChromeClient
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageContext
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T010a (Analyze remediation C1, FR-019 regression guard).
+ * Spec 012 T010a, revised by Spec 021 — the production [BrowserChromeClient]'s location answer.
  *
- * Verifies the universal-deny posture used by the production
- * `BrowserChromeClient` (private to `BrowserWebView.kt`): a
- * `WebChromeClient` MUST forward `(allow=false, retain=false)` to the
- * Geolocation callback so the in-app permission UI never surfaces. The same
- * universal-deny posture applies to the camera/microphone/MIDI/protected-
- * media surfaces routed through `onPermissionRequest(request)` — production
- * calls `request?.deny()` unconditionally.
+ * Spec 012 denied every request; Spec 021 asks the person instead (FR-001). What must still hold:
+ * the engine is never told to retain a decision (`retain = false`, INV-6), a request with no page
+ * behind it is refused, and an incognito tab's request is marked incognito so it is never
+ * remembered (FR-004).
  *
- * The full end-to-end test — load a `data:` URL containing
- * `navigator.geolocation.getCurrentPosition(...)` and assert no system
- * permission prompt surfaces — is deferred to the manual G3 user-device
- * gate (already ✅).
- *
- * **Why no WebView instance is constructed here**: an earlier draft created
- * `WebView(instrumentation.context)` on the main thread to wire the
- * `WebChromeClient`, but on API 29 emulator that left the main thread in a
- * state that hung the next Compose UI test (`AddressBarTest`'s
- * `setContent`). Constructing a bare `WebChromeClient` and invoking the
- * callback override directly preserves the contract under test (the
- * `onGeolocationPermissionsShowPrompt` signature + the `(false, false)`
- * pass-through) without any platform side-effects.
+ * No WebView is constructed (the Spec 012 finding: building one here hung the next Compose test
+ * on API 29); the client's callback override is invoked directly.
  */
 @RunWith(AndroidJUnit4::class)
 class IncognitoPermissionDenialInstrumentedTest {
 
+    private class CapturingSink(private val incognito: Boolean) : PageRequestSink {
+        val requests = mutableListOf<PageRequest.Permission>()
+
+        override fun context() = PageContext(tabId = -1L, generation = 1L, isIncognito = incognito)
+
+        override fun onNavigationStarted() = Unit
+
+        override fun enqueue(request: PageRequest) = request.cancel()
+
+        override fun onPermissionRequest(request: PageRequest.Permission, hasUnsupported: Boolean) {
+            requests += request
+        }
+    }
+
+    private fun client(sink: PageRequestSink) = BrowserChromeClient({}, {}, { _, _ -> }, sink)
+
     @Test
-    fun universalDeny_passes_allow_false_and_retain_false_to_callback() {
-        var allowedFlag: Boolean? = null
-        var retainFlag: Boolean? = null
-
-        // Mirrors production BrowserChromeClient.onGeolocationPermissionsShowPrompt
-        // (BrowserWebView.kt line 448-454): callback?.invoke(origin, false, false).
-        val chromeClient = object : WebChromeClient() {
-            override fun onGeolocationPermissionsShowPrompt(
-                origin: String?,
-                callback: GeolocationPermissions.Callback?,
-            ) {
-                callback?.invoke(origin, false, false)
-            }
+    fun noPage_refusesWithoutRetaining() {
+        var answer: Pair<Boolean, Boolean>? = null
+        client(PageRequestSink.None).onGeolocationPermissionsShowPrompt(ORIGIN) { _, allow, retain ->
+            answer = allow to retain
         }
+        assertEquals(false to false, answer)
+    }
 
-        chromeClient.onGeolocationPermissionsShowPrompt(
-            "https://incognito.example/",
-        ) { _, allowed, retain ->
-            allowedFlag = allowed
-            retainFlag = retain
-        }
+    @Test
+    fun incognitoRequest_isMarkedIncognito_andNeverRetained() {
+        val sink = CapturingSink(incognito = true)
+        var answer: Pair<Boolean, Boolean>? = null
+        client(sink).onGeolocationPermissionsShowPrompt(ORIGIN) { _, allow, retain -> answer = allow to retain }
 
-        assertEquals("permission MUST be denied (allow=false)", false, allowedFlag)
-        assertEquals("retain MUST be false", false, retainFlag)
+        val request = sink.requests.single()
+        assertTrue(request.isIncognito)
+        assertEquals(setOf(SiteCapability.Location), request.capabilities)
+        assertEquals("https://incognito.example", request.origin)
+
+        request.grant()
+        assertEquals("allowed, but never retained by the engine", true to false, answer)
+    }
+
+    private companion object {
+        const val ORIGIN = "https://incognito.example/"
     }
 }
