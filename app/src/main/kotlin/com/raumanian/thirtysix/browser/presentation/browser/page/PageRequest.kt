@@ -136,19 +136,6 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
         override fun cancel() = settle(onCancel)
     }
 
-    /** A window opened without a tap (FR-026, FR-026a). [openUrl] is null when it cannot be offered. */
-    class PopupBlocked(
-        tabId: Long,
-        generation: Long,
-        origin: String,
-        val openUrl: String?,
-        private val onOpen: () -> Unit,
-    ) : PageRequest(tabId, generation, origin) {
-        fun open() = settle(onOpen)
-
-        override fun cancel() = settle {}
-    }
-
     /** Long-press on a link or an image (FR-018 – FR-024). */
     class LongPress(
         tabId: Long,

@@ -130,12 +130,12 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 **Independent Test**: quickstart G13.
 
-- [ ] T047 [P] [US5] Write `TEST/domain/usecase/DecidePopupUseCaseTest.kt` covering contracts C1.3
-- [ ] T048 [P] [US5] Create `MAIN/domain/usecase/DecidePopupUseCase.kt`
-- [ ] T049 [US5] Create `MAIN/presentation/browser/page/PopupWebViewRegistry.kt` (`@Singleton`, data-model §6) and make `MAIN/presentation/browser/BrowserWebView.kt` adopt a registered WebView for the composed tab instead of building one (configuring it with the same clients and settings; released like any WebView)
-- [ ] T050 [US5] Implement `onCreateWindow` / `onCloseWindow` and enable `setSupportMultipleWindows(true)` + `javaScriptCanOpenWindowsAutomatically = true` in `MAIN/presentation/browser/BrowserWebView.kt`: gesture → new tab (normal or incognito per opener) + transport WebView + registry; no gesture → throw-away WebView captures the address, then `PageRequest.PopupBlocked(url?)`; at the cap → existing tab-limit message (research R5, FR-025–FR-028)
-- [ ] T051 [US5] Render `PopupBlocked` in `PageRequestHost` as a snackbar with Open (one-shot new active tab, FR-026a)
-- [ ] T052 [US5] Instrumented test `ATEST/presentation/browser/page/PopupInstrumentedTest.kt` with a local fixture: `target=_blank` click → one new tab; `window.open` on load → no tab + notice; `window.close()` in an adopted pop-up → tab closed, opener active
+- [X] T047 [P] [US5] Write `TEST/domain/usecase/DecidePopupUseCaseTest.kt` covering contracts C1.3
+- [X] T048 [P] [US5] Create `MAIN/domain/usecase/DecidePopupUseCase.kt`
+- [X] T049 [US5] Create `MAIN/presentation/browser/page/PopupWebViewRegistry.kt` (`@Singleton`, data-model §6) and make `MAIN/presentation/browser/BrowserWebView.kt` adopt a registered WebView for the composed tab instead of building one (configuring it with the same clients and settings; released like any WebView)
+- [X] T050 [US5] Implement `onCreateWindow` / `onCloseWindow` and enable `setSupportMultipleWindows(true)` + `javaScriptCanOpenWindowsAutomatically = true` in `MAIN/presentation/browser/BrowserWebView.kt`: gesture → new tab (normal or incognito per opener) + transport WebView + registry; no gesture → throw-away WebView captures the address, then `PageRequest.PopupBlocked(url?)`; at the cap → existing tab-limit message (research R5, FR-025–FR-028)
+- [X] T051 [US5] Render `PopupBlocked` in `PageRequestHost` as a snackbar with Open (one-shot new active tab, FR-026a)
+- [X] T052 [US5] Instrumented test `ATEST/presentation/browser/page/PopupInstrumentedTest.kt` with a local fixture: `target=_blank` click → one new tab; `window.open` on load → no tab + notice; `window.close()` in an adopted pop-up → tab closed, opener active
 - [ ] T053 [US5] Device gate G13 (including a real sign-in pop-up demo); record
 
 ---
@@ -268,6 +268,17 @@ Deviations from the task text, recorded as they happened:
 - **Long-press actions live in `LongPressActions` (`@HiltViewModel`)** plus `LongPressHooks`
   passed by `BrowserScreen`; downloads go through a second `rememberDownloadRequestHandler`, so
   the Spec 015 storage gate applies, with the WebView's default user agent.
+- **Pop-ups (US5)**: `DecidePopupUseCase` decides gesture/cap/blocked; whether Open is offered is
+  a separate `openUrlFor(target)` because a blocked window's address only arrives later (from a
+  throw-away WebView, `BlockedPopupCatcher`). `PageRequest.PopupBlocked` was removed: the notice
+  is a snackbar driven by `PopupTabs` events, so it never holds the dialog queue.
+- **Pop-up WebViews are registered before their tab exists**, under a unique placeholder address
+  (`about:blank#thirtysix-popup-N`) the tab is created with: the tab store can emit (and compose
+  the tab) before the creating coroutine resumes, so keying by tab id raced (seen in T052).
+- **🐞 Found by T052**: a page-created WebView with no `WebViewClient` hands its navigation to
+  another app — the emulator opened Chrome. The pop-up gets a plain client the moment it is made.
+- **`window.close()` before the tab exists** (a fast page) is remembered and applied once the tab
+  is created.
 - **WebChromeClient moved** to its own `BrowserChromeClient.kt` (internal), since every story adds
   hooks to it.
 

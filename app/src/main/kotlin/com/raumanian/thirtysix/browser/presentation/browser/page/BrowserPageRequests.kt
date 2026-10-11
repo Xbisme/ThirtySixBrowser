@@ -20,9 +20,10 @@ fun rememberPageSession(
     activeTabId: Long?,
     isIncognito: Boolean,
     permissionGate: SitePermissionGate = hiltViewModel(),
+    popups: PopupTabs? = null,
 ): PageSession {
     val scope = rememberCoroutineScope()
-    val session = remember(permissionGate) { PageSession(PageRequestQueue(), scope, permissionGate) }
+    val session = remember(permissionGate, popups) { PageSession(PageRequestQueue(), scope, permissionGate, popups) }
     LaunchedEffect(activeTabId, isIncognito) { session.onTabChanged(activeTabId, isIncognito) }
     val context = LocalContext.current
     DisposableEffect(session) {

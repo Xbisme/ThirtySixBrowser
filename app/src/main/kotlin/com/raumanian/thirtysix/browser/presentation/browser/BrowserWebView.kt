@@ -77,14 +77,19 @@ import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
  * - The replacement starts with no back/forward history.
  */
 @Composable
+@Suppress("LongParameterList") // Spec 021 adds the adopted pop-up WebView.
 internal fun BrowserWebView(
     state: BrowserUiState,
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
     modifier: Modifier = Modifier,
+    adopted: WebView? = null,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    // Spec 021 research R5 — a page-created WebView is adopted by the first generation only; a
+    // replacement after a renderer loss is built fresh.
+    val adoptable = remember { arrayOf(adopted) }
     val currentUrl = rememberUpdatedState(state.currentUrl)
     val host = remember { WebViewHost(currentUrl) }
 
@@ -119,8 +124,11 @@ internal fun BrowserWebView(
         AndroidView(
             modifier = modifier,
             factory = { context ->
+                val toAdopt = adoptable[0]
+                adoptable[0] = null
                 buildConfiguredWebView(
-                    context = context,
+                    webView = toAdopt ?: WebView(context),
+                    adopted = toAdopt != null,
                     state = state,
                     actions = actions,
                     callbacks = callbacks,
@@ -154,13 +162,14 @@ internal fun BrowserWebView(
  */
 @Suppress("LongParameterList")
 private fun buildConfiguredWebView(
-    context: android.content.Context,
+    webView: WebView,
+    adopted: Boolean,
     state: BrowserUiState,
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
     host: WebViewHost,
-): WebView = WebView(context).also { wv ->
+): WebView = webView.also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
     wv.webViewClient = BrowserWebViewClient(
@@ -201,9 +210,28 @@ private fun buildConfiguredWebView(
         onReceivedTitle = navigationCallbacks.onTitleChange,
         onReceivedIcon = navigationCallbacks.onIconReceived,
         pageRequests = callbacks.pageRequests,
+        newPopupWebView = { context -> newPopupWebView(context, state.isIncognito) },
     )
-    // Spec 008 — wire imperative handle. Each lambda captures `wv` via the
-    // factory closure; the lambdas persist for the lifetime of the WebView.
+    wireActions(wv, actions, host, adopted)
+
+    // Spec 008 — conditional initial load. When state is seeded to Failed
+    // (instrumented test pattern), skip the initial loadUrl so the test
+    // assertion on the error UI is not overridden by a successful auto-load.
+    // Renderer recovery — also skipped by the replacement for a crashed renderer, so a page
+    // that crashes its renderer waits for Reload instead of crashing it again in a loop.
+    // Spec 021 R5 — and by an adopted pop-up, already navigating for its opener.
+    val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
+    val loadable = host.loadInitialUrl && state.loadingState !is LoadingState.Failed
+    if (!adopted && loadable && !isHome) {
+        wv.loadUrl(state.currentUrl)
+    }
+}
+
+/**
+ * Spec 008 — wires the imperative handle. Each lambda captures [wv]; they persist for the
+ * lifetime of the WebView.
+ */
+private fun wireActions(wv: WebView, actions: WebViewActionsHandle, host: WebViewHost, adopted: Boolean) {
     actions.goBack = { if (wv.canGoBack()) wv.goBack() }
     actions.goForward = { if (wv.canGoForward()) wv.goForward() }
     // A replacement built after a renderer crash has loaded nothing, and `reload()` on an
@@ -216,18 +244,26 @@ private fun buildConfiguredWebView(
     }
     actions.stopLoading = { wv.stopLoading() }
     // Spec 019 R1 — the reserved Home address is never handed to the WebView.
-    actions.loadUrl = { url -> if (url != UrlConstants.HOME_PAGE_URL) wv.loadUrl(url) }
-
-    // Spec 008 — conditional initial load. When state is seeded to Failed
-    // (instrumented test pattern), skip the initial loadUrl so the test
-    // assertion on the error UI is not overridden by a successful auto-load.
-    // Renderer recovery — also skipped by the replacement for a crashed renderer, so a page
-    // that crashes its renderer waits for Reload instead of crashing it again in a loop.
-    val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
-    if (host.loadInitialUrl && state.loadingState !is LoadingState.Failed && !isHome) {
-        wv.loadUrl(state.currentUrl)
+    // Spec 021 R5 — an adopted pop-up is already navigating for its opener: the tab switch's
+    // load of the placeholder address is skipped once.
+    var skipNextLoad = adopted
+    actions.loadUrl = { url ->
+        when {
+            skipNextLoad -> skipNextLoad = false
+            url != UrlConstants.HOME_PAGE_URL -> wv.loadUrl(url)
+        }
     }
 }
+
+/** Spec 021 research R5 — a WebView with the browser's settings for a window the page opened. */
+private fun newPopupWebView(context: android.content.Context, incognito: Boolean): WebView =
+    WebView(context).also { popup ->
+        applySecuritySettings(popup)
+        if (incognito) applyIncognitoSettings(popup)
+        // Until its tab adopts it, the pop-up must load in place: a WebView with no client hands
+        // every navigation to another app (the system browser).
+        popup.webViewClient = WebViewClient()
+    }
 
 /**
  * Centralized WebView security configuration. Every setting referenced here is
@@ -258,6 +294,10 @@ private fun applySecuritySettings(webView: WebView) {
 
         // FR-018 — block all HTTP sub-resources on HTTPS pages.
         mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+
+        // Spec 021 research R5 — every window request reaches onCreateWindow, which decides.
+        setSupportMultipleWindows(true)
+        javaScriptCanOpenWindowsAutomatically = true
 
         // Spec 021 FR-001 — location requests reach the app, which asks the person first.
         setGeolocationEnabled(true)

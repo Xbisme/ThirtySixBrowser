@@ -2,6 +2,8 @@ package com.raumanian.thirtysix.browser.presentation.browser.page
 
 import android.view.View
 import android.webkit.WebChromeClient.CustomViewCallback
+import android.webkit.WebView
+import com.raumanian.thirtysix.browser.domain.usecase.PopupDecision
 
 /** Spec 021 — which page a request belongs to (data-model §3, §4). */
 data class PageContext(val tabId: Long, val generation: Long, val isIncognito: Boolean)
@@ -11,6 +13,7 @@ data class PageContext(val tabId: Long, val generation: Long, val isIncognito: B
  * clients translate platform callbacks; everything that involves the person happens behind this
  * interface. [None] is the inert default for previews and tests that build the WebView directly.
  */
+@Suppress("TooManyFunctions") // One entry point per kind of page request (C3.1).
 interface PageRequestSink {
     /** The page currently shown, or `null` when there is none. */
     fun context(): PageContext?
@@ -35,6 +38,21 @@ interface PageRequestSink {
 
     /** The page left fullscreen itself. */
     fun onHideCustomView() = Unit
+
+    /**
+     * Spec 021 research R5 — the page asked for a new window. `null` refuses it (no page, or no
+     * pop-up support where the WebView is built directly).
+     */
+    fun decideWindow(isUserGesture: Boolean): PopupDecision? = null
+
+    /** The page-created WebView for an allowed window; it becomes a new tab. */
+    fun adoptPopup(popup: WebView) = popup.destroy()
+
+    /** A blocked window's address, or `null` when the page named none. */
+    fun onPopupBlocked(target: String?) = Unit
+
+    /** `window.close()` from the page in [window]. */
+    fun onCloseWindow(window: WebView) = Unit
 
     object None : PageRequestSink {
         override fun context(): PageContext? = null

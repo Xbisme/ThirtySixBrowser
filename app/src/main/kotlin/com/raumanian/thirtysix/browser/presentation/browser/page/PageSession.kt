@@ -2,6 +2,8 @@ package com.raumanian.thirtysix.browser.presentation.browser.page
 
 import android.view.View
 import android.webkit.WebChromeClient.CustomViewCallback
+import android.webkit.WebView
+import com.raumanian.thirtysix.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.domain.usecase.SitePermissionOutcome
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -14,10 +16,12 @@ import kotlinx.coroutines.launch
  *
  * Owned by the browser screen, used on the main thread only.
  */
+@Suppress("TooManyFunctions") // One entry point per kind of page request (C3.1).
 class PageSession(
     val queue: PageRequestQueue,
     private val scope: CoroutineScope? = null,
     private val permissionGate: SitePermissionGate? = null,
+    private val popups: PopupTabs? = null,
 ) : PageRequestSink {
     /** Spec 021 research R4 — the page's fullscreen view, ended by a tab switch. */
     val fullscreen = FullscreenController()
@@ -76,6 +80,25 @@ class PageSession(
     override fun onShowCustomView(view: View, callback: CustomViewCallback) = fullscreen.enter(view, callback)
 
     override fun onHideCustomView() = fullscreen.onHiddenByPage()
+
+    override fun decideWindow(isUserGesture: Boolean): PopupDecision? {
+        val opener = context() ?: return null
+        return popups?.decide(isUserGesture, opener)
+    }
+
+    override fun adoptPopup(popup: WebView) {
+        val opener = context()
+        val tabs = popups
+        if (opener == null || tabs == null) popup.destroy() else tabs.adopt(popup, opener)
+    }
+
+    override fun onPopupBlocked(target: String?) {
+        context()?.let { popups?.onBlocked(target, it) }
+    }
+
+    override fun onCloseWindow(window: WebView) {
+        popups?.onCloseWindow(window)
+    }
 
     override fun onPermissionWithdrawn(match: (PageRequest.Permission) -> Boolean) = queue.withdraw(match)
 

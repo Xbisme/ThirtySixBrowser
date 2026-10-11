@@ -3,6 +3,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import android.webkit.WebSettings
+import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.background
@@ -50,6 +51,8 @@ import com.raumanian.thirtysix.browser.presentation.browser.page.FullscreenOverl
 import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressActions
 import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressHooks
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
+import com.raumanian.thirtysix.browser.presentation.browser.page.PopupEffects
+import com.raumanian.thirtysix.browser.presentation.browser.page.PopupTabs
 import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
 import com.raumanian.thirtysix.browser.presentation.home.HomeCallbacks
@@ -100,7 +103,12 @@ fun BrowserScreen(
     var quickSettingsUsed by remember { mutableStateOf(false) }
 
     // Spec 021 — requests the page makes of the browser (permissions, files, dialogs, …).
-    val pageSession = rememberPageSession(activeTabId = activeTab?.id, isIncognito = state.isIncognito)
+    val popupTabs: PopupTabs = hiltViewModel()
+    val pageSession = rememberPageSession(
+        activeTabId = activeTab?.id,
+        isIncognito = state.isIncognito,
+        popups = popupTabs,
+    )
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
     HomeBackHandlers(state = state, viewModel = viewModel)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = incomingContent)
@@ -133,6 +141,7 @@ fun BrowserScreen(
             activeTabId = activeTab?.id ?: 0L,
             onScrollDelta = chrome::onScrollDelta,
             pageRequests = pageSession,
+            takePopup = { activeTab?.url?.let(popupTabs::take) },
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
@@ -237,6 +246,7 @@ fun BrowserScreen(
         )
     }
     BrowserPageRequests(session = pageSession, longPress = longPress)
+    PopupEffects(popups = popupTabs, snackbarHostState = snackbarHostState)
 }
 
 /**
@@ -427,6 +437,7 @@ private fun BrowserContent(
     activeTabId: Long,
     onScrollDelta: (Float) -> Unit,
     pageRequests: PageRequestSink,
+    takePopup: () -> WebView?,
     modifier: Modifier = Modifier,
 ) {
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
@@ -437,6 +448,8 @@ private fun BrowserContent(
     )
     Box(modifier = modifier) {
         androidx.compose.runtime.key(activeTabId) {
+            // Spec 021 research R5 — a tab a page opened adopts the page's WebView.
+            val adopted = remember { takePopup() }
             BrowserWebView(
                 state = state,
                 actions = webViewActions,
@@ -458,6 +471,7 @@ private fun BrowserContent(
                     onScrollDelta = onScrollDelta,
                 ),
                 modifier = Modifier.fillMaxSize(),
+                adopted = adopted,
             )
         }
     }

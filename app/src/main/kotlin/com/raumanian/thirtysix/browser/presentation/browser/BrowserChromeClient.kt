@@ -1,7 +1,9 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Message
 import android.view.View
 import android.webkit.GeolocationPermissions
 import android.webkit.PermissionRequest
@@ -10,6 +12,8 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.domain.usecase.PopupDecision
+import com.raumanian.thirtysix.browser.presentation.browser.page.BlockedPopupCatcher
 import com.raumanian.thirtysix.browser.presentation.browser.page.FileChooserRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageContext
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
@@ -25,6 +29,8 @@ internal class BrowserChromeClient(
     private val onReceivedTitle: (String) -> Unit,
     private val onReceivedIcon: (String, Bitmap) -> Unit,
     private val pageRequests: PageRequestSink,
+    /** A WebView with the browser's settings, for a window the page opened (research R5). */
+    private val newPopupWebView: (Context) -> WebView = ::WebView,
 ) : WebChromeClient() {
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
         onProgressChanged(newProgress)
@@ -143,6 +149,42 @@ internal class BrowserChromeClient(
     }
 
     override fun onHideCustomView() = pageRequests.onHideCustomView()
+
+    /**
+     * Spec 021 FR-025 / FR-026 — a new window. Allowed: a configured WebView goes to the page and
+     * becomes a new tab. Blocked: a throw-away WebView only learns the address for the notice's
+     * Open, then is destroyed without loading anything.
+     */
+    override fun onCreateWindow(
+        view: WebView?,
+        isDialog: Boolean,
+        isUserGesture: Boolean,
+        resultMsg: Message?,
+    ): Boolean {
+        val transport = resultMsg?.obj as? WebView.WebViewTransport
+        val context = view?.context
+        val decision = if (transport == null || context == null) null else pageRequests.decideWindow(isUserGesture)
+        return when (decision) {
+            is PopupDecision.OpenInNewTab -> {
+                val popup = newPopupWebView(requireNotNull(context))
+                requireNotNull(transport).webView = popup
+                resultMsg.sendToTarget()
+                pageRequests.adoptPopup(popup)
+                true
+            }
+            PopupDecision.Blocked -> {
+                BlockedPopupCatcher.attach(requireNotNull(context), requireNotNull(transport), resultMsg) {
+                    pageRequests.onPopupBlocked(it)
+                }
+                true
+            }
+            PopupDecision.TabLimit, null -> false
+        }
+    }
+
+    override fun onCloseWindow(window: WebView?) {
+        window?.let(pageRequests::onCloseWindow)
+    }
 
     private fun capabilityOf(resource: String): SiteCapability? = when (resource) {
         PermissionRequest.RESOURCE_VIDEO_CAPTURE -> SiteCapability.Camera

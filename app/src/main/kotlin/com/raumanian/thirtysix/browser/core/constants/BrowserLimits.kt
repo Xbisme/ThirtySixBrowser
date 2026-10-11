@@ -170,4 +170,10 @@ object BrowserLimits {
 
     /** Spec 021 FR-031 — from this many dialogs on one page, the "don't show more" choice appears. */
     const val DIALOG_SUPPRESS_FROM_COUNT: Int = 2
+
+    /**
+     * Spec 021 research R5 — how long a blocked pop-up's throw-away WebView waits for the page
+     * to name its address before the notice is shown without Open.
+     */
+    const val BLOCKED_POPUP_ADDRESS_WAIT_MS: Long = 1_000L
 }
