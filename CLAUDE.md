@@ -280,7 +280,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `ui-redesign` | ✅ Done 2026-10-10 (PR #27 merged, `54e090a`; real-device pass 2026-10-11 — Layout Inspector, TalkBack, canvas comparison, dynamic color still open) | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
 | 020 | `default-browser-entry-points` | ✅ Done 2026-10-11 (PR #30 merged, `1bb8c6a`, CI 6/6; 65/65) | http/https VIEW + BROWSABLE intent filters, shared links/text, set-as-default (RoleManager API 29+) |
-| 021 | `web-capabilities` | 🟢 Implemented 2026-10-11 (68/70, PR open; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
+| 021 | `web-capabilities` | 🟢 Implemented 2026-10-11 (70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
 | 022 | `page-tools` | ⬜ Phase 6 | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
 | 023 | `privacy-protection` | ⬜ Phase 6 | Tracker blocking (APK-bundled list), HTTPS upgrade, param stripping, Fire button, GPC, privacy dashboard, cookie-banner + fingerprint scripts |
 
@@ -306,7 +306,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Recent Changes
 
-- 2026-10-11 (Spec 021 implementation): 🟢 **Spec 021 `web-capabilities` implemented on branch `021-web-capabilities` — 68/70, PR open.** Second spec of Phase 6.
+- 2026-10-11 (Spec 021 implementation): 🟢 **Spec 021 `web-capabilities` implemented on branch `021-web-capabilities` — 70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open.** Second spec of Phase 6.
 
   **What changed for the user.** A site asking for the camera, microphone or location gets an app dialog naming the site (Always allow / Allow this time / Don't allow; two choices in incognito, which never remembers), and only then the Android prompt; a permanently denied Android permission gets an explanation with Open settings. Settings → Privacy → **Site permissions** lists and changes the remembered decisions; Clear browsing data gains an opt-in **Site permissions** category. Also: file inputs open the system picker (plus the camera for capture inputs), page fullscreen video covers everything and follows the phone's orientation, windows the person asked for open as tabs (sign-in pop-ups keep `window.opener`) while self-opened ones are blocked with an Open notice, styled alert/confirm/prompt/"Leave site?" with flood control, an HTTP sign-in dialog that stores nothing, and a long-press menu for links and images.
 
@@ -608,7 +608,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 021 — Web Capabilities](specs/021-web-capabilities/) — implemented 2026-10-11, 68/70, PR open. See the Recent Changes entry; [tasks.md](specs/021-web-capabilities/tasks.md) holds the gate table (G1–G20, SC-001) and the implementation notes.
+**Current**: 🟢 [Spec 021 — Web Capabilities](specs/021-web-capabilities/) — implemented 2026-10-11, 70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open. See the Recent Changes entry; [tasks.md](specs/021-web-capabilities/tasks.md) holds the gate table (G1–G20, SC-001) and the implementation notes.
 
 **Previous**: ✅ [Spec 020 — Default Browser & Entry Points](specs/020-default-browser-entry-points/) — **merged into `main` via [PR #30](https://github.com/Xbisme/ThirtySixBrowser/pull/30) (2026-10-11, merge commit `1bb8c6a`, CI 6/6), 65/65.** [tasks.md](specs/020-default-browser-entry-points/tasks.md) holds the gate table and 13 implementation notes.
 
