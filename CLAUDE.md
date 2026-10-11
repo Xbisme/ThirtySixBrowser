@@ -279,7 +279,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 017 | `splash-screen` | ✅ Done 2026-09-15 (PR #20 merged, `cca5c0c`; 35/35; G1–G10 PASS, chỉ TalkBack deferred) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
 | 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `ui-redesign` | ✅ Done 2026-10-10 (PR #27 merged, `54e090a`; real-device pass 2026-10-11 — Layout Inspector, TalkBack, canvas comparison, dynamic color still open) | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
-| 020 | `default-browser-entry-points` | ⬜ Next (Phase 6) | http/https VIEW + BROWSABLE intent filters, shared links/text, set-as-default (RoleManager API 29+) |
+| 020 | `default-browser-entry-points` | 🟢 Implemented 2026-10-11 on `020-default-browser-entry-points` (64/65, PR pending) | http/https VIEW + BROWSABLE intent filters, shared links/text, set-as-default (RoleManager API 29+) |
 | 021 | `web-capabilities` | ⬜ Phase 6 | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
 | 022 | `page-tools` | ⬜ Phase 6 | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
 | 023 | `privacy-protection` | ⬜ Phase 6 | Tracker blocking (APK-bundled list), HTTPS upgrade, param stripping, Fire button, GPC, privacy dashboard, cookie-banner + fingerprint scripts |
@@ -305,6 +305,20 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 > **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd`. A key with no version component is bug 2 returning. `Starting 0 tests` alongside `Broken pipe` / `DeadSystemException` / `stop: Not implemented` is the bug-3 signature — delete the cache and re-run **before suspecting the code**; a healthy run logs `Starting 109 tests` → `Finished 109 tests`.
 
 ## Recent Changes
+
+- 2026-10-11 (Spec 020 implementation): 🟢 **Spec 020 `default-browser-entry-points` implemented — ThirtySix is now a browser to the rest of the phone.** First spec of Constitution v1.5.0 Phase 6.
+
+  **What changed for the user.** Web links from any app open in a new tab (one app instance, Back on the untouched tab returns to the sender); shared text opens its first link or is searched; "Search with ThirtySix" appears in text-selection menus; system web search works. Settings gains a **General → Default browser** row (system role dialog on Android 10+, default-apps screen on 7–9) and Home shows a dismissible invitation **from the 3rd launch**. At 50 tabs a link reuses the most recently used tab with a notice; incoming content never joins incognito; unsafe schemes are refused with a message.
+
+  **Gates.** unit ✅ **688/688** (+76) · instrumented ✅ **110/110** on the 16 KB AVD (run twice) · lint/detekt/ktlint ✅ · Compose report **162 restartable, 0 non-skippable** · 16 KB ✅ same 2 `.so` · release APK **3,263,644 B (+28,480 B, budget 60 KB)** · **no new dependency** (`lifecycle-runtime-compose` declared on the existing 2.10.0 key) · Room still v2 · no permission. Device gates G1–G18 ✅ (16 KB AVD, API 24 AVD, Galaxy A55): on the A55 a link opens the browser in **209.5 ms median cold, 97 ms warm**. The owner's default browser (Chrome) was left unchanged; picking ThirtySix from a real app's "Open with" on a phone without a default is left to the owner.
+
+  **Facts to keep.**
+  - **`MainActivity` is `singleTask`.** Links arrive in `onNewIntent`; an intent is handed over only when `savedInstanceState == null` and not `LAUNCHED_FROM_HISTORY` (rotation/process death never reopen a link). An unconsumed request is saved in the bundle and restored only into an empty relay.
+  - **⚠️ Never `navigate(Browser) { launchSingleTop }` while on the browser** — it replaces the back-stack entry and rebuilds the screen (WebView reload, snackbars cancelled). Found on device; `showBrowser()` in `AppNavGraph` pops instead.
+  - **One `EntryPointViewModel`, created outside the `NavHost`.** `BrowserScreen` gets `IncomingContentHooks` from it; no destination may call `hiltViewModel<EntryPointViewModel>()`.
+  - **Entry relays are one-slot `Channel`s**, not `SharedFlow(replay = 0)` — a cold start has no collector yet.
+  - **Default-browser state is re-read on RESUME** — the role dialog is translucent, the activity is never stopped.
+  - **⚠️ Instrumented tests that launch `MainActivity` need a per-test DataStore** (`@UninstallModules(SettingsDataStoreProviderModule)`), or the second test dies with "multiple DataStores active". `ActivityScenario` loses its activity if `onNewIntent` sets an intent with different data.
 
 - 2026-10-11 (Spec 019 post-merge sync + real-device pass): ✅ **Spec 019 merged — PR #27 (`019-ui-redesign` → `main`, merge commit `54e090a`, 2026-10-10), CI 6/6.** The owner ran it on a Galaxy A55 (SM-A556E, Android 16) and accepted it; this pass then ran the open gates on that phone. Local `main` had been 22 commits behind `origin` — `git fetch` before trusting the tree.
 
@@ -573,7 +587,9 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: ✅ [Spec 019 — UI Redesign](specs/019-ui-redesign/) — **merged into `main` via [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, merge commit `54e090a`, CI 6/6)**; real-device gates recorded 2026-10-11 on a Galaxy A55. Next spec: to be discussed with the owner. See the Recent Changes entry for gates and the facts to keep; [tasks.md](specs/019-ui-redesign/tasks.md) holds every deviation note.
+**Current**: 🟢 [Spec 020 — Default Browser & Entry Points](specs/020-default-browser-entry-points/) — implemented on `020-default-browser-entry-points` (2026-10-11), PR pending. See the Recent Changes entry; [tasks.md](specs/020-default-browser-entry-points/tasks.md) holds the gate table and 13 implementation notes.
+
+**Previous**: ✅ [Spec 019 — UI Redesign](specs/019-ui-redesign/) — **merged into `main` via [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, merge commit `54e090a`, CI 6/6)**; real-device gates recorded 2026-10-11 on a Galaxy A55. Next spec: to be discussed with the owner. See the Recent Changes entry for gates and the facts to keep; [tasks.md](specs/019-ui-redesign/tasks.md) holds every deviation note.
 
 **Previous**: ✅ [Spec 018 — Onboarding Flow](specs/018-onboarding-flow/) — **merged into `main` via [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, all 6 CI jobs green), 41/41 tasks. 🎉 This was the LAST spec of v1.0 — Specs 001–018 are now all merged.**
 

@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.presentation.browser
+package com.raumanian.thirtysix.browser.domain.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

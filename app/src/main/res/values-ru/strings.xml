@@ -280,4 +280,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">Открытые</string>
     <string name="tabs_chip_incognito">Инкогнито</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">Общие</string>
+    <string name="settings_default_browser_title">Браузер по умолчанию</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix не является браузером по умолчанию. Нажмите, чтобы изменить.</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix — ваш браузер по умолчанию</string>
+    <string name="home_default_browser_invite_title">Открывать ссылки в ThirtySix</string>
+    <string name="home_default_browser_invite_body">Сделайте ThirtySix браузером по умолчанию, чтобы ссылки из других приложений открывались здесь.</string>
+    <string name="home_default_browser_invite_action">Сделать основным</string>
+    <string name="home_default_browser_invite_dismiss">Закрыть</string>
+    <string name="entry_process_text_label">Искать в ThirtySix</string>
+    <string name="entry_link_rejected">Эту ссылку нельзя открыть</string>
+    <string name="entry_tab_limit_reused">Достигнут лимит вкладок — ссылка открыта в текущей вкладке</string>
+    <string name="entry_default_browser_unavailable">На этом устройстве нельзя изменить приложения по умолчанию</string>
 </resources>

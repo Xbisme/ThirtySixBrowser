@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,11 +10,18 @@ import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.raumanian.thirtysix.browser.core.constants.NavArgs
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.domain.usecase.GetUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.RecordAppLaunchUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
+import com.raumanian.thirtysix.browser.presentation.entry.IncomingIntentReader
+import com.raumanian.thirtysix.browser.presentation.entry.IncomingRequestRelay
+import com.raumanian.thirtysix.browser.presentation.entry.LaunchCountPolicy
+import com.raumanian.thirtysix.browser.presentation.entry.PendingRequestState
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.navigation.AppNavGraph
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
@@ -44,6 +52,25 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var getUserSettings: GetUserSettingsUseCase
 
+    /** Spec 020 — hand-off of links, shares and searches from other apps to the UI (research R5). */
+    @Inject
+    lateinit var incomingRequestRelay: IncomingRequestRelay
+
+    @Inject
+    lateinit var incomingIntentReader: IncomingIntentReader
+
+    /** Spec 020 FR-024a — counts launches toward the Home invitation's threshold. */
+    @Inject
+    lateinit var recordAppLaunch: RecordAppLaunchUseCase
+
+    /** Spec 020 FR-026 — retires the invitation once the app is seen as the default browser. */
+    @Inject
+    lateinit var syncDefaultBrowserInvite: SyncDefaultBrowserInviteUseCase
+
+    // Spec 020 research R9 — what the next onStart is coming back from (LaunchCountPolicy).
+    private var stoppedForConfigChange = false
+    private var returningFromDefaultBrowserScreen = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Spec 017 — MUST be the first statement, before super.onCreate().
         //
@@ -62,6 +89,10 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        receiveLaunchIntent(savedInstanceState)
+        // A rotation recreates the activity: the stop that preceded it happened on the old
+        // instance, so the new one learns it from the bundle and skips its first count.
+        stoppedForConfigChange = savedInstanceState != null
 
         // Spec 018 T008 — resolve the start destination BEFORE composing anything.
         //
@@ -85,6 +116,77 @@ class MainActivity : AppCompatActivity() {
                 AppDestination.Onboarding.route
             }
             renderApp(startDestination)
+        }
+    }
+
+    /**
+     * Spec 020 research R3 — an intent is handed to the app exactly once.
+     *
+     * A fresh launch carries its intent here. A rotation or a recreation after process death
+     * hands back the ORIGINAL launch intent with a non-null bundle, and reopening from recents
+     * after the task was cleared redelivers it flagged LAUNCHED_FROM_HISTORY: acting on either
+     * would reopen the link (FR-008). Instead, a request that had not been opened yet is
+     * restored from the bundle — only into an empty relay, which is what distinguishes process
+     * death from a rotation (FR-019).
+     */
+    private fun receiveLaunchIntent(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            PendingRequestState.decode(
+                kind = savedInstanceState.getString(NavArgs.PENDING_REQUEST_KIND),
+                raw = savedInstanceState.getString(NavArgs.PENDING_REQUEST_RAW),
+            )?.let(incomingRequestRelay::restoreIfEmpty)
+            return
+        }
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
+        incomingIntentReader.read(intent)?.let(incomingRequestRelay::submit)
+    }
+
+    /**
+     * Spec 020 FR-024a / FR-026 — every foreground re-checks the default-browser state (which
+     * may have changed in system settings) and, unless this start is only a rotation or the
+     * return from a system screen the app opened, counts one launch.
+     */
+    override fun onStart() {
+        super.onStart()
+        val counts = LaunchCountPolicy.shouldCount(
+            stoppedForConfigChange = stoppedForConfigChange,
+            returningFromOwnSystemScreen = returningFromDefaultBrowserScreen,
+        )
+        stoppedForConfigChange = false
+        returningFromDefaultBrowserScreen = false
+        lifecycleScope.launch {
+            syncDefaultBrowserInvite()
+            if (counts) recordAppLaunch()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stoppedForConfigChange = isChangingConfigurations
+    }
+
+    /**
+     * Spec 020 research R9 — called just before the app opens the system's default-browser
+     * confirmation or default-apps screen, so coming back from it is not counted as a launch.
+     */
+    fun markLeavingForDefaultBrowserScreen() {
+        returningFromDefaultBrowserScreen = true
+    }
+
+    /** Spec 020 — `singleTask`: links arriving while the app runs come here (research R2). */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        incomingIntentReader.read(intent)?.let(incomingRequestRelay::submit)
+    }
+
+    /** Spec 020 research R3 — keep a request that has not been opened yet across process death. */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        incomingRequestRelay.pending.value?.let { request ->
+            val (kind, raw) = PendingRequestState.encode(request)
+            outState.putString(NavArgs.PENDING_REQUEST_KIND, kind)
+            outState.putString(NavArgs.PENDING_REQUEST_RAW, raw)
         }
     }
 

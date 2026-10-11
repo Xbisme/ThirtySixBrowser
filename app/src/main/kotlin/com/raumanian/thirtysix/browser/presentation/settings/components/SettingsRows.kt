@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
@@ -60,6 +61,28 @@ fun SettingsValueRow(
             modifier = Modifier.size(Dimens.icon),
         )
     }
+}
+
+/**
+ * Spec 020 FR-021 — a setting shown for information only, such as "ThirtySix is your default
+ * browser": no click, no chevron. Title and summary are merged into one node so TalkBack reads
+ * them together.
+ */
+@Composable
+fun SettingsInfoRow(
+    title: String,
+    summary: String,
+    @DrawableRes icon: Int,
+    tone: SettingsIconTone,
+    modifier: Modifier = Modifier,
+) {
+    SettingsRowLayout(
+        icon = icon,
+        tone = tone,
+        title = title,
+        summary = summary,
+        modifier = modifier.semantics(mergeDescendants = true) {},
+    ) {}
 }
 
 /**

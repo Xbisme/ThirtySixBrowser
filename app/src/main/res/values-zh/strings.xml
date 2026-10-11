@@ -268,4 +268,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">已打开</string>
     <string name="tabs_chip_incognito">无痕</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">通用</string>
+    <string name="settings_default_browser_title">默认浏览器</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix 不是你的默认浏览器。点按即可更改。</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix 是你的默认浏览器</string>
+    <string name="home_default_browser_invite_title">用 ThirtySix 打开链接</string>
+    <string name="home_default_browser_invite_body">将 ThirtySix 设为默认浏览器，其他应用中的链接就会在这里打开。</string>
+    <string name="home_default_browser_invite_action">设为默认</string>
+    <string name="home_default_browser_invite_dismiss">关闭</string>
+    <string name="entry_process_text_label">使用 ThirtySix 搜索</string>
+    <string name="entry_link_rejected">无法打开此链接</string>
+    <string name="entry_tab_limit_reused">已达标签页上限，已在当前标签页中打开</string>
+    <string name="entry_default_browser_unavailable">此设备无法更改默认应用</string>
 </resources>

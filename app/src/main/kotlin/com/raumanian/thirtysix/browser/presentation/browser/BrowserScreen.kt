@@ -42,6 +42,7 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTo
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
+import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
 import com.raumanian.thirtysix.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.presentation.home.HomePage
 import com.raumanian.thirtysix.browser.presentation.incognito.IncognitoPage
@@ -71,6 +72,7 @@ fun BrowserScreen(
     navController: NavHostController = rememberNavController(),
     viewModel: BrowserViewModel = hiltViewModel(),
     hubViewModel: HubViewModel = hiltViewModel(),
+    incomingContent: IncomingContentHooks = IncomingContentHooks(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
@@ -90,7 +92,13 @@ fun BrowserScreen(
 
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
     HomeBackHandlers(state = state, viewModel = viewModel)
+    ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = incomingContent)
     BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
+    IncomingContentEffects(
+        hooks = incomingContent,
+        webViewActions = webViewActions,
+        snackbarHostState = snackbarHostState,
+    )
     HubEventEffect(hubViewModel = hubViewModel, snackbarHostState = snackbarHostState)
 
     LaunchedEffect(activeTab?.id) {

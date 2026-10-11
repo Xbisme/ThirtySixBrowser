@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.presentation.browser
+package com.raumanian.thirtysix.browser.domain.model
 
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.constants.UrlPatterns
@@ -27,7 +27,7 @@ private val newlineRegex = Regex(UrlPatterns.ADDRESS_BAR_NEWLINE_REGEX)
  *  - Uppercase scheme `HTTPS://example.com` → [AddressBarSubmitResult.Url]
  *    preserving the original scheme casing.
  */
-internal fun classifyAddressBarInput(raw: String): AddressBarSubmitResult {
+fun classifyAddressBarInput(raw: String): AddressBarSubmitResult {
     val cleaned = raw.replace(newlineRegex, " ").trim()
     if (cleaned.isEmpty()) return AddressBarSubmitResult.Empty
     return if (urlHeuristicRegex.matches(cleaned)) {

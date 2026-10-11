@@ -13,6 +13,7 @@ import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.IsDefaultBrowserUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
@@ -59,6 +60,7 @@ class SettingsViewModel @Inject constructor(
     private val changeHistoryRetention: ChangeHistoryRetentionUseCase,
     @Named(AppConstants.QUALIFIER_SUPPORTS_DYNAMIC_COLOR) supportsDynamicColor: Boolean,
     @Named(AppConstants.QUALIFIER_APP_VERSION_NAME) appVersionName: String,
+    private val isDefaultBrowser: IsDefaultBrowserUseCase,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SettingsUiState> = MutableStateFlow(
@@ -66,6 +68,7 @@ class SettingsViewModel @Inject constructor(
             isDynamicColorSupported = supportsDynamicColor,
             appLanguage = getAppLanguage(),
             appVersionName = appVersionName,
+            isDefaultBrowser = isDefaultBrowser(),
         ),
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -107,6 +110,15 @@ class SettingsViewModel @Inject constructor(
     }
 
     /** Closes whichever dialog is open. Outside tap, system back and Cancel all end up here. */
+    /**
+     * Spec 020 FR-022 — re-read whether ThirtySix is the default browser. Called on every resume:
+     * the system's confirmation is a translucent screen, so returning from it resumes the
+     * activity without starting it again.
+     */
+    fun refreshDefaultBrowser() {
+        _uiState.update { it.copy(isDefaultBrowser = isDefaultBrowser()) }
+    }
+
     fun dismissDialog() {
         _uiState.update { it.copy(dialog = null) }
     }

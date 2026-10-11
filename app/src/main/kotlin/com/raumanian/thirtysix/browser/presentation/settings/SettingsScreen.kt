@@ -17,12 +17,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -30,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.presentation.entry.rememberDefaultBrowserRequest
 import com.raumanian.thirtysix.browser.presentation.settings.components.AboutSection
 import com.raumanian.thirtysix.browser.presentation.settings.components.AppLanguageChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.ClearBrowsingDataDialog
@@ -38,6 +41,7 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.HistoryR
 import com.raumanian.thirtysix.browser.presentation.settings.components.SearchEngineChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsActionRow
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsIconTone
+import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsInfoRow
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSectionHeader
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSwitchRow
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
@@ -49,6 +53,7 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.searchEn
 import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
 import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Spec 016 — the Settings screen.
@@ -72,8 +77,19 @@ fun SettingsScreen(
         viewModel.onScreenStarted()
         onStopOrDispose { }
     }
+    // Spec 020 FR-022 — on RESUME, not start: the system's default-browser confirmation is a
+    // translucent screen, so coming back from it resumes this screen without starting it.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.refreshDefaultBrowser()
+        onPauseOrDispose { }
+    }
     BackHandler(onBack = navigateBack)
     SettingsSnackbarEffect(viewModel = viewModel, snackbarHostState = snackbarHostState)
+    val scope = rememberCoroutineScope()
+    val unavailableMessage = stringResource(R.string.entry_default_browser_unavailable)
+    val requestDefaultBrowser = rememberDefaultBrowserRequest(
+        onUnavailable = { scope.launch { snackbarHostState.showSnackbar(unavailableMessage) } },
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -87,6 +103,7 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .testTag(TEST_TAG_SETTINGS_LIST),
         ) {
+            generalSection(state = state, onMakeDefault = requestDefaultBrowser)
             appearanceSection(state = state, viewModel = viewModel)
             languageAndSearchSection(state = state, viewModel = viewModel)
             privacySection(state = state, viewModel = viewModel)
@@ -103,8 +120,39 @@ private fun LazyListScope.sectionHeader(key: String, @StringRes titleRes: Int, s
     }
 }
 
+/**
+ * Spec 020 FR-020 / FR-021 — first section: whether ThirtySix is the default browser. When it is
+ * not, the row opens the system's confirmation (or default-apps screen); when it is, the row is
+ * information only.
+ */
+private fun LazyListScope.generalSection(state: SettingsUiState, onMakeDefault: () -> Unit) {
+    sectionHeader(key = KEY_SECTION_GENERAL, titleRes = R.string.settings_section_general, showDivider = false)
+    item(key = KEY_ROW_DEFAULT_BROWSER, contentType = CONTENT_TYPE_ROW) {
+        val title = stringResource(R.string.settings_default_browser_title)
+        val modifier = Modifier.testTag(TEST_TAG_SETTINGS_DEFAULT_BROWSER_ROW)
+        if (state.isDefaultBrowser) {
+            SettingsInfoRow(
+                title = title,
+                summary = stringResource(R.string.settings_default_browser_summary_is_default),
+                icon = AppIcons.Globe,
+                tone = SettingsIconTone.Primary,
+                modifier = modifier,
+            )
+        } else {
+            SettingsValueRow(
+                title = title,
+                value = stringResource(R.string.settings_default_browser_summary_not_default),
+                icon = AppIcons.Globe,
+                tone = SettingsIconTone.Primary,
+                onClick = onMakeDefault,
+                modifier = modifier,
+            )
+        }
+    }
+}
+
 private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: SettingsViewModel) {
-    sectionHeader(key = KEY_SECTION_APPEARANCE, titleRes = R.string.settings_section_appearance, showDivider = false)
+    sectionHeader(key = KEY_SECTION_APPEARANCE, titleRes = R.string.settings_section_appearance)
     item(key = KEY_ROW_THEME, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_theme_title),
@@ -294,10 +342,12 @@ internal fun SettingsSnackbarEffect(
 }
 
 // Stable LazyColumn keys — Constitution §V forbids index-only keys.
+private const val KEY_SECTION_GENERAL: String = "section_general"
 private const val KEY_SECTION_APPEARANCE: String = "section_appearance"
 private const val KEY_SECTION_LANGUAGE_AND_SEARCH: String = "section_language_and_search"
 private const val KEY_SECTION_PRIVACY: String = "section_privacy"
 private const val KEY_SECTION_ABOUT: String = "section_about"
+private const val KEY_ROW_DEFAULT_BROWSER: String = "row_default_browser"
 private const val KEY_ROW_THEME: String = "row_theme"
 private const val KEY_ROW_DYNAMIC_COLOR: String = "row_dynamic_color"
 private const val KEY_ROW_LANGUAGE: String = "row_language"
@@ -312,6 +362,7 @@ private const val CONTENT_TYPE_ACTION_ROW: String = "action_row"
 private const val CONTENT_TYPE_ABOUT: String = "about"
 
 const val TEST_TAG_SETTINGS_LIST: String = "settings_list"
+const val TEST_TAG_SETTINGS_DEFAULT_BROWSER_ROW: String = "settings_default_browser_row"
 const val TEST_TAG_SETTINGS_THEME_ROW: String = "settings_theme_row"
 const val TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW: String = "settings_dynamic_color_row"
 const val TEST_TAG_SETTINGS_LANGUAGE_ROW: String = "settings_language_row"

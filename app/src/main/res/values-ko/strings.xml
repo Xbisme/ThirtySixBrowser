@@ -268,4 +268,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">열린 탭</string>
     <string name="tabs_chip_incognito">시크릿</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">일반</string>
+    <string name="settings_default_browser_title">기본 브라우저</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix가 기본 브라우저가 아닙니다. 탭하여 변경하세요.</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix가 기본 브라우저입니다</string>
+    <string name="home_default_browser_invite_title">ThirtySix에서 링크 열기</string>
+    <string name="home_default_browser_invite_body">다른 앱의 링크가 여기서 열리도록 ThirtySix를 기본 브라우저로 설정하세요.</string>
+    <string name="home_default_browser_invite_action">기본으로 설정</string>
+    <string name="home_default_browser_invite_dismiss">닫기</string>
+    <string name="entry_process_text_label">ThirtySix로 검색</string>
+    <string name="entry_link_rejected">이 링크를 열 수 없습니다</string>
+    <string name="entry_tab_limit_reused">탭 한도에 도달하여 현재 탭에서 열었습니다</string>
+    <string name="entry_default_browser_unavailable">이 기기에서는 기본 앱을 변경할 수 없습니다</string>
 </resources>

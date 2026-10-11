@@ -24,6 +24,8 @@ data class SettingsUiState(
     val historyRetention: HistoryRetention = AppDefaults.HISTORY_RETENTION,
     val appLanguage: AppLanguage = AppLanguage.FollowSystem,
     val appVersionName: String = "",
+    /** Spec 020 FR-020 — re-read from the system on every resume (FR-022), never stored. */
+    val isDefaultBrowser: Boolean = false,
     /** The single open dialog, or `null` when none is — at most one is ever open. */
     val dialog: SettingsDialog? = null,
 )

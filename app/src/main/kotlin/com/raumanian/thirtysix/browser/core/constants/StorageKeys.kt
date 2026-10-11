@@ -38,4 +38,18 @@ object StorageKeys {
 
     /** Spec 016 FR-020 — the history retention window, stored as its day count. */
     val HISTORY_RETENTION_DAYS = intPreferencesKey("history_retention_days")
+
+    /**
+     * Spec 020 FR-025 / FR-026 — whether the Home invitation to make ThirtySix the default
+     * browser was dismissed, or retired because the app was seen as the default. Absent → `false`.
+     * Never written back to `false` (data-model INV-8).
+     */
+    val DEFAULT_BROWSER_INVITE_DISMISSED = booleanPreferencesKey("default_browser_invite_dismissed")
+
+    /**
+     * Spec 020 FR-024a — app launches counted so far, stopping at
+     * `BrowserLimits.DEFAULT_BROWSER_INVITE_MIN_LAUNCHES`. Absent → `0`, so older installs need
+     * no migration.
+     */
+    val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
 }

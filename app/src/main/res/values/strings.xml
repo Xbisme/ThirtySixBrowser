@@ -310,4 +310,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">Open</string>
     <string name="tabs_chip_incognito">Incognito</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">General</string>
+    <string name="settings_default_browser_title">Default browser</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix isn\'t your default browser. Tap to change.</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix is your default browser</string>
+    <string name="home_default_browser_invite_title">Open links in ThirtySix</string>
+    <string name="home_default_browser_invite_body">Make ThirtySix your default browser so links from other apps open here.</string>
+    <string name="home_default_browser_invite_action">Set as default</string>
+    <string name="home_default_browser_invite_dismiss">Dismiss</string>
+    <string name="entry_process_text_label">Search with ThirtySix</string>
+    <string name="entry_link_rejected">This link can\'t be opened</string>
+    <string name="entry_tab_limit_reused">Tab limit reached — opened in your current tab</string>
+    <string name="entry_default_browser_unavailable">Default apps can\'t be changed on this device</string>
 </resources>

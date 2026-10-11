@@ -26,8 +26,9 @@ import kotlinx.coroutines.flow.Flow
  * write; `Error(throwable)` on disk failure. The `Result.Error` carries the raw
  * IOException; consumers needing typed error mapping call `AppError.from(...)`.
  *
- * SettingsRepositoryImpl is the only intended consumer; no other class should
- * depend on this wrapper directly.
+ * SettingsRepositoryImpl is the intended consumer; Spec 020's DefaultBrowserInviteRepositoryImpl
+ * also uses it for the two invitation keys, which deliberately stay out of `UserSettings`
+ * (research R9). No other class should depend on this wrapper directly.
  */
 @Singleton
 class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Preferences>) {
@@ -55,6 +56,17 @@ class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Pre
 
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = editCatching { prefs ->
         prefs[StorageKeys.IS_ONBOARDING_COMPLETED] = value
+    }
+
+    /** Spec 020 FR-025 / FR-026 — only ever writes `true` (data-model INV-8). */
+    suspend fun markDefaultBrowserInviteDismissed(): Result<Unit> = editCatching { prefs ->
+        prefs[StorageKeys.DEFAULT_BROWSER_INVITE_DISMISSED] = true
+    }
+
+    /** Spec 020 FR-024a — adds one launch, never past [cap]. Read and write in one transaction. */
+    suspend fun incrementAppLaunchCount(cap: Int): Result<Unit> = editCatching { prefs ->
+        val current = prefs[StorageKeys.APP_LAUNCH_COUNT] ?: 0
+        if (current < cap) prefs[StorageKeys.APP_LAUNCH_COUNT] = current + 1
     }
 
     private suspend fun editCatching(

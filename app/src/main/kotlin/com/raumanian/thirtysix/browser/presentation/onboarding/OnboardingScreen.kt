@@ -2,9 +2,6 @@
 
 package com.raumanian.thirtysix.browser.presentation.onboarding
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,6 +48,7 @@ import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.presentation.util.findActivity
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -82,7 +80,7 @@ fun OnboardingScreen(
     // (FR-012). Enabled unconditionally so the first-slide case is ours to handle rather than
     // the system's default "finish the activity" with no say in it.
     BackHandler {
-        if (!viewModel.onBack()) context.findHostActivity()?.finish()
+        if (!viewModel.onBack()) context.findActivity()?.finish()
     }
 
     val colors = ThirtySixTheme.colors
@@ -251,20 +249,3 @@ private fun LaunchedLeaveEffect(viewModel: OnboardingViewModel, onLeave: () -> U
 /** Test tags for the two controls every slide carries. */
 const val TEST_TAG_ONBOARDING_SKIP: String = "onboarding_skip"
 const val TEST_TAG_ONBOARDING_FORWARD: String = "onboarding_forward"
-
-/**
- * Walk the context chain to the hosting activity.
- *
- * `LocalContext.current` in a Compose hierarchy is typically a `ContextWrapper` rather than the
- * activity itself, so an unchecked cast would return null on some hosts. Kept private here
- * rather than widening the identical helper that is private to `DownloadPermissionGate.kt` —
- * two callers do not justify promoting it to shared API.
- */
-private fun Context.findHostActivity(): Activity? {
-    var current: Context? = this
-    while (current is ContextWrapper) {
-        if (current is Activity) return current
-        current = current.baseContext
-    }
-    return null
-}

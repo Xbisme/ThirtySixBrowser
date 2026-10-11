@@ -33,4 +33,12 @@ object UrlPatterns {
      * trimming and classifying (FR-007).
      */
     const val ADDRESS_BAR_NEWLINE_REGEX: String = "[\\r\\n]+"
+
+    /**
+     * Spec 020 research R4 — an explicit `http://` or `https://` address embedded in shared
+     * text, up to the next whitespace. Matched case-insensitively. Bare words such as
+     * `file.txt` are deliberately NOT matched, so a sentence is never mistaken for a domain;
+     * trailing punctuation is trimmed by the caller.
+     */
+    const val EMBEDDED_WEB_URL_REGEX: String = "https?://[^\\s]+"
 }

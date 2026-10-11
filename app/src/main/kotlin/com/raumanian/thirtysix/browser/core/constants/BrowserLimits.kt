@@ -154,4 +154,17 @@ object BrowserLimits {
 
     /** Spec 019 FR-040 — a tab card swiped past this fraction of its width closes the tab. */
     const val TAB_SWIPE_CLOSE_FRACTION: Float = 0.5f
+
+    /**
+     * Spec 020 FR-013 — shared, selected or searched text from another app is cut to its first
+     * this-many characters before use; an incoming address longer than this is refused rather
+     * than truncated, since a shortened URL would load a different page (research R4).
+     */
+    const val MAX_INCOMING_TEXT_LENGTH: Int = 2_048
+
+    /** Spec 020 FR-007 — the same address delivered again within this window opens one tab. */
+    const val INCOMING_DUPLICATE_WINDOW_MS: Long = 2_000L
+
+    /** Spec 020 FR-024 — the default-browser invitation appears from this app launch onwards. */
+    const val DEFAULT_BROWSER_INVITE_MIN_LAUNCHES: Int = 3
 }

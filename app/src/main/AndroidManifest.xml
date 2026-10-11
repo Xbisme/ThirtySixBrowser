@@ -47,15 +47,67 @@
              screenLayout is needed too: the FIRST change away from "follow system" also reports
              CONFIG_SCREEN_LAYOUT (seen on a Galaxy A55, Android 16), and leaving it out
              recreated the activity on exactly that first choice. -->
+        <!-- Spec 020 research R2 — singleTask: one instance in ThirtySix's own task. With the default
+             launch mode every link from another app would start a second MainActivity inside the
+             sender's task (one recents entry and one WebView per link, FR-004). New links arrive
+             in onNewIntent; Back on an untouched external tab uses moveTaskToBack to return to the
+             sender (FR-006). -->
         <activity
             android:name=".MainActivity"
             android:configChanges="locale|layoutDirection|screenLayout"
             android:exported="true"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.ThirtySix.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Spec 020 FR-001 — marks the app as a browser for launchers and the system. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.APP_BROWSER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <!-- Spec 020 FR-001 / FR-002 — web links ONLY: http and https, any host. This is the
+                 filter that puts the app in "Open with" and makes it eligible for the browser
+                 role. No other scheme may ever be added here (contracts C1-1). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+            </intent-filter>
+
+            <!-- Spec 020 FR-009 — plain text from another app's Share sheet. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <!-- Spec 020 FR-011 — "Search with ThirtySix" in other apps' text-selection menu. -->
+            <intent-filter android:label="@string/entry_process_text_label">
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <!-- Spec 020 FR-012 — the system's web-search request. -->
+            <intent-filter>
+                <action android:name="android.intent.action.WEB_SEARCH" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 

@@ -1,9 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -19,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.presentation.util.findActivity
 
 /**
  * Spec 015 FR-010 – FR-012 — the storage-permission gate in front of every download.
@@ -145,13 +144,4 @@ private fun Context.shouldShowStorageRationale(): Boolean {
         activity,
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
     )
-}
-
-private fun Context.findActivity(): Activity? {
-    var current: Context? = this
-    while (current is ContextWrapper) {
-        if (current is Activity) return current
-        current = current.baseContext
-    }
-    return null
 }
