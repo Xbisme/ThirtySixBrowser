@@ -44,15 +44,17 @@ fun BrowserPageRequests(
     longPress: LongPressHooks? = null,
 ) {
     longPress?.let { LongPressEffects(it) }
-    PageRequestHost(queue = session.queue, renderers = rememberPageRequestRenderers(permissionGate, longPress))
+    val renderers = rememberPageRequestRenderers(session, permissionGate, longPress)
+    PageRequestHost(queue = session.queue, renderers = renderers)
 }
 
 @Composable
 private fun rememberPageRequestRenderers(
+    session: PageSession,
     permissionGate: SitePermissionGate,
     longPress: LongPressHooks?,
 ): PageRequestRenderers =
-    remember(permissionGate, longPress) {
+    remember(session, permissionGate, longPress) {
         PageRequestRenderers { request, done ->
             when (request) {
                 is PageRequest.Permission -> {
@@ -63,11 +65,23 @@ private fun rememberPageRequestRenderers(
                     FileChooserLauncher(request, done)
                     true
                 }
+                is PageRequest.JsDialog -> {
+                    val suppress = { session.dialogs.suppress(request.tabId, request.generation) }
+                    SiteJsDialog(request, onSuppress = suppress, done)
+                    true
+                }
+                is PageRequest.LeavePage -> {
+                    SiteLeaveDialog(request, done)
+                    true
+                }
+                is PageRequest.HttpAuth -> {
+                    HttpAuthDialog(request, done)
+                    true
+                }
                 is PageRequest.LongPress -> longPress?.let {
                     LongPressHost(request, it, done)
                     true
                 } ?: false
-                else -> false
             }
         }
     }

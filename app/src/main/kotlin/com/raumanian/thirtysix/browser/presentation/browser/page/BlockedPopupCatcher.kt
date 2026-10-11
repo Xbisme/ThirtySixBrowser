@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -19,6 +20,10 @@ import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 object BlockedPopupCatcher {
     private const val BLANK = "about:blank"
 
+    // androidx.webkit's `MissingOnRenderProcessGone` also reports the `WebViewClient` constructor
+    // call, which in Kotlin includes this subclass's own superclass call; the override exists
+    // (Spec 016 finding, see BrowserWebViewClient).
+    @android.annotation.SuppressLint("MissingOnRenderProcessGone")
     fun attach(
         context: Context,
         transport: WebView.WebViewTransport,
@@ -42,6 +47,12 @@ object BlockedPopupCatcher {
         catcher.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 report(request?.url?.toString())
+                return true
+            }
+
+            // Losing this WebView's renderer must not take the app down: forget the address.
+            override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+                report(null)
                 return true
             }
 

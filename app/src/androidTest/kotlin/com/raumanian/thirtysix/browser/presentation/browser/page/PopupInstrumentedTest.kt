@@ -148,8 +148,9 @@ class PopupInstrumentedTest {
 
             tapPage()
 
-            assertEquals(before + 2, awaitTabCount(before + 2))
-            assertTrue(awaitRequest("/closer"))
+            // The pop-up's own request proves its tab was opened; the intermediate "+2" count is
+            // not asserted because the tab may open and close between two polls.
+            assertTrue("the pop-up loads in its own tab", awaitRequest("/closer"))
             assertEquals("window.close() closes the page-opened tab (FR-027)", before + 1, awaitTabCount(before + 1))
             val active = tabRepository.observeTabs().first().maxBy { it.lastActiveAt }
             assertTrue("the opener is active again", active.url.endsWith("/opener"))

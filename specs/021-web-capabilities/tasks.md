@@ -146,11 +146,11 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 **Independent Test**: quickstart G14–G15.
 
-- [ ] T054 [P] [US6] Write `TEST/presentation/browser/page/DialogSuppressionTest.kt` covering contracts C1.5
-- [ ] T055 [US6] Create `MAIN/presentation/browser/page/DialogSuppression.kt` (per tab, reset on generation change) and implement `onJsAlert` / `onJsConfirm` / `onJsPrompt` / `onJsBeforeUnload` in `MAIN/presentation/browser/BrowserWebView.kt` → `PageRequest.JsDialog` / `LeavePage` (return `true`; suppressed → `cancel()` silently)
-- [ ] T056 [US6] Create `MAIN/presentation/browser/page/SiteJsDialog.kt` (contracts C2.2) and render alert/confirm/prompt/leave in `PageRequestHost`
-- [ ] T057 [US6] Implement `onReceivedHttpAuthRequest` in `BrowserWebViewClient` → `PageRequest.HttpAuth`; create `MAIN/presentation/browser/page/HttpAuthDialog.kt` (contracts C2.3; masked password, autofill disabled, fields cleared on dismiss); `proceed` / `cancel` only — never `setHttpAuthUsernamePassword` (FR-032, INV-5)
-- [ ] T058 [P] [US6] Write `ATEST/presentation/browser/page/SiteDialogsTest.kt` (alert/confirm/prompt answers, suppress checkbox from the 2nd dialog, HTTP auth sign in/cancel, Back = cancel)
+- [X] T054 [P] [US6] Write `TEST/presentation/browser/page/DialogSuppressionTest.kt` covering contracts C1.5
+- [X] T055 [US6] Create `MAIN/presentation/browser/page/DialogSuppression.kt` (per tab, reset on generation change) and implement `onJsAlert` / `onJsConfirm` / `onJsPrompt` / `onJsBeforeUnload` in `MAIN/presentation/browser/BrowserWebView.kt` → `PageRequest.JsDialog` / `LeavePage` (return `true`; suppressed → `cancel()` silently)
+- [X] T056 [US6] Create `MAIN/presentation/browser/page/SiteJsDialog.kt` (contracts C2.2) and render alert/confirm/prompt/leave in `PageRequestHost`
+- [X] T057 [US6] Implement `onReceivedHttpAuthRequest` in `BrowserWebViewClient` → `PageRequest.HttpAuth`; create `MAIN/presentation/browser/page/HttpAuthDialog.kt` (contracts C2.3; masked password, autofill disabled, fields cleared on dismiss); `proceed` / `cancel` only — never `setHttpAuthUsernamePassword` (FR-032, INV-5)
+- [X] T058 [P] [US6] Write `ATEST/presentation/browser/page/SiteDialogsTest.kt` (alert/confirm/prompt answers, suppress checkbox from the 2nd dialog, HTTP auth sign in/cancel, Back = cancel)
 - [ ] T059 [US6] Device gates G14–G15 (credential search: `run-as` files, DataStore, Room, logcat); record
 
 ---
@@ -279,6 +279,22 @@ Deviations from the task text, recorded as they happened:
   another app — the emulator opened Chrome. The pop-up gets a plain client the moment it is made.
 - **`window.close()` before the tab exists** (a fast page) is remembered and applied once the tab
   is created.
+- **JS dialogs (US6)**: `DialogSuppression` lives in `PageSession.dialogs` and is consulted through
+  `PageRequestSink.admitDialog()`. "Leave site?" is never suppressed — a suppressed page answering
+  "stay" would trap the person on it.
+- **No `http_auth_realm` string**: the realm is the site's own text and is shown as-is as the
+  dialog body when present.
+- **🐞 Found by lint**: the blocked-pop-up catcher and the pending pop-up client lacked
+  `onRenderProcessGone`, so a renderer loss in either would have ended the app. Both now handle
+  it (`PendingPopupWebViewClient`); the constructor half of the check is the known Spec 016 false
+  positive and is suppressed with that note.
+- **Full suite after US6 (2026-10-11, `TA016_API36_16K`)**: unit 757/757; instrumented 132/135 on
+  the first run. Two were load-dependent flakes that pass in isolation twice (Spec 020's
+  duplicate-link window; T052's intermediate "+2 tabs" count, which the test no longer asserts
+  because a fast page opens and closes its tab between two polls). The third,
+  `BrowserWebViewRendererRecoveryTest.rendererCrash_…`, fails identically on the US3 commit
+  `8611c71` in a clean worktree on the same emulator boot — the known Spec 019 environment flake,
+  not a Spec 021 regression.
 - **WebChromeClient moved** to its own `BrowserChromeClient.kt` (internal), since every story adds
   hooks to it.
 

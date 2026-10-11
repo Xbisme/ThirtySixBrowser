@@ -7,6 +7,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -36,6 +37,7 @@ import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
+import com.raumanian.thirtysix.browser.presentation.browser.page.PendingPopupWebViewClient
 
 /**
  * Compose wrapper around [android.webkit.WebView] (Spec 007).
@@ -262,7 +264,7 @@ private fun newPopupWebView(context: android.content.Context, incognito: Boolean
         if (incognito) applyIncognitoSettings(popup)
         // Until its tab adopts it, the pop-up must load in place: a WebView with no client hands
         // every navigation to another app (the system browser).
-        popup.webViewClient = WebViewClient()
+        popup.webViewClient = PendingPopupWebViewClient()
     }
 
 /**
@@ -510,6 +512,30 @@ private class BrowserWebViewClient(
         // Constitution §I — NEVER `proceed()`. Always cancel.
         handler?.cancel()
         onLoadFailed(ErrorReason.SslError)
+    }
+
+    /**
+     * Spec 021 FR-032 — basic/digest sign-in. The typed name and password go to this one request
+     * only: never stored, never `setHttpAuthUsernamePassword` (INV-5).
+     */
+    override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?) {
+        handler ?: return
+        val context = pageRequests.context()
+        if (context == null || host.isNullOrBlank()) {
+            handler.cancel()
+            return
+        }
+        pageRequests.enqueue(
+            PageRequest.HttpAuth(
+                tabId = context.tabId,
+                generation = context.generation,
+                origin = host,
+                host = host,
+                realm = realm?.takeIf { it.isNotBlank() },
+                onProceed = { username, password -> handler.proceed(username, password) },
+                onCancel = { handler.cancel() },
+            ),
+        )
     }
 
     /**

@@ -6,6 +6,8 @@ import android.net.Uri
 import android.os.Message
 import android.view.View
 import android.webkit.GeolocationPermissions
+import android.webkit.JsPromptResult
+import android.webkit.JsResult
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -14,7 +16,9 @@ import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.presentation.browser.page.BlockedPopupCatcher
+import com.raumanian.thirtysix.browser.presentation.browser.page.DialogAdmission
 import com.raumanian.thirtysix.browser.presentation.browser.page.FileChooserRequest
+import com.raumanian.thirtysix.browser.presentation.browser.page.JsDialogKind
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageContext
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
@@ -184,6 +188,75 @@ internal class BrowserChromeClient(
 
     override fun onCloseWindow(window: WebView?) {
         window?.let(pageRequests::onCloseWindow)
+    }
+
+    /** Spec 021 FR-029 / FR-031 — `alert()`. */
+    override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean =
+        jsDialog(url, JsDialogKind.Alert, message, null, result, onConfirm = { result?.confirm() })
+
+    /** `confirm()`. */
+    override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean =
+        jsDialog(url, JsDialogKind.Confirm, message, null, result, onConfirm = { result?.confirm() })
+
+    /** `prompt()`: OK hands back the typed text. */
+    override fun onJsPrompt(
+        view: WebView?,
+        url: String?,
+        message: String?,
+        defaultValue: String?,
+        result: JsPromptResult?,
+    ): Boolean = jsDialog(url, JsDialogKind.Prompt, message, defaultValue, result) { text ->
+        result?.confirm(text.orEmpty())
+    }
+
+    /** Spec 021 FR-030 — "Leave site?". Never suppressed, so a page cannot trap the person. */
+    override fun onJsBeforeUnload(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+        result ?: return false
+        val context = pageRequests.context()
+        if (context == null) {
+            result.confirm()
+        } else {
+            pageRequests.enqueue(
+                PageRequest.LeavePage(
+                    tabId = context.tabId,
+                    generation = context.generation,
+                    origin = url?.let(SiteOrigin::of).orEmpty(),
+                    onLeave = { result.confirm() },
+                    onStay = { result.cancel() },
+                ),
+            )
+        }
+        return true
+    }
+
+    @Suppress("LongParameterList")
+    private fun jsDialog(
+        url: String?,
+        kind: JsDialogKind,
+        message: String?,
+        defaultText: String?,
+        result: JsResult?,
+        onConfirm: (String?) -> Unit,
+    ): Boolean {
+        result ?: return false
+        val context = pageRequests.context()
+        when (val admission = pageRequests.admitDialog()) {
+            is DialogAdmission.Show -> pageRequests.enqueue(
+                PageRequest.JsDialog(
+                    tabId = requireNotNull(context).tabId,
+                    generation = context.generation,
+                    origin = url?.let(SiteOrigin::of).orEmpty(),
+                    kind = kind,
+                    message = message.orEmpty(),
+                    defaultText = defaultText,
+                    showSuppress = admission.offerSuppress,
+                    onConfirm = onConfirm,
+                    onCancel = { result.cancel() },
+                ),
+            )
+            DialogAdmission.Suppressed, null -> result.cancel()
+        }
+        return true
     }
 
     private fun capabilityOf(resource: String): SiteCapability? = when (resource) {

@@ -26,6 +26,9 @@ class PageSession(
     /** Spec 021 research R4 — the page's fullscreen view, ended by a tab switch. */
     val fullscreen = FullscreenController()
 
+    /** Spec 021 C1.5 — the current page's dialog flood control. */
+    val dialogs = DialogSuppression()
+
     private var tabId: Long? = null
     private var isIncognito: Boolean = false
     private var generation: Long = 0L
@@ -80,6 +83,8 @@ class PageSession(
     override fun onShowCustomView(view: View, callback: CustomViewCallback) = fullscreen.enter(view, callback)
 
     override fun onHideCustomView() = fullscreen.onHiddenByPage()
+
+    override fun admitDialog(): DialogAdmission? = context()?.let { dialogs.admit(it.tabId, it.generation) }
 
     override fun decideWindow(isUserGesture: Boolean): PopupDecision? {
         val opener = context() ?: return null

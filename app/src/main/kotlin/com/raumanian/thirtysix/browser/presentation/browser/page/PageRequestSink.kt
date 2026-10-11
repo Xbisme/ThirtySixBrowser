@@ -54,6 +54,9 @@ interface PageRequestSink {
     /** `window.close()` from the page in [window]. */
     fun onCloseWindow(window: WebView) = Unit
 
+    /** Spec 021 C1.5 — whether the current page may show a dialog; `null` when there is no page. */
+    fun admitDialog(): DialogAdmission? = null
+
     object None : PageRequestSink {
         override fun context(): PageContext? = null
 
