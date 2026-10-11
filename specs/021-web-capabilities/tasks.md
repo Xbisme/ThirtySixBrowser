@@ -304,16 +304,18 @@ Deviations from the task text, recorded as they happened:
   accusative ("камеру"), which also showed as "Камеру" in Site permissions rows → nominative with
   "запрашивает доступ: …"; FR "votre caméra et micro" mixed genders → "demande l'accès : …".
   The blocked-explanation bodies were rephrased to match.
-- **Release builds refuse cleartext http** (`ERR_CLEARTEXT_NOT_PERMITTED`) — pre-existing since
-  Spec 007, already filed in `app/src/debug/AndroidManifest.xml` as undecided. Not changed here
-  (out of scope); fixture gates used the debug build, which allows cleartext.
+- **Release builds now open http:// sites** (owner decision 2026-10-11): they refused every one
+  with `ERR_CLEARTEXT_NOT_PERMITTED` (pre-existing since Spec 007, filed since Spec 015).
+  `usesCleartextTraffic="true"` moved from the debug manifest to the main one; mixed content stays
+  `NEVER_ALLOW`. Verified on the A55 release build (`http://example.com`); manifest test asserts
+  the flag. Release APK 3,359,268 B.
 - **Play Data safety (T067)**: camera, microphone and location are delivered by the system
   WebView to the website the person chose, after the person allowed that site; nothing is sent
   to the developer and nothing is retained by the app except the per-site allow/deny choice on
   the device. Under Play's definitions this is neither "collected" (the app does not transmit it
   off the device to itself) nor "shared" (a user-initiated transfer the person expects is
   exempt). **Conclusion: no change to the declaration** ("no data collected or shared"). The
-  owner should still confirm this reading in Play Console before the next release.
+  owner confirmed this reading on 2026-10-11 (to re-check in Play Console at submission).
 - **🐞 Camera video never started (found at G1 on the A55)**: with WebView's default
   `mediaPlaybackRequiresUserGesture = true`, a camera stream attached to a `<video>` did not play —
   the permission dialog outlives the tap's activation — so video calls showed nothing although

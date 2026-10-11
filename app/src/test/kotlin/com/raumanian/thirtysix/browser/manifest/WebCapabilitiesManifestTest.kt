@@ -79,4 +79,13 @@ class WebCapabilitiesManifestTest {
             android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT
         assertEquals(handled, info.configChanges and handled)
     }
+
+    @Test
+    fun `http sites can be opened`() {
+        val flags = context.applicationInfo.flags
+        assertEquals(
+            android.content.pm.ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC,
+            flags and android.content.pm.ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC,
+        )
+    }
 }

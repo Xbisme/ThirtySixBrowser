@@ -321,7 +321,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
   - **`javascript:` links get no long-press menu**: WebView reports them as an unknown hit.
   - **⚠️ Automation traps**: `adb input text` leaves touch mode, so after a dialog the address bar takes focus (soft-keyboard typing does not); adb-injected long-presses do not start Chromium text selection on the emulator (they do on the A55); the A55's chat-head overlay can catch swipes near the top.
 
-  **⚠️ Open decision (pre-existing, not Spec 021)**: **release builds refuse every `http://` page** (`ERR_CLEARTEXT_NOT_PERMITTED`) — filed in `app/src/debug/AndroidManifest.xml` since Spec 015, never decided. Owner to choose: allow cleartext now, or with Spec 023's HTTPS upgrade.
+  **http:// sites now open in release builds** (owner decision 2026-10-11): every one used to fail with `ERR_CLEARTEXT_NOT_PERMITTED` (filed since Spec 015). `usesCleartextTraffic="true"` is in the main manifest; mixed content on https pages stays blocked. Spec 023's HTTPS upgrade builds on this.
 
 - 2026-10-11 (Spec 020 merged + a fourth emulator-CI failure): ✅ **PR #30 merged (`1bb8c6a`), CI 6/6 after one rerun.** The first run's instrumented job failed with the zombie-boot signature — `Broken pipe (32)`, `No service published for: input`, `stop: Not implemented`, **no tests started** — and passed 110/110 after deleting the AVD cache and rerunning the job.
 
