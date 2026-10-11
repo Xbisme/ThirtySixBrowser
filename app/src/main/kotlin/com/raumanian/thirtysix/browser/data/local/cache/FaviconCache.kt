@@ -102,7 +102,7 @@ class DiskFaviconCache @Inject constructor(
         } catch (e: java.io.IOException) {
             // Disk full / permission denied — favicon falls back to the
             // deterministic placeholder; no crash, no retry.
-            android.util.Log.w(LOG_TAG, "Failed to write favicon for $url", e)
+            android.util.Log.w(LOG_TAG, "Failed to write a favicon", e) // Spec 021 FR-036: no address in logs.
         }
     }
 

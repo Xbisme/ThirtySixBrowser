@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spec 021 research R3 — the only files ever shared: photos taken for a page's file upload,
+     kept in the app's cache under capture/. -->
+<paths>
+    <cache-path name="capture" path="capture/" />
+</paths>

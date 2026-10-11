@@ -57,6 +57,13 @@ object UrlConstants {
     const val HTTPS_SCHEME_PREFIX: String = "https://"
 
     /**
+     * Spec 021 research R5 — the base of the address a page-opened tab is created with (a
+     * unique fragment is appended); the pop-up's own navigation replaces it as soon as the
+     * adopted WebView reports its address.
+     */
+    const val POPUP_PLACEHOLDER_URL: String = "about:blank"
+
+    /**
      * Spec 020 research R8 — a web address used only to ask the system, on Android 7–9, which app
      * opens web links by default. Never loaded.
      */

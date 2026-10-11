@@ -188,7 +188,7 @@ class SettingsViewModel @Inject constructor(
     fun onClearBrowsingDataRowClick() {
         openDialog(
             SettingsDialog.ClearBrowsingData(
-                selection = ClearBrowsingDataCategory.entries.toSet(),
+                selection = ClearBrowsingDataCategory.DEFAULT_SELECTION,
                 inProgress = false,
             ),
         )

@@ -34,6 +34,15 @@ object AppIcons {
 
     @DrawableRes val ContentCopy = R.drawable.ic_content_copy
 
+    // Spec 021 — long-press share and the site capabilities.
+    @DrawableRes val Share = R.drawable.ic_share
+
+    @DrawableRes val PhotoCamera = R.drawable.ic_photo_camera
+
+    @DrawableRes val Mic = R.drawable.ic_mic
+
+    @DrawableRes val LocationOn = R.drawable.ic_location_on
+
     @DrawableRes val ContrastFilled = R.drawable.ic_contrast_filled
 
     @DrawableRes val Cookie = R.drawable.ic_cookie

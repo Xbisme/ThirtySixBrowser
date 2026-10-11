@@ -8,6 +8,8 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration1To2
+import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration2To3
+import com.raumanian.thirtysix.browser.data.local.entity.SitePermissionEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -60,7 +62,7 @@ class AppDatabaseMigrationTest {
     fun `migrating v1 to v2 preserves every existing row and adds download_records`() = runTest {
         createVersionOneDatabaseWithData()
 
-        val db = openAtVersionTwo()
+        val db = openAtCurrentVersion()
 
         assertEquals("bookmark folders lost", 1, db.countOf("bookmark_folders"))
         assertEquals("bookmarks lost", 1, db.countOf("bookmarks"))
@@ -81,10 +83,36 @@ class AppDatabaseMigrationTest {
     }
 
     @Test
+    fun `migrating on to v3 adds an empty site_permissions table and keeps every row`() = runTest {
+        createVersionOneDatabaseWithData()
+
+        val db = openAtCurrentVersion()
+
+        assertEquals("bookmarks lost", 1, db.countOf("bookmarks"))
+        assertEquals("history entries lost", 2, db.countOf("history_entries"))
+        assertEquals("tabs lost", 2, db.countOf("tabs"))
+        assertEquals("site_permissions should start empty", 0, db.countOf(SitePermissionEntity.TABLE_NAME))
+    }
+
+    @Test
+    fun `site_permissions accepts writes and replaces by origin and capability`() = runTest {
+        createVersionOneDatabaseWithData()
+
+        val db = openAtCurrentVersion()
+        val dao = db.sitePermissionDao()
+        dao.upsert(SitePermissionEntity("https://a.org", "camera", "allow", 1L))
+        dao.upsert(SitePermissionEntity("https://a.org", "camera", "deny", 2L))
+        dao.upsert(SitePermissionEntity("https://a.org", "location", "allow", 3L))
+
+        val rows = dao.forOrigin("https://a.org").associate { it.capability to it.decision }
+        assertEquals(mapOf("camera" to "deny", "location" to "allow"), rows)
+    }
+
+    @Test
     fun `v2 database carries the download_records created_at index`() = runTest {
         createVersionOneDatabaseWithData()
 
-        val db = openAtVersionTwo()
+        val db = openAtCurrentVersion()
 
         db.openHelper.readableDatabase.query(
             "SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'download_records'",
@@ -101,7 +129,7 @@ class AppDatabaseMigrationTest {
     fun `the new table accepts writes immediately after migration`() = runTest {
         createVersionOneDatabaseWithData()
 
-        val db = openAtVersionTwo()
+        val db = openAtCurrentVersion()
         val id = db.downloadRecordDao().insert(
             com.raumanian.thirtysix.browser.data.local.entity.DownloadRecordEntity(
                 id = 0L,
@@ -123,9 +151,9 @@ class AppDatabaseMigrationTest {
      * `user_version = 1`, runs [Migration1To2], then validates the result against the
      * compiled v2 identity — which is where a drifted migration is caught.
      */
-    private fun openAtVersionTwo(): AppDatabase =
+    private fun openAtCurrentVersion(): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, TEST_DB)
-            .addMigrations(Migration1To2.MIGRATION_1_2)
+            .addMigrations(Migration1To2.MIGRATION_1_2, Migration2To3.MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
             .also { database = it }

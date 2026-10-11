@@ -13,5 +13,8 @@ sealed class AppDestination(val route: String) {
 
     data object Settings : AppDestination("settings")
 
+    /** Spec 021 FR-009 — remembered camera / microphone / location decisions per site. */
+    data object SitePermissions : AppDestination("settings/site_permissions")
+
     data object Onboarding : AppDestination("onboarding")
 }

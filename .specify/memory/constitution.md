@@ -23,6 +23,18 @@ Version Change: (none) → 1.0.0 (INITIAL — project constitution created)
                                 drops the optional tracker-blocker slot; §II defines
                                 the one permitted form of script injection; §I and
                                 §VII require protection data to ship in the APK)
+                1.5.0 → 1.5.1 (PATCH — Spec 021 fills in the permission rows that 1.5.0
+                                announced; no principle changes)
+
+Modified Sections (1.5.1, 2026-10-11, Spec 021 task T063):
+- Technical Standards → Android Permissions & Entitlements — rows added for CAMERA,
+       RECORD_AUDIO, ACCESS_COARSE_LOCATION / ACCESS_FINE_LOCATION (dangerous, requested
+       only after the person allows a site, or chooses to take a photo for an upload) and
+       MODIFY_AUDIO_SETTINGS (normal, required by WebView for audio capture). The
+       "Pending, Spec 021" note is replaced by these rows.
+- Bump rationale: PATCH — 1.5.0 already stated that Spec 021 would add these rows under
+       the point-of-use rule; nothing new is permitted beyond what it announced, except the
+       normal-level MODIFY_AUDIO_SETTINGS that the platform requires alongside RECORD_AUDIO.
 
 Modified Principles (1.5.0, 2026-10-11, decided by the project lead):
 - I. Privacy & Security First — new bullet: protection data (tracker host lists,
@@ -727,6 +739,10 @@ that complexity without adding value for a free, single-tier app.
 | `android.permission.INTERNET` | WebView page load | 007 |
 | `android.permission.ACCESS_NETWORK_STATE` | Offline detection | 007 |
 | `android.permission.WRITE_EXTERNAL_STORAGE` (`maxSdkVersion="28"`) | Write downloads to the **public** Downloads folder on Android 7.0–9.0, where Scoped Storage does not yet exist. Absent from the effective manifest on API 29+, requested at point of first use, never at launch. | 015 |
+| `android.permission.CAMERA` | A site the person allowed uses the camera (calls, scanning); photo/video capture for a page's file upload. Requested only after that choice, never at launch. | 021 |
+| `android.permission.RECORD_AUDIO` | A site the person allowed uses the microphone. Requested only after that choice. | 021 |
+| `android.permission.ACCESS_COARSE_LOCATION` / `ACCESS_FINE_LOCATION` | A site the person allowed uses location; the person may grant approximate only. Requested only after that choice; the engine is never told to retain it. | 021 |
+| `android.permission.MODIFY_AUDIO_SETTINGS` | *Normal* permission (granted at install, never prompted) that WebView requires alongside `RECORD_AUDIO` for a site's audio capture. | 021 |
 
 **`POST_NOTIFICATIONS` is deliberately NOT declared.** It was listed here against Spec 015
 until measured on a device, and the measurement said it is not needed: the download
@@ -738,10 +754,11 @@ granted, "Download complete" still appeared in the shade. Declaring it would hav
 §I's "MUST NOT request runtime permissions it does not actively use". Should the app ever
 compose a notification of its own, this decision must be revisited.
 
-> **Pending, Spec 021**: per-site camera, microphone and location prompts will need
-> `CAMERA`, `RECORD_AUDIO` and `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION`. Spec 021
-> adds those rows itself, with the same rule as storage: requested at point of use,
-> never at launch, and only when a page asks.
+> **Spec 021 rows**: the camera, microphone and location permissions are asked for only
+> after the person chose an allow option for a site in the app's own dialog (or chose to
+> take a photo for an upload) — never at launch, and never for a site the person refused.
+> The matching hardware features are declared `required="false"`, so the app installs on
+> devices without a camera or GPS.
 
 > The storage row is the **documented deviation** from the two-permission minimum in §II —
 > see `specs/015-downloads-manager/plan.md` Complexity Tracking for
@@ -855,4 +872,4 @@ All implementation decisions MUST align with these principles.
   red 16KB CI gate
 - Constitution supersedes all other practices; in case of conflict, the constitution wins
 
-**Version**: 1.5.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-11
+**Version**: 1.5.1 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-11

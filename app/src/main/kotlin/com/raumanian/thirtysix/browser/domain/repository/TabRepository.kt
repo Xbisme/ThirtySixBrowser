@@ -38,6 +38,16 @@ interface TabRepository {
     suspend fun createTab(url: String): Result<Tab>
 
     /**
+     * Spec 021 research R9 — a tab for [url] opened behind the active one (long-press "Open in
+     * new tab", FR-020): `lastActiveAt = activeAt - 1`, so the active tab does not change and the
+     * new tab is next in recency order. Same cap and errors as [createTab].
+     *
+     * The default body opens an ordinary tab, which keeps existing test doubles compiling;
+     * production implementations override it.
+     */
+    suspend fun createBackgroundTab(url: String, activeAt: Long): Result<Tab> = createTab(url)
+
+    /**
      * Make [tabId] the active tab. Writes `lastActiveAt = now()` on the
      * leaving tab BEFORE the new active tab so ordering remains stable (R1).
      * No-op if [tabId] does not exist.

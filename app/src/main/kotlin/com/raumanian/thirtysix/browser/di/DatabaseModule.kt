@@ -6,9 +6,11 @@ import com.raumanian.thirtysix.browser.data.local.dao.BookmarkDao
 import com.raumanian.thirtysix.browser.data.local.dao.BookmarkFolderDao
 import com.raumanian.thirtysix.browser.data.local.dao.DownloadRecordDao
 import com.raumanian.thirtysix.browser.data.local.dao.HistoryDao
+import com.raumanian.thirtysix.browser.data.local.dao.SitePermissionDao
 import com.raumanian.thirtysix.browser.data.local.dao.TabDao
 import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration1To2
+import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration2To3
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,7 +31,7 @@ object DatabaseModule {
             // Spec 015 FR-016: v1 -> v2 registered explicitly. Every future migration is
             // appended here; omitting one makes Room throw rather than destroy data, which
             // is the behaviour the strict policy is protecting.
-            .addMigrations(Migration1To2.MIGRATION_1_2)
+            .addMigrations(Migration1To2.MIGRATION_1_2, Migration2To3.MIGRATION_2_3)
             .build()
 
     @Provides
@@ -43,6 +45,9 @@ object DatabaseModule {
 
     @Provides
     fun provideHistoryDao(db: AppDatabase): HistoryDao = db.historyDao()
+
+    @Provides
+    fun provideSitePermissionDao(db: AppDatabase): SitePermissionDao = db.sitePermissionDao()
 
     @Provides
     fun provideTabDao(db: AppDatabase): TabDao = db.tabDao()

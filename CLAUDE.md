@@ -233,7 +233,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 ### Critical Rules
 - v1.0 phải ship đầy đủ Phase 1–4 (Specs 001–018) trước Phase 5 (019 ui-redesign), rồi Phase 6 "real browser" 020–023 theo đúng thứ tự (Constitution v1.5.0)
 - Phase order is MANDATORY (Constitution §X) — no spec may be skipped or reordered
-- Permissions giữ tối thiểu — `INTERNET`, `ACCESS_NETWORK_STATE`, plus `WRITE_EXTERNAL_STORAGE` capped at `maxSdkVersion="28"` (Spec 015's single documented deviation). `POST_NOTIFICATIONS` is deliberately **not** declared — the system download service notifies under its own UID (Spec 015 G9, Constitution v1.3.0 §II)
+- Permissions giữ tối thiểu — `INTERNET`, `ACCESS_NETWORK_STATE`, plus `WRITE_EXTERNAL_STORAGE` capped at `maxSdkVersion="28"` (Spec 015's single documented deviation). Spec 021 adds `CAMERA`, `RECORD_AUDIO`, `ACCESS_COARSE/FINE_LOCATION` (asked only after the person allows a site) and the normal-level `MODIFY_AUDIO_SETTINGS` (Constitution 1.5.1 table). `POST_NOTIFICATIONS` is deliberately **not** declared — the system download service notifies under its own UID (Spec 015 G9, Constitution v1.3.0 §II)
 - `addJavascriptInterface` FORBIDDEN unless allow-listed origin gating + spec justification
 - Scoped Storage MUST be respected — no `MANAGE_EXTERNAL_STORAGE`
 - `targetSdk = 36` for v1.0; bump within 12 months of any new Android release per Play policy
@@ -280,7 +280,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `ui-redesign` | ✅ Done 2026-10-10 (PR #27 merged, `54e090a`; real-device pass 2026-10-11 — Layout Inspector, TalkBack, canvas comparison, dynamic color still open) | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
 | 020 | `default-browser-entry-points` | ✅ Done 2026-10-11 (PR #30 merged, `1bb8c6a`, CI 6/6; 65/65) | http/https VIEW + BROWSABLE intent filters, shared links/text, set-as-default (RoleManager API 29+) |
-| 021 | `web-capabilities` | ⬜ Next (Phase 6) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
+| 021 | `web-capabilities` | 🟢 Implemented 2026-10-11 (70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
 | 022 | `page-tools` | ⬜ Phase 6 | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
 | 023 | `privacy-protection` | ⬜ Phase 6 | Tracker blocking (APK-bundled list), HTTPS upgrade, param stripping, Fire button, GPC, privacy dashboard, cookie-banner + fingerprint scripts |
 
@@ -305,6 +305,23 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 > **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd`. A key with no version component is bug 2 returning. `Starting 0 tests` alongside `Broken pipe` / `DeadSystemException` / `stop: Not implemented` is the bug-3 signature — delete the cache and re-run **before suspecting the code**; a healthy run logs `Starting 109 tests` → `Finished 109 tests`.
 
 ## Recent Changes
+
+- 2026-10-11 (Spec 021 implementation): 🟢 **Spec 021 `web-capabilities` implemented on branch `021-web-capabilities` — 70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open.** Second spec of Phase 6.
+
+  **What changed for the user.** A site asking for the camera, microphone or location gets an app dialog naming the site (Always allow / Allow this time / Don't allow; two choices in incognito, which never remembers), and only then the Android prompt; a permanently denied Android permission gets an explanation with Open settings. Settings → Privacy → **Site permissions** lists and changes the remembered decisions; Clear browsing data gains an opt-in **Site permissions** category. Also: file inputs open the system picker (plus the camera for capture inputs), page fullscreen video covers everything and follows the phone's orientation, windows the person asked for open as tabs (sign-in pop-ups keep `window.opener`) while self-opened ones are blocked with an Open notice, styled alert/confirm/prompt/"Leave site?" with flood control, an HTTP sign-in dialog that stores nothing, and a long-press menu for links and images.
+
+  **Gates.** unit ✅ **757/757** · instrumented **132/135** on the 16 KB AVD (2 load flakes pass in isolation; `rendererCrash_…` fails identically on an older commit — the known environment flake) · lint/detekt/ktlint ✅ · Compose report **179 restartable, 0 non-skippable** · release APK **3,359,236 B (+95,592 B, budget +150 KB)** · 16 KB ✅ no new `.so` · Room **v3** (`site_permissions`, additive `MIGRATION_2_3`; upgrade from `main` verified on device) · only new dependency `espresso-intents` 3.7.0 (androidTest). Device gates G1–G20 on the 16 KB AVD and a Galaxy A55; **SC-001 10/10 real sites on the A55** (WebRTC call, approximate location, YouTube fullscreen 10/10, Google sign-in pop-up, httpbin basic auth, camera-capture upload …).
+
+  **Facts to keep.**
+  - **One `PageRequestQueue` per browser screen** (`presentation/browser/page/`). Every page request is tied to tab + page generation and settled exactly once; `PageSession` advances the generation on every navigation and tab switch and cancels stale requests.
+  - **Pop-up WebViews are registered before their tab exists**, under a unique placeholder address (`about:blank#thirtysix-popup-N`): keying by tab id raced the tab store. ⚠️ **A page-created WebView with no `WebViewClient` hands its navigation to another app** (the emulator opened Chrome) — pop-ups get `PendingPopupWebViewClient` the moment they are made.
+  - **`mediaPlaybackRequiresUserGesture = false`** — with the default, a camera stream never played (found on the A55); pages may now start media on their own.
+  - **Fullscreen state lives in `PageSession.fullscreen`**; `MainActivity` now also handles `orientation|screenSize|smallestScreenSize|keyboardHidden`, so rotating never rebuilds the WebView.
+  - **`OneTimeGrantStore` lives in `data/local/permission/`** because the domain clear-data use case clears it.
+  - **`javascript:` links get no long-press menu**: WebView reports them as an unknown hit.
+  - **⚠️ Automation traps**: `adb input text` leaves touch mode, so after a dialog the address bar takes focus (soft-keyboard typing does not); adb-injected long-presses do not start Chromium text selection on the emulator (they do on the A55); the A55's chat-head overlay can catch swipes near the top.
+
+  **http:// sites now open in release builds** (owner decision 2026-10-11): every one used to fail with `ERR_CLEARTEXT_NOT_PERMITTED` (filed since Spec 015). `usesCleartextTraffic="true"` is in the main manifest; mixed content on https pages stays blocked. Spec 023's HTTPS upgrade builds on this.
 
 - 2026-10-11 (Spec 020 merged + a fourth emulator-CI failure): ✅ **PR #30 merged (`1bb8c6a`), CI 6/6 after one rerun.** The first run's instrumented job failed with the zombie-boot signature — `Broken pipe (32)`, `No service published for: input`, `stop: Not implemented`, **no tests started** — and passed 110/110 after deleting the AVD cache and rerunning the job.
 
@@ -591,7 +608,9 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: ✅ [Spec 020 — Default Browser & Entry Points](specs/020-default-browser-entry-points/) — **merged into `main` via [PR #30](https://github.com/Xbisme/ThirtySixBrowser/pull/30) (2026-10-11, merge commit `1bb8c6a`, CI 6/6), 65/65.** Next: Spec 021 `web-capabilities`. See the Recent Changes entry; [tasks.md](specs/020-default-browser-entry-points/tasks.md) holds the gate table and 13 implementation notes.
+**Current**: 🟢 [Spec 021 — Web Capabilities](specs/021-web-capabilities/) — implemented 2026-10-11, 70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open. See the Recent Changes entry; [tasks.md](specs/021-web-capabilities/tasks.md) holds the gate table (G1–G20, SC-001) and the implementation notes.
+
+**Previous**: ✅ [Spec 020 — Default Browser & Entry Points](specs/020-default-browser-entry-points/) — **merged into `main` via [PR #30](https://github.com/Xbisme/ThirtySixBrowser/pull/30) (2026-10-11, merge commit `1bb8c6a`, CI 6/6), 65/65.** [tasks.md](specs/020-default-browser-entry-points/tasks.md) holds the gate table and 13 implementation notes.
 
 **Previous**: ✅ [Spec 019 — UI Redesign](specs/019-ui-redesign/) — **merged into `main` via [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, merge commit `54e090a`, CI 6/6)**; real-device gates recorded 2026-10-11 on a Galaxy A55. Next spec: to be discussed with the owner. See the Recent Changes entry for gates and the facts to keep; [tasks.md](specs/019-ui-redesign/tasks.md) holds every deviation note.
 

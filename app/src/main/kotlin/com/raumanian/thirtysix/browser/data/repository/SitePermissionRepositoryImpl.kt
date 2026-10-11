@@ -1,0 +1,63 @@
+package com.raumanian.thirtysix.browser.data.repository
+
+import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.dao.SitePermissionDao
+import com.raumanian.thirtysix.browser.data.local.entity.SitePermissionEntity
+import com.raumanian.thirtysix.browser.data.mapper.toDomainOrNull
+import com.raumanian.thirtysix.browser.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
+import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
+import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+
+/** Spec 021 — [SitePermissionRepository] over Room (`site_permissions`, schema v3). */
+class SitePermissionRepositoryImpl @Inject constructor(
+    private val dao: SitePermissionDao,
+    private val dispatchers: DispatcherProvider,
+) : SitePermissionRepository {
+
+    override fun observeAll(): Flow<List<SitePermissionDecision>> =
+        dao.observeAll().map { rows -> rows.mapNotNull { it.toDomainOrNull() } }
+
+    override suspend fun decisionsFor(origin: String): Map<SiteCapability, SiteDecision> =
+        withContext(dispatchers.io) {
+            dao.forOrigin(origin).mapNotNull { it.toDomainOrNull() }.associate { it.capability to it.decision }
+        }
+
+    override suspend fun save(origin: String, capability: SiteCapability, decision: SiteDecision): Result<Unit> {
+        if (!SiteOrigin.isSecure(origin)) {
+            return Result.Error(IllegalArgumentException("Only secure origins are stored"))
+        }
+        return runIo {
+            dao.upsert(
+                SitePermissionEntity(
+                    origin = origin,
+                    capability = capability.storageValue,
+                    decision = decision.storageValue,
+                    decidedAt = System.currentTimeMillis(),
+                ),
+            )
+        }
+    }
+
+    override suspend fun removeSite(origin: String): Result<Unit> = runIo { dao.deleteOrigin(origin) }
+
+    override suspend fun clearAll(): Result<Unit> = runIo { dao.deleteAll() }
+
+    @Suppress("TooGenericExceptionCaught") // A failed write is reported, never thrown into the UI.
+    private suspend fun runIo(block: suspend () -> Unit): Result<Unit> = withContext(dispatchers.io) {
+        try {
+            block()
+            Result.Success(Unit)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+}

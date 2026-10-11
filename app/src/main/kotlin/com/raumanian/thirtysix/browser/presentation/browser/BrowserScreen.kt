@@ -2,6 +2,8 @@
 
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.webkit.WebSettings
+import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.background
@@ -18,12 +20,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -42,6 +46,14 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTo
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
+import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
+import com.raumanian.thirtysix.browser.presentation.browser.page.FullscreenOverlay
+import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressActions
+import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressHooks
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
+import com.raumanian.thirtysix.browser.presentation.browser.page.PopupEffects
+import com.raumanian.thirtysix.browser.presentation.browser.page.PopupTabs
+import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
 import com.raumanian.thirtysix.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.presentation.home.HomePage
@@ -90,6 +102,13 @@ fun BrowserScreen(
     var quickSettingRequest by remember { mutableStateOf<QuickSetting?>(null) }
     var quickSettingsUsed by remember { mutableStateOf(false) }
 
+    // Spec 021 — requests the page makes of the browser (permissions, files, dialogs, …).
+    val popupTabs: PopupTabs = hiltViewModel()
+    val pageSession = rememberPageSession(
+        activeTabId = activeTab?.id,
+        isIncognito = state.isIncognito,
+        popups = popupTabs,
+    )
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
     HomeBackHandlers(state = state, viewModel = viewModel)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = incomingContent)
@@ -121,6 +140,8 @@ fun BrowserScreen(
             webViewActions = webViewActions,
             activeTabId = activeTab?.id ?: 0L,
             onScrollDelta = chrome::onScrollDelta,
+            pageRequests = pageSession,
+            takePopup = { activeTab?.url?.let(popupTabs::take) },
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
@@ -184,6 +205,8 @@ fun BrowserScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomInset),
         )
+        // Spec 021 US3 — above everything, bars included.
+        FullscreenOverlay(controller = pageSession.fullscreen)
     }
 
     if (hubOpen) {
@@ -206,6 +229,24 @@ fun BrowserScreen(
             snackbarHostState = snackbarHostState,
         )
     }
+    // Spec 021 US4 — long-press downloads pass the same storage-permission gate as page downloads.
+    val context = LocalContext.current
+    val longPressDownload = rememberDownloadRequestHandler(
+        onGranted = viewModel::onDownloadRequested,
+        onDenied = viewModel::onStoragePermissionDenied,
+    )
+    val longPressActions: LongPressActions = hiltViewModel()
+    val currentIncognito by rememberUpdatedState(state.isIncognito)
+    val longPress = remember(longPressActions, snackbarHostState, longPressDownload) {
+        LongPressHooks(
+            actions = longPressActions,
+            snackbarHostState = snackbarHostState,
+            isIncognito = { currentIncognito },
+            onDownload = { url -> longPressDownload(url, WebSettings.getDefaultUserAgent(context), null, null) },
+        )
+    }
+    BrowserPageRequests(session = pageSession, longPress = longPress)
+    PopupEffects(popups = popupTabs, snackbarHostState = snackbarHostState)
 }
 
 /**
@@ -395,6 +436,8 @@ private fun BrowserContent(
     webViewActions: WebViewActionsHandle,
     activeTabId: Long,
     onScrollDelta: (Float) -> Unit,
+    pageRequests: PageRequestSink,
+    takePopup: () -> WebView?,
     modifier: Modifier = Modifier,
 ) {
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
@@ -405,6 +448,8 @@ private fun BrowserContent(
     )
     Box(modifier = modifier) {
         androidx.compose.runtime.key(activeTabId) {
+            // Spec 021 research R5 — a tab a page opened adopts the page's WebView.
+            val adopted = remember { takePopup() }
             BrowserWebView(
                 state = state,
                 actions = webViewActions,
@@ -414,6 +459,7 @@ private fun BrowserContent(
                     onLoadFinished = viewModel::onLoadFinished,
                     onLoadFailed = viewModel::onLoadFailed,
                     onDownloadRequested = onDownloadRequested,
+                    pageRequests = pageRequests,
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
                     onUrlChange = viewModel::onUrlChanged,
@@ -425,6 +471,7 @@ private fun BrowserContent(
                     onScrollDelta = onScrollDelta,
                 ),
                 modifier = Modifier.fillMaxSize(),
+                adopted = adopted,
             )
         }
     }

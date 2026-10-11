@@ -32,6 +32,7 @@ import kotlinx.coroutines.sync.withLock
  * Empty-state seeding + close-all atomicity are guarded by a single internal
  * [Mutex] to serialize concurrent collectors / writes (R5).
  */
+@Suppress("TooManyFunctions") // Spec 021 R9 adds createBackgroundTab; one function per contract member.
 class TabRepositoryImpl @Inject constructor(
     private val tabDao: TabDao,
     @param:Named("default_home_url") private val homeUrl: String,
@@ -56,7 +57,13 @@ class TabRepositoryImpl @Inject constructor(
         }
         .flowOn(dispatchers.io)
 
-    override suspend fun createTab(url: String): Result<Tab> {
+    override suspend fun createTab(url: String): Result<Tab> = insertTab(url, lastActiveAt = null)
+
+    override suspend fun createBackgroundTab(url: String, activeAt: Long): Result<Tab> =
+        insertTab(url, lastActiveAt = activeAt - 1)
+
+    /** [lastActiveAt] `null` → now, making the new tab the active one. */
+    private suspend fun insertTab(url: String, lastActiveAt: Long?): Result<Tab> {
         if (tabDao.count() >= BrowserLimits.MAX_TABS) {
             return Result.Error(throwable = MaxTabsReachedException())
         }
@@ -67,7 +74,7 @@ class TabRepositoryImpl @Inject constructor(
             title = "",
             position = nextPosition,
             createdAt = now,
-            lastActiveAt = now,
+            lastActiveAt = lastActiveAt ?: now,
         )
         val newId = tabDao.insert(entity)
         return Result.Success(entity.copy(id = newId).toDomain())

@@ -5,11 +5,11 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import android.net.http.SslError
 import android.os.Build
-import android.webkit.GeolocationPermissions
-import android.webkit.PermissionRequest
+import android.os.Handler
+import android.os.Looper
+import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
-import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -32,6 +32,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.domain.model.LongPressHit
+import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
+import com.raumanian.thirtysix.browser.presentation.browser.page.PendingPopupWebViewClient
 
 /**
  * Compose wrapper around [android.webkit.WebView] (Spec 007).
@@ -73,14 +79,19 @@ import com.raumanian.thirtysix.browser.core.constants.UrlConstants
  * - The replacement starts with no back/forward history.
  */
 @Composable
+@Suppress("LongParameterList") // Spec 021 adds the adopted pop-up WebView.
 internal fun BrowserWebView(
     state: BrowserUiState,
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
     modifier: Modifier = Modifier,
+    adopted: WebView? = null,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    // Spec 021 research R5 — a page-created WebView is adopted by the first generation only; a
+    // replacement after a renderer loss is built fresh.
+    val adoptable = remember { arrayOf(adopted) }
     val currentUrl = rememberUpdatedState(state.currentUrl)
     val host = remember { WebViewHost(currentUrl) }
 
@@ -115,8 +126,11 @@ internal fun BrowserWebView(
         AndroidView(
             modifier = modifier,
             factory = { context ->
+                val toAdopt = adoptable[0]
+                adoptable[0] = null
                 buildConfiguredWebView(
-                    context = context,
+                    webView = toAdopt ?: WebView(context),
+                    adopted = toAdopt != null,
                     state = state,
                     actions = actions,
                     callbacks = callbacks,
@@ -150,13 +164,14 @@ internal fun BrowserWebView(
  */
 @Suppress("LongParameterList")
 private fun buildConfiguredWebView(
-    context: android.content.Context,
+    webView: WebView,
+    adopted: Boolean,
     state: BrowserUiState,
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
     host: WebViewHost,
-): WebView = WebView(context).also { wv ->
+): WebView = webView.also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
     wv.webViewClient = BrowserWebViewClient(
@@ -177,6 +192,7 @@ private fun buildConfiguredWebView(
             if (crashed) callbacks.onLoadFailed(ErrorReason.Generic)
             host.replaceAfterRendererGone(crashed)
         },
+        pageRequests = callbacks.pageRequests,
     )
     // Spec 015 FR-001 — the engine hands off anything it will not render. Attached beside
     // the two platform clients because this is the same shape of event they carry, and the
@@ -185,6 +201,8 @@ private fun buildConfiguredWebView(
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
+    // Spec 021 US4 — the long-press menu on links and images; anything else keeps selection.
+    wv.setOnLongClickListener { onLongPress(wv, callbacks.pageRequests) }
     // Spec 019 R7 — feed the sliding bars. API 23+, below minSdk 24.
     wv.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
         navigationCallbacks.onScrollDelta((scrollY - oldScrollY).toFloat())
@@ -193,9 +211,29 @@ private fun buildConfiguredWebView(
         onProgressChanged = callbacks.onProgressChanged,
         onReceivedTitle = navigationCallbacks.onTitleChange,
         onReceivedIcon = navigationCallbacks.onIconReceived,
+        pageRequests = callbacks.pageRequests,
+        newPopupWebView = { context -> newPopupWebView(context, state.isIncognito) },
     )
-    // Spec 008 — wire imperative handle. Each lambda captures `wv` via the
-    // factory closure; the lambdas persist for the lifetime of the WebView.
+    wireActions(wv, actions, host, adopted)
+
+    // Spec 008 — conditional initial load. When state is seeded to Failed
+    // (instrumented test pattern), skip the initial loadUrl so the test
+    // assertion on the error UI is not overridden by a successful auto-load.
+    // Renderer recovery — also skipped by the replacement for a crashed renderer, so a page
+    // that crashes its renderer waits for Reload instead of crashing it again in a loop.
+    // Spec 021 R5 — and by an adopted pop-up, already navigating for its opener.
+    val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
+    val loadable = host.loadInitialUrl && state.loadingState !is LoadingState.Failed
+    if (!adopted && loadable && !isHome) {
+        wv.loadUrl(state.currentUrl)
+    }
+}
+
+/**
+ * Spec 008 — wires the imperative handle. Each lambda captures [wv]; they persist for the
+ * lifetime of the WebView.
+ */
+private fun wireActions(wv: WebView, actions: WebViewActionsHandle, host: WebViewHost, adopted: Boolean) {
     actions.goBack = { if (wv.canGoBack()) wv.goBack() }
     actions.goForward = { if (wv.canGoForward()) wv.goForward() }
     // A replacement built after a renderer crash has loaded nothing, and `reload()` on an
@@ -208,18 +246,26 @@ private fun buildConfiguredWebView(
     }
     actions.stopLoading = { wv.stopLoading() }
     // Spec 019 R1 — the reserved Home address is never handed to the WebView.
-    actions.loadUrl = { url -> if (url != UrlConstants.HOME_PAGE_URL) wv.loadUrl(url) }
-
-    // Spec 008 — conditional initial load. When state is seeded to Failed
-    // (instrumented test pattern), skip the initial loadUrl so the test
-    // assertion on the error UI is not overridden by a successful auto-load.
-    // Renderer recovery — also skipped by the replacement for a crashed renderer, so a page
-    // that crashes its renderer waits for Reload instead of crashing it again in a loop.
-    val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
-    if (host.loadInitialUrl && state.loadingState !is LoadingState.Failed && !isHome) {
-        wv.loadUrl(state.currentUrl)
+    // Spec 021 R5 — an adopted pop-up is already navigating for its opener: the tab switch's
+    // load of the placeholder address is skipped once.
+    var skipNextLoad = adopted
+    actions.loadUrl = { url ->
+        when {
+            skipNextLoad -> skipNextLoad = false
+            url != UrlConstants.HOME_PAGE_URL -> wv.loadUrl(url)
+        }
     }
 }
+
+/** Spec 021 research R5 — a WebView with the browser's settings for a window the page opened. */
+private fun newPopupWebView(context: android.content.Context, incognito: Boolean): WebView =
+    WebView(context).also { popup ->
+        applySecuritySettings(popup)
+        if (incognito) applyIncognitoSettings(popup)
+        // Until its tab adopts it, the pop-up must load in place: a WebView with no client hands
+        // every navigation to another app (the system browser).
+        popup.webViewClient = PendingPopupWebViewClient()
+    }
 
 /**
  * Centralized WebView security configuration. Every setting referenced here is
@@ -250,6 +296,19 @@ private fun applySecuritySettings(webView: WebView) {
 
         // FR-018 — block all HTTP sub-resources on HTTPS pages.
         mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+
+        // Spec 021 FR-001 (found at G1 on a Galaxy A55) — with the WebView default, a camera
+        // stream attached to a <video> never starts: autoplay needs a fresh tap, and the
+        // permission dialog outlives the tap. Video calls would show nothing. Mainstream
+        // browsers let such media start on their own; so does this one.
+        mediaPlaybackRequiresUserGesture = false
+
+        // Spec 021 research R5 — every window request reaches onCreateWindow, which decides.
+        setSupportMultipleWindows(true)
+        javaScriptCanOpenWindowsAutomatically = true
+
+        // Spec 021 FR-001 — location requests reach the app, which asks the person first.
+        setGeolocationEnabled(true)
     }
     // FR-006 — addJavascriptInterface is FORBIDDEN; intentionally never called.
 }
@@ -311,6 +370,7 @@ private class BrowserWebViewClient(
     private val onCanGoForwardChange: (Boolean) -> Unit,
     private val onScreenshotReady: (Bitmap) -> Unit,
     private val onRendererGone: (crashed: Boolean) -> Unit,
+    private val pageRequests: PageRequestSink,
 ) : WebViewClient() {
     /**
      * Spec 012 (T065 / FR-018) — external-intent crash safety.
@@ -340,12 +400,15 @@ private class BrowserWebViewClient(
             }
             context.startActivity(intent)
         } catch (t: Throwable) {
-            android.util.Log.w("BrowserWebView", "External intent dispatch failed: $uri", t)
+            // Spec 021 FR-036 — the address is not logged.
+            android.util.Log.w("BrowserWebView", "External intent dispatch failed", t)
         }
         return true
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        // Spec 021 FR-034 — a new page: the previous page's requests are now stale.
+        pageRequests.onNavigationStarted()
         url?.let {
             // Spec 009 — fire URL change FIRST so the address bar reflects
             // the submitted (or redirected-to) URL on the same UI tick the
@@ -459,6 +522,30 @@ private class BrowserWebViewClient(
     }
 
     /**
+     * Spec 021 FR-032 — basic/digest sign-in. The typed name and password go to this one request
+     * only: never stored, never `setHttpAuthUsernamePassword` (INV-5).
+     */
+    override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?) {
+        handler ?: return
+        val context = pageRequests.context()
+        if (context == null || host.isNullOrBlank()) {
+            handler.cancel()
+            return
+        }
+        pageRequests.enqueue(
+            PageRequest.HttpAuth(
+                tabId = context.tabId,
+                generation = context.generation,
+                origin = host,
+                host = host,
+                realm = realm?.takeIf { it.isNotBlank() },
+                onProceed = { username, password -> handler.proceed(username, password) },
+                onCancel = { handler.cancel() },
+            ),
+        )
+    }
+
+    /**
      * The renderer process behind [view] is gone: it crashed, or the system reclaimed it for
      * memory.
      *
@@ -544,41 +631,42 @@ private fun releaseWebView(webView: WebView, isIncognito: Boolean, rendererGone:
 }
 
 /**
- * Forwards progress, page title (Spec 011 / M1), favicon (Spec 011 favicon
- * amendment 2026-05-03), and silently denies all web-origin runtime
- * permissions (FR-017). Manifest stays at three Constitution-mandated
- * permissions.
+ * Spec 021 research R7 — reads what was pressed. An image inside a link carries the image address;
+ * the link address arrives asynchronously from `requestFocusNodeHref`. Returns `false` when there
+ * is no menu, so the WebView's text selection runs instead.
  */
-private class BrowserChromeClient(
-    private val onProgressChanged: (Int) -> Unit,
-    private val onReceivedTitle: (String) -> Unit,
-    private val onReceivedIcon: (String, android.graphics.Bitmap) -> Unit,
-) : WebChromeClient() {
-    override fun onProgressChanged(view: WebView?, newProgress: Int) {
-        onProgressChanged(newProgress)
+private fun onLongPress(webView: WebView, pageRequests: PageRequestSink): Boolean {
+    val hit = webView.hitTestResult
+    val type = when (hit.type) {
+        WebView.HitTestResult.SRC_ANCHOR_TYPE -> LongPressHit.Link
+        WebView.HitTestResult.IMAGE_TYPE -> LongPressHit.Image
+        WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE -> LongPressHit.ImageLink
+        else -> null
     }
-
-    override fun onReceivedTitle(view: WebView?, title: String?) {
-        title?.let(onReceivedTitle)
+    val context = pageRequests.context()
+    if (type == null || context == null) return false
+    val origin = SiteOrigin.of(webView.url.orEmpty()).orEmpty()
+    val enqueue: (String?, String?) -> Unit = { link, image ->
+        BuildLongPressMenuUseCase()(type, link, image)?.let { menu ->
+            pageRequests.enqueue(PageRequest.LongPress(context.tabId, context.generation, origin, menu) {})
+        }
     }
-
-    override fun onReceivedIcon(view: WebView?, icon: android.graphics.Bitmap?) {
-        val url = view?.url ?: return
-        if (icon != null) onReceivedIcon(url, icon)
+    when (type) {
+        LongPressHit.Link -> enqueue(hit.extra, null)
+        LongPressHit.Image -> enqueue(null, hit.extra)
+        LongPressHit.ImageLink -> {
+            val handler = Handler(Looper.getMainLooper()) { message ->
+                enqueue(message.data.getString(FOCUS_NODE_HREF_URL), hit.extra)
+                true
+            }
+            webView.requestFocusNodeHref(handler.obtainMessage())
+        }
     }
-
-    override fun onPermissionRequest(request: PermissionRequest?) {
-        request?.deny()
-    }
-
-    override fun onGeolocationPermissionsShowPrompt(
-        origin: String?,
-        callback: GeolocationPermissions.Callback?,
-    ) {
-        // FR-017 — silently deny: allow=false, retain=false.
-        callback?.invoke(origin, false, false)
-    }
+    return true
 }
+
+/** Key of the link address in `requestFocusNodeHref`'s reply. */
+private const val FOCUS_NODE_HREF_URL: String = "url"
 
 private const val BLANK_PAGE: String = "about:blank"
 

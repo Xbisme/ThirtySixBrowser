@@ -25,6 +25,24 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- Spec 021 FR-001 / FR-002 / FR-037 — a site's camera, microphone or location request.
+         Each is requested only after the person chose an allow option for that site (or chose
+         to take a photo for a file upload), never at launch. Listed in the Constitution's
+         permission table. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Spec 021 — WebView's audio capture (WebRTC) requires this alongside RECORD_AUDIO
+         (PermissionRequest.RESOURCE_AUDIO_CAPTURE). A normal permission: granted at install,
+         never prompted. -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Spec 021 research R10 — none of these is needed to install or use the browser. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+
     <application
         android:name=".ThirtySixApplication"
         android:allowBackup="true"
@@ -35,8 +53,13 @@
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.ThirtySix"
         tools:targetApi="33">
+        <!-- Spec 021 (owner decision 2026-10-11) — usesCleartextTraffic: a browser has to open
+             http:// sites; with the Android 9+ default every one failed with
+             ERR_CLEARTEXT_NOT_PERMITTED (filed since Spec 015). Mixed content stays blocked:
+             an https page still cannot load http sub-resources (Spec 007 FR-018). -->
         <!-- Spec 017 — the activity starts on the splash theme; installSplashScreen()
              swaps in Theme.ThirtySix (its postSplashScreenTheme) before AppCompat builds
              its delegate. The <application> theme above stays Theme.ThirtySix. -->
@@ -52,9 +75,12 @@
              sender's task (one recents entry and one WebView per link, FR-004). New links arrive
              in onNewIntent; Back on an untouched external tab uses moveTaskToBack to return to the
              sender (FR-006). -->
+        <!-- Spec 021 research R4 — rotation and size changes are handled in place too, so a
+             fullscreen video (and every page) keeps playing and scrolling through a rotation
+             instead of the activity, and its WebView, being rebuilt. -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="locale|layoutDirection|screenLayout"
+            android:configChanges="locale|layoutDirection|screenLayout|orientation|screenSize|smallestScreenSize|keyboardHidden"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.ThirtySix.Splash">
@@ -110,6 +136,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- Spec 021 research R3 — hands the camera app a place to write a photo for a page's file
+             upload. Not exported; only cache/capture/ is exposed (res/xml/file_paths.xml). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <!-- Spec 016 research R1 — lets AndroidX persist the in-app language on Android 7.0–12.
              With autoStoreLocales, AppCompat saves the user's choice and re-applies it at start-up;

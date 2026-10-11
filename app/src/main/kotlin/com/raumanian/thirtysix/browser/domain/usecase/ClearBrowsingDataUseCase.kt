@@ -1,12 +1,15 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataResult
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.domain.repository.WebDataCleaner
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -25,19 +28,24 @@ import kotlinx.coroutines.CancellationException
  *  - **Cached images and files** → `WebDataCleaner.clearWebCache()`, skipped when this same call
  *    already produced `Complete` because the engine emptied the cache then (spec A16); then
  *    `FaviconCache.clearAll()` and `ScreenshotCache.clearAll()`, always.
+ *  - **Site permissions** (Spec 021 FR-010a) → `SitePermissionRepository.clearAll()` and the
+ *    in-memory one-time grants.
  *
  * Every category, and every step inside a category, runs in its own failure boundary: an
  * earlier failure never stops later work (FR-033, FR-043), and a category is failed if any of
- * its steps threw, returned `false` or returned `Failed`. Nothing outside the three categories
+ * its steps threw, returned `false` or returned `Failed`. Nothing outside the categories
  * is touched — no tabs, bookmarks, downloads or settings (FR-031). Returns normally in every
  * case except cancellation, which is rethrown.
  */
+@Suppress("LongParameterList") // Spec 021 adds the seventh collaborator; each clears one kind of data.
 class ClearBrowsingDataUseCase @Inject constructor(
     private val historyRepository: HistoryRepository,
     private val webDataCleaner: WebDataCleaner,
     private val cookieJarSnapshotManager: CookieJarSnapshotManager,
     private val faviconCache: FaviconCache,
     private val screenshotCache: ScreenshotCache,
+    private val sitePermissionRepository: SitePermissionRepository,
+    private val oneTimeGrants: OneTimeGrantStore,
 ) {
 
     /** @param categories non-empty — an empty set is a programming error (FR-026). */
@@ -69,6 +77,12 @@ class ClearBrowsingDataUseCase @Inject constructor(
             if (!(webCacheCleared && iconsCleared && previewsCleared)) {
                 failed += ClearBrowsingDataCategory.CachedImagesAndFiles
             }
+        }
+
+        if (ClearBrowsingDataCategory.SitePermissions in categories) {
+            val stored = attempt { sitePermissionRepository.clearAll() } is Result.Success
+            oneTimeGrants.clear()
+            if (!stored) failed += ClearBrowsingDataCategory.SitePermissions
         }
 
         return ClearBrowsingDataResult(requested = categories, failed = failed)

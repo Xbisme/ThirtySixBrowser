@@ -1,5 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
+
 /**
  * Bundles the load-lifecycle callbacks `BrowserWebView` forwards to the
  * ViewModel.
@@ -31,4 +33,9 @@ internal data class BrowserWebViewCallbacks(
         contentDisposition: String?,
         mimeType: String?,
     ) -> Unit,
+    /**
+     * Spec 021 research R1 — where the page's requests (permissions, files, dialogs, windows,
+     * long-press) go. Inert by default so tests that build the WebView directly need nothing.
+     */
+    val pageRequests: PageRequestSink = PageRequestSink.None,
 )

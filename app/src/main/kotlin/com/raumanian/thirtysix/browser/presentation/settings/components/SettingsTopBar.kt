@@ -3,7 +3,9 @@
 package com.raumanian.thirtysix.browser.presentation.settings.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -32,6 +35,8 @@ import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 fun SettingsTopBar(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.settings_screen_title),
+    action: (@Composable () -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -40,17 +45,24 @@ fun SettingsTopBar(
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(top = Spacing.sm, bottom = Spacing.sm),
     ) {
-        RoundIconButton(
-            icon = AppIcons.ArrowBack,
-            contentDescription = stringResource(R.string.settings_action_back),
-            onClick = onBackClick,
-            style = RoundIconStyle.Bare,
-            modifier = Modifier
-                .padding(start = Spacing.xs)
-                .testTag(TEST_TAG_SETTINGS_BACK),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth().padding(end = Spacing.xs),
+        ) {
+            RoundIconButton(
+                icon = AppIcons.ArrowBack,
+                contentDescription = stringResource(R.string.settings_action_back),
+                onClick = onBackClick,
+                style = RoundIconStyle.Bare,
+                modifier = Modifier
+                    .padding(start = Spacing.xs)
+                    .testTag(TEST_TAG_SETTINGS_BACK),
+            )
+            action?.invoke()
+        }
         Text(
-            text = stringResource(R.string.settings_screen_title),
+            text = title,
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier

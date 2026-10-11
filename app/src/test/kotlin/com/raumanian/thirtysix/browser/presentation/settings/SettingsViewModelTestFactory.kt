@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.settings
 
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
@@ -16,6 +17,7 @@ import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeWebDataCleaner
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +45,8 @@ internal fun settingsViewModel(
         cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
         faviconCache = FakeFaviconCache(),
         screenshotCache = FakeScreenshotCache(),
+        sitePermissionRepository = FakeSitePermissionRepository(),
+        oneTimeGrants = OneTimeGrantStore(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
