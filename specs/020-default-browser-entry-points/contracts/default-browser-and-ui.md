@@ -52,8 +52,8 @@ data class InviteState(val dismissed: Boolean, val launchCount: Int)
 
 ## C3.4 Settings row — "Default browser"
 
-New section header + row in `SettingsScreen`'s `LazyColumn`, placed **first** (above
-Appearance), keyed `KEY_SECTION_DEFAULT_BROWSER` / `KEY_ROW_DEFAULT_BROWSER`, built with the
+New section header ("General") + row in `SettingsScreen`'s `LazyColumn`, placed **first** (above
+Appearance), keyed `KEY_SECTION_GENERAL` / `KEY_ROW_DEFAULT_BROWSER`, built with the
 existing Spec 019 `ListRow`.
 
 | State | Title | Summary | Click |
@@ -85,7 +85,7 @@ frame-rate state is read (§V). Test tags: `TEST_TAG_HOME_DEFAULT_BROWSER_INVITE
 
 | Key | EN |
 |---|---|
-| `settings_section_default_browser` | Default browser |
+| `settings_section_general` | General (section header; renamed at implementation so the header and the row title are not both "Default browser") |
 | `settings_default_browser_title` | Default browser |
 | `settings_default_browser_summary_not_default` | ThirtySix isn't your default browser. Tap to change. |
 | `settings_default_browser_summary_is_default` | ThirtySix is your default browser |
