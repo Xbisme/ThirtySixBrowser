@@ -57,6 +57,9 @@ import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.presentation.browser.page.PopupEffects
 import com.raumanian.thirtysix.browser.presentation.browser.page.PopupTabs
 import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
+import com.raumanian.thirtysix.browser.presentation.browser.suggestions.AddressSuggestionList
+import com.raumanian.thirtysix.browser.presentation.browser.suggestions.AddressSuggestionsViewModel
+import com.raumanian.thirtysix.browser.presentation.browser.suggestions.BrowserAddressSuggestions
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
 import com.raumanian.thirtysix.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.presentation.home.HomePage
@@ -123,6 +126,9 @@ fun BrowserScreen(
         viewModel.findInPage.map { it.isOpen }.distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = false)
     val findCallbacks = rememberFindCallbacks(viewModel, webViewActions)
+    // Spec 022 US2 — address suggestions for the address bar and the Home search field.
+    val suggestions: AddressSuggestionsViewModel = hiltViewModel()
+    val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions, suggestions)
     // FR-010 — composed after every other back handler, so Back closes the find bar first.
     BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
     BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
@@ -170,9 +176,17 @@ fun BrowserScreen(
             )
         }
         if (state.isHomeContent) {
+            val homeCallbacks =
+                rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, navController, suggestions)
             HomeOverlay(
                 isIncognito = state.isIncognito,
-                callbacks = rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, navController),
+                callbacks = homeCallbacks,
+                suggestions = {
+                    AddressSuggestionList(
+                        stateFlow = suggestions.uiState,
+                        onPick = { suggestion -> homeCallbacks.onSearchSubmit(suggestion.url) },
+                    )
+                },
                 searchFocus = homeSearchFocus,
                 bottomPadding = bottomInset,
             )
@@ -193,7 +207,7 @@ fun BrowserScreen(
             topBar = {
                 BrowserTopBar(
                     state = state,
-                    addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions),
+                    addressBarCallbacks = addressBarCallbacks,
                     onStarTapped = viewModel::onStarTapped,
                     onReloadOrStop = {
                         if (state.loadingState is LoadingState.Loading) {
@@ -211,6 +225,13 @@ fun BrowserScreen(
                         .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
                 )
             },
+        )
+        // Only a focused address bar shows suggestions; on Home the field has its own list.
+        BrowserAddressSuggestions(
+            visible = state.isAddressBarFocused,
+            topBarHeight = topInset,
+            stateFlow = suggestions.uiState,
+            onPick = { suggestion -> addressBarCallbacks.onSuggestion(suggestion.url) },
         )
         // FR-005 — no bottom bar while finding (I-7).
         UnlessFinding(findOpen) {
@@ -303,11 +324,17 @@ private fun HomeOverlay(
     callbacks: HomeCallbacks,
     searchFocus: FocusRequester,
     bottomPadding: Dp,
+    suggestions: @Composable () -> Unit,
 ) {
     if (isIncognito) {
         IncognitoPage(bottomPadding = bottomPadding)
     } else {
-        HomePage(callbacks = callbacks, searchFocus = searchFocus, bottomPadding = bottomPadding)
+        HomePage(
+            callbacks = callbacks,
+            searchFocus = searchFocus,
+            bottomPadding = bottomPadding,
+            searchSuggestions = suggestions,
+        )
     }
 }
 
@@ -389,10 +416,19 @@ private fun rememberHomeCallbacks(
     hubViewModel: HubViewModel,
     webViewActions: WebViewActionsHandle,
     navController: NavHostController,
+    suggestions: AddressSuggestionsViewModel,
 ): HomeCallbacks {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    return remember(viewModel, hubViewModel, webViewActions, navController, keyboardController, focusManager) {
+    return remember(
+        viewModel,
+        hubViewModel,
+        webViewActions,
+        navController,
+        keyboardController,
+        focusManager,
+        suggestions,
+    ) {
         HomeCallbacks(
             onSearchSubmit = { input ->
                 viewModel.onHomeSubmit(input) { url ->
@@ -407,6 +443,9 @@ private fun rememberHomeCallbacks(
             },
             onSeeAllHistory = { navController.navigate(AppDestination.History.route) },
             onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
+            // Spec 022 R6 — Home's field starts empty, so it has no page address to compare with.
+            onSearchTextChange = { text -> suggestions.onTextChanged(text, currentPageUrl = null) },
+            onSearchFocusChange = { focused -> suggestions.onFocusChanged(focused) },
         )
     }
 }
@@ -535,21 +574,35 @@ private fun BrowserContent(
 private fun rememberAddressBarCallbacks(
     viewModel: BrowserViewModel,
     webViewActions: WebViewActionsHandle,
+    suggestions: AddressSuggestionsViewModel,
 ): AddressBarCallbacks {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    return remember(viewModel, webViewActions, keyboardController, focusManager) {
+    return remember(viewModel, webViewActions, keyboardController, focusManager, suggestions) {
+        val submit = {
+            viewModel.onAddressBarSubmit { url ->
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                webViewActions.loadUrl(url)
+            }
+            Unit
+        }
         AddressBarCallbacks(
-            onTextChange = viewModel::onAddressBarTextChange,
-            onFocusChange = viewModel::onAddressBarFocusChange,
-            onSubmit = {
-                viewModel.onAddressBarSubmit { url ->
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                    webViewActions.loadUrl(url)
-                }
+            onTextChange = { text ->
+                viewModel.onAddressBarTextChange(text)
+                suggestions.onTextChanged(text, currentPageUrl = viewModel.uiState.value.currentUrl)
             },
+            onFocusChange = { focused ->
+                viewModel.onAddressBarFocusChange(focused)
+                suggestions.onFocusChanged(focused)
+            },
+            onSubmit = submit,
             onClear = viewModel::onAddressBarClear,
+            // Spec 022 FR-019 — a chosen suggestion is submitted exactly like a typed address.
+            onSuggestion = { url ->
+                viewModel.onAddressBarTextChange(url)
+                submit()
+            },
         )
     }
 }

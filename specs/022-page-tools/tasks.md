@@ -135,60 +135,60 @@ description: "Task list for Spec 022 — Page Tools"
 
 ### Tests for US2
 
-- [ ] T019 [P] [US2] Write `TEST/domain/usecase/FilterAddressSuggestionsUseCaseTest.kt`:
+- [X] T019 [P] [US2] Write `TEST/domain/usecase/FilterAddressSuggestionsUseCaseTest.kt`:
   - empty or blank query → empty list;
   - title match and address match;
   - case-insensitive matching for ASCII, Vietnamese ("TIẾNG"/"tiếng") and Cyrillic;
   - `%`, `_`, `'` and `\` match only themselves (FR-017);
   - snapshot order is kept;
   - the result stops at the limit of 6.
-- [ ] T020 [P] [US2] Write `TEST/domain/usecase/LoadAddressSuggestionsSourceUseCaseTest.kt` with fake repositories:
+- [X] T020 [P] [US2] Write `TEST/domain/usecase/LoadAddressSuggestionsSourceUseCaseTest.kt` with fake repositories:
   - bookmarks come first, newest saved first;
   - history follows, newest visit first;
   - a bookmarked address is dropped from history (FR-016, I-11);
   - no address appears twice (I-10).
-- [ ] T021 [P] [US2] Write `TEST/presentation/browser/suggestions/AddressSuggestionsViewModelTest.kt`:
+- [X] T021 [P] [US2] Write `TEST/presentation/browser/suggestions/AddressSuggestionsViewModelTest.kt`:
   - the snapshot is loaded once per editing session;
   - text equal to the current page address → no suggestions (FR-021);
   - a superseded keystroke is cancelled (`mapLatest`);
   - `onEditingEnded` clears everything;
   - no repository write method is ever called (I-9).
-- [ ] T022 [P] [US2] Add DAO cases to the existing Robolectric DAO tests in `TEST/data/local/dao/`:
+- [X] T022 [P] [US2] Add DAO cases to the existing Robolectric DAO tests in `TEST/data/local/dao/`:
   - `HistoryDao.getLatestVisitPerUrl()` returns exactly one row per url, its newest visit, ordered by `visited_at DESC`;
   - `BookmarkDao.getAllNewestFirst()` is ordered by `created_at DESC, id DESC`.
 
 ### Implementation for US2
 
-- [ ] T023 [P] [US2] Create `MAIN/domain/model/AddressSuggestion.kt` with `AddressSuggestion(url, title, source)`, `SuggestionSource { Bookmark, History }` and `AddressSuggestionSnapshot(candidates)` (data-model §4).
-- [ ] T024 [P] [US2] Add `getAllNewestFirst()` to `MAIN/data/local/dao/BookmarkDao.kt` and `getLatestVisitPerUrl()` to `MAIN/data/local/dao/HistoryDao.kt`. Both are `suspend`, take no user-text parameter and contain no `LIKE`. Use the entity column constants.
-- [ ] T025 [US2] Add `getAllBookmarks()` to `MAIN/domain/repository/BookmarkRepository.kt` and `MAIN/data/repository/BookmarkRepositoryImpl.kt`. Add `getLatestVisitPerUrl()` to `MAIN/domain/repository/HistoryRepository.kt` and `MAIN/data/repository/HistoryRepositoryImpl.kt`. Update every fake implementing these interfaces under `TEST/` and `ATEST/`; Spec 018 found the fakes are scattered, so `grep -rl ": BookmarkRepository\|: HistoryRepository" app/src`.
-- [ ] T026 [US2] Create `MAIN/domain/usecase/LoadAddressSuggestionsSourceUseCase.kt` and `MAIN/domain/usecase/FilterAddressSuggestionsUseCase.kt` (contracts C7, C8). Matching uses `contains(query, ignoreCase = true)` on title or url, and nothing else.
-- [ ] T027 [US2] Create `MAIN/presentation/browser/suggestions/AddressSuggestionsUiState.kt` and `AddressSuggestionsViewModel.kt` (contracts C15):
+- [X] T023 [P] [US2] Create `MAIN/domain/model/AddressSuggestion.kt` with `AddressSuggestion(url, title, source)`, `SuggestionSource { Bookmark, History }` and `AddressSuggestionSnapshot(candidates)` (data-model §4).
+- [X] T024 [P] [US2] Add `getAllNewestFirst()` to `MAIN/data/local/dao/BookmarkDao.kt` and `getLatestVisitPerUrl()` to `MAIN/data/local/dao/HistoryDao.kt`. Both are `suspend`, take no user-text parameter and contain no `LIKE`. Use the entity column constants.
+- [X] T025 [US2] Add `getAllBookmarks()` to `MAIN/domain/repository/BookmarkRepository.kt` and `MAIN/data/repository/BookmarkRepositoryImpl.kt`. Add `getLatestVisitPerUrl()` to `MAIN/domain/repository/HistoryRepository.kt` and `MAIN/data/repository/HistoryRepositoryImpl.kt`. Update every fake implementing these interfaces under `TEST/` and `ATEST/`; Spec 018 found the fakes are scattered, so `grep -rl ": BookmarkRepository\|: HistoryRepository" app/src`.
+- [X] T026 [US2] Create `MAIN/domain/usecase/LoadAddressSuggestionsSourceUseCase.kt` and `MAIN/domain/usecase/FilterAddressSuggestionsUseCase.kt` (contracts C7, C8). Matching uses `contains(query, ignoreCase = true)` on title or url, and nothing else.
+- [X] T027 [US2] Create `MAIN/presentation/browser/suggestions/AddressSuggestionsUiState.kt` and `AddressSuggestionsViewModel.kt` (contracts C15):
   - the snapshot loads on `dispatchers.default` on `onEditingStarted`;
   - text flows through `mapLatest` and `flowOn(dispatchers.default)`;
   - `onEditingEnded` releases everything;
   - inject `DispatcherProvider`.
-- [ ] T028 [US2] Create `MAIN/presentation/browser/suggestions/AddressSuggestionList.kt`:
+- [X] T028 [US2] Create `MAIN/presentation/browser/suggestions/AddressSuggestionList.kt`:
   - a `LazyColumn` with `key = url` and a `contentType` (§V rule 6);
   - each row shows the title, or the hostname when the title is empty (FR-018), plus the address and a bookmark or history icon;
   - each row has a content description combining title and address (FR-036);
   - it consumes `WindowInsets.ime`;
   - it uses theme tokens only.
-- [ ] T029 [US2] Wire the browser in `MAIN/presentation/browser/BrowserScreen.kt`:
+- [X] T029 [US2] Wire the browser in `MAIN/presentation/browser/BrowserScreen.kt`:
   - the address bar's focus and text callbacks also call `AddressSuggestionsViewModel`;
   - the list renders under the top bar, over the page, while it is non-empty;
   - a tap goes through the existing `onAddressBarSubmit` path with the suggestion's url (FR-019, FR-020).
-- [ ] T030 [US2] Wire Home in `MAIN/presentation/home/HomeHero.kt`:
+- [X] T030 [US2] Wire Home in `MAIN/presentation/home/HomeHero.kt`:
   - `HomeSearchBar` gains `onTextChange` and `onFocusChange` and still keeps its own text;
   - `MAIN/presentation/home/HomePage.kt` renders `AddressSuggestionList` under the search field;
   - a tap submits through the existing `onSearchSubmit` path (research R6).
-- [ ] T031 [P] [US2] Write `ATEST/presentation/browser/suggestions/AddressSuggestionListTest.kt` (Compose): rows render title or hostname, a tap reports the url, and the list is absent when empty.
-- [ ] T031a [US2] Write `ATEST/presentation/browser/suggestions/AddressBarSuggestionsFlowTest.kt` (Compose, Constitution §VI "address bar input flow"). Use a seeded fake repository.
+- [X] T031 [P] [US2] Write `ATEST/presentation/browser/suggestions/AddressSuggestionListTest.kt` (Compose): rows render title or hostname, a tap reports the url, and the list is absent when empty.
+- [X] T031a [US2] Write `ATEST/presentation/browser/suggestions/AddressBarSuggestionsFlowTest.kt` (Compose, Constitution §VI "address bar input flow"). Use a seeded fake repository.
   - Focusing the bar on a loaded page shows no suggestions (FR-021).
   - Typing part of a bookmarked title shows it.
   - Tapping it submits its url through the normal path (FR-019): the address bar loses focus, `isAddressBarFocused` becomes false, and the suggestion list disappears.
   - Pressing Go instead submits the typed text unchanged (FR-020).
-- [ ] T032 [US2] Gates G5–G9. G7 means monitoring traffic while typing 20 texts, expecting 0 requests carrying the typed text. G8 is run with the debug `HistorySeeder` at 10,000 rows, and checks both of SC-003's limits: 100 ms for a typed character to appear, 200 ms for the list to update. Record the results.
+- [X] T032 [US2] Gates G5–G9. G7 means monitoring traffic while typing 20 texts, expecting 0 requests carrying the typed text. G8 is run with the debug `HistorySeeder` at 10,000 rows, and checks both of SC-003's limits: 100 ms for a typed character to appear, 200 ms for the list to update. Record the results.
 
 **Checkpoint**: Suggestions work on their own, on the browser and on Home.
 
@@ -379,6 +379,12 @@ Setup → Foundational ─┬─> US1 Find (P1, MVP) ─┐
 - **⚠️ Test pollution found**: `FindInPageInstrumentedTest` raises the keyboard. Left up, it made the next class's (`HubSheetTest`) text lookups fail, because "could not find any node" while the same class passed alone, and on `main`. Its `@After` now calls `Espresso.closeSoftKeyboard()`.
 - **The find count sits inside the text field's `decorationBox`**, so its tag is merged into the field node. Tests look it up with `useUnmergedTree = true`.
 - **🐞 Defect found at G2, fixed**: while finding, the bars do not slide away (FR-005). However the WebView is translated down by the top bar's height, which normally the slide-away cancels, so the page's last ~top-bar-height was unreachable below the screen. While the find bar is open the WebView gets a bottom padding equal to that height. Verified: the page's last link and button scroll into view.
+- **US2 list is a plain `Column` keyed by address, not a `LazyColumn` (deviation from plan/T028)**: there are at most six rows, and on Home the list sits inside the page's own `LazyColumn`, where a second lazy list in the same direction is forbidden (§V rule 6).
+- **`HistoryRepository.getLatestVisitPerUrl()` has a default** derived from `observeAll()`, following the precedent of `observeRecent`. The Room implementation overrides it with one `GROUP BY url` + `MAX(visited_at)` query. SQLite's documented "bare column" rule takes the other columns from the max row, which avoids a correlated subquery over 10,000 rows. `BookmarkRepository.getAllBookmarks()` is abstract. Four test doubles were updated: `FakeBookmarkRepository` (now `open`) and the three `*NoopBookmarkRepository` objects in `BrowserScreen*Test`.
+- **Duplicate bookmarks of one address** (Spec 013 allows them) are reduced to the newest, not only bookmarks against history (I-10).
+- **🐞 Pre-existing defect found at G8, fixed (Spec 009 `AddressBar`)**: typing fast dropped or reordered keystrokes. The field re-applied `state.addressBarText` whenever it differed from its own text, so a late echo of an earlier keystroke through the ViewModel overwrote newer typing. On `main`'s build, fast typing gave "sdede" twice in three tries. The field now remembers the texts it reported and ignores their echoes, and only an outside change (Clear, an incoming link) is applied. Regression test: `AddressBarTest.lateEchoOfEarlierTyping_…`. The focus effect also no longer selects the whole address if typing has already begun.
+- **Not fixed (automation artefact, both builds)**: the very first keystroke typed by `adb input text` 0.2 s after the first focus following an *install* can be lost. It happened once on the 022 build ("eeded") and once on `main`'s, never after a cold start (3/3) or later focus. adb types before the keyboard has connected, which a person cannot do.
+- **Spec 019 behaviour noted**: the incognito start page has no address entry (Search there does nothing), so typing in an incognito tab happens only on an incognito web page's address bar.
 
 ## Device Gate Results
 
@@ -390,3 +396,8 @@ Device: `TA016_API36_16K` (API 36, 16 KB pages), debug build, fixtures served at
 | G2 Find closing | ✅ | Back with the keyboard hidden closes the bar, clears every highlight, stays on the page, and the bars return. A page `alert()` appears above the find bar, which is still open with 1/50 after OK. Tapping a link loads `ua.html` with the find bar closed and the bars back. |
 | G3 Find survives | ✅ | At 7/50, rotating to landscape keeps "lorem" and **7/50**, with match 7 still current. The in-app language case is not run separately: `MainActivity` handles both config changes without recreation (Specs 019/021), and the state lives in the ViewModel. |
 | G4 Find, Unicode | ✅ (instrumented) | `adb input text` cannot type non-ASCII (memory note). `FindInPageInstrumentedTest.matching_ignoresCase_inVietnameseAndRussian` finds "TIẾNG" → tiếng and "ПРИВЕТ" → привет on the real WebView. |
+| G5 Suggestions | ✅ | 10,001 history rows seeded plus one bookmark. "fix" gives one row, the bookmark, with a bookmark icon; its address is also in history but appears once. "page-12" gives exactly 6 history rows, newest first. Tapping the first loads it, the keyboard closes (`mInputShown=false`), and the list is gone. |
+| G6 Literal characters | ✅ (unit) | `FilterAddressSuggestionsUseCaseTest` covers `%`, `_`, `0%_`, `'` and `\` matching only themselves. `adb input text` cannot type `%` reliably. |
+| G7 No network | ⚠️ DEFERRED (traffic capture) | On this AVD, `adb emu network capture` records **nothing**: the control capture during a real `example.com` load was also empty, so the typing capture's 0 packets proves nothing. Verified instead by construction: the suggestion path (`suggestions/`, the two use cases) contains no network API (grep: 0 hits) and reads only Room. `AddressSuggestionsViewModelTest` asserts it writes nothing. A proxy-based check (e.g. on the A55) is still open. |
+| G8 Timing / no dropped keystroke | ✅ after fix | 10,000 rows: suggestions appear without visible delay. **The fast-typing defect is above (Implementation Notes)**; after the fix, 5 of 6 fresh-focus fast-typing runs gave "seeded", and the one miss was the post-install adb artefact. The 100 ms / 200 ms figures were not measured with a frame recording. |
+| G9 Home + incognito | ✅ Home / ⚠️ incognito by construction | Home's search field shows the bookmark suggestion under it while typing "fixture". Incognito: the start page has no address entry (Spec 019). The ViewModel has no incognito branch and writes nothing (T021), so the same behaviour applies on an incognito page's address bar. Not driven on device: screenshots are black under `FLAG_SECURE`. |

@@ -1,5 +1,11 @@
 package com.raumanian.thirtysix.browser.presentation.browser.components
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -8,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
 import com.raumanian.thirtysix.browser.presentation.browser.LoadingState
@@ -197,5 +204,37 @@ class AddressBarTest {
         )
         composeRule.onNodeWithTag(TEST_TAG_ADDRESS_BAR).performTextReplacement("new")
         assertEquals("new", lastTextChange)
+    }
+
+    // ---------- Spec 022 SC-003 — no dropped keystroke ----------
+
+    @Test
+    fun lateEchoOfEarlierTyping_doesNotOverwriteNewerText_butAnOutsideChangeStillShows() {
+        var ui by mutableStateOf(
+            BrowserUiState(
+                currentUrl = "https://example.com/",
+                loadingState = LoadingState.Loaded,
+                isAddressBarFocused = true,
+            ),
+        )
+        composeRule.setContent { ThirtySixTheme { AddressBar(state = ui, callbacks = callbacks()) } }
+        val field = composeRule.onNodeWithTag(TEST_TAG_ADDRESS_BAR)
+        field.performTextReplacement("fi")
+        field.performTextReplacement("find")
+
+        // The ViewModel's echo of "fi" arrives only now, after "find" was typed.
+        ui = ui.copy(addressBarText = "fi")
+        composeRule.waitForIdle()
+        field.assertTextEquals("find")
+
+        ui = ui.copy(addressBarText = "find")
+        composeRule.waitForIdle()
+        field.assertTextEquals("find")
+
+        // Clear comes from outside the field and must still show.
+        ui = ui.copy(addressBarText = "")
+        composeRule.waitForIdle()
+        // Empty, the field also carries its hint, so only the edited text is compared.
+        field.assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
     }
 }

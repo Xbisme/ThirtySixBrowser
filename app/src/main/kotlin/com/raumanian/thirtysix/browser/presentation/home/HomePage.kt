@@ -60,6 +60,10 @@ data class HomeCallbacks(
     val onOpenUrl: (String) -> Unit,
     val onSeeAllHistory: () -> Unit,
     val onNewIncognitoTab: () -> Unit,
+    /** Spec 022 R6 — the search field's text, for address suggestions. */
+    val onSearchTextChange: (String) -> Unit = {},
+    /** Spec 022 R6 — the search field gained or lost focus: a suggestion session starts or ends. */
+    val onSearchFocusChange: (Boolean) -> Unit = {},
 )
 
 /**
@@ -75,6 +79,8 @@ fun HomePage(
     searchFocus: FocusRequester,
     bottomPadding: Dp,
     modifier: Modifier = Modifier,
+    // Spec 022 R6 — address suggestions, drawn under the search field.
+    searchSuggestions: @Composable () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
     inviteViewModel: DefaultBrowserInviteViewModel = hiltViewModel(),
 ) {
@@ -104,6 +110,7 @@ fun HomePage(
         searchFocus = searchFocus,
         bottomPadding = bottomPadding,
         modifier = modifier,
+        searchSuggestions = searchSuggestions,
         inviteCard = if (showInvite) {
             { DefaultBrowserInviteCard(onAction = requestDefaultBrowser, onDismiss = inviteViewModel::onDismiss) }
         } else {
@@ -122,6 +129,7 @@ fun HomeContent(
     searchFocus: FocusRequester,
     bottomPadding: Dp,
     modifier: Modifier = Modifier,
+    searchSuggestions: @Composable () -> Unit = {},
     // Spec 020 FR-024 — the default-browser invitation, directly under the hero; null hides it.
     inviteCard: (@Composable () -> Unit)? = null,
 ) {
@@ -142,6 +150,11 @@ fun HomeContent(
                 onShortcut = onShortcut,
                 onNewIncognitoTab = callbacks.onNewIncognitoTab,
                 searchFocus = searchFocus,
+                search = HomeSearchHooks(
+                    onTextChange = callbacks.onSearchTextChange,
+                    onFocusChange = callbacks.onSearchFocusChange,
+                    suggestions = searchSuggestions,
+                ),
             )
         }
         if (inviteCard != null) {

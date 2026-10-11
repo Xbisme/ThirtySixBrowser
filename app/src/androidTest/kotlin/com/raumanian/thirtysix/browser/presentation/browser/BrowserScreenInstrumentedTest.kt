@@ -257,6 +257,8 @@ private object InstrumentedNoopBookmarkRepository :
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override fun observeRecentBookmarks(limit: Int) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+    override suspend fun getAllBookmarks() = emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>()
+
     override fun searchBookmarks(query: String) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
     override suspend fun getBookmark(id: Long) = null
