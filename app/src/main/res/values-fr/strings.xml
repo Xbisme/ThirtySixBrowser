@@ -348,4 +348,25 @@
     <string name="settings_clear_category_site_permissions">Autorisations des sites</string>
     <string name="settings_clear_category_site_permissions_description">Les sites redemanderont la caméra, le micro et la position</string>
     <string name="file_chooser_title">Choisir un fichier</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">Outils de la page</string>
+    <string name="hub_tile_find_in_page">Rechercher dans la page</string>
+    <string name="hub_tile_share">Partager</string>
+    <string name="hub_tile_print">Imprimer</string>
+    <string name="hub_tile_desktop_site">Version ordinateur</string>
+    <string name="hub_tile_text_size">Taille du texte</string>
+    <string name="hub_tile_state_on">Activé</string>
+    <string name="hub_tile_state_off">Désactivé</string>
+    <string name="find_in_page_hint">Rechercher dans la page</string>
+    <string name="find_in_page_count_cd">Résultat %1$d sur %2$d</string>
+    <string name="find_in_page_no_matches_cd">Aucun résultat</string>
+    <string name="find_in_page_previous">Résultat précédent</string>
+    <string name="find_in_page_next">Résultat suivant</string>
+    <string name="find_in_page_close">Fermer la recherche</string>
+    <string name="settings_text_size_title">Taille du texte</string>
+    <string name="text_size_level">%1$d %%</string>
+    <string name="suggestion_bookmark_cd">Favori : %1$s, %2$s</string>
+    <string name="suggestion_history_cd">Historique : %1$s, %2$s</string>
+    <string name="share_page_title">Partager la page</string>
 </resources>

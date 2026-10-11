@@ -340,4 +340,25 @@
     <string name="settings_clear_category_site_permissions">サイトの権限</string>
     <string name="settings_clear_category_site_permissions_description">サイトがカメラ、マイク、位置情報をもう一度確認します</string>
     <string name="file_chooser_title">ファイルを選択</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">ページツール</string>
+    <string name="hub_tile_find_in_page">ページ内検索</string>
+    <string name="hub_tile_share">共有</string>
+    <string name="hub_tile_print">印刷</string>
+    <string name="hub_tile_desktop_site">PC版サイト</string>
+    <string name="hub_tile_text_size">文字サイズ</string>
+    <string name="hub_tile_state_on">オン</string>
+    <string name="hub_tile_state_off">オフ</string>
+    <string name="find_in_page_hint">ページ内検索</string>
+    <string name="find_in_page_count_cd">%2$d件中%1$d件目</string>
+    <string name="find_in_page_no_matches_cd">一致なし</string>
+    <string name="find_in_page_previous">前の一致</string>
+    <string name="find_in_page_next">次の一致</string>
+    <string name="find_in_page_close">検索を閉じる</string>
+    <string name="settings_text_size_title">文字サイズ</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">ブックマーク: %1$s、%2$s</string>
+    <string name="suggestion_history_cd">履歴: %1$s、%2$s</string>
+    <string name="share_page_title">ページを共有</string>
 </resources>

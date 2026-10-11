@@ -201,6 +201,8 @@ private fun buildConfiguredWebView(
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
+    // Spec 022 US1 — find-in-page results go to the find bar's state.
+    wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }
     // Spec 021 US4 — the long-press menu on links and images; anything else keeps selection.
     wv.setOnLongClickListener { onLongPress(wv, callbacks.pageRequests) }
     // Spec 019 R7 — feed the sliding bars. API 23+, below minSdk 24.
@@ -245,6 +247,10 @@ private fun wireActions(wv: WebView, actions: WebViewActionsHandle, host: WebVie
         }
     }
     actions.stopLoading = { wv.stopLoading() }
+    // Spec 022 US1 — find in page, on the WebView's own search (research R3).
+    actions.findAll = { text -> wv.findAllAsync(text) }
+    actions.findNext = { forward -> wv.findNext(forward) }
+    actions.clearMatches = { wv.clearMatches() }
     // Spec 019 R1 — the reserved Home address is never handed to the WebView.
     // Spec 021 R5 — an adopted pop-up is already navigating for its opener: the tab switch's
     // load of the placeholder address is skipped once.

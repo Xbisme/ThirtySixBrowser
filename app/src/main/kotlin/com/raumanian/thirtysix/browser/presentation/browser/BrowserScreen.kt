@@ -38,12 +38,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserErrorState
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTopBar
+import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
+import com.raumanian.thirtysix.browser.presentation.browser.components.HubPageToolsState
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
 import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
@@ -60,6 +63,8 @@ import com.raumanian.thirtysix.browser.presentation.home.HomePage
 import com.raumanian.thirtysix.browser.presentation.incognito.IncognitoPage
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
  * Spec 007–018 browser screen; Spec 019 rebuilt its chrome (research R7, R8, R12, R16).
@@ -112,6 +117,14 @@ fun BrowserScreen(
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
     HomeBackHandlers(state = state, viewModel = viewModel)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = incomingContent)
+    // Spec 022 US1 — only whether the find bar is open is read here; its text and count are
+    // collected by the bar itself (§V rule 3).
+    val findOpen by remember(viewModel) {
+        viewModel.findInPage.map { it.isOpen }.distinctUntilChanged()
+    }.collectAsStateWithLifecycle(initialValue = false)
+    val findCallbacks = rememberFindCallbacks(viewModel, webViewActions)
+    // FR-010 — composed after every other back handler, so Back closes the find bar first.
+    BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
     BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
     IncomingContentEffects(
         hooks = incomingContent,
@@ -129,6 +142,7 @@ fun BrowserScreen(
         if (state.loadingState !is LoadingState.Loaded || state.isAddressBarFocused) chrome.show()
     }
 
+    val findOpenNow by rememberUpdatedState(findOpen)
     val density = LocalDensity.current
     val topInset = with(density) { topBarHeightPx.toDp() }
     val bottomInset = with(density) { bottomBarHeightPx.toDp() }
@@ -139,11 +153,14 @@ fun BrowserScreen(
             viewModel = viewModel,
             webViewActions = webViewActions,
             activeTabId = activeTab?.id ?: 0L,
-            onScrollDelta = chrome::onScrollDelta,
+            onScrollDelta = rememberScrollDeltaHandler(chrome) { findOpenNow },
             pageRequests = pageSession,
             takePopup = { activeTab?.url?.let(popupTabs::take) },
             modifier = Modifier
                 .fillMaxSize()
+                // FR-005 — while finding, the bars do not slide away, so the page is shortened by the
+                // find bar's height: otherwise its last part would sit below the screen, unreachable.
+                .padding(bottom = findBarPagePadding(findOpen, topInset))
                 .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
         )
         (state.loadingState as? LoadingState.Failed)?.let { failed ->
@@ -160,47 +177,64 @@ fun BrowserScreen(
                 bottomPadding = bottomInset,
             )
         }
-        if (!state.isHomeContent) {
-            BrowserTopBar(
-                state = state,
-                addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions),
-                onStarTapped = viewModel::onStarTapped,
-                onReloadOrStop = {
-                    if (state.loadingState is LoadingState.Loading) {
-                        webViewActions.stopLoading()
-                        viewModel.onLoadStopped()
-                    } else {
-                        webViewActions.reload()
-                    }
-                },
-                progress = { progress.value },
-                focusRequester = addressFocus,
+        FindOrTopBar(
+            findOpen = findOpen,
+            showTopBar = !state.isHomeContent,
+            findBar = {
+                FindInPageBar(
+                    stateFlow = viewModel.findInPage,
+                    isIncognito = state.isIncognito,
+                    callbacks = findCallbacks,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .onSizeChanged { topBarHeightPx = it.height },
+                )
+            },
+            topBar = {
+                BrowserTopBar(
+                    state = state,
+                    addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions),
+                    onStarTapped = viewModel::onStarTapped,
+                    onReloadOrStop = {
+                        if (state.loadingState is LoadingState.Loading) {
+                            webViewActions.stopLoading()
+                            viewModel.onLoadStopped()
+                        } else {
+                            webViewActions.reload()
+                        }
+                    },
+                    progress = { progress.value },
+                    focusRequester = addressFocus,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .onSizeChanged { topBarHeightPx = it.height }
+                        .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
+                )
+            },
+        )
+        // FR-005 — no bottom bar while finding (I-7).
+        UnlessFinding(findOpen) {
+            BrowserBottomBar(
+                tabCount = tabCount,
+                isIncognito = state.isIncognito,
+                isHomeActive = state.isHomeContent,
+                callbacks = BrowserBottomBarCallbacks(
+                    onHome = viewModel::onHomePressed,
+                    onSearch = {
+                        chrome.show()
+                        if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
+                    },
+                    onNewTab = viewModel::onLongPressNewTab,
+                    onTabs = { navController.navigate(AppDestination.Tabs.route) },
+                    onTabsLongPress = viewModel::onLongPressNewTab,
+                    onMenu = { hubOpen = true },
+                ),
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .onSizeChanged { topBarHeightPx = it.height }
-                    .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
+                    .align(Alignment.BottomCenter)
+                    .onSizeChanged { bottomBarHeightPx = it.height }
+                    .graphicsLayer { translationY = chrome.hiddenFraction * size.height },
             )
         }
-        BrowserBottomBar(
-            tabCount = tabCount,
-            isIncognito = state.isIncognito,
-            isHomeActive = state.isHomeContent,
-            callbacks = BrowserBottomBarCallbacks(
-                onHome = viewModel::onHomePressed,
-                onSearch = {
-                    chrome.show()
-                    if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
-                },
-                onNewTab = viewModel::onLongPressNewTab,
-                onTabs = { navController.navigate(AppDestination.Tabs.route) },
-                onTabsLongPress = viewModel::onLongPressNewTab,
-                onMenu = { hubOpen = true },
-            ),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .onSizeChanged { bottomBarHeightPx = it.height }
-                .graphicsLayer { translationY = chrome.hiddenFraction * size.height },
-        )
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomInset),
@@ -209,7 +243,11 @@ fun BrowserScreen(
         FullscreenOverlay(controller = pageSession.fullscreen)
     }
 
+    val pageToolHandler = rememberPageToolHandler(viewModel = viewModel, chrome = chrome)
     if (hubOpen) {
+        val available = remember(state.isHomeContent, state.loadingState) {
+            PageToolsAvailability.of(state.isHomeContent, state.loadingState)
+        }
         BrowserHub(
             state = state,
             hubViewModel = hubViewModel,
@@ -220,6 +258,12 @@ fun BrowserScreen(
                 quickSettingsUsed = true
                 quickSettingRequest = setting
             },
+            pageTools = HubPageToolsState(
+                available = available,
+                isDesktopMode = false,
+                textSizePercent = BrowserLimits.TEXT_SIZE_PERCENT_100,
+            ),
+            onPageTool = pageToolHandler,
         )
     }
     if (quickSettingsUsed) {
@@ -277,6 +321,8 @@ private fun BrowserHub(
     navController: NavHostController,
     onDismiss: () -> Unit,
     onQuickSetting: (QuickSetting) -> Unit,
+    pageTools: HubPageToolsState,
+    onPageTool: (PageTool) -> Unit,
 ) {
     HubSheet(
         canGoBack = state.canGoBack,
@@ -294,7 +340,9 @@ private fun BrowserHub(
             onHistory = { navController.navigate(AppDestination.History.route) },
             onBookmarks = { navController.navigate(AppDestination.Bookmarks.route) },
             onQuickSetting = onQuickSetting,
+            onPageTool = onPageTool,
         ),
+        pageTools = pageTools,
     )
 }
 
@@ -460,6 +508,7 @@ private fun BrowserContent(
                     onLoadFailed = viewModel::onLoadFailed,
                     onDownloadRequested = onDownloadRequested,
                     pageRequests = pageRequests,
+                    onFindResult = viewModel::onFindResult,
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
                     onUrlChange = viewModel::onUrlChanged,

@@ -340,4 +340,25 @@
     <string name="settings_clear_category_site_permissions">사이트 권한</string>
     <string name="settings_clear_category_site_permissions_description">사이트에서 카메라, 마이크, 위치를 다시 묻습니다</string>
     <string name="file_chooser_title">파일 선택</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">페이지 도구</string>
+    <string name="hub_tile_find_in_page">페이지에서 찾기</string>
+    <string name="hub_tile_share">공유</string>
+    <string name="hub_tile_print">인쇄</string>
+    <string name="hub_tile_desktop_site">데스크톱 사이트</string>
+    <string name="hub_tile_text_size">글자 크기</string>
+    <string name="hub_tile_state_on">켜짐</string>
+    <string name="hub_tile_state_off">꺼짐</string>
+    <string name="find_in_page_hint">페이지에서 찾기</string>
+    <string name="find_in_page_count_cd">%2$d개 중 %1$d번째</string>
+    <string name="find_in_page_no_matches_cd">일치 항목 없음</string>
+    <string name="find_in_page_previous">이전 항목</string>
+    <string name="find_in_page_next">다음 항목</string>
+    <string name="find_in_page_close">찾기 닫기</string>
+    <string name="settings_text_size_title">글자 크기</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">북마크: %1$s, %2$s</string>
+    <string name="suggestion_history_cd">기록: %1$s, %2$s</string>
+    <string name="share_page_title">페이지 공유</string>
 </resources>

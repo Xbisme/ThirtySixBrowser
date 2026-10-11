@@ -60,6 +60,7 @@ internal fun HubSheet(
     canGoBack: Boolean,
     canGoForward: Boolean,
     callbacks: HubCallbacks,
+    pageTools: HubPageToolsState,
     onDismiss: () -> Unit,
     hasActiveDownloadsFlow: StateFlow<Boolean>,
     modifier: Modifier = Modifier,
@@ -99,6 +100,7 @@ internal fun HubSheet(
                 coinIcon = AppIcons.IncognitoFilled,
                 onClick = closeThen(callbacks.onNewIncognitoTab),
             )
+            HubPageTools(state = pageTools, onPageTool = { tool -> closeThen { callbacks.onPageTool(tool) }() })
             HubPlaces(callbacks = callbacks, closeThen = closeThen)
             Text(
                 text = stringResource(R.string.hub_quick_settings_title),

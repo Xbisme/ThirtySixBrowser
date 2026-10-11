@@ -36,6 +36,15 @@ internal class WebViewActionsHandle {
      */
     var loadUrl: (String) -> Unit = {}
 
+    /** Spec 022 FR-007 — highlights every match of the text; results arrive through the find listener. */
+    var findAll: (String) -> Unit = {}
+
+    /** Spec 022 FR-008 — moves to the next (or previous) match, wrapping at both ends. */
+    var findNext: (forward: Boolean) -> Unit = {}
+
+    /** Spec 022 FR-010 — removes every find highlight from the page. */
+    var clearMatches: () -> Unit = {}
+
     /**
      * Points every action back at a no-op. Called when the renderer process behind the
      * current WebView goes away: that WebView must not be used again, and the replacement
@@ -47,5 +56,8 @@ internal class WebViewActionsHandle {
         reload = {}
         stopLoading = {}
         loadUrl = {}
+        findAll = {}
+        findNext = {}
+        clearMatches = {}
     }
 }

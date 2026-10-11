@@ -23,19 +23,19 @@ description: "Task list for Spec 022 — Page Tools"
 
 ## Phase 1: Setup
 
-- [ ] T001 [P] Add constants to `MAIN/core/constants/BrowserLimits.kt`:
+- [X] T001 [P] Add constants to `MAIN/core/constants/BrowserLimits.kt`:
   - `TEXT_SIZE_PERCENT_50 = 50`, `_75`, `_90`, `_100`, `_110`, `_125`, `_150`, `_175`, `_200`;
   - `MAX_ADDRESS_SUGGESTIONS = 6`;
   - `MAX_FIND_QUERY_LENGTH = 200` ("Find text MUST be limited to 200 characters", FR-013).
-- [ ] T002 [P] Add the string keys for all six stories to `RES/values/strings.xml`, and translate them in `RES/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml`. Keep "ThirtySix" in Latin script.
+- [X] T002 [P] Add the string keys for all six stories to `RES/values/strings.xml`, and translate them in `RES/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml`. Keep "ThirtySix" in Latin script.
   - Hub section title and tile labels: Find in page, Share, Print, Desktop site, Text size.
   - Find bar: the field hint, a `%1$d/%2$d` count, and the Previous / Next / Close content descriptions.
   - The Settings Text size row title and the chooser title.
   - The suggestion row content description (title + address).
   - The share chooser title.
   - The "on" / "off" state descriptions.
-- [ ] T003 [P] Add Material Symbols vector drawables to `RES/drawable/`: `ic_find_in_page`, `ic_share`, `ic_print`, `ic_desktop`, `ic_text_size`. Use the outlined 24dp versions, matching the existing `AppIcons` set. Register them in `MAIN/presentation/theme/AppIcons.kt`.
-- [ ] T004 [P] Create the local fixtures:
+- [X] T003 [P] Add Material Symbols vector drawables to `RES/drawable/`: `ic_find_in_page`, `ic_share`, `ic_print`, `ic_desktop`, `ic_text_size`. Use the outlined 24dp versions, matching the existing `AppIcons` set. Register them in `MAIN/presentation/theme/AppIcons.kt`.
+- [X] T004 [P] Create the local fixtures:
   - `FIX/find.html`: exactly 50 × "lorem", one "tiếng", one "привет", and enough text to scroll;
   - `FIX/ua.html`: prints `navigator.userAgent`, `navigator.userAgentData?.mobile` and `window.innerWidth`.
 
@@ -47,21 +47,21 @@ description: "Task list for Spec 022 — Page Tools"
 
 **Purpose**: the hub's page-tools section and its availability rule, which every story plugs into (research R9).
 
-- [ ] T005 Create `MAIN/presentation/browser/PageTools.kt` with:
+- [X] T005 Create `MAIN/presentation/browser/PageTools.kt` with:
   - `enum class PageTool { Find, Share, DesktopSite, TextSize, Print }`;
   - `object PageToolsAvailability { fun of(isHomeContent, loadingState): Set<PageTool> }`, implementing research R9's table exactly. On Home: `{TextSize}`. While loading: every tool except Print. When loaded: all five. On failure: `{Share, DesktopSite, TextSize}`.
-- [ ] T006 [P] Write `TEST/presentation/browser/PageToolsAvailabilityTest.kt`: one case per row of the R9 table, including the incognito start page (`isHomeContent = true`).
-- [ ] T007 [P] Extend `QuickTile` in `MAIN/presentation/components/QuickTile.kt` with two defaulted parameters (contracts C16):
+- [X] T006 [P] Write `TEST/presentation/browser/PageToolsAvailabilityTest.kt`: one case per row of the R9 table, including the incognito start page (`isHomeContent = true`).
+- [X] T007 [P] Extend `QuickTile` in `MAIN/presentation/components/QuickTile.kt` with two defaulted parameters (contracts C16):
   - `selected: Boolean? = null`: when non-null, the tile uses `Modifier.toggleable` semantics with an on/off `stateDescription` and a selected fill from `MaterialTheme.colorScheme` (no inline colour);
   - `value: String? = null`: a second line in `MaterialTheme.typography.labelSmall`.
 
   Existing call sites must stay unchanged.
-- [ ] T008 Add `onPageTool: (PageTool) -> Unit` to `HubCallbacks` in `MAIN/presentation/browser/components/HubCallbacks.kt`. Add a `HubPageTools` section to `MAIN/presentation/browser/components/HubSheet.kt`, placed above the places row, in two rows:
+- [X] T008 Add `onPageTool: (PageTool) -> Unit` to `HubCallbacks` in `MAIN/presentation/browser/components/HubCallbacks.kt`. Add a `HubPageTools` section to `MAIN/presentation/browser/components/HubSheet.kt`, placed above the places row, in two rows:
   - Find · Share · Print
   - Desktop site · Text size
 
   The section receives `available: Set<PageTool>`, `isDesktopMode: Boolean` and `textSizeLabel: String`. It hides unavailable tiles (FR-002) and goes through `closeThen` (FR-004). Give each tile a test tag constant at the top of the file.
-- [ ] T009 Wire the section in `MAIN/presentation/browser/BrowserScreen.kt`:
+- [X] T009 Wire the section in `MAIN/presentation/browser/BrowserScreen.kt`:
   - pass `PageToolsAvailability.of(state.isHomeContent, state.loadingState)`, remembered on those two keys;
   - route `onPageTool` to a `when` whose branches each story fills in, initially no-ops;
   - until US4 and US5 land, pass `isDesktopMode = false` and the label for `AppDefaults` text size ("100%"). T043 and T052 replace them with the real values.
@@ -78,7 +78,7 @@ description: "Task list for Spec 022 — Page Tools"
 
 ### Tests for US1
 
-- [ ] T010 [P] [US1] Write `TEST/presentation/browser/BrowserViewModelFindTest.kt` covering data-model §3:
+- [X] T010 [P] [US1] Write `TEST/presentation/browser/BrowserViewModelFindTest.kt` covering data-model §3:
   - open gives "" and 0/0;
   - a query is truncated at 200 characters;
   - a result `(o, n)` becomes `(o+1)/n`;
@@ -88,7 +88,7 @@ description: "Task list for Spec 022 — Page Tools"
   - a change of active tab closes the bar;
   - close requests `clearMatches`;
   - `current ≤ total` always (I-6).
-- [ ] T011 [P] [US1] Write `ATEST/presentation/browser/FindInPageInstrumentedTest.kt` against `find.html`:
+- [X] T011 [P] [US1] Write `ATEST/presentation/browser/FindInPageInstrumentedTest.kt` against `find.html`:
   - "lorem" → 1/50;
   - Next ×50 wraps to 1;
   - "zzz" → 0/0 with Previous and Next disabled;
@@ -97,31 +97,31 @@ description: "Task list for Spec 022 — Page Tools"
 
 ### Implementation for US1
 
-- [ ] T012 [P] [US1] Create `MAIN/presentation/browser/FindInPageState.kt` (`@Immutable data class FindInPageState(isOpen, query, current, total)`, contracts C10).
-- [ ] T013 [US1] Add `findAll`, `findNext(forward)` and `clearMatches` to `MAIN/presentation/browser/WebViewActionsHandle.kt`. Reset them in `detach()`.
-- [ ] T014 [US1] In `MAIN/presentation/browser/BrowserWebView.kt`, wire the find actions in `wireActions`. Set `wv.setFindListener { ordinal, total, _ -> callbacks.onFindResult(ordinal, total) }`. Add `onFindResult` to `MAIN/presentation/browser/BrowserWebViewCallbacks.kt`.
-- [ ] T015 [US1] In `MAIN/presentation/browser/BrowserViewModel.kt`, expose `findInPage: StateFlow<FindInPageState>` as a separate flow, not a field of `BrowserUiState` (§V rule 3). Add:
+- [X] T012 [P] [US1] Create `MAIN/presentation/browser/FindInPageState.kt` (`@Immutable data class FindInPageState(isOpen, query, current, total)`, contracts C10).
+- [X] T013 [US1] Add `findAll`, `findNext(forward)` and `clearMatches` to `MAIN/presentation/browser/WebViewActionsHandle.kt`. Reset them in `detach()`.
+- [X] T014 [US1] In `MAIN/presentation/browser/BrowserWebView.kt`, wire the find actions in `wireActions`. Set `wv.setFindListener { ordinal, total, _ -> callbacks.onFindResult(ordinal, total) }`. Add `onFindResult` to `MAIN/presentation/browser/BrowserWebViewCallbacks.kt`.
+- [X] T015 [US1] In `MAIN/presentation/browser/BrowserViewModel.kt`, expose `findInPage: StateFlow<FindInPageState>` as a separate flow, not a field of `BrowserUiState` (§V rule 3). Add:
   - `onFindOpened`;
   - `onFindQueryChanged`, which truncates at `MAX_FIND_QUERY_LENGTH`;
   - `onFindResult`;
   - `onFindClosed`.
 
   Close the bar from `onLoadStarted` and from the active-tab collector. Expose a one-shot "clear matches" signal, or let the screen call `actions.clearMatches()` on close.
-- [ ] T016 [US1] Create `MAIN/presentation/browser/components/FindInPageBar.kt`. It collects `findInPage` itself and contains:
+- [X] T016 [US1] Create `MAIN/presentation/browser/components/FindInPageBar.kt`. It collects `findInPage` itself and contains:
   - a text field, focused with the keyboard shown on open (FR-006);
   - a "current/total" count, as a polite `liveRegion`, hidden when the query is empty (FR-009, FR-036);
   - Previous and Next, disabled when `total == 0`;
   - Close.
 
   It consumes `WindowInsets.statusBars` (§V rule 7) and uses only theme tokens and `Spacing`.
-- [ ] T017 [US1] In `MAIN/presentation/browser/BrowserScreen.kt`:
+- [X] T017 [US1] In `MAIN/presentation/browser/BrowserScreen.kt`:
   - swap `BrowserTopBar` for `FindInPageBar` while the bar is open;
   - do not compose `BrowserBottomBar` while it is open (FR-005, I-7);
   - add a `BackHandler(enabled = isOpen)` composed after the existing back handlers, so it wins (FR-010);
   - on query change, call `actions.findAll(query)`, or `clearMatches()` when the query is empty;
   - on close, call `actions.clearMatches()` (I-5);
   - route `PageTool.Find` → `viewModel.onFindOpened()`.
-- [ ] T018 [US1] Gates G1–G4 on `TA016_API36_16K`. Record the results in "Device Gate Results".
+- [X] T018 [US1] Gates G1–G4 on `TA016_API36_16K`. Record the results in "Device Gate Results".
 
 **Checkpoint**: Find in page works on its own.
 
@@ -370,8 +370,23 @@ Setup → Foundational ─┬─> US1 Find (P1, MVP) ─┐
 
 ## Implementation Notes
 
-_(filled during implementation)_
+- **Icons (T003)**: six Material Symbols Rounded vectors (weight 300, grade −25) fetched from `google/material-design-icons @ 49d4db35`, the commit every existing `AppIcons` vector cites: `find_in_page`, `print`, `desktop_windows`, `format_size`, `keyboard_arrow_up`, `keyboard_arrow_down`. Outline style, like the hub's Places tiles. `ic_share` already existed (Spec 021).
+- **One extra string**: `find_in_page_count` (`%1$d/%2$d`) is `translatable="false"` and lives in `values/` only. It holds digits and a slash, so no locale needs its own copy.
+- **`QuickTile` switch semantics (T007)**: a non-null `selected` uses `Modifier.toggleable(role = Role.Switch)` plus an explicit "On"/"Off" `stateDescription` (`hub_tile_state_on/off`).
+- **Hub layout (T008)**: the page-tools section sits above the Places row in its own file, `HubPageTools.kt`. Each row keeps three slots, so the second row's two tiles stay the same width as the first row's.
+- **Shared test fixture**: `BrowserViewModelFixture` (unit) builds `BrowserViewModel` over fakes for the new Spec 022 tests. Older test classes keep their own builders.
+- **Shared test server**: `testing/AssetPageServer` (androidTest) serves the test APK's assets over HTTP and records `User-Agent` headers. A server is needed because file access is off (Spec 007 FR-013), and `file:///android_asset/` reads the *app's* assets, not the test APK's.
+- **⚠️ Test pollution found**: `FindInPageInstrumentedTest` raises the keyboard. Left up, it made the next class's (`HubSheetTest`) text lookups fail, because "could not find any node" while the same class passed alone, and on `main`. Its `@After` now calls `Espresso.closeSoftKeyboard()`.
+- **The find count sits inside the text field's `decorationBox`**, so its tag is merged into the field node. Tests look it up with `useUnmergedTree = true`.
+- **🐞 Defect found at G2, fixed**: while finding, the bars do not slide away (FR-005). However the WebView is translated down by the top bar's height, which normally the slide-away cancels, so the page's last ~top-bar-height was unreachable below the screen. While the find bar is open the WebView gets a bottom padding equal to that height. Verified: the page's last link and button scroll into view.
 
 ## Device Gate Results
 
-_(filled during implementation)_
+Device: `TA016_API36_16K` (API 36, 16 KB pages), debug build, fixtures served at `127.0.0.1:8022` via `adb reverse`.
+
+| Gate | Result | Evidence |
+|---|---|---|
+| G1 Find | ✅ | Hub → Find in page → "lorem": **1/50** at once. All 50 highlighted, the current one orange. The find bar replaces the top bar, the bottom bar is hidden, and the keyboard is up. Wrap-around 50→1 and 1→50 is also covered by `FindInPageInstrumentedTest` (4/4). |
+| G2 Find closing | ✅ | Back with the keyboard hidden closes the bar, clears every highlight, stays on the page, and the bars return. A page `alert()` appears above the find bar, which is still open with 1/50 after OK. Tapping a link loads `ua.html` with the find bar closed and the bars back. |
+| G3 Find survives | ✅ | At 7/50, rotating to landscape keeps "lorem" and **7/50**, with match 7 still current. The in-app language case is not run separately: `MainActivity` handles both config changes without recreation (Specs 019/021), and the state lives in the ViewModel. |
+| G4 Find, Unicode | ✅ (instrumented) | `adb input text` cannot type non-ASCII (memory note). `FindInPageInstrumentedTest.matching_ignoresCase_inVietnameseAndRussian` finds "TIẾNG" → tiếng and "ПРИВЕТ" → привет on the real WebView. |
