@@ -51,6 +51,7 @@ import kotlinx.coroutines.withContext
  * pattern as Spec 011 `UpdateActiveTabUrlAndTitleUseCase`.
  */
 @Singleton
+@Suppress("TooManyFunctions") // Spec 021 R9 adds createBackgroundTab; one function per contract member.
 class IncognitoTabRepositoryImpl @Inject constructor(
     private val cookieJarSnapshotManager: CookieJarSnapshotManager,
     private val tabRepository: TabRepository,
@@ -68,7 +69,13 @@ class IncognitoTabRepositoryImpl @Inject constructor(
             )
         }
 
-    override suspend fun createTab(url: String): Result<Tab> =
+    override suspend fun createTab(url: String): Result<Tab> = insertTab(url, lastActiveAt = null)
+
+    override suspend fun createBackgroundTab(url: String, activeAt: Long): Result<Tab> =
+        insertTab(url, lastActiveAt = activeAt - 1)
+
+    /** [lastActiveAt] `null` → now, making the new tab the active one. */
+    private suspend fun insertTab(url: String, lastActiveAt: Long?): Result<Tab> =
         withContext(dispatchers.io) {
             mutex.withLock {
                 if (state.value.size >= BrowserLimits.MAX_INCOGNITO_TABS) {
@@ -88,7 +95,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                     title = "",
                     position = state.value.size,
                     createdAt = now,
-                    lastActiveAt = now,
+                    lastActiveAt = lastActiveAt ?: now,
                     isIncognito = true,
                 )
                 state.value = state.value + newTab

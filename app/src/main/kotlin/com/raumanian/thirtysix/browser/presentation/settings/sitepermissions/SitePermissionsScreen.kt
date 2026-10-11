@@ -26,6 +26,7 @@ import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.presentation.browser.page.capitalizedForLocale
+import com.raumanian.thirtysix.browser.presentation.browser.page.iconRes
 import com.raumanian.thirtysix.browser.presentation.browser.page.labelRes
 import com.raumanian.thirtysix.browser.presentation.components.ChoiceDialog
 import com.raumanian.thirtysix.browser.presentation.components.ConfirmDialog
@@ -35,7 +36,6 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.Settings
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSectionHeader
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsValueRow
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 
 /**
@@ -112,7 +112,7 @@ private fun LazyListScope.siteGroup(
             SettingsValueRow(
                 title = stringResource(capability.labelRes()).capitalizedForLocale(),
                 value = decisionLabel(decision),
-                icon = AppIcons.Shield,
+                icon = capability.iconRes(),
                 tone = SettingsIconTone.Primary,
                 onClick = { viewModel.onDecisionClick(site.origin, capability, decision) },
             )

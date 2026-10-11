@@ -2,6 +2,7 @@
 
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.webkit.WebSettings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.background
@@ -18,12 +19,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -44,6 +47,8 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
 import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
 import com.raumanian.thirtysix.browser.presentation.browser.page.FullscreenOverlay
+import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressActions
+import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressHooks
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
@@ -215,7 +220,23 @@ fun BrowserScreen(
             snackbarHostState = snackbarHostState,
         )
     }
-    BrowserPageRequests(session = pageSession)
+    // Spec 021 US4 — long-press downloads pass the same storage-permission gate as page downloads.
+    val context = LocalContext.current
+    val longPressDownload = rememberDownloadRequestHandler(
+        onGranted = viewModel::onDownloadRequested,
+        onDenied = viewModel::onStoragePermissionDenied,
+    )
+    val longPressActions: LongPressActions = hiltViewModel()
+    val currentIncognito by rememberUpdatedState(state.isIncognito)
+    val longPress = remember(longPressActions, snackbarHostState, longPressDownload) {
+        LongPressHooks(
+            actions = longPressActions,
+            snackbarHostState = snackbarHostState,
+            isIncognito = { currentIncognito },
+            onDownload = { url -> longPressDownload(url, WebSettings.getDefaultUserAgent(context), null, null) },
+        )
+    }
+    BrowserPageRequests(session = pageSession, longPress = longPress)
 }
 
 /**

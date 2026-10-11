@@ -113,13 +113,13 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 **Independent Test**: quickstart G12.
 
-- [ ] T039 [P] [US4] Write `TEST/domain/usecase/BuildLongPressMenuUseCaseTest.kt` covering every row of contracts C1.4
-- [ ] T040 [P] [US4] Create `MAIN/domain/model/LongPressMenu.kt` (`LongPressHit { Link, Image, ImageLink }`, `LongPressAction`, `LongPressMenu`) and `MAIN/domain/usecase/BuildLongPressMenuUseCase.kt` (data-model §7)
-- [ ] T041 [US4] Add `createBackgroundTab(url)` with a default body delegating to `createTab(url)` to `MAIN/domain/repository/TabRepository.kt` and `IncognitoTabRepository.kt`; override it in `MAIN/data/repository/TabRepositoryImpl.kt` (insert with `lastActiveAt = currentActive.lastActiveAt - 1`, same cap) and the incognito implementation (research R9); add `TEST/data/repository/TabRepositoryBackgroundTabTest.kt` (active tab unchanged, recency order, cap)
-- [ ] T042 [US4] Create `MAIN/domain/usecase/OpenInBackgroundTabUseCase.kt` (normal or incognito; returns the new tab id or `TabLimit`)
-- [ ] T043 [US4] Wire `WebView.setOnLongClickListener` in `MAIN/presentation/browser/BrowserWebView.kt` (hit test types, `requestFocusNodeHref` for image links via a main-thread `Handler`, return `false` when no menu) → `PageRequest.LongPressMenu`
-- [ ] T044 [US4] Create `MAIN/presentation/browser/page/LongPressSheet.kt` (contracts C2.4) and its actions in `PageRequestHost`: background tab + "Switch" snackbar, incognito tab, `ClipboardWriter` copy + confirmation, `ACTION_SEND` chooser, `StartDownloadUseCase` for downloads (Spec 015), tab-limit message (FR-018–FR-024)
-- [ ] T045 [P] [US4] Write `ATEST/presentation/browser/page/LongPressSheetTest.kt` (rows, header, callbacks, Back closes)
+- [X] T039 [P] [US4] Write `TEST/domain/usecase/BuildLongPressMenuUseCaseTest.kt` covering every row of contracts C1.4
+- [X] T040 [P] [US4] Create `MAIN/domain/model/LongPressMenu.kt` (`LongPressHit { Link, Image, ImageLink }`, `LongPressAction`, `LongPressMenu`) and `MAIN/domain/usecase/BuildLongPressMenuUseCase.kt` (data-model §7)
+- [X] T041 [US4] Add `createBackgroundTab(url)` with a default body delegating to `createTab(url)` to `MAIN/domain/repository/TabRepository.kt` and `IncognitoTabRepository.kt`; override it in `MAIN/data/repository/TabRepositoryImpl.kt` (insert with `lastActiveAt = currentActive.lastActiveAt - 1`, same cap) and the incognito implementation (research R9); add `TEST/data/repository/TabRepositoryBackgroundTabTest.kt` (active tab unchanged, recency order, cap)
+- [X] T042 [US4] Create `MAIN/domain/usecase/OpenInBackgroundTabUseCase.kt` (normal or incognito; returns the new tab id or `TabLimit`)
+- [X] T043 [US4] Wire `WebView.setOnLongClickListener` in `MAIN/presentation/browser/BrowserWebView.kt` (hit test types, `requestFocusNodeHref` for image links via a main-thread `Handler`, return `false` when no menu) → `PageRequest.LongPressMenu`
+- [X] T044 [US4] Create `MAIN/presentation/browser/page/LongPressSheet.kt` (contracts C2.4) and its actions in `PageRequestHost`: background tab + "Switch" snackbar, incognito tab, `ClipboardWriter` copy + confirmation, `ACTION_SEND` chooser, `StartDownloadUseCase` for downloads (Spec 015), tab-limit message (FR-018–FR-024)
+- [X] T045 [P] [US4] Write `ATEST/presentation/browser/page/LongPressSheetTest.kt` (rows, header, callbacks, Back closes)
 - [ ] T046 [US4] Device gate G12; record
 
 ---
@@ -239,8 +239,10 @@ Deviations from the task text, recorded as they happened:
   separate `AppDatabaseMigration2To3Test`.
 - **Models created early**: `LongPressMenu` (US4) and `SitePermission` landed in Phase 2 with the
   request types that reference them.
-- **No new icons**: the dialogs use existing glyphs (Shield, Settings); camera/mic/location
-  vectors were not added rather than drawn from memory.
+- **Four icons added** (`ic_share`, `ic_photo_camera`, `ic_mic`, `ic_location_on`), fetched
+  from google/material-design-icons @ 49d4db35 — the same source and style (Rounded, weight 300,
+  grade −25) as Spec 019's set; used by the long-press sheet, the permission dialog glyph and the
+  Site permissions rows.
 - **Manifest test** checks an exact permission allow-list: Robolectric has no framework permission
   metadata, so "no other dangerous permission" cannot be read from protection levels.
 - **Capture files are deleted when the next capture starts and when the browser screen goes
@@ -257,6 +259,15 @@ Deviations from the task text, recorded as they happened:
   tab does not. Background is `colorScheme.scrim` (no inline colour, §III).
 - **T038 suite part**: full `connectedDebugAndroidTest` 120/120 on `TA016_API36_16K` after the
   `configChanges` widening (2026-10-11). Device gates G10–G11 still to run.
+- **`createBackgroundTab(url, activeAt)`** takes the active tab's `lastActiveAt` (contract C3.2
+  had `url` only): the repository cannot see the other repository's tabs, and the active tab can
+  be incognito while the new one is normal (or the reverse). `OpenInBackgroundTabUseCase` reads
+  it from `ObserveActiveTabUseCase`.
+- **`SwitchToTabUseCase` added** for the notice's Switch: the existing `SwitchActiveTabUseCase`
+  only knows normal tabs (incognito switching in `TabsViewModel` is a documented no-op).
+- **Long-press actions live in `LongPressActions` (`@HiltViewModel`)** plus `LongPressHooks`
+  passed by `BrowserScreen`; downloads go through a second `rememberDownloadRequestHandler`, so
+  the Spec 015 storage gate applies, with the WebView's default user agent.
 - **WebChromeClient moved** to its own `BrowserChromeClient.kt` (internal), since every story adds
   hooks to it.
 

@@ -37,13 +37,21 @@ fun rememberPageSession(
 
 /** Spec 021 — renders the session's pending requests with every story's renderer. */
 @Composable
-fun BrowserPageRequests(session: PageSession, permissionGate: SitePermissionGate = hiltViewModel()) {
-    PageRequestHost(queue = session.queue, renderers = rememberPageRequestRenderers(permissionGate))
+fun BrowserPageRequests(
+    session: PageSession,
+    permissionGate: SitePermissionGate = hiltViewModel(),
+    longPress: LongPressHooks? = null,
+) {
+    longPress?.let { LongPressEffects(it) }
+    PageRequestHost(queue = session.queue, renderers = rememberPageRequestRenderers(permissionGate, longPress))
 }
 
 @Composable
-private fun rememberPageRequestRenderers(permissionGate: SitePermissionGate): PageRequestRenderers =
-    remember(permissionGate) {
+private fun rememberPageRequestRenderers(
+    permissionGate: SitePermissionGate,
+    longPress: LongPressHooks?,
+): PageRequestRenderers =
+    remember(permissionGate, longPress) {
         PageRequestRenderers { request, done ->
             when (request) {
                 is PageRequest.Permission -> {
@@ -54,6 +62,10 @@ private fun rememberPageRequestRenderers(permissionGate: SitePermissionGate): Pa
                     FileChooserLauncher(request, done)
                     true
                 }
+                is PageRequest.LongPress -> longPress?.let {
+                    LongPressHost(request, it, done)
+                    true
+                } ?: false
                 else -> false
             }
         }

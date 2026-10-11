@@ -109,7 +109,7 @@ private fun ChooseDialog(request: PageRequest.Permission, onChoice: (SitePermiss
         // FR-004 — incognito never remembers, so "Always allow" is not offered.
         actions = if (request.isIncognito) listOf(allowOnce, deny) else listOf(alwaysAllow, allowOnce, deny),
         onDismiss = { onChoice(SitePermissionChoice.Deny) },
-        glyph = AppIcons.Shield,
+        glyph = request.askedCapabilities.minByOrNull { it.ordinal }?.iconRes() ?: AppIcons.Shield,
     )
 }
 

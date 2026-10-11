@@ -5,6 +5,8 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import android.net.http.SslError
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -29,6 +31,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.domain.model.LongPressHit
+import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 
 /**
@@ -184,6 +190,8 @@ private fun buildConfiguredWebView(
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
+    // Spec 021 US4 — the long-press menu on links and images; anything else keeps selection.
+    wv.setOnLongClickListener { onLongPress(wv, callbacks.pageRequests) }
     // Spec 019 R7 — feed the sliding bars. API 23+, below minSdk 24.
     wv.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
         navigationCallbacks.onScrollDelta((scrollY - oldScrollY).toFloat())
@@ -548,6 +556,44 @@ private fun releaseWebView(webView: WebView, isIncognito: Boolean, rendererGone:
     webView.removeAllViews()
     webView.destroy()
 }
+
+/**
+ * Spec 021 research R7 — reads what was pressed. An image inside a link carries the image address;
+ * the link address arrives asynchronously from `requestFocusNodeHref`. Returns `false` when there
+ * is no menu, so the WebView's text selection runs instead.
+ */
+private fun onLongPress(webView: WebView, pageRequests: PageRequestSink): Boolean {
+    val hit = webView.hitTestResult
+    val type = when (hit.type) {
+        WebView.HitTestResult.SRC_ANCHOR_TYPE -> LongPressHit.Link
+        WebView.HitTestResult.IMAGE_TYPE -> LongPressHit.Image
+        WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE -> LongPressHit.ImageLink
+        else -> null
+    }
+    val context = pageRequests.context()
+    if (type == null || context == null) return false
+    val origin = SiteOrigin.of(webView.url.orEmpty()).orEmpty()
+    val enqueue: (String?, String?) -> Unit = { link, image ->
+        BuildLongPressMenuUseCase()(type, link, image)?.let { menu ->
+            pageRequests.enqueue(PageRequest.LongPress(context.tabId, context.generation, origin, menu) {})
+        }
+    }
+    when (type) {
+        LongPressHit.Link -> enqueue(hit.extra, null)
+        LongPressHit.Image -> enqueue(null, hit.extra)
+        LongPressHit.ImageLink -> {
+            val handler = Handler(Looper.getMainLooper()) { message ->
+                enqueue(message.data.getString(FOCUS_NODE_HREF_URL), hit.extra)
+                true
+            }
+            webView.requestFocusNodeHref(handler.obtainMessage())
+        }
+    }
+    return true
+}
+
+/** Key of the link address in `requestFocusNodeHref`'s reply. */
+private const val FOCUS_NODE_HREF_URL: String = "url"
 
 private const val BLANK_PAGE: String = "about:blank"
 
