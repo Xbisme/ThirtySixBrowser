@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-10-10 — 🟢 **Spec 019 `ui-redesign` implemented on its branch (PR pending).** **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** ✅ Spec 018 `onboarding-flow` done — merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41 · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.4.0 (2026-10-10: §V Compose Phase Discipline; Phase 5 = 019 ui-redesign, then optional 020 tracker blocker).
+Auto-generated from project context. Last updated: 2026-10-11 — ✅ **Spec 019 `ui-redesign` merged via [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, merge commit `54e090a`, CI 6/6); real-device pass on a Galaxy A55 on 2026-10-11 — SC-005 PASS, one locale defect fixed, first-run cold start +30% open.** **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** ✅ Spec 018 `onboarding-flow` done — merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41 · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.4.0 (2026-10-10: §V Compose Phase Discipline; Phase 5 = 019 ui-redesign, then optional 020 tracker blocker).
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-10-10 — 🟢 **Spec 01
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), ✅ **018 `onboarding-flow` merged 2026-09-15 (41/41, PR #24, `492e4f3`)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), ✅ **018 `onboarding-flow` merged 2026-09-15 (41/41, PR #24, `492e4f3`)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. **Phase 5: ✅ 019 `ui-redesign` merged 2026-10-10 (PR #27, `54e090a`)**; 020 tracker blocker vẫn optional. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -246,9 +246,10 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 
 | # | Item | Blocked on |
 |---|---|---|
-| 1 | **Screen-reader passes** — Spec 016 T109, Spec 017 SC-012, Spec 018 SC-010 | A person. TalkBack is not scriptable on these emulators; three specs have now hit this. |
-| 2 | **SC-005 (Spec 014 T103b) + SC-006 (Spec 015)** — list p99 ≤ 16 ms | **A release-seeding mechanism, first.** Confirmed on device that a release build cannot be seeded at all (see below), so hardware alone does not unblock this. |
-| 3 | ~~**Emulator CI cache** propagating broken AVD snapshots~~ | ✅ **Fixed** in [PR #26](https://github.com/Xbisme/ThirtySixBrowser/pull/26) — the cache is now saved only when the tests pass. Merge pending. |
+| 1 | **Screen-reader passes** — Spec 016 T109, Spec 017 SC-012, Spec 018 SC-010, Spec 019 T098 | A person. TalkBack is not scriptable on these emulators; four specs have now hit this. |
+| 2 | **SC-005 (Spec 014 T103b) + SC-006 (Spec 015)** — list p99 ≤ 16 ms | **A release-seeding mechanism, first.** Confirmed on device that a release build cannot be seeded at all (see below), so hardware alone does not unblock this. (Spec 019's own SC-005 needs no seeding and **passed** on a Galaxy A55 release build, 2026-10-11.) |
+| 3 | ~~**Emulator CI cache** propagating broken AVD snapshots~~ | ✅ **Fixed** in [PR #26](https://github.com/Xbisme/ThirtySixBrowser/pull/26) — the cache is now saved only when the tests pass. Merged. |
+| 4 | **First-run cold start +30%** (Spec 019 G15) — ≈265 → ≈345 ms on a Galaxy A55, release, against SC-010's +5% | Code. Only the first launch after install (onboarding on the hero); the returning-user launch is +4.2%, inside budget. |
 
 Item 2's ordering matters: booking Pixel 5-class hardware before fixing release seeding would waste the session, because there is no way to get 10,000 rows into the build being measured.
 
@@ -277,7 +278,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 016 | `settings-screen` | ✅ Done 2026-09-12 (PR #18 merged into `main`, merge commit `3083941`; 112/113 — T109's TalkBack pass deferred to a person) | Theme · dynamic color · app language (AndroidX per-app API) · search engine · history retention · clear browsing data (androidx.webkit) · About |
 | 017 | `splash-screen` | ✅ Done 2026-09-15 (PR #20 merged, `cca5c0c`; 35/35; G1–G10 PASS, chỉ TalkBack deferred) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
 | 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
-| 019 | `ui-redesign` | 🟢 Implemented 2026-10-10 on `019-ui-redesign`, PR pending | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
+| 019 | `ui-redesign` | ✅ Done 2026-10-10 (PR #27 merged, `54e090a`; real-device pass 2026-10-11 — Layout Inspector, TalkBack, canvas comparison, dynamic color still open) | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
 | 020 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–019 done) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
@@ -301,6 +302,19 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 > **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd`. A key with no version component is bug 2 returning. `Starting 0 tests` alongside `Broken pipe` / `DeadSystemException` / `stop: Not implemented` is the bug-3 signature — delete the cache and re-run **before suspecting the code**; a healthy run logs `Starting 109 tests` → `Finished 109 tests`.
 
 ## Recent Changes
+
+- 2026-10-11 (Spec 019 post-merge sync + real-device pass): ✅ **Spec 019 merged — PR #27 (`019-ui-redesign` → `main`, merge commit `54e090a`, 2026-10-10), CI 6/6.** The owner ran it on a Galaxy A55 (SM-A556E, Android 16) and accepted it; this pass then ran the open gates on that phone. Local `main` had been 22 commits behind `origin` — `git fetch` before trusting the tree.
+
+  **Measured on real hardware, release build** (`dumpsys gfxinfo` / framestats; app renders at 60 Hz):
+  - **SC-005 PASS** — p95 page scroll **14 ms**, Home scroll **14 ms**, hub drag **15 ms**, tab swipe **10 ms**. These need no seeded data, so the release-seeding blocker never applied to Spec 019 (it still blocks Spec 014 T103b and Spec 015 SC-006). The A55 is faster than a Pixel 5: Pixel-5-class-or-better evidence.
+  - **G16** Tabs with 10 tabs opens in **median 104 ms** (≤ 200). New tab → Home **≈57 ms median** (≤ 300).
+  - **⚠️ G15 cold start, Spec 018 vs 019 interleaved on the same phone**: returning user **+4.2%** (433.5 → 451.5 ms, inside +5%); **first run ≈+30%** (≈265 → ≈345 ms, onboarding on the hero) — **fails SC-010**, once per install, left open. Single rounds swung by up to 80 ms, so only interleaved rounds are worth reporting.
+
+  **🐞 One defect found and fixed (G11)**: at 360dp the hub's German "Suchmaschine" tile broke mid-word ("Suchmaschin / e"). `QuickTile` now sets `Hyphens.Auto`, and the tile reads a new `hub_tile_search_engine` key — DE **"Suche"**, the other seven identical to `settings_search_engine_title` (hyphenation alone gave "Suchmaschi-ne"). DE/RU checked on onboarding, Home, hub, Settings, Tabs; FR/VI spot-checked. APK **3,235,164 B**.
+
+  **Instrumented 103/103 on the A55** after one environment trap: ⚠️ **`SettingsScreenThemeTest` fails 3/3 when the app has a per-app language different from the device's** — strings come from `targetContext`, the UI renders in the app locale. Reproduced with `cmd locale set-app-locales`. Clear the app locale before a device run.
+
+  **Still open for Spec 019**: Layout Inspector before/after (GUI-only; the "before" now needs a checkout of `25cad6b`), the 15-artboard canvas comparison, dynamic color with three wallpapers, reduced motion, API 24/29 + three-button insets, KO/JA/ZH visual check, TalkBack — and the first-run cold start.
 
 - 2026-10-10 (Spec 019 implementation): 🟢 **Spec 019 `ui-redesign` implemented on branch `019-ui-redesign` — every screen rebuilt from the ThirtySix design system, violet replacing Deep Teal.** PR not yet opened.
 
@@ -556,7 +570,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 019 — UI Redesign](specs/019-ui-redesign/) — implemented on `019-ui-redesign` (2026-10-10), PR pending. See the Recent Changes entry for gates and the facts to keep; [tasks.md](specs/019-ui-redesign/tasks.md) holds every deviation note.
+**Current**: ✅ [Spec 019 — UI Redesign](specs/019-ui-redesign/) — **merged into `main` via [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, merge commit `54e090a`, CI 6/6)**; real-device gates recorded 2026-10-11 on a Galaxy A55. Next spec: to be discussed with the owner. See the Recent Changes entry for gates and the facts to keep; [tasks.md](specs/019-ui-redesign/tasks.md) holds every deviation note.
 
 **Previous**: ✅ [Spec 018 — Onboarding Flow](specs/018-onboarding-flow/) — **merged into `main` via [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, all 6 CI jobs green), 41/41 tasks. 🎉 This was the LAST spec of v1.0 — Specs 001–018 are now all merged.**
 

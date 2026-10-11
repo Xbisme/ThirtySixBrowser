@@ -203,7 +203,7 @@ private fun HubQuickSettings(onQuickSetting: (QuickSetting) -> Unit) {
             modifier = Modifier.weight(1f),
         )
         QuickTile(
-            label = stringResource(R.string.settings_search_engine_title),
+            label = stringResource(R.string.hub_tile_search_engine),
             icon = AppIcons.SearchEngineFilled,
             tone = QuickTileTone.Mint,
             onClick = { onQuickSetting(QuickSetting.SearchEngine) },

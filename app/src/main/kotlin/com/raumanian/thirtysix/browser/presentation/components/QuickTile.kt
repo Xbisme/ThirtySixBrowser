@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,7 +36,9 @@ private const val LABEL_MAX_LINES = 2
 /**
  * Spec 019 — the hub's tiles (design system QuickTile): an icon well with the label underneath.
  * [QuickTileTone.Place] tiles are white with a hairline ring; pastel tiles are square and use a
- * filled icon in their matching ink. Labels wrap to two lines (German "Suchmaschine").
+ * filled icon in their matching ink. Labels wrap to two lines and hyphenate a single long word
+ * rather than break it at an arbitrary character; a label that still splits badly gets a shorter
+ * hub-specific string (`hub_tile_search_engine`, German "Suche").
  */
 @Composable
 fun QuickTile(
@@ -80,7 +83,7 @@ fun QuickTile(
         }
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelMedium.copy(hyphens = Hyphens.Auto),
             color = scheme.onSurface,
             textAlign = TextAlign.Center,
             maxLines = LABEL_MAX_LINES,

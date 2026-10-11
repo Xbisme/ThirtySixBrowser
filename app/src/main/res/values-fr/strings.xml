@@ -245,6 +245,7 @@
     <string name="hub_incognito_banner_body">Ouvrir un onglet privé : aucun historique, cookies effacés à la fermeture.</string>
     <string name="hub_quick_settings_title">Réglages rapides</string>
     <string name="hub_tile_clear_data">Effacer les données</string>
+    <string name="hub_tile_search_engine">Moteur de recherche</string>
     <string name="hub_downloads_in_progress_cd">Téléchargements en cours</string>
     <plurals name="nav_tabs_count_cd">
         <item quantity="one">Onglets, %1$d ouvert</item>

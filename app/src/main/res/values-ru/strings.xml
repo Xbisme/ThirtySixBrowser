@@ -248,6 +248,7 @@
     <string name="hub_incognito_banner_body">Откройте вкладку инкогнито: без истории, cookie удаляются при закрытии.</string>
     <string name="hub_quick_settings_title">Быстрые настройки</string>
     <string name="hub_tile_clear_data">Очистить данные</string>
+    <string name="hub_tile_search_engine">Поисковая система</string>
     <string name="hub_downloads_in_progress_cd">Идут загрузки</string>
     <plurals name="nav_tabs_count_cd">
         <item quantity="one">Вкладки, открыта %1$d</item>
