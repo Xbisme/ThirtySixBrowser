@@ -6,6 +6,7 @@ import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.dao.inMemoryAppDatabase
 import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
+import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
@@ -30,6 +31,7 @@ class TabRepositoryBackgroundTabTest {
         cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
         tabRepository = FakeTabRepository(),
         dispatchers = Direct,
+        incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
     )
 
     @After

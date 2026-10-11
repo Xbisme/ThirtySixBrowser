@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.domain.repository.IncognitoProtectionExceptions
 import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.domain.repository.TabRepository
@@ -56,6 +57,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
     private val cookieJarSnapshotManager: CookieJarSnapshotManager,
     private val tabRepository: TabRepository,
     private val dispatchers: DispatcherProvider,
+    private val incognitoProtectionExceptions: IncognitoProtectionExceptions,
 ) : IncognitoTabRepository {
 
     private val state: MutableStateFlow<List<Tab>> = MutableStateFlow(emptyList())
@@ -133,6 +135,8 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                 // any incognito-set cookies that this tab created.
                 if (sizeBefore > 0 && sizeAfter == 0) {
                     cookieJarSnapshotManager.restoreSnapshot()
+                    // Spec 023 FR-014: incognito protection choices end with the session.
+                    incognitoProtectionExceptions.clear()
                 }
             }
         }
@@ -143,6 +147,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                 if (state.value.isEmpty()) return@withLock
                 state.value = emptyList()
                 cookieJarSnapshotManager.restoreSnapshot()
+                incognitoProtectionExceptions.clear()
             }
         }
 

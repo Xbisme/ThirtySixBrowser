@@ -9,7 +9,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration1To2
 import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration2To3
+import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration3To4
 import com.raumanian.thirtysix.browser.data.local.entity.SitePermissionEntity
+import com.raumanian.thirtysix.browser.data.local.entity.SiteProtectionExceptionEntity
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -95,6 +98,31 @@ class AppDatabaseMigrationTest {
     }
 
     @Test
+    fun `migrating on to v4 adds an empty site_protection_exceptions table and keeps every row`() = runTest {
+        createVersionOneDatabaseWithData()
+
+        val db = openAtCurrentVersion()
+
+        assertEquals("bookmarks lost", 1, db.countOf("bookmarks"))
+        assertEquals("history entries lost", 2, db.countOf("history_entries"))
+        assertEquals("tabs lost", 2, db.countOf("tabs"))
+        assertEquals(0, db.countOf(SiteProtectionExceptionEntity.TABLE_NAME))
+    }
+
+    @Test
+    fun `site_protection_exceptions accepts writes and replaces by site`() = runTest {
+        createVersionOneDatabaseWithData()
+
+        val db = openAtCurrentVersion()
+        val dao = db.siteProtectionExceptionDao()
+        dao.upsert(SiteProtectionExceptionEntity("shop.example", 1L))
+        dao.upsert(SiteProtectionExceptionEntity("shop.example", 5L))
+        dao.upsert(SiteProtectionExceptionEntity("news.example", 3L))
+
+        assertEquals(listOf("shop.example" to 5L, "news.example" to 3L), dao.observeAll().first().map { it.site to it.addedAt })
+    }
+
+    @Test
     fun `site_permissions accepts writes and replaces by origin and capability`() = runTest {
         createVersionOneDatabaseWithData()
 
@@ -153,7 +181,7 @@ class AppDatabaseMigrationTest {
      */
     private fun openAtCurrentVersion(): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, TEST_DB)
-            .addMigrations(Migration1To2.MIGRATION_1_2, Migration2To3.MIGRATION_2_3)
+            .addMigrations(Migration1To2.MIGRATION_1_2, Migration2To3.MIGRATION_2_3, Migration3To4.MIGRATION_3_4)
             .allowMainThreadQueries()
             .build()
             .also { database = it }
