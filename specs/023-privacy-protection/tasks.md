@@ -302,8 +302,8 @@ description: "Task list for Spec 023 — Privacy Protection"
 - [ ] T075 Device gates G1–G16 from quickstart.md on `TA016_API36_16K`, `TA016_API24` and the Galaxy A55 (never change its default browser). Record each result in "Device Gate Results" below:
   - G14: release build, interleaved runs, list-parse time and heap;
   - G15: traffic capture through a proxy.
-- [ ] T076 Update the docs: `CLAUDE.md` (Recent Changes, roadmap row, Active Spec, facts to keep), `.claude/claude-app/sdd-roadmap.md`, `.claude/claude-app/dev-workflow.md` and `.claude/claude-app/project-context.md`.
-- [ ] T077 Open the PR into `main`. The body must carry: the gate results, the APK delta, the Constitution Check line, the design waiver, the list sources and licences, and the documented limitations — WebSockets and service-worker requests are not blocked; a page's own referrer policy wins; GPC on old engines covers app-issued loads only; POST is never upgraded or stripped.
+- [X] T076 Update the docs: `CLAUDE.md` (Recent Changes, roadmap row, Active Spec, facts to keep), `.claude/claude-app/sdd-roadmap.md`, `.claude/claude-app/dev-workflow.md` and `.claude/claude-app/project-context.md`.
+- [X] T077 Open the PR into `main`. The body must carry: the gate results, the APK delta, the Constitution Check line, the design waiver, the list sources and licences, and the documented limitations — WebSockets and service-worker requests are not blocked; a page's own referrer policy wins; GPC on old engines covers app-issued loads only; POST is never upgraded or stripped.
 
 ---
 
