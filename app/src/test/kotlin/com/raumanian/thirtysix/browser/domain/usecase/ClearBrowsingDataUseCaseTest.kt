@@ -1,11 +1,15 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
+import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
+import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeScreenshotCache
+import com.raumanian.thirtysix.browser.testdoubles.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeWebDataCleaner
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
@@ -31,7 +35,30 @@ class ClearBrowsingDataUseCaseTest {
     private val cookies = FakeCookieJarSnapshotManager(log)
     private val favicons = FakeFaviconCache(log)
     private val screenshots = FakeScreenshotCache(log)
-    private val useCase = ClearBrowsingDataUseCase(history, web, cookies, favicons, screenshots)
+    private val sitePermissions = FakeSitePermissionRepository()
+    private val grants = OneTimeGrantStore()
+    private val useCase =
+        ClearBrowsingDataUseCase(history, web, cookies, favicons, screenshots, sitePermissions, grants)
+
+    @Test
+    fun `site permissions are cleared only when their category is selected`() = runTest {
+        sitePermissions.save(ORIGIN, SiteCapability.Camera, SiteDecision.Allow)
+        grants.grant(1L, 1L, ORIGIN, setOf(SiteCapability.Microphone))
+
+        useCase(ClearBrowsingDataCategory.DEFAULT_SELECTION)
+        assertEquals(1, sitePermissions.rows.value.size)
+        assertTrue(grants.has(1L, 1L, ORIGIN, SiteCapability.Microphone))
+
+        val result = useCase(setOf(ClearBrowsingDataCategory.SitePermissions))
+        assertTrue(result.failed.isEmpty())
+        assertTrue(sitePermissions.rows.value.isEmpty())
+        assertFalse(grants.has(1L, 1L, ORIGIN, SiteCapability.Microphone))
+    }
+
+    @Test
+    fun `the default selection leaves site permissions out`() {
+        assertFalse(ClearBrowsingDataCategory.SitePermissions in ClearBrowsingDataCategory.DEFAULT_SELECTION)
+    }
 
     @Test
     fun `the incognito set-aside is discarded before the cookie jar is wiped`() = runTest {
@@ -182,5 +209,9 @@ class ClearBrowsingDataUseCaseTest {
         val thrown = runCatching { useCase(setOf(ClearBrowsingDataCategory.CookiesAndSiteData)) }.exceptionOrNull()
 
         assertTrue("got $thrown", thrown is CancellationException)
+    }
+
+    private companion object {
+        const val ORIGIN = "https://meet.example"
     }
 }

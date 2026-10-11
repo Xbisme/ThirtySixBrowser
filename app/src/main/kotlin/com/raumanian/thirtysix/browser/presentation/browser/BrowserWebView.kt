@@ -5,11 +5,8 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import android.net.http.SslError
 import android.os.Build
-import android.webkit.GeolocationPermissions
-import android.webkit.PermissionRequest
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
-import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -32,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 
 /**
  * Compose wrapper around [android.webkit.WebView] (Spec 007).
@@ -177,6 +175,7 @@ private fun buildConfiguredWebView(
             if (crashed) callbacks.onLoadFailed(ErrorReason.Generic)
             host.replaceAfterRendererGone(crashed)
         },
+        pageRequests = callbacks.pageRequests,
     )
     // Spec 015 FR-001 — the engine hands off anything it will not render. Attached beside
     // the two platform clients because this is the same shape of event they carry, and the
@@ -193,6 +192,7 @@ private fun buildConfiguredWebView(
         onProgressChanged = callbacks.onProgressChanged,
         onReceivedTitle = navigationCallbacks.onTitleChange,
         onReceivedIcon = navigationCallbacks.onIconReceived,
+        pageRequests = callbacks.pageRequests,
     )
     // Spec 008 — wire imperative handle. Each lambda captures `wv` via the
     // factory closure; the lambdas persist for the lifetime of the WebView.
@@ -250,6 +250,9 @@ private fun applySecuritySettings(webView: WebView) {
 
         // FR-018 — block all HTTP sub-resources on HTTPS pages.
         mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+
+        // Spec 021 FR-001 — location requests reach the app, which asks the person first.
+        setGeolocationEnabled(true)
     }
     // FR-006 — addJavascriptInterface is FORBIDDEN; intentionally never called.
 }
@@ -311,6 +314,7 @@ private class BrowserWebViewClient(
     private val onCanGoForwardChange: (Boolean) -> Unit,
     private val onScreenshotReady: (Bitmap) -> Unit,
     private val onRendererGone: (crashed: Boolean) -> Unit,
+    private val pageRequests: PageRequestSink,
 ) : WebViewClient() {
     /**
      * Spec 012 (T065 / FR-018) — external-intent crash safety.
@@ -346,6 +350,8 @@ private class BrowserWebViewClient(
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        // Spec 021 FR-034 — a new page: the previous page's requests are now stale.
+        pageRequests.onNavigationStarted()
         url?.let {
             // Spec 009 — fire URL change FIRST so the address bar reflects
             // the submitted (or redirected-to) URL on the same UI tick the
@@ -541,43 +547,6 @@ private fun releaseWebView(webView: WebView, isIncognito: Boolean, rendererGone:
     webView.loadUrl(BLANK_PAGE)
     webView.removeAllViews()
     webView.destroy()
-}
-
-/**
- * Forwards progress, page title (Spec 011 / M1), favicon (Spec 011 favicon
- * amendment 2026-05-03), and silently denies all web-origin runtime
- * permissions (FR-017). Manifest stays at three Constitution-mandated
- * permissions.
- */
-private class BrowserChromeClient(
-    private val onProgressChanged: (Int) -> Unit,
-    private val onReceivedTitle: (String) -> Unit,
-    private val onReceivedIcon: (String, android.graphics.Bitmap) -> Unit,
-) : WebChromeClient() {
-    override fun onProgressChanged(view: WebView?, newProgress: Int) {
-        onProgressChanged(newProgress)
-    }
-
-    override fun onReceivedTitle(view: WebView?, title: String?) {
-        title?.let(onReceivedTitle)
-    }
-
-    override fun onReceivedIcon(view: WebView?, icon: android.graphics.Bitmap?) {
-        val url = view?.url ?: return
-        if (icon != null) onReceivedIcon(url, icon)
-    }
-
-    override fun onPermissionRequest(request: PermissionRequest?) {
-        request?.deny()
-    }
-
-    override fun onGeolocationPermissionsShowPrompt(
-        origin: String?,
-        callback: GeolocationPermissions.Callback?,
-    ) {
-        // FR-017 — silently deny: allow=false, retain=false.
-        callback?.invoke(origin, false, false)
-    }
 }
 
 private const val BLANK_PAGE: String = "about:blank"

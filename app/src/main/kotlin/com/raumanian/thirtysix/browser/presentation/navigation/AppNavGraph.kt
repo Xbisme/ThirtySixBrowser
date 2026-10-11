@@ -17,6 +17,7 @@ import com.raumanian.thirtysix.browser.presentation.entry.EntryPointViewModel
 import com.raumanian.thirtysix.browser.presentation.history.HistoryScreen
 import com.raumanian.thirtysix.browser.presentation.onboarding.OnboardingScreen
 import com.raumanian.thirtysix.browser.presentation.settings.SettingsScreen
+import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsScreen
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsScreen
 
 @Composable
@@ -50,6 +51,7 @@ fun AppNavGraph(
         composable(AppDestination.History.route) { HistoryScreen(navController = navController) }
         composable(AppDestination.Downloads.route) { DownloadsScreen(navController = navController) }
         composable(AppDestination.Settings.route) { SettingsScreen(navController = navController) }
+        composable(AppDestination.SitePermissions.route) { SitePermissionsScreen(navController = navController) }
         // Spec 018 — receives the controller so finishing or skipping can navigate to the
         // browser popping this route inclusively (FR-010a).
         composable(AppDestination.Onboarding.route) { OnboardingScreen(navController = navController) }

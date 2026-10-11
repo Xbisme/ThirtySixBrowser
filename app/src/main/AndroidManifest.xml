@@ -25,6 +25,24 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- Spec 021 FR-001 / FR-002 / FR-037 — a site's camera, microphone or location request.
+         Each is requested only after the person chose an allow option for that site (or chose
+         to take a photo for a file upload), never at launch. Listed in the Constitution's
+         permission table. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Spec 021 — WebView's audio capture (WebRTC) requires this alongside RECORD_AUDIO
+         (PermissionRequest.RESOURCE_AUDIO_CAPTURE). A normal permission: granted at install,
+         never prompted. -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Spec 021 research R10 — none of these is needed to install or use the browser. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+
     <application
         android:name=".ThirtySixApplication"
         android:allowBackup="true"

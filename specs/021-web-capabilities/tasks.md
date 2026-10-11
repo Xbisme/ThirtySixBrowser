@@ -23,8 +23,8 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 ## Phase 1: Setup
 
-- [ ] T001 [P] Add the ~45 string keys of contracts C2.9 to `RES/values/strings.xml` and translate them in `RES/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml` (site names stay as given; "ThirtySix" stays Latin)
-- [ ] T002 [P] Add constants to `MAIN/core/constants/AppConstants.kt` (`FILE_PROVIDER_AUTHORITY_SUFFIX = ".fileprovider"`, `CAPTURE_CACHE_DIR = "capture"`) and to `MAIN/core/constants/BrowserLimits.kt` (`DIALOG_SUPPRESS_FROM_COUNT = 2` — "from a site's second dialog", FR-031)
+- [X] T001 [P] Add the ~45 string keys of contracts C2.9 to `RES/values/strings.xml` and translate them in `RES/values-{vi,de,ru,ko,ja,zh,fr}/strings.xml` (site names stay as given; "ThirtySix" stays Latin)
+- [X] T002 [P] Add constants to `MAIN/core/constants/AppConstants.kt` (`FILE_PROVIDER_AUTHORITY_SUFFIX = ".fileprovider"`, `CAPTURE_CACHE_DIR = "capture"`) and to `MAIN/core/constants/BrowserLimits.kt` (`DIALOG_SUPPRESS_FROM_COUNT = 2` — "from a site's second dialog", FR-031)
 
 ---
 
@@ -32,12 +32,12 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 **Purpose**: the request queue and page-generation plumbing every story uses (research R1).
 
-- [ ] T003 Create `MAIN/presentation/browser/page/PageRequest.kt`: sealed `PageRequest` with common `tabId`, `pageGeneration`, `origin`, and the variants of data-model §3 (`Permission`, `FileChooser`, `JsDialog`, `LeavePage`, `HttpAuth`, `PopupBlocked`, `LongPressMenu`), each exposing `answerCancelled()` that settles its platform callback exactly once (INV-3)
-- [ ] T004 Create `MAIN/presentation/browser/page/PageRequestQueue.kt`: FIFO with `enqueue`, `head: StateFlow<PageRequest?>`, `complete(request)`, `dropStale(activeTabId, activeGeneration)` that answers stale requests cancelled (FR-034), merging rule for duplicate `Permission` requests (data-model §3), and `dispose()` that cancels everything
-- [ ] T005 [P] Write `TEST/presentation/browser/page/PageRequestQueueTest.kt`: FIFO order, one head at a time (FR-035), stale requests answered once and removed, duplicate permission merge, dispose cancels all
-- [ ] T006 Create `MAIN/presentation/browser/page/PageGenerations.kt` (per-tab counter advanced on new main-frame navigation and on tab switch; data-model §4) and wire it in `MAIN/presentation/browser/BrowserWebView.kt` (`onPageStarted` for a new URL) and `MAIN/presentation/browser/BrowserScreen.kt` (`activeTab` change → advance + `dropStale`)
-- [ ] T007 Create `MAIN/presentation/browser/page/PageRequestHost.kt`: composable that renders the queue head by variant (initially an empty `when` over the variants, which each story fills in) and is placed once in `MAIN/presentation/browser/BrowserScreen.kt`; on disposal calls `queue.dispose()`
-- [ ] T008 Extend `BrowserChromeClient` and `BrowserWebViewClient` in `MAIN/presentation/browser/BrowserWebView.kt` with a `PageRequestSink` parameter (enqueue + current tab id/generation/incognito) passed through `BrowserWebViewCallbacks`; no behaviour change yet (existing deny paths stay until US1)
+- [X] T003 Create `MAIN/presentation/browser/page/PageRequest.kt`: sealed `PageRequest` with common `tabId`, `pageGeneration`, `origin`, and the variants of data-model §3 (`Permission`, `FileChooser`, `JsDialog`, `LeavePage`, `HttpAuth`, `PopupBlocked`, `LongPressMenu`), each exposing `answerCancelled()` that settles its platform callback exactly once (INV-3)
+- [X] T004 Create `MAIN/presentation/browser/page/PageRequestQueue.kt`: FIFO with `enqueue`, `head: StateFlow<PageRequest?>`, `complete(request)`, `dropStale(activeTabId, activeGeneration)` that answers stale requests cancelled (FR-034), merging rule for duplicate `Permission` requests (data-model §3), and `dispose()` that cancels everything
+- [X] T005 [P] Write `TEST/presentation/browser/page/PageRequestQueueTest.kt`: FIFO order, one head at a time (FR-035), stale requests answered once and removed, duplicate permission merge, dispose cancels all
+- [X] T006 Create `MAIN/presentation/browser/page/PageGenerations.kt` (per-tab counter advanced on new main-frame navigation and on tab switch; data-model §4) and wire it in `MAIN/presentation/browser/BrowserWebView.kt` (`onPageStarted` for a new URL) and `MAIN/presentation/browser/BrowserScreen.kt` (`activeTab` change → advance + `dropStale`)
+- [X] T007 Create `MAIN/presentation/browser/page/PageRequestHost.kt`: composable that renders the queue head by variant (initially an empty `when` over the variants, which each story fills in) and is placed once in `MAIN/presentation/browser/BrowserScreen.kt`; on disposal calls `queue.dispose()`
+- [X] T008 Extend `BrowserChromeClient` and `BrowserWebViewClient` in `MAIN/presentation/browser/BrowserWebView.kt` with a `PageRequestSink` parameter (enqueue + current tab id/generation/incognito) passed through `BrowserWebViewCallbacks`; no behaviour change yet (existing deny paths stay until US1)
 
 **Checkpoint**: unit tests green; the app behaves exactly as before.
 
@@ -51,27 +51,27 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 
 ### Tests for US1
 
-- [ ] T009 [P] [US1] Write `TEST/domain/usecase/ResolveSitePermissionUseCaseTest.kt` covering rows 1–10 of contracts C1.1
-- [ ] T010 [P] [US1] Write `TEST/domain/usecase/ApplySitePermissionChoiceUseCaseTest.kt` covering contracts C1.2 (normal/incognito × three choices × dismiss; incognito never writes — INV-1)
-- [ ] T011 [P] [US1] Write `TEST/data/local/database/AppDatabaseMigration2To3Test.kt` (Spec 015 style, real `Room.databaseBuilder` on the JVM): v2 data survives, `site_permissions` exists, no other table touched
-- [ ] T012 [P] [US1] Write `TEST/data/repository/SitePermissionRepositoryImplTest.kt`: save/replace per `(origin, capability)`, `decisionsFor`, `removeSite`, `clearAll`, http origins rejected (INV-2)
+- [X] T009 [P] [US1] Write `TEST/domain/usecase/ResolveSitePermissionUseCaseTest.kt` covering rows 1–10 of contracts C1.1
+- [X] T010 [P] [US1] Write `TEST/domain/usecase/ApplySitePermissionChoiceUseCaseTest.kt` covering contracts C1.2 (normal/incognito × three choices × dismiss; incognito never writes — INV-1)
+- [X] T011 [P] [US1] Write `TEST/data/local/database/AppDatabaseMigration2To3Test.kt` (Spec 015 style, real `Room.databaseBuilder` on the JVM): v2 data survives, `site_permissions` exists, no other table touched
+- [X] T012 [P] [US1] Write `TEST/data/repository/SitePermissionRepositoryImplTest.kt`: save/replace per `(origin, capability)`, `decisionsFor`, `removeSite`, `clearAll`, http origins rejected (INV-2)
 
 ### Implementation for US1
 
-- [ ] T013 [P] [US1] Create `MAIN/domain/model/SitePermission.kt` (`SiteCapability { Camera, Microphone, Location }`, `SiteDecision { Allow, Deny }`, `SitePermissionDecision`) and an origin normaliser (`scheme://host[:port]`, lower-cased, default port omitted) in `MAIN/domain/model/SiteOrigin.kt`
-- [ ] T014 [US1] Create `MAIN/data/local/entity/SitePermissionEntity.kt` (table `site_permissions`, columns `origin` TEXT, `capability` TEXT ("camera"|"microphone"|"location"), `decision` TEXT ("allow"|"deny"), `decided_at` INTEGER, primary key `(origin, capability)`) and `MAIN/data/local/dao/SitePermissionDao.kt` (`upsert`, `observeAll`, `forOrigin`, `deleteOrigin`, `deleteAll`)
-- [ ] T015 [US1] Bump `MAIN/data/local/database/AppDatabase.kt` to `SCHEMA_VERSION = 3`, add the entity/DAO, create `MAIN/data/local/database/Migration2To3.kt` (`CREATE TABLE site_permissions …` only), register it in `MAIN/di/DatabaseModule.kt` beside `MIGRATION_1_2`, export `app/schemas/…/3.json`; `fallbackToDestructiveMigration` stays absent
-- [ ] T016 [US1] Create `MAIN/domain/repository/SitePermissionRepository.kt` (contracts C3.2), `MAIN/data/mapper/SitePermissionMapper.kt`, `MAIN/data/repository/SitePermissionRepositoryImpl.kt`, and bind it in new `MAIN/di/SitePermissionModule.kt`
-- [ ] T017 [US1] Create `MAIN/presentation/browser/page/OneTimeGrantStore.kt` (`@Singleton`; key `(tabId, pageGeneration, origin, capability)`; drop by tab/generation; `clear()`) — data-model §2
-- [ ] T018 [US1] Create use cases `MAIN/domain/usecase/ResolveSitePermissionUseCase.kt` and `ApplySitePermissionChoiceUseCase.kt` per contracts C1.1/C1.2 (one-time grants passed in as a lookup so the domain stays pure)
-- [ ] T019 [US1] Replace the deny-all hooks in `MAIN/presentation/browser/BrowserWebView.kt`: `onPermissionRequest` maps resources to capabilities (any other resource → `deny`, FR-008), resolves, then `grant`/`deny`/enqueue `PageRequest.Permission`; `onPermissionRequestCanceled` drops it; geolocation prompt the same with `callback.invoke(origin, allow, retain = false)` (INV-6); enable `setGeolocationEnabled(true)`
-- [ ] T020 [US1] Create `MAIN/presentation/browser/page/SitePermissionDialog.kt` (contracts C2.1; incognito → two buttons) and the permission flow in `PageRequestHost`: after an allow choice request missing Android permissions with `rememberLauncherForActivityResult(RequestMultiplePermissions())` (location = FINE + COARSE together, either grant counts), detect permanently denied via `shouldShowRequestPermissionRationale`, show the blocked explanation with Open settings (`ACTION_APPLICATION_DETAILS_SETTINGS`) — FR-002, FR-006, INV-4
-- [ ] T021 [US1] Update `app/src/main/AndroidManifest.xml` per contracts C3.3: `CAMERA`, `RECORD_AUDIO`, `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`, and `uses-feature` camera / microphone / location `required="false"`, each with a comment citing Spec 021 FR-002/FR-037
-- [ ] T022 [P] [US1] Write `TEST/manifest/WebCapabilitiesManifestTest.kt` (Robolectric): the four permissions present, the three features not required, no other dangerous permission beyond Spec 015's capped storage one
-- [ ] T023 [US1] Add `AppDestination.SitePermissions` in `MAIN/presentation/navigation/AppDestination.kt` + route in `AppNavGraph.kt`; create `MAIN/presentation/settings/sitepermissions/SitePermissionsViewModel.kt` (observe, set, remove site, remove all) and `SitePermissionsScreen.kt` (contracts C2.7: keyed lazy list per origin, choice dialog Always allow / Don't allow, remove site, remove all with confirm, empty state)
-- [ ] T024 [US1] Add the Privacy row "Site permissions" in `MAIN/presentation/settings/SettingsScreen.kt` navigating to the new destination
-- [ ] T025 [US1] Add `SitePermissions` to `MAIN/domain/model/ClearBrowsingDataCategory.kt` (not in the default selection), handle it in `MAIN/domain/usecase/ClearBrowsingDataUseCase.kt` (`SitePermissionRepository.clearAll()` + `OneTimeGrantStore.clear()`), and show the unticked row in the clear-data dialog (FR-010a); update `TEST/domain/usecase/ClearBrowsingDataUseCaseTest.kt` and the settings test factories for the new dependency
-- [ ] T026 [P] [US1] Write `TEST/presentation/settings/sitepermissions/SitePermissionsViewModelTest.kt` and `ATEST/presentation/settings/SitePermissionsScreenTest.kt` + `ATEST/presentation/browser/page/SitePermissionDialogTest.kt` (three vs two buttons, labels)
+- [X] T013 [P] [US1] Create `MAIN/domain/model/SitePermission.kt` (`SiteCapability { Camera, Microphone, Location }`, `SiteDecision { Allow, Deny }`, `SitePermissionDecision`) and an origin normaliser (`scheme://host[:port]`, lower-cased, default port omitted) in `MAIN/domain/model/SiteOrigin.kt`
+- [X] T014 [US1] Create `MAIN/data/local/entity/SitePermissionEntity.kt` (table `site_permissions`, columns `origin` TEXT, `capability` TEXT ("camera"|"microphone"|"location"), `decision` TEXT ("allow"|"deny"), `decided_at` INTEGER, primary key `(origin, capability)`) and `MAIN/data/local/dao/SitePermissionDao.kt` (`upsert`, `observeAll`, `forOrigin`, `deleteOrigin`, `deleteAll`)
+- [X] T015 [US1] Bump `MAIN/data/local/database/AppDatabase.kt` to `SCHEMA_VERSION = 3`, add the entity/DAO, create `MAIN/data/local/database/Migration2To3.kt` (`CREATE TABLE site_permissions …` only), register it in `MAIN/di/DatabaseModule.kt` beside `MIGRATION_1_2`, export `app/schemas/…/3.json`; `fallbackToDestructiveMigration` stays absent
+- [X] T016 [US1] Create `MAIN/domain/repository/SitePermissionRepository.kt` (contracts C3.2), `MAIN/data/mapper/SitePermissionMapper.kt`, `MAIN/data/repository/SitePermissionRepositoryImpl.kt`, and bind it in new `MAIN/di/SitePermissionModule.kt`
+- [X] T017 [US1] Create `MAIN/presentation/browser/page/OneTimeGrantStore.kt` (`@Singleton`; key `(tabId, pageGeneration, origin, capability)`; drop by tab/generation; `clear()`) — data-model §2
+- [X] T018 [US1] Create use cases `MAIN/domain/usecase/ResolveSitePermissionUseCase.kt` and `ApplySitePermissionChoiceUseCase.kt` per contracts C1.1/C1.2 (one-time grants passed in as a lookup so the domain stays pure)
+- [X] T019 [US1] Replace the deny-all hooks in `MAIN/presentation/browser/BrowserWebView.kt`: `onPermissionRequest` maps resources to capabilities (any other resource → `deny`, FR-008), resolves, then `grant`/`deny`/enqueue `PageRequest.Permission`; `onPermissionRequestCanceled` drops it; geolocation prompt the same with `callback.invoke(origin, allow, retain = false)` (INV-6); enable `setGeolocationEnabled(true)`
+- [X] T020 [US1] Create `MAIN/presentation/browser/page/SitePermissionDialog.kt` (contracts C2.1; incognito → two buttons) and the permission flow in `PageRequestHost`: after an allow choice request missing Android permissions with `rememberLauncherForActivityResult(RequestMultiplePermissions())` (location = FINE + COARSE together, either grant counts), detect permanently denied via `shouldShowRequestPermissionRationale`, show the blocked explanation with Open settings (`ACTION_APPLICATION_DETAILS_SETTINGS`) — FR-002, FR-006, INV-4
+- [X] T021 [US1] Update `app/src/main/AndroidManifest.xml` per contracts C3.3: `CAMERA`, `RECORD_AUDIO`, `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`, and `uses-feature` camera / microphone / location `required="false"`, each with a comment citing Spec 021 FR-002/FR-037
+- [X] T022 [P] [US1] Write `TEST/manifest/WebCapabilitiesManifestTest.kt` (Robolectric): the four permissions present, the three features not required, no other dangerous permission beyond Spec 015's capped storage one
+- [X] T023 [US1] Add `AppDestination.SitePermissions` in `MAIN/presentation/navigation/AppDestination.kt` + route in `AppNavGraph.kt`; create `MAIN/presentation/settings/sitepermissions/SitePermissionsViewModel.kt` (observe, set, remove site, remove all) and `SitePermissionsScreen.kt` (contracts C2.7: keyed lazy list per origin, choice dialog Always allow / Don't allow, remove site, remove all with confirm, empty state)
+- [X] T024 [US1] Add the Privacy row "Site permissions" in `MAIN/presentation/settings/SettingsScreen.kt` navigating to the new destination
+- [X] T025 [US1] Add `SitePermissions` to `MAIN/domain/model/ClearBrowsingDataCategory.kt` (not in the default selection), handle it in `MAIN/domain/usecase/ClearBrowsingDataUseCase.kt` (`SitePermissionRepository.clearAll()` + `OneTimeGrantStore.clear()`), and show the unticked row in the clear-data dialog (FR-010a); update `TEST/domain/usecase/ClearBrowsingDataUseCaseTest.kt` and the settings test factories for the new dependency
+- [X] T026 [P] [US1] Write `TEST/presentation/settings/sitepermissions/SitePermissionsViewModelTest.kt` and `ATEST/presentation/settings/SitePermissionsScreenTest.kt` + `ATEST/presentation/browser/page/SitePermissionDialogTest.kt` (three vs two buttons, labels)
 - [ ] T027 [US1] Device gates G1–G8 (quickstart) on the Galaxy A55 and the 16 KB AVD; if WebRTC audio fails without `MODIFY_AUDIO_SETTINGS`, add it with a Constitution table row (research R10); record results
 
 **Checkpoint**: MVP — sites can use camera, microphone and location with the person's consent.
@@ -215,6 +215,36 @@ Setup → Foundational ─┬─> US1 (P1, MVP)
 - `BrowserWebView.kt` is touched by most stories: keep each story's hook in its own private
   class/function and land stories sequentially there.
 - On the A55: never change the default browser; reinstall the debug build after instrumented runs.
+
+## Implementation Notes
+
+Deviations from the task text, recorded as they happened:
+
+- **Generations live in `page/PageSession.kt`** (not `PageGenerations.kt`): one class owns the
+  tab/page generation, the queue's staleness and the permission entry point.
+- **`SitePermissionGate` is a `@HiltViewModel`** wrapping the resolve/apply use cases, the
+  one-time grants and the Android permission check, so platform callbacks never reach a
+  ViewModel's state and the domain stays pure.
+- **`OneTimeGrantStore` lives in `data/local/permission/`**, not `presentation/browser/page/`:
+  `ClearBrowsingDataUseCase` (domain) clears it, and domain must not import presentation. Same
+  standing as `FaviconCache`, which that use case already uses.
+- **`MODIFY_AUDIO_SETTINGS` declared** (normal permission, no prompt): `PermissionRequest`
+  documents it as required with `RECORD_AUDIO` for `RESOURCE_AUDIO_CAPTURE`. Needs its
+  Constitution table row in T063.
+- **Clear-data string keys** are `settings_clear_category_site_permissions(_description)`, matching
+  the existing `settings_clear_category_*` family, not the contract's `clear_data_site_permissions`.
+  `ClearBrowsingDataCategory.DEFAULT_SELECTION` now names the three ticked categories; the
+  Spec 016 tests that assumed "every category is ticked" use it.
+- **Migration test**: the v3 cases extend the existing `AppDatabaseMigrationTest` instead of a
+  separate `AppDatabaseMigration2To3Test`.
+- **Models created early**: `LongPressMenu` (US4) and `SitePermission` landed in Phase 2 with the
+  request types that reference them.
+- **No new icons**: the dialogs use existing glyphs (Shield, Settings); camera/mic/location
+  vectors were not added rather than drawn from memory.
+- **Manifest test** checks an exact permission allow-list: Robolectric has no framework permission
+  metadata, so "no other dangerous permission" cannot be read from protection levels.
+- **WebChromeClient moved** to its own `BrowserChromeClient.kt` (internal), since every story adds
+  hooks to it.
 
 ---
 

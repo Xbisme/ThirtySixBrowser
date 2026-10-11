@@ -302,14 +302,17 @@ class SettingsViewModelTest {
     // ──────── US4 — clear browsing data (T076) ────────
 
     @Test
-    fun `the clear dialog opens with all three categories selected`() = runTest {
+    fun `the clear dialog opens with the three default categories selected`() = runTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
 
         viewModel.onClearBrowsingDataRowClick()
 
         assertEquals(
-            SettingsDialog.ClearBrowsingData(selection = ClearBrowsingDataCategory.entries.toSet(), inProgress = false),
+            SettingsDialog.ClearBrowsingData(
+                selection = ClearBrowsingDataCategory.DEFAULT_SELECTION,
+                inProgress = false,
+            ),
             viewModel.uiState.value.dialog,
         )
     }
@@ -327,7 +330,7 @@ class SettingsViewModelTest {
         )
 
         viewModel.onClearCategoryToggled(ClearBrowsingDataCategory.History)
-        assertEquals(ClearBrowsingDataCategory.entries.toSet(), clearDialog(viewModel).selection)
+        assertEquals(ClearBrowsingDataCategory.DEFAULT_SELECTION, clearDialog(viewModel).selection)
     }
 
     @Test
@@ -339,7 +342,7 @@ class SettingsViewModelTest {
         )
         advanceUntilIdle()
         viewModel.onClearBrowsingDataRowClick()
-        ClearBrowsingDataCategory.entries.forEach(viewModel::onClearCategoryToggled)
+        ClearBrowsingDataCategory.DEFAULT_SELECTION.forEach(viewModel::onClearCategoryToggled)
 
         viewModel.onClearBrowsingDataConfirmed()
         advanceUntilIdle()
@@ -364,7 +367,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertTrue("FR-032", clearDialog(viewModel).inProgress)
-        assertEquals(ClearBrowsingDataCategory.entries.toSet(), clearDialog(viewModel).selection)
+        assertEquals(ClearBrowsingDataCategory.DEFAULT_SELECTION, clearDialog(viewModel).selection)
         assertEquals(1, log.count { it == FakeWebDataCleaner.CALL_CLEAR_SITE_DATA })
 
         web.siteDataGate?.complete(Unit)

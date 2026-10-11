@@ -56,7 +56,9 @@ class SettingsScreenClearDataTest {
         render()
         openClearDialog()
 
-        ClearBrowsingDataCategory.entries.forEach { categoryRow(it).assertIsOn() }
+        ClearBrowsingDataCategory.DEFAULT_SELECTION.forEach { categoryRow(it).assertIsOn() }
+        // Spec 021 FR-010a — site permissions are opt-in.
+        categoryRow(ClearBrowsingDataCategory.SitePermissions).assertIsOff()
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_CLEAR_CONFIRM).assertIsEnabled()
     }
 
@@ -65,9 +67,9 @@ class SettingsScreenClearDataTest {
         render()
         openClearDialog()
 
-        ClearBrowsingDataCategory.entries.forEach { categoryRow(it).performClick() }
+        ClearBrowsingDataCategory.DEFAULT_SELECTION.forEach { categoryRow(it).performClick() }
 
-        ClearBrowsingDataCategory.entries.forEach { categoryRow(it).assertIsOff() }
+        ClearBrowsingDataCategory.DEFAULT_SELECTION.forEach { categoryRow(it).assertIsOff() }
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_CLEAR_CONFIRM).assertIsNotEnabled()
     }
 

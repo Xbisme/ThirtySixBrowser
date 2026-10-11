@@ -5,16 +5,21 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.isSelectable
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
+import com.raumanian.thirtysix.browser.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.domain.repository.AppLanguageController
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
+import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.domain.repository.WebDataCleaner
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
@@ -36,6 +41,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Spec 016 T031 — shared in-memory doubles for the Settings Compose UI tests.
@@ -170,6 +176,8 @@ internal fun settingsViewModel(
         cookieJarSnapshotManager = InstrumentedNoopCookieJarSnapshotManager,
         faviconCache = InstrumentedNoopFaviconCacheForHistory,
         screenshotCache = InstrumentedNoopScreenshotCache,
+        sitePermissionRepository = InstrumentedNoopSitePermissionRepository,
+        oneTimeGrants = OneTimeGrantStore(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
@@ -200,3 +208,17 @@ internal const val SETTINGS_TEST_TIMEOUT_MS: Long = 10_000L
  * selectable (radio) node. Nothing else on the Settings screen is selectable.
  */
 fun isSettingsChoiceOption(): SemanticsMatcher = isSelectable()
+
+/** Spec 021 — the clear-data dialog's site permissions category, with nothing stored. */
+internal object InstrumentedNoopSitePermissionRepository : SitePermissionRepository {
+    override fun observeAll(): Flow<List<SitePermissionDecision>> = flowOf(emptyList())
+
+    override suspend fun decisionsFor(origin: String): Map<SiteCapability, SiteDecision> = emptyMap()
+
+    override suspend fun save(origin: String, capability: SiteCapability, decision: SiteDecision): Result<Unit> =
+        Result.Success(Unit)
+
+    override suspend fun removeSite(origin: String): Result<Unit> = Result.Success(Unit)
+
+    override suspend fun clearAll(): Result<Unit> = Result.Success(Unit)
+}

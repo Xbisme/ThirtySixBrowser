@@ -57,4 +57,10 @@ object AppConstants {
     // Spec 016 R10 — Hilt `@Named` qualifier for the installed version name shown in About,
     // sourced from `BuildConfig.VERSION_NAME`. Injected for the same testability reason.
     const val QUALIFIER_APP_VERSION_NAME = "app_version_name"
+
+    /** Spec 021 research R3 — appended to the application id to form the FileProvider authority. */
+    const val FILE_PROVIDER_AUTHORITY_SUFFIX = ".fileprovider"
+
+    /** Spec 021 research R3 — `cacheDir` sub-folder holding photos/videos captured for an upload. */
+    const val CAPTURE_CACHE_DIR = "capture"
 }

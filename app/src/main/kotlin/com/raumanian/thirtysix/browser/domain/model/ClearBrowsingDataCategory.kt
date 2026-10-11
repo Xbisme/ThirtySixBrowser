@@ -13,4 +13,16 @@ enum class ClearBrowsingDataCategory {
     History,
     CookiesAndSiteData,
     CachedImagesAndFiles,
+
+    /**
+     * Spec 021 FR-010a — remembered camera / microphone / location decisions and this session's
+     * one-time grants. Opt-in: never part of the default selection ([DEFAULT_SELECTION]).
+     */
+    SitePermissions,
+    ;
+
+    companion object {
+        /** What the clear-data dialog ticks when it opens. */
+        val DEFAULT_SELECTION: Set<ClearBrowsingDataCategory> = setOf(History, CookiesAndSiteData, CachedImagesAndFiles)
+    }
 }

@@ -167,4 +167,7 @@ object BrowserLimits {
 
     /** Spec 020 FR-024 — the default-browser invitation appears from this app launch onwards. */
     const val DEFAULT_BROWSER_INVITE_MIN_LAUNCHES: Int = 3
+
+    /** Spec 021 FR-031 — from this many dialogs on one page, the "don't show more" choice appears. */
+    const val DIALOG_SUPPRESS_FROM_COUNT: Int = 2
 }

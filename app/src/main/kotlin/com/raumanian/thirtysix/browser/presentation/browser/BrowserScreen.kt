@@ -42,6 +42,9 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTo
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
+import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
+import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
+import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
 import com.raumanian.thirtysix.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.presentation.home.HomePage
@@ -90,6 +93,8 @@ fun BrowserScreen(
     var quickSettingRequest by remember { mutableStateOf<QuickSetting?>(null) }
     var quickSettingsUsed by remember { mutableStateOf(false) }
 
+    // Spec 021 — requests the page makes of the browser (permissions, files, dialogs, …).
+    val pageSession = rememberPageSession(activeTabId = activeTab?.id, isIncognito = state.isIncognito)
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
     HomeBackHandlers(state = state, viewModel = viewModel)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = incomingContent)
@@ -121,6 +126,7 @@ fun BrowserScreen(
             webViewActions = webViewActions,
             activeTabId = activeTab?.id ?: 0L,
             onScrollDelta = chrome::onScrollDelta,
+            pageRequests = pageSession,
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
@@ -206,6 +212,7 @@ fun BrowserScreen(
             snackbarHostState = snackbarHostState,
         )
     }
+    BrowserPageRequests(session = pageSession)
 }
 
 /**
@@ -395,6 +402,7 @@ private fun BrowserContent(
     webViewActions: WebViewActionsHandle,
     activeTabId: Long,
     onScrollDelta: (Float) -> Unit,
+    pageRequests: PageRequestSink,
     modifier: Modifier = Modifier,
 ) {
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
@@ -414,6 +422,7 @@ private fun BrowserContent(
                     onLoadFinished = viewModel::onLoadFinished,
                     onLoadFailed = viewModel::onLoadFailed,
                     onDownloadRequested = onDownloadRequested,
+                    pageRequests = pageRequests,
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
                     onUrlChange = viewModel::onUrlChanged,
