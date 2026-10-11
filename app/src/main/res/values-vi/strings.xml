@@ -268,4 +268,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">Đang mở</string>
     <string name="tabs_chip_incognito">Ẩn danh</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">Chung</string>
+    <string name="settings_default_browser_title">Trình duyệt mặc định</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix chưa phải trình duyệt mặc định. Chạm để đổi.</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix là trình duyệt mặc định của bạn</string>
+    <string name="home_default_browser_invite_title">Mở link bằng ThirtySix</string>
+    <string name="home_default_browser_invite_body">Đặt ThirtySix làm trình duyệt mặc định để link từ các ứng dụng khác mở tại đây.</string>
+    <string name="home_default_browser_invite_action">Đặt làm mặc định</string>
+    <string name="home_default_browser_invite_dismiss">Bỏ qua</string>
+    <string name="entry_process_text_label">Tìm bằng ThirtySix</string>
+    <string name="entry_link_rejected">Không thể mở link này</string>
+    <string name="entry_tab_limit_reused">Đã đạt giới hạn thẻ — link được mở trong thẻ hiện tại</string>
+    <string name="entry_default_browser_unavailable">Thiết bị này không cho đổi ứng dụng mặc định</string>
 </resources>

@@ -276,4 +276,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">Ouverts</string>
     <string name="tabs_chip_incognito">Privé</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">Général</string>
+    <string name="settings_default_browser_title">Navigateur par défaut</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix n\'est pas votre navigateur par défaut. Appuyez pour changer.</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix est votre navigateur par défaut</string>
+    <string name="home_default_browser_invite_title">Ouvrir les liens dans ThirtySix</string>
+    <string name="home_default_browser_invite_body">Faites de ThirtySix votre navigateur par défaut pour que les liens des autres applis s\'ouvrent ici.</string>
+    <string name="home_default_browser_invite_action">Définir par défaut</string>
+    <string name="home_default_browser_invite_dismiss">Ignorer</string>
+    <string name="entry_process_text_label">Rechercher avec ThirtySix</string>
+    <string name="entry_link_rejected">Impossible d\'ouvrir ce lien</string>
+    <string name="entry_tab_limit_reused">Limite d\'onglets atteinte — ouvert dans l\'onglet actuel</string>
+    <string name="entry_default_browser_unavailable">Les applis par défaut ne peuvent pas être modifiées sur cet appareil</string>
 </resources>

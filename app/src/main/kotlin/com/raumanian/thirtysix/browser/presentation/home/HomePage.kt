@@ -2,8 +2,10 @@
 
 package com.raumanian.thirtysix.browser.presentation.home
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -36,6 +39,7 @@ import com.raumanian.thirtysix.browser.presentation.components.ListRow
 import com.raumanian.thirtysix.browser.presentation.components.ListRowLetter
 import com.raumanian.thirtysix.browser.presentation.components.PillButton
 import com.raumanian.thirtysix.browser.presentation.components.PillStyle
+import com.raumanian.thirtysix.browser.presentation.entry.rememberDefaultBrowserRequest
 import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 
 internal const val TEST_TAG_HOME_PAGE: String = "home_page"
@@ -43,7 +47,9 @@ internal const val TEST_TAG_HOME_RECENT_TITLE: String = "home_recent_title"
 
 private const val KEY_HERO = "hero"
 private const val KEY_RECENT_HEADER = "recent_header"
+private const val KEY_DEFAULT_BROWSER_INVITE = "default_browser_invite"
 private const val TYPE_HERO = "hero"
+private const val TYPE_INVITE = "invite"
 private const val TYPE_HEADER = "header"
 private const val TYPE_RECENT = "recent"
 
@@ -63,18 +69,27 @@ data class HomeCallbacks(
  * shortcuts the card row is absent — no empty boxes on a fresh install.
  */
 @Composable
+@Suppress("LongParameterList") // Two injected view models (Home content, Spec 020 invitation) + layout inputs.
 fun HomePage(
     callbacks: HomeCallbacks,
     searchFocus: FocusRequester,
     bottomPadding: Dp,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
+    inviteViewModel: DefaultBrowserInviteViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    LifecycleResumeEffect(viewModel) {
+    val showInvite by inviteViewModel.showInvite.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(viewModel, inviteViewModel) {
         viewModel.onResume()
+        inviteViewModel.onResume()
         onPauseOrDispose { }
     }
+    val unavailableMessage = stringResource(R.string.entry_default_browser_unavailable)
+    val context = LocalContext.current
+    val requestDefaultBrowser = rememberDefaultBrowserRequest(
+        onUnavailable = { Toast.makeText(context, unavailableMessage, Toast.LENGTH_SHORT).show() },
+    )
     HomeContent(
         state = state,
         callbacks = callbacks,
@@ -89,6 +104,11 @@ fun HomePage(
         searchFocus = searchFocus,
         bottomPadding = bottomPadding,
         modifier = modifier,
+        inviteCard = if (showInvite) {
+            { DefaultBrowserInviteCard(onAction = requestDefaultBrowser, onDismiss = inviteViewModel::onDismiss) }
+        } else {
+            null
+        },
     )
 }
 
@@ -102,6 +122,8 @@ fun HomeContent(
     searchFocus: FocusRequester,
     bottomPadding: Dp,
     modifier: Modifier = Modifier,
+    // Spec 020 FR-024 — the default-browser invitation, directly under the hero; null hides it.
+    inviteCard: (@Composable () -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()
     LazyColumn(
@@ -121,6 +143,11 @@ fun HomeContent(
                 onNewIncognitoTab = callbacks.onNewIncognitoTab,
                 searchFocus = searchFocus,
             )
+        }
+        if (inviteCard != null) {
+            item(key = KEY_DEFAULT_BROWSER_INVITE, contentType = TYPE_INVITE) {
+                Box(modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.md)) { inviteCard() }
+            }
         }
         if (state.recent.isNotEmpty()) {
             item(key = KEY_RECENT_HEADER, contentType = TYPE_HEADER) {

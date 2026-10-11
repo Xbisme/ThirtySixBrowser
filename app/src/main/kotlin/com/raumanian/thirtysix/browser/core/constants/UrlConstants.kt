@@ -55,4 +55,10 @@ object UrlConstants {
      * inline string literals.
      */
     const val HTTPS_SCHEME_PREFIX: String = "https://"
+
+    /**
+     * Spec 020 research R8 — a web address used only to ask the system, on Android 7–9, which app
+     * opens web links by default. Never loaded.
+     */
+    const val DEFAULT_BROWSER_PROBE_URL: String = "https://example.com"
 }

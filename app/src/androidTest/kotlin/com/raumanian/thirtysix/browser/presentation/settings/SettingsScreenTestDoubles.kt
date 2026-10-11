@@ -19,6 +19,7 @@ import com.raumanian.thirtysix.browser.domain.repository.WebDataCleaner
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.IsDefaultBrowserUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
@@ -174,6 +175,7 @@ internal fun settingsViewModel(
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
     supportsDynamicColor: Boolean = true,
     appVersionName: String = INSTRUMENTED_APP_VERSION_NAME,
+    isDefaultBrowser: IsDefaultBrowserUseCase = IsDefaultBrowserUseCase { false },
 ): SettingsViewModel = SettingsViewModel(
     observeUserSettings = ObserveUserSettingsUseCase(settingsRepository),
     setThemeMode = setThemeMode,
@@ -185,6 +187,7 @@ internal fun settingsViewModel(
     changeHistoryRetention = changeHistoryRetention,
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
+    isDefaultBrowser = isDefaultBrowser,
 )
 
 internal const val INSTRUMENTED_APP_VERSION_NAME: String = "9.9.9-instrumented"

@@ -268,4 +268,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">開いているタブ</string>
     <string name="tabs_chip_incognito">シークレット</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">一般</string>
+    <string name="settings_default_browser_title">既定のブラウザ</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix は既定のブラウザではありません。タップして変更します。</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix は既定のブラウザです</string>
+    <string name="home_default_browser_invite_title">ThirtySix でリンクを開く</string>
+    <string name="home_default_browser_invite_body">ThirtySix を既定のブラウザにすると、他のアプリのリンクがここで開きます。</string>
+    <string name="home_default_browser_invite_action">既定に設定</string>
+    <string name="home_default_browser_invite_dismiss">閉じる</string>
+    <string name="entry_process_text_label">ThirtySix で検索</string>
+    <string name="entry_link_rejected">このリンクは開けません</string>
+    <string name="entry_tab_limit_reused">タブの上限に達したため、現在のタブで開きました</string>
+    <string name="entry_default_browser_unavailable">この端末では既定のアプリを変更できません</string>
 </resources>

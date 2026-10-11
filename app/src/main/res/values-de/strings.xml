@@ -272,4 +272,18 @@
     <!-- Spec 019 — tab switcher modes (FR-040) -->
     <string name="tabs_chip_open">Geöffnet</string>
     <string name="tabs_chip_incognito">Inkognito</string>
+
+    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <string name="settings_section_general">Allgemein</string>
+    <string name="settings_default_browser_title">Standardbrowser</string>
+    <string name="settings_default_browser_summary_not_default">ThirtySix ist nicht dein Standardbrowser. Zum Ändern tippen.</string>
+    <string name="settings_default_browser_summary_is_default">ThirtySix ist dein Standardbrowser</string>
+    <string name="home_default_browser_invite_title">Links in ThirtySix öffnen</string>
+    <string name="home_default_browser_invite_body">Mach ThirtySix zu deinem Standardbrowser, damit Links aus anderen Apps hier geöffnet werden.</string>
+    <string name="home_default_browser_invite_action">Als Standard festlegen</string>
+    <string name="home_default_browser_invite_dismiss">Schließen</string>
+    <string name="entry_process_text_label">Mit ThirtySix suchen</string>
+    <string name="entry_link_rejected">Dieser Link kann nicht geöffnet werden</string>
+    <string name="entry_tab_limit_reused">Tab-Limit erreicht – im aktuellen Tab geöffnet</string>
+    <string name="entry_default_browser_unavailable">Standard-Apps können auf diesem Gerät nicht geändert werden</string>
 </resources>
