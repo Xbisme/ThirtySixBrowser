@@ -15,6 +15,15 @@
 | Size budget | **At most +500 KB** on the release app, lists included. |
 | Design | **Waived as for Specs 020–022** (see Assumptions). |
 
+## Clarifications
+
+### Session 2026-10-11
+
+- Q: How broad should the block list be? → A: Trackers and advertising networks that follow people across sites; hosts that serve content the person chose to see (embedded video, maps, sign-in buttons, CDNs) are not on the list.
+- Q: Does Clear browsing data also clear the list of sites without protection? → A: Yes, as a new opt-in category, unticked by default, like Spec 021's Site permissions.
+- Q: What does the blocked count on the hub count? → A: Distinct tracker hosts blocked on the page, not individual requests and not companies.
+- Q: When a page ends up on `http://` (not encrypted), is the person told? → A: Yes, quietly: the hub shows a "Connection not secure" line for any `http://` page, including sites with protection off; no pop-up or notice while browsing.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Trackers on a page are blocked without anything to set up (Priority: P1)
@@ -38,7 +47,7 @@ A person installs ThirtySix and reads a news article. The page tries to load ana
 
 ### User Story 2 - See how many trackers were stopped and turn protection off for a broken site (Priority: P1)
 
-A person opens the hub on a page and sees how many tracker requests were blocked there. A shopping site's checkout button does nothing; the person turns protection off for that site from the hub, the page reloads and checkout works. Every later visit to that site, even after restarting the phone, loads without protection, until the person turns it back on — from the hub on that site, or from a list in Settings.
+A person opens the hub on a page and sees how many trackers were blocked there. A shopping site's checkout button does nothing; the person turns protection off for that site from the hub, the page reloads and checkout works. Every later visit to that site, even after restarting the phone, loads without protection, until the person turns it back on — from the hub on that site, or from a list in Settings.
 
 **Why this priority**: Blocking will occasionally break a site. Without a per-site switch the only way out would be to stop using the browser for that site, so the switch is what makes on-by-default safe to ship. The count is how the person knows the protection is working.
 
@@ -46,7 +55,7 @@ A person opens the hub on a page and sees how many tracker requests were blocked
 
 **Acceptance Scenarios**:
 
-1. **Given** a loaded web page on which 7 tracker requests were blocked, **When** the person opens the hub, **Then** it shows that 7 trackers were blocked on this page and that protection is on for this site.
+1. **Given** a loaded web page on which 40 requests to 7 different tracker hosts were blocked, **When** the person opens the hub, **Then** it shows that 7 trackers were blocked on this page and that protection is on for this site.
 2. **Given** a new page starts loading in the tab, **When** the person opens the hub, **Then** the count reflects only that new page.
 3. **Given** protection is on for `shop.example`, **When** the person switches it off in the hub, **Then** the hub closes, the page reloads with no protection applied, and the hub now shows protection off for this site.
 4. **Given** protection is off for `shop.example`, **When** the person opens any page of `shop.example` (or `www.shop.example`) in a normal tab, now or after an app restart, **Then** no protection is applied to it, and the hub says so.
@@ -73,6 +82,7 @@ A person taps an old `http://` link in a chat app. ThirtySix first tries the sec
 4. **Given** the secure version answers with an error page (for example "not found"), **When** it loads, **Then** it is shown as the site's answer; there is no fallback to `http://`.
 5. **Given** an address on `localhost`, an IP address, or a single-label name (for example `http://router/`), **When** it is opened, **Then** it is not upgraded.
 6. **Given** protection is off for the site, **When** its `http://` address is opened, **Then** it is not upgraded.
+7. **Given** a page shown over `http://` (after a fallback, a non-upgradable host, or a site with protection off), **When** the person opens the hub, **Then** it shows that the connection is not secure; no notice appears while browsing.
 
 ---
 
@@ -128,7 +138,7 @@ When a page links to or loads something from another site, the other site learns
 
 - **Tracker list matches the page's own site via a different hostname** (for example the page is `www.example.com` and the request goes to `cdn.example.com`, both on `example.com`): same site, not blocked.
 - **Companies that use several registrable domains** (for example a site and its separate CDN domain owned by the same company): treated as third party unless the bundled data says they belong to the same owner; if the list provides ownership data, requests to the same owner as the page are first-party.
-- **Embedded content from a listed host that the person wants** (a video or comment widget served from a tracker's domain): blocked; the person can turn protection off for the site. No per-request allow is offered.
+- **Embedded content the person chose to see** (embedded video, maps, sign-in buttons, content delivery networks): not on the list (FR-004a), so it loads. If a listed host still serves something a site needs, the person turns protection off for the site; no per-request allow is offered.
 - **Downloads** started by the person are never blocked, even from a listed host.
 - **A page of the excepted site embedded in another site's frame**: the exception follows the top-level page's site, not the frame's.
 - **Pop-ups and new tabs opened by a page** (Spec 021): protections follow the new tab's own page.
@@ -155,6 +165,7 @@ When a page links to or loads something from another site, the other site learns
 **Tracker blocking**
 
 - **FR-004**: A request made by a page to a host on the tracker list, or a subdomain of a listed host, MUST NOT be made when that host belongs to a different site than the top-level page, unless protection is off for the top-level page's site.
+- **FR-004a**: The list MUST cover analytics, tracking pixels and advertising networks that follow people across sites. It MUST NOT include hosts whose main purpose is serving content the person chose to see — embedded video and maps, sign-in services, content delivery networks. Research records how the chosen source is filtered to meet this.
 - **FR-005**: The main-frame navigation the person asked for (typed address, tapped link, bookmark, history entry, link from another app) MUST NOT be blocked, whatever its host.
 - **FR-006**: Downloads the person starts MUST NOT be blocked.
 - **FR-007**: A blocked request MUST fail silently: no error page, message or dialog, and the rest of the page MUST continue loading.
@@ -163,7 +174,7 @@ When a page links to or loads something from another site, the other site learns
 
 **Blocked-tracker count**
 
-- **FR-010**: For the page currently shown in a tab, the app MUST count the tracker requests blocked by FR-004. The count MUST restart at zero when a new page starts loading in the tab (not on an in-page address change of the same document).
+- **FR-010**: For the page currently shown in a tab, the app MUST count the distinct tracker hosts that had at least one request blocked by FR-004 (several requests to one host count once). The count MUST restart at zero when a new page starts loading in the tab (not on an in-page address change of the same document).
 - **FR-011**: While a web page is shown, the hub MUST show that page's count and whether protection is on for its site. On the Home page and the incognito start page, the hub MUST show neither.
 
 **Per-site switch**
@@ -173,6 +184,7 @@ When a page links to or loads something from another site, the other site learns
 - **FR-014**: In an incognito tab, the switch MUST affect only incognito browsing, MUST NOT be saved, MUST be forgotten when the last incognito tab closes, and incognito MUST NOT read the remembered list from normal browsing (mirrors Spec 021 FR-004).
 - **FR-015**: Settings → Privacy MUST contain **Sites without protection**, listing every remembered site with protection off, each removable; removing one turns protection back on for it. An empty list MUST show an empty-state message.
 - **FR-016**: When protection is off for a site, tracker blocking, HTTPS upgrade, tracking-parameter stripping and referrer trimming MUST NOT be applied to its pages; Global Privacy Control MUST still be sent.
+- **FR-016a**: Clear browsing data (Spec 016) MUST offer a **Sites without protection** category, unticked by default, as Spec 021 does for Site permissions; when ticked, every remembered site without protection is removed, so protection is on again everywhere.
 - **FR-017**: There MUST be no global switch turning all protections off.
 
 **HTTPS upgrade**
@@ -182,6 +194,7 @@ When a page links to or loads something from another site, the other site learns
 - **FR-020**: A host whose secure attempt failed MUST NOT be upgraded again until the app process ends; this memory MUST NOT be saved to disk.
 - **FR-021**: If the secure attempt returns any page, including an error page, that page MUST be shown and no fallback MUST occur.
 - **FR-022**: Addresses whose host is `localhost`, an IP address, or a single-label name MUST NOT be upgraded.
+- **FR-022a**: While a web page shown over `http://` is current, the hub MUST show a "Connection not secure" line, whatever the reason the page is not encrypted; the app MUST NOT show a separate notice or dialog for it.
 - **FR-023**: Requests made by a page for its resources MUST NOT be upgraded by this spec; the existing mixed-content behaviour is unchanged.
 
 **Tracking parameters**
@@ -212,16 +225,16 @@ When a page links to or loads something from another site, the other site learns
 
 - **Tracker list**: Bundled set of hosts known to track people across sites, optionally with the company that owns each; read-only, versioned with the app.
 - **Tracking-parameter list**: Bundled set of query-parameter names and name prefixes that exist only to track; read-only.
-- **Site without protection**: A registrable domain the person turned protection off for in normal browsing; saved on the device; created from the hub, removed from the hub or Settings.
+- **Site without protection**: A registrable domain the person turned protection off for in normal browsing; saved on the device; created from the hub, removed from the hub, Settings or Clear browsing data.
 - **Incognito site exception**: Same as above for incognito browsing; held in memory only, discarded when incognito ends.
-- **Page block count**: Number of tracker requests blocked for the page currently shown in a tab; in memory only, reset per page.
+- **Page block count**: Number of distinct tracker hosts blocked for the page currently shown in a tab; in memory only, reset per page.
 - **Failed-upgrade host**: A host whose HTTPS attempt failed in this app session; in memory only.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: On a local test page that requests 20 resources from listed third-party hosts and 10 from unlisted hosts, all 20 listed requests are blocked, all 10 others load, and the hub shows 20.
+- **SC-001**: On a local test page that makes 30 requests to 12 different listed third-party hosts and 10 requests to unlisted hosts, all 30 listed requests are blocked, all 10 others load, and the hub shows 12.
 - **SC-002**: On 10 popular real sites (news, shopping, search, video, social), every site shows at least one blocked tracker, and on at least 9 of them the main content, navigation and sign-in link work as with protection off.
 - **SC-003**: Of 10 real `http://` addresses whose sites support HTTPS, 10 open as `https://`; of 3 sites that support only HTTP (or redirect back to it), all 3 open over `http://` within one extra attempt and never loop.
 - **SC-004**: 10 test addresses mixing listed tracking parameters, ordinary parameters and fragments are cleaned exactly as FR-024/FR-025 specify, in the address bar, history and Share.
@@ -238,9 +251,8 @@ When a page links to or loads something from another site, the other site learns
 
 - **Design waiver (owner decision, 2026-10-11, as for Specs 020–022)**: Constitution §X's "Design before spec" rule is waived because Claude Design is not available on the owner's account. The hub's tracker count and per-site switch, and the Settings → Privacy → Sites without protection screen, are built from existing Spec 019 design-system components (hub rows/tiles, Settings rows, list rows, empty states, shared dialogs) and tokens. The owner will supply designs later; a later visual change MUST NOT change the behaviour specified here.
 - **"Site"** means registrable domain (eTLD+1), determined from a public-suffix list bundled in the app or already available on the device; no lookup goes over the network.
-- **The count is of blocked requests**, not of distinct companies; the per-company breakdown is the dashboard's job in Spec 024.
+- **The count is of distinct hosts** (clarified); grouping by company is the dashboard's job in Spec 024.
 - **Global Privacy Control stays on for excepted sites** because it cannot break a page and is a legal opt-out in some places; the per-site switch exists to fix broken sites.
-- **Clear browsing data gains no new category**: the list of sites without protection is a setting, edited from Settings → Privacy, like Spec 021's site permissions are listed there. If research or review finds the list should be clearable, that is added in clarification.
 - **The failed-upgrade memory is per app process**, shared by normal and incognito tabs, and holds hosts only; it is never written to disk.
 - **Web-engine limits**: some request types (for example requests made by service workers or WebSockets) may not be interceptable on every Android/WebView version. Research documents which are covered; uncovered types are a known limitation, not a failure of this spec.
 - **List source and size**: the tracker list is chosen in research among public lists whose license permits bundling in a free app on Google Play (candidates include EasyPrivacy, Disconnect and DuckDuckGo's tracker data); the choice and its license are recorded in research. Lists may be reduced to host-level entries to fit the size budget.

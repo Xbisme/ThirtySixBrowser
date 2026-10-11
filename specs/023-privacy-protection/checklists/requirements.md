@@ -36,6 +36,7 @@
   library, class or Android API is named.
 - FR-029 / FR-030 deliberately bound coverage of page resources by what the web engine allows
   and require research to document gaps — the main-frame part is unconditional and testable.
-- Decisions taken by default instead of [NEEDS CLARIFICATION] (candidates for `/speckit-clarify`):
-  count unit = blocked requests; GPC stays on for excepted sites; no Clear-browsing-data
-  category for the exception list; incognito ignores the remembered list.
+- Clarified 2026-10-11 (4 questions): list breadth (trackers + ad networks, content embeds
+  excluded), Clear browsing data opt-in category, count = distinct hosts, "not secure" line
+  in the hub. Still default, not asked: GPC stays on for excepted sites; incognito ignores
+  the remembered list.
