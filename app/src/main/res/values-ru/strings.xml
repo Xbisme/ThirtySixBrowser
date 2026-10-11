@@ -358,7 +358,7 @@
     <string name="hub_tile_find_in_page">Найти на странице</string>
     <string name="hub_tile_share">Поделиться</string>
     <string name="hub_tile_print">Печать</string>
-    <string name="hub_tile_desktop_site">Версия для ПК</string>
+    <string name="hub_tile_desktop_site">ПК-версия</string>
     <string name="hub_tile_text_size">Размер текста</string>
     <string name="hub_tile_state_on">Вкл.</string>
     <string name="hub_tile_state_off">Выкл.</string>

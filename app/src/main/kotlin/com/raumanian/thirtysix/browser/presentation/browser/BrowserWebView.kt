@@ -7,6 +7,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.print.PrintManager
 import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
@@ -90,6 +91,7 @@ internal fun BrowserWebView(
     modifier: Modifier = Modifier,
     adopted: WebView? = null,
     textZoomPercent: Int = BrowserLimits.TEXT_SIZE_PERCENT_100,
+    desktopMode: Boolean = false,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     // Spec 021 research R5 — a page-created WebView is adopted by the first generation only; a
@@ -137,7 +139,7 @@ internal fun BrowserWebView(
                 val toAdopt = adoptable[0]
                 adoptable[0] = null
                 buildConfiguredWebView(
-                    webView = (toAdopt ?: WebView(context)).apply { settings.textZoom = textZoom.value },
+                    webView = preparePageTools(toAdopt ?: WebView(context), actions, textZoom.value, desktopMode),
                     adopted = toAdopt != null,
                     state = state,
                     actions = actions,
@@ -161,6 +163,34 @@ internal fun BrowserWebView(
                 }
                 instance[0] = null
             }
+        }
+    }
+}
+
+/**
+ * Spec 022 — the page tools' WebView side, set up before the first load: the app-wide text size
+ * (FR-031), the tab's page mode (FR-026), and the desktop-mode and print actions.
+ */
+private fun preparePageTools(
+    webView: WebView,
+    actions: WebViewActionsHandle,
+    textZoomPercent: Int,
+    desktopMode: Boolean,
+): WebView = webView.apply {
+    settings.textZoom = textZoomPercent
+    val pageMode = DesktopModeController(this)
+    pageMode.apply(desktopMode)
+    actions.setDesktopMode = { desktop ->
+        stopLoading()
+        pageMode.apply(desktop)
+        actions.reload()
+    }
+    // FR-033 / FR-034 — the system print screen ("Save as PDF" included); nothing about the job
+    // is recorded. The WebView's context is the activity, which PrintManager requires.
+    actions.print = { jobName ->
+        runCatching {
+            val printManager = context.getSystemService(PrintManager::class.java)
+            printManager.print(jobName, createPrintDocumentAdapter(jobName), null)
         }
     }
 }

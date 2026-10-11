@@ -19,6 +19,12 @@ class AssetPageServer : AutoCloseable {
     /** The `User-Agent` header of every request so far, in order. */
     val userAgents: MutableList<String> = CopyOnWriteArrayList()
 
+    /** Every request so far as (path without query, `User-Agent`), in order. */
+    val requests: MutableList<Pair<String, String>> = CopyOnWriteArrayList()
+
+    /** The `User-Agent` of each request for the asset [name], in order. */
+    fun userAgentsFor(name: String): List<String> = requests.filter { it.first == name }.map { it.second }
+
     init {
         thread(isDaemon = true) { serve() }
     }
@@ -36,13 +42,16 @@ class AssetPageServer : AutoCloseable {
                     val reader = it.getInputStream().bufferedReader()
                     val path = reader.readLine().orEmpty().split(' ').getOrNull(1).orEmpty()
                     var line = reader.readLine()
+                    var userAgent = ""
                     while (!line.isNullOrEmpty()) {
                         if (line.startsWith(USER_AGENT_HEADER, ignoreCase = true)) {
-                            userAgents += line.substring(USER_AGENT_HEADER.length).trim()
+                            userAgent = line.substring(USER_AGENT_HEADER.length).trim()
+                            userAgents += userAgent
                         }
                         line = reader.readLine()
                     }
                     val name = path.trimStart('/').substringBefore('?')
+                    requests += name to userAgent
                     val body = runCatching { assets.open(name).use { input -> input.readBytes() } }.getOrNull()
                     val head = if (body != null) {
                         "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: ${body.size}\r\n"

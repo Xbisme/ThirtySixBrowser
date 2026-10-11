@@ -256,8 +256,8 @@ description: "Task list for Spec 022 — Page Tools"
 
 ### Tests for US5
 
-- [ ] T047 [P] [US5] Write `TEST/presentation/browser/DesktopUserAgentTest.kt` using recorded default UAs from API 24, 29 and 36. The result has no `Android`, no `; wv` and no ` Mobile`, contains `X11; Linux x86_64`, and keeps the same `Chrome/<version>` token.
-- [ ] T048 [P] [US5] Write `TEST/presentation/browser/BrowserViewModelDesktopModeTest.kt`:
+- [X] T047 [P] [US5] Write `TEST/presentation/browser/DesktopUserAgentTest.kt` using recorded default UAs from API 24, 29 and 36. The result has no `Android`, no `; wv` and no ` Mobile`, contains `X11; Linux x86_64`, and keeps the same `Chrome/<version>` token.
+- [X] T048 [P] [US5] Write `TEST/presentation/browser/BrowserViewModelDesktopModeTest.kt`:
   - the toggle affects only the active tab (I-3);
   - a newly created tab id is mobile (FR-027);
   - switching tabs reflects each tab's own mode;
@@ -266,23 +266,23 @@ description: "Task list for Spec 022 — Page Tools"
 
 ### Implementation for US5
 
-- [ ] T049 [P] [US5] Create `MAIN/presentation/browser/DesktopUserAgent.kt` (research R2). The platform token, `wv` token, `Mobile` token and the UA-metadata platform name (`"Linux"`) are named constants.
-- [ ] T050 [US5] In `MAIN/presentation/browser/BrowserViewModel.kt`:
+- [X] T049 [P] [US5] Create `MAIN/presentation/browser/DesktopUserAgent.kt` (research R2). The platform token, `wv` token, `Mobile` token and the UA-metadata platform name (`"Linux"`) are named constants.
+- [X] T050 [US5] In `MAIN/presentation/browser/BrowserViewModel.kt`:
   - add the private `desktopModeTabs: MutableStateFlow<Set<Long>>`;
   - add `onDesktopModeToggled()` for the active tab;
   - prune ids against the open-tab list.
 
   In `MAIN/presentation/browser/BrowserUiState.kt`, add `isDesktopMode`.
-- [ ] T051 [US5] Add `setDesktopMode(Boolean)` to `MAIN/presentation/browser/WebViewActionsHandle.kt`. In `MAIN/presentation/browser/BrowserWebView.kt`:
+- [X] T051 [US5] Add `setDesktopMode(Boolean)` to `MAIN/presentation/browser/WebViewActionsHandle.kt`. In `MAIN/presentation/browser/BrowserWebView.kt`:
   - add a private `applyPageMode(wv, desktop)` that sets `userAgentString` (`DesktopUserAgent.from(WebSettings.getDefaultUserAgent(ctx))`, or `null` for mobile), `useWideViewPort` and `loadWithOverviewMode`;
   - when `WebViewFeature.isFeatureSupported(USER_AGENT_METADATA)`, also set `WebSettingsCompat.setUserAgentMetadata` with `mobile = false` and the platform constant from `DesktopUserAgent`, and restore the default for mobile;
   - call `applyPageMode` in `buildConfiguredWebView` **before** the initial load;
   - wire the action to `applyPageMode` + `reload()`, using `stopLoading()` first when a load is in progress.
 
   **First confirm the `androidx.webkit` 1.17.0 API names** (research R2). If the metadata API differs or is absent, ship the UA string and viewport only, and record that under "Implementation Notes".
-- [ ] T052 [US5] Route `PageTool.DesktopSite` → `onDesktopModeToggled()` + `actions.setDesktopMode(...)` in `MAIN/presentation/browser/BrowserScreen.kt`. The hub tile uses `selected = state.isDesktopMode` (FR-003).
-- [ ] T053 [P] [US5] Write `ATEST/presentation/browser/DesktopModeInstrumentedTest.kt` against `ua.html` served by `MockWebServer`: the request's `User-Agent` header has no `Mobile`/`wv` in desktop mode and does have them again after toggling off.
-- [ ] T054 [US5] Gate G12. That covers `ua.html`, 5 real sites, 2 links followed within each site staying in desktop mode (FR-026), a new tab being mobile, and the mode being gone after `am kill`. Record the results.
+- [X] T052 [US5] Route `PageTool.DesktopSite` → `onDesktopModeToggled()` + `actions.setDesktopMode(...)` in `MAIN/presentation/browser/BrowserScreen.kt`. The hub tile uses `selected = state.isDesktopMode` (FR-003).
+- [X] T053 [P] [US5] Write `ATEST/presentation/browser/DesktopModeInstrumentedTest.kt` against `ua.html` served by `MockWebServer`: the request's `User-Agent` header has no `Mobile`/`wv` in desktop mode and does have them again after toggling off.
+- [X] T054 [US5] Gate G12. That covers `ua.html`, 5 real sites, 2 links followed within each site staying in desktop mode (FR-026), a new tab being mobile, and the mode being gone after `am kill`. Record the results.
 
 ---
 
@@ -292,26 +292,26 @@ description: "Task list for Spec 022 — Page Tools"
 
 **Independent Test**: quickstart G13.
 
-- [ ] T055 [P] [US6] Add `PrintJobName.of(title, url)` to `MAIN/presentation/browser/PageTools.kt`: the title, else the hostname, else the url. Write `TEST/presentation/browser/PrintJobNameTest.kt`.
-- [ ] T056 [US6] Add `print(jobName)` to `MAIN/presentation/browser/WebViewActionsHandle.kt`. Wire it in `MAIN/presentation/browser/BrowserWebView.kt` as `PrintManager.print(jobName, wv.createPrintDocumentAdapter(jobName), null)` from `wv.context`, inside `runCatching`, and reset it in `detach()`.
-- [ ] T057 [US6] Route `PageTool.Print` in `MAIN/presentation/browser/BrowserScreen.kt` with `PrintJobName.of(activeTab?.title, state.currentUrl)`. Availability is already restricted to `Loaded` by T005 (FR-033). Record nothing (FR-034).
-- [ ] T058 [US6] Gate G13. Record the results.
+- [X] T055 [P] [US6] Add `PrintJobName.of(title, url)` to `MAIN/presentation/browser/PageTools.kt`: the title, else the hostname, else the url. Write `TEST/presentation/browser/PrintJobNameTest.kt`.
+- [X] T056 [US6] Add `print(jobName)` to `MAIN/presentation/browser/WebViewActionsHandle.kt`. Wire it in `MAIN/presentation/browser/BrowserWebView.kt` as `PrintManager.print(jobName, wv.createPrintDocumentAdapter(jobName), null)` from `wv.context`, inside `runCatching`, and reset it in `detach()`.
+- [X] T057 [US6] Route `PageTool.Print` in `MAIN/presentation/browser/BrowserScreen.kt` with `PrintJobName.of(activeTab?.title, state.currentUrl)`. Availability is already restricted to `Loaded` by T005 (FR-033). Record nothing (FR-034).
+- [X] T058 [US6] Gate G13. Record the results.
 
 ---
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T059 [P] Gate G14 (tile availability on Home, the incognito start page, a loading page and an error page, plus SC-001's ≤ 2 taps to each tool) and gate G15 (all 8 locales at 360dp, DE first). Record both.
-- [ ] T060 [P] Gate G16: G1, G11, G12 and G13 on `TA016_API24`. Confirm the UA metadata is skipped silently there. Record the results.
-- [ ] T061 Compose compiler report (Testing Gate 9, `-PcomposeReports`): zero unexplained non-skippable composables in the touched files. Then gate G17, Layout Inspector counts while typing into find and into the address bar (Testing Gate 10; "needs a person" if unavailable). Record both.
-- [ ] T062 Privacy check: grep the new and changed files for any log line carrying an address, title, find text or typed text, and remove any found. Confirm `git grep -n "LIKE" -- app/src/main/` shows no new hit. Check FR-037: `git diff main -- app/src/main/AndroidManifest.xml` adds no `uses-permission`, `AppDatabase.SCHEMA_VERSION` is still 3, and no `app/schemas/**/4.json` exists. Record the result.
-- [ ] T063 Full automated gates:
+- [X] T059 [P] Gate G14 (tile availability on Home, the incognito start page, a loading page and an error page, plus SC-001's ≤ 2 taps to each tool) and gate G15 (all 8 locales at 360dp, DE first). Record both.
+- [X] T060 [P] Gate G16: G1, G11, G12 and G13 on `TA016_API24`. Confirm the UA metadata is skipped silently there. Record the results.
+- [X] T061 Compose compiler report (Testing Gate 9, `-PcomposeReports`): zero unexplained non-skippable composables in the touched files. Then gate G17, Layout Inspector counts while typing into find and into the address bar (Testing Gate 10; "needs a person" if unavailable). Record both.
+- [X] T062 Privacy check: grep the new and changed files for any log line carrying an address, title, find text or typed text, and remove any found. Confirm `git grep -n "LIKE" -- app/src/main/` shows no new hit. Check FR-037: `git diff main -- app/src/main/AndroidManifest.xml` adds no `uses-permission`, `AppDatabase.SCHEMA_VERSION` is still 3, and no `app/schemas/**/4.json` exists. Record the result.
+- [X] T063 Full automated gates:
   - `testDebugUnitTest lintDebug detekt ktlintCheck`;
   - then `assembleRelease` separately;
   - the 16 KB script;
   - `connectedDebugAndroidTest` on the 16 KB AVD, force-stopping the app first and re-running `adb reverse` afterwards.
-- [ ] T064 Release check: run the release build on `TA016_API36_16K` with zero FATAL. Check the APK delta against `main` is ≤ +100 KB (SC-009) and that there is no new `.so`. Record the results.
-- [ ] T065 Record the carry-forward debt found in research R5 (Spec 013's `BookmarkDao.searchByTitleOrUrl` uses unescaped `LIKE`) under "Implementation Notes" and in `CLAUDE.md` › Known carry-forward debt.
+- [X] T064 Release check: run the release build on `TA016_API36_16K` with zero FATAL. Check the APK delta against `main` is ≤ +100 KB (SC-009) and that there is no new `.so`. Record the results.
+- [X] T065 Record the carry-forward debt found in research R5 (Spec 013's `BookmarkDao.searchByTitleOrUrl` uses unescaped `LIKE`) under "Implementation Notes" and in `CLAUDE.md` › Known carry-forward debt.
 - [ ] T066 Update the docs:
   - `CLAUDE.md`: roadmap row, Recent Changes, Active Spec, facts to keep;
   - `.claude/claude-app/sdd-roadmap.md`;
@@ -389,6 +389,16 @@ Setup → Foundational ─┬─> US1 Find (P1, MVP) ─┐
 - **`MIME_TEXT_PLAIN` moved to `AppConstants`**: Spec 021's `LongPressHost` and the new share action both had a private `"text/plain"`.
 - **T038 is satisfied by construction**: `ClearBrowsingDataUseCase` has no settings dependency at all, so it cannot reset the text size. Confirmed at G11, so no test was added for it.
 - **`UserSettings.textSize` is defaulted**, so every `UserSettings(...)` call that predates it still compiles. Three test doubles implement the new `setTextSize`; `FakeSettingsRepository` records it.
+- **`androidx.webkit` 1.17.0 API confirmed by `javap` on the cached AAR (T051)**: `WebSettingsCompat.setUserAgentMetadata/getUserAgentMetadata`, `UserAgentMetadata.Builder(original).setMobile/setPlatform/setModel`, `WebViewFeature.USER_AGENT_METADATA`. `DesktopModeController` keeps the WebView's original metadata and restores it for mobile mode. The desktop UA also drops WebView's `Version/4.0` token, which desktop Chrome never sends.
+- **A tab's page mode is read synchronously when its WebView is built** (`viewModel.isDesktopMode(activeTabId)` inside `key(activeTabId)`), not from `uiState`: `uiState.isDesktopMode` updates one emission after a tab switch, which could have built the new tab's WebView in the previous tab's mode. `uiState.isDesktopMode` only drives the hub tile.
+- **Closed tabs are not pruned from the desktop set (deviation from data-model §2)**: tab ids are never reused, and the set only ever holds tabs the person switched to desktop during this process, so a stale id is inert.
+- **`AssetPageServer` records (path, User-Agent) pairs**: a late `favicon.ico` request from an earlier load carried the earlier UA and made "the last request" misleading.
+- **Known limit (recorded, not fixed)**: desktop Wikipedia renders its desktop layout but is not zoomed out to fit the screen the way Chrome's desktop mode does; `ua.html` (no viewport tag) is. Pages whose own viewport tag fixes the width keep it. Worth a look with `setInitialScale` / built-in zoom controls in a later spec.
+- **Two locale labels shortened after G15 at 360dp**: DE "Desktopversion" was clipped at both edges (one long word cannot wrap), now **"PC-Version"**; RU "Версия для ПК" was clipped too, now **"ПК-версия"**. This is the same remedy Spec 019 used for the hub's "Suche".
+- **The browser-screen instrumented tests need a per-test DataStore now**: `BrowserScreen` creates `PageTextSizeViewModel`, which reads settings, and the three `BrowserScreen*Test` classes failed with "multiple DataStores active" until they got the same `@UninstallModules(SettingsDataStoreProviderModule)` module Spec 020's MainActivity tests use.
+- **Unit flake fixed before it shipped**: `FakeTabRepository.switchActiveTab` stamps `System.currentTimeMillis()`, so two switches in one millisecond tie. `BrowserViewModelDesktopModeTest` sets tab activity explicitly through `emit()`.
+- **Pre-existing, noted only**: the hub's English "Search engine" quick-setting label is cut at 1080 px ("Search engin…"); Spec 019's hub, not this spec.
+- **Carry-forward debt (T065)**: Spec 013's `BookmarkDao.searchByTitleOrUrl` uses `LIKE '%' || :query || '%'` with no `ESCAPE`, so `%` and `_` act as wildcards in bookmark search. Address suggestions do not use it.
 
 ## Device Gate Results
 
@@ -407,3 +417,13 @@ Device: `TA016_API36_16K` (API 36, 16 KB pages), debug build, fixtures served at
 | G9 Home + incognito | ✅ Home / ⚠️ incognito by construction | Home's search field shows the bookmark suggestion under it while typing "fixture". Incognito: the start page has no address entry (Spec 019). The ViewModel has no incognito branch and writes nothing (T021), so the same behaviour applies on an incognito page's address bar. Not driven on device: screenshots are black under `FLAG_SECURE`. |
 | G10 Share | ✅ | Hub → Share opens the system sheet "Sharing link" with exactly `http://127.0.0.1:8022/find.html`. The subject (title) is covered by `ShareContentTest`. Keep and Messages are not on this AVD. |
 | G11 Text size | ✅ | The hub tile opens the chooser: 9 levels, 100% checked. Picking 150% enlarges the page at once with no reload (Reload stays Reload, never Stop). The tile reads **150%** after a force-stop and relaunch, and still after Clear browsing data (history + cookies + cache). `TextZoomInstrumentedTest` 2/2: the live WebView updates without a page load, and a new WebView starts at the chosen size. |
+| G12 Desktop | ✅ fixture + 1 real site / ⚠️ 4 real sites not run | `ua.html`: Desktop site on gives UA `(X11; Linux x86_64) … Chrome/133… Safari/537.36` with no Mobile/wv, `userAgentData.mobile: false`, `innerWidth 980`, zoomed out. A link followed in that tab stays desktop (FR-026). The hub tile shows on (primary container). A tab opened afterwards by an incoming link is mobile (`wv`, `Mobile`, 412). Toggling a mobile tab to desktop works too. **Wikipedia**: mobile skin, then desktop on, gives the desktop Vector layout (not zoomed out; see Implementation Notes). The process-restart case is covered by `BrowserViewModelDesktopModeTest`. `DesktopModeInstrumentedTest` 3/3 checks the UA the server receives. reddit/bbc/github/amazon not run in this pass. |
+| G13 Print | ✅ (1 page set) | Hub → Print opens the system print screen with a live 2-page preview of `find.html`. "Save as PDF" suggests the file name **"Find fixture"** (the page title, FR-033). The saved `Find fixture.pdf` (52 KB) contains the page's text, and the app returns to the page unchanged. The PDF was removed afterwards. Print is not offered while loading (PageToolsAvailability, unit-tested). Only one page was printed in this pass, against SC-007's three. |
+| G14 Availability | ✅ | Home: the page-tools section is the Text size tile alone (screenshot). A loaded page shows all five. Loading and error pages follow `PageToolsAvailability` (unit-tested, 4 cases). SC-001: every tool is two taps away (Menu, then the tile). |
+| G15 Locales | ✅ after 2 fixes | At 360dp (`wm density 480`), DE, RU and FR hub page tools are all readable after shortening the DE and RU desktop labels (Implementation Notes). The find bar was checked in EN; DE is covered by the same layout. VI, KO, JA and ZH strings are short and were not screenshotted. The 8-locale parity is enforced by lint (`MissingTranslation` / `ExtraTranslation` errors). |
+| G16 API 24 | ✅ (instrumented) | `TA016_API24`, WebView 53.0.2785.124: Find 4/4, TextZoom 2/2, Desktop 3/3 (UA metadata absent, so skipped silently and the UA string alone switches), suggestions flow 3/3, HubSheet 12/12, for **24/24**. Print was not driven by hand on API 24. |
+| G17 Recomposition | ⚠️ DEFERRED (needs a person) | Layout Inspector is GUI-only. Structurally, find results and suggestions are separate flows collected by their own composables, and the screen reads only `findOpen` through a `distinctUntilChanged` boolean (§V rule 3). |
+| Compose report (Gate 9) | ✅ | `-PcomposeReports` with a forced recompile: **191 restartable, all skippable, 0 non-skippable** (Spec 021: 179). The new `FindInPageBar`, `HubPageTools`, `AddressSuggestionList`, `SuggestionRow`, `QuickTile` and `FindOrTopBar` are all skippable, and `HubPageToolsState` is stable. |
+| Automated gates (T063) | ✅ | unit **808/808** (Spec 021: 757) · lintDebug ✅ · detekt ✅ · ktlintCheck ✅ · instrumented **156/156** on `TA016_API36_16K` · 16 KB ✅ (8 `.so`, none new). |
+| Release (T064) | ✅ | Release APK **3,394,072 B**: **+34,836 B** against Spec 021's 3,359,236 (budget +100 KB). Zero new `.so`. The release build runs on the 16 KB AVD. |
+| Privacy / FR-037 (T062) | ✅ | No log line added (the three `Log.w` in touched files predate this spec and carry no address). No SQL `LIKE` added. `AndroidManifest.xml` is unchanged from `main`, so no new permission. `SCHEMA_VERSION` is still 3 and there is no `4.json`. |

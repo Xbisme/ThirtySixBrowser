@@ -1,15 +1,20 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
@@ -27,9 +32,16 @@ import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_PAGE_LOAD_PROGRESS
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
+import dagger.hilt.components.SingletonComponent
 import java.io.File
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -72,8 +84,23 @@ import org.junit.runner.RunWith
  * on the JVM.
  */
 @HiltAndroidTest
+// Spec 022 — the browser screen now reads settings (text size), so each test needs its own
+// DataStore file: a fresh Hilt component per test would otherwise open a second one on the same
+// file ("multiple DataStores active"), as Spec 020 found for MainActivity tests.
+@UninstallModules(SettingsDataStoreProviderModule::class)
 @RunWith(AndroidJUnit4::class)
 class BrowserScreenLoadingIndicatorTest {
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object PerTestSettingsDataStoreModule {
+        @Provides
+        @Singleton
+        fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                produceFile = { File(context.cacheDir, "spec022-settings-${System.nanoTime()}.preferences_pb") },
+            )
+    }
 
     @get:Rule(order = 0)
     val hiltRule: HiltAndroidRule = HiltAndroidRule(this)

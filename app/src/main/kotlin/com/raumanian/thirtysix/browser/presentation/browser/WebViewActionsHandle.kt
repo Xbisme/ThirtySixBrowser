@@ -45,6 +45,12 @@ internal class WebViewActionsHandle {
     /** Spec 022 FR-010 — removes every find highlight from the page. */
     var clearMatches: () -> Unit = {}
 
+    /** Spec 022 FR-025 — switches the page mode (research R2) and reloads the tab's address. */
+    var setDesktopMode: (Boolean) -> Unit = {}
+
+    /** Spec 022 FR-033 — opens the system print screen for the live page, under [jobName]. */
+    var print: (jobName: String) -> Unit = {}
+
     /**
      * Points every action back at a no-op. Called when the renderer process behind the
      * current WebView goes away: that WebView must not be used again, and the replacement
@@ -59,5 +65,7 @@ internal class WebViewActionsHandle {
         findAll = {}
         findNext = {}
         clearMatches = {}
+        setDesktopMode = {}
+        print = {}
     }
 }

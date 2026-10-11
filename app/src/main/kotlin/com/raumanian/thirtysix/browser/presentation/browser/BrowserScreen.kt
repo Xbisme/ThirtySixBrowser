@@ -272,6 +272,13 @@ fun BrowserScreen(
         chrome = chrome,
         actions = PageToolActions(
             share = rememberShareAction(viewModel),
+            // Spec 022 FR-025 — flip the active tab's mode, then reconfigure and reload its page.
+            toggleDesktopSite = { viewModel.onDesktopModeToggled()?.let(webViewActions.setDesktopMode) },
+            // Spec 022 FR-033 — offered only once the page has loaded (PageToolsAvailability).
+            print = {
+                val title = viewModel.activeTab.value?.title
+                webViewActions.print(PrintJobName.of(title, viewModel.uiState.value.currentUrl))
+            },
             openTextSize = {
                 quickSettingsUsed = true
                 quickSettingRequest = QuickSetting.TextSize
@@ -294,7 +301,7 @@ fun BrowserScreen(
             },
             pageTools = HubPageToolsState(
                 available = available,
-                isDesktopMode = false,
+                isDesktopMode = state.isDesktopMode,
                 textSizePercent = textZoomPercent,
             ),
             onPageTool = pageToolHandler,
@@ -575,6 +582,7 @@ private fun BrowserContent(
                 modifier = Modifier.fillMaxSize(),
                 adopted = adopted,
                 textZoomPercent = textZoomPercent,
+                desktopMode = remember { viewModel.isDesktopMode(activeTabId) },
             )
         }
     }

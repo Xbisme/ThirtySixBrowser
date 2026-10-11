@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -138,6 +139,13 @@ class BrowserViewModel @Inject constructor(
 
     private val currentTitleCache: MutableStateFlow<String> = MutableStateFlow("")
 
+    /**
+     * Spec 022 data-model §2 — the tabs in desktop mode, in memory only: every new tab and every
+     * tab after a process restart is in mobile mode (FR-027, FR-028, I-4). Tab ids are never
+     * reused, so a closed tab's entry is inert.
+     */
+    private val desktopModeTabs = MutableStateFlow<Set<Long>>(emptySet())
+
     private val _findInPage = MutableStateFlow(FindInPageState())
 
     /**
@@ -187,6 +195,12 @@ class BrowserViewModel @Inject constructor(
                 // Spec 022 FR-011 — the find bar belongs to the page it searched.
                 onFindClosed()
             }
+            .launchIn(viewModelScope)
+
+        // Spec 022 FR-003 — the hub tile shows the active tab's page mode.
+        combine(activeTabFlow.map { it?.id }, desktopModeTabs) { id, desktop -> id != null && id in desktop }
+            .distinctUntilChanged()
+            .onEach { desktop -> _uiState.update { it.copy(isDesktopMode = desktop) } }
             .launchIn(viewModelScope)
 
         // Spec 012 — observe active-tab incognito state into UiState. Drives
@@ -286,6 +300,22 @@ class BrowserViewModel @Inject constructor(
     /** Spec 015 — clears the download snackbar event once shown. Idempotent. */
     fun consumeDownloadSnackbarEvent() {
         _uiState.update { it.copy(downloadSnackbarEvent = null) }
+    }
+
+    /**
+     * Spec 022 FR-026 — whether [tabId] is in desktop mode. Read synchronously when a tab's
+     * WebView is built, so it starts in the right mode before its first load.
+     */
+    fun isDesktopMode(tabId: Long): Boolean = tabId in desktopModeTabs.value
+
+    /**
+     * Spec 022 FR-025 — flips the active tab's page mode and returns the new one, or `null` when
+     * there is no active tab. The caller reconfigures and reloads the live WebView.
+     */
+    fun onDesktopModeToggled(): Boolean? {
+        val tabId = activeTabFlow.value?.id ?: return null
+        desktopModeTabs.update { tabs -> if (tabId in tabs) tabs - tabId else tabs + tabId }
+        return tabId in desktopModeTabs.value
     }
 
     /** Spec 022 FR-005 — the find bar opens empty, replacing the top bar. */

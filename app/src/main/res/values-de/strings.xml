@@ -350,7 +350,7 @@
     <string name="hub_tile_find_in_page">Auf Seite suchen</string>
     <string name="hub_tile_share">Teilen</string>
     <string name="hub_tile_print">Drucken</string>
-    <string name="hub_tile_desktop_site">Desktopversion</string>
+    <string name="hub_tile_desktop_site">PC-Version</string>
     <string name="hub_tile_text_size">Textgröße</string>
     <string name="hub_tile_state_on">An</string>
     <string name="hub_tile_state_off">Aus</string>
