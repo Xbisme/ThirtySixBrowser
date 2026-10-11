@@ -296,12 +296,12 @@
     <string name="site_capability_microphone">micro</string>
     <string name="site_capability_location">position</string>
     <string name="site_capability_pair">%1$s et %2$s</string>
-    <string name="site_permission_title">%1$s souhaite utiliser votre %2$s</string>
+    <string name="site_permission_title">%1$s demande l\'accès : %2$s</string>
     <string name="site_permission_always_allow">Toujours autoriser</string>
     <string name="site_permission_allow_once">Autoriser cette fois</string>
     <string name="site_permission_deny">Ne pas autoriser</string>
     <string name="site_permission_blocked_title">Accès (%1$s) désactivé pour ThirtySix</string>
-    <string name="site_permission_blocked_body">Pour que les sites puissent utiliser votre %1$s, activez l\'accès pour ThirtySix dans les paramètres du téléphone.</string>
+    <string name="site_permission_blocked_body">Pour que les sites puissent y accéder (%1$s), activez l\'accès pour ThirtySix dans les paramètres du téléphone.</string>
     <string name="site_permission_open_settings">Ouvrir les paramètres</string>
     <string name="site_permission_not_now">Plus tard</string>
     <string name="site_dialog_from">Message de %1$s</string>

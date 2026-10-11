@@ -48,8 +48,11 @@ interface PageRequestSink {
     /** The page-created WebView for an allowed window; it becomes a new tab. */
     fun adoptPopup(popup: WebView) = popup.destroy()
 
-    /** A blocked window's address, or `null` when the page named none. */
-    fun onPopupBlocked(target: String?) = Unit
+    /**
+     * A blocked window's address, or `null` when the page named none. [generation] is the page
+     * that asked: a notice for a page that has since been replaced is dropped.
+     */
+    fun onPopupBlocked(target: String?, generation: Long) = Unit
 
     /** `window.close()` from the page in [window]. */
     fun onCloseWindow(window: WebView) = Unit

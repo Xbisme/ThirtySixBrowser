@@ -177,8 +177,9 @@ internal class BrowserChromeClient(
                 true
             }
             PopupDecision.Blocked -> {
-                BlockedPopupCatcher.attach(requireNotNull(context), requireNotNull(transport), resultMsg) {
-                    pageRequests.onPopupBlocked(it)
+                val generation = pageRequests.context()?.generation
+                BlockedPopupCatcher.attach(requireNotNull(context), requireNotNull(transport), resultMsg) { address ->
+                    generation?.let { pageRequests.onPopupBlocked(address, it) }
                 }
                 true
             }

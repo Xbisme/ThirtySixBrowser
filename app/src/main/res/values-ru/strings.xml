@@ -296,16 +296,16 @@
     <string name="entry_default_browser_unavailable">На этом устройстве нельзя изменить приложения по умолчанию</string>
 
     <!-- Spec 021 — web capabilities (contracts C2) -->
-    <string name="site_capability_camera">камеру</string>
+    <string name="site_capability_camera">камера</string>
     <string name="site_capability_microphone">микрофон</string>
     <string name="site_capability_location">геоданные</string>
     <string name="site_capability_pair">%1$s и %2$s</string>
-    <string name="site_permission_title">%1$s запрашивает доступ к: %2$s</string>
+    <string name="site_permission_title">%1$s запрашивает доступ: %2$s</string>
     <string name="site_permission_always_allow">Всегда разрешать</string>
     <string name="site_permission_allow_once">Только в этот раз</string>
     <string name="site_permission_deny">Не разрешать</string>
     <string name="site_permission_blocked_title">Доступ (%1$s) для ThirtySix отключён</string>
-    <string name="site_permission_blocked_body">Чтобы сайты могли использовать %1$s, включите доступ для ThirtySix в настройках телефона.</string>
+    <string name="site_permission_blocked_body">Чтобы сайты могли получить доступ (%1$s), включите его для ThirtySix в настройках телефона.</string>
     <string name="site_permission_open_settings">Открыть настройки</string>
     <string name="site_permission_not_now">Не сейчас</string>
     <string name="site_dialog_from">Сообщение от %1$s</string>

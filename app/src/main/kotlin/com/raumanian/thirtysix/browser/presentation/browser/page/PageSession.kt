@@ -97,8 +97,10 @@ class PageSession(
         if (opener == null || tabs == null) popup.destroy() else tabs.adopt(popup, opener)
     }
 
-    override fun onPopupBlocked(target: String?) {
-        context()?.let { popups?.onBlocked(target, it) }
+    override fun onPopupBlocked(target: String?, generation: Long) {
+        // The opener may have been replaced while the address was awaited (its window then
+        // never navigates and reports nothing): such a late notice would cover the real one.
+        context()?.takeIf { it.generation == generation }?.let { popups?.onBlocked(target, it) }
     }
 
     override fun onCloseWindow(window: WebView) {

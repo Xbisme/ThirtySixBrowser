@@ -394,7 +394,8 @@ private class BrowserWebViewClient(
             }
             context.startActivity(intent)
         } catch (t: Throwable) {
-            android.util.Log.w("BrowserWebView", "External intent dispatch failed: $uri", t)
+            // Spec 021 FR-036 — the address is not logged.
+            android.util.Log.w("BrowserWebView", "External intent dispatch failed", t)
         }
         return true
     }
