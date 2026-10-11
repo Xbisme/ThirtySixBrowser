@@ -166,7 +166,7 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 - [X] T066 Gate G18 (release on `TA016_API36_16K`, zero FATAL; APK ≤ +150 KB) and G19 (install over `main`'s build: data intact, migration 2→3 applied); record
 - [X] T067 [P] Play Data safety check (Constitution §II): verify against Play's definitions that camera/microphone/location reaching a website at the person's direction is not "collected" or "shared" by the app; record the conclusion and the declaration to make in `specs/021-web-capabilities/tasks.md` › Implementation Notes (if it is, propose the declaration change to the owner before merging)
 - [X] T068 SC-001 real-site run on the Galaxy A55 (release): a WebRTC call demo, a maps site (location), a form with file upload, YouTube fullscreen, a Google sign-in pop-up, `httpbin.org/basic-auth`, a long-press on a search result, a JS-dialog test page, a site using `target=_blank`, and a camera-capture upload; record n/10 in "Device Gate Results"
-- [ ] T069 Update docs: `CLAUDE.md` (roadmap row, Recent Changes, Active Spec, facts to keep), `.claude/claude-app/sdd-roadmap.md`, `dev-workflow.md`, `project-context.md`
+- [X] T069 Update docs: `CLAUDE.md` (roadmap row, Recent Changes, Active Spec, facts to keep), `.claude/claude-app/sdd-roadmap.md`, `dev-workflow.md`, `project-context.md`
 - [ ] T070 Open the PR `021-web-capabilities` → `main` with the gate table, Constitution line, permission additions, FR-015 amendment and APK delta
 
 ---
