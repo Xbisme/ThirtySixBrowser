@@ -19,6 +19,47 @@ Version Change: (none) → 1.0.0 (INITIAL — project constitution created)
                                 Discipline" subsection; §X Phase 5 becomes 019
                                 ui-redesign + 020 optional tracker blocker, with a
                                 design-before-spec rule)
+                1.4.0 → 1.5.0 (MINOR — §X gains Phase 6 "Real browser" (020–023) and
+                                drops the optional tracker-blocker slot; §II defines
+                                the one permitted form of script injection; §I and
+                                §VII require protection data to ship in the APK)
+
+Modified Principles (1.5.0, 2026-10-11, decided by the project lead):
+- I. Privacy & Security First — new bullet: protection data (tracker host lists,
+       HTTPS-upgrade lists, parameter-stripping rules, injected scripts) ships inside the
+       APK, updates only with app releases, and is never fetched at runtime.
+- II. Google Play Compliance — the addJavascriptInterface bullet is replaced by a precise
+       rule: every JS→native bridge (addJavascriptInterface, WebMessageListener) stays
+       forbidden; one-way injection is allowed only for APK-bundled scripts via
+       WebViewCompat.addDocumentStartJavaScript (feature-detected, off when unsupported),
+       serving a spec-defined privacy protection, exposing nothing and receiving nothing,
+       with the spec documenting where it runs.
+- VI. Testing Discipline — unit-test list now names the Spec 023 rule engines (host
+       blocklist matcher, HTTPS upgrade, URL-parameter stripping) and Spec 020's
+       incoming-link / intent handling.
+- VII. Offline-First Architecture — the Spec 023 protections are on the list of features
+       that MUST work fully offline.
+- X. Simplicity & Build Order — new Phase 6 "Real browser", order MANDATORY: 020
+       default-browser-entry-points → 021 web-capabilities → 022 page-tools → 023
+       privacy-protection. The Phase 5 line "020 (Optional) — tracker blocker host list"
+       is removed; that scope moves into 023, which is not optional. "Design before
+       spec" explicitly covers the Phase 6 specs that add UI. Rationale reworded.
+- Technical Standards → Android Permissions — note added: Spec 021 will add CAMERA,
+       RECORD_AUDIO and ACCESS_FINE/COARSE_LOCATION to the table itself, requested only at
+       point of use.
+- Bump rationale: MINOR — a new phase and material expansion of §I, §II and §X; the only
+       removal is the obsolete optional-020 line, whose scope survives inside 023.
+
+Follow-up TODOs (1.5.0):
+- TODO(SDD_ROADMAP): sdd-roadmap.md, dev-workflow.md, project-context.md and CLAUDE.md
+       still describe 020 as the optional tracker blocker — renumber in the same change.
+- TODO(DESIGN_021_023): the UI for 021, 022, 023 and 020's set-as-default prompt is not
+       yet in the ThirtySix design system; design and approve before each
+       /speckit-specify (§X "Design before spec").
+
+Templates (1.5.0 re-check): plan-template.md, spec-template.md, tasks-template.md ✅ —
+       the Constitution Check loads principles at runtime; no template names Phase 6 or
+       specs 020–023.
 
 Modified Principles (1.4.0, 2026-10-10, decided by the project lead):
 - V. Performance Excellence — new subsection "Compose Phase Discipline (NON-NEGOTIABLE)",
@@ -150,6 +191,10 @@ data practices MUST embody that promise without exception.
 - The app MUST NOT request runtime permissions it does not actively use
 - Search queries typed in the address bar MUST NOT be logged or sent anywhere except
   the user-selected search engine
+- Protection data — tracker host lists, HTTPS-upgrade lists, URL-parameter-stripping
+  rules and injected scripts — MUST ship inside the APK and change only with an app
+  release; the app MUST NOT fetch such data at runtime from any server, ThirtySix's or
+  anyone else's
 
 **Rationale**: A browser that leaks the URLs and search queries it handles is uniquely
 dangerous. On-device-only architecture eliminates the attack surface entirely — not as
@@ -181,9 +226,17 @@ constraint.
 - Google Play data safety form MUST be accurate — declare zero data collected
 - Target SDK MUST stay current — `targetSdk = 36` for v1.0; bump within 12 months of
   any new Android release per Play policy
-- App MUST NOT include WebView JavaScript bridges that expose privileged Java APIs to
-  loaded web content (`addJavascriptInterface` is forbidden unless absolutely necessary
-  and gated to allow-listed origins)
+- Every JavaScript→native bridge is FORBIDDEN: `addJavascriptInterface`,
+  `WebMessageListener` / `addWebMessageListener`, and any equivalent that lets page
+  script call into the app or hand it data
+- One-way script injection is permitted only when ALL of these hold:
+  1. the script is bundled inside the APK — never downloaded, and never generated from
+     remote data;
+  2. it is installed with `WebViewCompat.addDocumentStartJavaScript`, feature-detected
+     first; on a WebView without the feature the protection is simply off;
+  3. it implements a privacy protection defined in a spec (Spec 023);
+  4. it exposes no native API and receives nothing back from the page;
+  5. the spec documents the origin rules for where it runs.
 
 **Rationale**: Google Play is the primary distribution channel. Positioning ThirtySix
 correctly (Tools, not VPN/Privacy) and using only Play-approved APIs is the compliant
@@ -429,7 +482,8 @@ Unit tests are REQUIRED for all business logic. Compose UI tests are REQUIRED fo
 critical user flows. Integration tests for Room and DataStore are REQUIRED.
 
 - Unit tests MUST cover: repositories, ViewModels, use cases, mappers, URL parsing,
-  search engine URL builders, host blocklist matcher (if Spec 020)
+  search engine URL builders, incoming-link and intent handling (Spec 020), and the
+  host blocklist matcher, HTTPS-upgrade and URL-parameter-stripping rules (Spec 023)
 - Compose UI tests MUST cover: address bar input flow, tab switcher tap, bookmark
   add/delete, settings toggles, onboarding flow
 - Instrumented tests MUST cover: Room DAOs, DataStore read/write, WebView basic load
@@ -453,8 +507,9 @@ roadmap.
 All non-network features MUST operate without connectivity. All writes MUST be atomic.
 No data loss under any failure mode is acceptable.
 
-- ALL features (bookmarks, history, tabs, settings, downloads list view) MUST function
-  fully offline — the ONLY exception is WebView page load + outbound search query
+- ALL features (bookmarks, history, tabs, settings, downloads list view, and the
+  Spec 023 privacy protections) MUST function fully offline — the ONLY exception is
+  WebView page load + outbound search query
 - All user data MUST be persisted to Room DB (with `journal_mode = WAL`) within 500ms
   of any change — partial writes MUST NOT corrupt existing data
 - No data loss on app crash — all user-created content MUST be recoverable on next
@@ -571,10 +626,23 @@ MUST follow the spec roadmap. No speculative code is permitted.
   - Phase 5 (only after 001–018 complete): 019 — UI redesign, a full rebuild of every
     screen from the approved ThirtySix design system
     (https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys; violet brand replacing Deep
-    Teal); then 020 (Optional) — tracker blocker host list
+    Teal)
+  - Phase 6 "Real browser" (only after 001–019 complete), in this order:
+    - 020 `default-browser-entry-points` — http/https `VIEW` + `BROWSABLE` intent
+      filters, text and links shared from other apps, and an offer to become the
+      default browser (`RoleManager` on API 29+, the system settings screen below it)
+    - 021 `web-capabilities` — file-upload chooser, fullscreen video, popups and
+      `window.open`, JS dialogs and HTTP auth, per-site camera / microphone / location
+      prompts remembered per origin, long-press menu on links and images
+    - 022 `page-tools` — find in page, share, desktop mode, text zoom, print / save as
+      PDF, address-bar autocomplete from local history and bookmarks
+    - 023 `privacy-protection` — tracker blocking from a host list, HTTPS upgrade,
+      tracking-parameter stripping and referrer trimming, Fire button with fireproof
+      sites, Global Privacy Control, per-site privacy dashboard, cookie-banner
+      auto-decline and fingerprinting protection through bundled scripts (§II)
 - **Design before spec**: a screen or feature whose UI is not yet in the design system
   MUST be designed there and approved by the project lead before `/speckit-specify`
-  runs for it. New features proposed while designing are added to `sdd-roadmap.md` for
+  runs for it. In Phase 6 this covers 021, 022, 023 and 020's set-as-default prompt. New features proposed while designing are added to `sdd-roadmap.md` for
   a later version; they MUST NOT be folded into the spec in progress.
 - **Implementation sequence within Phase 1 is MANDATORY**: 001 → 002 → (003, 004,
   005, 006 parallel)
@@ -586,8 +654,11 @@ MUST follow the spec roadmap. No speculative code is permitted.
 - Pro tier / monetization is OUT OF SCOPE for v1.0 — entire app is free
 
 **Rationale**: Shipping a complete, polished basic browser is what defines v1.0
-success. A stripped-down or unpolished v1.0 with a half-built tracker blocker would
-undermine the "minimalist, just works" positioning. Phase-gating enforces this.
+success; a stripped-down or unpolished v1.0 would undermine the "minimalist, just works"
+positioning. Phase 6 then follows the same rule: the app must first be reachable as a
+browser (020) and handle the web properly (021, 022) before it adds protections (023),
+because protections on a browser nobody can open links in protect nothing. Phase-gating
+enforces this.
 
 ### XI. Build Configuration & Environment Separation
 
@@ -666,6 +737,11 @@ grant is irrelevant to them. Verified at Spec 015 gate G9 on Android 16 / API 36
 granted, "Download complete" still appeared in the shade. Declaring it would have violated
 §I's "MUST NOT request runtime permissions it does not actively use". Should the app ever
 compose a notification of its own, this decision must be revisited.
+
+> **Pending, Spec 021**: per-site camera, microphone and location prompts will need
+> `CAMERA`, `RECORD_AUDIO` and `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION`. Spec 021
+> adds those rows itself, with the same rule as storage: requested at point of use,
+> never at launch, and only when a page asks.
 
 > The storage row is the **documented deviation** from the two-permission minimum in §II —
 > see `specs/015-downloads-manager/plan.md` Complexity Tracking for
@@ -779,4 +855,4 @@ All implementation decisions MUST align with these principles.
   red 16KB CI gate
 - Constitution supersedes all other practices; in case of conflict, the constitution wins
 
-**Version**: 1.4.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-10
+**Version**: 1.5.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-11

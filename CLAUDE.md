@@ -1,6 +1,6 @@
 # ThirtySixBrowser Development Guidelines
 
-Auto-generated from project context. Last updated: 2026-10-11 — ✅ **Spec 019 `ui-redesign` merged via [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, merge commit `54e090a`, CI 6/6); real-device pass on a Galaxy A55 on 2026-10-11 — SC-005 PASS, one locale defect fixed, first-run cold start +30% open.** **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** ✅ Spec 018 `onboarding-flow` done — merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41 · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.4.0 (2026-10-10: §V Compose Phase Discipline; Phase 5 = 019 ui-redesign, then optional 020 tracker blocker).
+Auto-generated from project context. Last updated: 2026-10-11 — ✅ **Spec 019 `ui-redesign` merged via [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, merge commit `54e090a`, CI 6/6); real-device pass on a Galaxy A55 on 2026-10-11 — SC-005 PASS, one locale defect fixed, first-run cold start +30% open.** **🎉 v1.0 FEATURE-COMPLETE: Specs 001–018 all implemented.** ✅ Spec 018 `onboarding-flow` done — merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41 · ✅ Specs 001–016 done · ✅ Spec 017 `splash-screen` done — merged vào `main` qua [PR #20](https://github.com/Xbisme/ThirtySixBrowser/pull/20) (2026-09-15, merge commit `cca5c0c`, CI xanh 6/6), 35/35.** Spec 016 merged into `main` via PR #18 (2026-09-12, merge commit `3083941`, CI green), 112/113 — still open: T109's TalkBack pass (DEFERRED, needs a person). Build config, Clean Architecture + Hilt, theme system, 8-locale i18n, Room schema, DataStore settings persistence, WebView Compose wrapper, navigation controls, address bar / omnibox, search engine (Google/DuckDuckGo/Bing), multi-tab management with Chrome-style tab cards, private/incognito mode, bookmarks CRUD with unlimited-depth folders, **full history view — auto-record + day-grouped list + tap-to-replace + live search + long-press actions (open in new tab / delete / copy URL) + confirmed clear-all, 8-locale**, downloads manager (system `DownloadManager` → public Downloads folder, first schema migration v1→v2), **settings screen** (theme · dynamic color · in-app language via the AndroidX per-app API · search engine · 7/30/90/180-day history retention · Chrome-style clear browsing data · About). Constitution v1.5.0 (2026-10-11: Phase 6 "real browser" = 020 default browser → 021 web capabilities → 022 page tools → 023 privacy protection; §II permits only APK-bundled one-way script injection; §I protection data ships in the APK).
 
 > **Google Play Name**: "ThirtySix Browser" (Category: Tools / Productivity)
 > Internal package: `com.raumanian.thirtysix.browser`
@@ -9,7 +9,7 @@ Auto-generated from project context. Last updated: 2026-10-11 — ✅ **Spec 019
 
 ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckDuckGo Browser nhưng đơn giản hơn — chỉ dùng những gì Android cung cấp sẵn (`WebView`, `DownloadManager`, Room, DataStore). Offline-first, không tài khoản, không cloud sync, không tracking. Toàn bộ data lưu on-device.
 
-**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), ✅ **018 `onboarding-flow` merged 2026-09-15 (41/41, PR #24, `492e4f3`)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. **Phase 5: ✅ 019 `ui-redesign` merged 2026-10-10 (PR #27, `54e090a`)**; 020 tracker blocker vẫn optional. Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
+**Current Status:** 🎉 **v1.0 feature-complete.** Phase 1–3 hoàn tất; **Phase 4 3/3**: 016 merged, 017 merged (PR #20, `cca5c0c`), ✅ **018 `onboarding-flow` merged 2026-09-15 (41/41, PR #24, `492e4f3`)**. Sau khi merge 018, Specs 001–018 đủ — app đạt điều kiện nộp Play Store, **trừ các mục còn nợ bên dưới**. **Phase 5: ✅ 019 `ui-redesign` merged 2026-10-10 (PR #27, `54e090a`)**; tiếp theo là **Phase 6 "real browser"** (020–023, Constitution v1.5.0). Figures still owed on real hardware: Spec 014 T103b (SC-005), Spec 015 SC-006, and Spec 016's SC-009 clearing time and Settings-list 60 fps figure.
 
 ## Active Technologies
 
@@ -231,7 +231,7 @@ unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so 2>/
 - **Pricing**: Free (no Pro tier in v1.0)
 
 ### Critical Rules
-- v1.0 phải ship đầy đủ Phase 1–4 (Specs 001–018) trước Phase 5 (019 ui-redesign, rồi optional 020)
+- v1.0 phải ship đầy đủ Phase 1–4 (Specs 001–018) trước Phase 5 (019 ui-redesign), rồi Phase 6 "real browser" 020–023 theo đúng thứ tự (Constitution v1.5.0)
 - Phase order is MANDATORY (Constitution §X) — no spec may be skipped or reordered
 - Permissions giữ tối thiểu — `INTERNET`, `ACCESS_NETWORK_STATE`, plus `WRITE_EXTERNAL_STORAGE` capped at `maxSdkVersion="28"` (Spec 015's single documented deviation). `POST_NOTIFICATIONS` is deliberately **not** declared — the system download service notifies under its own UID (Spec 015 G9, Constitution v1.3.0 §II)
 - `addJavascriptInterface` FORBIDDEN unless allow-listed origin gating + spec justification
@@ -259,7 +259,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 | # | Spec | Status | Description |
 |---|------|--------|-------------|
-| — | Constitution | ✅ Done v1.4.0 (amended 2026-10-10) | Project governing principles |
+| — | Constitution | ✅ Done v1.5.0 (amended 2026-10-11) | Project governing principles |
 | 001 | `project-init-build-config` | ✅ Done 2026-05-01 | Gradle Kotlin DSL + version catalog + 16KB-ready build |
 | 002 | `clean-architecture-skeleton-di` | ✅ Done 2026-05-01 | Module structure + Hilt + base classes |
 | 003 | `theme-typography-darkmode` | ✅ Done 2026-05-01 | Material3 + light/dark/system |
@@ -279,7 +279,10 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 017 | `splash-screen` | ✅ Done 2026-09-15 (PR #20 merged, `cca5c0c`; 35/35; G1–G10 PASS, chỉ TalkBack deferred) | SplashScreen API + branding — thay toàn bộ artwork template bằng mark ThirtySix |
 | 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `ui-redesign` | ✅ Done 2026-10-10 (PR #27 merged, `54e090a`; real-device pass 2026-10-11 — Layout Inspector, TalkBack, canvas comparison, dynamic color still open) | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
-| 020 | `tracker-blocker-hostlist` | ⬜ Optional | Host blocklist (only after 001–019 done) |
+| 020 | `default-browser-entry-points` | ⬜ Next (Phase 6) | http/https VIEW + BROWSABLE intent filters, shared links/text, set-as-default (RoleManager API 29+) |
+| 021 | `web-capabilities` | ⬜ Phase 6 | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
+| 022 | `page-tools` | ⬜ Phase 6 | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
+| 023 | `privacy-protection` | ⬜ Phase 6 | Tracker blocking (APK-bundled list), HTTPS upgrade, param stripping, Fire button, GPC, privacy dashboard, cookie-banner + fingerprint scripts |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
 
