@@ -118,8 +118,8 @@ Các Spec theo thứ tự implement:
 | 017 | `splash-screen` | 002 | ✅ Done (PR #20) |
 | 018 | `onboarding-flow` | 003, 004, 006, 017 | ✅ Done (PR #24) |
 | 019 | `ui-redesign` | 001–018 | ✅ Done (PR #27, Phase 5) |
-| 020 | `default-browser-entry-points` | 001–019 | 🟢 Implemented, PR pending (Phase 6) |
-| 021 | `web-capabilities` | 020 | ⬜ Phase 6 |
+| 020 | `default-browser-entry-points` | 001–019 | ✅ Done (PR #30, Phase 6) |
+| 021 | `web-capabilities` | 020 | ⬜ Next (Phase 6) |
 | 022 | `page-tools` | 021 | ⬜ Phase 6 |
 | 023 | `privacy-protection` | 022 | ⬜ Phase 6 |
 
