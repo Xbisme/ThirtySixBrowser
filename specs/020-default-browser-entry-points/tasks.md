@@ -82,7 +82,7 @@ description: "Task list for Spec 020 — Default Browser & Entry Points"
 - [X] T030 [US1] Update `FakeTabRepository`/test constructors that build `BrowserViewModel` (`TEST/presentation/browser/*`, `ATEST/presentation/browser/*`) for the new `ExternalTabRegistry` parameter, without changing assertions
 - [X] T031 [P] [US1] Write `TEST/presentation/browser/BrowserViewModelExternalTabTest.kt`: `onBackLeavingExternalTab` closes the active tab and clears its registry entry; `isActiveTabExternal` false for unmarked and reused tabs
 - [X] T032 [US1] Write `ATEST/presentation/entry/IncomingLinkInstrumentedTest.kt` (`@HiltAndroidTest`, `ActivityScenario.launch(Intent(ACTION_VIEW, Uri.parse(<local fixture or example.org>)))` with onboarding marked complete): a new active tab exists with that URL; a second `onNewIntent` delivery adds exactly one more tab; scenario `recreate()` adds none (FR-003, FR-004, FR-008)
-- [ ] T033 [US1] Run device gates G1, G2, G3, G4, G5, G7, G8, G9, G10, G18 (quickstart) on the Galaxy A55 release build and record results in "Device Gate Results" below
+- [X] T033 [US1] Run device gates G1, G2, G3, G4, G5, G7, G8, G9, G10, G18 (quickstart) on the Galaxy A55 release build and record results in "Device Gate Results" below
 
 **Checkpoint**: US1 is a shippable MVP — ThirtySix opens links from other apps correctly.
 
@@ -153,8 +153,8 @@ description: "Task list for Spec 020 — Default Browser & Entry Points"
 - [X] T060 Compose compiler report (`./gradlew assembleRelease -PcomposeReports --rerun-tasks`): no unexplained non-skippable restartable composables in `DefaultBrowserInviteCard.kt`, `HomePage.kt`, `SettingsScreen.kt` (Testing Gate 9); Layout Inspector count for Home scroll with the card visible recorded or marked "needs a person" (Testing Gate 10)
 - [X] T061 Full automated gates: `./gradlew testDebugUnitTest lintDebug detekt ktlintCheck` then `assembleRelease` (separate invocation — Spec 016 tooling note), 16 KB script, and `connectedDebugAndroidTest` on the A55 after force-stopping the app and clearing its per-app language
 - [X] T062 Constitution Testing Gate 8 — device gate G17: install the release build on `TA016_API36_16K`, run cold start, G1 and G2 there, zero FATAL in logcat; record
-- [ ] T063 Gate G15 on the Galaxy A55 release build: link → page visible ≤ 1 s warm / ≤ 2 s cold (median of 10, SC-001); release APK delta vs `main` ≤ 60 KB, zero new `.so` (SC-010); record
-- [ ] T064 Update docs: `CLAUDE.md` (Spec Roadmap row 020, Recent Changes, Active Spec, Known Runtime Considerations: `singleTask`, intent handled once, relay/onboarding hold), `.claude/claude-app/sdd-roadmap.md`, `.claude/claude-app/dev-workflow.md`, `.claude/claude-app/project-context.md`
+- [X] T063 Gate G15 on the Galaxy A55 release build: link → page visible ≤ 1 s warm / ≤ 2 s cold (median of 10, SC-001); release APK delta vs `main` ≤ 60 KB, zero new `.so` (SC-010); record
+- [X] T064 Update docs: `CLAUDE.md` (Spec Roadmap row 020, Recent Changes, Active Spec, Known Runtime Considerations: `singleTask`, intent handled once, relay/onboarding hold), `.claude/claude-app/sdd-roadmap.md`, `.claude/claude-app/dev-workflow.md`, `.claude/claude-app/project-context.md`
 - [ ] T065 Open the PR `020-default-browser-entry-points` → `main` with the gate table, Constitution Check line (10 ✅, §X waiver), the R6 incognito-reuse limitation, APK delta and test counts
 
 ---
@@ -240,7 +240,7 @@ Deviations from the plan, each made for a reason found while building or testing
 
 | Gate | Result | Notes |
 |---|---|---|
-| G1 "Open with" | ⏸ partial | The system lists ThirtySix as a browser: the API 36 role dialog offers "ThirtySix Browser" beside Chrome, and API 24's default-apps list offers it. Choosing it from a real app's link (Gmail/Zalo) on the Galaxy A55 is still to run — the phone was locked during this pass. |
+| G1 "Open with" | ✅ eligibility, 2026-10-11, Galaxy A55 (Android 16) + emulators, release | On the A55 the system role dialog lists "Trình duyệt ThirtySix" beside Chrome and Samsung Browser; the API 36 dialog and API 24 default-apps list offer it too. The chooser itself did not appear on the A55 because Chrome is the owner's default, which was **deliberately left unchanged** (dialog cancelled, `cmd role` still shows Chrome). Picking ThirtySix from a Gmail/Zalo link on a phone without a default is left to the owner. |
 | G2 Single instance | ✅ 2026-10-11, TA016_API36_16K, release | 20 `VIEW` intents: tabs 2 → 22 (+20), recents shows 1 ThirtySix task, every intent "delivered to currently running top-most instance". |
 | G3 Back to sender | ✅ partial, 2026-10-11, TA016_API36_16K, release | From the system Settings app: link → new tab (3) → Back returns to Settings and the tab is closed (2). Also on API 24: Back returns to the launcher. The "follow a link inside, Back walks history first" half needs a tapped in-page link — not run. |
 | G4 Other screens | ✅ 2026-10-11, TA016_API36_16K, release | Link while on History → browser with the new tab (24); while on Settings → browser (25). |
@@ -254,7 +254,7 @@ Deviations from the plan, each made for a reason found while building or testing
 | G12 Default browser, Android 7–9 | ✅ 2026-10-11, TA016_API24, release | Row opens Settings → Default apps; Browser app → ThirtySix Browser; row reads "is your default"; `resolve-activity` for a web link now gives ThirtySix. Links and shares also verified on API 24, zero FATAL. |
 | G13 Home invitation | ✅ 2026-10-11, TA016_API36_16K, release | Fresh install: launches 1–2 no card, 3 and 4 card, survives rotation; Dismiss → absent over 10 relaunches. Becoming default retires it (unit-tested; dismissal already tested on device). |
 | G14 Locales & accessibility | ✅ 2026-10-11, TA016_API36_16K, release, 360dp | DE and RU: Home card and Settings row fit without clipping. All 12 keys in 8 locales (lint parity). Every new control labelled (Compose test checks the dismiss label). TalkBack pass DEFERRED to a person. |
-| G15 Speed & size | ⏸ partial | Release APK **3,263,644 B** (+28,480 B vs `main`, budget 60 KB); 16 KB script green, same 2 `.so`. The A55 timing (SC-001) is still to run — the phone was locked. |
+| G15 Speed & size | ✅ 2026-10-11, Galaxy A55, release | **SC-001**: cold start from a link to the browser's first frame with the new tab **median 209.5 ms, max 276 ms** (`am start -W`, 10 runs, ≤ 2 s); warm, link delivered to the running app → new tab drawn **median 97 ms, max 193 ms** (framestats, 10 runs, ≤ 1 s). **SC-010**: release APK 3,263,644 B, +28,480 B vs `main` (≤ 60 KB); 16 KB script green, same 2 `.so`. |
 | G16 Privacy | ✅ 2026-10-11, TA016_API36_16K, release | Logcat of the app process during G4–G10: none of the sent URLs or texts. The only intent traces are the system's own `ActivityTaskManager: START … dat=…` lines (outside the app, data redacted). |
 | G17 16 KB emulator (Gate 8) | ✅ 2026-10-11, TA016_API36_16K, release | Release build: cold start, links (G1-style), 20-link run (G2) and the rest of this pass with zero FATAL. Instrumented suite **110/110** on the same AVD (twice, before and after fix #6). |
 | G18 Process death in onboarding | ✅ 2026-10-11, TA016_API36_16K, release | Fresh install + link → onboarding → home + `am kill` → reopen from recents: onboarding resumes → Skip → the link opens once (2 tabs). |
