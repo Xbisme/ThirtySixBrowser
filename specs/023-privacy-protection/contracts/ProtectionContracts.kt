@@ -67,6 +67,8 @@ interface ProtectionDataRepository {
     fun preload()
     /** Waits at most [timeoutMs]; `null` on timeout or parse failure (fail open). Call off the main thread. */
     fun awaitData(timeoutMs: Long): ProtectionData?
+    /** Never blocks; safe on the main thread. */
+    fun currentDataOrNull(): ProtectionData?
 }
 
 interface ProtectionExceptionRepository {
@@ -85,6 +87,10 @@ class ObserveProtectionExceptionsUseCase { operator fun invoke(): kotlinx.corout
 class SetSiteProtectionUseCase { suspend operator fun invoke(site: String, on: Boolean, isIncognito: Boolean): Result<Unit> }
 /** `site == null` removes all. */
 class RemoveProtectionExceptionsUseCase { suspend operator fun invoke(site: String?): Result<Unit> }
+/** Synchronous, any thread. Normal → Room snapshot; incognito → incognito store only (FR-014). The only way presentation reads protection state (§IV). */
+class IsSiteProtectedUseCase { operator fun invoke(site: String, isIncognito: Boolean): Boolean }
+/** Domain view of the in-memory incognito store, implemented in data/local/protection. */
+interface IncognitoProtectionExceptions { fun contains(site: String): Boolean }
 
 // ───────────────────────── data/local ─────────────────────────
 
@@ -105,6 +111,13 @@ class IncognitoProtectionExceptionStore {
 /** In-memory, process lifetime (FR-020). */
 class HttpsUpgradeFailureStore { fun markFailed(host: String); fun snapshot(): Set<String> }
 
+/** Builds the matchers once after data loads. */
+class ProtectionMatchersHolder {
+    data class Matchers(val suffixes: PublicSuffixMatcher, val trackers: TrackerMatcher, val preparer: NavigationPreparer)
+    fun matchersOrNull(): Matchers?                 // main thread OK
+    fun awaitMatchers(timeoutMs: Long): Matchers?   // background threads only
+}
+
 // ───────────────────────── presentation/browser/protection ─────────────────────────
 
 /**
@@ -113,8 +126,9 @@ class HttpsUpgradeFailureStore { fun markFailed(host: String); fun snapshot(): S
  */
 class PageProtectionMonitor {
     val status: kotlinx.coroutines.flow.StateFlow<PageProtectionStatus>
-    fun onPageChanged(topUrl: String, isWebPage: Boolean, protectionOn: Boolean)   // PageSession.advance()
-    fun onMainFrameRequest(url: String)                                            // IO thread
+    fun onPageChanged(topUrl: String, isWebPage: Boolean)   // PageSession.advance(): UI fields; resets only for restores
+    fun onMainFrameRequest(url: String)                     // IO thread: per-page reset + protectionOn
+    fun blockedHosts(): Set<String>                         // tests
     /** IO thread. Returns a blocked response or null. */
     fun onSubresource(requestUrl: String): android.webkit.WebResourceResponse?
     fun beginUpgrade(prepared: NavigationPreparer.Prepared)

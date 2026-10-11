@@ -110,7 +110,7 @@ Assets are stored compressed in the APK (no `noCompress` entry for `.txt`/`.dat`
 
 ## R10 — Loading the lists without slowing start-up
 
-**Decision**: A `@Singleton` `ProtectionDataSource` parses the three assets on `Dispatchers.IO` into immutable sets, **started from `ThirtySixApplication.onCreate` without waiting** (like the Spec 014 retention sweep). `shouldInterceptRequest` is already on a background thread: if a request arrives before parsing finishes, it **waits** on the load (bounded by `NetworkTimeouts.PROTECTION_DATA_LOAD_TIMEOUT_MS`, failing open on timeout) — the first page load is the only one that can wait, and parsing ≈26k lines is expected in tens of ms [B, measure in G-perf]. The main thread never waits. Heap: ≈16k host strings + PSL rules, estimated 2–3 MB [B, measure].
+**Decision**: A `@Singleton` `ProtectionDataSource` parses the three assets on `Dispatchers.IO` into immutable sets, **started from `ThirtySixApplication.onCreate` without waiting** (like the Spec 014 retention sweep). `shouldInterceptRequest` is already on a background thread: if a request arrives before parsing finishes, it **waits** on the load (bounded by `NetworkTimeouts.PROTECTION_DATA_LOAD_TIMEOUT_MS`, failing open on timeout) — the first page load is the only one that can wait, and parsing ≈26k lines is expected in tens of ms [B, measure in G-perf]. The main thread never waits: main-thread callers (the app's `loadUrl` sites) use a non-blocking `matchersOrNull()`, and when it is not ready yet (a cold start straight into a link) they await on IO in a coroutine before loading; `shouldOverrideUrlLoading` skips rewriting when not ready (analyze I1). Heap: ≈16k host strings + PSL rules, estimated 2–3 MB [B, measure].
 
 ## R11 — Per-site exceptions storage
 
@@ -120,7 +120,7 @@ Rejected: DataStore string-set (no observe-and-list ergonomics, no "added at"); 
 
 ## R12 — Blocked count on the hub without recomposing the chrome
 
-**Decision**: Each page's blocked hosts go into a concurrent set owned by a per-WebView `PageProtectionMonitor`; it publishes a separate `StateFlow<PageProtectionStatus>` (count, protection on/off, connection secure) conflated so bursts collapse. Only the hub reads it (§V rule 3: high-frequency state isolated from `BrowserUiState`). Reset happens where `PageSession.advance()` already bumps the page generation (codebase map), not on same-document changes.
+**Decision**: Each page's blocked hosts go into a concurrent set owned by a per-WebView `PageProtectionMonitor`; it publishes a separate `StateFlow<PageProtectionStatus>` (count, protection on/off, connection secure) conflated so bursts collapse. Only the hub reads it (§V rule 3: high-frequency state isolated from `BrowserUiState`). Reset and the per-page `protectionOn` happen in `onMainFrameRequest` on the IO thread, which runs before any of the new page's resources; `PageSession.advance()` only updates UI-facing fields and covers restores that issue no main-frame request (analyze U1). Same-document changes reset nothing.
 
 ## R13 — Clear browsing data and About
 

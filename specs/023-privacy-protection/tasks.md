@@ -111,7 +111,7 @@ description: "Task list for Spec 023 — Privacy Protection"
 
 - [ ] T023 Create `MAIN/data/local/protection/ProtectionAssetParser.kt` with three tolerant parsers: tracker hosts, PSL (ICANN + private sections; `!` and `*.` rules), and tracking parameters (`*` suffix = prefix). Each skips comments and blank lines, lower-cases hosts, and ignores malformed lines.
 - [ ] T024 [P] Write `TEST/data/local/protection/ProtectionAssetParserTest.kt` over small inline samples. Also add one test that parses the **real** committed assets from `ASSETS`, asserting a non-zero count, that none of the R3 never-block hosts appears in the tracker set, and that `utm_*` is a prefix.
-- [ ] T025 Create `MAIN/domain/repository/ProtectionDataRepository.kt` (contracts) and `MAIN/data/local/protection/ProtectionDataSource.kt`, a `@Singleton`. `preload()` starts parsing once on `DispatcherProvider.io`. `awaitData(timeoutMs)` blocks the calling background thread up to the timeout and returns `null` on timeout or failure (fail open). The main thread must never call `awaitData`. Implement the repository in `MAIN/data/repository/ProtectionDataRepositoryImpl.kt`. Log the parse time and entry counts once.
+- [ ] T025 Create `MAIN/domain/repository/ProtectionDataRepository.kt` (contracts) and `MAIN/data/local/protection/ProtectionDataSource.kt`, a `@Singleton`. `preload()` starts parsing once on `DispatcherProvider.io`. `awaitData(timeoutMs)` blocks the calling **background** thread up to the timeout and returns `null` on timeout or failure (fail open). Add `currentDataOrNull()`, which never blocks, for main-thread callers (see T035 and T058). The main thread must never call `awaitData`. Implement the repository in `MAIN/data/repository/ProtectionDataRepositoryImpl.kt`. Log the parse time and entry counts once.
 - [ ] T026 [P] Write `TEST/data/local/protection/ProtectionDataSourceTest.kt`. Cover: concurrent `preload` parses once; `awaitData` before completion waits; a parse failure → `null`; a timeout → `null`.
 - [ ] T027 Wire `preload()` into `MAIN/ThirtySixApplication.kt` `onCreate`, beside the retention sweep, without waiting on it.
 
@@ -124,7 +124,12 @@ description: "Task list for Spec 023 — Privacy Protection"
 - [ ] T032 [P] Create `MAIN/data/local/protection/IncognitoProtectionExceptionStore.kt` and `MAIN/data/local/protection/HttpsUpgradeFailureStore.kt`. Both are `@Singleton` and in memory only, using a concurrent set. Neither may be persisted (FR-014, FR-020).
 - [ ] T033 Clear `IncognitoProtectionExceptionStore` in `MAIN/data/repository/IncognitoTabRepositoryImpl.kt`, on the 1 → 0 transition in `closeTab` and in `closeAll`, next to the existing cookie-snapshot restore.
 - [ ] T034 [P] Write `TEST/data/repository/ProtectionExceptionRepositoryImplTest.kt` (add / remove / clearAll / observe order, snapshot follows Room). Extend `TEST/data/repository/IncognitoTabRepositoryImplTest.kt`: closing the last incognito tab clears the store, and closing one of two does not.
-- [ ] T035 Create `MAIN/di/ProtectionModule.kt`. It binds both repositories, the stores and the snapshot, and provides `PublicSuffixMatcher`, `TrackerMatcher`, `TrackingParamStripper` and `NavigationPreparer` lazily from the loaded `ProtectionData` (a `Provider`/holder resolved off the main thread). Every `@Module` stays in `di/`.
+- [ ] T035 Create `MAIN/di/ProtectionModule.kt`. It binds both repositories, the stores and the snapshot. It also provides `MAIN/data/local/protection/ProtectionMatchersHolder.kt`, a `@Singleton` that builds `PublicSuffixMatcher`, `TrackerMatcher`, `TrackingParamStripper` and `NavigationPreparer` **once**, after the data loads. Callers use it in two ways:
+  - `matchersOrNull()` never blocks; on the main thread, `null` means the data is not loaded yet;
+  - `awaitMatchers(timeoutMs)` is for background threads only.
+
+  `NavigationPreparer`'s `isExcepted` is `IsSiteProtectedUseCase` (T035a). Every `@Module` stays in `di/`.
+- [ ] T035a Create `MAIN/domain/usecase/IsSiteProtectedUseCase.kt`: `operator fun invoke(site: String, isIncognito: Boolean): Boolean`. It is synchronous and safe on any thread. Normal tabs read `ProtectionExceptionRepository.currentSites()`. Incognito tabs read **only** `IncognitoProtectionExceptionStore`, exposed through a small domain interface `IncognitoProtectionExceptions` that the data store implements (FR-014). This use case is the **only** way presentation code learns whether a site is protected (§IV). Add `TEST/domain/usecase/IsSiteProtectedUseCaseTest.kt` covering normal, incognito and the separation between the two.
 
 ### Per-WebView monitor
 
@@ -135,7 +140,11 @@ description: "Task list for Spec 023 — Privacy Protection"
   - the pending upgrade;
   - a conflated `MutableStateFlow<PageProtectionStatus>`.
 
-  `onSubresource` uses `ProtectionDataRepository.awaitData(NetworkTimeouts.PROTECTION_DATA_LOAD_TIMEOUT_MS)` and `TrackerMatcher`. It returns `WebResourceResponse(BLOCKED_RESPONSE_MIME, "utf-8", BLOCKED_RESPONSE_STATUS, BLOCKED_RESPONSE_REASON, emptyMap(), empty stream)` and adds the host to the blocked set; otherwise it returns `null`. It never touches Room or the main thread.
+  **Per-page reset happens in `onMainFrameRequest`** (WebView IO thread), which runs before any of the new page's resources. It clears the blocked set and recomputes `protectionOn` with `IsSiteProtectedUseCase`, using the registrable domain of the new top URL and the tab's incognito flag. Same-document changes never reach it (FR-010).
+
+  `onSubresource` uses `ProtectionMatchersHolder.awaitMatchers(NetworkTimeouts.PROTECTION_DATA_LOAD_TIMEOUT_MS)` and `TrackerMatcher`. It returns `WebResourceResponse(BLOCKED_RESPONSE_MIME, "utf-8", BLOCKED_RESPONSE_STATUS, BLOCKED_RESPONSE_REASON, emptyMap(), empty stream)` and adds the host to the blocked set; otherwise it returns `null`. It never touches Room or the main thread.
+
+  Add `blockedHosts(): Set<String>` for tests.
 - [ ] T037 [P] Write `TEST/presentation/browser/protection/PageProtectionMonitorTest.kt` (Robolectric for `WebResourceResponse`). Cover:
   - a listed third-party host is blocked, and a second request to it counts once;
   - first-party and unlisted hosts pass;
@@ -160,11 +169,15 @@ description: "Task list for Spec 023 — Privacy Protection"
 
   Downloads are untouched (FR-006). The callback must stay on its WebView IO thread with no main-thread hop.
 - [ ] T040 [US1] Keep the top URL right on history and back/forward restores. Refresh the monitor from `onPageStarted` and `doUpdateVisitedHistory`. Where `WebViewFeature.isFeatureSupported(NAVIGATION_LISTENER)`, also use `WebViewCompat.addNavigationListener` `onNavigationCompleted`, skipping `isSameDocument` (research R4).
-- [ ] T041 [US1] In `MAIN/presentation/browser/page/PageSession.kt`, call `monitor.onPageChanged(topUrl, isWebPage, protectionOn)` from `advance()`. `protectionOn` comes from the exception snapshot, or from the incognito store for incognito tabs, keyed by the registrable domain of the top URL. `isWebPage` is false for `HOME_PAGE_URL` and the incognito start page. This implements FR-010's reset on a new page but not on a same-document change.
+- [ ] T041 [US1] In `MAIN/presentation/browser/page/PageSession.kt`, call `monitor.onPageChanged(topUrl, isWebPage)` from `advance()`. This updates only UI-facing fields: `isWebPage` is false for `HOME_PAGE_URL` and the incognito start page, and `connectionSecure` is set as well. It also covers history and back/forward restores that issue no main-frame request: when the top URL differs from the one `onMainFrameRequest` saw, reset the count and recompute `protectionOn` there via `IsSiteProtectedUseCase`. Counting and the normal reset belong to `onMainFrameRequest` (T036). The IO-thread reset makes FR-010 hold even for resources that arrive before `onPageStarted`.
 - [ ] T042 [US1] Confirm `onReceivedHttpError` still ignores non-main-frame responses (it already does, research R4), so a blocked request never shows error UI (FR-007). Add a comment naming FR-007.
-- [ ] T043 [P] [US1] Create `ATEST/protection/FakeProtectionDataModule.kt`, a `@TestInstallIn` replacement providing a `ProtectionData` whose tracker set is `tracker-01.test` … `tracker-12.test`. Mark it per-class where needed, as with the Spec 007 `@UninstallModules` pattern.
-- [ ] T044 [US1] Write `ATEST/protection/TrackerBlockingTest.kt` on `trackers.html` served by `AssetPageServer`. Assert that 0 of the 30 tracker requests reach the network (record via a counting resource: the page sets `data-loaded` flags for images that loaded), that 10/10 local resources load, and that no error UI shows. Run it in both a normal and an incognito tab (FR-009).
-- [ ] T045 [US1] Write `ATEST/protection/TrackerBlockingOfflineTest.kt`: the same assertions with the device network turned off (SC-011). If the emulator cannot toggle the network from a test, record this as a manual step of G1.
+- [ ] T043 [P] [US1] Create `ATEST/protection/FakeProtectionDataModule.kt`, a `@TestInstallIn` replacement providing a `ProtectionData` whose tracker set is `tracker-01.test` … `tracker-12.test`. Mark it per-class where needed, as with the Spec 007 `@UninstallModules` pattern. It also contains `127.0.0.1`, the resolvable tracker used by T044(b).
+- [ ] T044 [US1] Write `ATEST/protection/TrackerBlockingTest.kt` on `trackers.html` served by `AssetPageServer` on `localhost`. `*.test` hosts never resolve, so "did not load" alone proves nothing. The test proves blocking in two ways:
+  - **(a)** `monitor.blockedHosts()` equals the 12 `tracker-NN.test` hosts, and the hub status reads 12;
+  - **(b)** a **resolvable** tracker: the fake list (T043) also contains `127.0.0.1`, and the page loads `http://127.0.0.1:<port>/pixel.png` (a different site from `localhost` under the IP rule). The image's `onload` flag must stay **false** with protection on, and become **true** after the site is excepted (`ProtectionExceptionRepository.add("localhost")` + reload).
+
+  Also assert that 10/10 same-origin resources load and that no error UI shows. Run it in both a normal and an incognito tab (FR-009).
+- [ ] T045 [US1] Write `ATEST/protection/TrackerBlockingOfflineTest.kt`: assertion (a) of T044 with the device network turned off (SC-011). `localhost` is served on the device, so assertion (b) still holds. If the emulator cannot toggle the network from a test, record this as a manual step of G1.
 
 **Checkpoint**: US1 is shippable alone — blocking works with protection always on.
 
@@ -180,7 +193,7 @@ description: "Task list for Spec 023 — Privacy Protection"
   - `SetSiteProtectionUseCase(site, on, isIncognito)`: normal goes to the repository; incognito goes to `IncognitoProtectionExceptionStore` only, and **never reads or writes Room** (FR-014);
   - `RemoveProtectionExceptionsUseCase(site?)`: `null` = all.
 - [ ] T047 [P] [US2] Write `TEST/domain/usecase/SiteProtectionUseCasesTest.kt`. Cover: normal on/off persists, incognito on/off touches only the store, remove-one, remove-all.
-- [ ] T048 [US2] Create `MAIN/presentation/browser/protection/ProtectionViewModel.kt` (contracts). It exposes the active WebView monitor's `status` (switched with the active tab), and `onProtectionSwitched(on)` → `SetSiteProtectionUseCase` with the current page's registrable domain and `isIncognito`, then emits `reloadEvents`. Keep it separate from `BrowserViewModel` (Spec 022 `PageTextSizeViewModel` precedent).
+- [ ] T048 [US2] Create `MAIN/presentation/browser/protection/ProtectionViewModel.kt` (contracts). It exposes the active WebView monitor's `status` (switched with the active tab), and `onProtectionSwitched(on)` → `SetSiteProtectionUseCase` with the current page's registrable domain and `isIncognito`, then emits `reloadEvents`. Keep it separate from `BrowserViewModel` (Spec 022 `PageTextSizeViewModel` precedent). It learns the site's state only through `IsSiteProtectedUseCase` and the monitor's status, never from a data-layer store (§IV, analyze D1).
 - [ ] T049 [P] [US2] Write `TEST/presentation/browser/protection/ProtectionViewModelTest.kt`: status passthrough, switch off/on in normal and incognito, and one reload event per switch.
 - [ ] T050 [US2] Create `MAIN/presentation/browser/components/HubProtectionSection.kt`. It shows:
   - the plural count;
@@ -188,7 +201,7 @@ description: "Task list for Spec 023 — Privacy Protection"
   - a switch row with toggle semantics and an on/off `stateDescription`.
 
   It is hidden when `!isWebPage` (FR-011). Use Spec 019 components and tokens only, with no inline colours or dimens.
-- [ ] T051 [US2] Wire the section into `MAIN/presentation/browser/components/HubSheet.kt`, above `HubPageTools`. Collect `ProtectionViewModel.status` **only inside the hub** (§V rule 3). In `MAIN/presentation/browser/BrowserScreen.kt`, close the hub on switch and reload the current page on `reloadEvents` (FR-012).
+- [ ] T051 [US2] Wire the section into `MAIN/presentation/browser/components/HubSheet.kt`. **While a web page is shown, `HubProtectionSection` takes the place of the existing `PrivacyStageBanner`**, so the hub has one privacy block, not two. On Home and the incognito start page, the banner stays as it is (FR-011). Collect `ProtectionViewModel.status` **only inside the hub** (§V rule 3). In `MAIN/presentation/browser/BrowserScreen.kt`, close the hub on switch and reload the current page on `reloadEvents` (FR-012).
 - [ ] T052 [US2] Create the Settings screen `MAIN/presentation/settings/protectionexceptions/` (`ProtectionExceptionsScreen`, `ProtectionExceptionsUiState`, `ProtectionExceptionsViewModel`), mirroring `sitepermissions/`:
   - newest first;
   - remove one;
@@ -198,9 +211,9 @@ description: "Task list for Spec 023 — Privacy Protection"
 
   Add `AppDestination.ProtectionExceptions` (`settings/protection_exceptions`) in `MAIN/presentation/navigation/AppDestination.kt` + `AppNavGraph.kt`, and a "Sites without protection" `SettingsValueRow` in `SettingsScreen.privacySection` after Site permissions.
 - [ ] T053 [P] [US2] Write `TEST/presentation/settings/protectionexceptions/ProtectionExceptionsViewModelTest.kt`: list order, remove, remove-all confirm/cancel, empty state.
-- [ ] T054 [US2] Add `SitesWithoutProtection` to `MAIN/domain/model/ClearBrowsingDataCategory.kt`. **Do not** add it to `DEFAULT_SELECTION`. Handle it in `MAIN/domain/usecase/ClearBrowsingDataUseCase.kt`: repository `clearAll()` plus `IncognitoProtectionExceptionStore.clear()`. Add its label and description in `MAIN/presentation/settings/components/ClearBrowsingDataDialog.kt`.
+- [ ] T054 [US2] Add `SitesWithoutProtection` to `MAIN/domain/model/ClearBrowsingDataCategory.kt`. **Do not** add it to `DEFAULT_SELECTION`. Handle it in `MAIN/domain/usecase/ClearBrowsingDataUseCase.kt`: repository `clearAll()` plus `IncognitoProtectionExceptionStore.clear()`. Add its label and description in `MAIN/presentation/settings/components/ClearBrowsingDataDialog.kt`. `ClearBrowsingDataUseCase` already has 7 dependencies; take the two new ones behind a single `PerSiteSettingsCleaner` domain interface if detekt's `LongParameterList` fires — never by adding to the baseline.
 - [ ] T055 [P] [US2] Extend `TEST/domain/usecase/ClearBrowsingDataUseCaseTest.kt`: the default selection leaves exceptions intact; selecting the category clears Room and the incognito store; other categories are unaffected.
-- [ ] T056 [US2] Write `ATEST/protection/ProtectionSwitchTest.kt` (per-test DataStore and Room, `@UninstallModules(SettingsDataStoreProviderModule)` as in Specs 020/022). Steps:
+- [ ] T056 [US2] Write `ATEST/protection/ProtectionSwitchTest.kt` (per-test DataStore and Room, `@UninstallModules(SettingsDataStoreProviderModule)` as in Specs 020/022). Steps: Steps 2–4 use activity recreation; real process restarts (SC-007's "3 restarts") and the 2-tap count are covered by device gate G5.
   1. Open `trackers.html` → the hub shows **12** (SC-001).
   2. Switch off → reload → count 0, trackers load.
   3. Recreate the activity → still off.
@@ -215,9 +228,17 @@ description: "Task list for Spec 023 — Privacy Protection"
 **Goal**: app-issued and page-initiated `http://` main-frame GETs try `https://` first and fall back silently; the hub shows "not secure" on http pages (FR-018 – FR-023, FR-022a).
 **Independent Test**: quickstart G6, G7, G8; SC-003.
 
-- [ ] T058 [US3] In `MAIN/presentation/browser/BrowserWebView.kt`, route **both** app `loadUrl` call sites through `NavigationPreparer.prepare(url, isIncognito)`: the `actions.loadUrl` lambda and the initial load. Skip `HOME_PAGE_URL` as today. Call `monitor.beginUpgrade(prepared)` when `upgradedFrom != null`. This covers typed addresses, Home, bookmarks, history, Spec 020 intents and tab switches (research R7).
+- [ ] T058 [US3] In `MAIN/presentation/browser/BrowserWebView.kt`, route **both** app `loadUrl` call sites through `NavigationPreparer.prepare(url, isIncognito)`: the `actions.loadUrl` lambda and the initial load. Skip `HOME_PAGE_URL` as today. This covers typed addresses, Home, bookmarks, history, Spec 020 intents and tab switches (research R7).
+
+  These call sites run on the main thread, so they must never block (analyze I1):
+  - if `ProtectionMatchersHolder.matchersOrNull()` is ready, prepare synchronously and load;
+  - otherwise launch a coroutine that awaits the matchers on `DispatcherProvider.io`, bounded by `NetworkTimeouts.PROTECTION_DATA_LOAD_TIMEOUT_MS`, then prepares and calls `loadUrl` on the main thread;
+  - on timeout, load the URL unprepared (fail open).
+
+  Only a cold start straight into a link can hit the await path. Call `monitor.beginUpgrade(prepared)` when `upgradedFrom != null`.
 - [ ] T059 [US3] In `BrowserWebViewClient.shouldOverrideUrlLoading`, handle main-frame `http`/`https` requests that are not redirects:
-  - `prepared = prepare(url)`;
+  - if `ProtectionMatchersHolder.matchersOrNull()` is `null`, return `false` and do not rewrite: this method must answer synchronously, and the page that issued the link has already loaded, so this is practically unreachable;
+  - otherwise `prepared = prepare(url)`;
   - if it differs, `beginUpgrade` when upgraded, then `view.loadUrl(prepared.url, gpcHeadersIfNeeded)` and return `true`;
   - never re-issue an identical URL (invariant 5).
 
@@ -274,7 +295,9 @@ description: "Task list for Spec 023 — Privacy Protection"
   - the APK delta against 3,394,072 B (**SC-010: ≤ 500 KB**);
   - no new `.so`;
   - `4.json` committed;
-  - `unzip -l` listing the three protection assets.
+  - `unzip -l` listing the three protection assets;
+  - `git diff main -- app/src/main/AndroidManifest.xml` adds no `uses-permission` (FR-034);
+  - no setting anywhere turns all protections off (FR-017; check in review).
 - [ ] T074 Run the Compose compiler report (`-PcomposeReports=true`). Expect zero unexplained non-skippable composables in the touched files.
 - [ ] T075 Device gates G1–G16 from quickstart.md on `TA016_API36_16K`, `TA016_API24` and the Galaxy A55 (never change its default browser). Record each result in "Device Gate Results" below:
   - G14: release build, interleaved runs, list-parse time and heap;

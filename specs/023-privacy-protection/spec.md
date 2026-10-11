@@ -22,6 +22,7 @@
 - Q: How broad should the block list be? → A: Trackers and advertising networks that follow people across sites; hosts that serve content the person chose to see (embedded video, maps, sign-in buttons, CDNs) are not on the list.
 - Q: Does Clear browsing data also clear the list of sites without protection? → A: Yes, as a new opt-in category, unticked by default, like Spec 021's Site permissions.
 - Q: What does the blocked count on the hub count? → A: Distinct tracker hosts blocked on the page, not individual requests and not companies.
+- Analyze remediation (2026-10-12): FR-016 no longer lists referrer trimming (it is the engine default and cannot be switched per site), User Story 6's per-site scenario was removed, and FR-008 drops owner grouping (research R2).
 - Research amendment (plan, 2026-10-11): FR-028–FR-030 and SC-009 narrowed to what the web engine allows — the app cannot override a page's own looser referrer policy, and on older web engines GPC reaches only the page loads the app starts itself (research R5, R6).
 - Q: When a page ends up on `http://` (not encrypted), is the person told? → A: Yes, quietly: the hub shows a "Connection not secure" line for any `http://` page, including sites with protection off; no pop-up or notice while browsing.
 
@@ -131,14 +132,13 @@ When a page links to or loads something from another site, the other site learns
 
 1. **Given** a page on site A, **When** it navigates to or loads a resource from site B, **Then** site B receives at most A's origin as the referrer, unless the page itself explicitly asked to send more (a limit of the web engine, see FR-029).
 2. **Given** a page on site A, **When** it navigates within site A, **Then** the referrer behaves as the web normally does.
-3. **Given** protection is off for site A, **When** its pages make cross-site requests, **Then** referrers are not trimmed.
 
 ---
 
 ### Edge Cases
 
 - **Tracker list matches the page's own site via a different hostname** (for example the page is `www.example.com` and the request goes to `cdn.example.com`, both on `example.com`): same site, not blocked.
-- **Companies that use several registrable domains** (for example a site and its separate CDN domain owned by the same company): treated as third party unless the bundled data says they belong to the same owner; if the list provides ownership data, requests to the same owner as the page are first-party.
+- **Companies that use several registrable domains** (for example a site and its separate CDN domain owned by the same company): treated as third party (FR-008). Content hosts are kept off the list (FR-004a), so this mainly affects trackers, which is intended.
 - **Embedded content the person chose to see** (embedded video, maps, sign-in buttons, content delivery networks): not on the list (FR-004a), so it loads. If a listed host still serves something a site needs, the person turns protection off for the site; no per-request allow is offered.
 - **Downloads** started by the person are never blocked, even from a listed host.
 - **A page of the excepted site embedded in another site's frame**: the exception follows the top-level page's site, not the frame's.
@@ -159,7 +159,7 @@ When a page links to or loads something from another site, the other site learns
 
 **Protection data**
 
-- **FR-001**: The tracker list, the tracking-parameter list and any ownership data used by this spec MUST ship inside the app and MUST change only with an app release. The app MUST NOT download, update or verify them over the network.
+- **FR-001**: The tracker list, the tracking-parameter list and the public-suffix data used by this spec MUST ship inside the app and MUST change only with an app release. The app MUST NOT download, update or verify them over the network.
 - **FR-002**: Protections MUST make no network request of their own.
 - **FR-003**: If the bundled source requires attribution, Settings → About MUST show it in every supported language.
 
@@ -170,7 +170,7 @@ When a page links to or loads something from another site, the other site learns
 - **FR-005**: The main-frame navigation the person asked for (typed address, tapped link, bookmark, history entry, link from another app) MUST NOT be blocked, whatever its host.
 - **FR-006**: Downloads the person starts MUST NOT be blocked.
 - **FR-007**: A blocked request MUST fail silently: no error page, message or dialog, and the rest of the page MUST continue loading.
-- **FR-008**: Two hosts MUST be treated as the same site when they share a registrable domain (the part a person registers, such as `example.co.uk`); if the bundled data groups domains by owner, hosts with the same owner MUST also count as first-party.
+- **FR-008**: Two hosts MUST be treated as the same site when they share a registrable domain (the part a person registers, such as `example.co.uk`). No grouping by owning company is applied in this spec (research R2); that is left to Spec 024 or later.
 - **FR-009**: Tracker blocking MUST apply in incognito tabs exactly as in normal tabs.
 
 **Blocked-tracker count**
@@ -184,7 +184,7 @@ When a page links to or loads something from another site, the other site learns
 - **FR-013**: In a normal tab, turning protection off MUST be remembered on the device for that site (its registrable domain and all subdomains) across app restarts, until the person turns it back on.
 - **FR-014**: In an incognito tab, the switch MUST affect only incognito browsing, MUST NOT be saved, MUST be forgotten when the last incognito tab closes, and incognito MUST NOT read the remembered list from normal browsing (mirrors Spec 021 FR-004).
 - **FR-015**: Settings → Privacy MUST contain **Sites without protection**, listing every remembered site with protection off, each removable; removing one turns protection back on for it. An empty list MUST show an empty-state message.
-- **FR-016**: When protection is off for a site, tracker blocking, HTTPS upgrade, tracking-parameter stripping and referrer trimming MUST NOT be applied to its pages; Global Privacy Control MUST still be sent.
+- **FR-016**: When protection is off for a site, tracker blocking, HTTPS upgrade and tracking-parameter stripping MUST NOT be applied to its pages. Global Privacy Control MUST still be sent, and referrers keep the web engine's default (FR-028), which the switch does not change.
 - **FR-016a**: Clear browsing data (Spec 016) MUST offer a **Sites without protection** category, unticked by default, as Spec 021 does for Site permissions; when ticked, every remembered site without protection is removed, so protection is on again everywhere.
 - **FR-017**: There MUST be no global switch turning all protections off.
 

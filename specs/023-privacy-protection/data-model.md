@@ -20,7 +20,7 @@
 | `ProtectionExceptionSnapshot` (`@Singleton`) | process | `StateFlow<Set<String>>` mirror of the Room table | follows Room |
 | `IncognitoProtectionExceptionStore` (`@Singleton`) | incognito session | `Set<String>` of sites switched off in incognito | incognito 1 → 0 transition; Clear browsing data with the category ticked |
 | `HttpsUpgradeFailureStore` (`@Singleton`) | process | `Set<String>` of hosts whose HTTPS attempt failed | process death only |
-| `PageProtectionMonitor` (one per WebView) | page | top URL + its site, `protectionOn`, blocked-host set, pending upgrade `(host, originalHttpUrl, httpsUrl)?`, `StateFlow<PageProtectionStatus>` | reset on every new page (`PageSession.advance()`); disposed with the WebView |
+| `PageProtectionMonitor` (one per WebView) | page | top URL + its site, `protectionOn`, blocked-host set, pending upgrade `(host, originalHttpUrl, httpsUrl)?`, `StateFlow<PageProtectionStatus>` | reset in `onMainFrameRequest` (IO thread) for every new page; `PageSession.advance()` covers restores; disposed with the WebView |
 | Registrable-domain cache (inside `PublicSuffixMatcher`) | process | host → site, bounded at `BrowserLimits.REGISTRABLE_DOMAIN_CACHE_SIZE` | eviction |
 
 ### `PageProtectionStatus`
@@ -72,6 +72,12 @@ on  --hub switch off (incognito)--> incognito store add(site) → page reload
 off --hub switch on / Settings remove / Clear data category--> delete → reload (hub only)
 incognito store --last incognito tab closed--> cleared
 ```
+
+## Naming
+
+The UI says **Sites without protection**; code says **protection exceptions** (`SiteProtectionException`, `ProtectionExceptionRepository`, `ProtectionExceptionsScreen`). Both mean the same records.
+
+Presentation code learns whether a site is protected only through `IsSiteProtectedUseCase(site, isIncognito)` (§IV); it never reads `ProtectionExceptionSnapshot` or `IncognitoProtectionExceptionStore` directly.
 
 ## Invariants
 
