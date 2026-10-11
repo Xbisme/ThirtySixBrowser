@@ -43,6 +43,10 @@ interface DefaultBrowserInviteRepository {
     suspend fun markInviteDismissed(): Result<Unit>      // never un-dismisses (INV-8)
     suspend fun recordLaunch(): Result<Unit>             // +1, capped at 3
 }
+// SyncDefaultBrowserInviteUseCase (run on every MainActivity.onStart):
+//   if (controller.isDefaultBrowser()) repository.markInviteDismissed()   // FR-026
+// LaunchCountPolicy.shouldCount(stoppedForConfigChange, returningFromOwnSystemScreen) =
+//   !stoppedForConfigChange && !returningFromOwnSystemScreen             // FR-024a
 data class InviteState(val dismissed: Boolean, val launchCount: Int)
 ```
 
@@ -70,7 +74,7 @@ New `LazyColumn` item in `HomePage`, key `KEY_DEFAULT_BROWSER_INVITE`, content t
 |---|---|---|
 | title | `home_default_browser_invite_title` | — |
 | body | `home_default_browser_invite_body` | — |
-| primary button | `home_default_browser_invite_action` | `rememberDefaultBrowserRequest`; on launch → `markInviteDismissed()` |
+| primary button | `home_default_browser_invite_action` | `rememberDefaultBrowserRequest(onUnavailable = show entry_default_browser_unavailable)`; does **not** dismiss (FR-025, FR-027) |
 | dismiss | `RoundIconButton`, close icon, `contentDescription = home_default_browser_invite_dismiss` | `markInviteDismissed()` |
 
 Built from the Home page's card surface and tokens (Spec 019); static content, so no

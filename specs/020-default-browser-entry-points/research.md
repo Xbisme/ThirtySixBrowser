@@ -62,6 +62,15 @@ recents after the task was cleared redelivers it with `FLAG_ACTIVITY_LAUNCHED_FR
 Handling the intent on those paths would reopen the link — the duplicate SC-008 forbids.
 A rotation therefore never reaches the handler; a fresh launch always does.
 
+**Unconsumed requests survive process death** (spec edge case, FR-019): in
+`onSaveInstanceState`, if `IncomingRequestRelay` still holds a request (typically: the link
+arrived on a fresh install and the person is still in onboarding), it is written to the
+bundle as two strings (`kind`, `raw`; keys in `NavArgs`). In `onCreate` with a non-null
+bundle, a saved request is put back into the relay **only if the relay is empty** — empty
+means the process was recreated; after a plain rotation the relay still holds the same
+request and nothing is restored twice. A consumed request is never in the bundle, so a
+recreation cannot reopen it (FR-008).
+
 **Alternatives considered**: remembering a hash of handled intents in DataStore — rejected:
 more state, and a user who genuinely taps the same link again a day later must get a tab.
 
@@ -107,7 +116,8 @@ class (keeps the rule out of the JVM tests) and matches bare words like `file.tx
 **Decision**: A process-scoped `IncomingRequestRelay` (`@Singleton`, in-memory
 `MutableStateFlow<IncomingRequest?>`) sits between the activity and the UI.
 - `MainActivity` writes to it (R3).
-- An activity-scoped `EntryPointViewModel`, created in `AppNavGraph`, collects it. If
+- An activity-scoped `EntryPointViewModel`, created **once** in `AppNavGraph` outside the
+  `NavHost` (so it is scoped to the activity, not to a back-stack entry), collects it. If
   onboarding is not completed (read through the existing `ObserveUserSettingsUseCase`), it
   waits; once completed — or immediately when it already is — it consumes the request,
   runs `OpenIncomingRequestUseCase`, and emits a one-shot "show browser" event.
@@ -115,12 +125,17 @@ class (keeps the rule out of the JVM tests) and matches bare words like `file.tx
   `navigate(Browser) { popUpTo(Browser) { inclusive = false }; launchSingleTop = true }`,
   so History/Settings/Tabs/Downloads/Bookmarks are popped and the browser shows (FR-005).
 
+Messages (rejected link, tab limit) do not go through that view model's events: it writes
+them to a `@Singleton EntryMessageRelay` (one-shot `SharedFlow<Int>` of string ids), which
+`BrowserScreen` collects into its existing `SnackbarHostState`. This avoids a second
+`EntryPointViewModel` instance being created inside the Browser destination, which would not
+see the first instance's events.
+
 **Rationale**: The relay survives rotation (FR-019 "survives a configuration change during
 onboarding") because it is process-scoped, and keeps the activity free of tab logic (§IV).
 Onboarding's two write sites (Spec 018) are untouched: the view model only *observes* the
-flag. Holding the request across **process death** during onboarding is not required by the
-spec and is not attempted; the request is simply lost in that rare case and the user taps the
-link again.
+flag. Process death while a request is held is covered by R3's save/restore of the
+unconsumed request.
 
 **Alternatives considered**: putting the request into the NavHost start route as an argument
 — rejected: it only works for cold starts, not `onNewIntent`, and would couple Spec 018's
@@ -210,7 +225,16 @@ invitation's concerns out of the settings model. The keys are app state, not use
 and stay inside Auto Backup's existing policy for the settings file (a restored device that
 already dismissed the invitation should not see it again).
 
-**Counting (FR-024a)**: `MainActivity.onStart` increments the count (capped at 3) unless
+**Remembering "became the default" (FR-026)**: every `MainActivity.onStart` also runs
+`SyncDefaultBrowserInviteUseCase`, which marks the invitation dismissed when
+`DefaultBrowserController.isDefaultBrowser()` is true. Becoming the default by any route is
+therefore recorded on the next foreground, whether or not Home is ever shown. The
+invitation's action itself never writes the flag (FR-025, FR-027).
+
+**Counting (FR-024a)**: the decision is a pure class, `LaunchCountPolicy`
+(`fun shouldCount(stoppedForConfigChange: Boolean, returningFromOwnSystemScreen: Boolean): Boolean`),
+unit-tested on the JVM; `MainActivity.onStart` only feeds it the two flags and calls
+`RecordAppLaunchUseCase` (capped at 3) when it says so. It counts unless
 - the previous `onStop` happened during a configuration change (`isChangingConfigurations`),
   or
 - the app itself launched the default-browser screen and is returning from it (a flag set
@@ -222,8 +246,10 @@ already dismissed the invitation should not see it again).
 shortcut cards, built from the Home page's existing card surface and `RoundIconButton` for
 dismiss; its visibility is a `HomeUiState` boolean computed in `HomeViewModel` from: invite
 not dismissed, launch count ≥ 3, onboarding completed (always true on Home), not default
-(re-read on resume), active tab not incognito (FR-024). Accepting runs the same launcher as
-Settings and marks the invitation dismissed (FR-025/FR-026).
+(re-read on resume), active tab not incognito (FR-024). The action runs the same launcher as
+Settings (including FR-023's unavailable message) and does **not** dismiss; on return, a
+resume refresh that finds ThirtySix is now the default hides the card and records it
+(R9, FR-026). Only the close button dismisses.
 
 **Rationale**: Home already composes from a single `LazyColumn` with stable keys and content
 types (Spec 019, §V rule 6); an extra keyed item does not disturb the others. The card is

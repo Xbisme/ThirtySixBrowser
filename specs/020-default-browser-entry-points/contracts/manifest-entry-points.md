@@ -72,6 +72,8 @@ declares exactly the following (research R1, R2). Nothing else may be added with
 |---|---|---|
 | `onCreate` | `savedInstanceState == null` **and** no `FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY` | `IncomingIntentReader.read(intent)?.let(relay::submit)` |
 | `onNewIntent` | always | `setIntent(intent)`, then as above |
+| `onCreate` with a bundle | the bundle holds a saved request **and** the relay is empty | restore it into the relay (process death, research R3) |
+| `onSaveInstanceState` | the relay holds an unconsumed request | write `kind` + `raw` to the bundle |
 
 `IncomingIntentReader.read` is total: any missing extra, wrong type or unknown action returns
 `null`; it never throws.

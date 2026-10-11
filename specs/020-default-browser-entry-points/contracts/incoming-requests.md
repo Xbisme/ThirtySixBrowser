@@ -65,9 +65,9 @@ Only `Load` and `Search` reach it (`Rejected`/`Nothing` are handled by the view 
 | onboarding incomplete | keep it; do nothing |
 | onboarding becomes complete while a value is held | resolve → open → emit `ShowBrowser` |
 | onboarding complete | resolve → open → emit `ShowBrowser` |
-| target `Rejected` | emit `ShowBrowser` + message `entry_link_rejected` |
+| target `Rejected` | emit `ShowBrowser`; `EntryMessageRelay` ← `entry_link_rejected` |
 | target `Nothing` | emit `ShowBrowser` only |
-| outcome `OpenedInExistingTab` | emit `ShowBrowser` + message `entry_tab_limit_reused`; push URL to `ActiveTabNavigationRelay` |
+| outcome `OpenedInExistingTab` | emit `ShowBrowser`; `EntryMessageRelay` ← `entry_tab_limit_reused`; push URL to `ActiveTabNavigationRelay` |
 | outcome `OpenedInNewTab(id)` | `ExternalTabRegistry.add(id)`; emit `ShowBrowser` |
 
 The relay value is cleared as soon as it is consumed, before the open completes, so a

@@ -46,13 +46,21 @@ Result of `OpenIncomingRequestUseCase`.
 `MutableStateFlow<IncomingRequest?>`. One slot: a newer request replaces an unconsumed older
 one (the person's latest tap wins). Written by `MainActivity`, consumed (set back to `null`)
 by `EntryPointViewModel` only after onboarding is completed (FR-019). Survives configuration
-changes; does not survive process death (research R5).
+changes in memory; an **unconsumed** request also survives process death through the
+activity's saved state (research R3: saved as `kind` + `raw`, restored only into an empty
+relay).
 
 ## 5. `ActiveTabNavigationRelay` (process singleton)
 
 `MutableSharedFlow<String>` (`replay = 0`, `extraBufferCapacity = 1`, `DROP_OLDEST`, the
 project's one-shot policy). Carries the URL to load into the current tab for
 `OpenedInExistingTab` (research R6). Collected by `BrowserScreen`.
+
+## 5a. `EntryMessageRelay` (process singleton)
+
+`MutableSharedFlow<Int>` of string resource ids (`replay = 0`, `extraBufferCapacity = 1`,
+`DROP_OLDEST`). Written by `EntryPointViewModel`, shown by `BrowserScreen`'s snackbar host
+(research R5).
 
 ## 6. `ExternalTabRegistry` (process singleton)
 
@@ -75,8 +83,8 @@ stored. Re-read on every `ON_RESUME` by the screens that show it (FR-022).
 
 | Key (`StorageKeys`) | Type | Default | Written when |
 |---|---|---|---|
-| `default_browser_invite_dismissed` | Boolean | `false` | the person dismisses the invitation, or accepts it (FR-025, FR-026) |
-| `app_launch_count` | Int | `0` | `MainActivity.onStart`, per research R9 rules; stops at 3 |
+| `default_browser_invite_dismissed` | Boolean | `false` | the person taps the invitation's close button (FR-025), or the app sees ThirtySix as the default on any foreground (FR-026, research R9) — never by the invitation's action alone (FR-027) |
+| `app_launch_count` | Int | `0` | `MainActivity.onStart` when `LaunchCountPolicy.shouldCount(...)` (research R9); stops at 3 |
 
 Exposed only through `DefaultBrowserInviteRepository` (new, narrow; does not touch
 `SettingsRepository` / `UserSettings`). Old installs read the defaults — no migration.
@@ -96,7 +104,7 @@ Onboarding completion is implied: Home is only reachable after it (Spec 018).
 
 - **INV-1**: An incoming request never creates or modifies an incognito tab (FR-017).
 - **INV-2**: A `Rejected` target never reaches the WebView (FR-015).
-- **INV-3**: A given `Intent` instance is handed to the relay at most once (research R3, FR-008).
+- **INV-3**: A given `Intent` instance is handed to the relay at most once; a request restored from saved state is one that was never consumed (research R3, FR-008, FR-019).
 - **INV-4**: The relay is not consumed while onboarding is incomplete (FR-019).
 - **INV-5**: A request never produces more than one tab; under the cap it produces none (FR-018).
 - **INV-6**: Two identical final URLs within 2,000 ms produce one outcome (FR-007).

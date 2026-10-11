@@ -39,6 +39,6 @@
 - Decisions made as informed defaults rather than clarification markers (candidates for
   `/speckit-clarify` if the owner disagrees): Back on a fresh external tab closes it
   (FR-006); tab cap shows the message and opens nothing (FR-018); the first of several
-  addresses wins (FR-010); selected text is always searched (FR-011); the invitation shows
-  from the first Home view after onboarding with no delay (Assumptions).
+  addresses wins (FR-010); selected text is always searched (FR-011); the invitation timing was
+  later settled by clarification (from the 3rd launch, FR-024a).
 - The §X "Design before spec" waiver is recorded in Assumptions as an owner decision.

@@ -9,8 +9,8 @@ How to prove ThirtySix is reachable as a browser. Contracts:
 
 - `JAVA_HOME` set to Android Studio's JBR before any Gradle call.
 - Devices: the owner's **Galaxy A55** (Android 16, reference device, release build) and the
-  **`TA016_API24`** AVD (Android 7.0, for the default-apps-screen path). Optional: the 16 KB
-  `TA016_API36_16K` AVD for Constitution Testing Gate 8.
+  **`TA016_API24`** AVD (Android 7.0, for the default-apps-screen path), and the 16 KB
+  **`TA016_API36_16K`** AVD for Constitution Testing Gate 8 (mandatory).
 - On the A55: clear any per-app language on the debug build before instrumented runs
   (Spec 019 finding), force-stop the app first (Spec 018 finding), and restore
   `wm density 420` after any 360dp check.
@@ -58,6 +58,8 @@ adb shell am start -a android.intent.action.WEB_SEARCH --es query "weather hanoi
 | G14 | Locales + accessibility (FR-029, FR-030) | Settings row, invitation and messages translated in all 8 locales; DE and RU at 360dp without clipping; every new control has a TalkBack label (TalkBack pass itself: DEFERRED to a person, as Specs 016–019) |
 | G15 | Speed and size (SC-001, SC-010) | Release on the A55: link → page visible ≤ 1 s warm, ≤ 2 s cold (median of 10, `am start -W` + first frame). Release APK ≤ +60 KB over `main`; 16 KB script green, zero new `.so` |
 | G16 | Privacy (FR-016) | `adb logcat` while running G1–G6 contains none of the sent URLs or texts |
+| G17 | 16 KB page size (Constitution Testing Gate 8) | Release build on `TA016_API36_16K`: cold start, G1 (`VIEW` intent) and G2 (5 intents) run with zero FATAL in logcat |
+| G18 | Process death during onboarding (FR-019) | `pm clear`, send a `VIEW`, background the app on the onboarding screen, `am kill $PKG`, reopen from recents → onboarding resumes; finishing it opens the link once |
 
 ## Recording
 

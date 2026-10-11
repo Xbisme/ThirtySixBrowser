@@ -47,7 +47,7 @@ Home invitation adds one static `LazyColumn` item (no frame-rate state)
 | III | Code Quality & Safety | ✅ | New limits/keys/tags in `core/constants`, strings in resources, design-system tokens; no magic numbers (2,048, 2,000 ms, 3 launches become constants) |
 | IV | Clean Architecture | ✅ | `Intent` read only in presentation; rules in domain use cases; platform role behind `DefaultBrowserController`; invitation storage behind its own repository; moving `classifyAddressBarInput` to domain removes a would-be presentation import (research R4) |
 | V | Performance & Compose Phase Discipline | ✅ | New UI is static (row, card); keyed `LazyColumn` items with content types; no frame-rate state; recomposition count for Home recorded (Testing Gate 10) |
-| VI | Testing Discipline | ✅ | §VI now names "incoming-link and intent handling (Spec 020)": every C2 table row is a unit test; manifest scheme test; instrumented intent delivery |
+| VI | Testing Discipline (+ Testing Gate 8: 16 KB emulator run, quickstart G17) | ✅ | §VI now names "incoming-link and intent handling (Spec 020)": every C2 table row is a unit test; manifest scheme test; instrumented intent delivery |
 | VII | Offline-First | ✅ | Everything except loading the page works offline; invitation state persisted via DataStore suspend API |
 | VIII | Localization & Accessibility | ✅ | 12 keys × 8 locales, lint parity at error; every new control labelled; TalkBack pass DEFERRED to a person (as 016–019) |
 | IX | Dependency Currency & 16 KB | ✅ | No new artifact; the explicit `lifecycle-runtime-compose` declaration reuses version 2.10.0 already in the graph |
@@ -82,7 +82,7 @@ app/src/main/
 ├── AndroidManifest.xml                         # C1: filters + singleTask
 ├── res/values*/strings.xml                     # 12 keys × 8 locales
 └── kotlin/com/raumanian/thirtysix/browser/
-    ├── MainActivity.kt                          # read intents once (R3), count launches (R9)
+    ├── MainActivity.kt                          # read intents once + save/restore unconsumed request (R3), count launches + sync invite (R9)
     ├── core/constants/
     │   ├── BrowserLimits.kt                     # + MAX_INCOMING_TEXT_LENGTH, INCOMING_DUPLICATE_WINDOW_MS, DEFAULT_BROWSER_INVITE_MIN_LAUNCHES
     │   ├── StorageKeys.kt                       # + 2 keys
@@ -97,6 +97,8 @@ app/src/main/
     │       ├── OpenIncomingRequestUseCase.kt
     │       ├── ObserveDefaultBrowserInviteUseCase.kt
     │       ├── DismissDefaultBrowserInviteUseCase.kt
+    │       ├── SyncDefaultBrowserInviteUseCase.kt   # FR-026: default seen → dismissed
+    │       ├── IsDefaultBrowserUseCase.kt
     │       └── RecordAppLaunchUseCase.kt
     ├── data/
     │   ├── local/datastore/SettingsDataStore.kt # + 2 keys' read/write
@@ -106,10 +108,13 @@ app/src/main/
     └── presentation/
         ├── entry/
         │   ├── IncomingIntentReader.kt          # Intent → IncomingRequest
-        │   ├── IncomingRequestRelay.kt          # + ActiveTabNavigationRelay, ExternalTabRegistry
+        │   ├── IncomingRequestRelay.kt          # + ActiveTabNavigationRelay, EntryMessageRelay, ExternalTabRegistry
+        │   ├── PendingRequestState.kt           # saved-state encoding of an unconsumed request (R3)
+        │   ├── LaunchCountPolicy.kt             # pure FR-024a rule (R9)
         │   ├── EntryPointViewModel.kt
         │   └── DefaultBrowserRequest.kt         # rememberDefaultBrowserRequest
-        ├── navigation/AppNavGraph.kt            # collect ShowBrowser → pop to Browser
+        ├── navigation/AppNavGraph.kt            # the ONE EntryPointViewModel; ShowBrowser → pop to Browser
+        ├── util/ContextExt.kt                   # Context.findActivity() shared helper
         ├── browser/BrowserScreen.kt             # external-tab Back handler; collect navigation relay
         ├── browser/BrowserViewModel.kt          # onBackLeavingExternalTab()
         ├── browser/AddressBarInputClassifier.kt # REMOVED (moved to domain)

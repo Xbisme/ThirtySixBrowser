@@ -163,7 +163,7 @@ a new tab opens with a search for exactly that word using the chosen engine.
 - **FR-011**: ThirtySix MUST offer an entry in other apps' text-selection menu; selected text sent this way MUST always be searched, even when it looks like a web address.
 - **FR-012**: ThirtySix MUST handle the system's web-search request; its query MUST be searched with the chosen engine.
 - **FR-013**: Shared, selected or searched text MUST be trimmed of surrounding whitespace and cut to the first 2,048 characters before use; text that is empty after trimming MUST NOT create a tab or a search.
-- **FR-014**: Opened addresses, shares and searches from Stories 3 and 4 MUST follow the same new-tab rules as Story 1 (FR-003 to FR-008).
+- **FR-014**: (Reference, no new rule.) Opened addresses, shares and searches from Stories 3 and 4 follow the same new-tab rules as Story 1 (FR-003 to FR-008).
 
 **Safety**
 
@@ -174,18 +174,18 @@ a new tab opens with a search for exactly that word using the chosen engine.
 
 **Arriving before onboarding**
 
-- **FR-019**: If onboarding (Spec 018) has never been completed or skipped, an incoming address, share or search MUST NOT skip it; the content MUST be held until the person finishes or skips onboarding and then opened under the same rules. It MUST survive a configuration change during onboarding.
+- **FR-019**: If onboarding (Spec 018) has never been completed or skipped, an incoming address, share or search MUST NOT skip it; the content MUST be held until the person finishes or skips onboarding and then opened under the same rules. It MUST survive a configuration change during onboarding and the system reclaiming the app while it is in the background.
 
 **Default browser (Story 2)**
 
 - **FR-020**: Settings MUST contain a "Default browser" row that states whether ThirtySix is currently the default browser.
 - **FR-021**: When ThirtySix is not the default, the row MUST offer an action that, on Android 10 and later, shows the system's own default-browser confirmation, and on Android 7–9 opens the system's default-apps settings screen. When ThirtySix is the default, the row MUST state it and offer no action.
 - **FR-022**: The default-browser state shown in Settings and used by the Home invitation MUST be re-read every time the app returns to the foreground, so changes made in system settings are reflected without a restart.
-- **FR-023**: If the device can open neither the system confirmation nor the default-apps screen, the action MUST show a short message instead of doing nothing.
+- **FR-023**: If the device can open neither the system confirmation nor the default-apps screen, the action — from the Settings row or from the Home invitation — MUST show a short message instead of doing nothing.
 - **FR-024**: The Home page MUST show a dismissible invitation to make ThirtySix the default browser, only when all hold: ThirtySix is not the default; onboarding is complete; the app has been launched at least 3 times; the invitation has never been dismissed; the current tab is not incognito.
 - **FR-024a**: A launch MUST be counted each time ThirtySix comes to the foreground from outside the app (the home screen, the recent-apps view, or another app sending it a link), including the very first launch; returning from a system screen ThirtySix itself opened (such as the default-browser confirmation) MUST NOT count. The count MUST be kept on the device only and MAY stop increasing once it reaches 3.
-- **FR-025**: The invitation MUST offer the same action as the Settings row and a way to dismiss it. Once dismissed, it MUST never reappear on its own, including after app restarts and updates. The dismissal MUST be remembered on the device only.
-- **FR-026**: When ThirtySix becomes the default, the invitation MUST disappear; it MUST NOT reappear if ThirtySix later stops being the default (the Settings row remains the way back).
+- **FR-025**: The invitation MUST offer the same action as the Settings row and a way to dismiss it. Using the action does NOT dismiss it by itself (declining the system confirmation leaves it in place, FR-027). Once dismissed, it MUST never reappear on its own, including after app restarts and updates. The dismissal MUST be remembered on the device only.
+- **FR-026**: When ThirtySix becomes the default — by any route: the invitation, the Settings row or system settings — the invitation MUST disappear and this MUST be remembered the first time the app sees ThirtySix as the default; it MUST NOT reappear if ThirtySix later stops being the default (the Settings row remains the way back).
 - **FR-027**: Declining the system confirmation MUST change nothing: no state is recorded, the row keeps its action and an undismissed invitation stays.
 
 **Platform and quality constraints**
