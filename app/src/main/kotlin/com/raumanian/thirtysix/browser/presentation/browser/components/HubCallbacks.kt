@@ -22,4 +22,4 @@ internal data class HubCallbacks(
 )
 
 /** Spec 019 — the hub's quick-setting tiles, each opening an existing Settings chooser. */
-internal enum class QuickSetting { Theme, Language, SearchEngine, ClearData }
+internal enum class QuickSetting { Theme, Language, SearchEngine, ClearData, TextSize }

@@ -8,6 +8,7 @@ import com.raumanian.thirtysix.browser.core.constants.StorageKeys
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import java.io.IOException
 import javax.inject.Inject
@@ -52,6 +53,11 @@ class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Pre
     /** Spec 016 FR-020 — stored as the window's day count (data-model §1). */
     suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> = editCatching { prefs ->
         prefs[StorageKeys.HISTORY_RETENTION_DAYS] = retention.days
+    }
+
+    /** Spec 022 FR-029 — stored as the level's percentage (data-model §1). */
+    suspend fun setTextSize(size: TextSize): Result<Unit> = editCatching { prefs ->
+        prefs[StorageKeys.TEXT_ZOOM_PERCENT] = size.percent
     }
 
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = editCatching { prefs ->

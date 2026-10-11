@@ -5,6 +5,14 @@ import java.net.URI
 /** Spec 022 — the five page tools the hub offers (contracts C12). */
 enum class PageTool { Find, Share, DesktopSite, TextSize, Print }
 
+/** Spec 022 — the page tools other than Find, each supplied by the browser screen. */
+internal data class PageToolActions(
+    val share: () -> Unit = {},
+    val toggleDesktopSite: () -> Unit = {},
+    val openTextSize: () -> Unit = {},
+    val print: () -> Unit = {},
+)
+
 /**
  * Spec 022 research R9 — which page tools the hub offers for the page on screen.
  *

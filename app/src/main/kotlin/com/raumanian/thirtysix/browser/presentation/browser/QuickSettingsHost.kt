@@ -40,6 +40,7 @@ internal fun QuickSettingsHost(
             }
             QuickSetting.SearchEngine -> viewModel.onSearchEngineRowClick()
             QuickSetting.ClearData -> viewModel.onClearBrowsingDataRowClick()
+            QuickSetting.TextSize -> viewModel.onTextSizeRowClick()
             null -> return@LaunchedEffect
         }
         onRequestHandled()

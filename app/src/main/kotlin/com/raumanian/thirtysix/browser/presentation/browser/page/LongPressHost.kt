@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.domain.model.LongPressAction
 import kotlinx.coroutines.launch
 
@@ -34,7 +35,9 @@ fun LongPressHost(request: PageRequest.LongPress, hooks: LongPressHooks, done: (
                 LongPressAction.CopyImageAddress -> hooks.actions.copy(image)
                 LongPressAction.ShareLink, LongPressAction.ShareImageLink -> {
                     val text = if (action == LongPressAction.ShareLink) link else image
-                    val send = Intent(Intent.ACTION_SEND).setType(PLAIN_TEXT).putExtra(Intent.EXTRA_TEXT, text)
+                    val send = Intent(Intent.ACTION_SEND)
+                        .setType(AppConstants.MIME_TEXT_PLAIN)
+                        .putExtra(Intent.EXTRA_TEXT, text)
                     try {
                         context.startActivity(Intent.createChooser(send, shareTitle))
                     } catch (_: ActivityNotFoundException) {
@@ -76,5 +79,3 @@ fun LongPressEffects(hooks: LongPressHooks) {
         }
     }
 }
-
-private const val PLAIN_TEXT = "text/plain"

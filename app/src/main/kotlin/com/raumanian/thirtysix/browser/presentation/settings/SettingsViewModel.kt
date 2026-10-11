@@ -9,6 +9,7 @@ import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetentionChangeResult
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
@@ -18,6 +19,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSearchEngineUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.SetTextSizeUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetThemeModeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -61,6 +63,7 @@ class SettingsViewModel @Inject constructor(
     @Named(AppConstants.QUALIFIER_SUPPORTS_DYNAMIC_COLOR) supportsDynamicColor: Boolean,
     @Named(AppConstants.QUALIFIER_APP_VERSION_NAME) appVersionName: String,
     private val isDefaultBrowser: IsDefaultBrowserUseCase,
+    private val setTextSize: SetTextSizeUseCase,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SettingsUiState> = MutableStateFlow(
@@ -94,6 +97,7 @@ class SettingsViewModel @Inject constructor(
                         isDynamicColorEnabled = settings.isDynamicColorEnabled,
                         searchEngine = settings.searchEngine,
                         historyRetention = settings.historyRetention,
+                        textSize = settings.textSize,
                     )
                 }
             }
@@ -134,6 +138,19 @@ class SettingsViewModel @Inject constructor(
         dismissDialog()
         if (mode == _uiState.value.themeMode) return
         persist { setThemeMode(mode) }
+    }
+
+    // ──────── Spec 022 US4 — text size ────────
+
+    fun onTextSizeRowClick() {
+        openDialog(SettingsDialog.TextSizeChooser)
+    }
+
+    /** Spec 022 FR-030 — re-selecting the current level closes the chooser and writes nothing. */
+    fun onTextSizeSelected(size: TextSize) {
+        dismissDialog()
+        if (size == _uiState.value.textSize) return
+        persist { setTextSize(size) }
     }
 
     // ──────── US2 — search engine ────────

@@ -38,7 +38,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBarCallbacks
@@ -128,6 +127,9 @@ fun BrowserScreen(
     val findCallbacks = rememberFindCallbacks(viewModel, webViewActions)
     // Spec 022 US2 — address suggestions for the address bar and the Home search field.
     val suggestions: AddressSuggestionsViewModel = hiltViewModel()
+    // Spec 022 US4 — the app-wide text size: changes rarely, read by the WebView and the hub.
+    val pageTextSize: PageTextSizeViewModel = hiltViewModel()
+    val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
     val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions, suggestions)
     // FR-010 — composed after every other back handler, so Back closes the find bar first.
     BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
@@ -162,6 +164,7 @@ fun BrowserScreen(
             onScrollDelta = rememberScrollDeltaHandler(chrome) { findOpenNow },
             pageRequests = pageSession,
             takePopup = { activeTab?.url?.let(popupTabs::take) },
+            textZoomPercent = textZoomPercent,
             modifier = Modifier
                 .fillMaxSize()
                 // FR-005 — while finding, the bars do not slide away, so the page is shortened by the
@@ -264,7 +267,17 @@ fun BrowserScreen(
         FullscreenOverlay(controller = pageSession.fullscreen)
     }
 
-    val pageToolHandler = rememberPageToolHandler(viewModel = viewModel, chrome = chrome)
+    val pageToolHandler = rememberPageToolHandler(
+        viewModel = viewModel,
+        chrome = chrome,
+        actions = PageToolActions(
+            share = rememberShareAction(viewModel),
+            openTextSize = {
+                quickSettingsUsed = true
+                quickSettingRequest = QuickSetting.TextSize
+            },
+        ),
+    )
     if (hubOpen) {
         val available = remember(state.isHomeContent, state.loadingState) {
             PageToolsAvailability.of(state.isHomeContent, state.loadingState)
@@ -282,7 +295,7 @@ fun BrowserScreen(
             pageTools = HubPageToolsState(
                 available = available,
                 isDesktopMode = false,
-                textSizePercent = BrowserLimits.TEXT_SIZE_PERCENT_100,
+                textSizePercent = textZoomPercent,
             ),
             onPageTool = pageToolHandler,
         )
@@ -525,6 +538,7 @@ private fun BrowserContent(
     onScrollDelta: (Float) -> Unit,
     pageRequests: PageRequestSink,
     takePopup: () -> WebView?,
+    textZoomPercent: Int,
     modifier: Modifier = Modifier,
 ) {
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
@@ -560,6 +574,7 @@ private fun BrowserContent(
                 ),
                 modifier = Modifier.fillMaxSize(),
                 adopted = adopted,
+                textZoomPercent = textZoomPercent,
             )
         }
     }

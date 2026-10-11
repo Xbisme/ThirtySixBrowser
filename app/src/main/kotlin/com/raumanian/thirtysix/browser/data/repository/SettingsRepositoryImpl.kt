@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.data.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
@@ -39,6 +40,8 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
         dataStore.setHistoryRetention(retention)
+
+    override suspend fun setTextSize(size: TextSize): Result<Unit> = dataStore.setTextSize(size)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         dataStore.setOnboardingCompleted(value)

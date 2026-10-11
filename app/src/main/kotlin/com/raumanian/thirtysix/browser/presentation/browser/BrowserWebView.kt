@@ -19,6 +19,7 @@ import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,6 +32,7 @@ import androidx.core.graphics.scale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
@@ -87,6 +89,7 @@ internal fun BrowserWebView(
     navigationCallbacks: BrowserNavigationCallbacks,
     modifier: Modifier = Modifier,
     adopted: WebView? = null,
+    textZoomPercent: Int = BrowserLimits.TEXT_SIZE_PERCENT_100,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     // Spec 021 research R5 — a page-created WebView is adopted by the first generation only; a
@@ -94,6 +97,11 @@ internal fun BrowserWebView(
     val adoptable = remember { arrayOf(adopted) }
     val currentUrl = rememberUpdatedState(state.currentUrl)
     val host = remember { WebViewHost(currentUrl) }
+    // Spec 022 FR-031 — the text size, applied before a WebView's first load and then to the live
+    // one whenever it changes, without a reload. A tab that is not showing has no WebView; it gets
+    // the current size when it is shown.
+    val textZoom = rememberUpdatedState(textZoomPercent)
+    LaunchedEffect(textZoomPercent) { host.current?.settings?.textZoom = textZoomPercent }
 
     // Lifecycle: pause WebView when host stops, resume when started.
     DisposableEffect(lifecycleOwner) {
@@ -129,7 +137,7 @@ internal fun BrowserWebView(
                 val toAdopt = adoptable[0]
                 adoptable[0] = null
                 buildConfiguredWebView(
-                    webView = toAdopt ?: WebView(context),
+                    webView = (toAdopt ?: WebView(context)).apply { settings.textZoom = textZoom.value },
                     adopted = toAdopt != null,
                     state = state,
                     actions = actions,

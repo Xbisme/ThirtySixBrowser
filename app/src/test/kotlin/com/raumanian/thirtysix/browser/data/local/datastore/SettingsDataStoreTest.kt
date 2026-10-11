@@ -7,6 +7,7 @@ import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -190,6 +191,23 @@ class SettingsDataStoreTest {
         val s2 = CoroutineScope(SupervisorJob())
         val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
         assertEquals(AppDefaults.HISTORY_RETENTION, mapper.toDomain(second.data.first()).historyRetention)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    @Test
+    fun writeTextSize_then_freshReadReturnsIt() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "text-size.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertEquals(TextSize.Percent100, mapper.toDomain(first.data.first()).textSize)
+        assertTrue(first.setTextSize(TextSize.Percent150) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(TextSize.Percent150, mapper.toDomain(second.data.first()).textSize)
         s2.coroutineContext.job.cancelAndJoin()
     }
 

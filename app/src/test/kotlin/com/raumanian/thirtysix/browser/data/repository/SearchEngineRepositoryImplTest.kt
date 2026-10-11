@@ -195,5 +195,9 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
     override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
         error("not used in this test")
 
+    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
+
+        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = error("not used in this test")
 }

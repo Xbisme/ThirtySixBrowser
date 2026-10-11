@@ -29,6 +29,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSearchEngineUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.SetTextSizeUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.presentation.history.InstrumentedFakeHistoryRepository
 import com.raumanian.thirtysix.browser.presentation.history.InstrumentedImmediateDispatchers
@@ -78,6 +79,10 @@ internal class InstrumentedFakeSettingsRepository(
 
     override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
         write { copy(historyRetention = retention) }
+
+    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
+
+        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         write { copy(isOnboardingCompleted = value) }
@@ -184,6 +189,7 @@ internal fun settingsViewModel(
     supportsDynamicColor: Boolean = true,
     appVersionName: String = INSTRUMENTED_APP_VERSION_NAME,
     isDefaultBrowser: IsDefaultBrowserUseCase = IsDefaultBrowserUseCase { false },
+    setTextSize: SetTextSizeUseCase = SetTextSizeUseCase(settingsRepository),
 ): SettingsViewModel = SettingsViewModel(
     observeUserSettings = ObserveUserSettingsUseCase(settingsRepository),
     setThemeMode = setThemeMode,
@@ -196,6 +202,7 @@ internal fun settingsViewModel(
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
     isDefaultBrowser = isDefaultBrowser,
+    setTextSize = setTextSize,
 )
 
 internal const val INSTRUMENTED_APP_VERSION_NAME: String = "9.9.9-instrumented"

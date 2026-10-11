@@ -21,6 +21,8 @@ data class UserSettings(
     val searchEngine: SearchEngine,
     val historyRetention: HistoryRetention,
     val isOnboardingCompleted: Boolean,
+    /** Spec 022 FR-029 — defaulted so call sites that predate it keep compiling. */
+    val textSize: TextSize = AppDefaults.TEXT_SIZE,
 ) {
     companion object {
         /**
@@ -34,6 +36,7 @@ data class UserSettings(
             searchEngine = AppDefaults.SEARCH_ENGINE,
             historyRetention = AppDefaults.HISTORY_RETENTION,
             isOnboardingCompleted = AppDefaults.IS_ONBOARDING_COMPLETED,
+            textSize = AppDefaults.TEXT_SIZE,
         )
     }
 }

@@ -99,6 +99,10 @@ private class FakeSettingsRepository : SettingsRepository {
         return Result.Success(Unit)
     }
 
+    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
+
+        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> {
         lastOnboardingCompleted = value
         return Result.Success(Unit)

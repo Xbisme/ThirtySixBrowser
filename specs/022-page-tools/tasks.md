@@ -200,14 +200,14 @@ description: "Task list for Spec 022 — Page Tools"
 
 **Independent Test**: quickstart G10.
 
-- [ ] T033 [P] [US3] Add `ShareContent.of(url, title)` to `MAIN/presentation/browser/PageTools.kt`: `text = url`, and `subject = title` only when the title is not blank. Write `TEST/presentation/browser/ShareContentTest.kt`.
-- [ ] T034 [US3] In `MAIN/presentation/browser/BrowserScreen.kt`, route `PageTool.Share`:
+- [X] T033 [P] [US3] Add `ShareContent.of(url, title)` to `MAIN/presentation/browser/PageTools.kt`: `text = url`, and `subject = title` only when the title is not blank. Write `TEST/presentation/browser/ShareContentTest.kt`.
+- [X] T034 [US3] In `MAIN/presentation/browser/BrowserScreen.kt`, route `PageTool.Share`:
   - build `Intent.ACTION_SEND` (`text/plain`, `EXTRA_TEXT`, and `EXTRA_SUBJECT` when present);
   - wrap it in `Intent.createChooser(…, stringResource(share chooser title))`;
   - `startActivity` from `LocalContext` inside `runCatching`;
   - take the title from `activeTab?.title`;
   - add no incognito branch (FR-024).
-- [ ] T035 [US3] Gate G10. Record the results.
+- [X] T035 [US3] Gate G10. Record the results.
 
 ---
 
@@ -219,32 +219,32 @@ description: "Task list for Spec 022 — Page Tools"
 
 ### Tests for US4
 
-- [ ] T036 [P] [US4] Write `TEST/domain/model/TextSizeTest.kt`: there are exactly 9 levels, in order; `fromPercentOrDefault(null)`, `(0)` and `(130)` each return `Percent100`; and every level round-trips (I-1, I-2).
-- [ ] T037 [P] [US4] Extend `TEST/data/local/datastore/SettingsDataStoreTest.kt` and `TEST/data/mapper/SettingsMapperTest.kt`: a missing key reads 100; 150 round-trips; an unknown value falls back to the default.
-- [ ] T038 [P] [US4] Extend `TEST/domain/usecase/ClearBrowsingDataUseCaseTest.kt` to assert that the text size is untouched after a clear (FR-032).
+- [X] T036 [P] [US4] Write `TEST/domain/model/TextSizeTest.kt`: there are exactly 9 levels, in order; `fromPercentOrDefault(null)`, `(0)` and `(130)` each return `Percent100`; and every level round-trips (I-1, I-2).
+- [X] T037 [P] [US4] Extend `TEST/data/local/datastore/SettingsDataStoreTest.kt` and `TEST/data/mapper/SettingsMapperTest.kt`: a missing key reads 100; 150 round-trips; an unknown value falls back to the default.
+- [X] T038 [P] [US4] Extend `TEST/domain/usecase/ClearBrowsingDataUseCaseTest.kt` to assert that the text size is untouched after a clear (FR-032).
 
 ### Implementation for US4
 
-- [ ] T039 [P] [US4] Create `MAIN/domain/model/TextSize.kt` (data-model §1, percentages from `BrowserLimits`). Add `AppDefaults.TEXT_SIZE = TextSize.Percent100` and `StorageKeys.TEXT_ZOOM_PERCENT = intPreferencesKey("text_zoom_percent")`, the latter with a schema-evolution note matching the other keys.
-- [ ] T040 [US4] Thread `textSize` through the settings stack:
+- [X] T039 [P] [US4] Create `MAIN/domain/model/TextSize.kt` (data-model §1, percentages from `BrowserLimits`). Add `AppDefaults.TEXT_SIZE = TextSize.Percent100` and `StorageKeys.TEXT_ZOOM_PERCENT = intPreferencesKey("text_zoom_percent")`, the latter with a schema-evolution note matching the other keys.
+- [X] T040 [US4] Thread `textSize` through the settings stack:
   - `MAIN/domain/model/UserSettings.kt`: add the field and its `DEFAULT`;
   - `MAIN/data/local/datastore/SettingsDataStore.kt`: read and write;
   - `MAIN/data/mapper/SettingsMapper.kt`;
   - `MAIN/domain/repository/SettingsRepository.kt` and `MAIN/data/repository/SettingsRepositoryImpl.kt`: `setTextSize`;
   - every `SettingsRepository` fake: `grep -rl ": SettingsRepository" app/src`.
-- [ ] T041 [US4] Create `MAIN/domain/usecase/SetTextSizeUseCase.kt` (contracts C6).
-- [ ] T042 [US4] Add the Settings UI:
+- [X] T041 [US4] Create `MAIN/domain/usecase/SetTextSizeUseCase.kt` (contracts C6).
+- [X] T042 [US4] Add the Settings UI:
   - `MAIN/presentation/settings/SettingsUiState.kt` gains `SettingsDialog.TextSizeChooser` and `textSize`;
   - `MAIN/presentation/settings/SettingsViewModel.kt` gains `onTextSizeRowClick` and `onTextSizeChosen`;
   - create `MAIN/presentation/settings/components/TextSizeChooserDialog.kt`, built on the existing `SingleChoiceDialog`, with labels such as "125%";
   - add a **Text size** row to `MAIN/presentation/settings/components/SettingsRows.kt` and `MAIN/presentation/settings/SettingsScreen.kt`, in the appearance section beside Theme. The row shows the current level (FR-030).
-- [ ] T043 [US4] Add `QuickSetting.TextSize` in `MAIN/presentation/browser/components/HubCallbacks.kt`, handled in `MAIN/presentation/browser/QuickSettingsHost.kt` by `onTextSizeRowClick`. Route `PageTool.TextSize` → `QuickSetting.TextSize`. The hub tile shows `value = "<n>%"` (FR-003).
-- [ ] T044 [US4] Apply the level in the browser:
+- [X] T043 [US4] Add `QuickSetting.TextSize` in `MAIN/presentation/browser/components/HubCallbacks.kt`, handled in `MAIN/presentation/browser/QuickSettingsHost.kt` by `onTextSizeRowClick`. Route `PageTool.TextSize` → `QuickSetting.TextSize`. The hub tile shows `value = "<n>%"` (FR-003).
+- [X] T044 [US4] Apply the level in the browser:
   - `BrowserViewModel` exposes `textZoomPercent: StateFlow<Int>`, mapped from `ObserveUserSettingsUseCase`;
   - `BrowserWebView` gains a `textZoomPercent: Int` parameter, set in `buildConfiguredWebView` before the initial load;
   - a `LaunchedEffect(textZoomPercent)` sets it on `host.current` (§V rule 8), with no reload (FR-031).
-- [ ] T045 [P] [US4] Write `ATEST/presentation/browser/TextZoomInstrumentedTest.kt`: after a change of level, a live WebView's `settings.textZoom` equals the new value and no new page load starts.
-- [ ] T046 [US4] Gate G11. Record the results.
+- [X] T045 [P] [US4] Write `ATEST/presentation/browser/TextZoomInstrumentedTest.kt`: after a change of level, a live WebView's `settings.textZoom` equals the new value and no new page load starts.
+- [X] T046 [US4] Gate G11. Record the results.
 
 ---
 
@@ -385,6 +385,10 @@ Setup → Foundational ─┬─> US1 Find (P1, MVP) ─┐
 - **🐞 Pre-existing defect found at G8, fixed (Spec 009 `AddressBar`)**: typing fast dropped or reordered keystrokes. The field re-applied `state.addressBarText` whenever it differed from its own text, so a late echo of an earlier keystroke through the ViewModel overwrote newer typing. On `main`'s build, fast typing gave "sdede" twice in three tries. The field now remembers the texts it reported and ignores their echoes, and only an outside change (Clear, an incoming link) is applied. Regression test: `AddressBarTest.lateEchoOfEarlierTyping_…`. The focus effect also no longer selects the whole address if typing has already begun.
 - **Not fixed (automation artefact, both builds)**: the very first keystroke typed by `adb input text` 0.2 s after the first focus following an *install* can be lost. It happened once on the 022 build ("eeded") and once on `main`'s, never after a cold start (3/3) or later focus. adb types before the keyboard has connected, which a person cannot do.
 - **Spec 019 behaviour noted**: the incognito start page has no address entry (Search there does nothing), so typing in an incognito tab happens only on an incognito web page's address bar.
+- **`textZoomPercent` comes from a small `PageTextSizeViewModel`, not `BrowserViewModel` (deviation from T044)**. Spec 021 split `PopupTabs` and `LongPressActions` the same way. This keeps `BrowserViewModel` free of a settings dependency, and avoids touching its seven test builders for one number.
+- **`MIME_TEXT_PLAIN` moved to `AppConstants`**: Spec 021's `LongPressHost` and the new share action both had a private `"text/plain"`.
+- **T038 is satisfied by construction**: `ClearBrowsingDataUseCase` has no settings dependency at all, so it cannot reset the text size. Confirmed at G11, so no test was added for it.
+- **`UserSettings.textSize` is defaulted**, so every `UserSettings(...)` call that predates it still compiles. Three test doubles implement the new `setTextSize`; `FakeSettingsRepository` records it.
 
 ## Device Gate Results
 
@@ -401,3 +405,5 @@ Device: `TA016_API36_16K` (API 36, 16 KB pages), debug build, fixtures served at
 | G7 No network | ⚠️ DEFERRED (traffic capture) | On this AVD, `adb emu network capture` records **nothing**: the control capture during a real `example.com` load was also empty, so the typing capture's 0 packets proves nothing. Verified instead by construction: the suggestion path (`suggestions/`, the two use cases) contains no network API (grep: 0 hits) and reads only Room. `AddressSuggestionsViewModelTest` asserts it writes nothing. A proxy-based check (e.g. on the A55) is still open. |
 | G8 Timing / no dropped keystroke | ✅ after fix | 10,000 rows: suggestions appear without visible delay. **The fast-typing defect is above (Implementation Notes)**; after the fix, 5 of 6 fresh-focus fast-typing runs gave "seeded", and the one miss was the post-install adb artefact. The 100 ms / 200 ms figures were not measured with a frame recording. |
 | G9 Home + incognito | ✅ Home / ⚠️ incognito by construction | Home's search field shows the bookmark suggestion under it while typing "fixture". Incognito: the start page has no address entry (Spec 019). The ViewModel has no incognito branch and writes nothing (T021), so the same behaviour applies on an incognito page's address bar. Not driven on device: screenshots are black under `FLAG_SECURE`. |
+| G10 Share | ✅ | Hub → Share opens the system sheet "Sharing link" with exactly `http://127.0.0.1:8022/find.html`. The subject (title) is covered by `ShareContentTest`. Keep and Messages are not on this AVD. |
+| G11 Text size | ✅ | The hub tile opens the chooser: 9 levels, 100% checked. Picking 150% enlarges the page at once with no reload (Reload stays Reload, never Stop). The tile reads **150%** after a force-stop and relaunch, and still after Clear browsing data (history + cookies + cache). `TextZoomInstrumentedTest` 2/2: the live WebView updates without a page load, and a new WebView starts at the chosen size. |

@@ -1,10 +1,16 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageCallbacks
 
 /**
@@ -12,8 +18,13 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPag
  * closed when this runs (FR-004).
  */
 @Composable
-internal fun rememberPageToolHandler(viewModel: BrowserViewModel, chrome: ChromeScrollState): (PageTool) -> Unit =
-    remember(viewModel, chrome) {
+internal fun rememberPageToolHandler(
+    viewModel: BrowserViewModel,
+    chrome: ChromeScrollState,
+    actions: PageToolActions,
+): (PageTool) -> Unit {
+    val current = rememberUpdatedState(actions)
+    return remember(viewModel, chrome) {
         { tool ->
             when (tool) {
                 PageTool.Find -> {
@@ -21,10 +32,39 @@ internal fun rememberPageToolHandler(viewModel: BrowserViewModel, chrome: Chrome
                     chrome.show()
                     viewModel.onFindOpened()
                 }
-                PageTool.Share, PageTool.DesktopSite, PageTool.TextSize, PageTool.Print -> Unit
+                PageTool.Share -> current.value.share()
+                PageTool.DesktopSite -> current.value.toggleDesktopSite()
+                PageTool.TextSize -> current.value.openTextSize()
+                PageTool.Print -> current.value.print()
             }
         }
     }
+}
+
+/**
+ * Spec 022 US3 — the system share sheet with the page's address, and its title as the subject
+ * when it has one (FR-023). Incognito is not consulted: sharing is the person's explicit action,
+ * and nothing about it is recorded (FR-024).
+ */
+@Composable
+internal fun rememberShareAction(viewModel: BrowserViewModel): () -> Unit {
+    val context = LocalContext.current
+    val chooserTitle = stringResource(R.string.share_page_title)
+    return remember(viewModel, context, chooserTitle) {
+        {
+            val content = ShareContent.of(viewModel.uiState.value.currentUrl, viewModel.activeTab.value?.title)
+            val send = Intent(Intent.ACTION_SEND)
+                .setType(AppConstants.MIME_TEXT_PLAIN)
+                .putExtra(Intent.EXTRA_TEXT, content.text)
+            content.subject?.let { send.putExtra(Intent.EXTRA_SUBJECT, it) }
+            try {
+                context.startActivity(Intent.createChooser(send, chooserTitle))
+            } catch (_: ActivityNotFoundException) {
+                // No app can receive text: the system has nothing to offer, and neither do we.
+            }
+        }
+    }
+}
 
 /**
  * Spec 022 US1 — the find bar's actions. Typing updates the ViewModel and searches the page with

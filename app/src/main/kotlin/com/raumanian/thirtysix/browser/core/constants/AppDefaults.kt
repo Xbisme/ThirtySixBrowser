@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.core.constants
 
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 
 /**
@@ -29,4 +30,7 @@ object AppDefaults {
 
     /** Spec 016 FR-020 — the window Spec 014 shipped as a fixed constant. */
     val HISTORY_RETENTION: HistoryRetention = HistoryRetention.Days90
+
+    /** Spec 022 FR-029 — pages keep their own text size until the person picks another. */
+    val TEXT_SIZE: TextSize = TextSize.Percent100
 }
