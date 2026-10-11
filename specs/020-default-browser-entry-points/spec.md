@@ -14,6 +14,14 @@ else. Every other feature shipped in Specs 001–019 is therefore reachable only
 who remember to open the app first and type an address. This spec makes the app reachable
 from everywhere a web address appears on the phone.
 
+## Clarifications
+
+### Session 2026-10-11
+
+- Q: When 50 normal tabs are already open and a link arrives from another app, what should happen? → A: Open the link in the most recently used normal tab as a new navigation (Back returns to the page it replaced), with a short notice that the tab limit was reached.
+- Q: When the person presses Back on a tab just opened from another app's link, with no history of its own, what happens to that tab? → A: The tab is closed and the person returns to the app that sent the link (FR-006 as written).
+- Q: From when should the Home invitation to make ThirtySix the default browser start appearing? → A: From the 3rd app launch onwards, counting launches rather than pages viewed.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Open a link from another app (Priority: P1)
@@ -63,7 +71,8 @@ invitation no longer appears.
 1. **Given** ThirtySix is not the default browser on Android 10 or later, **When** the person uses the Settings row's action, **Then** the system's own default-browser confirmation appears, and accepting it makes ThirtySix the default.
 2. **Given** ThirtySix is not the default browser on Android 7–9, **When** the person uses the Settings row's action, **Then** the system's default-apps settings screen opens, where the person can pick ThirtySix.
 3. **Given** the person has just made ThirtySix the default and returns to the app, **When** Settings is visible, **Then** the row shows ThirtySix as the default without needing a restart, and offers no action.
-4. **Given** ThirtySix is not the default and onboarding is complete, **When** the person opens the Home page, **Then** a dismissible invitation offers to make ThirtySix the default browser.
+4. **Given** ThirtySix is not the default, onboarding is complete and the app has been launched at least 3 times, **When** the person opens the Home page, **Then** a dismissible invitation offers to make ThirtySix the default browser.
+4a. **Given** a fresh install on its 1st or 2nd launch, **When** the person opens the Home page, **Then** no invitation is shown.
 5. **Given** the invitation is visible, **When** the person dismisses it, **Then** it disappears and does not come back on later launches; the Settings row is still available.
 6. **Given** the invitation is visible, **When** the person accepts it and ThirtySix becomes the default, **Then** the invitation disappears and does not return.
 7. **Given** the person declines the system confirmation, **When** they return to the app, **Then** nothing changes: the row still offers the action and the invitation (if not dismissed) is still shown.
@@ -118,7 +127,7 @@ a new tab opens with a search for exactly that word using the chosen engine.
 ### Edge Cases
 
 - **Onboarding never completed**: a link (or shared text, or search) arrives on a fresh install before Spec 018's onboarding was finished or skipped. Onboarding is shown first and is not skipped silently; when the person finishes or skips it, the pending link opens in a new tab. The link is not lost.
-- **Tab cap reached**: 50 normal tabs (Spec 011) are already open when a link arrives. The existing tab-cap message is shown and no tab is created; the person's tabs are untouched.
+- **Tab cap reached**: 50 normal tabs (Spec 011) are already open when a link arrives. No tab is created; the link opens in the most recently used normal tab as a new navigation, so the page it replaced is one Back away, and a short notice says the tab limit was reached. If the person was on an incognito tab, the most recently used normal tab is used, never the incognito one.
 - **Active tab is incognito**: incoming links, shares and searches always open in a new **normal** tab, never in the incognito session, and never inherit incognito state.
 - **Unsafe or non-web addresses**: a delivered address whose scheme is not http or https (for example `intent:`, `javascript:`, `file:`, `content:`, `data:`, `market:`) is never loaded. ThirtySix opens without creating a tab and shows a short message that the link could not be opened.
 - **Malformed address**: an http/https address that cannot be parsed into a valid web address is treated as unsafe (above) rather than searched, because the person tried to open a link, not to search.
@@ -161,7 +170,7 @@ a new tab opens with a search for exactly that word using the chosen engine.
 - **FR-015**: Any delivered address whose scheme is not http or https, or that cannot be parsed as a valid web address, MUST NOT be loaded; the app MUST open without creating a tab and show a short message that the link could not be opened.
 - **FR-016**: Incoming links, shared text and selected text MUST NOT be written to any log, analytics or diagnostic output, and MUST NOT be sent anywhere except the web page itself or, for searches, the user's chosen search engine.
 - **FR-017**: Incoming content MUST always open in a normal tab, never in an incognito tab, regardless of whether the active tab is incognito.
-- **FR-018**: When 50 normal tabs are already open, an incoming address or search MUST show the existing tab-cap message (Spec 011) and MUST NOT create a tab or replace an existing one.
+- **FR-018**: When 50 normal tabs are already open, an incoming address or search MUST NOT create a tab; it MUST open in the most recently used **normal** tab as a new navigation, which becomes the active tab, so that the page it replaced stays reachable with Back. A short notice MUST tell the person the tab limit was reached and the link opened in that tab. FR-006's close-on-Back rule does not apply to a tab reused this way.
 
 **Arriving before onboarding**
 
@@ -173,7 +182,8 @@ a new tab opens with a search for exactly that word using the chosen engine.
 - **FR-021**: When ThirtySix is not the default, the row MUST offer an action that, on Android 10 and later, shows the system's own default-browser confirmation, and on Android 7–9 opens the system's default-apps settings screen. When ThirtySix is the default, the row MUST state it and offer no action.
 - **FR-022**: The default-browser state shown in Settings and used by the Home invitation MUST be re-read every time the app returns to the foreground, so changes made in system settings are reflected without a restart.
 - **FR-023**: If the device can open neither the system confirmation nor the default-apps screen, the action MUST show a short message instead of doing nothing.
-- **FR-024**: The Home page MUST show a dismissible invitation to make ThirtySix the default browser, only when all hold: ThirtySix is not the default; onboarding is complete; the invitation has never been dismissed; the current tab is not incognito.
+- **FR-024**: The Home page MUST show a dismissible invitation to make ThirtySix the default browser, only when all hold: ThirtySix is not the default; onboarding is complete; the app has been launched at least 3 times; the invitation has never been dismissed; the current tab is not incognito.
+- **FR-024a**: A launch MUST be counted each time ThirtySix comes to the foreground from outside the app (the home screen, the recent-apps view, or another app sending it a link), including the very first launch; returning from a system screen ThirtySix itself opened (such as the default-browser confirmation) MUST NOT count. The count MUST be kept on the device only and MAY stop increasing once it reaches 3.
 - **FR-025**: The invitation MUST offer the same action as the Settings row and a way to dismiss it. Once dismissed, it MUST never reappear on its own, including after app restarts and updates. The dismissal MUST be remembered on the device only.
 - **FR-026**: When ThirtySix becomes the default, the invitation MUST disappear; it MUST NOT reappear if ThirtySix later stops being the default (the Settings row remains the way back).
 - **FR-027**: Declining the system confirmation MUST change nothing: no state is recorded, the row keeps its action and an undismissed invitation stays.
@@ -189,6 +199,7 @@ a new tab opens with a search for exactly that word using the chosen engine.
 - **Incoming request**: what another app hands to ThirtySix — a web address to open, text to interpret, or a query to search — together with whether it must always be searched (selection menu, web-search request) or interpreted (Share sheet). Held only until it is opened or rejected; never stored beyond that.
 - **Default-browser state**: whether the phone currently names ThirtySix as its default browser. Owned by the system, read on demand, never stored by the app.
 - **Invitation dismissal**: a single on-device flag recording that the person dismissed (or accepted) the Home invitation, so it is never shown again.
+- **Launch count**: an on-device count of app launches (FR-024a), needed only to tell whether the 3rd launch has been reached.
 - **Opened-from-another-app marker**: the fact that a tab was created for an incoming link and has not yet been navigated, used only to make Back return to the sending app (FR-006).
 
 ## Success Criteria *(mandatory)*
@@ -215,7 +226,7 @@ a new tab opens with a search for exactly that word using the chosen engine.
 - **2,048 characters** (FR-013) matches the longest address the app already accepts for bookmarks; the address bar has no separate limit.
 - **The first web address wins** (FR-010): the app does not ask which of several addresses to open.
 - **Selected text is always searched** (FR-011) because the person explicitly picked a search action; the Share sheet is where addresses are opened.
-- **Invitation timing**: shown from the first Home view after onboarding is completed, with no launch counter or delay; it is shown on the Home page only, never over a loaded web page.
+- **Invitation timing**: shown from the 3rd app launch onwards (clarified 2026-10-11), on the Home page only, never over a loaded web page. A fresh install therefore never sees it right after onboarding.
 - **Custom Tabs stay out of scope** (Constitution: WebView only). Apps that would use Custom Tabs fall back to an ordinary link open, which FR-001 to FR-008 handle.
 - **No new dependency is expected**: system role and intent handling are part of the platform and of AndroidX libraries already in the project; anything added at plan time is verified per Constitution §IX and the 16 KB gate.
 - **Out of scope**: file upload, fullscreen video, popups, site permissions (Spec 021); find in page, sharing from the app, autocomplete (Spec 022); tracker blocking and other protections (Spec 023); launching other apps for non-web schemes, which Spec 012's external-intent guard already covers for links clicked inside pages.
@@ -223,7 +234,7 @@ a new tab opens with a search for exactly that word using the chosen engine.
 ## Dependencies
 
 - **Spec 010** — search-address building with the user's chosen engine (FR-010 to FR-012).
-- **Spec 011** — tab creation, active tab and the 50-tab cap message (FR-003, FR-018).
+- **Spec 011** — tab creation, active tab and the 50-tab cap (FR-003, FR-018).
 - **Spec 012** — incognito tabs, which incoming content must never join (FR-017).
 - **Spec 016** — the Settings screen that hosts the new row (FR-020).
 - **Spec 018** — onboarding, which incoming content must not skip (FR-019).
