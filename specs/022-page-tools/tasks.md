@@ -312,7 +312,7 @@ description: "Task list for Spec 022 — Page Tools"
   - `connectedDebugAndroidTest` on the 16 KB AVD, force-stopping the app first and re-running `adb reverse` afterwards.
 - [X] T064 Release check: run the release build on `TA016_API36_16K` with zero FATAL. Check the APK delta against `main` is ≤ +100 KB (SC-009) and that there is no new `.so`. Record the results.
 - [X] T065 Record the carry-forward debt found in research R5 (Spec 013's `BookmarkDao.searchByTitleOrUrl` uses unescaped `LIKE`) under "Implementation Notes" and in `CLAUDE.md` › Known carry-forward debt.
-- [ ] T066 Update the docs:
+- [X] T066 Update the docs:
   - `CLAUDE.md`: roadmap row, Recent Changes, Active Spec, facts to keep;
   - `.claude/claude-app/sdd-roadmap.md`;
   - `.claude/claude-app/dev-workflow.md`;
