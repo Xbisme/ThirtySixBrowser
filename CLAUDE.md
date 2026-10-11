@@ -280,8 +280,8 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 018 | `onboarding-flow` | ✅ Done 2026-09-15 (PR #24 merged, `492e4f3`; 41/41; G1–G12 PASS, chỉ screen-reader deferred) | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine; Skip mọi slide; lưu-ngay; giữ vị trí slide qua recreate |
 | 019 | `ui-redesign` | ✅ Done 2026-10-10 (PR #27 merged, `54e090a`; real-device pass 2026-10-11 — Layout Inspector, TalkBack, canvas comparison, dynamic color still open) | Full UI rebuild from the [ThirtySix design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (violet replaces teal) + Compose Phase Discipline (Constitution v1.4.0 §V) |
 | 020 | `default-browser-entry-points` | ✅ Done 2026-10-11 (PR #30 merged, `1bb8c6a`, CI 6/6; 65/65) | http/https VIEW + BROWSABLE intent filters, shared links/text, set-as-default (RoleManager API 29+) |
-| 021 | `web-capabilities` | 🟢 Implemented 2026-10-11 (70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
-| 022 | `page-tools` | ⬜ Phase 6 | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
+| 021 | `web-capabilities` | ✅ Done 2026-10-11 ([PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) merged, `ef9ae68`, CI 6/6, 135/135 on API 29; 70/70; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
+| 022 | `page-tools` | ⬜ Next (Phase 6) | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
 | 023 | `privacy-protection` | ⬜ Phase 6 | Tracker blocking (APK-bundled list), HTTPS upgrade, param stripping, Fire button, GPC, privacy dashboard, cookie-banner + fingerprint scripts |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
@@ -292,7 +292,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Pending CI / Tooling Tasks
 
-> **⚠️ One open CI item** (see Recent Changes, 2026-10-11): a cache saved by a *passing* run still zombie-booted, so bug 3's fix is not sufficient on its own. The emulator job has now surfaced **three** distinct hangs plus this fourth occurrence with confusingly similar symptoms, all three fixed. Check all three before assuming a fourth:
+> **⚠️ One open CI item** (see Recent Changes, 2026-10-11): a cache saved by a *passing* run zombie-booted — **twice** (Spec 020 PR #30, Spec 021 PR #32) — so bug 3's fix is not sufficient on its own. The emulator job has now surfaced **three** distinct hangs plus this fourth occurrence with confusingly similar symptoms, all three fixed. Check all three before assuming a fourth:
 >
 > 1. **Spec 008 — shutdown hang.** QEMU's `stop` emits `stop: Not implemented`, so the action's terminate phase never sees the process exit. Fixed by killing qemu at the end of `script` plus `ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5`.
 > 2. **Spec 017 — stale AVD snapshot, a *key* bug (PR #22, `d5ab63d`).** The cache key used `${{ env.ImageVersion }}`, which is **always empty** — `ImageVersion` belongs to the runner image, not the workflow's `env:` block, and the `env` context only exposes what the workflow, job or step declares. The key was therefore unversioned (`avd-api29-Linux-`), so a snapshot written by an older emulator binary was restored forever, giving a zombie boot: `sys.boot_completed=1` but `settings`/`input` never published, `adb` exits 1, Gradle never runs, job wedges until timeout. Now resolved through a step output, with a hard failure if the variable disappears.
@@ -305,6 +305,8 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 > **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd`. A key with no version component is bug 2 returning. `Starting 0 tests` alongside `Broken pipe` / `DeadSystemException` / `stop: Not implemented` is the bug-3 signature — delete the cache and re-run **before suspecting the code**; a healthy run logs `Starting 109 tests` → `Finished 109 tests`.
 
 ## Recent Changes
+
+- 2026-10-11 (Spec 021 merged + the AVD cache again): ✅ **PR #32 merged (`ef9ae68`), CI 6/6.** The first emulator run zombie-booted (`Broken pipe (32)`, `stop: Not implemented`, no tests) from cache `avd-api29-20261004.327.1` — **the same cache a passing run had saved, poisoned a second time**. Deleting it and rerunning gave `Starting 135 tests` → `Finished 135 tests`. PR #26's "save only on success" is confirmed insufficient twice; a follow-up CI change (always cold-boot, or no AVD snapshot cache) is recommended.
 
 - 2026-10-11 (Spec 021 implementation): 🟢 **Spec 021 `web-capabilities` implemented on branch `021-web-capabilities` — 70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open.** Second spec of Phase 6.
 
@@ -608,7 +610,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 021 — Web Capabilities](specs/021-web-capabilities/) — implemented 2026-10-11, 70/70, [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) open. See the Recent Changes entry; [tasks.md](specs/021-web-capabilities/tasks.md) holds the gate table (G1–G20, SC-001) and the implementation notes.
+**Current**: ✅ [Spec 021 — Web Capabilities](specs/021-web-capabilities/) — **merged into `main` via [PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) (2026-10-11, merge commit `ef9ae68`, CI 6/6), 70/70.** Next: Spec 022 `page-tools`. See the Recent Changes entry; [tasks.md](specs/021-web-capabilities/tasks.md) holds the gate table (G1–G20, SC-001) and the implementation notes.
 
 **Previous**: ✅ [Spec 020 — Default Browser & Entry Points](specs/020-default-browser-entry-points/) — **merged into `main` via [PR #30](https://github.com/Xbisme/ThirtySixBrowser/pull/30) (2026-10-11, merge commit `1bb8c6a`, CI 6/6), 65/65.** [tasks.md](specs/020-default-browser-entry-points/tasks.md) holds the gate table and 13 implementation notes.
 
