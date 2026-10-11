@@ -12,12 +12,12 @@ class TrackerMatcher(
     private val neverBlock: Set<String> = NEVER_BLOCK_HOSTS,
 ) {
     fun shouldBlock(requestHost: String, topHost: String, protectionOn: Boolean): Boolean {
-        if (!protectionOn) return false
         val host = requestHost.lowercase()
         val site = suffixes.registrableDomain(host)
-        if (site == suffixes.registrableDomain(topHost)) return false
-        if (isNeverBlock(host)) return false
-        return trackers.containsHostOrParent(host, stopAt = site)
+        return protectionOn &&
+            site != suffixes.registrableDomain(topHost) &&
+            !isNeverBlock(host) &&
+            trackers.containsHostOrParent(host, stopAt = site)
     }
 
     private fun isNeverBlock(host: String): Boolean =

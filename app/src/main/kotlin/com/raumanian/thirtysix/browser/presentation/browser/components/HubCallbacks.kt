@@ -19,6 +19,8 @@ internal data class HubCallbacks(
     val onQuickSetting: (QuickSetting) -> Unit,
     /** Spec 022 — a page tool was chosen (FR-001); the sheet has already closed (FR-004). */
     val onPageTool: (PageTool) -> Unit,
+    /** Spec 023 FR-012 — the per-site protection switch; the sheet has already closed. */
+    val onProtectionSwitched: (on: Boolean) -> Unit = {},
 )
 
 /** Spec 019 — the hub's quick-setting tiles, each opening an existing Settings chooser. */

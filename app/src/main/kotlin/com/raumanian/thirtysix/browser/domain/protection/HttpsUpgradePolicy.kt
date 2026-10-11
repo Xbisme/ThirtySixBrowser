@@ -10,12 +10,11 @@ import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 object HttpsUpgradePolicy {
 
     fun upgrade(url: String, failedHosts: Set<String>): String? {
-        val schemeEnd = url.indexOf("://")
-        if (schemeEnd < 0) return null
-        if (!url.substring(0, schemeEnd).equals(UrlConstants.SCHEME_HTTP, ignoreCase = true)) return null
-        val host = hostOf(url, schemeEnd + SCHEME_SEPARATOR.length) ?: return null
-        if (!isUpgradableHost(host) || host in failedHosts) return null
-        return UrlConstants.SCHEME_HTTPS + url.substring(schemeEnd)
+        val schemeEnd = url.indexOf(SCHEME_SEPARATOR)
+        val isHttp = schemeEnd > 0 && url.substring(0, schemeEnd).equals(UrlConstants.SCHEME_HTTP, ignoreCase = true)
+        val host = if (isHttp) hostOf(url, schemeEnd + SCHEME_SEPARATOR.length) else null
+        val upgradable = host != null && isUpgradableHost(host) && host !in failedHosts
+        return if (upgradable) UrlConstants.SCHEME_HTTPS + url.substring(schemeEnd) else null
     }
 
     /** Lower-case host of an http(s) address, or `null` when it has none. */

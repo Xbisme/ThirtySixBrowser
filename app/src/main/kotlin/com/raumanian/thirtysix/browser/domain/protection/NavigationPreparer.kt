@@ -16,8 +16,8 @@ class NavigationPreparer(
     data class Prepared(val url: String, val upgradedFrom: String?)
 
     fun prepare(url: String, isIncognito: Boolean): Prepared {
-        val host = HttpsUpgradePolicy.hostOf(url) ?: return Prepared(url, upgradedFrom = null)
-        if (!isSiteProtected(suffixes.registrableDomain(host), isIncognito)) {
+        val host = HttpsUpgradePolicy.hostOf(url)
+        if (host == null || !isSiteProtected(suffixes.registrableDomain(host), isIncognito)) {
             return Prepared(url, upgradedFrom = null)
         }
         val stripped = stripper.strip(url)

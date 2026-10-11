@@ -33,7 +33,7 @@ class ProtectionDataSourceTest {
     @Test
     fun `a broken asset fails open`() {
         val broken = object : android.content.ContextWrapper(context) {
-            override fun getAssets(): android.content.res.AssetManager = throw IllegalStateException("no assets")
+            override fun getAssets(): android.content.res.AssetManager = error("no assets")
         }
         val source = ProtectionDataSource(broken, IoDispatchers)
 

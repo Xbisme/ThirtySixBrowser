@@ -13,15 +13,16 @@ class TrackingParamStripper(private val rules: TrackingParamRules) {
 
     /** Returns [url] itself (same instance) when nothing is removed. */
     fun strip(url: String): String {
-        if (!isWebUrl(url)) return url
         val fragmentAt = url.indexOf('#').let { if (it < 0) url.length else it }
         val queryAt = url.indexOf('?')
-        if (queryAt < 0 || queryAt > fragmentAt) return url
+        if (!isWebUrl(url) || queryAt < 0 || queryAt > fragmentAt) return url
 
         val pairs = url.substring(queryAt + 1, fragmentAt).split('&')
         val kept = pairs.filterNot { isTracking(it) }
-        if (kept.size == pairs.size) return url
+        return if (kept.size == pairs.size) url else rebuild(url, queryAt, fragmentAt, kept)
+    }
 
+    private fun rebuild(url: String, queryAt: Int, fragmentAt: Int, kept: List<String>): String {
         val base = url.substring(0, queryAt)
         val fragment = url.substring(fragmentAt)
         val query = kept.joinToString("&")

@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
+import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
@@ -8,6 +9,7 @@ import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeWebDataCleaner
@@ -37,8 +39,36 @@ class ClearBrowsingDataUseCaseTest {
     private val screenshots = FakeScreenshotCache(log)
     private val sitePermissions = FakeSitePermissionRepository()
     private val grants = OneTimeGrantStore()
-    private val useCase =
-        ClearBrowsingDataUseCase(history, web, cookies, favicons, screenshots, sitePermissions, grants)
+    private val protectionExceptions = FakeProtectionExceptionRepository()
+    private val incognitoProtection = IncognitoProtectionExceptionStore()
+    private val useCase = ClearBrowsingDataUseCase(
+        history,
+        web,
+        cookies,
+        favicons,
+        screenshots,
+        sitePermissions,
+        grants,
+        protectionExceptions,
+        incognitoProtection,
+    )
+
+    @Test
+    fun `sites without protection are cleared only when their category is selected`() = runTest {
+        protectionExceptions.add("shop.example")
+        incognitoProtection.add("private.example")
+
+        useCase(ClearBrowsingDataCategory.DEFAULT_SELECTION)
+        assertEquals(setOf("shop.example"), protectionExceptions.currentSites())
+        assertTrue(incognitoProtection.contains("private.example"))
+
+        log.clear()
+        val result = useCase(setOf(ClearBrowsingDataCategory.SitesWithoutProtection))
+        assertTrue(result.failed.isEmpty())
+        assertTrue(protectionExceptions.currentSites().isEmpty())
+        assertTrue(!incognitoProtection.contains("private.example"))
+        assertEquals("no other category ran", emptyList<String>(), log)
+    }
 
     @Test
     fun `site permissions are cleared only when their category is selected`() = runTest {

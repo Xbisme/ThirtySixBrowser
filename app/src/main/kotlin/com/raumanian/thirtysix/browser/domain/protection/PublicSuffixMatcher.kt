@@ -30,28 +30,30 @@ class PublicSuffixMatcher(
         registrableDomain(requestHost) != registrableDomain(topHost)
 
     private fun compute(host: String): String {
-        if (host.isEmpty() || isIpLiteral(host) || '.' !in host) return host
         val labels = host.split('.')
-        if (labels.any { it.isEmpty() }) return host
-        val suffixStart = publicSuffixStart(labels)
-        // The host is itself a public suffix: it is its own site.
-        if (suffixStart == 0) return host
-        return labels.subList(suffixStart - 1, labels.size).joinToString(".")
+        val isOwnSite = host.isEmpty() || isIpLiteral(host) || labels.size < 2 || labels.any { it.isEmpty() }
+        // A host that is itself a public suffix (start 0) is its own site too.
+        val suffixStart = if (isOwnSite) 0 else publicSuffixStart(labels)
+        return if (suffixStart == 0) host else labels.subList(suffixStart - 1, labels.size).joinToString(".")
     }
 
-    /** Index of the first label of the longest matching public suffix. */
-    private fun publicSuffixStart(labels: List<String>): Int {
-        for (i in labels.indices) {
-            val candidate = labels.subList(i, labels.size).joinToString(".")
-            if (candidate in rules.exception) return i + 1
-            if (candidate in rules.normal) return i
-            if (i + 1 < labels.size) {
-                val parent = labels.subList(i + 1, labels.size).joinToString(".")
-                if (parent in rules.wildcard) return i
-            }
+    /**
+     * Index of the first label of the longest matching public suffix. Without any match the
+     * implicit "*" rule applies: an unknown top-level label is the public suffix.
+     */
+    private fun publicSuffixStart(labels: List<String>): Int =
+        labels.indices.firstNotNullOfOrNull { i -> suffixStartAt(labels, i) } ?: (labels.size - 1)
+
+    /** The suffix start if a rule matches the labels from [i] on, else `null`. */
+    private fun suffixStartAt(labels: List<String>, i: Int): Int? {
+        val candidate = labels.subList(i, labels.size).joinToString(".")
+        val parent = labels.subList(minOf(i + 1, labels.size), labels.size).joinToString(".")
+        return when {
+            candidate in rules.exception -> i + 1
+            candidate in rules.normal -> i
+            parent.isNotEmpty() && parent in rules.wildcard -> i
+            else -> null
         }
-        // Implicit "*" rule: an unknown top-level label is the public suffix.
-        return labels.size - 1
     }
 
     private companion object {

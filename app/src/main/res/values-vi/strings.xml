@@ -361,4 +361,26 @@
     <string name="suggestion_bookmark_cd">Dấu trang: %1$s, %2$s</string>
     <string name="suggestion_history_cd">Lịch sử: %1$s, %2$s</string>
     <string name="share_page_title">Chia sẻ trang</string>
+    <!-- Spec 023 privacy protection -->
+    <string name="hub_protection_site_title">Bảo vệ cho trang này</string>
+    <string name="hub_protection_site_on">Chặn trình theo dõi, xoá thẻ theo dõi, ưu tiên kết nối an toàn</string>
+    <string name="hub_protection_site_off">Đã tắt cho %1$s. Trình theo dõi có thể tải ở đây.</string>
+    <string name="hub_protection_not_secure_title">Kết nối không an toàn</string>
+    <string name="hub_protection_not_secure_body">Trang này không được mã hoá. Người khác trong mạng có thể thấy những gì bạn gửi.</string>
+    <string name="settings_protection_exceptions">Trang không được bảo vệ</string>
+    <string name="settings_protection_exceptions_summary">Các trang bạn đã tắt chặn trình theo dõi</string>
+    <string name="protection_exceptions_empty">Mọi trang đều được bảo vệ. Khi đang ở một trang, bạn có thể tắt bảo vệ cho trang đó từ menu; trang sẽ hiện ở đây.</string>
+    <string name="protection_exceptions_turn_on">Bật lại</string>
+    <string name="protection_exceptions_turn_on_cd">Bật lại bảo vệ cho %1$s</string>
+    <string name="protection_exceptions_turn_all_on">Bật lại tất cả</string>
+    <string name="protection_exceptions_turn_all_on_confirm_title">Bật lại bảo vệ cho mọi trang?</string>
+    <string name="protection_exceptions_turn_all_on_confirm_body">Trình theo dõi sẽ bị chặn lại trên mọi trang trong danh sách này.</string>
+    <string name="settings_clear_category_sites_without_protection">Trang không được bảo vệ</string>
+    <string name="settings_clear_category_sites_without_protection_description">Bật lại bảo vệ cho mọi trang bạn đã tắt</string>
+    <string name="settings_about_notices_title">Thông báo mã nguồn mở</string>
+    <string name="settings_about_notice_trackers">Danh sách trình theo dõi và máy chủ quảng cáo được lấy từ EasyList và EasyPrivacy của The EasyList authors (https://easylist.to/), chia sẻ theo giấy phép CC BY-SA 3.0.</string>
+    <string name="settings_about_notice_public_suffix">Public Suffix List (https://publicsuffix.org/) của Mozilla và cộng đồng, dùng theo giấy phép MPL 2.0.</string>
+    <plurals name="hub_protection_trackers_blocked">
+        <item quantity="other">Đã chặn %1$d trình theo dõi trên trang này</item>
+    </plurals>
 </resources>

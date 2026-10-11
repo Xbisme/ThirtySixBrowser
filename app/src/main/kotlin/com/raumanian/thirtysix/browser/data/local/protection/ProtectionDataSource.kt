@@ -60,9 +60,9 @@ class ProtectionDataSource @Inject constructor(
     private fun load(): ProtectionData {
         val startedAt = SystemClock.elapsedRealtime()
         val result = ProtectionData(
-            trackers = readLines(AssetPaths.PROTECTION_TRACKER_HOSTS) { ProtectionAssetParser.parseTrackerHosts(it) },
-            suffixes = readLines(AssetPaths.PROTECTION_PUBLIC_SUFFIXES) { ProtectionAssetParser.parsePublicSuffixes(it) },
-            params = readLines(AssetPaths.PROTECTION_TRACKING_PARAMS) { ProtectionAssetParser.parseTrackingParams(it) },
+            trackers = readLines(AssetPaths.PROTECTION_TRACKER_HOSTS, ProtectionAssetParser::parseTrackerHosts),
+            suffixes = readLines(AssetPaths.PROTECTION_PUBLIC_SUFFIXES, ProtectionAssetParser::parsePublicSuffixes),
+            params = readLines(AssetPaths.PROTECTION_TRACKING_PARAMS, ProtectionAssetParser::parseTrackingParams),
         )
         Log.i(
             TAG,

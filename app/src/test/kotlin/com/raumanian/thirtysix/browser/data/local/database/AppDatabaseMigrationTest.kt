@@ -119,7 +119,8 @@ class AppDatabaseMigrationTest {
         dao.upsert(SiteProtectionExceptionEntity("shop.example", 5L))
         dao.upsert(SiteProtectionExceptionEntity("news.example", 3L))
 
-        assertEquals(listOf("shop.example" to 5L, "news.example" to 3L), dao.observeAll().first().map { it.site to it.addedAt })
+        val rows = dao.observeAll().first().map { it.site to it.addedAt }
+        assertEquals(listOf("shop.example" to 5L, "news.example" to 3L), rows)
     }
 
     @Test

@@ -13,12 +13,14 @@ class FakeProtectionExceptionRepository : ProtectionExceptionRepository {
     private val rows = MutableStateFlow<List<SiteProtectionException>>(emptyList())
     private var clock = 0L
 
-    override fun observeAll(): Flow<List<SiteProtectionException>> = rows.map { list -> list.sortedByDescending { it.addedAt } }
+    override fun observeAll(): Flow<List<SiteProtectionException>> =
+        rows.map { list -> list.sortedByDescending { it.addedAt } }
 
     override fun currentSites(): Set<String> = rows.value.mapTo(HashSet()) { it.site }
 
     override suspend fun add(site: String): Result<Unit> {
-        rows.value = rows.value.filterNot { it.site == site } + SiteProtectionException(site, Instant.ofEpochMilli(++clock))
+        val added = SiteProtectionException(site, Instant.ofEpochMilli(++clock))
+        rows.value = rows.value.filterNot { it.site == site } + added
         return Result.Success(Unit)
     }
 

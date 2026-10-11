@@ -18,16 +18,10 @@ class TrackerHostSet(private val hosts: Set<String>) {
      * True when [host] or one of its parents is listed, checking parents no shorter than
      * [stopAt] (the host's registrable domain) so a public suffix is never matched.
      */
-    fun containsHostOrParent(host: String, stopAt: String): Boolean {
-        var candidate = host
-        while (true) {
-            if (candidate in hosts) return true
-            if (candidate.length <= stopAt.length) return false
-            val dot = candidate.indexOf('.')
-            if (dot < 0) return false
-            candidate = candidate.substring(dot + 1)
-        }
-    }
+    fun containsHostOrParent(host: String, stopAt: String): Boolean =
+        generateSequence(host) { candidate ->
+            candidate.substringAfter('.', missingDelimiterValue = "").takeIf { it.length >= stopAt.length }
+        }.any { it in hosts }
 }
 
 /** Public Suffix List rules, lower-case, without the `*.` / `!` markers. */
