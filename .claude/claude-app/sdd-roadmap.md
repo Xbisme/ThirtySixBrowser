@@ -52,16 +52,21 @@ Constitution
                           │
                           └── Phase 5
                                 │
-                                ├── 019 ui-redesign (design system trước, rồi mới specify)
-                                │
-                                └── 020 tracker-blocker-hostlist (Optional)
+                                └── 019 ui-redesign (design system trước, rồi mới specify)
+                                      │
+                                      └── Phase 6 "Trình duyệt thật" (thứ tự bắt buộc)
+                                            │
+                                            ├── 020 default-browser-entry-points
+                                            ├── 021 web-capabilities
+                                            ├── 022 page-tools
+                                            └── 023 privacy-protection
 ```
 
 ## Spec List (v1.0)
 
 | # | Tên | User Story chính | Test được gì? | Dependencies | Status |
 |---|-----|-----------------|---------------|-------------|--------|
-| — | Constitution | Nguyên tắc nền tảng v1.4.0 (§V Compose Phase Discipline; §X Phase 5 = 019 redesign + 020 tracker) | — | — | ✅ Done 2026-05-01 · amended 2026-10-10 |
+| — | Constitution | Nguyên tắc nền tảng v1.5.0 (§V Compose Phase Discipline; §X Phase 5 = 019 redesign, Phase 6 = 020–023 "trình duyệt thật"; §II chỉ cho tiêm script đóng gói sẵn, một chiều) | — | — | ✅ Done 2026-05-01 · amended 2026-10-11 |
 | 001 | `project-init-build-config` | Setup Gradle Kotlin DSL + version catalog + 16KB-ready | `./gradlew assembleDebug` pass, lint clean, `.so` align 16KB | Constitution | ✅ Done 2026-05-01 |
 | 002 | `clean-architecture-skeleton-di` | Module structure + Hilt + base classes | App build + Hilt graph valid | 001 | ✅ Done 2026-05-01 |
 | 003 | `theme-typography-darkmode` | Material3 + light/dark/system | Toggle theme → app re-compose đúng | 002 | ✅ Done 2026-05-01 |
@@ -81,11 +86,14 @@ Constitution
 | 017 | `splash-screen` | Splash API + branding | Cold start → splash → main | 002 | ✅ **Done 2026-09-15 — PR #20 merged (`cca5c0c`), 35/35 tasks.** `androidx.core:core-splashscreen` **1.2.0** (zero `.so`, verify bằng cách giải nén AAR). Thay **toàn bộ** artwork template Android Studio bằng mark ThirtySix (đĩa gradient + "36" tô đặc): vector tĩnh, vector động `drawable-v31/`, monochrome, 5 bitmap density, xoá hẳn biến thể round. testDebugUnitTest ✅ 557/557 · instrumented ✅ 109/109 trên AVD 16 KB API 36 · lint/detekt/ktlint ✅ · 16 KB ✅ 8 `.so` zero mới · APK **3,126,212 B** (+4,097 B, chỉ dùng 2% ngân sách 204,800 B) · cold start **−1,4%** (575 ms vs 583 ms). ⚠️ **Phát hiện quan trọng: theme splash KHÔNG được dùng parent AppCompat** — thư viện kế thừa `Theme.DeviceDefault` theo thiết kế; an toàn đến từ `postSplashScreenTheme` + thứ tự gọi `installSplashScreen()` trước `super.onCreate()` (research.md R3, chứng minh bằng bytecode). Còn lại: G3 + 3 phần gate deferred (screenrecord lỗi encoder trên AVD; TalkBack không script được) và PR. |
 | 018 | `onboarding-flow` | 4 slide: chào + cam kết riêng tư · ngôn ngữ · theme · search engine | Lần đầu mở → onboarding → main; Skip mọi slide; đổi ngôn ngữ vẫn giữ đúng slide | 003, 004, 006, 017 | ✅ **Done 2026-09-15 — PR #24 merged (`492e4f3`), 41/41 tasks.** Không thêm dependency; Room vẫn v2. unit ✅ 579/579 (+22) · instrumented ✅ 109/109 trên AVD 16 KB · lint/detekt/ktlint ✅ · 16KB ✅ · APK **3,134,976 B** (+8,764 B, dùng 4,3% ngân sách) · **G1–G12 đều PASS**, gồm 4 gate blocking. ⚠️ Hai bẫy kỹ thuật: đọc cờ từ settings *flow* trong `setContent` sẽ đưa **mọi** lần mở vào onboarding (vì `NavHost` chốt `startDestination` ở lần compose đầu); và giữ chỉ số slide trong field ViewModel thường thì **sống qua xoay, chết khi đổi ngôn ngữ**. Còn lại: screen-reader pass (cần người) + PR. |
 | 019 | `ui-redesign` | Đập đi xây lại toàn bộ giao diện theo [design system ThirtySix](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (tím thay teal) + Compose Phase Discipline (Constitution v1.4.0 §V) | Mọi màn theo design system; chrome không recompose theo từng frame khi cuộn/tải/kéo | 001–018, design đã duyệt | ✅ **Done 2026-10-10 — PR #27 merged (`54e090a`, CI 6/6).** Chạy trên máy thật Galaxy A55 (2026-10-11, release): **SC-005 PASS** (p95 14/14/15/10 ms), Tabs 10 thẻ 104 ms, thẻ mới → Home ≈57 ms; sửa lỗi ô "Suchmaschine" bị ngắt giữa từ ở 360dp. ⚠️ Cold start lần đầu (onboarding) +30% so với Spec 018 — vượt ngưỡng +5% của SC-010, còn mở; người dùng quay lại +4,2% (đạt). Còn cần người: Layout Inspector, TalkBack, so canvas, dynamic color |
-| 020 | `tracker-blocker-hostlist` | (Optional) Block request via host list | Toggle on → request đến host trong list bị block | 011–019 | ⬜ Optional |
+| 020 | `default-browser-entry-points` | Intent filter http/https `VIEW` + `BROWSABLE`; nhận link/text chia sẻ từ app khác; đề nghị đặt làm trình duyệt mặc định (`RoleManager` API 29+, màn cài đặt hệ thống dưới đó) | Bấm link trong app khác → mở bằng ThirtySix; đặt làm mặc định được | 001–019 | ⬜ Next (Phase 6) |
+| 021 | `web-capabilities` | Chọn file khi upload · video toàn màn hình · popup/`window.open` · hộp thoại JS + HTTP auth · hỏi quyền camera/mic/vị trí theo từng trang (nhớ theo origin) · menu nhấn giữ link/ảnh | Upload ảnh, YouTube fullscreen, đăng nhập popup, Google Meet đều chạy | 020 | ⬜ Phase 6 |
+| 022 | `page-tools` | Tìm trong trang · chia sẻ · chế độ máy tính · cỡ chữ · in/lưu PDF · gợi ý khi gõ từ lịch sử + bookmark | Mỗi công cụ dùng được từ hub | 021 | ⬜ Phase 6 |
+| 023 | `privacy-protection` | Chặn tracker (host list đóng gói trong APK) · tự nâng HTTPS · xoá tham số theo dõi + cắt referrer · nút Fire + trang fireproof · Global Privacy Control · privacy dashboard theo trang · tự từ chối cookie banner + chống fingerprint bằng script đóng gói sẵn (Constitution §II) | Request tới tracker bị chặn; dashboard hiện số đã chặn | 022 | ⬜ Phase 6 |
 
 ## Ý tưởng cho bản sau (chưa có spec)
 
-> Constitution v1.4.0 §X: tính năng mới nảy ra khi thiết kế được ghi ở đây, **không** gộp vào spec đang làm. Muốn làm thì phải thiết kế trong [design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) và được duyệt trước khi `/speckit-specify`.
+> Constitution v1.5.0 §X: tính năng mới nảy ra khi thiết kế được ghi ở đây, **không** gộp vào spec đang làm. Muốn làm thì phải thiết kế trong [design system](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) và được duyệt trước khi `/speckit-specify`.
 
 | Ý tưởng | Nguồn | Ghi chú |
 |---|---|---|
@@ -101,7 +109,7 @@ Constitution → 001 → 002
              → 013, 014, 015 (parallel sau 007)
              → 016, 017, 018
              → 019 ui-redesign
-             → [020 optional]
+             → 020 → 021 → 022 → 023 (Phase 6)
 ```
 
 ### Test flow tích lũy
@@ -126,7 +134,10 @@ Sau 016: Settings screen full options
 Sau 017: Branded splash screen
 Sau 018: Onboarding lần đầu mở app
 Sau 019: Giao diện mới theo design system, đạt Compose Phase Discipline
-Sau 020 (optional): Tracker blocker toggle hoạt động
+Sau 020: Mở link từ app khác bằng ThirtySix, đặt làm trình duyệt mặc định
+Sau 021: Upload, fullscreen, popup, quyền camera/mic/vị trí theo trang chạy đúng
+Sau 022: Tìm trong trang, chia sẻ, chế độ máy tính, cỡ chữ, in, gợi ý khi gõ
+Sau 023: Chặn tracker, HTTPS, nút Fire, privacy dashboard
 ```
 
 ## Quy ước đặt tên branch + spec folder

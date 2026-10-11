@@ -118,6 +118,9 @@ Các Spec theo thứ tự implement:
 | 017 | `splash-screen` | 002 | ✅ Done (PR #20) |
 | 018 | `onboarding-flow` | 003, 004, 006, 017 | ✅ Done (PR #24) |
 | 019 | `ui-redesign` | 001–018 | ✅ Done (PR #27, Phase 5) |
-| 020 | `tracker-blocker-hostlist` | 011–019 | ⬜ Optional (Phase 5) |
+| 020 | `default-browser-entry-points` | 001–019 | ⬜ Next (Phase 6) |
+| 021 | `web-capabilities` | 020 | ⬜ Phase 6 |
+| 022 | `page-tools` | 021 | ⬜ Phase 6 |
+| 023 | `privacy-protection` | 022 | ⬜ Phase 6 |
 
-> Cập nhật 2026-10-11: Specs 001–019 đã merge vào `main` (019 `ui-redesign` qua PR #27, `54e090a`, 2026-10-10; đã chạy gate trên máy thật Galaxy A55 ngày 2026-10-11). Bước tiếp theo: thảo luận với owner về spec kế tiếp (020 tracker blocker vẫn optional). Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
+> Cập nhật 2026-10-11: Specs 001–019 đã merge vào `main` (019 `ui-redesign` qua PR #27, `54e090a`, 2026-10-10; đã chạy gate trên máy thật Galaxy A55 ngày 2026-10-11). Bước tiếp theo: Phase 6 "trình duyệt thật" (Constitution v1.5.0) — bắt đầu từ Spec 020 `default-browser-entry-points`; phần UI (lời mời đặt làm mặc định) phải được thiết kế trong design system trước khi specify. Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
