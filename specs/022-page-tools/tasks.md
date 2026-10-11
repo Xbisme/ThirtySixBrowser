@@ -317,7 +317,7 @@ description: "Task list for Spec 022 — Page Tools"
   - `.claude/claude-app/sdd-roadmap.md`;
   - `.claude/claude-app/dev-workflow.md`;
   - `.claude/claude-app/project-context.md`.
-- [ ] T067 Open the PR `022-page-tools` → `main`. Include the gate table, the Constitution line (11/11, §X waiver), the APK delta and the debt from T065.
+- [X] T067 Open the PR `022-page-tools` → `main`. Include the gate table, the Constitution line (11/11, §X waiver), the APK delta and the debt from T065.
 
 ---
 
