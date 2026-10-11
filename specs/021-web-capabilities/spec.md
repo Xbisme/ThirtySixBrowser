@@ -152,6 +152,8 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 - **Dialog flood across pages**: the "don't show more" choice ends when the page changes, so a later page from the same site can show dialogs again.
 - **HTTP auth repeated failures**: wrong credentials ask again; after the person cancels, the page shows whatever the site returns for a refused sign-in.
 - **Removing a site from Site permissions while it is open**: the next request from that site asks again; access already granted to the open page continues until it is reloaded.
+- **Pop-up tab after switching away**: a tab opened by a page keeps its link to that page only while it stays on screen; after the person switches to another tab and back, it reloads like any other tab (the app keeps one live page view), so it can no longer be closed by the page.
+- **Leaving the browser screen with a request pending** (opening Settings, History… from the hub): pending permission, file, dialog and sign-in requests are answered as refused / cancelled, as for a page change (FR-034).
 - **Clearing browsing data** (Spec 016) removes remembered site permissions only when its new "Site permissions" category is ticked (unticked by default); otherwise they stay and are managed in Site permissions.
 
 ## Requirements *(mandatory)*
@@ -161,7 +163,7 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 **Site permissions (Story 1)**
 
 - **FR-001**: When a page asks for camera, microphone or location, the app MUST ask the person with an app dialog that names the site (its origin as an address) and the capability, offering **Always allow**, **Allow this time** and **Don't allow** (in incognito tabs only Allow this time and Don't allow), unless a remembered or current-page decision exists for that site and capability.
-- **FR-002**: Only after the person taps Always allow or Allow this time, and only if the app does not already hold the matching Android permission, the app MUST request that Android permission; it MUST NEVER request these permissions at launch or for any other reason.
+- **FR-002**: The app MUST request one of these Android permissions only in response to the person's own choice: tapping Always allow or Allow this time for a site (FR-001), or choosing to take a photo or video while uploading a file (FR-013, camera only) — and only if the app does not already hold it. It MUST NEVER request them at launch or for any other reason.
 - **FR-003**: In normal tabs, **Always allow** and **Don't allow** MUST be remembered per site and per capability (camera, microphone, location) and applied silently to later requests from that site, until the person changes or removes them. **Allow this time** MUST apply only to the current page in that tab and end when the tab navigates to another page, is closed, or the app's process ends; it is never remembered.
 - **FR-004**: In incognito tabs, a decision MUST apply only to that tab's current visit and MUST NOT be remembered or read from remembered decisions made in normal tabs.
 - **FR-005**: A combined request (for example camera and microphone together) MUST be presented as one dialog and its answer applied to every capability in it.
@@ -233,7 +235,7 @@ A site shows a message, a yes/no question, asks for a short text, or asks "Leave
 
 - **SC-001**: On a set of 10 common sites that need these capabilities (video call, map, file upload form, video site, Google sign-in popup, password-protected test address, and similar), each task completes in ThirtySix as it does in a mainstream browser: 10/10.
 - **SC-002**: A site given Always allow or Don't allow is never asked again in a normal tab across 10 later visits; a site given Allow this time, and any incognito tab, is asked again on every new visit.
-- **SC-003**: The app's camera, microphone and location permissions are never requested at launch or without the person first tapping Allow for a site: 0 occurrences across all test runs.
+- **SC-003**: The app's camera, microphone and location permissions are never requested at launch, nor without the person first choosing an allow option for a site or (camera only) choosing to take a photo/video in a file upload: 0 occurrences across all test runs.
 - **SC-004**: Entering and leaving fullscreen 10 times returns to the same tab and scroll position without a reload in 10/10 trials.
 - **SC-005**: From long-press to a new background tab takes at most 2 taps (long-press, Open in new tab), and the page on screen does not change.
 - **SC-006**: Popups opened without a tap are blocked in 100% of tested cases; popups after a tap open as tabs in 100% of tested cases.

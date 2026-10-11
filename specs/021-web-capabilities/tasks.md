@@ -36,7 +36,7 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 - [ ] T004 Create `MAIN/presentation/browser/page/PageRequestQueue.kt`: FIFO with `enqueue`, `head: StateFlow<PageRequest?>`, `complete(request)`, `dropStale(activeTabId, activeGeneration)` that answers stale requests cancelled (FR-034), merging rule for duplicate `Permission` requests (data-model §3), and `dispose()` that cancels everything
 - [ ] T005 [P] Write `TEST/presentation/browser/page/PageRequestQueueTest.kt`: FIFO order, one head at a time (FR-035), stale requests answered once and removed, duplicate permission merge, dispose cancels all
 - [ ] T006 Create `MAIN/presentation/browser/page/PageGenerations.kt` (per-tab counter advanced on new main-frame navigation and on tab switch; data-model §4) and wire it in `MAIN/presentation/browser/BrowserWebView.kt` (`onPageStarted` for a new URL) and `MAIN/presentation/browser/BrowserScreen.kt` (`activeTab` change → advance + `dropStale`)
-- [ ] T007 Create `MAIN/presentation/browser/page/PageRequestHost.kt`: composable that renders the queue head by variant (initially an empty `when` with TODO-free placeholders filled by each story) and is placed once in `MAIN/presentation/browser/BrowserScreen.kt`; on disposal calls `queue.dispose()`
+- [ ] T007 Create `MAIN/presentation/browser/page/PageRequestHost.kt`: composable that renders the queue head by variant (initially an empty `when` over the variants, which each story fills in) and is placed once in `MAIN/presentation/browser/BrowserScreen.kt`; on disposal calls `queue.dispose()`
 - [ ] T008 Extend `BrowserChromeClient` and `BrowserWebViewClient` in `MAIN/presentation/browser/BrowserWebView.kt` with a `PageRequestSink` parameter (enqueue + current tab id/generation/incognito) passed through `BrowserWebViewCallbacks`; no behaviour change yet (existing deny paths stay until US1)
 
 **Checkpoint**: unit tests green; the app behaves exactly as before.
@@ -164,8 +164,10 @@ row of contracts C1 is a test case; migration 2→3 has its own test.
 - [ ] T064 Compose compiler report (Testing Gate 9) + recomposition note for the fullscreen overlay and Site permissions list (Gate 10, "needs a person" if Layout Inspector is unavailable)
 - [ ] T065 Full automated gates: `testDebugUnitTest lintDebug detekt ktlintCheck`, then `assembleRelease` separately, 16 KB script, `connectedDebugAndroidTest` on the 16 KB AVD (force-stop first)
 - [ ] T066 Gate G18 (release on `TA016_API36_16K`, zero FATAL; APK ≤ +150 KB) and G19 (install over `main`'s build: data intact, migration 2→3 applied); record
-- [ ] T067 Update docs: `CLAUDE.md` (roadmap row, Recent Changes, Active Spec, facts to keep), `.claude/claude-app/sdd-roadmap.md`, `dev-workflow.md`, `project-context.md`
-- [ ] T068 Open the PR `021-web-capabilities` → `main` with the gate table, Constitution line, permission additions, FR-015 amendment and APK delta
+- [ ] T067 [P] Play Data safety check (Constitution §II): verify against Play's definitions that camera/microphone/location reaching a website at the person's direction is not "collected" or "shared" by the app; record the conclusion and the declaration to make in `specs/021-web-capabilities/tasks.md` › Implementation Notes (if it is, propose the declaration change to the owner before merging)
+- [ ] T068 SC-001 real-site run on the Galaxy A55 (release): a WebRTC call demo, a maps site (location), a form with file upload, YouTube fullscreen, a Google sign-in pop-up, `httpbin.org/basic-auth`, a long-press on a search result, a JS-dialog test page, a site using `target=_blank`, and a camera-capture upload; record n/10 in "Device Gate Results"
+- [ ] T069 Update docs: `CLAUDE.md` (roadmap row, Recent Changes, Active Spec, facts to keep), `.claude/claude-app/sdd-roadmap.md`, `dev-workflow.md`, `project-context.md`
+- [ ] T070 Open the PR `021-web-capabilities` → `main` with the gate table, Constitution line, permission additions, FR-015 amendment and APK delta
 
 ---
 
@@ -206,6 +208,8 @@ Setup → Foundational ─┬─> US1 (P1, MVP)
 
 ## Notes
 
+- Device-gate tasks record their results in this file, "Device Gate Results" (no other file path).
+
 - `[P]` = different files, no dependency on an incomplete task.
 - Write each story's tests first and see them fail.
 - `BrowserWebView.kt` is touched by most stories: keep each story's hook in its own private
@@ -240,4 +244,5 @@ Setup → Foundational ─┬─> US1 (P1, MVP)
 | G18 16 KB + size | — | |
 | G19 Upgrade | — | |
 | G20 Privacy | — | |
+| SC-001 real sites | — | |
 | TalkBack | — | |
