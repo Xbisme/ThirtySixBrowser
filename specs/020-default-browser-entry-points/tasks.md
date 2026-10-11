@@ -155,7 +155,7 @@ description: "Task list for Spec 020 — Default Browser & Entry Points"
 - [X] T062 Constitution Testing Gate 8 — device gate G17: install the release build on `TA016_API36_16K`, run cold start, G1 and G2 there, zero FATAL in logcat; record
 - [X] T063 Gate G15 on the Galaxy A55 release build: link → page visible ≤ 1 s warm / ≤ 2 s cold (median of 10, SC-001); release APK delta vs `main` ≤ 60 KB, zero new `.so` (SC-010); record
 - [X] T064 Update docs: `CLAUDE.md` (Spec Roadmap row 020, Recent Changes, Active Spec, Known Runtime Considerations: `singleTask`, intent handled once, relay/onboarding hold), `.claude/claude-app/sdd-roadmap.md`, `.claude/claude-app/dev-workflow.md`, `.claude/claude-app/project-context.md`
-- [ ] T065 Open the PR `020-default-browser-entry-points` → `main` with the gate table, Constitution Check line (10 ✅, §X waiver), the R6 incognito-reuse limitation, APK delta and test counts
+- [X] T065 Open the PR `020-default-browser-entry-points` → `main` with the gate table, Constitution Check line (10 ✅, §X waiver), the R6 incognito-reuse limitation, APK delta and test counts — *PR #30.*
 
 ---
 
