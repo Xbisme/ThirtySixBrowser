@@ -38,4 +38,6 @@ internal data class BrowserWebViewCallbacks(
      * long-press) go. Inert by default so tests that build the WebView directly need nothing.
      */
     val pageRequests: PageRequestSink = PageRequestSink.None,
+    /** Spec 022 FR-007 — find-in-page results: 0-based active match and the number of matches. */
+    val onFindResult: (activeOrdinal: Int, total: Int) -> Unit = { _, _ -> },
 )

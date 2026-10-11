@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.testdoubles
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
@@ -54,6 +55,9 @@ class FakeSettingsRepository(
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         write(CALL_SET_ONBOARDING_COMPLETED) { copy(isOnboardingCompleted = value) }
 
+    override suspend fun setTextSize(size: TextSize): Result<Unit> =
+        write(CALL_SET_TEXT_SIZE) { copy(textSize = size) }
+
     private fun write(name: String, transform: UserSettings.() -> UserSettings): Result<Unit> {
         writes += name
         callLog += name
@@ -71,5 +75,6 @@ class FakeSettingsRepository(
         const val CALL_SET_SEARCH_ENGINE: String = "settings.setSearchEngine"
         const val CALL_SET_HISTORY_RETENTION: String = "settings.setHistoryRetention"
         const val CALL_SET_ONBOARDING_COMPLETED: String = "settings.setOnboardingCompleted"
+        const val CALL_SET_TEXT_SIZE: String = "settings.setTextSize"
     }
 }

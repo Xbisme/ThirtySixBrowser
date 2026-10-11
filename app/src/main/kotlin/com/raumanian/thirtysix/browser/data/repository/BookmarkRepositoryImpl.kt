@@ -50,6 +50,9 @@ class BookmarkRepositoryImpl @Inject constructor(
     override fun searchBookmarks(query: String): Flow<List<Bookmark>> =
         bookmarkDao.searchByTitleOrUrl(query).map { list -> list.map(BookmarkMapper::toDomain) }
 
+    override suspend fun getAllBookmarks(): List<Bookmark> =
+        withContext(dispatchers.io) { bookmarkDao.getAllNewestFirst().map(BookmarkMapper::toDomain) }
+
     override suspend fun getBookmark(id: Long): Bookmark? =
         withContext(dispatchers.io) { bookmarkDao.getById(id)?.let(BookmarkMapper::toDomain) }
 

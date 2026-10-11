@@ -59,6 +59,18 @@ interface BookmarkDao {
     @Query("SELECT * FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_URL} = :url")
     fun observeByUrl(url: String): Flow<List<BookmarkEntity>>
 
+    /**
+     * Spec 022 data-model §4 — every bookmark, most recently saved first: the bookmark half of
+     * the address-suggestion snapshot. Takes no user text (FR-017).
+     */
+    @Query(
+        """
+        SELECT * FROM ${BookmarkEntity.TABLE_NAME}
+        ORDER BY ${BookmarkEntity.COL_CREATED_AT} DESC, ${BookmarkEntity.COL_ID} DESC
+        """,
+    )
+    suspend fun getAllNewestFirst(): List<BookmarkEntity>
+
     /** Spec 013 — synchronous count gate inside `ToggleBookmarkUseCase` (R9). */
     @Query("SELECT COUNT(*) FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_URL} = :url")
     suspend fun countByUrl(url: String): Int

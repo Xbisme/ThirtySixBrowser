@@ -75,6 +75,8 @@ data class BrowserUiState(
     val homeOverlay: Boolean = false,
     /** Spec 019 — this tab left the Home page; Back without page history returns there. */
     val cameFromHome: Boolean = false,
+    /** Spec 022 FR-003 / FR-026 — the active tab asks for desktop pages; shown on the hub tile. */
+    val isDesktopMode: Boolean = false,
 ) {
     /** Spec 019 FR-010 — the tab shows the Home page (or, incognito, the incognito page). */
     val isHomeContent: Boolean

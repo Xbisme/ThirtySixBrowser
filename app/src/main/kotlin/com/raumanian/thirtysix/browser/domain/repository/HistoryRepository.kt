@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.domain.repository
 
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
@@ -39,6 +40,13 @@ interface HistoryRepository {
      * from [observeAll]; the Room implementation overrides it with an indexed `LIMIT` query.
      */
     fun observeRecent(limit: Int): Flow<List<HistoryEntry>> = observeAll().map { it.take(limit) }
+
+    /**
+     * Spec 022 data-model §4 — one entry per address (its most recent visit), newest first, read
+     * once. The default derives it from [observeAll]; the Room implementation overrides it with a
+     * single grouped query.
+     */
+    suspend fun getLatestVisitPerUrl(): List<HistoryEntry> = observeAll().first().distinctBy { it.url }
 
     /**
      * Spec 014 FR-001 (title backfill) — correct the title of an already-recorded row.

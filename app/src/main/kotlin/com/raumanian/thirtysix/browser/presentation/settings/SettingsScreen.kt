@@ -47,10 +47,12 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.Settings
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSwitchRow
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsValueRow
+import com.raumanian.thirtysix.browser.presentation.settings.components.TextSizeChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.ThemeModeChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.appLanguageLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.historyRetentionLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
+import com.raumanian.thirtysix.browser.presentation.settings.components.textSizeLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
 import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import kotlinx.coroutines.delay
@@ -166,6 +168,17 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
             tone = SettingsIconTone.Sky,
             onClick = viewModel::onThemeRowClick,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_THEME_ROW),
+        )
+    }
+    // Spec 022 FR-030 — the app-wide text size of web pages.
+    item(key = KEY_ROW_TEXT_SIZE, contentType = CONTENT_TYPE_ROW) {
+        SettingsValueRow(
+            title = stringResource(R.string.settings_text_size_title),
+            value = textSizeLabel(state.textSize),
+            icon = AppIcons.TextSize,
+            tone = SettingsIconTone.Sky,
+            onClick = viewModel::onTextSizeRowClick,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_TEXT_SIZE_ROW),
         )
     }
     // FR-010 — dynamic color does not exist below Android 12, so neither does its control.
@@ -323,6 +336,11 @@ internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewM
             onSelect = viewModel::onRetentionSelected,
             onDismiss = viewModel::dismissDialog,
         )
+        SettingsDialog.TextSizeChooser -> TextSizeChooserDialog(
+            selected = state.textSize,
+            onSelect = viewModel::onTextSizeSelected,
+            onDismiss = viewModel::dismissDialog,
+        )
         is SettingsDialog.ConfirmShortenRetention -> ConfirmShortenRetentionDialog(
             target = dialog.target,
             onConfirm = viewModel::onShortenRetentionConfirmed,
@@ -370,6 +388,7 @@ private const val KEY_SECTION_ABOUT: String = "section_about"
 private const val KEY_ROW_DEFAULT_BROWSER: String = "row_default_browser"
 private const val KEY_ROW_THEME: String = "row_theme"
 private const val KEY_ROW_DYNAMIC_COLOR: String = "row_dynamic_color"
+private const val KEY_ROW_TEXT_SIZE: String = "row_text_size"
 private const val KEY_ROW_LANGUAGE: String = "row_language"
 private const val KEY_ROW_SEARCH_ENGINE: String = "row_search_engine"
 private const val KEY_ROW_RETENTION: String = "row_retention"
@@ -385,6 +404,7 @@ private const val CONTENT_TYPE_ABOUT: String = "about"
 const val TEST_TAG_SETTINGS_LIST: String = "settings_list"
 const val TEST_TAG_SETTINGS_DEFAULT_BROWSER_ROW: String = "settings_default_browser_row"
 const val TEST_TAG_SETTINGS_THEME_ROW: String = "settings_theme_row"
+const val TEST_TAG_SETTINGS_TEXT_SIZE_ROW: String = "settings_text_size_row"
 const val TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW: String = "settings_dynamic_color_row"
 const val TEST_TAG_SETTINGS_LANGUAGE_ROW: String = "settings_language_row"
 const val TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW: String = "settings_search_engine_row"

@@ -1,5 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser.components
 
+import com.raumanian.thirtysix.browser.presentation.browser.PageTool
+
 /**
  * Spec 019 FR-031 — every destination the hub reaches. The sheet closes itself before
  * invoking one (FR-032), so callers only navigate or act.
@@ -15,7 +17,9 @@ internal data class HubCallbacks(
     val onHistory: () -> Unit,
     val onBookmarks: () -> Unit,
     val onQuickSetting: (QuickSetting) -> Unit,
+    /** Spec 022 — a page tool was chosen (FR-001); the sheet has already closed (FR-004). */
+    val onPageTool: (PageTool) -> Unit,
 )
 
 /** Spec 019 — the hub's quick-setting tiles, each opening an existing Settings chooser. */
-internal enum class QuickSetting { Theme, Language, SearchEngine, ClearData }
+internal enum class QuickSetting { Theme, Language, SearchEngine, ClearData, TextSize }

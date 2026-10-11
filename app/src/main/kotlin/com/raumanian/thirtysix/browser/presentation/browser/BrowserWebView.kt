@@ -7,6 +7,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.print.PrintManager
 import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
@@ -19,6 +20,7 @@ import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,6 +33,7 @@ import androidx.core.graphics.scale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
@@ -87,6 +90,8 @@ internal fun BrowserWebView(
     navigationCallbacks: BrowserNavigationCallbacks,
     modifier: Modifier = Modifier,
     adopted: WebView? = null,
+    textZoomPercent: Int = BrowserLimits.TEXT_SIZE_PERCENT_100,
+    desktopMode: Boolean = false,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     // Spec 021 research R5 — a page-created WebView is adopted by the first generation only; a
@@ -94,6 +99,11 @@ internal fun BrowserWebView(
     val adoptable = remember { arrayOf(adopted) }
     val currentUrl = rememberUpdatedState(state.currentUrl)
     val host = remember { WebViewHost(currentUrl) }
+    // Spec 022 FR-031 — the text size, applied before a WebView's first load and then to the live
+    // one whenever it changes, without a reload. A tab that is not showing has no WebView; it gets
+    // the current size when it is shown.
+    val textZoom = rememberUpdatedState(textZoomPercent)
+    LaunchedEffect(textZoomPercent) { host.current?.settings?.textZoom = textZoomPercent }
 
     // Lifecycle: pause WebView when host stops, resume when started.
     DisposableEffect(lifecycleOwner) {
@@ -129,7 +139,7 @@ internal fun BrowserWebView(
                 val toAdopt = adoptable[0]
                 adoptable[0] = null
                 buildConfiguredWebView(
-                    webView = toAdopt ?: WebView(context),
+                    webView = preparePageTools(toAdopt ?: WebView(context), actions, textZoom.value, desktopMode),
                     adopted = toAdopt != null,
                     state = state,
                     actions = actions,
@@ -153,6 +163,34 @@ internal fun BrowserWebView(
                 }
                 instance[0] = null
             }
+        }
+    }
+}
+
+/**
+ * Spec 022 — the page tools' WebView side, set up before the first load: the app-wide text size
+ * (FR-031), the tab's page mode (FR-026), and the desktop-mode and print actions.
+ */
+private fun preparePageTools(
+    webView: WebView,
+    actions: WebViewActionsHandle,
+    textZoomPercent: Int,
+    desktopMode: Boolean,
+): WebView = webView.apply {
+    settings.textZoom = textZoomPercent
+    val pageMode = DesktopModeController(this)
+    pageMode.apply(desktopMode)
+    actions.setDesktopMode = { desktop ->
+        stopLoading()
+        pageMode.apply(desktop)
+        actions.reload()
+    }
+    // FR-033 / FR-034 — the system print screen ("Save as PDF" included); nothing about the job
+    // is recorded. The WebView's context is the activity, which PrintManager requires.
+    actions.print = { jobName ->
+        runCatching {
+            val printManager = context.getSystemService(PrintManager::class.java)
+            printManager.print(jobName, createPrintDocumentAdapter(jobName), null)
         }
     }
 }
@@ -201,6 +239,8 @@ private fun buildConfiguredWebView(
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
+    // Spec 022 US1 — find-in-page results go to the find bar's state.
+    wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }
     // Spec 021 US4 — the long-press menu on links and images; anything else keeps selection.
     wv.setOnLongClickListener { onLongPress(wv, callbacks.pageRequests) }
     // Spec 019 R7 — feed the sliding bars. API 23+, below minSdk 24.
@@ -245,6 +285,10 @@ private fun wireActions(wv: WebView, actions: WebViewActionsHandle, host: WebVie
         }
     }
     actions.stopLoading = { wv.stopLoading() }
+    // Spec 022 US1 — find in page, on the WebView's own search (research R3).
+    actions.findAll = { text -> wv.findAllAsync(text) }
+    actions.findNext = { forward -> wv.findNext(forward) }
+    actions.clearMatches = { wv.clearMatches() }
     // Spec 019 R1 — the reserved Home address is never handed to the WebView.
     // Spec 021 R5 — an adopted pop-up is already navigating for its opener: the tab switch's
     // load of the placeholder address is skipped once.

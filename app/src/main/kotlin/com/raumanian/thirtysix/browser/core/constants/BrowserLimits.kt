@@ -176,4 +176,40 @@ object BrowserLimits {
      * to name its address before the notice is shown without Open.
      */
     const val BLOCKED_POPUP_ADDRESS_WAIT_MS: Long = 1_000L
+
+    /**
+     * Spec 022 FR-029 — the nine text size levels, in percent of the page's own text size.
+     * [TEXT_SIZE_PERCENT_100] is the default (data-model §1).
+     */
+    const val TEXT_SIZE_PERCENT_50: Int = 50
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. */
+    const val TEXT_SIZE_PERCENT_75: Int = 75
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. */
+    const val TEXT_SIZE_PERCENT_90: Int = 90
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. The default. */
+    const val TEXT_SIZE_PERCENT_100: Int = 100
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. */
+    const val TEXT_SIZE_PERCENT_110: Int = 110
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. */
+    const val TEXT_SIZE_PERCENT_125: Int = 125
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. */
+    const val TEXT_SIZE_PERCENT_150: Int = 150
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. */
+    const val TEXT_SIZE_PERCENT_175: Int = 175
+
+    /** Spec 022 FR-029 — see [TEXT_SIZE_PERCENT_50]. */
+    const val TEXT_SIZE_PERCENT_200: Int = 200
+
+    /** Spec 022 FR-014 — at most this many address suggestions while typing. */
+    const val MAX_ADDRESS_SUGGESTIONS: Int = 6
+
+    /** Spec 022 FR-013 — find-in-page text is cut to this many characters, like history search. */
+    const val MAX_FIND_QUERY_LENGTH: Int = 200
 }

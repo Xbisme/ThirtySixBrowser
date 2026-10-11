@@ -340,4 +340,25 @@
     <string name="settings_clear_category_site_permissions">Quyền trang web</string>
     <string name="settings_clear_category_site_permissions_description">Các trang sẽ hỏi lại quyền camera, micrô và vị trí</string>
     <string name="file_chooser_title">Chọn tệp</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">Công cụ trang</string>
+    <string name="hub_tile_find_in_page">Tìm trong trang</string>
+    <string name="hub_tile_share">Chia sẻ</string>
+    <string name="hub_tile_print">In</string>
+    <string name="hub_tile_desktop_site">Bản máy tính</string>
+    <string name="hub_tile_text_size">Cỡ chữ</string>
+    <string name="hub_tile_state_on">Bật</string>
+    <string name="hub_tile_state_off">Tắt</string>
+    <string name="find_in_page_hint">Tìm trong trang</string>
+    <string name="find_in_page_count_cd">Kết quả %1$d trên %2$d</string>
+    <string name="find_in_page_no_matches_cd">Không có kết quả</string>
+    <string name="find_in_page_previous">Kết quả trước</string>
+    <string name="find_in_page_next">Kết quả tiếp theo</string>
+    <string name="find_in_page_close">Đóng thanh tìm</string>
+    <string name="settings_text_size_title">Cỡ chữ</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">Dấu trang: %1$s, %2$s</string>
+    <string name="suggestion_history_cd">Lịch sử: %1$s, %2$s</string>
+    <string name="share_page_title">Chia sẻ trang</string>
 </resources>

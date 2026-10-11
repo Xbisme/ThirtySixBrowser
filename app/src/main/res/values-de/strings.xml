@@ -344,4 +344,25 @@
     <string name="settings_clear_category_site_permissions">Website-Berechtigungen</string>
     <string name="settings_clear_category_site_permissions_description">Websites fragen erneut nach Kamera, Mikrofon und Standort</string>
     <string name="file_chooser_title">Datei auswählen</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">Seitentools</string>
+    <string name="hub_tile_find_in_page">Auf Seite suchen</string>
+    <string name="hub_tile_share">Teilen</string>
+    <string name="hub_tile_print">Drucken</string>
+    <string name="hub_tile_desktop_site">PC-Version</string>
+    <string name="hub_tile_text_size">Textgröße</string>
+    <string name="hub_tile_state_on">An</string>
+    <string name="hub_tile_state_off">Aus</string>
+    <string name="find_in_page_hint">Auf Seite suchen</string>
+    <string name="find_in_page_count_cd">Treffer %1$d von %2$d</string>
+    <string name="find_in_page_no_matches_cd">Keine Treffer</string>
+    <string name="find_in_page_previous">Vorheriger Treffer</string>
+    <string name="find_in_page_next">Nächster Treffer</string>
+    <string name="find_in_page_close">Suchleiste schließen</string>
+    <string name="settings_text_size_title">Textgröße</string>
+    <string name="text_size_level">%1$d %%</string>
+    <string name="suggestion_bookmark_cd">Lesezeichen: %1$s, %2$s</string>
+    <string name="suggestion_history_cd">Verlauf: %1$s, %2$s</string>
+    <string name="share_page_title">Seite teilen</string>
 </resources>

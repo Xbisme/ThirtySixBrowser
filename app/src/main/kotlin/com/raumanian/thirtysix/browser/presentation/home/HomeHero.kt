@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
@@ -82,6 +84,7 @@ fun HomeHero(
     onNewIncognitoTab: () -> Unit,
     searchFocus: FocusRequester,
     modifier: Modifier = Modifier,
+    search: HomeSearchHooks = HomeSearchHooks(),
 ) {
     val colors = ThirtySixTheme.colors
     Box(modifier = modifier.fillMaxWidth()) {
@@ -112,8 +115,10 @@ fun HomeHero(
                 engine = state.searchEngine,
                 onSubmit = onSearchSubmit,
                 focusRequester = searchFocus,
+                hooks = search,
                 modifier = Modifier.padding(horizontal = Spacing.md),
             )
+            Box(modifier = Modifier.padding(horizontal = Spacing.md)) { search.suggestions() }
             if (state.shortcuts.isNotEmpty()) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -173,12 +178,24 @@ private fun HeroGreeting(greeting: GreetingPeriod) {
     }
 }
 
+/**
+ * Spec 022 research R6 — what the Home search field reports for address suggestions, and the
+ * suggestion list drawn under it. The defaults do nothing, so the hero works without them.
+ */
+@Immutable
+data class HomeSearchHooks(
+    val onTextChange: (String) -> Unit = {},
+    val onFocusChange: (Boolean) -> Unit = {},
+    val suggestions: @Composable () -> Unit = {},
+)
+
 /** The white floating search pill; submits exactly as the address bar does (FR-012). */
 @Composable
 private fun HomeSearchBar(
     engine: SearchEngine,
     onSubmit: (String) -> Unit,
     focusRequester: FocusRequester,
+    hooks: HomeSearchHooks,
     modifier: Modifier = Modifier,
 ) {
     var text by remember { mutableStateOf("") }
@@ -186,7 +203,10 @@ private fun HomeSearchBar(
     val shape = ThirtySixTheme.shapes.full
     BasicTextField(
         value = text,
-        onValueChange = { text = it },
+        onValueChange = {
+            text = it
+            hooks.onTextChange(it)
+        },
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = scheme.onSurface),
         cursorBrush = SolidColor(scheme.primary),
@@ -195,6 +215,7 @@ private fun HomeSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .focusRequester(focusRequester)
+            .onFocusChanged { hooks.onFocusChange(it.isFocused) }
             .testTag(TEST_TAG_HOME_SEARCH),
         decorationBox = { inner ->
             Row(

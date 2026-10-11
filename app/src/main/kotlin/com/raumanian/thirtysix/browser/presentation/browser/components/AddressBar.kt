@@ -87,21 +87,43 @@ internal fun AddressBar(
     focusRequester: FocusRequester? = null,
 ) {
     var fieldValue by remember { mutableStateOf(TextFieldValue(text = state.addressBarText)) }
+    // Spec 022 SC-003 — texts this field has reported but whose echo through the ViewModel has not
+    // come back yet. While the main thread is busy the echo of an earlier keystroke can arrive after
+    // later ones were typed; treating it as an outside change wrote the old text back and dropped
+    // the keystrokes typed since (found typing fast while 10,000 history rows loaded).
+    val pendingEchoes = remember { ArrayDeque<String>() }
+    val report: (String) -> Unit = { text ->
+        pendingEchoes.addLast(text)
+        callbacks.onTextChange(text)
+    }
 
     LaunchedEffect(state.isAddressBarFocused) {
         if (state.isAddressBarFocused) {
-            val url = state.currentUrl
-            fieldValue = TextFieldValue(text = url, selection = TextRange(0, url.length))
-            callbacks.onTextChange(url)
+            // Spec 022 SC-003 — this runs a frame after focus. If typing has already started
+            // (seen once when typing began before the keyboard was up), selecting the whole
+            // address now would let the next keystroke replace what was typed.
+            if (fieldValue.text.isEmpty()) {
+                val url = state.currentUrl
+                fieldValue = TextFieldValue(text = url, selection = TextRange(0, url.length))
+                report(url)
+            }
         } else {
             fieldValue = TextFieldValue(text = "")
-            callbacks.onTextChange("")
+            report("")
         }
     }
 
     LaunchedEffect(state.addressBarText, state.isAddressBarFocused) {
-        if (state.isAddressBarFocused && state.addressBarText != fieldValue.text) {
-            fieldValue = fieldValue.copy(text = state.addressBarText)
+        val incoming = state.addressBarText
+        val echo = pendingEchoes.indexOf(incoming)
+        when {
+            // Our own earlier text coming back: forget it and everything reported before it.
+            echo >= 0 -> repeat(echo + 1) { pendingEchoes.removeFirst() }
+            // A change from outside the field (Clear, an incoming link): show it.
+            state.isAddressBarFocused && incoming != fieldValue.text -> {
+                pendingEchoes.clear()
+                fieldValue = TextFieldValue(text = incoming, selection = TextRange(incoming.length))
+            }
         }
     }
 
@@ -118,8 +140,9 @@ internal fun AddressBar(
         BasicTextField(
             value = displayedValue,
             onValueChange = { newValue ->
+                val changed = newValue.text != fieldValue.text
                 fieldValue = newValue
-                callbacks.onTextChange(newValue.text)
+                if (changed) report(newValue.text)
             },
             modifier = Modifier
                 .fillMaxWidth()

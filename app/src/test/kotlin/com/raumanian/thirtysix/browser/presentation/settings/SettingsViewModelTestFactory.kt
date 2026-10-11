@@ -10,6 +10,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSearchEngineUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.SetTextSizeUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
@@ -53,6 +54,7 @@ internal fun settingsViewModel(
     supportsDynamicColor: Boolean = true,
     appVersionName: String = TEST_APP_VERSION_NAME,
     isDefaultBrowser: IsDefaultBrowserUseCase = IsDefaultBrowserUseCase { false },
+    setTextSize: SetTextSizeUseCase = SetTextSizeUseCase(settingsRepository),
 ): SettingsViewModel = SettingsViewModel(
     observeUserSettings = ObserveUserSettingsUseCase(settingsRepository),
     setThemeMode = setThemeMode,
@@ -65,6 +67,7 @@ internal fun settingsViewModel(
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
     isDefaultBrowser = isDefaultBrowser,
+    setTextSize = setTextSize,
 )
 
 internal const val TEST_APP_VERSION_NAME: String = "9.9.9-test"

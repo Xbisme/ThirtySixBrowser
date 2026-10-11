@@ -340,4 +340,25 @@
     <string name="settings_clear_category_site_permissions">网站权限</string>
     <string name="settings_clear_category_site_permissions_description">网站将再次请求摄像头、麦克风和位置信息</string>
     <string name="file_chooser_title">选择文件</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">页面工具</string>
+    <string name="hub_tile_find_in_page">在页面中查找</string>
+    <string name="hub_tile_share">分享</string>
+    <string name="hub_tile_print">打印</string>
+    <string name="hub_tile_desktop_site">桌面版网站</string>
+    <string name="hub_tile_text_size">文字大小</string>
+    <string name="hub_tile_state_on">开</string>
+    <string name="hub_tile_state_off">关</string>
+    <string name="find_in_page_hint">在页面中查找</string>
+    <string name="find_in_page_count_cd">第 %1$d 个，共 %2$d 个</string>
+    <string name="find_in_page_no_matches_cd">无匹配项</string>
+    <string name="find_in_page_previous">上一个匹配项</string>
+    <string name="find_in_page_next">下一个匹配项</string>
+    <string name="find_in_page_close">关闭查找栏</string>
+    <string name="settings_text_size_title">文字大小</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">书签：%1$s，%2$s</string>
+    <string name="suggestion_history_cd">历史：%1$s，%2$s</string>
+    <string name="share_page_title">分享网页</string>
 </resources>

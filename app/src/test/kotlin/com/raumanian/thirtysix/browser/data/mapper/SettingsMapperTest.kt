@@ -6,6 +6,7 @@ import com.raumanian.thirtysix.browser.core.constants.AppDefaults
 import com.raumanian.thirtysix.browser.core.constants.StorageKeys
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -92,6 +93,25 @@ class SettingsMapperTest {
         assertEquals(HistoryRetention.Days180, mapper.toDomain(prefs).historyRetention)
     }
 
+    @Test
+    fun missingTextSize_isOneHundredPercent() {
+        assertEquals(TextSize.Percent100, mapper.toDomain(mutablePreferencesOf()).textSize)
+    }
+
+    @Test
+    fun outOfSetTextSize_isOneHundredPercent() {
+        val prefs = mutablePreferencesOf().toMutablePreferences()
+        prefs[StorageKeys.TEXT_ZOOM_PERCENT] = OUT_OF_SET_TEXT_SIZE_PERCENT
+        assertEquals(TextSize.Percent100, mapper.toDomain(prefs).textSize)
+    }
+
+    @Test
+    fun storedTextSize150_isOneHundredFiftyPercent() {
+        val prefs = mutablePreferencesOf().toMutablePreferences()
+        prefs[StorageKeys.TEXT_ZOOM_PERCENT] = TextSize.Percent150.percent
+        assertEquals(TextSize.Percent150, mapper.toDomain(prefs).textSize)
+    }
+
     // ----------------------------- US7 / FR-019: schema rule --------------
 
     /**
@@ -138,3 +158,6 @@ class SettingsMapperTest {
         const val OUT_OF_SET_RETENTION_DAYS = 45
     }
 }
+
+/** Spec 022 — a percentage that is not one of the nine text size levels. */
+private const val OUT_OF_SET_TEXT_SIZE_PERCENT: Int = 130
