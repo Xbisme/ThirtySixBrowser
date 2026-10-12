@@ -1,6 +1,6 @@
 # ThirtySixBrowser Android — Project Context & Progress
 
-> Cập nhật lần cuối: 2026-10-11 — 🟢 **Spec 022 `page-tools` đã implement** (branch `022-page-tools`, PR đang mở): tìm trong trang, chia sẻ, chế độ máy tính theo tab, cỡ chữ toàn app (DataStore `text_zoom_percent`), in/lưu PDF, gợi ý offline từ bookmark + lịch sử; sửa lỗi mất phím khi gõ nhanh ở address bar (Spec 009); xem `specs/022-page-tools/tasks.md`. ✅ **Spec 021 `web-capabilities` đã merged** (PR #32, `ef9ae68`) (quyền camera/mic/vị trí theo trang, upload file, video toàn màn hình, pop-up, hộp thoại JS + HTTP auth, menu nhấn giữ; xem `specs/021-web-capabilities/tasks.md`). ✅ **Spec 020 `default-browser-entry-points` đã merged** (PR #30, `1bb8c6a`; xem `specs/020-default-browser-entry-points/tasks.md`). ✅ **Spec 019 `ui-redesign` đã merged** qua [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, `54e090a`, CI 6/6); gate trên máy thật Galaxy A55 ghi trong `specs/019-ui-redesign/tasks.md`. 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** ✅ Spec 018 `onboarding-flow` đã merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41. ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
+> Cập nhật lần cuối: 2026-10-11 — ✅ **Spec 022 `page-tools` đã merged** ([PR #35](https://github.com/Xbisme/ThirtySixBrowser/pull/35), `d0908a1`, CI 6/6, 68/68); tiếp theo: **Spec 023 `privacy-protection`**: tìm trong trang, chia sẻ, chế độ máy tính theo tab, cỡ chữ toàn app (DataStore `text_zoom_percent`), in/lưu PDF, gợi ý offline từ bookmark + lịch sử; sửa lỗi mất phím khi gõ nhanh ở address bar (Spec 009); xem `specs/022-page-tools/tasks.md`. ✅ **Spec 021 `web-capabilities` đã merged** (PR #32, `ef9ae68`) (quyền camera/mic/vị trí theo trang, upload file, video toàn màn hình, pop-up, hộp thoại JS + HTTP auth, menu nhấn giữ; xem `specs/021-web-capabilities/tasks.md`). ✅ **Spec 020 `default-browser-entry-points` đã merged** (PR #30, `1bb8c6a`; xem `specs/020-default-browser-entry-points/tasks.md`). ✅ **Spec 019 `ui-redesign` đã merged** qua [PR #27](https://github.com/Xbisme/ThirtySixBrowser/pull/27) (2026-10-10, `54e090a`, CI 6/6); gate trên máy thật Galaxy A55 ghi trong `specs/019-ui-redesign/tasks.md`. 🎉 **v1.0 FEATURE-COMPLETE: Specs 001–018 đều đã implement.** ✅ Spec 018 `onboarding-flow` đã merged vào `main` qua [PR #24](https://github.com/Xbisme/ThirtySixBrowser/pull/24) (2026-09-15, merge commit `492e4f3`, CI xanh 6/6), 41/41. ✅ Specs 001–017 done (017 qua PR #20, `cca5c0c`).
 > Dùng để Claude hiểu ngữ cảnh dự án qua các cuộc hội thoại.
 > **QUAN TRỌNG**: Đọc file này + sdd-roadmap.md + dev-workflow.md + constitution.md khi bắt đầu hội thoại mới.
 
@@ -341,7 +341,7 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 8. Bookmarks + History + Downloads (Specs 013–015)
 9. Settings + Splash + Onboarding (Specs 016–018)
 10. UI redesign theo design system (Spec 019)
-11. Phase 6 "trình duyệt thật": trình duyệt mặc định (020) → khả năng web (021) → công cụ trên trang (022) → bảo vệ quyền riêng tư, gồm chặn tracker (023)
+11. Phase 6 "trình duyệt thật": trình duyệt mặc định (020) → khả năng web (021) → công cụ trên trang (022) → bảo vệ quyền riêng tư ở tầng mạng, gồm chặn tracker (023) → công cụ riêng tư: nút Fire, dashboard, script (024)
 
 ---
 
@@ -440,6 +440,8 @@ app/src/main/kotlin/com/raumanian/thirtysix/browser/
 ## Key Decisions Log
 
 ### 2026-10-11 — Spec 022 `page-tools`
+
+- **Merged** qua PR #35 (merge commit `d0908a1`, 2026-10-11, CI 6/6).
 
 - **Không thêm thư viện nào.** API UA metadata (`WebSettingsCompat.setUserAgentMetadata`, `UserAgentMetadata.Builder`, `WebViewFeature.USER_AGENT_METADATA`) đã có sẵn trong `androidx.webkit` 1.17.0 (Spec 016), xác nhận bằng `javap` trên AAR. Room giữ v3, chỉ thêm key DataStore `text_zoom_percent`.
 - **Chế độ máy tính theo tab, chỉ trong bộ nhớ** (quyết định của owner): một set tab id trong `BrowserViewModel`, đọc đồng bộ khi dựng WebView của tab.
