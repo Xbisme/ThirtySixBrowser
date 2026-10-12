@@ -200,80 +200,25 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # Spec 015 — the runner image version is part of the AVD cache key on purpose.
+      # No AVD cache, and every run cold-boots (`-no-snapshot` below). Do not bring a
+      # snapshot cache back without reading this.
       #
-      # The cached AVD contains a *quickboot snapshot*, which is only valid for the
-      # emulator binary that wrote it. A key with no version component means the
-      # stale snapshot keeps being restored forever, so when the runner image
-      # upgrades the emulator the result is a zombie boot: the emulator reports
-      # `sys.boot_completed=1` while `settings` and `input` are never published, the
-      # action's unlock step fails with `adb ... exit code 1`, the Gradle script
-      # never runs at all, and the job sits wedged until its 20-minute timeout.
-      # Keying on the runner image makes that self-healing.
+      # The job used to cache the AVD together with its quickboot snapshot. That cache
+      # zombie-booted the emulator four times — `Broken pipe (32)`, `No service published
+      # for: input`, `stop: Not implemented`, `Starting 0 tests` — and needed a manual
+      # `gh cache delete` each time:
+      #   - Spec 017 (PR #22): the key was unversioned, so a snapshot from an older runner
+      #     image was restored forever.
+      #   - Spec 018 (PR #26): `actions/cache` saved in a post-step even when the job failed,
+      #     so a broken snapshot was cached. Fixed by saving only on success.
+      #   - Spec 020 (PR #30) and Spec 021 (PR #32): the cache had been saved by a run that
+      #     PASSED, and the next run still zombie-booted from it. So a snapshot that boots
+      #     once is no guarantee it boots again; no keying or gating rule can fix that.
+      # The likely cause is that the snapshot is written while the emulator shuts down, the
+      # same phase where QEMU's `stop` is broken (see the Spec 008 note further down).
       #
-      # Spec 017 — ⚠️ the previous form of this key, `${{ env.ImageVersion }}`, did
-      # NOT work and the bug above kept happening. `ImageVersion` is an environment
-      # variable of the *runner image*, not a workflow-level `env:` entry, and the
-      # `env` context in an expression only exposes what the workflow, job or step
-      # declares. It therefore interpolated to an empty string, which was visible in
-      # the cache listing as `avd-api29-Linux-` (trailing dash, no version) — the key
-      # was effectively unversioned, exactly what the comment above says to avoid.
-      # It was only caught when the emulator job hung on PR #20 and the cache list
-      # was inspected by hand.
-      #
-      # The variable IS available to a shell, so read it there and republish it as a
-      # step output, which expressions can see. `runner.os` is dropped from the key:
-      # the image version already identifies the OS, and keeping both invites the
-      # same false sense of specificity.
-      # Fails loudly if the variable ever disappears. A silent fallback such as
-      # `${ImageVersion:-unknown}` would pin every run to one constant and quietly
-      # recreate the unversioned key this step exists to prevent.
-      - name: Resolve runner image version
-        id: runner-image
-        run: |
-          if [ -z "${ImageVersion:-}" ]; then
-            echo "::error::ImageVersion is empty — the AVD cache key would be unversioned. See the comment above this step."
-            exit 1
-          fi
-          echo "Runner image: $ImageVersion"
-          echo "version=$ImageVersion" >> "$GITHUB_OUTPUT"
-
-      # Spec 018 — ⚠️ RESTORE ONLY. The matching save is the LAST step of this job and is
-      # gated on the tests having passed.
-      #
-      # `actions/cache@v4` saves in a post-step that runs even when the job FAILS. That is how
-      # this job poisoned itself on 2026-09-15: a run wrote a broken snapshot at 11:53, and
-      # every run afterwards restored it and died with `Broken pipe` / `stop: Not implemented`
-      # and `Starting 0 tests` — including one on `main` at 4041f608, a docs-only commit. Every
-      # run *before* that cache existed had passed. Deleting it by hand fixed the next run
-      # immediately.
-      #
-      # This is a DIFFERENT bug from the one the key fixes (see the comment above): that one is
-      # a snapshot from an older runner image being restored forever, and its fix — the version
-      # in the key — is still correct and still needed. It cannot help here, because a snapshot
-      # written broken at the *current* version matches the key by design.
-      #
-      # Splitting restore from save means a failed run leaves the cache exactly as it found it.
-      - name: AVD cache (restore)
-        uses: actions/cache/restore@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-api${{ matrix.api-level }}-${{ steps.runner-image.outputs.version }}
-
-      - name: Create AVD snapshot (first run only)
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        timeout-minutes: 10
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "AVD snapshot generated"
+      # A cold boot costs a minute or two per run. That is cheaper than a wedged job that
+      # needs someone to notice it, delete a cache and re-run.
 
       - run: chmod +x ./gradlew
 
@@ -297,7 +242,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           # NOTE: must be a SINGLE LINE — emulator-runner@v2 invokes a fresh
           # `/usr/bin/sh -c "<line>"` for each YAML script line, so multi-line
@@ -331,28 +276,3 @@ jobs:
           name: instrumented-test-report-api${{ matrix.api-level }}
           path: app/build/reports/androidTests/
           if-no-files-found: ignore
-
-      # Spec 018 — the save half of the split above. Deliberately the LAST step, and NOT
-      # `if: always()`: it runs only when every preceding step succeeded, which for this job
-      # means the instrumented tests actually ran and passed.
-      #
-      # A snapshot is therefore only ever cached if it demonstrably booted an emulator that
-      # ran 109 tests. A run that fails or hangs leaves the existing cache untouched instead
-      # of overwriting it with whatever broken state it produced.
-      #
-      # ⚠️ `success()` is spelled out on purpose. A step with no `if` inherits an implicit
-      # success check, but writing ANY custom `if` REPLACES that check rather than adding to
-      # it — so `if: steps.avd-cache.outputs.cache-hit != 'true'` alone would run after a
-      # failed test run and cache the broken snapshot, which is the exact bug being fixed.
-      #
-      # The second half skips the upload when the cache was already restored: saving under a
-      # key that exists is a no-op, and skipping it keeps the log honest about when a snapshot
-      # is genuinely new.
-      - name: AVD cache (save, only when the tests passed)
-        if: success() && steps.avd-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-api${{ matrix.api-level }}-${{ steps.runner-image.outputs.version }}
