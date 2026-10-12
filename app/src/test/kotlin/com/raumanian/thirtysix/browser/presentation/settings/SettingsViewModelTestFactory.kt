@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.presentation.settings
 
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
+import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
@@ -16,6 +17,7 @@ import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeSitePermissionRepository
@@ -48,6 +50,8 @@ internal fun settingsViewModel(
         screenshotCache = FakeScreenshotCache(),
         sitePermissionRepository = FakeSitePermissionRepository(),
         oneTimeGrants = OneTimeGrantStore(),
+        protectionExceptions = FakeProtectionExceptionRepository(),
+        incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),

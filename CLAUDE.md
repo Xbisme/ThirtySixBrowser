@@ -26,6 +26,8 @@ ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckD
   - Test: `junit`, `androidx.test.ext:junit`, `androidx.test.espresso:espresso-core`, `androidx.compose.ui:ui-test-junit4`, `androidx.compose.ui:ui-tooling`, `androidx.compose.ui:ui-test-manifest`
 - **Spec 016 (`settings-screen`, planned 2026-09-11)**: `androidx.appcompat:appcompat` **1.8.0** (per-app language on Android 7–12) · `androidx.webkit:webkit` **1.17.0** (complete site-data removal) — both latest stable at lookup, zero `.so` in real release builds; re-verify at the moment of addition (§IX)
 
+- **Spec 023 (`privacy-protection`, planned 2026-10-11)**: **no new dependency** — `androidx.webkit` 1.17.0 `Profile.addCustomHeader` for GPC (feature-detected). New bundled data assets: EasyPrivacy + EasyList host subset (**CC BY-SA 3.0** option), Public Suffix List (**MPL-2.0**), own tracking-parameter list; Room v3 → v4 (`site_protection_exceptions`)
+
 ### Dependencies (final versions looked up at implementation time per Constitution §IX)
 
 - All versions MUST be fetched from `central.sonatype.com` / official release notes at moment of `libs.versions.toml` addition
@@ -282,7 +284,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 020 | `default-browser-entry-points` | ✅ Done 2026-10-11 (PR #30 merged, `1bb8c6a`, CI 6/6; 65/65) | http/https VIEW + BROWSABLE intent filters, shared links/text, set-as-default (RoleManager API 29+) |
 | 021 | `web-capabilities` | ✅ Done 2026-10-11 ([PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) merged, `ef9ae68`, CI 6/6, 135/135 on API 29; 70/70; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
 | 022 | `page-tools` | ✅ Done 2026-10-11 ([PR #35](https://github.com/Xbisme/ThirtySixBrowser/pull/35) merged, `d0908a1`, CI 6/6; 68/68) | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
-| 023 | `privacy-protection` | ⬜ Phase 6 — next | Tracker blocking (APK-bundled list), HTTPS upgrade, param stripping + referrer trimming, GPC; all on by default, off per site |
+| 023 | `privacy-protection` | 🟢 Implemented 2026-10-12 (branch `023-privacy-protection`, stacked on PR #36; 75/78 — A55 gates + docs/PR open) | Tracker blocking (EasyPrivacy+EasyList subset, 11,012 hosts), HTTPS upgrade + fallback, param stripping, GPC; all on by default, off per site |
 | 024 | `privacy-tools` | ⬜ Phase 6 | Fire button + fireproof sites, per-site privacy dashboard, cookie-banner + fingerprint scripts (split from 023, Constitution v1.6.0) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
@@ -306,6 +308,22 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 > **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd`. A key with no version component is bug 2 returning. `Starting 0 tests` alongside `Broken pipe` / `DeadSystemException` / `stop: Not implemented` is the bug-3 signature — delete the cache and re-run **before suspecting the code**; a healthy run logs `Starting 109 tests` → `Finished 109 tests`.
 
 ## Recent Changes
+
+- 2026-10-12 (Spec 023 implementation): 🟢 **Spec 023 `privacy-protection` implemented on branch `023-privacy-protection`** (stacked on docs PR #36, Constitution v1.6.0). Fourth spec of Phase 6.
+
+  **What changed for the user.** Third-party trackers and ad networks are blocked on every page, from a host list bundled in the APK. `http://` addresses are tried as `https://` first and fall back silently. Tracking parameters (`utm_*`, `fbclid`, `gclid`, …) are removed before the request. Global Privacy Control is sent. The hub's privacy banner shows "N trackers blocked on this page", a **Protection for this site** switch, and "Connection not secure" on http pages. Settings → Privacy → **Sites without protection** lists the exceptions; Clear browsing data gains an opt-in category; About carries the open-source notices.
+
+  **Gates.** unit ✅ **881/881** (+73) · instrumented **168/169** on the 16 KB AVD (the one failure is the known `rendererCrash_…` flake, 2/2 alone) · lint/detekt/ktlint ✅, no baseline change · Compose report **195 restartable, 0 non-skippable** · release APK **3,626,601 B (+232,529 B, budget 500 KB)** · no new `.so` · **no new dependency** · Room **v4** (`site_protection_exceptions`, additive `MIGRATION_3_4`). On the Galaxy A55 (WebView 153): 10 real sites block 1–25 trackers each and work; GPC reaches resource requests; page loads with protection on are as fast or faster; cold start −3.4%. Still open: proxy capture (G15), visual locale sweep, screen reader.
+
+  **Facts to keep.**
+  - **Protection data is three APK assets** (`assets/protection/`): `tracker_hosts.txt` (CC BY-SA 3.0, regenerated only by hand with `tools/protection-lists/build_tracker_hosts.py`; EasyList ad servers limited to Tranco top-1M domains), `public_suffix_list.dat` (MPL-2.0, IDN rules converted to punycode on parse), and our own `tracking_params.txt`. They are parsed once off the main thread from `Application.onCreate`.
+  - **Every app-issued `loadUrl` goes through `WebView.loadProtected`** (strip, then upgrade, plus GPC headers when they are not app-wide). Page-initiated main-frame GETs are rewritten in `shouldOverrideUrlLoading`; redirects never are.
+  - **🐞 HTTPS fallback traps (two, both fixed)**: (1) the browser issues two loads in a row on tab open, and the cancelled one still reports `onPageFinished` — a pending upgrade ends only after its page has *started*. (2) A fallback `loadUrl` started from `onReceivedError` — even posted — can be replaced by the error page's commit (A55, 2/6 runs); it is loaded from that error page's `onPageFinished`, which is not reported as a visit.
+  - **⚠️ Never install a pre-023 build over a 023 install**: Room v4 → v3 has no migration, so the older app crashes at start (seen on the A55 during the cold-start comparison).
+  - **The per-page blocked count resets in `shouldInterceptRequest` for the main frame (IO thread)**, before any resource of the new page; `onPageStarted` handles redirects and history restores.
+  - **GPC is app-wide only with `MULTI_PROFILE` + `CUSTOM_REQUEST_HEADERS`** — not on the 16 KB AVD's WebView 133. Lint's `RequiresFeature` wants `addCustomHeader` directly inside an `isFeatureSupported(CUSTOM_REQUEST_HEADERS)` branch.
+  - **Presentation learns protection state only via `IsSiteProtectedUseCase`**; incognito reads only the in-memory incognito list, which `IncognitoTabRepositoryImpl` clears on the 1 → 0 transition.
+  - **theguardian.com shows 0 trackers until its consent banner is accepted**: it loads none before that.
 
 - 2026-10-11 (Spec 022 merged): ✅ **PR #35 merged (`d0908a1`), CI 6/6**. Docs-only sync. **Phase 6 is 3/5; next is Spec 023 `privacy-protection`.**
 
@@ -630,7 +648,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: ⬜ Spec 023 `privacy-protection` — pre-specify meeting done 2026-10-11 (split from 024, waiver, on by default + per-site off, ≤ +500 KB); next `/speckit-specify`.
+**Current**: 🟢 [Spec 023 — Privacy Protection](specs/023-privacy-protection/) — **implemented on branch `023-privacy-protection` (stacked on PR #36), 75/78**; open: Galaxy A55 gates (T075), PR. [tasks.md](specs/023-privacy-protection/tasks.md) holds the gate table and implementation notes. Next: Spec 024 `privacy-tools`.
 
 **Previous**: ✅ [Spec 022 — Page Tools](specs/022-page-tools/) — **merged into `main` via [PR #35](https://github.com/Xbisme/ThirtySixBrowser/pull/35) (2026-10-11, merge commit `d0908a1`, CI 6/6), 68/68.** [tasks.md](specs/022-page-tools/tasks.md) holds the gate table (G1–G17) and the implementation notes.
 

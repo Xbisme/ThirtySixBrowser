@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
@@ -35,6 +36,7 @@ class IncognitoTabRepositoryImplTest {
     private lateinit var cookieManager: FakeCookieJarSnapshotManager
     private lateinit var tabRepository: FakeTabRepository
     private lateinit var repository: IncognitoTabRepositoryImpl
+    private val protectionExceptions = IncognitoProtectionExceptionStore()
 
     @Before
     fun setup() {
@@ -44,6 +46,7 @@ class IncognitoTabRepositoryImplTest {
             cookieJarSnapshotManager = cookieManager,
             tabRepository = tabRepository,
             dispatchers = TestDispatcherProvider(),
+            incognitoProtectionExceptions = protectionExceptions,
         )
     }
 
@@ -94,6 +97,29 @@ class IncognitoTabRepositoryImplTest {
 
         repository.closeTab(b.id)
         assertEquals("close from 1→0 triggers restore exactly once", 1, cookieManager.restoreCount)
+    }
+
+    @Test
+    fun `4b - closing the last incognito tab clears incognito protection exceptions`() = runTest {
+        val a = (repository.createTab("https://a.com/") as Result.Success).data
+        val b = (repository.createTab("https://b.com/") as Result.Success).data
+        protectionExceptions.add("a.com")
+
+        repository.closeTab(a.id)
+        assertTrue("2→1 keeps the incognito choices", protectionExceptions.contains("a.com"))
+
+        repository.closeTab(b.id)
+        assertFalse("1→0 ends them (Spec 023 FR-014)", protectionExceptions.contains("a.com"))
+    }
+
+    @Test
+    fun `5c - closeAll clears incognito protection exceptions`() = runTest {
+        repository.createTab("https://a.com/")
+        protectionExceptions.add("a.com")
+
+        repository.closeAll()
+
+        assertFalse(protectionExceptions.contains("a.com"))
     }
 
     @Test
@@ -238,6 +264,7 @@ class IncognitoTabRepositoryImplTest {
             cookieJarSnapshotManager = cookieManager,
             tabRepository = withHome,
             dispatchers = TestDispatcherProvider(),
+            incognitoProtectionExceptions = protectionExceptions,
         )
 
         repo.createTab(UrlConstants.HOME_PAGE_URL)

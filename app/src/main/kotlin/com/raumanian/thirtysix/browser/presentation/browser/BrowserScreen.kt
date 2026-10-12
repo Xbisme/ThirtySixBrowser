@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBarCallbacks
@@ -56,6 +57,8 @@ import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.presentation.browser.page.PopupEffects
 import com.raumanian.thirtysix.browser.presentation.browser.page.PopupTabs
 import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
+import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionHooks
+import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.suggestions.AddressSuggestionList
 import com.raumanian.thirtysix.browser.presentation.browser.suggestions.AddressSuggestionsViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.suggestions.BrowserAddressSuggestions
@@ -65,6 +68,7 @@ import com.raumanian.thirtysix.browser.presentation.home.HomePage
 import com.raumanian.thirtysix.browser.presentation.incognito.IncognitoPage
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -130,6 +134,12 @@ fun BrowserScreen(
     // Spec 022 US4 — the app-wide text size: changes rarely, read by the WebView and the hub.
     val pageTextSize: PageTextSizeViewModel = hiltViewModel()
     val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
+    // Spec 023 — the privacy protections: the WebView reports its page, the hub reads it.
+    val protection: ProtectionViewModel = hiltViewModel()
+    LaunchedEffect(protection) {
+        // FR-012 — after the per-site switch the page reloads with the new setting.
+        protection.reloadEvents.collect { webViewActions.reload() }
+    }
     val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions, suggestions)
     // FR-010 — composed after every other back handler, so Back closes the find bar first.
     BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
@@ -165,6 +175,7 @@ fun BrowserScreen(
             pageRequests = pageSession,
             takePopup = { activeTab?.url?.let(popupTabs::take) },
             textZoomPercent = textZoomPercent,
+            protection = protection.hooks,
             modifier = Modifier
                 .fillMaxSize()
                 // FR-005 — while finding, the bars do not slide away, so the page is shortened by the
@@ -305,6 +316,9 @@ fun BrowserScreen(
                 textSizePercent = textZoomPercent,
             ),
             onPageTool = pageToolHandler,
+            // FR-011 — nothing about protection on Home or the incognito start page.
+            protectionFlow = if (state.isHomeContent) null else protection.status,
+            onProtectionSwitched = protection::onProtectionSwitched,
         )
     }
     if (quickSettingsUsed) {
@@ -370,6 +384,8 @@ private fun BrowserHub(
     onQuickSetting: (QuickSetting) -> Unit,
     pageTools: HubPageToolsState,
     onPageTool: (PageTool) -> Unit,
+    protectionFlow: StateFlow<PageProtectionStatus>?,
+    onProtectionSwitched: (Boolean) -> Unit,
 ) {
     HubSheet(
         canGoBack = state.canGoBack,
@@ -388,8 +404,10 @@ private fun BrowserHub(
             onBookmarks = { navController.navigate(AppDestination.Bookmarks.route) },
             onQuickSetting = onQuickSetting,
             onPageTool = onPageTool,
+            onProtectionSwitched = onProtectionSwitched,
         ),
         pageTools = pageTools,
+        protectionFlow = protectionFlow,
     )
 }
 
@@ -546,6 +564,7 @@ private fun BrowserContent(
     pageRequests: PageRequestSink,
     takePopup: () -> WebView?,
     textZoomPercent: Int,
+    protection: ProtectionHooks,
     modifier: Modifier = Modifier,
 ) {
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
@@ -583,6 +602,7 @@ private fun BrowserContent(
                 adopted = adopted,
                 textZoomPercent = textZoomPercent,
                 desktopMode = remember { viewModel.isDesktopMode(activeTabId) },
+                protection = protection,
             )
         }
     }

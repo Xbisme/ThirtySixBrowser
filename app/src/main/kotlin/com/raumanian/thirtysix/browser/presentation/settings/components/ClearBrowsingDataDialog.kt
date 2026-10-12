@@ -204,6 +204,7 @@ private val ClearBrowsingDataCategory.labelRes: Int
         ClearBrowsingDataCategory.CookiesAndSiteData -> R.string.settings_clear_category_cookies
         ClearBrowsingDataCategory.CachedImagesAndFiles -> R.string.settings_clear_category_cache
         ClearBrowsingDataCategory.SitePermissions -> R.string.settings_clear_category_site_permissions
+        ClearBrowsingDataCategory.SitesWithoutProtection -> R.string.settings_clear_category_sites_without_protection
     }
 
 @get:StringRes
@@ -213,6 +214,8 @@ private val ClearBrowsingDataCategory.descriptionRes: Int
         ClearBrowsingDataCategory.CookiesAndSiteData -> R.string.settings_clear_category_cookies_description
         ClearBrowsingDataCategory.CachedImagesAndFiles -> R.string.settings_clear_category_cache_description
         ClearBrowsingDataCategory.SitePermissions -> R.string.settings_clear_category_site_permissions_description
+        ClearBrowsingDataCategory.SitesWithoutProtection ->
+            R.string.settings_clear_category_sites_without_protection_description
     }
 
 const val TEST_TAG_SETTINGS_CLEAR_DIALOG: String = "settings_clear_dialog"

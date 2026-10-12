@@ -369,4 +369,28 @@
     <string name="suggestion_bookmark_cd">Favori : %1$s, %2$s</string>
     <string name="suggestion_history_cd">Historique : %1$s, %2$s</string>
     <string name="share_page_title">Partager la page</string>
+    <!-- Spec 023 privacy protection -->
+    <string name="hub_protection_site_title">Protection sur ce site</string>
+    <string name="hub_protection_site_on">Traqueurs bloqués, balises de suivi retirées, connexion sécurisée en priorité</string>
+    <string name="hub_protection_site_off">Désactivée pour %1$s. Les traqueurs peuvent se charger ici.</string>
+    <string name="hub_protection_not_secure_title">Connexion non sécurisée</string>
+    <string name="hub_protection_not_secure_body">Cette page n’est pas chiffrée. D’autres personnes sur le réseau pourraient voir ce que vous envoyez.</string>
+    <string name="settings_protection_exceptions">Sites sans protection</string>
+    <string name="settings_protection_exceptions_summary">Sites où vous avez désactivé le blocage des traqueurs</string>
+    <string name="protection_exceptions_empty">Tous les sites sont protégés. Désactivez la protection d’un site depuis le menu lorsque vous y êtes ; il apparaîtra ici.</string>
+    <string name="protection_exceptions_turn_on">Activer</string>
+    <string name="protection_exceptions_turn_on_cd">Réactiver la protection pour %1$s</string>
+    <string name="protection_exceptions_turn_all_on">Tout réactiver</string>
+    <string name="protection_exceptions_turn_all_on_confirm_title">Réactiver la protection pour tous les sites ?</string>
+    <string name="protection_exceptions_turn_all_on_confirm_body">Les traqueurs seront de nouveau bloqués sur tous les sites de cette liste.</string>
+    <string name="settings_clear_category_sites_without_protection">Sites sans protection</string>
+    <string name="settings_clear_category_sites_without_protection_description">La protection est réactivée sur tous les sites où vous l’aviez désactivée</string>
+    <string name="settings_about_notices_title">Mentions open source</string>
+    <string name="settings_about_notice_trackers">La liste des traqueurs et serveurs publicitaires est dérivée d’EasyList et EasyPrivacy de The EasyList authors (https://easylist.to/) et partagée sous CC BY-SA 3.0.</string>
+    <string name="settings_about_notice_public_suffix">Public Suffix List (https://publicsuffix.org/) de Mozilla et des contributeurs, utilisée sous MPL 2.0.</string>
+    <plurals name="hub_protection_trackers_blocked">
+        <item quantity="one">%1$d traqueur bloqué sur cette page</item>
+        <item quantity="many">%1$d traqueurs bloqués sur cette page</item>
+        <item quantity="other">%1$d traqueurs bloqués sur cette page</item>
+    </plurals>
 </resources>

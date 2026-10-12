@@ -9,6 +9,8 @@ import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataResult
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.domain.repository.IncognitoProtectionExceptions
+import com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.domain.repository.WebDataCleaner
 import javax.inject.Inject
@@ -30,6 +32,8 @@ import kotlinx.coroutines.CancellationException
  *    `FaviconCache.clearAll()` and `ScreenshotCache.clearAll()`, always.
  *  - **Site permissions** (Spec 021 FR-010a) → `SitePermissionRepository.clearAll()` and the
  *    in-memory one-time grants.
+ *  - **Sites without protection** (Spec 023 FR-016a) → `ProtectionExceptionRepository.clearAll()`
+ *    and the incognito choices held in memory.
  *
  * Every category, and every step inside a category, runs in its own failure boundary: an
  * earlier failure never stops later work (FR-033, FR-043), and a category is failed if any of
@@ -37,7 +41,7 @@ import kotlinx.coroutines.CancellationException
  * is touched — no tabs, bookmarks, downloads or settings (FR-031). Returns normally in every
  * case except cancellation, which is rethrown.
  */
-@Suppress("LongParameterList") // Spec 021 adds the seventh collaborator; each clears one kind of data.
+@Suppress("LongParameterList") // Specs 021 and 023 add collaborators; each clears one kind of data.
 class ClearBrowsingDataUseCase @Inject constructor(
     private val historyRepository: HistoryRepository,
     private val webDataCleaner: WebDataCleaner,
@@ -46,6 +50,8 @@ class ClearBrowsingDataUseCase @Inject constructor(
     private val screenshotCache: ScreenshotCache,
     private val sitePermissionRepository: SitePermissionRepository,
     private val oneTimeGrants: OneTimeGrantStore,
+    private val protectionExceptions: ProtectionExceptionRepository,
+    private val incognitoProtectionExceptions: IncognitoProtectionExceptions,
 ) {
 
     /** @param categories non-empty — an empty set is a programming error (FR-026). */
@@ -79,13 +85,29 @@ class ClearBrowsingDataUseCase @Inject constructor(
             }
         }
 
+        failed += clearPerSiteSettings(categories)
+        return ClearBrowsingDataResult(requested = categories, failed = failed)
+    }
+
+    /**
+     * The two opt-in per-site categories (Spec 021 FR-010a, Spec 023 FR-016a): the saved list
+     * and its in-memory counterpart are both cleared. Returns the categories that failed.
+     */
+    private suspend fun clearPerSiteSettings(
+        categories: Set<ClearBrowsingDataCategory>,
+    ): Set<ClearBrowsingDataCategory> {
+        val failed = mutableSetOf<ClearBrowsingDataCategory>()
         if (ClearBrowsingDataCategory.SitePermissions in categories) {
             val stored = attempt { sitePermissionRepository.clearAll() } is Result.Success
             oneTimeGrants.clear()
             if (!stored) failed += ClearBrowsingDataCategory.SitePermissions
         }
-
-        return ClearBrowsingDataResult(requested = categories, failed = failed)
+        if (ClearBrowsingDataCategory.SitesWithoutProtection in categories) {
+            val stored = attempt { protectionExceptions.clearAll() } is Result.Success
+            incognitoProtectionExceptions.clear()
+            if (!stored) failed += ClearBrowsingDataCategory.SitesWithoutProtection
+        }
+        return failed
     }
 
     /** Runs one step in its own failure boundary; `true` when it returned normally. */

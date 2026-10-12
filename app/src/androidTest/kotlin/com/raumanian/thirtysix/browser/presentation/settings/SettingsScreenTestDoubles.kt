@@ -6,6 +6,7 @@ import androidx.compose.ui.test.isSelectable
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
+import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
@@ -183,6 +184,8 @@ internal fun settingsViewModel(
         screenshotCache = InstrumentedNoopScreenshotCache,
         sitePermissionRepository = InstrumentedNoopSitePermissionRepository,
         oneTimeGrants = OneTimeGrantStore(),
+        protectionExceptions = InstrumentedNoopProtectionExceptionRepository,
+        incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
@@ -228,4 +231,19 @@ internal object InstrumentedNoopSitePermissionRepository : SitePermissionReposit
     override suspend fun removeSite(origin: String): Result<Unit> = Result.Success(Unit)
 
     override suspend fun clearAll(): Result<Unit> = Result.Success(Unit)
+}
+
+/** Spec 023 — the Settings tests never touch sites without protection. */
+internal object InstrumentedNoopProtectionExceptionRepository :
+    com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository {
+    override fun observeAll() =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.SiteProtectionException>())
+
+    override fun currentSites(): Set<String> = emptySet()
+
+    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+
+    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+
+    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
 }

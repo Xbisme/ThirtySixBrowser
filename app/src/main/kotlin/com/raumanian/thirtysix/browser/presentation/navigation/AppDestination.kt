@@ -16,5 +16,8 @@ sealed class AppDestination(val route: String) {
     /** Spec 021 FR-009 — remembered camera / microphone / location decisions per site. */
     data object SitePermissions : AppDestination("settings/site_permissions")
 
+    /** Spec 023 FR-015 — sites the person turned protection off for. */
+    data object ProtectionExceptions : AppDestination("settings/protection_exceptions")
+
     data object Onboarding : AppDestination("onboarding")
 }

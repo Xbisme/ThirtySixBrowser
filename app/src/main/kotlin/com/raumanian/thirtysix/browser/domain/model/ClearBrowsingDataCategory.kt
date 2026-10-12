@@ -19,6 +19,12 @@ enum class ClearBrowsingDataCategory {
      * one-time grants. Opt-in: never part of the default selection ([DEFAULT_SELECTION]).
      */
     SitePermissions,
+
+    /**
+     * Spec 023 FR-016a — sites the person turned protection off for, saved and incognito.
+     * Opt-in like [SitePermissions]: never part of [DEFAULT_SELECTION].
+     */
+    SitesWithoutProtection,
     ;
 
     companion object {

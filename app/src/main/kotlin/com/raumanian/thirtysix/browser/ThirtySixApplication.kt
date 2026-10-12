@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser
 import android.app.Application
 import android.util.Log
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.domain.usecase.PruneOldHistoryUseCase
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -30,6 +31,9 @@ class ThirtySixApplication : Application() {
     @Inject
     lateinit var dispatchers: DispatcherProvider
 
+    @Inject
+    lateinit var protectionData: ProtectionDataRepository
+
     private val applicationScope: CoroutineScope by lazy {
         CoroutineScope(SupervisorJob() + dispatchers.io)
     }
@@ -42,6 +46,9 @@ class ThirtySixApplication : Application() {
                 .onSuccess { removed -> Log.i(TAG, "history retention sweep removed $removed row(s)") }
                 .onFailure { cause -> Log.w(TAG, "history retention sweep failed", cause) }
         }
+        // Spec 023 research R10: parse the bundled protection lists off the main thread now,
+        // so the first page load rarely has to wait for them. Never awaited here.
+        protectionData.preload()
     }
 
     private companion object {

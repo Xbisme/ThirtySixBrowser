@@ -1,0 +1,42 @@
+# ThirtySix Browser tracking query parameters (Spec 023, research R8).
+# Own list of parameter names that exist only to track; one per line.
+# A trailing * marks a prefix. Generic names (ref, source, cid) are deliberately absent.
+utm_*
+gclid
+gclsrc
+dclid
+gbraid
+wbraid
+_ga
+_gl
+fbclid
+fb_action_ids
+fb_action_types
+fb_source
+fb_ref
+msclkid
+twclid
+ttclid
+li_fat_id
+igshid
+yclid
+ysclid
+epik
+rdt_cid
+sccid
+irclickid
+mc_cid
+mc_eid
+_hsenc
+_hsmi
+__hssc
+__hstc
+__hsfp
+hsCtaTracking
+mkt_tok
+oly_anon_id
+oly_enc_id
+vero_id
+wickedid
+s_cid
+ck_subscriber_id

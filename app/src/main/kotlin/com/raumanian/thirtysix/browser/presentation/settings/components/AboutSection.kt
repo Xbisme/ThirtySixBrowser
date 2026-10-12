@@ -24,6 +24,9 @@ import com.raumanian.thirtysix.browser.presentation.theme.Spacing
  * Plain text only: no links, licence list or rating prompt (spec A10), so everything here renders
  * the same with no network at all. Spec 019 leads it with a soft-primary icon like every other
  * row that has no hub tile (FR-044).
+ *
+ * Spec 023 FR-003 adds the open-source notices the bundled protection lists require, still as
+ * plain text: addresses are written out, never opened.
  */
 @Composable
 fun AboutSection(
@@ -61,8 +64,28 @@ fun AboutSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT_PRIVACY),
         )
+        Text(
+            text = stringResource(R.string.settings_about_notices_title),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = Spacing.sm),
+        )
+        Text(
+            text = stringResource(R.string.settings_about_notice_trackers),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT_NOTICE_TRACKERS),
+        )
+        Text(
+            text = stringResource(R.string.settings_about_notice_public_suffix),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT_NOTICE_PSL),
+        )
     }
 }
 
 const val TEST_TAG_SETTINGS_ABOUT_VERSION: String = "settings_about_version"
 const val TEST_TAG_SETTINGS_ABOUT_PRIVACY: String = "settings_about_privacy"
+const val TEST_TAG_SETTINGS_ABOUT_NOTICE_TRACKERS: String = "settings_about_notice_trackers"
+const val TEST_TAG_SETTINGS_ABOUT_NOTICE_PSL: String = "settings_about_notice_psl"

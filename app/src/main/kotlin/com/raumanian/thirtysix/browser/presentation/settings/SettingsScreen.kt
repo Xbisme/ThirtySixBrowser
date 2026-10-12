@@ -113,6 +113,7 @@ fun SettingsScreen(
                 state = state,
                 viewModel = viewModel,
                 onSitePermissions = { navController.navigate(AppDestination.SitePermissions.route) },
+                onProtectionExceptions = { navController.navigate(AppDestination.ProtectionExceptions.route) },
             )
             aboutSection(state = state)
         }
@@ -226,6 +227,7 @@ private fun LazyListScope.privacySection(
     state: SettingsUiState,
     viewModel: SettingsViewModel,
     onSitePermissions: () -> Unit,
+    onProtectionExceptions: () -> Unit,
 ) {
     sectionHeader(key = KEY_SECTION_PRIVACY, titleRes = R.string.settings_section_privacy)
     item(key = KEY_ROW_RETENTION, contentType = CONTENT_TYPE_ROW) {
@@ -247,6 +249,17 @@ private fun LazyListScope.privacySection(
             tone = SettingsIconTone.Primary,
             onClick = onSitePermissions,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_SITE_PERMISSIONS_ROW),
+        )
+    }
+    // Spec 023 FR-015.
+    item(key = KEY_ROW_PROTECTION_EXCEPTIONS, contentType = CONTENT_TYPE_ROW) {
+        SettingsValueRow(
+            title = stringResource(R.string.settings_protection_exceptions),
+            value = stringResource(R.string.settings_protection_exceptions_summary),
+            icon = AppIcons.Shield,
+            tone = SettingsIconTone.Primary,
+            onClick = onProtectionExceptions,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_PROTECTION_EXCEPTIONS_ROW),
         )
     }
     item(key = KEY_ROW_CLEAR_BROWSING_DATA, contentType = CONTENT_TYPE_ACTION_ROW) {
@@ -394,6 +407,7 @@ private const val KEY_ROW_SEARCH_ENGINE: String = "row_search_engine"
 private const val KEY_ROW_RETENTION: String = "row_retention"
 private const val KEY_ROW_CLEAR_BROWSING_DATA: String = "row_clear_browsing_data"
 private const val KEY_ROW_SITE_PERMISSIONS: String = "row_site_permissions"
+private const val KEY_ROW_PROTECTION_EXCEPTIONS: String = "row_protection_exceptions"
 private const val KEY_ROW_ABOUT: String = "row_about"
 private const val CONTENT_TYPE_HEADER: String = "header"
 private const val CONTENT_TYPE_ROW: String = "value_row"
@@ -411,4 +425,5 @@ const val TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW: String = "settings_search_engine_
 const val TEST_TAG_SETTINGS_RETENTION_ROW: String = "settings_retention_row"
 const val TEST_TAG_SETTINGS_CLEAR_ROW: String = "settings_clear_row"
 const val TEST_TAG_SETTINGS_SITE_PERMISSIONS_ROW: String = "settings_site_permissions_row"
+const val TEST_TAG_SETTINGS_PROTECTION_EXCEPTIONS_ROW: String = "settings_protection_exceptions_row"
 const val TEST_TAG_SETTINGS_ABOUT: String = "settings_about"

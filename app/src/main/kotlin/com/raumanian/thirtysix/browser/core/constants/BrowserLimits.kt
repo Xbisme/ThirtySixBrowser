@@ -212,4 +212,7 @@ object BrowserLimits {
 
     /** Spec 022 FR-013 — find-in-page text is cut to this many characters, like history search. */
     const val MAX_FIND_QUERY_LENGTH: Int = 200
+
+    /** Spec 023 research R3 — host → registrable-domain results kept in memory. */
+    const val REGISTRABLE_DOMAIN_CACHE_SIZE: Int = 2_048
 }
