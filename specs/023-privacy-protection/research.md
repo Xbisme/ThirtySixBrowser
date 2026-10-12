@@ -71,6 +71,8 @@ Tags: **[V]** verified from the source (license file, `javap` of `androidx.webki
 
 **Rationale**: `androidx.webkit` 1.17.0 has no referrer-policy API (grep of all sources) [V]; a profile-wide custom `Referer` would be one static value. A page that sets `Referrer-Policy: unsafe-url` cannot be overridden — spec FR-028/FR-029 amended to say so.
 
+**Found in CI (2026-10-12)** [V]: the API 29 emulator's WebView 74 predates M85 and sends the **full** address (`…/referrer.html?secret=1`) as a cross-site referrer — the old `no-referrer-when-downgrade` default. The app cannot change subresource referrers, so on engines older than 85 FR-028 holds only for app-issued navigations (which send none). FR-029 records it; `NavigationProtectionTest` checks the cross-site case only on WebView ≥ 85. The 16 KB AVD (133) and the Galaxy A55 (153) send the origin only.
+
 ## R7 — HTTPS upgrade
 
 **Decision**: One pure decision function and two choke points.

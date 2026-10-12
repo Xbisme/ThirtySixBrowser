@@ -208,7 +208,7 @@ When a page links to or loads something from another site, the other site learns
 **Referrer trimming**
 
 - **FR-028**: For a request from a page on one site to a different site, the referrer sent MUST be at most the origin of the page whenever the page has not set its own referrer policy. Same-site requests MUST keep the web's normal referrer behaviour. The app MUST NOT loosen the web engine's default referrer policy, and any navigation the app re-issues itself (HTTPS upgrade, parameter stripping) MUST send no more than the origin.
-- **FR-029**: A page that explicitly sets a looser referrer policy cannot be overridden by the app (research R6); this is a documented limitation, not a failure of FR-028.
+- **FR-029**: A page that explicitly sets a looser referrer policy cannot be overridden by the app, and web engines older than Chromium 85 send the full address across sites by default (research R6); both are documented limitations, not failures of FR-028.
 
 **Global Privacy Control**
 

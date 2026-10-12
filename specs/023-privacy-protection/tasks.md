@@ -370,6 +370,7 @@ Deviations from the task text, each deliberate:
   - Regression test: `PageProtectionMonitorTest` "a cancelled load that never started does not end the attempt".
   - Retest: NeverSSL loads over http and the hub shows "Connection not secure".
 - **🐞 Second HTTPS-fallback defect, found on the A55 (2 of 6 runs)**: the posted fallback `loadUrl` could still be replaced by the error page's commit (logcat: fallback decided, no load followed). The fallback address is now remembered (`fallbackDue`) and loaded from the error page's own `onPageFinished`, which always follows `onReceivedError`; that `onPageFinished` is no longer reported as a finished visit (no history row for the failed attempt). 8/8 runs pass after the change. Regression test: "the http fallback waits for the error page to finish and is handed out once".
+- **CI (API 29, WebView 74) found a referrer gap**: engines before Chromium 85 send the full address as a cross-site referrer (`no-referrer-when-downgrade` default), which the app cannot change for page resources. Recorded in FR-029 and research R6; `NavigationProtectionTest` now checks the cross-site referrer only on WebView ≥ 85 (13/13 with 2 skipped on the API 29 AVD).
 - **Unit tests**: 882/882 (808 before, +74). lint, detekt and ktlint are clean with **no baseline change**. Release APK **3,626,601 B (+232,529 B, budget 500 KB)**, no new `.so`.
 
 ## Device Gate Results

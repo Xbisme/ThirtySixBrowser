@@ -2,6 +2,8 @@ package com.raumanian.thirtysix.browser.protection
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.webkit.WebViewCompat
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.presentation.browser.protection.GpcHeaderInstaller
 import com.raumanian.thirtysix.browser.testing.AssetPageServer
@@ -82,7 +84,21 @@ class NavigationProtectionTest {
         }
 
         val origin = "http://${TestProtection.PAGE_HOST}:${server.port}/"
-        assertEquals(origin, server.headersFor("cross.gif").first()["referer"])
         assertEquals("${origin}referrer.html?secret=1", server.headersFor("same.gif").first()["referer"])
+        // Engines before Chromium 85 default to sending the full address across sites, which the
+        // app cannot change for page resources (FR-029, research R6; CI's API 29 has WebView 74).
+        assumeTrue("WebView older than 85", webViewMajorVersion() >= ORIGIN_ONLY_DEFAULT_SINCE)
+        assertEquals(origin, server.headersFor("cross.gif").first()["referer"])
+    }
+
+    private fun webViewMajorVersion(): Int {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val version = WebViewCompat.getCurrentWebViewPackage(context)?.versionName.orEmpty()
+        return version.substringBefore('.').toIntOrNull() ?: 0
+    }
+
+    private companion object {
+        /** Chromium made `strict-origin-when-cross-origin` the default referrer policy in M85. */
+        const val ORIGIN_ONLY_DEFAULT_SINCE = 85
     }
 }
