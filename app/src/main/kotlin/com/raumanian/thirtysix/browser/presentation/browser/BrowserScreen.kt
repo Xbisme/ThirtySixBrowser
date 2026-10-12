@@ -38,12 +38,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserErrorState
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserTopBar
+import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
+import com.raumanian.thirtysix.browser.presentation.browser.components.HubPageToolsState
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
 import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
@@ -54,12 +57,20 @@ import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.presentation.browser.page.PopupEffects
 import com.raumanian.thirtysix.browser.presentation.browser.page.PopupTabs
 import com.raumanian.thirtysix.browser.presentation.browser.page.rememberPageSession
+import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionHooks
+import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionViewModel
+import com.raumanian.thirtysix.browser.presentation.browser.suggestions.AddressSuggestionList
+import com.raumanian.thirtysix.browser.presentation.browser.suggestions.AddressSuggestionsViewModel
+import com.raumanian.thirtysix.browser.presentation.browser.suggestions.BrowserAddressSuggestions
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
 import com.raumanian.thirtysix.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.presentation.home.HomePage
 import com.raumanian.thirtysix.browser.presentation.incognito.IncognitoPage
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
  * Spec 007–018 browser screen; Spec 019 rebuilt its chrome (research R7, R8, R12, R16).
@@ -112,6 +123,26 @@ fun BrowserScreen(
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
     HomeBackHandlers(state = state, viewModel = viewModel)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = incomingContent)
+    // Spec 022 US1 — only whether the find bar is open is read here; its text and count are
+    // collected by the bar itself (§V rule 3).
+    val findOpen by remember(viewModel) {
+        viewModel.findInPage.map { it.isOpen }.distinctUntilChanged()
+    }.collectAsStateWithLifecycle(initialValue = false)
+    val findCallbacks = rememberFindCallbacks(viewModel, webViewActions)
+    // Spec 022 US2 — address suggestions for the address bar and the Home search field.
+    val suggestions: AddressSuggestionsViewModel = hiltViewModel()
+    // Spec 022 US4 — the app-wide text size: changes rarely, read by the WebView and the hub.
+    val pageTextSize: PageTextSizeViewModel = hiltViewModel()
+    val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
+    // Spec 023 — the privacy protections: the WebView reports its page, the hub reads it.
+    val protection: ProtectionViewModel = hiltViewModel()
+    LaunchedEffect(protection) {
+        // FR-012 — after the per-site switch the page reloads with the new setting.
+        protection.reloadEvents.collect { webViewActions.reload() }
+    }
+    val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions, suggestions)
+    // FR-010 — composed after every other back handler, so Back closes the find bar first.
+    BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
     BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
     IncomingContentEffects(
         hooks = incomingContent,
@@ -129,6 +160,7 @@ fun BrowserScreen(
         if (state.loadingState !is LoadingState.Loaded || state.isAddressBarFocused) chrome.show()
     }
 
+    val findOpenNow by rememberUpdatedState(findOpen)
     val density = LocalDensity.current
     val topInset = with(density) { topBarHeightPx.toDp() }
     val bottomInset = with(density) { bottomBarHeightPx.toDp() }
@@ -139,11 +171,16 @@ fun BrowserScreen(
             viewModel = viewModel,
             webViewActions = webViewActions,
             activeTabId = activeTab?.id ?: 0L,
-            onScrollDelta = chrome::onScrollDelta,
+            onScrollDelta = rememberScrollDeltaHandler(chrome) { findOpenNow },
             pageRequests = pageSession,
             takePopup = { activeTab?.url?.let(popupTabs::take) },
+            textZoomPercent = textZoomPercent,
+            protection = protection.hooks,
             modifier = Modifier
                 .fillMaxSize()
+                // FR-005 — while finding, the bars do not slide away, so the page is shortened by the
+                // find bar's height: otherwise its last part would sit below the screen, unreachable.
+                .padding(bottom = findBarPagePadding(findOpen, topInset))
                 .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
         )
         (state.loadingState as? LoadingState.Failed)?.let { failed ->
@@ -153,54 +190,86 @@ fun BrowserScreen(
             )
         }
         if (state.isHomeContent) {
+            val homeCallbacks =
+                rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, navController, suggestions)
             HomeOverlay(
                 isIncognito = state.isIncognito,
-                callbacks = rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, navController),
+                callbacks = homeCallbacks,
+                suggestions = {
+                    AddressSuggestionList(
+                        stateFlow = suggestions.uiState,
+                        onPick = { suggestion -> homeCallbacks.onSearchSubmit(suggestion.url) },
+                    )
+                },
                 searchFocus = homeSearchFocus,
                 bottomPadding = bottomInset,
             )
         }
-        if (!state.isHomeContent) {
-            BrowserTopBar(
-                state = state,
-                addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions),
-                onStarTapped = viewModel::onStarTapped,
-                onReloadOrStop = {
-                    if (state.loadingState is LoadingState.Loading) {
-                        webViewActions.stopLoading()
-                        viewModel.onLoadStopped()
-                    } else {
-                        webViewActions.reload()
-                    }
-                },
-                progress = { progress.value },
-                focusRequester = addressFocus,
+        FindOrTopBar(
+            findOpen = findOpen,
+            showTopBar = !state.isHomeContent,
+            findBar = {
+                FindInPageBar(
+                    stateFlow = viewModel.findInPage,
+                    isIncognito = state.isIncognito,
+                    callbacks = findCallbacks,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .onSizeChanged { topBarHeightPx = it.height },
+                )
+            },
+            topBar = {
+                BrowserTopBar(
+                    state = state,
+                    addressBarCallbacks = addressBarCallbacks,
+                    onStarTapped = viewModel::onStarTapped,
+                    onReloadOrStop = {
+                        if (state.loadingState is LoadingState.Loading) {
+                            webViewActions.stopLoading()
+                            viewModel.onLoadStopped()
+                        } else {
+                            webViewActions.reload()
+                        }
+                    },
+                    progress = { progress.value },
+                    focusRequester = addressFocus,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .onSizeChanged { topBarHeightPx = it.height }
+                        .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
+                )
+            },
+        )
+        // Only a focused address bar shows suggestions; on Home the field has its own list.
+        BrowserAddressSuggestions(
+            visible = state.isAddressBarFocused,
+            topBarHeight = topInset,
+            stateFlow = suggestions.uiState,
+            onPick = { suggestion -> addressBarCallbacks.onSuggestion(suggestion.url) },
+        )
+        // FR-005 — no bottom bar while finding (I-7).
+        UnlessFinding(findOpen) {
+            BrowserBottomBar(
+                tabCount = tabCount,
+                isIncognito = state.isIncognito,
+                isHomeActive = state.isHomeContent,
+                callbacks = BrowserBottomBarCallbacks(
+                    onHome = viewModel::onHomePressed,
+                    onSearch = {
+                        chrome.show()
+                        if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
+                    },
+                    onNewTab = viewModel::onLongPressNewTab,
+                    onTabs = { navController.navigate(AppDestination.Tabs.route) },
+                    onTabsLongPress = viewModel::onLongPressNewTab,
+                    onMenu = { hubOpen = true },
+                ),
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .onSizeChanged { topBarHeightPx = it.height }
-                    .graphicsLayer { translationY = -chrome.hiddenFraction * size.height },
+                    .align(Alignment.BottomCenter)
+                    .onSizeChanged { bottomBarHeightPx = it.height }
+                    .graphicsLayer { translationY = chrome.hiddenFraction * size.height },
             )
         }
-        BrowserBottomBar(
-            tabCount = tabCount,
-            isIncognito = state.isIncognito,
-            isHomeActive = state.isHomeContent,
-            callbacks = BrowserBottomBarCallbacks(
-                onHome = viewModel::onHomePressed,
-                onSearch = {
-                    chrome.show()
-                    if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
-                },
-                onNewTab = viewModel::onLongPressNewTab,
-                onTabs = { navController.navigate(AppDestination.Tabs.route) },
-                onTabsLongPress = viewModel::onLongPressNewTab,
-                onMenu = { hubOpen = true },
-            ),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .onSizeChanged { bottomBarHeightPx = it.height }
-                .graphicsLayer { translationY = chrome.hiddenFraction * size.height },
-        )
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomInset),
@@ -209,7 +278,28 @@ fun BrowserScreen(
         FullscreenOverlay(controller = pageSession.fullscreen)
     }
 
+    val pageToolHandler = rememberPageToolHandler(
+        viewModel = viewModel,
+        chrome = chrome,
+        actions = PageToolActions(
+            share = rememberShareAction(viewModel),
+            // Spec 022 FR-025 — flip the active tab's mode, then reconfigure and reload its page.
+            toggleDesktopSite = { viewModel.onDesktopModeToggled()?.let(webViewActions.setDesktopMode) },
+            // Spec 022 FR-033 — offered only once the page has loaded (PageToolsAvailability).
+            print = {
+                val title = viewModel.activeTab.value?.title
+                webViewActions.print(PrintJobName.of(title, viewModel.uiState.value.currentUrl))
+            },
+            openTextSize = {
+                quickSettingsUsed = true
+                quickSettingRequest = QuickSetting.TextSize
+            },
+        ),
+    )
     if (hubOpen) {
+        val available = remember(state.isHomeContent, state.loadingState) {
+            PageToolsAvailability.of(state.isHomeContent, state.loadingState)
+        }
         BrowserHub(
             state = state,
             hubViewModel = hubViewModel,
@@ -220,6 +310,15 @@ fun BrowserScreen(
                 quickSettingsUsed = true
                 quickSettingRequest = setting
             },
+            pageTools = HubPageToolsState(
+                available = available,
+                isDesktopMode = state.isDesktopMode,
+                textSizePercent = textZoomPercent,
+            ),
+            onPageTool = pageToolHandler,
+            // FR-011 — nothing about protection on Home or the incognito start page.
+            protectionFlow = if (state.isHomeContent) null else protection.status,
+            onProtectionSwitched = protection::onProtectionSwitched,
         )
     }
     if (quickSettingsUsed) {
@@ -259,11 +358,17 @@ private fun HomeOverlay(
     callbacks: HomeCallbacks,
     searchFocus: FocusRequester,
     bottomPadding: Dp,
+    suggestions: @Composable () -> Unit,
 ) {
     if (isIncognito) {
         IncognitoPage(bottomPadding = bottomPadding)
     } else {
-        HomePage(callbacks = callbacks, searchFocus = searchFocus, bottomPadding = bottomPadding)
+        HomePage(
+            callbacks = callbacks,
+            searchFocus = searchFocus,
+            bottomPadding = bottomPadding,
+            searchSuggestions = suggestions,
+        )
     }
 }
 
@@ -277,6 +382,10 @@ private fun BrowserHub(
     navController: NavHostController,
     onDismiss: () -> Unit,
     onQuickSetting: (QuickSetting) -> Unit,
+    pageTools: HubPageToolsState,
+    onPageTool: (PageTool) -> Unit,
+    protectionFlow: StateFlow<PageProtectionStatus>?,
+    onProtectionSwitched: (Boolean) -> Unit,
 ) {
     HubSheet(
         canGoBack = state.canGoBack,
@@ -294,7 +403,11 @@ private fun BrowserHub(
             onHistory = { navController.navigate(AppDestination.History.route) },
             onBookmarks = { navController.navigate(AppDestination.Bookmarks.route) },
             onQuickSetting = onQuickSetting,
+            onPageTool = onPageTool,
+            onProtectionSwitched = onProtectionSwitched,
         ),
+        pageTools = pageTools,
+        protectionFlow = protectionFlow,
     )
 }
 
@@ -341,10 +454,19 @@ private fun rememberHomeCallbacks(
     hubViewModel: HubViewModel,
     webViewActions: WebViewActionsHandle,
     navController: NavHostController,
+    suggestions: AddressSuggestionsViewModel,
 ): HomeCallbacks {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    return remember(viewModel, hubViewModel, webViewActions, navController, keyboardController, focusManager) {
+    return remember(
+        viewModel,
+        hubViewModel,
+        webViewActions,
+        navController,
+        keyboardController,
+        focusManager,
+        suggestions,
+    ) {
         HomeCallbacks(
             onSearchSubmit = { input ->
                 viewModel.onHomeSubmit(input) { url ->
@@ -359,6 +481,9 @@ private fun rememberHomeCallbacks(
             },
             onSeeAllHistory = { navController.navigate(AppDestination.History.route) },
             onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
+            // Spec 022 R6 — Home's field starts empty, so it has no page address to compare with.
+            onSearchTextChange = { text -> suggestions.onTextChanged(text, currentPageUrl = null) },
+            onSearchFocusChange = { focused -> suggestions.onFocusChanged(focused) },
         )
     }
 }
@@ -438,6 +563,8 @@ private fun BrowserContent(
     onScrollDelta: (Float) -> Unit,
     pageRequests: PageRequestSink,
     takePopup: () -> WebView?,
+    textZoomPercent: Int,
+    protection: ProtectionHooks,
     modifier: Modifier = Modifier,
 ) {
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
@@ -460,6 +587,7 @@ private fun BrowserContent(
                     onLoadFailed = viewModel::onLoadFailed,
                     onDownloadRequested = onDownloadRequested,
                     pageRequests = pageRequests,
+                    onFindResult = viewModel::onFindResult,
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
                     onUrlChange = viewModel::onUrlChanged,
@@ -472,6 +600,9 @@ private fun BrowserContent(
                 ),
                 modifier = Modifier.fillMaxSize(),
                 adopted = adopted,
+                textZoomPercent = textZoomPercent,
+                desktopMode = remember { viewModel.isDesktopMode(activeTabId) },
+                protection = protection,
             )
         }
     }
@@ -486,21 +617,35 @@ private fun BrowserContent(
 private fun rememberAddressBarCallbacks(
     viewModel: BrowserViewModel,
     webViewActions: WebViewActionsHandle,
+    suggestions: AddressSuggestionsViewModel,
 ): AddressBarCallbacks {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    return remember(viewModel, webViewActions, keyboardController, focusManager) {
+    return remember(viewModel, webViewActions, keyboardController, focusManager, suggestions) {
+        val submit = {
+            viewModel.onAddressBarSubmit { url ->
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                webViewActions.loadUrl(url)
+            }
+            Unit
+        }
         AddressBarCallbacks(
-            onTextChange = viewModel::onAddressBarTextChange,
-            onFocusChange = viewModel::onAddressBarFocusChange,
-            onSubmit = {
-                viewModel.onAddressBarSubmit { url ->
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                    webViewActions.loadUrl(url)
-                }
+            onTextChange = { text ->
+                viewModel.onAddressBarTextChange(text)
+                suggestions.onTextChanged(text, currentPageUrl = viewModel.uiState.value.currentUrl)
             },
+            onFocusChange = { focused ->
+                viewModel.onAddressBarFocusChange(focused)
+                suggestions.onFocusChanged(focused)
+            },
+            onSubmit = submit,
             onClear = viewModel::onAddressBarClear,
+            // Spec 022 FR-019 — a chosen suggestion is submitted exactly like a typed address.
+            onSuggestion = { url ->
+                viewModel.onAddressBarTextChange(url)
+                submit()
+            },
         )
     }
 }

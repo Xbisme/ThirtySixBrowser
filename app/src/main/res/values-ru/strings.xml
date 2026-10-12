@@ -352,4 +352,50 @@
     <string name="settings_clear_category_site_permissions">Разрешения сайтов</string>
     <string name="settings_clear_category_site_permissions_description">Сайты снова запросят камеру, микрофон и геоданные</string>
     <string name="file_chooser_title">Выберите файл</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">Инструменты страницы</string>
+    <string name="hub_tile_find_in_page">Найти на странице</string>
+    <string name="hub_tile_share">Поделиться</string>
+    <string name="hub_tile_print">Печать</string>
+    <string name="hub_tile_desktop_site">ПК-версия</string>
+    <string name="hub_tile_text_size">Размер текста</string>
+    <string name="hub_tile_state_on">Вкл.</string>
+    <string name="hub_tile_state_off">Выкл.</string>
+    <string name="find_in_page_hint">Найти на странице</string>
+    <string name="find_in_page_count_cd">Совпадение %1$d из %2$d</string>
+    <string name="find_in_page_no_matches_cd">Нет совпадений</string>
+    <string name="find_in_page_previous">Предыдущее совпадение</string>
+    <string name="find_in_page_next">Следующее совпадение</string>
+    <string name="find_in_page_close">Закрыть поиск</string>
+    <string name="settings_text_size_title">Размер текста</string>
+    <string name="text_size_level">%1$d %%</string>
+    <string name="suggestion_bookmark_cd">Закладка: %1$s, %2$s</string>
+    <string name="suggestion_history_cd">История: %1$s, %2$s</string>
+    <string name="share_page_title">Поделиться страницей</string>
+    <!-- Spec 023 privacy protection -->
+    <string name="hub_protection_site_title">Защита на этом сайте</string>
+    <string name="hub_protection_site_on">Трекеры блокируются, метки отслеживания удаляются, сначала защищённое соединение</string>
+    <string name="hub_protection_site_off">Отключена для %1$s. Трекеры могут загружаться.</string>
+    <string name="hub_protection_not_secure_title">Небезопасное соединение</string>
+    <string name="hub_protection_not_secure_body">Страница не зашифрована. Другие в сети могут видеть, что вы отправляете.</string>
+    <string name="settings_protection_exceptions">Сайты без защиты</string>
+    <string name="settings_protection_exceptions_summary">Сайты, где вы отключили блокировку трекеров</string>
+    <string name="protection_exceptions_empty">Все сайты защищены. Отключить защиту для сайта можно в меню, находясь на нём; он появится здесь.</string>
+    <string name="protection_exceptions_turn_on">Включить</string>
+    <string name="protection_exceptions_turn_on_cd">Снова включить защиту для %1$s</string>
+    <string name="protection_exceptions_turn_all_on">Включить для всех</string>
+    <string name="protection_exceptions_turn_all_on_confirm_title">Снова включить защиту для всех сайтов?</string>
+    <string name="protection_exceptions_turn_all_on_confirm_body">Трекеры снова будут блокироваться на всех сайтах из списка.</string>
+    <string name="settings_clear_category_sites_without_protection">Сайты без защиты</string>
+    <string name="settings_clear_category_sites_without_protection_description">Защита снова включится на всех сайтах, где вы её отключили</string>
+    <string name="settings_about_notices_title">Уведомления об открытом ПО</string>
+    <string name="settings_about_notice_trackers">Список трекеров и рекламных серверов создан на основе EasyList и EasyPrivacy от The EasyList authors (https://easylist.to/) и распространяется по лицензии CC BY-SA 3.0.</string>
+    <string name="settings_about_notice_public_suffix">Public Suffix List (https://publicsuffix.org/) от Mozilla и участников, используется по лицензии MPL 2.0.</string>
+    <plurals name="hub_protection_trackers_blocked">
+        <item quantity="one">На этой странице заблокирован %1$d трекер</item>
+        <item quantity="few">На этой странице заблокировано %1$d трекера</item>
+        <item quantity="many">На этой странице заблокировано %1$d трекеров</item>
+        <item quantity="other">На этой странице заблокировано %1$d трекера</item>
+    </plurals>
 </resources>

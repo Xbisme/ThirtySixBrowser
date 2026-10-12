@@ -6,6 +6,7 @@ import androidx.compose.ui.test.isSelectable
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
+import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
@@ -29,6 +30,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSearchEngineUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.SetTextSizeUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.presentation.history.InstrumentedFakeHistoryRepository
 import com.raumanian.thirtysix.browser.presentation.history.InstrumentedImmediateDispatchers
@@ -78,6 +80,10 @@ internal class InstrumentedFakeSettingsRepository(
 
     override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
         write { copy(historyRetention = retention) }
+
+    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
+
+        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         write { copy(isOnboardingCompleted = value) }
@@ -178,12 +184,15 @@ internal fun settingsViewModel(
         screenshotCache = InstrumentedNoopScreenshotCache,
         sitePermissionRepository = InstrumentedNoopSitePermissionRepository,
         oneTimeGrants = OneTimeGrantStore(),
+        protectionExceptions = InstrumentedNoopProtectionExceptionRepository,
+        incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
     supportsDynamicColor: Boolean = true,
     appVersionName: String = INSTRUMENTED_APP_VERSION_NAME,
     isDefaultBrowser: IsDefaultBrowserUseCase = IsDefaultBrowserUseCase { false },
+    setTextSize: SetTextSizeUseCase = SetTextSizeUseCase(settingsRepository),
 ): SettingsViewModel = SettingsViewModel(
     observeUserSettings = ObserveUserSettingsUseCase(settingsRepository),
     setThemeMode = setThemeMode,
@@ -196,6 +205,7 @@ internal fun settingsViewModel(
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
     isDefaultBrowser = isDefaultBrowser,
+    setTextSize = setTextSize,
 )
 
 internal const val INSTRUMENTED_APP_VERSION_NAME: String = "9.9.9-instrumented"
@@ -221,4 +231,19 @@ internal object InstrumentedNoopSitePermissionRepository : SitePermissionReposit
     override suspend fun removeSite(origin: String): Result<Unit> = Result.Success(Unit)
 
     override suspend fun clearAll(): Result<Unit> = Result.Success(Unit)
+}
+
+/** Spec 023 — the Settings tests never touch sites without protection. */
+internal object InstrumentedNoopProtectionExceptionRepository :
+    com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository {
+    override fun observeAll() =
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.SiteProtectionException>())
+
+    override fun currentSites(): Set<String> = emptySet()
+
+    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+
+    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+
+    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
 }

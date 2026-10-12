@@ -13,6 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+__pycache__/
 
 # Claude Code agent worktrees (local only)
 /.claude/worktrees/

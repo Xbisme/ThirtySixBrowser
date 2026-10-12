@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.core.constants.AppDefaults
 import com.raumanian.thirtysix.browser.core.constants.StorageKeys
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import javax.inject.Inject
@@ -21,6 +22,9 @@ import javax.inject.Inject
  *  - missing `history_retention_days`, or any stored integer that is not exactly one of the
  *    four day counts → 90 days, via [HistoryRetention.fromDaysOrDefault]. A corrupt or
  *    future value can therefore never produce an unbounded or out-of-set window.
+ *
+ * Spec 022 (data-model §1): missing `text_zoom_percent`, or any value that is not one of the nine
+ * levels → 100%, via [TextSize.fromPercentOrDefault].
  */
 class SettingsMapper @Inject constructor() {
 
@@ -32,5 +36,6 @@ class SettingsMapper @Inject constructor() {
         historyRetention = HistoryRetention.fromDaysOrDefault(prefs[StorageKeys.HISTORY_RETENTION_DAYS]),
         isOnboardingCompleted = prefs[StorageKeys.IS_ONBOARDING_COMPLETED]
             ?: AppDefaults.IS_ONBOARDING_COMPLETED,
+        textSize = TextSize.fromPercentOrDefault(prefs[StorageKeys.TEXT_ZOOM_PERCENT]),
     )
 }

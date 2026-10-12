@@ -7,6 +7,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.print.PrintManager
 import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
@@ -19,6 +20,7 @@ import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,6 +33,7 @@ import androidx.core.graphics.scale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
@@ -38,6 +41,8 @@ import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.presentation.browser.page.PendingPopupWebViewClient
+import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionHooks
+import com.raumanian.thirtysix.browser.presentation.browser.protection.WebViewProtection
 
 /**
  * Compose wrapper around [android.webkit.WebView] (Spec 007).
@@ -87,6 +92,9 @@ internal fun BrowserWebView(
     navigationCallbacks: BrowserNavigationCallbacks,
     modifier: Modifier = Modifier,
     adopted: WebView? = null,
+    textZoomPercent: Int = BrowserLimits.TEXT_SIZE_PERCENT_100,
+    desktopMode: Boolean = false,
+    protection: ProtectionHooks? = null,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     // Spec 021 research R5 — a page-created WebView is adopted by the first generation only; a
@@ -94,6 +102,11 @@ internal fun BrowserWebView(
     val adoptable = remember { arrayOf(adopted) }
     val currentUrl = rememberUpdatedState(state.currentUrl)
     val host = remember { WebViewHost(currentUrl) }
+    // Spec 022 FR-031 — the text size, applied before a WebView's first load and then to the live
+    // one whenever it changes, without a reload. A tab that is not showing has no WebView; it gets
+    // the current size when it is shown.
+    val textZoom = rememberUpdatedState(textZoomPercent)
+    LaunchedEffect(textZoomPercent) { host.current?.settings?.textZoom = textZoomPercent }
 
     // Lifecycle: pause WebView when host stops, resume when started.
     DisposableEffect(lifecycleOwner) {
@@ -122,20 +135,25 @@ internal fun BrowserWebView(
         // This generation's own WebView: by the time its cleanup runs after a renderer loss,
         // `host.current` no longer points at it.
         val instance = remember { arrayOfNulls<WebView>(1) }
+        // Spec 023 — this generation's protections; none when the caller passes no hooks.
+        val guard = remember { arrayOfNulls<WebViewProtection>(1) }
 
         AndroidView(
             modifier = modifier,
             factory = { context ->
                 val toAdopt = adoptable[0]
                 adoptable[0] = null
+                val webView = preparePageTools(toAdopt ?: WebView(context), actions, textZoom.value, desktopMode)
+                guard[0] = protection?.protect(webView, state.isIncognito)
                 buildConfiguredWebView(
-                    webView = toAdopt ?: WebView(context),
+                    webView = webView,
                     adopted = toAdopt != null,
                     state = state,
                     actions = actions,
                     callbacks = callbacks,
                     navigationCallbacks = navigationCallbacks,
                     host = host,
+                    protection = guard[0],
                 ).also { wv ->
                     instance[0] = wv
                     host.current = wv
@@ -147,12 +165,42 @@ internal fun BrowserWebView(
         // disposal (NOT every recomposition). See research.md R2 and [releaseWebView].
         DisposableEffect(Unit) {
             onDispose {
+                guard[0]?.let { protection?.unprotect(it) }
+                guard[0] = null
                 instance[0]?.let { wv ->
                     releaseWebView(wv, isIncognito, rendererGone = generation != host.generation)
                     if (host.current === wv) host.current = null
                 }
                 instance[0] = null
             }
+        }
+    }
+}
+
+/**
+ * Spec 022 — the page tools' WebView side, set up before the first load: the app-wide text size
+ * (FR-031), the tab's page mode (FR-026), and the desktop-mode and print actions.
+ */
+private fun preparePageTools(
+    webView: WebView,
+    actions: WebViewActionsHandle,
+    textZoomPercent: Int,
+    desktopMode: Boolean,
+): WebView = webView.apply {
+    settings.textZoom = textZoomPercent
+    val pageMode = DesktopModeController(this)
+    pageMode.apply(desktopMode)
+    actions.setDesktopMode = { desktop ->
+        stopLoading()
+        pageMode.apply(desktop)
+        actions.reload()
+    }
+    // FR-033 / FR-034 — the system print screen ("Save as PDF" included); nothing about the job
+    // is recorded. The WebView's context is the activity, which PrintManager requires.
+    actions.print = { jobName ->
+        runCatching {
+            val printManager = context.getSystemService(PrintManager::class.java)
+            printManager.print(jobName, createPrintDocumentAdapter(jobName), null)
         }
     }
 }
@@ -171,6 +219,7 @@ private fun buildConfiguredWebView(
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
     host: WebViewHost,
+    protection: WebViewProtection?,
 ): WebView = webView.also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
@@ -193,6 +242,7 @@ private fun buildConfiguredWebView(
             host.replaceAfterRendererGone(crashed)
         },
         pageRequests = callbacks.pageRequests,
+        protection = protection,
     )
     // Spec 015 FR-001 — the engine hands off anything it will not render. Attached beside
     // the two platform clients because this is the same shape of event they carry, and the
@@ -201,6 +251,8 @@ private fun buildConfiguredWebView(
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
+    // Spec 022 US1 — find-in-page results go to the find bar's state.
+    wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }
     // Spec 021 US4 — the long-press menu on links and images; anything else keeps selection.
     wv.setOnLongClickListener { onLongPress(wv, callbacks.pageRequests) }
     // Spec 019 R7 — feed the sliding bars. API 23+, below minSdk 24.
@@ -214,7 +266,7 @@ private fun buildConfiguredWebView(
         pageRequests = callbacks.pageRequests,
         newPopupWebView = { context -> newPopupWebView(context, state.isIncognito) },
     )
-    wireActions(wv, actions, host, adopted)
+    wireActions(wv, actions, host, adopted, protection)
 
     // Spec 008 — conditional initial load. When state is seeded to Failed
     // (instrumented test pattern), skip the initial loadUrl so the test
@@ -225,7 +277,7 @@ private fun buildConfiguredWebView(
     val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
     val loadable = host.loadInitialUrl && state.loadingState !is LoadingState.Failed
     if (!adopted && loadable && !isHome) {
-        wv.loadUrl(state.currentUrl)
+        wv.loadProtected(state.currentUrl, protection)
     }
 }
 
@@ -233,7 +285,13 @@ private fun buildConfiguredWebView(
  * Spec 008 — wires the imperative handle. Each lambda captures [wv]; they persist for the
  * lifetime of the WebView.
  */
-private fun wireActions(wv: WebView, actions: WebViewActionsHandle, host: WebViewHost, adopted: Boolean) {
+private fun wireActions(
+    wv: WebView,
+    actions: WebViewActionsHandle,
+    host: WebViewHost,
+    adopted: Boolean,
+    protection: WebViewProtection?,
+) {
     actions.goBack = { if (wv.canGoBack()) wv.goBack() }
     actions.goForward = { if (wv.canGoForward()) wv.goForward() }
     // A replacement built after a renderer crash has loaded nothing, and `reload()` on an
@@ -241,10 +299,14 @@ private fun wireActions(wv: WebView, actions: WebViewActionsHandle, host: WebVie
     actions.reload = {
         when {
             wv.url != null -> wv.reload()
-            host.currentUrl != UrlConstants.HOME_PAGE_URL -> wv.loadUrl(host.currentUrl)
+            host.currentUrl != UrlConstants.HOME_PAGE_URL -> wv.loadProtected(host.currentUrl, protection)
         }
     }
     actions.stopLoading = { wv.stopLoading() }
+    // Spec 022 US1 — find in page, on the WebView's own search (research R3).
+    actions.findAll = { text -> wv.findAllAsync(text) }
+    actions.findNext = { forward -> wv.findNext(forward) }
+    actions.clearMatches = { wv.clearMatches() }
     // Spec 019 R1 — the reserved Home address is never handed to the WebView.
     // Spec 021 R5 — an adopted pop-up is already navigating for its opener: the tab switch's
     // load of the placeholder address is skipped once.
@@ -252,9 +314,17 @@ private fun wireActions(wv: WebView, actions: WebViewActionsHandle, host: WebVie
     actions.loadUrl = { url ->
         when {
             skipNextLoad -> skipNextLoad = false
-            url != UrlConstants.HOME_PAGE_URL -> wv.loadUrl(url)
+            url != UrlConstants.HOME_PAGE_URL -> wv.loadProtected(url, protection)
         }
     }
+}
+
+/**
+ * Spec 023 research R7 — every address the app itself loads (typed, Home, bookmarks, history,
+ * links from other apps, tab switches, Reload of an empty WebView) goes through the protections.
+ */
+private fun WebView.loadProtected(url: String, protection: WebViewProtection?) {
+    if (protection == null) loadUrl(url) else protection.load(this, url)
 }
 
 /** Spec 021 research R5 — a WebView with the browser's settings for a window the page opened. */
@@ -355,7 +425,7 @@ private fun applyIncognitoSettings(webView: WebView) {
  * Renderer recovery — [onRenderProcessGone] reports the loss of the renderer process through
  * [onRendererGone] instead of letting it end the app.
  */
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions") // One override per WebView callback.
 // androidx.webkit's `MissingOnRenderProcessGone` check has two halves. One looks for an
 // `onRenderProcessGone` override, which this class has. The other reports every call to the
 // `WebViewClient` constructor, and in Kotlin that includes the superclass call in this class
@@ -371,7 +441,17 @@ private class BrowserWebViewClient(
     private val onScreenshotReady: (Bitmap) -> Unit,
     private val onRendererGone: (crashed: Boolean) -> Unit,
     private val pageRequests: PageRequestSink,
+    private val protection: WebViewProtection?,
 ) : WebViewClient() {
+
+    /**
+     * Spec 023 US1 — runs on a WebView IO thread for every request. Main-frame requests are
+     * never blocked (FR-005); listed third-party requests get an empty response (FR-004, FR-007).
+     * Downloads do not pass through here (FR-006).
+     */
+    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? =
+        request?.let { protection?.intercept(it) }
+
     /**
      * Spec 012 (T065 / FR-018) — external-intent crash safety.
      *
@@ -392,7 +472,10 @@ private class BrowserWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val uri = request?.url ?: return false
         val scheme = uri.scheme?.lowercase() ?: return false
-        if (scheme in WEB_NATIVE_SCHEMES) return false // let WebView load it normally
+        if (scheme in WEB_NATIVE_SCHEMES) {
+            // Spec 023 US3/US4 — a page's own http(s) navigation may be upgraded or cleaned.
+            return view != null && protection?.overrideNavigation(view, request) == true
+        }
         val context = view?.context ?: return false
         try {
             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
@@ -409,6 +492,7 @@ private class BrowserWebViewClient(
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         // Spec 021 FR-034 — a new page: the previous page's requests are now stale.
         pageRequests.onNavigationStarted()
+        url?.let { protection?.monitor?.onPageStarted(it) }
         url?.let {
             // Spec 009 — fire URL change FIRST so the address bar reflects
             // the submitted (or redirected-to) URL on the same UI tick the
@@ -419,6 +503,9 @@ private class BrowserWebViewClient(
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
+        // Spec 023 FR-019 — a failed HTTPS attempt's error page is not a visit: the http:// page
+        // that replaces it reports its own start and finish.
+        if (view != null && protection?.onPageFinished(view, url) == true) return
         url?.let(onLoadFinished)
         // Spec 011 Q4 amendment — schedule a screenshot capture after the
         // WebView has actually painted. `postDelayed` defers past the next
@@ -494,6 +581,8 @@ private class BrowserWebViewClient(
         error: WebResourceError?,
     ) {
         if (request?.isForMainFrame != true || error == null) return
+        // Spec 023 FR-019 — a failed HTTPS upgrade falls back to http:// without an error.
+        if (protection?.fallBackIfUpgrade(request.url.toString()) == true) return
         val reason = when (error.errorCode) {
             ERROR_HOST_LOOKUP -> ErrorReason.DnsFailure
             ERROR_CONNECT, ERROR_TIMEOUT, ERROR_IO -> ErrorReason.NetworkUnavailable
@@ -507,6 +596,8 @@ private class BrowserWebViewClient(
         request: WebResourceRequest?,
         errorResponse: WebResourceResponse?,
     ) {
+        // Spec 023 FR-007 — sub-resource errors, including our own blocked responses, never
+        // reach the error UI. FR-021 — an HTTP error is the site's answer, never a fallback.
         if (request?.isForMainFrame != true || errorResponse == null) return
         onLoadFailed(ErrorReason.HttpError(errorResponse.statusCode))
     }
@@ -518,6 +609,8 @@ private class BrowserWebViewClient(
     ) {
         // Constitution §I — NEVER `proceed()`. Always cancel.
         handler?.cancel()
+        // Spec 023 FR-019 — a certificate failure on an HTTPS upgrade falls back to http://.
+        if (protection?.fallBackIfUpgrade(error?.url) == true) return
         onLoadFailed(ErrorReason.SslError)
     }
 

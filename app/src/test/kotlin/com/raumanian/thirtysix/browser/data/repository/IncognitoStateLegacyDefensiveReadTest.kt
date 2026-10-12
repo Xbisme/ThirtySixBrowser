@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
@@ -38,6 +39,7 @@ class IncognitoStateLegacyDefensiveReadTest {
             cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
             tabRepository = FakeTabRepository(),
             dispatchers = TestDispatcherProvider(),
+            incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
         )
         val first = repository.observeTabs().first()
         assertEquals("singleton constructed → empty state per FR-012", emptyList<Tab>(), first)
@@ -51,6 +53,7 @@ class IncognitoStateLegacyDefensiveReadTest {
             cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
             tabRepository = poisoned,
             dispatchers = TestDispatcherProvider(),
+            incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
         )
 
         // Snapshot capture on 0→1 transition reads tabRepository.observeTabs().
@@ -71,6 +74,7 @@ class IncognitoStateLegacyDefensiveReadTest {
             cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
             tabRepository = FakeTabRepository(),
             dispatchers = TestDispatcherProvider(),
+            incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
         )
 
         // Should NOT throw; state stays empty.

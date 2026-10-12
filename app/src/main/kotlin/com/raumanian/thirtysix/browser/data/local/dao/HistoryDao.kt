@@ -42,6 +42,26 @@ interface HistoryDao {
     fun observeAll(): Flow<List<HistoryEntryEntity>>
 
     /**
+     * Spec 022 data-model §4 — one row per address, the one from its most recent visit, newest
+     * first: the history half of the address-suggestion snapshot.
+     *
+     * One pass with `GROUP BY` instead of a correlated subquery, which would scan the table once
+     * per row. With a lone `MAX()` aggregate, SQLite takes the other columns from the row that
+     * holds the maximum (documented "bare column" behaviour). No user text reaches this query, so
+     * there is no `LIKE` anywhere on the suggestion path (FR-017).
+     */
+    @Query(
+        """
+        SELECT ${HistoryEntryEntity.COL_ID}, ${HistoryEntryEntity.COL_URL}, ${HistoryEntryEntity.COL_TITLE},
+               MAX(${HistoryEntryEntity.COL_VISITED_AT}) AS ${HistoryEntryEntity.COL_VISITED_AT}
+          FROM ${HistoryEntryEntity.TABLE_NAME}
+         GROUP BY ${HistoryEntryEntity.COL_URL}
+         ORDER BY ${HistoryEntryEntity.COL_VISITED_AT} DESC, ${HistoryEntryEntity.COL_ID} DESC
+        """,
+    )
+    suspend fun getLatestVisitPerUrl(): List<HistoryEntryEntity>
+
+    /**
      * Spec 019 (data-model §4) — the newest [limit] visits for the Home page. Served by the
      * existing `visited_at` index, so it never scans the whole table the way [observeAll] does.
      */

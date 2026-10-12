@@ -1,6 +1,6 @@
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
-> Cập nhật lần cuối: 2026-09-15 (Spec 017 implemented)
+> Cập nhật lần cuối: 2026-10-11 (Spec 022 merged — Phase 6 còn 023)
 > v1.0: Android Native Browser — ✅ Specs 001–016 done (013, 014, 015, 016 đều đã merge vào `main`; 016 qua PR #18, merge commit `3083941`, 2026-09-12). **Phase 3 3/3 · Phase 4 1/3 merged + 017 đã implement** (Spec 016 ở 112/113 — còn TalkBack pass của T109, cần người thật). ✅ **017 `splash-screen` merged 2026-09-15 — PR #20, merge commit `cca5c0c`, CI xanh 6/6, 35/35 tasks.** **Phase 4 giờ 3/3 — 🎉 v1.0 FEATURE-COMPLETE.** ✅ **018 `onboarding-flow` merged 2026-09-15 — PR #24, merge commit `492e4f3`, CI xanh 6/6, 41/41 tasks. Specs 001–018 đều đã merge vào `main`.** Sau khi merge 018, Specs 001–018 đủ; còn lại là các mục nợ trước khi nộp store (số đo phần cứng Spec 014/015, screen-reader pass Spec 016/017/018).
 
 ## Nguyên tắc Roadmap
@@ -59,7 +59,8 @@ Constitution
                                             ├── 020 default-browser-entry-points
                                             ├── 021 web-capabilities
                                             ├── 022 page-tools
-                                            └── 023 privacy-protection
+                                            ├── 023 privacy-protection
+                                            └── 024 privacy-tools
 ```
 
 ## Spec List (v1.0)
@@ -88,8 +89,9 @@ Constitution
 | 019 | `ui-redesign` | Đập đi xây lại toàn bộ giao diện theo [design system ThirtySix](https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys) (tím thay teal) + Compose Phase Discipline (Constitution v1.4.0 §V) | Mọi màn theo design system; chrome không recompose theo từng frame khi cuộn/tải/kéo | 001–018, design đã duyệt | ✅ **Done 2026-10-10 — PR #27 merged (`54e090a`, CI 6/6).** Chạy trên máy thật Galaxy A55 (2026-10-11, release): **SC-005 PASS** (p95 14/14/15/10 ms), Tabs 10 thẻ 104 ms, thẻ mới → Home ≈57 ms; sửa lỗi ô "Suchmaschine" bị ngắt giữa từ ở 360dp. ⚠️ Cold start lần đầu (onboarding) +30% so với Spec 018 — vượt ngưỡng +5% của SC-010, còn mở; người dùng quay lại +4,2% (đạt). Còn cần người: Layout Inspector, TalkBack, so canvas, dynamic color |
 | 020 | `default-browser-entry-points` | Intent filter http/https `VIEW` + `BROWSABLE`; nhận link/text chia sẻ từ app khác; đề nghị đặt làm trình duyệt mặc định (`RoleManager` API 29+, màn cài đặt hệ thống dưới đó) | Bấm link trong app khác → mở bằng ThirtySix; đặt làm mặc định được | 001–019 | ✅ **Done 2026-10-11 — PR #30 merged (`1bb8c6a`, CI 6/6), 65/65.** Unit 688/688, instrumented 110/110 (AVD 16 KB), APK +28.480 B, không thêm thư viện/quyền. Gate G1–G18 đạt (emulator + Galaxy A55: mở link 209,5 ms cold / 97 ms warm). Phát hiện + sửa lỗi `ShowBrowser` dựng lại màn browser |
 | 021 | `web-capabilities` | Chọn file khi upload · video toàn màn hình · popup/`window.open` · hộp thoại JS + HTTP auth · hỏi quyền camera/mic/vị trí theo từng trang (nhớ theo origin) · menu nhấn giữ link/ảnh | Upload ảnh, YouTube fullscreen, đăng nhập popup, Google Meet đều chạy | 020 | ✅ **Done 2026-10-11 — PR #32 merged (`ef9ae68`, CI 6/6), 70/70.** Unit 757/757; instrumented 132/135 (3 lỗi đã giải thích: 2 flake do tải, 1 lỗi môi trường AVD có sẵn từ Spec 019); APK 3.359.236 B (+95.592 B, ngân sách +150 KB); Room v3 (`site_permissions`); thêm 4 quyền nguy hiểm + `MODIFY_AUDIO_SETTINGS` (Constitution 1.5.1). Gate G1–G20 + SC-001 10/10 trên Galaxy A55. 6 lỗi tìm ra khi test, đã sửa (xem tasks.md) |
-| 022 | `page-tools` | Tìm trong trang · chia sẻ · chế độ máy tính · cỡ chữ · in/lưu PDF · gợi ý khi gõ từ lịch sử + bookmark | Mỗi công cụ dùng được từ hub | 021 | ⬜ Next (Phase 6) |
-| 023 | `privacy-protection` | Chặn tracker (host list đóng gói trong APK) · tự nâng HTTPS · xoá tham số theo dõi + cắt referrer · nút Fire + trang fireproof · Global Privacy Control · privacy dashboard theo trang · tự từ chối cookie banner + chống fingerprint bằng script đóng gói sẵn (Constitution §II) | Request tới tracker bị chặn; dashboard hiện số đã chặn | 022 | ⬜ Phase 6 |
+| 022 | `page-tools` | Tìm trong trang · chia sẻ · chế độ máy tính · cỡ chữ · in/lưu PDF · gợi ý khi gõ từ lịch sử + bookmark | Mỗi công cụ dùng được từ hub | 021 | ✅ **Done 2026-10-11 — PR #35 merged (`d0908a1`, CI 6/6), 68/68.** Unit 808/808, instrumented 156/156 (AVD 16 KB), APK +34.836 B (ngân sách +100 KB), không thêm thư viện, Room vẫn v3. Sửa lỗi mất phím khi gõ nhanh ở address bar (Spec 009). Còn mở: G7 (cần proxy), G17 Layout Inspector + screen reader (cần người) |
+| 023 | `privacy-protection` | Chặn tracker (host list đóng gói trong APK) · tự nâng HTTPS · xoá tham số theo dõi + cắt referrer · Global Privacy Control; mọi lớp bảo vệ bật sẵn, tắt được theo từng trang | Request tới tracker bị chặn; `http://` được nâng lên HTTPS; link có `utm_*` bị xoá tham số | 022 | 🟢 **Đã implement 2026-10-12** (branch `023-privacy-protection`, chồng lên PR #36). Unit 881/881, instrumented 168/169 (1 flake cũ), APK +232.529 B, Room v4, không thêm thư viện. Tìm + sửa lỗi lùi về http không chạy. Còn: gate trên Galaxy A55 (máy chưa kết nối được), PR |
+| 024 | `privacy-tools` | Nút Fire + trang fireproof · privacy dashboard theo trang · tự từ chối cookie banner + chống fingerprint bằng script đóng gói sẵn (Constitution §II) | Bấm Fire → xoá dữ liệu trừ trang fireproof; dashboard hiện số tracker đã chặn | 023 | ⬜ Phase 6 (tách từ 023, Constitution v1.6.0) |
 
 ## Ý tưởng cho bản sau (chưa có spec)
 
@@ -109,7 +111,7 @@ Constitution → 001 → 002
              → 013, 014, 015 (parallel sau 007)
              → 016, 017, 018
              → 019 ui-redesign
-             → 020 → 021 → 022 → 023 (Phase 6)
+             → 020 → 021 → 022 → 023 → 024 (Phase 6)
 ```
 
 ### Test flow tích lũy
@@ -137,7 +139,8 @@ Sau 019: Giao diện mới theo design system, đạt Compose Phase Discipline
 Sau 020: Mở link từ app khác bằng ThirtySix, đặt làm trình duyệt mặc định
 Sau 021: Upload, fullscreen, popup, quyền camera/mic/vị trí theo trang chạy đúng
 Sau 022: Tìm trong trang, chia sẻ, chế độ máy tính, cỡ chữ, in, gợi ý khi gõ
-Sau 023: Chặn tracker, HTTPS, nút Fire, privacy dashboard
+Sau 023: Chặn tracker, tự nâng HTTPS, xoá tham số theo dõi, GPC
+Sau 024: Nút Fire, privacy dashboard, script cookie banner + fingerprint
 ```
 
 ## Quy ước đặt tên branch + spec folder

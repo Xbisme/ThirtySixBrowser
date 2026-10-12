@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 
 /**
@@ -22,6 +23,8 @@ data class SettingsUiState(
     val isDynamicColorSupported: Boolean = false,
     val searchEngine: SearchEngine = AppDefaults.SEARCH_ENGINE,
     val historyRetention: HistoryRetention = AppDefaults.HISTORY_RETENTION,
+    /** Spec 022 FR-030 — the app-wide text size of web pages. */
+    val textSize: TextSize = AppDefaults.TEXT_SIZE,
     val appLanguage: AppLanguage = AppLanguage.FollowSystem,
     val appVersionName: String = "",
     /** Spec 020 FR-020 — re-read from the system on every resume (FR-022), never stored. */
@@ -56,6 +59,9 @@ sealed interface SettingsDialog {
 
     /** US5 — 7 / 30 / 90 / 180 days. */
     data object RetentionChooser : SettingsDialog
+
+    /** Spec 022 FR-030 — the text size chooser, also opened from the hub's Text size tile. */
+    data object TextSizeChooser : SettingsDialog
 
     /** US5 FR-021 — the warning before a shorter window deletes history. */
     data class ConfirmShortenRetention(val target: HistoryRetention) : SettingsDialog

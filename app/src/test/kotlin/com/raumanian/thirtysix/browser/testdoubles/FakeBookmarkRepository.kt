@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
  * mutations are not synchronized.
  */
 @Suppress("TooManyFunctions")
-class FakeBookmarkRepository : BookmarkRepository {
+open class FakeBookmarkRepository : BookmarkRepository {
 
     private val bookmarksFlow: MutableStateFlow<Map<Long, Bookmark>> = MutableStateFlow(emptyMap())
     private val foldersFlow: MutableStateFlow<Map<Long, BookmarkFolder>> = MutableStateFlow(emptyMap())
@@ -51,6 +51,9 @@ class FakeBookmarkRepository : BookmarkRepository {
 
     override fun observeRecentBookmarks(limit: Int): Flow<List<Bookmark>> =
         bookmarksFlow.asStateFlow().map { map -> map.values.sortedByDescending { it.createdAt }.take(limit) }
+
+    override suspend fun getAllBookmarks(): List<Bookmark> =
+        bookmarksFlow.value.values.sortedWith(compareByDescending<Bookmark> { it.createdAt }.thenByDescending { it.id })
 
     override fun searchBookmarks(query: String): Flow<List<Bookmark>> =
         bookmarksFlow.asStateFlow().map { map ->

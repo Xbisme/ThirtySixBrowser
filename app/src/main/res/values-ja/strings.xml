@@ -340,4 +340,47 @@
     <string name="settings_clear_category_site_permissions">サイトの権限</string>
     <string name="settings_clear_category_site_permissions_description">サイトがカメラ、マイク、位置情報をもう一度確認します</string>
     <string name="file_chooser_title">ファイルを選択</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">ページツール</string>
+    <string name="hub_tile_find_in_page">ページ内検索</string>
+    <string name="hub_tile_share">共有</string>
+    <string name="hub_tile_print">印刷</string>
+    <string name="hub_tile_desktop_site">PC版サイト</string>
+    <string name="hub_tile_text_size">文字サイズ</string>
+    <string name="hub_tile_state_on">オン</string>
+    <string name="hub_tile_state_off">オフ</string>
+    <string name="find_in_page_hint">ページ内検索</string>
+    <string name="find_in_page_count_cd">%2$d件中%1$d件目</string>
+    <string name="find_in_page_no_matches_cd">一致なし</string>
+    <string name="find_in_page_previous">前の一致</string>
+    <string name="find_in_page_next">次の一致</string>
+    <string name="find_in_page_close">検索を閉じる</string>
+    <string name="settings_text_size_title">文字サイズ</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">ブックマーク: %1$s、%2$s</string>
+    <string name="suggestion_history_cd">履歴: %1$s、%2$s</string>
+    <string name="share_page_title">ページを共有</string>
+    <!-- Spec 023 privacy protection -->
+    <string name="hub_protection_site_title">このサイトの保護</string>
+    <string name="hub_protection_site_on">トラッカーをブロックし、追跡タグを削除し、安全な接続を優先します</string>
+    <string name="hub_protection_site_off">%1$s ではオフです。トラッカーが読み込まれる可能性があります。</string>
+    <string name="hub_protection_not_secure_title">安全でない接続</string>
+    <string name="hub_protection_not_secure_body">このページは暗号化されていません。同じネットワーク上の他人が送信内容を見られる可能性があります。</string>
+    <string name="settings_protection_exceptions">保護なしのサイト</string>
+    <string name="settings_protection_exceptions_summary">トラッカーのブロックをオフにしたサイト</string>
+    <string name="protection_exceptions_empty">すべてのサイトが保護されています。サイトを表示中にメニューから保護をオフにすると、ここに表示されます。</string>
+    <string name="protection_exceptions_turn_on">オンにする</string>
+    <string name="protection_exceptions_turn_on_cd">%1$s の保護をオンに戻す</string>
+    <string name="protection_exceptions_turn_all_on">すべてオンに戻す</string>
+    <string name="protection_exceptions_turn_all_on_confirm_title">すべてのサイトの保護をオンに戻しますか？</string>
+    <string name="protection_exceptions_turn_all_on_confirm_body">このリストのすべてのサイトで再びトラッカーがブロックされます。</string>
+    <string name="settings_clear_category_sites_without_protection">保護なしのサイト</string>
+    <string name="settings_clear_category_sites_without_protection_description">保護をオフにしたすべてのサイトで保護がオンに戻ります</string>
+    <string name="settings_about_notices_title">オープンソースに関する通知</string>
+    <string name="settings_about_notice_trackers">トラッカーと広告サーバーのリストは The EasyList authors（https://easylist.to/）の EasyList と EasyPrivacy を基にしており、CC BY-SA 3.0 で提供されます。</string>
+    <string name="settings_about_notice_public_suffix">Mozilla とコントリビューターによる Public Suffix List（https://publicsuffix.org/）を MPL 2.0 の下で使用しています。</string>
+    <plurals name="hub_protection_trackers_blocked">
+        <item quantity="other">このページで %1$d 件のトラッカーをブロック</item>
+    </plurals>
 </resources>

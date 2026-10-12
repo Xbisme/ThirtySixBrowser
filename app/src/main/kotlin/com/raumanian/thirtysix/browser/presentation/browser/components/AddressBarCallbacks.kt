@@ -21,4 +21,6 @@ internal data class AddressBarCallbacks(
     val onFocusChange: (Boolean) -> Unit,
     val onSubmit: () -> Unit,
     val onClear: () -> Unit,
+    /** Spec 022 FR-019 — load a chosen suggestion's address as if it had been typed and submitted. */
+    val onSuggestion: (String) -> Unit = {},
 )

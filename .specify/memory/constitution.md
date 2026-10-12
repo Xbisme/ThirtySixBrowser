@@ -25,6 +25,32 @@ Version Change: (none) → 1.0.0 (INITIAL — project constitution created)
                                 §VII require protection data to ship in the APK)
                 1.5.0 → 1.5.1 (PATCH — Spec 021 fills in the permission rows that 1.5.0
                                 announced; no principle changes)
+                1.5.1 → 1.6.0 (MINOR — §X Phase 6 gains 024 privacy-tools: Spec 023's
+                                scope is split in two; §II, §VI, §VII re-pointed)
+
+Modified Principles (1.6.0, 2026-10-11, decided by the project lead):
+- II. Google Play Compliance — one-way script injection condition 3 now names Spec 024
+       (cookie-banner auto-decline, fingerprinting protection); Spec 023 injects no script.
+- VI. Testing Discipline — the rule-engine bullet keeps Spec 023 (host blocklist matcher,
+       HTTPS upgrade, URL-parameter stripping) and adds the per-site protection exception
+       list (023) and fireproof-site rules (024).
+- VII. Offline-First Architecture — "the Spec 023 privacy protections" becomes "the Spec
+       023 and 024 privacy protections".
+- X. Simplicity & Build Order — Phase 6 order is now 020 → 021 → 022 → 023 → 024,
+       MANDATORY. 023 `privacy-protection` keeps the network-level protections (tracker
+       blocking from an APK-bundled host list, HTTPS upgrade, tracking-parameter stripping
+       and referrer trimming, Global Privacy Control), every one on by default and
+       switchable off per site. New 024 `privacy-tools`: Fire button with fireproof sites,
+       per-site privacy dashboard, cookie-banner auto-decline and fingerprinting protection
+       through bundled scripts. "Design before spec" covers 024. Rationale names 023–024.
+- Bump rationale: MINOR — a new spec slot in a mandatory phase; nothing is removed, the
+       former 023 scope survives in full across 023 and 024. Reason for the split: seven
+       feature groups in one spec would exceed any previous spec in tasks and PR size.
+
+Follow-up TODOs (1.6.0):
+- ✅ RESOLVED in the same change — TODO(SDD_ROADMAP_024): sdd-roadmap.md, dev-workflow.md, project-context.md and CLAUDE.md
+       still describe 023 as the full privacy scope and stop at 023 — split the row and add
+       024 in the same change as this amendment.
 
 Modified Sections (1.5.1, 2026-10-11, Spec 021 task T063):
 - Technical Standards → Android Permissions & Entitlements — rows added for CAMERA,
@@ -246,7 +272,7 @@ constraint.
      remote data;
   2. it is installed with `WebViewCompat.addDocumentStartJavaScript`, feature-detected
      first; on a WebView without the feature the protection is simply off;
-  3. it implements a privacy protection defined in a spec (Spec 023);
+  3. it implements a privacy protection defined in a spec (Spec 024);
   4. it exposes no native API and receives nothing back from the page;
   5. the spec documents the origin rules for where it runs.
 
@@ -495,7 +521,8 @@ critical user flows. Integration tests for Room and DataStore are REQUIRED.
 
 - Unit tests MUST cover: repositories, ViewModels, use cases, mappers, URL parsing,
   search engine URL builders, incoming-link and intent handling (Spec 020), and the
-  host blocklist matcher, HTTPS-upgrade and URL-parameter-stripping rules (Spec 023)
+  host blocklist matcher, HTTPS-upgrade and URL-parameter-stripping rules and the
+  per-site protection exception list (Spec 023), and the fireproof-site rules (Spec 024)
 - Compose UI tests MUST cover: address bar input flow, tab switcher tap, bookmark
   add/delete, settings toggles, onboarding flow
 - Instrumented tests MUST cover: Room DAOs, DataStore read/write, WebView basic load
@@ -520,7 +547,7 @@ All non-network features MUST operate without connectivity. All writes MUST be a
 No data loss under any failure mode is acceptable.
 
 - ALL features (bookmarks, history, tabs, settings, downloads list view, and the
-  Spec 023 privacy protections) MUST function fully offline — the ONLY exception is
+  Spec 023 and 024 privacy protections) MUST function fully offline — the ONLY exception is
   WebView page load + outbound search query
 - All user data MUST be persisted to Room DB (with `journal_mode = WAL`) within 500ms
   of any change — partial writes MUST NOT corrupt existing data
@@ -648,13 +675,16 @@ MUST follow the spec roadmap. No speculative code is permitted.
       prompts remembered per origin, long-press menu on links and images
     - 022 `page-tools` — find in page, share, desktop mode, text zoom, print / save as
       PDF, address-bar autocomplete from local history and bookmarks
-    - 023 `privacy-protection` — tracker blocking from a host list, HTTPS upgrade,
-      tracking-parameter stripping and referrer trimming, Fire button with fireproof
-      sites, Global Privacy Control, per-site privacy dashboard, cookie-banner
-      auto-decline and fingerprinting protection through bundled scripts (§II)
+    - 023 `privacy-protection` — tracker blocking from an APK-bundled host list, HTTPS
+      upgrade, tracking-parameter stripping and referrer trimming, Global Privacy
+      Control; every protection on by default and switchable off per site
+    - 024 `privacy-tools` — Fire button with fireproof sites, per-site privacy
+      dashboard, cookie-banner auto-decline and fingerprinting protection through
+      bundled scripts (§II)
 - **Design before spec**: a screen or feature whose UI is not yet in the design system
   MUST be designed there and approved by the project lead before `/speckit-specify`
-  runs for it. In Phase 6 this covers 021, 022, 023 and 020's set-as-default prompt. New features proposed while designing are added to `sdd-roadmap.md` for
+  runs for it. In Phase 6 this covers 021, 022, 023, 024 and 020's set-as-default
+  prompt. New features proposed while designing are added to `sdd-roadmap.md` for
   a later version; they MUST NOT be folded into the spec in progress.
 - **Implementation sequence within Phase 1 is MANDATORY**: 001 → 002 → (003, 004,
   005, 006 parallel)
@@ -668,7 +698,8 @@ MUST follow the spec roadmap. No speculative code is permitted.
 **Rationale**: Shipping a complete, polished basic browser is what defines v1.0
 success; a stripped-down or unpolished v1.0 would undermine the "minimalist, just works"
 positioning. Phase 6 then follows the same rule: the app must first be reachable as a
-browser (020) and handle the web properly (021, 022) before it adds protections (023),
+browser (020) and handle the web properly (021, 022) before it adds protections
+(023, then the tools built on them in 024),
 because protections on a browser nobody can open links in protect nothing. Phase-gating
 enforces this.
 
@@ -872,4 +903,4 @@ All implementation decisions MUST align with these principles.
   red 16KB CI gate
 - Constitution supersedes all other practices; in case of conflict, the constitution wins
 
-**Version**: 1.5.1 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-11
+**Version**: 1.6.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-11

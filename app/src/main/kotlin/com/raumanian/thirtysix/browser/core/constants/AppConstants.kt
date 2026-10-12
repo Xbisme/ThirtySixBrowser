@@ -63,4 +63,7 @@ object AppConstants {
 
     /** Spec 021 research R3 — `cacheDir` sub-folder holding photos/videos captured for an upload. */
     const val CAPTURE_CACHE_DIR = "capture"
+
+    /** Spec 021 / Spec 022 — the MIME type of a link or page address handed to the share sheet. */
+    const val MIME_TEXT_PLAIN = "text/plain"
 }

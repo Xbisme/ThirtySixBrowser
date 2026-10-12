@@ -382,4 +382,49 @@
     <string name="settings_clear_category_site_permissions">Site permissions</string>
     <string name="settings_clear_category_site_permissions_description">Sites will ask again for camera, microphone and location</string>
     <string name="file_chooser_title">Choose a file</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">Page tools</string>
+    <string name="hub_tile_find_in_page">Find in page</string>
+    <string name="hub_tile_share">Share</string>
+    <string name="hub_tile_print">Print</string>
+    <string name="hub_tile_desktop_site">Desktop site</string>
+    <string name="hub_tile_text_size">Text size</string>
+    <string name="hub_tile_state_on">On</string>
+    <string name="hub_tile_state_off">Off</string>
+    <string name="find_in_page_hint">Find in page</string>
+    <string name="find_in_page_count" translatable="false">%1$d/%2$d</string>
+    <string name="find_in_page_count_cd">Match %1$d of %2$d</string>
+    <string name="find_in_page_no_matches_cd">No matches</string>
+    <string name="find_in_page_previous">Previous match</string>
+    <string name="find_in_page_next">Next match</string>
+    <string name="find_in_page_close">Close find bar</string>
+    <string name="settings_text_size_title">Text size</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">Bookmark: %1$s, %2$s</string>
+    <string name="suggestion_history_cd">History: %1$s, %2$s</string>
+    <string name="share_page_title">Share page</string>
+    <!-- Spec 023 privacy protection -->
+    <string name="hub_protection_site_title">Protection for this site</string>
+    <string name="hub_protection_site_on">Trackers blocked, tracking tags removed, secure connection tried first</string>
+    <string name="hub_protection_site_off">Off for %1$s. Trackers can load here.</string>
+    <string name="hub_protection_not_secure_title">Connection not secure</string>
+    <string name="hub_protection_not_secure_body">This page is not encrypted. Others on the network could see what you send.</string>
+    <string name="settings_protection_exceptions">Sites without protection</string>
+    <string name="settings_protection_exceptions_summary">Sites where you turned tracker blocking off</string>
+    <string name="protection_exceptions_empty">Every site is protected. Turn protection off for a site from the menu while you are on it; it will be listed here.</string>
+    <string name="protection_exceptions_turn_on">Turn on</string>
+    <string name="protection_exceptions_turn_on_cd">Turn protection back on for %1$s</string>
+    <string name="protection_exceptions_turn_all_on">Turn all back on</string>
+    <string name="protection_exceptions_turn_all_on_confirm_title">Turn protection back on for every site?</string>
+    <string name="protection_exceptions_turn_all_on_confirm_body">Trackers will be blocked again on every site in this list.</string>
+    <string name="settings_clear_category_sites_without_protection">Sites without protection</string>
+    <string name="settings_clear_category_sites_without_protection_description">Protection turns back on for every site you switched it off for</string>
+    <string name="settings_about_notices_title">Open-source notices</string>
+    <string name="settings_about_notice_trackers">The tracker and ad-server list is derived from EasyList and EasyPrivacy by The EasyList authors (https://easylist.to/) and shared under CC BY-SA 3.0.</string>
+    <string name="settings_about_notice_public_suffix">Public Suffix List (https://publicsuffix.org/) by Mozilla and contributors, used under MPL 2.0.</string>
+    <plurals name="hub_protection_trackers_blocked">
+        <item quantity="one">%1$d tracker blocked on this page</item>
+        <item quantity="other">%1$d trackers blocked on this page</item>
+    </plurals>
 </resources>

@@ -340,4 +340,47 @@
     <string name="settings_clear_category_site_permissions">网站权限</string>
     <string name="settings_clear_category_site_permissions_description">网站将再次请求摄像头、麦克风和位置信息</string>
     <string name="file_chooser_title">选择文件</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">页面工具</string>
+    <string name="hub_tile_find_in_page">在页面中查找</string>
+    <string name="hub_tile_share">分享</string>
+    <string name="hub_tile_print">打印</string>
+    <string name="hub_tile_desktop_site">桌面版网站</string>
+    <string name="hub_tile_text_size">文字大小</string>
+    <string name="hub_tile_state_on">开</string>
+    <string name="hub_tile_state_off">关</string>
+    <string name="find_in_page_hint">在页面中查找</string>
+    <string name="find_in_page_count_cd">第 %1$d 个，共 %2$d 个</string>
+    <string name="find_in_page_no_matches_cd">无匹配项</string>
+    <string name="find_in_page_previous">上一个匹配项</string>
+    <string name="find_in_page_next">下一个匹配项</string>
+    <string name="find_in_page_close">关闭查找栏</string>
+    <string name="settings_text_size_title">文字大小</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">书签：%1$s，%2$s</string>
+    <string name="suggestion_history_cd">历史：%1$s，%2$s</string>
+    <string name="share_page_title">分享网页</string>
+    <!-- Spec 023 privacy protection -->
+    <string name="hub_protection_site_title">此网站的保护</string>
+    <string name="hub_protection_site_on">拦截跟踪器、移除跟踪参数、优先使用安全连接</string>
+    <string name="hub_protection_site_off">已对 %1$s 关闭，跟踪器可在此加载。</string>
+    <string name="hub_protection_not_secure_title">连接不安全</string>
+    <string name="hub_protection_not_secure_body">此页面未加密，同一网络中的其他人可能看到您发送的内容。</string>
+    <string name="settings_protection_exceptions">未受保护的网站</string>
+    <string name="settings_protection_exceptions_summary">您关闭了跟踪器拦截的网站</string>
+    <string name="protection_exceptions_empty">所有网站都受保护。在网站上通过菜单关闭保护后，它会显示在这里。</string>
+    <string name="protection_exceptions_turn_on">开启</string>
+    <string name="protection_exceptions_turn_on_cd">重新开启 %1$s 的保护</string>
+    <string name="protection_exceptions_turn_all_on">全部重新开启</string>
+    <string name="protection_exceptions_turn_all_on_confirm_title">要重新开启所有网站的保护吗？</string>
+    <string name="protection_exceptions_turn_all_on_confirm_body">此列表中所有网站的跟踪器都将再次被拦截。</string>
+    <string name="settings_clear_category_sites_without_protection">未受保护的网站</string>
+    <string name="settings_clear_category_sites_without_protection_description">您关闭过保护的所有网站将重新开启保护</string>
+    <string name="settings_about_notices_title">开源声明</string>
+    <string name="settings_about_notice_trackers">跟踪器和广告服务器列表源自 The EasyList authors（https://easylist.to/）的 EasyList 和 EasyPrivacy，按 CC BY-SA 3.0 共享。</string>
+    <string name="settings_about_notice_public_suffix">使用 Mozilla 及贡献者的 Public Suffix List（https://publicsuffix.org/），遵循 MPL 2.0。</string>
+    <plurals name="hub_protection_trackers_blocked">
+        <item quantity="other">已在此页面拦截 %1$d 个跟踪器</item>
+    </plurals>
 </resources>

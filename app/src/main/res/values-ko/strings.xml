@@ -340,4 +340,47 @@
     <string name="settings_clear_category_site_permissions">사이트 권한</string>
     <string name="settings_clear_category_site_permissions_description">사이트에서 카메라, 마이크, 위치를 다시 묻습니다</string>
     <string name="file_chooser_title">파일 선택</string>
+
+    <!-- Spec 022 — page tools -->
+    <string name="hub_page_tools_title">페이지 도구</string>
+    <string name="hub_tile_find_in_page">페이지에서 찾기</string>
+    <string name="hub_tile_share">공유</string>
+    <string name="hub_tile_print">인쇄</string>
+    <string name="hub_tile_desktop_site">데스크톱 사이트</string>
+    <string name="hub_tile_text_size">글자 크기</string>
+    <string name="hub_tile_state_on">켜짐</string>
+    <string name="hub_tile_state_off">꺼짐</string>
+    <string name="find_in_page_hint">페이지에서 찾기</string>
+    <string name="find_in_page_count_cd">%2$d개 중 %1$d번째</string>
+    <string name="find_in_page_no_matches_cd">일치 항목 없음</string>
+    <string name="find_in_page_previous">이전 항목</string>
+    <string name="find_in_page_next">다음 항목</string>
+    <string name="find_in_page_close">찾기 닫기</string>
+    <string name="settings_text_size_title">글자 크기</string>
+    <string name="text_size_level">%1$d%%</string>
+    <string name="suggestion_bookmark_cd">북마크: %1$s, %2$s</string>
+    <string name="suggestion_history_cd">기록: %1$s, %2$s</string>
+    <string name="share_page_title">페이지 공유</string>
+    <!-- Spec 023 privacy protection -->
+    <string name="hub_protection_site_title">이 사이트 보호</string>
+    <string name="hub_protection_site_on">추적기 차단, 추적 태그 제거, 보안 연결 우선</string>
+    <string name="hub_protection_site_off">%1$s에서 꺼짐. 추적기가 로드될 수 있습니다.</string>
+    <string name="hub_protection_not_secure_title">안전하지 않은 연결</string>
+    <string name="hub_protection_not_secure_body">이 페이지는 암호화되지 않았습니다. 같은 네트워크의 다른 사람이 보내는 내용을 볼 수 있습니다.</string>
+    <string name="settings_protection_exceptions">보호하지 않는 사이트</string>
+    <string name="settings_protection_exceptions_summary">추적기 차단을 끈 사이트</string>
+    <string name="protection_exceptions_empty">모든 사이트가 보호됩니다. 사이트를 보는 중에 메뉴에서 보호를 끄면 여기에 표시됩니다.</string>
+    <string name="protection_exceptions_turn_on">켜기</string>
+    <string name="protection_exceptions_turn_on_cd">%1$s 보호 다시 켜기</string>
+    <string name="protection_exceptions_turn_all_on">모두 다시 켜기</string>
+    <string name="protection_exceptions_turn_all_on_confirm_title">모든 사이트의 보호를 다시 켤까요?</string>
+    <string name="protection_exceptions_turn_all_on_confirm_body">이 목록의 모든 사이트에서 추적기가 다시 차단됩니다.</string>
+    <string name="settings_clear_category_sites_without_protection">보호하지 않는 사이트</string>
+    <string name="settings_clear_category_sites_without_protection_description">보호를 끈 모든 사이트에서 보호가 다시 켜집니다</string>
+    <string name="settings_about_notices_title">오픈소스 고지</string>
+    <string name="settings_about_notice_trackers">추적기 및 광고 서버 목록은 The EasyList authors(https://easylist.to/)의 EasyList와 EasyPrivacy를 바탕으로 하며 CC BY-SA 3.0으로 공유됩니다.</string>
+    <string name="settings_about_notice_public_suffix">Mozilla 및 기여자의 Public Suffix List(https://publicsuffix.org/)를 MPL 2.0에 따라 사용합니다.</string>
+    <plurals name="hub_protection_trackers_blocked">
+        <item quantity="other">이 페이지에서 추적기 %1$d개 차단됨</item>
+    </plurals>
 </resources>

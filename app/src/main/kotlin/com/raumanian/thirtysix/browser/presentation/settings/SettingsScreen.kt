@@ -47,10 +47,12 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.Settings
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSwitchRow
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsValueRow
+import com.raumanian.thirtysix.browser.presentation.settings.components.TextSizeChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.ThemeModeChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.appLanguageLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.historyRetentionLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
+import com.raumanian.thirtysix.browser.presentation.settings.components.textSizeLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
 import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import kotlinx.coroutines.delay
@@ -111,6 +113,7 @@ fun SettingsScreen(
                 state = state,
                 viewModel = viewModel,
                 onSitePermissions = { navController.navigate(AppDestination.SitePermissions.route) },
+                onProtectionExceptions = { navController.navigate(AppDestination.ProtectionExceptions.route) },
             )
             aboutSection(state = state)
         }
@@ -168,6 +171,17 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_THEME_ROW),
         )
     }
+    // Spec 022 FR-030 — the app-wide text size of web pages.
+    item(key = KEY_ROW_TEXT_SIZE, contentType = CONTENT_TYPE_ROW) {
+        SettingsValueRow(
+            title = stringResource(R.string.settings_text_size_title),
+            value = textSizeLabel(state.textSize),
+            icon = AppIcons.TextSize,
+            tone = SettingsIconTone.Sky,
+            onClick = viewModel::onTextSizeRowClick,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_TEXT_SIZE_ROW),
+        )
+    }
     // FR-010 — dynamic color does not exist below Android 12, so neither does its control.
     if (state.isDynamicColorSupported) {
         item(key = KEY_ROW_DYNAMIC_COLOR, contentType = CONTENT_TYPE_SWITCH_ROW) {
@@ -213,6 +227,7 @@ private fun LazyListScope.privacySection(
     state: SettingsUiState,
     viewModel: SettingsViewModel,
     onSitePermissions: () -> Unit,
+    onProtectionExceptions: () -> Unit,
 ) {
     sectionHeader(key = KEY_SECTION_PRIVACY, titleRes = R.string.settings_section_privacy)
     item(key = KEY_ROW_RETENTION, contentType = CONTENT_TYPE_ROW) {
@@ -234,6 +249,17 @@ private fun LazyListScope.privacySection(
             tone = SettingsIconTone.Primary,
             onClick = onSitePermissions,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_SITE_PERMISSIONS_ROW),
+        )
+    }
+    // Spec 023 FR-015.
+    item(key = KEY_ROW_PROTECTION_EXCEPTIONS, contentType = CONTENT_TYPE_ROW) {
+        SettingsValueRow(
+            title = stringResource(R.string.settings_protection_exceptions),
+            value = stringResource(R.string.settings_protection_exceptions_summary),
+            icon = AppIcons.Shield,
+            tone = SettingsIconTone.Primary,
+            onClick = onProtectionExceptions,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_PROTECTION_EXCEPTIONS_ROW),
         )
     }
     item(key = KEY_ROW_CLEAR_BROWSING_DATA, contentType = CONTENT_TYPE_ACTION_ROW) {
@@ -323,6 +349,11 @@ internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewM
             onSelect = viewModel::onRetentionSelected,
             onDismiss = viewModel::dismissDialog,
         )
+        SettingsDialog.TextSizeChooser -> TextSizeChooserDialog(
+            selected = state.textSize,
+            onSelect = viewModel::onTextSizeSelected,
+            onDismiss = viewModel::dismissDialog,
+        )
         is SettingsDialog.ConfirmShortenRetention -> ConfirmShortenRetentionDialog(
             target = dialog.target,
             onConfirm = viewModel::onShortenRetentionConfirmed,
@@ -370,11 +401,13 @@ private const val KEY_SECTION_ABOUT: String = "section_about"
 private const val KEY_ROW_DEFAULT_BROWSER: String = "row_default_browser"
 private const val KEY_ROW_THEME: String = "row_theme"
 private const val KEY_ROW_DYNAMIC_COLOR: String = "row_dynamic_color"
+private const val KEY_ROW_TEXT_SIZE: String = "row_text_size"
 private const val KEY_ROW_LANGUAGE: String = "row_language"
 private const val KEY_ROW_SEARCH_ENGINE: String = "row_search_engine"
 private const val KEY_ROW_RETENTION: String = "row_retention"
 private const val KEY_ROW_CLEAR_BROWSING_DATA: String = "row_clear_browsing_data"
 private const val KEY_ROW_SITE_PERMISSIONS: String = "row_site_permissions"
+private const val KEY_ROW_PROTECTION_EXCEPTIONS: String = "row_protection_exceptions"
 private const val KEY_ROW_ABOUT: String = "row_about"
 private const val CONTENT_TYPE_HEADER: String = "header"
 private const val CONTENT_TYPE_ROW: String = "value_row"
@@ -385,10 +418,12 @@ private const val CONTENT_TYPE_ABOUT: String = "about"
 const val TEST_TAG_SETTINGS_LIST: String = "settings_list"
 const val TEST_TAG_SETTINGS_DEFAULT_BROWSER_ROW: String = "settings_default_browser_row"
 const val TEST_TAG_SETTINGS_THEME_ROW: String = "settings_theme_row"
+const val TEST_TAG_SETTINGS_TEXT_SIZE_ROW: String = "settings_text_size_row"
 const val TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW: String = "settings_dynamic_color_row"
 const val TEST_TAG_SETTINGS_LANGUAGE_ROW: String = "settings_language_row"
 const val TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW: String = "settings_search_engine_row"
 const val TEST_TAG_SETTINGS_RETENTION_ROW: String = "settings_retention_row"
 const val TEST_TAG_SETTINGS_CLEAR_ROW: String = "settings_clear_row"
 const val TEST_TAG_SETTINGS_SITE_PERMISSIONS_ROW: String = "settings_site_permissions_row"
+const val TEST_TAG_SETTINGS_PROTECTION_EXCEPTIONS_ROW: String = "settings_protection_exceptions_row"
 const val TEST_TAG_SETTINGS_ABOUT: String = "settings_about"

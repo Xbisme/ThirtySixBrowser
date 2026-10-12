@@ -24,7 +24,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.PrivacyStageBanner
+import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.presentation.components.QuickTile
 import com.raumanian.thirtysix.browser.presentation.components.QuickTileTone
 import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
@@ -60,11 +60,15 @@ internal fun HubSheet(
     canGoBack: Boolean,
     canGoForward: Boolean,
     callbacks: HubCallbacks,
+    pageTools: HubPageToolsState,
     onDismiss: () -> Unit,
     hasActiveDownloadsFlow: StateFlow<Boolean>,
     modifier: Modifier = Modifier,
+    protectionFlow: StateFlow<PageProtectionStatus>? = null,
 ) {
     val hasActiveDownloads by hasActiveDownloadsFlow.collectAsStateWithLifecycle()
+    // Spec 023 — collected only while the hub is open (§V rule 3).
+    val protection = protectionFlow?.collectAsStateWithLifecycle()?.value ?: PageProtectionStatus.NOT_A_WEB_PAGE
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val closeThen: (() -> Unit) -> () -> Unit = { action ->
@@ -89,9 +93,10 @@ internal fun HubSheet(
                 callbacks = callbacks,
                 closeThen = closeThen,
             )
-            PrivacyStageBanner(
-                text = stringResource(R.string.hub_privacy_banner),
-                onClick = closeThen(callbacks.onPrivacy),
+            HubProtectionSection(
+                status = protection,
+                onBanner = closeThen(callbacks.onPrivacy),
+                onProtectionSwitched = { on -> closeThen { callbacks.onProtectionSwitched(on) }() },
             )
             RowBanner(
                 title = stringResource(R.string.hub_incognito_banner_title),
@@ -99,6 +104,7 @@ internal fun HubSheet(
                 coinIcon = AppIcons.IncognitoFilled,
                 onClick = closeThen(callbacks.onNewIncognitoTab),
             )
+            HubPageTools(state = pageTools, onPageTool = { tool -> closeThen { callbacks.onPageTool(tool) }() })
             HubPlaces(callbacks = callbacks, closeThen = closeThen)
             Text(
                 text = stringResource(R.string.hub_quick_settings_title),

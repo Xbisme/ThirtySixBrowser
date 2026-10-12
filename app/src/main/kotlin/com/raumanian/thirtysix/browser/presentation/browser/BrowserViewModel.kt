@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -138,6 +140,21 @@ class BrowserViewModel @Inject constructor(
     private val currentTitleCache: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
+     * Spec 022 data-model §2 — the tabs in desktop mode, in memory only: every new tab and every
+     * tab after a process restart is in mobile mode (FR-027, FR-028, I-4). Tab ids are never
+     * reused, so a closed tab's entry is inert.
+     */
+    private val desktopModeTabs = MutableStateFlow<Set<Long>>(emptySet())
+
+    private val _findInPage = MutableStateFlow(FindInPageState())
+
+    /**
+     * Spec 022 US1 — the find bar's state, deliberately NOT part of [uiState] (data-model §3):
+     * a result per keystroke must recompose the find bar only, not the browser chrome.
+     */
+    val findInPage: StateFlow<FindInPageState> = _findInPage.asStateFlow()
+
+    /**
      * Spec 014 FR-001 / FR-003 — URL of a navigation that has started but has not yet
      * been written to history. Set by [onLoadStarted], consumed by [onLoadFinished],
      * and cleared by [onLoadFailed] so an error page is never recorded.
@@ -173,7 +190,17 @@ class BrowserViewModel @Inject constructor(
         activeTabFlow
             .map { it?.id }
             .distinctUntilChanged()
-            .onEach { currentTitleCache.value = "" }
+            .onEach {
+                currentTitleCache.value = ""
+                // Spec 022 FR-011 — the find bar belongs to the page it searched.
+                onFindClosed()
+            }
+            .launchIn(viewModelScope)
+
+        // Spec 022 FR-003 — the hub tile shows the active tab's page mode.
+        combine(activeTabFlow.map { it?.id }, desktopModeTabs) { id, desktop -> id != null && id in desktop }
+            .distinctUntilChanged()
+            .onEach { desktop -> _uiState.update { it.copy(isDesktopMode = desktop) } }
             .launchIn(viewModelScope)
 
         // Spec 012 — observe active-tab incognito state into UiState. Drives
@@ -276,6 +303,60 @@ class BrowserViewModel @Inject constructor(
     }
 
     /**
+     * Spec 022 FR-026 — whether [tabId] is in desktop mode. Read synchronously when a tab's
+     * WebView is built, so it starts in the right mode before its first load.
+     */
+    fun isDesktopMode(tabId: Long): Boolean = tabId in desktopModeTabs.value
+
+    /**
+     * Spec 022 FR-025 — flips the active tab's page mode and returns the new one, or `null` when
+     * there is no active tab. The caller reconfigures and reloads the live WebView.
+     */
+    fun onDesktopModeToggled(): Boolean? {
+        val tabId = activeTabFlow.value?.id ?: return null
+        desktopModeTabs.update { tabs -> if (tabId in tabs) tabs - tabId else tabs + tabId }
+        return tabId in desktopModeTabs.value
+    }
+
+    /** Spec 022 FR-005 — the find bar opens empty, replacing the top bar. */
+    fun onFindOpened() {
+        _findInPage.value = FindInPageState(isOpen = true)
+    }
+
+    /**
+     * Spec 022 FR-007 / FR-013 — new find text, cut at [BrowserLimits.MAX_FIND_QUERY_LENGTH]. The
+     * count resets until the WebView reports the new text's matches.
+     */
+    fun onFindQueryChanged(query: String) {
+        _findInPage.update { state ->
+            if (!state.isOpen) {
+                state
+            } else {
+                state.copy(query = query.take(BrowserLimits.MAX_FIND_QUERY_LENGTH), current = 0, total = 0)
+            }
+        }
+    }
+
+    /**
+     * Spec 022 FR-007 — the WebView's find result: [activeOrdinal] is 0-based. Ignored once the
+     * bar has closed, or while there is no text, so a late result cannot reopen or relabel it.
+     */
+    fun onFindResult(activeOrdinal: Int, total: Int) {
+        _findInPage.update { state ->
+            when {
+                !state.isOpen || state.query.isEmpty() -> state
+                total <= 0 -> state.copy(current = 0, total = 0)
+                else -> state.copy(current = (activeOrdinal + 1).coerceIn(1, total), total = total)
+            }
+        }
+    }
+
+    /** Spec 022 FR-010 / FR-011 — closes the find bar; the screen clears the highlights (I-5). */
+    fun onFindClosed() {
+        _findInPage.value = FindInPageState()
+    }
+
+    /**
      * Called from `BrowserWebViewClient.onPageStarted`.
      *
      * Spec 009 narrows the responsibility: this method no longer mutates
@@ -295,6 +376,8 @@ class BrowserViewModel @Inject constructor(
         // both fall back to the hostname (FR-009), and [onTitleReceived] patches the
         // real title in as soon as the page announces one.
         currentTitleCache.value = ""
+        // Spec 022 FR-011 — a new page closes the find bar; its highlights went with the old page.
+        onFindClosed()
         _loadProgress.value = 0f
         _uiState.update {
             it.copy(loadingState = LoadingState.Loading)

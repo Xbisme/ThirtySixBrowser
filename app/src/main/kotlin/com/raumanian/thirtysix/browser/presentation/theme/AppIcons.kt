@@ -124,4 +124,17 @@ object AppIcons {
     @DrawableRes val SearchEngineFilled = R.drawable.ic_travel_explore_filled
 
     @DrawableRes val Warning = R.drawable.ic_warning
+
+    // Spec 022 — page tools in the hub and the find bar.
+    @DrawableRes val FindInPage = R.drawable.ic_find_in_page
+
+    @DrawableRes val Print = R.drawable.ic_print
+
+    @DrawableRes val DesktopSite = R.drawable.ic_desktop_windows
+
+    @DrawableRes val TextSize = R.drawable.ic_format_size
+
+    @DrawableRes val ArrowUp = R.drawable.ic_keyboard_arrow_up
+
+    @DrawableRes val ArrowDown = R.drawable.ic_keyboard_arrow_down
 }

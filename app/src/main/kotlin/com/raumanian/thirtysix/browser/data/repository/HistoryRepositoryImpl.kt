@@ -40,6 +40,9 @@ class HistoryRepositoryImpl @Inject constructor(
     override fun observeRecent(limit: Int): Flow<List<HistoryEntry>> =
         dao.observeRecent(limit).map { list -> list.map(HistoryEntryMapper::toDomain) }
 
+    override suspend fun getLatestVisitPerUrl(): List<HistoryEntry> =
+        withContext(dispatchers.io) { dao.getLatestVisitPerUrl().map(HistoryEntryMapper::toDomain) }
+
     override suspend fun updateTitle(id: Long, title: String): Int =
         withContext(dispatchers.io) { dao.updateTitle(id, title) }
 

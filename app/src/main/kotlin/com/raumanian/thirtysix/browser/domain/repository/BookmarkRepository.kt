@@ -31,6 +31,9 @@ interface BookmarkRepository {
 
     fun searchBookmarks(query: String): Flow<List<Bookmark>>
 
+    /** Spec 022 data-model §4 — every bookmark, most recently saved first, read once. */
+    suspend fun getAllBookmarks(): List<Bookmark>
+
     suspend fun getBookmark(id: Long): Bookmark?
 
     suspend fun countBookmarksByUrl(url: String): Int

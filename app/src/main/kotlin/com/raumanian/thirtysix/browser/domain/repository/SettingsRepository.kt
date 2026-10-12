@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.domain.repository
 import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.domain.model.TextSize
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import kotlinx.coroutines.flow.Flow
@@ -63,4 +64,7 @@ interface SettingsRepository {
     suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit>
 
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit>
+
+    /** Spec 022 FR-029 / FR-032 — the app-wide text size of web pages. */
+    suspend fun setTextSize(size: TextSize): Result<Unit>
 }

@@ -52,4 +52,11 @@ object StorageKeys {
      * no migration.
      */
     val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
+
+    /**
+     * Spec 022 FR-029 / FR-032 — the app-wide text size, stored as its percentage. Absent, or
+     * not one of the nine levels → 100 (data-model §1), so older installs need no migration.
+     * Clear browsing data does not touch it.
+     */
+    val TEXT_ZOOM_PERCENT = intPreferencesKey("text_zoom_percent")
 }

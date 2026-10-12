@@ -68,4 +68,28 @@ object UrlConstants {
      * opens web links by default. Never loaded.
      */
     const val DEFAULT_BROWSER_PROBE_URL: String = "https://example.com"
+
+    /** Spec 023 research R7 — plain-web scheme an address may be upgraded from. */
+    const val SCHEME_HTTP: String = "http"
+
+    /** Spec 023 research R7 — secure scheme an address is upgraded to. */
+    const val SCHEME_HTTPS: String = "https"
+
+    /** Spec 023 FR-030 — Global Privacy Control request header name. */
+    const val GPC_HEADER_NAME: String = "Sec-GPC"
+
+    /** Spec 023 FR-030 — Global Privacy Control header value ("do not sell or share"). */
+    const val GPC_HEADER_VALUE: String = "1"
+
+    /** Spec 023 research R4 — HTTP status of the empty response returned for a blocked request. */
+    const val BLOCKED_RESPONSE_STATUS: Int = 403
+
+    /** Spec 023 research R4 — reason phrase of a blocked response (the platform rejects an empty one). */
+    const val BLOCKED_RESPONSE_REASON: String = "Blocked"
+
+    /** Spec 023 research R4 — MIME type of a blocked response. */
+    const val BLOCKED_RESPONSE_MIME: String = "text/plain"
+
+    /** Spec 023 research R4 — encoding of a blocked response. */
+    const val BLOCKED_RESPONSE_ENCODING: String = "utf-8"
 }
