@@ -45,6 +45,9 @@ class PageProtectionMonitor internal constructor(
 
     @Volatile private var pending: PendingUpgrade? = null
 
+    /** The `http://` address to load once the failed attempt's error page has finished. */
+    @Volatile private var fallbackDue: String? = null
+
     private val _status = MutableStateFlow(PageProtectionStatus.NOT_A_WEB_PAGE)
     val status: StateFlow<PageProtectionStatus> = _status.asStateFlow()
 
@@ -114,9 +117,17 @@ class PageProtectionMonitor internal constructor(
         if (upgrade != null) {
             pending = null
             engine.failures.markFailed(upgrade.host)
+            fallbackDue = upgrade.httpUrl
         }
         return upgrade?.httpUrl
     }
+
+    /**
+     * `onPageFinished`: the `http://` address to load now, if a failed attempt is waiting for its
+     * error page to finish. Loading any earlier — even posted from the error callback — can be
+     * replaced by that error page's commit (found on a Galaxy A55, 2 of 6 runs).
+     */
+    fun takeFallbackDue(): String? = fallbackDue.also { fallbackDue = null }
 
     private fun isSecureAttempt(upgrade: PendingUpgrade, url: String): Boolean =
         url.startsWith(UrlConstants.HTTPS_SCHEME_PREFIX, ignoreCase = true) &&

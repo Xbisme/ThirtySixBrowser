@@ -369,29 +369,30 @@ Deviations from the task text, each deliberate:
   - Fix: a pending attempt now ends only after its page has *started* and then finished without an error. The fallback load is also posted, so it is not swallowed by the error page being committed.
   - Regression test: `PageProtectionMonitorTest` "a cancelled load that never started does not end the attempt".
   - Retest: NeverSSL loads over http and the hub shows "Connection not secure".
-- **Unit tests**: 881/881 (808 before, +73). lint, detekt and ktlint are clean with **no baseline change**. Release APK **3,626,601 B (+232,529 B, budget 500 KB)**, no new `.so`.
+- **🐞 Second HTTPS-fallback defect, found on the A55 (2 of 6 runs)**: the posted fallback `loadUrl` could still be replaced by the error page's commit (logcat: fallback decided, no load followed). The fallback address is now remembered (`fallbackDue`) and loaded from the error page's own `onPageFinished`, which always follows `onReceivedError`; that `onPageFinished` is no longer reported as a finished visit (no history row for the failed attempt). 8/8 runs pass after the change. Regression test: "the http fallback waits for the error page to finish and is handed out once".
+- **Unit tests**: 882/882 (808 before, +74). lint, detekt and ktlint are clean with **no baseline change**. Release APK **3,626,601 B (+232,529 B, budget 500 KB)**, no new `.so`.
 
 ## Device Gate Results
 
-Run 2026-10-12 on `TA016_API36_16K` (Android 16, WebView 133, internet on). **The Galaxy A55 was not reachable over USB** (`adb devices` empty, no Samsung device in `system_profiler`), so its gates are open.
+Run 2026-10-12 on `TA016_API36_16K` (Android 16, WebView 133) and, once connected, on the owner's **Galaxy A55** (SM-A556E, Android 16, WebView 153). The owner's default browser was not touched; Spec 023's release build now sits on the phone (data kept, DB v4).
 
 | Gate | Result |
 |---|---|
-| Automated | unit ✅ 881/881 · instrumented ✅ **168/169** on the 16 KB AVD — the one failure, `BrowserWebViewRendererRecoveryTest.rendererCrash_…`, is the known Spec 019 environment flake and passes 2/2 alone · 13 new instrumented tests ✅ · lint/detekt/ktlint ✅ · Compose report **195 restartable, 0 non-skippable** · release APK **3,626,601 B (+232,529 B)** · no new `.so` · `4.json` committed |
+| Automated | unit ✅ **882/882** · instrumented ✅ **168/169** on the 16 KB AVD (known `rendererCrash_…` flake, 2/2 alone) and **13/13 Spec 023 tests on the A55** · lint/detekt/ktlint ✅ · Compose report **195 restartable, 0 non-skippable** · release APK **3,626,601 B (+232,529 B)** · no new `.so` · `4.json` committed |
 | G1 Blocking, fixture | ✅ `TrackerBlockingTest` 3/3, also in airplane mode |
-| G2 Real sites | 🟡 partial: vnexpress.net **7 trackers blocked**, page works. theguardian.com 0 before its consent banner is accepted (it loads no trackers until then). The 10-site sweep is open (A55) |
-| G3 Never-block | ⬜ open (A55) |
+| G2 Real sites | ✅ **A55 (WebView 153), 2026-10-12**: CNN 25 · NYTimes 6 · eBay 6 · vnexpress 7 · dantri 4 · tuoitre 4 · IMDb 4 · YouTube 2 · Amazon 1 · Reddit 1 blocked; all 10 render and work (screenshot grid). Excluded with cause: **bbc.com resolves to 127.0.0.1 on this network** (DNS block, `ERR_CONNECTION_REFUSED` before any request of ours); theguardian.com loads no trackers before consent; bing.com's trackers are Microsoft first-party (FR-008) |
+| G3 Never-block | ✅ A55: a page embedding a YouTube video plays it; `accounts.google.com` sign-in opens, 0 blocked |
 | G4 Count reset | ✅ by unit tests (`PageProtectionMonitorTest`); on device, each new site showed its own count |
 | G5 Per-site switch | ✅ vnexpress.net: switch off → page reloads, count 0, "Off for vnexpress.net" → survives force-stop → listed in Settings → Turn on → empty state |
-| G6 HTTPS upgrade | 🟡 `http://example.com/?utm_source=test&a=1` from another app → history shows `https://example.com/?a=1`. `http://neverssl.com` falls back to http after the fix above. Ten-site sweep and Back-stack check open (A55) |
+| G6 HTTPS upgrade | ✅ A55: `http://` wikipedia.org, github.com, www.vnexpress.net, example.org end on https (no not-secure line). NeverSSL via a page link: after the second fix below, 8/8 runs fall back to http (two were still loading at the 20 s snapshot and completed). ⚠️ **Limitation**: each failed HTTPS attempt leaves a history entry, so Back from NeverSSL's subdomain took 3 presses instead of 2 (the entries reload and show the page, never an error) — research R7's case; the experimental `navigate(replaceCurrentEntry)` API is not adopted |
 | G7 Not upgraded | ✅ `NavigationProtectionTest` (localhost) |
 | G8 Not-secure line | ✅ NeverSSL page: hub shows "Connection not secure" and its body text |
 | G9 Parameters | ✅ `NavigationProtectionTest` (typed/initial and page link); intent case ✅ above |
-| G10 GPC | 🟡 page loads ✅ (`NavigationProtectionTest`). App-wide header **unavailable on WebView 133**, resource-level check skipped; open for a device with a newer WebView (A55) |
+| G10 GPC | ✅ A55 (WebView 153, `CUSTOM_REQUEST_HEADERS` present): `NavigationProtectionTest` 13/13, **0 skipped** — `Sec-GPC: 1` on page **and** resource requests. 16 KB AVD (WebView 133): page loads only, as designed |
 | G11 Referrer | ✅ `NavigationProtectionTest`: cross-site = origin, same-site = full, re-issued = none |
 | G12 Incognito | ✅ unit (`SiteProtectionUseCasesTest`, `ProtectionViewModelTest`, `IncognitoTabRepositoryImplTest`); `TrackerBlockingTest` incognito run |
 | G13 Clear data | ✅ unit (`ClearBrowsingDataUseCaseTest`); dialog on device open |
-| G14 Performance | ⬜ open (A55, release, interleaved) |
+| G14 Performance | ✅ A55. **SC-005** page load (`loadEventEnd`, CDP, cache disabled, 3 runs each, debug build): on is faster on tracker-heavy pages (median CNN 3.4 s vs ≥7.9 s off with 2 timeouts, vnexpress 1.6 vs 5.7 s, tuoitre 0.7 vs 2.6 s, NYTimes 6.7 vs 10.0 s, dantri 2.5 vs 3.2 s, eBay 1.9 vs 1.4 s); Amazon/Reddit/YouTube/IMDb re-measured with **off first** to remove an order effect: on ≤ off on all four. **SC-006** cold start, release, returning user, interleaved 3×5 per build: main **324 ms** vs 023 **313 ms** median (−3.4%) — indicative only: main's runs hit the v4 database and crash *after* first frame (`migration from 4 to 3` — expected, no destructive fallback). First-run not measured (needs `pm clear` of the owner's data). List parse **97–114 ms** off the main thread; app Java heap 19.4 MB |
 | G15 Own traffic | ⬜ open (needs a proxy) |
 | G16 Locales | 🟡 lint 8-locale parity ✅; visual sweep at 360dp open |
 

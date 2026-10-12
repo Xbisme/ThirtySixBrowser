@@ -503,7 +503,9 @@ private class BrowserWebViewClient(
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
-        protection?.monitor?.onPageFinished(url)
+        // Spec 023 FR-019 — a failed HTTPS attempt's error page is not a visit: the http:// page
+        // that replaces it reports its own start and finish.
+        if (view != null && protection?.onPageFinished(view, url) == true) return
         url?.let(onLoadFinished)
         // Spec 011 Q4 amendment — schedule a screenshot capture after the
         // WebView has actually painted. `postDelayed` defers past the next
@@ -580,7 +582,7 @@ private class BrowserWebViewClient(
     ) {
         if (request?.isForMainFrame != true || error == null) return
         // Spec 023 FR-019 — a failed HTTPS upgrade falls back to http:// without an error.
-        if (view != null && protection?.fallBackIfUpgrade(view, request.url.toString()) == true) return
+        if (protection?.fallBackIfUpgrade(request.url.toString()) == true) return
         val reason = when (error.errorCode) {
             ERROR_HOST_LOOKUP -> ErrorReason.DnsFailure
             ERROR_CONNECT, ERROR_TIMEOUT, ERROR_IO -> ErrorReason.NetworkUnavailable
@@ -608,7 +610,7 @@ private class BrowserWebViewClient(
         // Constitution §I — NEVER `proceed()`. Always cancel.
         handler?.cancel()
         // Spec 023 FR-019 — a certificate failure on an HTTPS upgrade falls back to http://.
-        if (view != null && protection?.fallBackIfUpgrade(view, error?.url) == true) return
+        if (protection?.fallBackIfUpgrade(error?.url) == true) return
         onLoadFailed(ErrorReason.SslError)
     }
 

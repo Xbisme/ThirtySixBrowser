@@ -69,14 +69,23 @@ class WebViewProtection(
     }
 
     /**
-     * A main-frame load failed. When it was a pending HTTPS attempt, the original `http://`
-     * address is loaded instead and `true` is returned: no error is shown (FR-019).
+     * A main-frame load failed. When it was a pending HTTPS attempt, `true` is returned so no
+     * error is shown (FR-019); the original `http://` address loads from [onPageFinished].
      */
-    fun fallBackIfUpgrade(webView: WebView, failedUrl: String?): Boolean {
-        val http = monitor.onMainFrameFailure(failedUrl) ?: return false
-        // Posted, not called here: a load started inside the error callback is replaced by the
-        // error page the engine is committing (found on the 16 KB AVD with neverssl.com).
-        webView.post { if (!released) webView.loadUrl(http, GpcHeaderInstaller.headersForLoad()) }
+    fun fallBackIfUpgrade(failedUrl: String?): Boolean {
+        // The http:// load itself waits for the error page to finish ([onPageFinished]).
+        return monitor.onMainFrameFailure(failedUrl) != null
+    }
+
+    /**
+     * `onPageFinished`: after a failed HTTPS attempt's error page has finished, load the original
+     * `http://` address. Started any earlier, the load can be replaced by that error page.
+     * Returns `true` when it did, so the error page is not reported as a finished visit.
+     */
+    fun onPageFinished(webView: WebView, url: String?): Boolean {
+        monitor.onPageFinished(url)
+        val http = monitor.takeFallbackDue() ?: return false
+        if (!released) webView.loadUrl(http, GpcHeaderInstaller.headersForLoad())
         return true
     }
 

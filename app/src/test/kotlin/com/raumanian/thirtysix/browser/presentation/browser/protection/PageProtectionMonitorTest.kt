@@ -104,6 +104,19 @@ class PageProtectionMonitorTest {
     }
 
     @Test
+    fun `the http fallback waits for the error page to finish and is handed out once`() {
+        // Regression (Galaxy A55, 2 of 6 runs): a load started from the error callback, even
+        // posted, could be replaced by the error page's commit.
+        monitor.beginUpgrade(NavigationPreparer.Prepared("https://old.org/x", upgradedFrom = "http://old.org/x"))
+        assertNull("nothing due before a failure", monitor.takeFallbackDue())
+
+        monitor.onMainFrameFailure("https://old.org/x")
+
+        assertEquals("http://old.org/x", monitor.takeFallbackDue())
+        assertNull("handed out once", monitor.takeFallbackDue())
+    }
+
+    @Test
     fun `a redirect back to http is detected`() {
         monitor.beginUpgrade(NavigationPreparer.Prepared("https://old.org/", upgradedFrom = "http://old.org/"))
 
