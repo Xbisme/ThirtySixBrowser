@@ -148,6 +148,7 @@ ksp {
 detekt {
     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
     baseline = file("$rootDir/config/detekt/baseline.xml")
+    source.setFrom("src/main/kotlin", "src/test/kotlin", "src/androidTest/kotlin", "src/debug/kotlin")
     buildUponDefaultConfig = true
     allRules = false
     ignoreFailures = false
@@ -160,10 +161,16 @@ detekt {
 ktlint {
     android.set(true)
     ignoreFailures.set(false)
+    baseline.set(file("$rootDir/config/ktlint/baseline.xml"))
 }
 
 kotlin {
     jvmToolchain(11)
+}
+
+// Konsist 0.18 ships Java 17 bytecode; tests run on the same JDK 21 as the Gradle daemon.
+tasks.withType<Test>().configureEach {
+    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) })
 }
 
 // --- Compose compiler (Spec 019 R9, Constitution v1.4.0 §V rule 5) ------------
@@ -189,6 +196,7 @@ gradle.taskGraph.whenReady {
 }
 
 dependencies {
+    ktlintRuleset(libs.compose.rules.ktlint)
     // Spec 014 — core library desugaring runtime (build-time tool, NOT runtime lib).
     coreLibraryDesugaring(libs.android.desugar.jdk.libs)
 
@@ -236,6 +244,7 @@ dependencies {
     testImplementation(libs.app.cash.turbine)
     testImplementation(libs.androidx.junit)
     testImplementation(libs.robolectric)
+    testImplementation(libs.konsist)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

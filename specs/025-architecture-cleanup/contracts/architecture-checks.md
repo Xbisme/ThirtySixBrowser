@@ -12,6 +12,7 @@ Location: `app/src/test/kotlin/com/raumanian/thirtysix/browser/architecture/`.
 | `ArchitectureTest.domain is pure Kotlin` | no `android.`, `androidx.`, `retrofit2.`, `okhttp3.`, `kotlinx.serialization.` imports in `..domain..` | I |
 | `ArchitectureTest.features do not import other features` | `feature.<a>` never imports `feature.<b>` | I |
 | `ArchitectureTest.core does not import features` | `core..` never imports `feature..` | I |
+| `ArchitectureTest.dispatchers are injected` | no `Dispatchers.IO` / `Dispatchers.Default` outside `..di..` (added: detekt `InjectDispatcher` needs type resolution) | III |
 | `PlacementTest.*` (8 tests) | placement table in [data-model.md](../data-model.md#placement-rules-what-the-checks-enforce); view models take no data-layer types; view models expose no mutable state; `*UiState` is `data`/`sealed` with `val`s only | II, III |
 | `NoHardcodeTest.composables take text from string resources` | no `Text("…")` / `contentDescription = "…"` outside `@Preview` | V |
 | `NoHardcodeTest.colors come from the theme` | no `Color(0x` outside `..designsystem.theme` | V |
@@ -20,7 +21,7 @@ Location: `app/src/test/kotlin/com/raumanian/thirtysix/browser/architecture/`.
 
 Failure output: Konsist's assertion message lists every offending declaration with its file path, plus the `additionalMessage` that says where it belongs.
 
-`KonsistScope.kt`: `ROOT = "com.raumanian.thirtysix.browser"`; `productionScope()` = `Konsist.scopeFromProduction()` minus `KNOWN_VIOLATIONS` (empty at the end of this spec). The `debug` source set (`HiltTestActivity`, `dev.*` seeders) is not production scope.
+`KonsistScope.kt`: `ROOT = "com.raumanian.thirtysix.browser"`; `productionScope()` = `Konsist.scopeFromProduction(moduleName = "app")` (the repository also holds sample `.kt` files under `specs/`) minus `KNOWN_VIOLATIONS` (empty at the end of this spec). The `debug` source set (`HiltTestActivity`, `dev.*` seeders) is not production scope.
 
 ## Static checks (`./gradlew detekt ktlintCheck lintDebug`)
 
@@ -28,7 +29,7 @@ Failure output: Konsist's assertion message lists every offending declaration wi
 |---|---|---|---|
 | detekt `ForbiddenComment` | `config/detekt/detekt.yml`; detekt `source` set to `src/main/kotlin`, `src/test/kotlin`, `src/androidTest/kotlin`, `src/debug/kotlin` so test comments are checked too | spec / requirement / task IDs, planning-doc citations, constitution citations, change history, emoji and ALL-CAPS banners, TODO without `(ABC-123)`, FIXME/STOPSHIP | VI |
 | detekt `OutdatedDocumentation` | same | KDoc matches signature | VI |
-| detekt `InjectDispatcher` | same, excludes `**/di/**`, tests | no `Dispatchers.IO/Default` outside `di/` | III |
+| detekt `InjectDispatcher` | same, excludes `**/di/**`, tests | configured but inert without type resolution; the Konsist test above enforces the rule | III |
 | detekt `MagicNumber` | same (existing settings kept), `ignoreAnnotated: [Preview]` | V |
 | ktlint + compose-rules 0.6.8 | `.editorconfig` (`compose_allowed_composition_locals` lists this app's locals) | Compose API rules | IV |
 | Android Lint | `app/build.gradle.kts` (unchanged: `warningsAsErrors`, `MissingTranslation`, `ExtraTranslation` as errors) | resources, translations, platform API | V, product constraints |

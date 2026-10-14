@@ -35,6 +35,9 @@ ktlint_standard_class-signature = disabled
 # in use (1.6 via plugin 14.2.0) does not honor `ignore_when_annotated_with` reliably.
 ktlint_standard_function-naming = disabled
 
+# compose-rules: the CompositionLocals the design system may define.
+compose_allowed_composition_locals = LocalThirtySixColors,LocalThirtySixShapes,LocalIoDispatcher
+
 [*.{md,markdown}]
 trim_trailing_whitespace = false
 max_line_length = off

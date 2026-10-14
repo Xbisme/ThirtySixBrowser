@@ -82,7 +82,7 @@ comments:
     active: false
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
   OutdatedDocumentation:
-    active: false
+    active: true
     matchTypeParameters: true
     matchDeclarationsOrder: true
     allowParamOnConstructorProperties: false
@@ -197,6 +197,8 @@ coroutines:
     active: false
   InjectDispatcher:
     active: true
+    # DispatcherModule is the one place that names a dispatcher.
+    excludes: ['**/di/**', '**/test/**', '**/androidTest/**']
     dispatcherNames:
       - 'IO'
       - 'Default'
@@ -603,12 +605,26 @@ style:
   ForbiddenComment:
     active: true
     comments:
-      - reason: 'Forbidden FIXME todo marker in comment, please fix the problem.'
-        value: 'FIXME:'
-      - reason: 'Forbidden STOPSHIP todo marker in comment, please address the problem before shipping the code.'
-        value: 'STOPSHIP:'
-      - reason: 'Forbidden TODO todo marker in comment, please do the changes.'
-        value: 'TODO:'
+      - value: '\b[Ss]pec[ -]?\d{2,}\b'
+        reason: 'Spec numbers go in the commit, the PR and specs/, not in source (constitution VI).'
+      - value: '\b(FR|NFR|SC|US|AC|INV)-\d+'
+        reason: 'Requirement IDs go in the commit, the PR and specs/, not in source (constitution VI).'
+      - value: '\bT\d{3}\b'
+        reason: 'Task IDs go in the commit, the PR and specs/, not in source (constitution VI).'
+      - value: '\b(spec|plan|tasks|research|data-model|quickstart)\.md\b'
+        reason: 'Point to the reason itself, not to a planning document (constitution VI).'
+      - value: '(?i)\bconstitution\b|§'
+        reason: 'The constitution is enforced by checks, not cited in comments (constitution VI).'
+      - value: '(?i)\b(previously|used to be|was changed|changed from|before this change|old implementation)\b'
+        reason: 'Change history belongs in git, not in comments (constitution VI).'
+      - value: '[\x{26A0}\x{2705}\x{274C}\x{2757}\x{1F6A8}\x{1F525}]'
+        reason: 'No emoji banners; a reason does not need decoration (constitution VI).'
+      - value: '\b[A-Z]{2,}(?: [A-Z]{2,}){3,}\b'
+        reason: 'No ALL-CAPS banners (constitution VI).'
+      - value: 'TODO(?!\([A-Z][A-Z0-9]*-\d+\))'
+        reason: 'A TODO needs a ticket: TODO(APP-123): ... (constitution VI).'
+      - value: 'FIXME|STOPSHIP'
+        reason: 'Fix it before merging, or file a ticket and write TODO(APP-123).'
     allowedPatterns: ''
   ForbiddenImport:
     active: false
@@ -639,6 +655,7 @@ style:
   MagicNumber:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**', '**/*.kts']
+    ignoreAnnotated: ['Preview']
     ignoreNumbers:
       - '-1'
       - '0'
@@ -767,6 +784,7 @@ style:
     active: true
   UnusedPrivateMember:
     active: true
+    ignoreAnnotated: ['Preview']
     allowedNames: ''
   UnusedPrivateProperty:
     active: true
