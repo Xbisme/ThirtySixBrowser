@@ -1,0 +1,9 @@
+<!doctype html>
+<!-- Spec 024 consent fixture: cookiebot markup reduced to what autoconsent 16.51.0's rule matches. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>consent cookiebot</title>
+<style>[data-banner]{position:fixed;left:0;right:0;bottom:0;padding:16px;background:#eee;border-top:1px solid #999}</style>
+<script src="common.js"></script>
+<script>window.Cookiebot = { hasResponse: false, declined: false, dialog: { visible: true }, withdraw: function () {}, hide: function () {} };</script>
+<h1>cookiebot fixture</h1>
+<div id="CybotCookiebotDialog" data-banner><p>Cookies</p><button id="CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll" data-choice="accept">Allow all</button><button id="CybotCookiebotDialogBodyButtonDecline" data-choice="reject">Deny</button></div>

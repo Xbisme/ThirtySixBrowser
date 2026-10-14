@@ -17,6 +17,7 @@ import com.raumanian.thirtysix.browser.presentation.entry.EntryPointViewModel
 import com.raumanian.thirtysix.browser.presentation.history.HistoryScreen
 import com.raumanian.thirtysix.browser.presentation.onboarding.OnboardingScreen
 import com.raumanian.thirtysix.browser.presentation.settings.SettingsScreen
+import com.raumanian.thirtysix.browser.presentation.settings.fireproof.FireproofSitesScreen
 import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.ProtectionExceptionsScreen
 import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsScreen
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsScreen
@@ -55,6 +56,9 @@ fun AppNavGraph(
         composable(AppDestination.SitePermissions.route) { SitePermissionsScreen(navController = navController) }
         composable(AppDestination.ProtectionExceptions.route) {
             ProtectionExceptionsScreen(navController = navController)
+        }
+        composable(AppDestination.FireproofSites.route) {
+            FireproofSitesScreen(navController = navController)
         }
         // Spec 018 — receives the controller so finishing or skipping can navigate to the
         // browser popping this route inclusively (FR-010a).

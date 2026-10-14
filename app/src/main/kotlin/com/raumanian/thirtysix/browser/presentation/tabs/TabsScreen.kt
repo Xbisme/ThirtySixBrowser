@@ -25,7 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -38,6 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.domain.model.FireState
+import com.raumanian.thirtysix.browser.presentation.browser.components.FireConfirmDialog
+import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel
 import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
 import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
 import com.raumanian.thirtysix.browser.presentation.components.ThirtySixChip
@@ -101,7 +107,7 @@ fun TabsScreen(
         topBar = {
             TabsHeader(
                 state = state,
-                onBack = { navController.popBackStack() },
+                navController = navController,
                 onModeSelected = viewModel::onModeSelected,
                 onCloseAll = if (state.mode == TabsMode.Incognito) {
                     viewModel::onCloseAllIncognitoRequested
@@ -128,6 +134,31 @@ fun TabsScreen(
             },
         )
     }
+}
+
+/** Spec 024 FR-001 — the Tabs header's Fire button; disabled while a run is in progress (INV-5). */
+private data class TabsFireButton(val enabled: Boolean, val onClick: () -> Unit)
+
+/** Spec 024 FR-001, FR-002 — the Tabs header's Fire button and the confirmation it opens. */
+@Composable
+private fun rememberTabsFire(
+    navController: NavHostController,
+    fire: FireViewModel = hiltViewModel(),
+): TabsFireButton {
+    val fireState by fire.state.collectAsStateWithLifecycle()
+    var confirmOpen by rememberSaveable { mutableStateOf(false) }
+    if (confirmOpen) {
+        FireConfirmDialog(
+            onConfirm = {
+                confirmOpen = false
+                // Research R10 — back to the browser first; its overlay shows the run.
+                navController.popBackStack(AppDestination.Browser.route, inclusive = false)
+                fire.fire()
+            },
+            onDismiss = { confirmOpen = false },
+        )
+    }
+    return TabsFireButton(enabled = fireState == FireState.Idle, onClick = { confirmOpen = true })
 }
 
 @Composable
@@ -174,10 +205,11 @@ private fun TabsConfirmDialogs(state: TabsUiState, viewModel: TabsViewModel) {
 @Composable
 private fun TabsHeader(
     state: TabsUiState,
-    onBack: () -> Unit,
+    navController: NavHostController,
     onModeSelected: (TabsMode) -> Unit,
     onCloseAll: () -> Unit,
 ) {
+    val fire = rememberTabsFire(navController = navController)
     val incognito = state.mode == TabsMode.Incognito
     Column(
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -191,10 +223,19 @@ private fun TabsHeader(
             RoundIconButton(
                 icon = AppIcons.ArrowBack,
                 contentDescription = stringResource(R.string.browser_action_back),
-                onClick = onBack,
+                onClick = { navController.popBackStack() },
                 style = RoundIconStyle.Bare,
             )
             Spacer(modifier = Modifier.weight(1f))
+            // Spec 024 FR-001 — Fire, beside close-all; disabled while a run is in progress (INV-5).
+            RoundIconButton(
+                icon = AppIcons.Fire,
+                contentDescription = stringResource(R.string.fire_action_tabs_cd),
+                onClick = fire.onClick,
+                style = RoundIconStyle.Bare,
+                enabled = fire.enabled,
+                modifier = Modifier.testTag(TEST_TAG_TABS_FIRE),
+            )
             RoundIconButton(
                 icon = AppIcons.DeleteSweep,
                 contentDescription = stringResource(
@@ -299,6 +340,9 @@ private fun TabsGrid(
 }
 
 const val TEST_TAG_TABS_SCREEN: String = "tabs_screen"
+
+/** Spec 024 FR-001 — the Fire button in the Tabs header. */
+const val TEST_TAG_TABS_FIRE: String = "tabs_fire_action"
 const val TEST_TAG_CLOSE_ALL_ACTION: String = "tabs_close_all_action"
 const val TEST_TAG_CLOSE_ALL_INCOGNITO_ACTION: String = "tabs_close_all_incognito_action"
 const val TEST_TAG_TABS_CHIP_OPEN: String = "tabs_chip_open"

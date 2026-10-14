@@ -27,6 +27,7 @@ ThirtySixBrowser là Android browser tối giản, lấy cảm hứng từ DuckD
 - **Spec 016 (`settings-screen`, planned 2026-09-11)**: `androidx.appcompat:appcompat` **1.8.0** (per-app language on Android 7–12) · `androidx.webkit:webkit` **1.17.0** (complete site-data removal) — both latest stable at lookup, zero `.so` in real release builds; re-verify at the moment of addition (§IX)
 
 - **Spec 023 (`privacy-protection`, planned 2026-10-11)**: **no new dependency** — `androidx.webkit` 1.17.0 `Profile.addCustomHeader` for GPC (feature-detected). New bundled data assets: EasyPrivacy + EasyList host subset (**CC BY-SA 3.0** option), Public Suffix List (**MPL-2.0**), own tracking-parameter list; Room v3 → v4 (`site_protection_exceptions`)
+- **Spec 024 (`privacy-tools`, planned 2026-10-13)**: **no new Gradle dependency** — `androidx.webkit` 1.17.0 `addDocumentStartJavaScript`, `CookieManagerCompat.getCookieInfo`, `WebStorageCompat.deleteBrowsingDataForSite` (all feature-detected, confirmed by `javap`). Vendored asset: DuckDuckGo **autoconsent 16.51.0** (**MPL-2.0**, opt-out only, generic CMP rules) built by the hand-run `tools/privacy-scripts/`; Room v4 → v5 (`fireproof_sites`)
 
 ### Dependencies (final versions looked up at implementation time per Constitution §IX)
 
@@ -285,7 +286,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 021 | `web-capabilities` | ✅ Done 2026-10-11 ([PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) merged, `ef9ae68`, CI 6/6, 135/135 on API 29; 70/70; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
 | 022 | `page-tools` | ✅ Done 2026-10-11 ([PR #35](https://github.com/Xbisme/ThirtySixBrowser/pull/35) merged, `d0908a1`, CI 6/6; 68/68) | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
 | 023 | `privacy-protection` | ✅ Done 2026-10-12 ([PR #37](https://github.com/Xbisme/ThirtySixBrowser/pull/37) merged, `ec631d1`, CI 6/6; 77/78 — proxy capture + screen reader open) | Tracker blocking (EasyPrivacy+EasyList subset, 11,012 hosts), HTTPS upgrade + fallback, param stripping, GPC; all on by default, off per site |
-| 024 | `privacy-tools` | ⬜ Phase 6 | Fire button + fireproof sites, per-site privacy dashboard, cookie-banner + fingerprint scripts (split from 023, Constitution v1.6.0) |
+| 024 | `privacy-tools` | 🟢 Implemented 2026-10-14 — [PR #39](https://github.com/Xbisme/ThirtySixBrowser/pull/39) open; 72/72 tasks, A55 gates run (G5 real sign-ins left to the owner) | Fire button + fireproof sites, per-site privacy dashboard, cookie-banner + fingerprint scripts (split from 023, Constitution v1.6.0) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
 
@@ -308,6 +309,32 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 > **If the emulator job hangs again**: read the job log for which phase stalled, then check `gh cache list | grep avd`. A key with no version component is bug 2 returning. `Starting 0 tests` alongside `Broken pipe` / `DeadSystemException` / `stop: Not implemented` is the bug-3 signature — delete the cache and re-run **before suspecting the code**; a healthy run logs `Starting 109 tests` → `Finished 109 tests`.
 
 ## Recent Changes
+
+- 2026-10-13 (Spec 024 implementation): 🟢 **Spec 024 `privacy-tools` implemented on branch `024-privacy-tools`** — the last spec of Phase 6. Owner pre-specify decisions: §X design waiver, one spec, DuckDuckGo-style Fire, fireproof via dashboard + Settings, dashboard grouped by site (no licence-compatible owner data), autoconsent rules, basic fingerprinting.
+
+  **What changed for the user.**
+  - **Fire** — a hub tile and a Tabs button, always confirmed. It closes every tab, normal and incognito, and clears history, cookies, site data, cache, site permissions and favicons, then ends on Home in one tab with a short overlay. It keeps bookmarks, downloads, settings and **fireproof sites**.
+  - **Privacy dashboard** — the hub's "N trackers blocked" line opens it on a web page: blocked hosts grouped by site, the connection state, the protection switch and a **Fireproof this site** switch (normal tabs only).
+  - **Settings → Privacy → Fireproof sites**, plus an opt-in Clear-browsing-data category for the list.
+  - **Cookie banners are refused automatically** (DuckDuckGo autoconsent 16.51.0, MPL-2.0, opt-out only).
+  - **Basic fingerprinting protection**: canvas and audio noise per site and session, no battery details, no device ids before permission.
+
+  **Gates.**
+  - Unit ✅ **928/928** (+46). Instrumented on the 16 KB AVD: **186 tests**, every Spec 024 test green (`FireDataTest` 3, `CookieBannerTest` 2, `FingerprintShieldTest` 3, `PrivacyToolsScreensTest` 7, `FireproofSitesScreenTest` 2). Two long-run flakes in untouched code pass alone; `rendererCrash_…` is the known flake.
+  - lint/detekt/ktlint ✅ **no baseline change**. Compose report **206 restartable, 0 non-skippable**.
+  - Release APK **3,725,735 B (+99,134 B, budget 200 KB)**. Same 8 `.so`, all 16 KB-aligned.
+  - **No new Gradle dependency**. Room **v5** (`fireproof_sites`, additive `MIGRATION_4_5`). One DataStore key, `fire_in_progress`. Manifest unchanged.
+
+  **Facts to keep.**
+  - **Fire is `RunFireUseCase` behind the `FireCoordinator` singleton** (`domain/fire/`, `@ApplicationScope`).
+    - A DataStore marker is written before the first step, and `MainActivity` finishes an interrupted run before `setContent`.
+    - The order is load-bearing: hosts collected → incognito closed → tabs → history → cookies/site data → cache → permissions → favicons → session traces.
+  - **Fireproof cookies survive via snapshot → per-site delete → wipe → restore**, using `CookieManagerCompat.getCookieInfo` (attributes kept) and `WebStorageCompat.deleteBrowsingDataForSite`. A host-only cookie is reported as `domain=<host>` without a dot, so the restore drops that attribute. WebView 53 has neither feature (fallback path, documented limits).
+  - **The page-start scripts go through Spec 023's `ProtectionHooks`** (`PrivacyScriptInstaller`, `addDocumentStartJavaScript(…, "*")`). The prelude `{v,s,x}` is built from **local data only** (session secret, exceptions); the scripts stand down by the top-level page (`ancestorOrigins`). This is the only injection path; no bridge.
+  - **autoconsent must stay `optOut` with `heuristicMode: 'off'`**: upstream `tier2` clicks Accept. Rebuild only with `tools/privacy-scripts/build.sh` (generic + frame rules, 201,669 B raw).
+  - **⚠️ Spec 012 limitation found (not fixed)**: an incognito session's cookie restore keeps only sites open in normal tabs, so it signs the person out of every other site, fireproof or not. Raised with the owner.
+  - **⚠️ Never install a pre-024 build over a 024 install** (Room v5 → v4 has no migration).
+  - The dashboard state lives in `ProtectionViewModel` (it owns the shown page's monitor). WebView 53 rejects `async`/`await` in fixtures.
 
 - 2026-10-12 (Spec 023 merged + CI fixed): ✅ **PR #36 (`bca076c`), PR #37 (`ec631d1`) and PR #34 (`5331c46`) merged, each CI 6/6.**
   - PR #36's and PR #37's instrumented jobs first zombie-booted from the AVD cache (`Can't find service: settings`, `stop: Not implemented`); deleting the cache and re-running fixed both. Root cause: **PR #34 had never been merged**. It is now, so the job always cold-boots.
@@ -654,7 +681,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: ⬜ Spec 024 `privacy-tools` — next (pre-specify meeting with the owner).
+**Current**: 🟢 [Spec 024 — Privacy Tools](specs/024-privacy-tools/) — [PR #39](https://github.com/Xbisme/ThirtySixBrowser/pull/39) open, 72/72. [tasks.md](specs/024-privacy-tools/tasks.md) holds the implementation notes and the Device Gate Results (A55: SC-007 17/20 refused, 0 accepted; page load +3.0%). Open: G5 real sign-ins (owner), proxy capture, screen reader; two findings for the owner (Spec 012 incognito cookie restore, blank `height:100%` pages).
 
 **Previous**: ✅ [Spec 023 — Privacy Protection](specs/023-privacy-protection/) — **merged into `main` via [PR #37](https://github.com/Xbisme/ThirtySixBrowser/pull/37) (2026-10-12, merge commit `ec631d1`, CI 6/6), 77/78** (T075's proxy capture and screen-reader checks open). [tasks.md](specs/023-privacy-protection/tasks.md) holds the gate table and implementation notes.
 

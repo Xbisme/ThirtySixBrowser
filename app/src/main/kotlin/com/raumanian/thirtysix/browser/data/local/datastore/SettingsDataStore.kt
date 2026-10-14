@@ -69,6 +69,11 @@ class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Pre
         prefs[StorageKeys.DEFAULT_BROWSER_INVITE_DISMISSED] = true
     }
 
+    /** Spec 024 FR-007 — the interrupted-Fire marker (data-model "DataStore — one key"). */
+    suspend fun setFireInProgress(value: Boolean): Result<Unit> = editCatching { prefs ->
+        prefs[StorageKeys.FIRE_IN_PROGRESS] = value
+    }
+
     /** Spec 020 FR-024a — adds one launch, never past [cap]. Read and write in one transaction. */
     suspend fun incrementAppLaunchCount(cap: Int): Result<Unit> = editCatching { prefs ->
         val current = prefs[StorageKeys.APP_LAUNCH_COUNT] ?: 0

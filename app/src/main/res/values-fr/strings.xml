@@ -393,4 +393,28 @@
         <item quantity="many">%1$d traqueurs bloqués sur cette page</item>
         <item quantity="other">%1$d traqueurs bloqués sur cette page</item>
     </plurals>
+    <!-- Spec 024 privacy tools -->
+    <string name="fire_action">Feu</string>
+    <string name="fire_action_tabs_cd">Feu : fermer tous les onglets et effacer les données de navigation</string>
+    <string name="fire_confirm_title">Fermer tous les onglets et effacer les données ?</string>
+    <string name="fire_confirm_body">Ferme tous les onglets, y compris les onglets de navigation privée, et efface l\'historique, les cookies et données de site, les fichiers en cache et les autorisations des sites.\n\nConservés : favoris, téléchargements, paramètres et sites protégés du feu.</string>
+    <string name="fire_confirm_action">Effacer</string>
+    <string name="fire_confirm_cancel">Annuler</string>
+    <string name="fire_done_announcement">Données de navigation effacées</string>
+    <string name="dashboard_title">Confidentialité sur ce site</string>
+    <string name="dashboard_connection_secure">La connexion est sécurisée</string>
+    <string name="dashboard_no_trackers">Aucun traceur bloqué sur cette page</string>
+    <string name="dashboard_fireproof_title">Protéger ce site du feu</string>
+    <string name="dashboard_fireproof_help">Vous restez connecté quand vous utilisez Feu. Les services de connexion d\'autres sites doivent aussi être protégés.</string>
+    <string name="settings_fireproof_sites">Sites protégés du feu</string>
+    <string name="settings_fireproof_sites_summary">Sites qui gardent leurs cookies et données quand vous utilisez Feu</string>
+    <string name="fireproof_sites_empty">Aucun site protégé du feu. Activez « Protéger ce site du feu » dans le panneau de confidentialité d\'une page ; il apparaîtra ici.</string>
+    <string name="fireproof_sites_remove">Retirer</string>
+    <string name="fireproof_sites_remove_cd">Retirer %1$s des sites protégés du feu</string>
+    <string name="fireproof_sites_remove_all">Tout retirer</string>
+    <string name="fireproof_sites_remove_all_confirm_title">Retirer tous les sites protégés du feu ?</string>
+    <string name="fireproof_sites_remove_all_confirm_body">La prochaine fois que vous utiliserez Feu, les cookies et données de ces sites seront effacés.</string>
+    <string name="settings_clear_category_fireproof_sites">Sites protégés du feu</string>
+    <string name="settings_clear_category_fireproof_sites_description">Les sites ne sont plus conservés quand vous utilisez Feu</string>
+    <string name="settings_about_notice_autoconsent">Les règles pour les bannières de cookies proviennent d\'autoconsent de DuckDuckGo (https://github.com/duckduckgo/autoconsent), utilisé sous MPL 2.0.</string>
 </resources>

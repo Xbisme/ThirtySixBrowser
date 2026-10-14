@@ -12,6 +12,7 @@ import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
+import com.raumanian.thirtysix.browser.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
@@ -139,10 +140,27 @@ internal class InstrumentedFakeWebDataCleaner(
         return true
     }
 
+    override suspend fun storageOrigins(): Set<String> = emptySet()
+
+    override suspend fun clearExcept(
+        keepSites: Set<String>,
+        candidateHosts: Set<String>,
+        isKept: (host: String) -> Boolean,
+    ): SiteDataPath = SiteDataPath.PerSite
+
     companion object {
         const val CALL_SITE_DATA: String = "siteData"
         const val CALL_WEB_CACHE: String = "webCache"
     }
+}
+
+/** Spec 024 — an empty fireproof list; the Settings screen only ever clears it. */
+internal object InstrumentedNoopFireproofSiteRepository : com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository {
+    override fun observeAll() = kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.FireproofSite>())
+    override fun currentSites(): Set<String> = emptySet()
+    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
 }
 
 /** Spec 016 T077 — holds no incognito snapshot; the Settings screen only ever discards. */
@@ -186,6 +204,7 @@ internal fun settingsViewModel(
         oneTimeGrants = OneTimeGrantStore(),
         protectionExceptions = InstrumentedNoopProtectionExceptionRepository,
         incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
+        fireproofSites = InstrumentedNoopFireproofSiteRepository,
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),

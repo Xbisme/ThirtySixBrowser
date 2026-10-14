@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.core.dispatcher.DefaultDispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptBundlesImpl
+import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptSessionImpl
 import com.raumanian.thirtysix.browser.data.local.protection.HttpsUpgradeFailureStore
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.model.ProtectionData
@@ -23,12 +26,15 @@ import com.raumanian.thirtysix.browser.presentation.browser.BrowserWebView
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserWebViewCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.LoadingState
 import com.raumanian.thirtysix.browser.presentation.browser.WebViewActionsHandle
+import com.raumanian.thirtysix.browser.presentation.browser.privacy.PrivacyScriptInputs
 import com.raumanian.thirtysix.browser.presentation.browser.protection.PageProtectionMonitor
 import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionEngine
 import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionHooks
+import com.raumanian.thirtysix.browser.presentation.browser.protection.ScriptHooks
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -37,7 +43,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * host [BrowserWebView] directly (Spec 022 pattern; no Hilt). The tracker list holds the 12
  * `tracker-NN.test` hosts of `trackers.html` plus `127.0.0.1`, the one tracker that resolves.
  */
-internal class TestProtection {
+internal class TestProtection(
+    /** Spec 024 — install the real page-start scripts (cookie banners, fingerprinting). */
+    withScripts: Boolean = false,
+    /** Spec 024 — `false` keeps `127.0.0.1` off the tracker list, so cross-site frames load. */
+    blockResolvableTracker: Boolean = true,
+) {
     val exceptions = InMemoryExceptions()
     val incognito = IncognitoProtectionExceptionStore()
     val failures = HttpsUpgradeFailureStore()
@@ -45,8 +56,11 @@ internal class TestProtection {
     val loadsFinished = AtomicInteger()
     val actions = WebViewActionsHandle()
 
+    /** Spec 024 — the page title, which the fixtures use to report their results. */
+    val title = AtomicReference("")
+
     private val data = ProtectionData(
-        trackers = TrackerHostSet(TRACKER_HOSTS + RESOLVABLE_TRACKER),
+        trackers = TrackerHostSet(if (blockResolvableTracker) TRACKER_HOSTS + RESOLVABLE_TRACKER else TRACKER_HOSTS),
         suffixes = PublicSuffixRules(normal = setOf("test", "com"), wildcard = emptySet(), exception = emptySet()),
         params = TrackingParamRules(names = setOf("fbclid", "gclid"), prefixes = listOf("utm_")),
     )
@@ -68,10 +82,22 @@ internal class TestProtection {
         dispatchers = DefaultDispatcherProvider(),
     )
 
+    /** Spec 024 — the real session and the app's bundled scripts. */
+    val scriptSession = PrivacyScriptSessionImpl()
+
     val hooks = ProtectionHooks(
         engine = engine,
         attach = { monitor.set(it) },
         detach = { monitor.compareAndSet(it, null) },
+        scripts = if (withScripts) {
+            val bundles = PrivacyScriptBundlesImpl(
+                InstrumentationRegistry.getInstrumentation().targetContext,
+                DefaultDispatcherProvider(),
+            ).also { it.preload() }
+            ScriptHooks(PrivacyScriptInputs(scriptSession, bundles, exceptions, incognito), MainScope())
+        } else {
+            null
+        },
     )
 
     @Composable
@@ -90,7 +116,7 @@ internal class TestProtection {
                 onUrlChange = {},
                 onCanGoBackChange = {},
                 onCanGoForwardChange = {},
-                onTitleChange = {},
+                onTitleChange = { title.set(it) },
                 onIconReceived = { _, _ -> },
                 onScreenshotReady = {},
             ),

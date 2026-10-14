@@ -383,4 +383,28 @@
     <plurals name="hub_protection_trackers_blocked">
         <item quantity="other">이 페이지에서 추적기 %1$d개 차단됨</item>
     </plurals>
+    <!-- Spec 024 privacy tools -->
+    <string name="fire_action">파이어</string>
+    <string name="fire_action_tabs_cd">파이어: 모든 탭을 닫고 인터넷 사용 기록 삭제</string>
+    <string name="fire_confirm_title">모든 탭을 닫고 데이터를 삭제할까요?</string>
+    <string name="fire_confirm_body">시크릿 탭을 포함한 모든 탭을 닫고 방문 기록, 쿠키 및 사이트 데이터, 캐시된 파일, 사이트 권한을 삭제합니다.\n\n유지되는 항목: 북마크, 다운로드, 설정, 파이어 보호 사이트.</string>
+    <string name="fire_confirm_action">삭제</string>
+    <string name="fire_confirm_cancel">취소</string>
+    <string name="fire_done_announcement">인터넷 사용 기록이 삭제됨</string>
+    <string name="dashboard_title">이 사이트의 개인정보 보호</string>
+    <string name="dashboard_connection_secure">안전한 연결</string>
+    <string name="dashboard_no_trackers">이 페이지에서 차단된 추적기 없음</string>
+    <string name="dashboard_fireproof_title">이 사이트를 파이어에서 보호</string>
+    <string name="dashboard_fireproof_help">파이어를 사용해도 로그인 상태가 유지됩니다. 다른 사이트의 로그인 서비스도 보호해야 합니다.</string>
+    <string name="settings_fireproof_sites">파이어 보호 사이트</string>
+    <string name="settings_fireproof_sites_summary">파이어를 사용해도 쿠키와 데이터가 유지되는 사이트</string>
+    <string name="fireproof_sites_empty">파이어 보호 사이트가 없습니다. 페이지의 개인정보 보호 패널에서 \'이 사이트를 파이어에서 보호\'를 켜면 여기에 표시됩니다.</string>
+    <string name="fireproof_sites_remove">삭제</string>
+    <string name="fireproof_sites_remove_cd">파이어 보호 사이트에서 %1$s 삭제</string>
+    <string name="fireproof_sites_remove_all">모두 삭제</string>
+    <string name="fireproof_sites_remove_all_confirm_title">파이어 보호 사이트를 모두 삭제할까요?</string>
+    <string name="fireproof_sites_remove_all_confirm_body">다음에 파이어를 사용하면 이 사이트들의 쿠키와 데이터가 삭제됩니다.</string>
+    <string name="settings_clear_category_fireproof_sites">파이어 보호 사이트</string>
+    <string name="settings_clear_category_fireproof_sites_description">파이어를 사용할 때 더 이상 유지되지 않음</string>
+    <string name="settings_about_notice_autoconsent">쿠키 배너 규칙은 DuckDuckGo의 autoconsent(https://github.com/duckduckgo/autoconsent)에서 가져왔으며 MPL 2.0에 따라 사용합니다.</string>
 </resources>

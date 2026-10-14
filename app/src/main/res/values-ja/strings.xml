@@ -383,4 +383,28 @@
     <plurals name="hub_protection_trackers_blocked">
         <item quantity="other">このページで %1$d 件のトラッカーをブロック</item>
     </plurals>
+    <!-- Spec 024 privacy tools -->
+    <string name="fire_action">ファイア</string>
+    <string name="fire_action_tabs_cd">ファイア：すべてのタブを閉じて閲覧データを削除</string>
+    <string name="fire_confirm_title">すべてのタブを閉じてデータを削除しますか？</string>
+    <string name="fire_confirm_body">シークレットタブを含むすべてのタブを閉じ、履歴、Cookie とサイトデータ、キャッシュされたファイル、サイトの権限を削除します。\n\n残るもの：ブックマーク、ダウンロード、設定、ファイアから保護したサイト。</string>
+    <string name="fire_confirm_action">削除</string>
+    <string name="fire_confirm_cancel">キャンセル</string>
+    <string name="fire_done_announcement">閲覧データを削除しました</string>
+    <string name="dashboard_title">このサイトのプライバシー</string>
+    <string name="dashboard_connection_secure">安全な接続</string>
+    <string name="dashboard_no_trackers">このページでブロックしたトラッカーはありません</string>
+    <string name="dashboard_fireproof_title">このサイトをファイアから保護</string>
+    <string name="dashboard_fireproof_help">ファイアを使ってもログインしたままになります。他のサイトのログインサービスも保護する必要があります。</string>
+    <string name="settings_fireproof_sites">ファイアから保護したサイト</string>
+    <string name="settings_fireproof_sites_summary">ファイアを使っても Cookie とデータが残るサイト</string>
+    <string name="fireproof_sites_empty">ファイアから保護したサイトはありません。ページのプライバシーパネルで「このサイトをファイアから保護」をオンにすると、ここに表示されます。</string>
+    <string name="fireproof_sites_remove">削除</string>
+    <string name="fireproof_sites_remove_cd">%1$s をファイアから保護したサイトから削除</string>
+    <string name="fireproof_sites_remove_all">すべて削除</string>
+    <string name="fireproof_sites_remove_all_confirm_title">ファイアから保護したサイトをすべて削除しますか？</string>
+    <string name="fireproof_sites_remove_all_confirm_body">次にファイアを使うと、これらのサイトの Cookie とデータが削除されます。</string>
+    <string name="settings_clear_category_fireproof_sites">ファイアから保護したサイト</string>
+    <string name="settings_clear_category_fireproof_sites_description">ファイアを使ったときに残らなくなります</string>
+    <string name="settings_about_notice_autoconsent">Cookie バナーのルールは DuckDuckGo の autoconsent（https://github.com/duckduckgo/autoconsent）を MPL 2.0 の下で使用しています。</string>
 </resources>

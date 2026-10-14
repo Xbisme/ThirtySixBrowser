@@ -52,6 +52,7 @@ internal fun settingsViewModel(
         oneTimeGrants = OneTimeGrantStore(),
         protectionExceptions = FakeProtectionExceptionRepository(),
         incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
+        fireproofSites = com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),

@@ -383,4 +383,28 @@
     <plurals name="hub_protection_trackers_blocked">
         <item quantity="other">Đã chặn %1$d trình theo dõi trên trang này</item>
     </plurals>
+    <!-- Spec 024 privacy tools -->
+    <string name="fire_action">Đốt dữ liệu</string>
+    <string name="fire_action_tabs_cd">Đốt dữ liệu: đóng mọi tab và xoá dữ liệu duyệt web</string>
+    <string name="fire_confirm_title">Đóng mọi tab và xoá dữ liệu?</string>
+    <string name="fire_confirm_body">Đóng mọi tab, kể cả tab ẩn danh, và xoá lịch sử, cookie và dữ liệu trang, tệp đã lưu bộ nhớ đệm cùng quyền của trang.\n\nGiữ lại: dấu trang, tệp tải xuống, cài đặt và các trang được giữ lại.</string>
+    <string name="fire_confirm_action">Xoá</string>
+    <string name="fire_confirm_cancel">Huỷ</string>
+    <string name="fire_done_announcement">Đã xoá dữ liệu duyệt web</string>
+    <string name="dashboard_title">Quyền riêng tư trên trang này</string>
+    <string name="dashboard_connection_secure">Kết nối an toàn</string>
+    <string name="dashboard_no_trackers">Không chặn trình theo dõi nào trên trang này</string>
+    <string name="dashboard_fireproof_title">Giữ lại trang này khi đốt</string>
+    <string name="dashboard_fireproof_help">Giúp bạn vẫn đăng nhập sau khi đốt dữ liệu. Dịch vụ đăng nhập ở trang khác cũng cần được giữ lại.</string>
+    <string name="settings_fireproof_sites">Trang được giữ lại</string>
+    <string name="settings_fireproof_sites_summary">Các trang giữ cookie và dữ liệu khi bạn đốt dữ liệu</string>
+    <string name="fireproof_sites_empty">Chưa có trang nào được giữ lại. Bật Giữ lại trang này khi đốt trong bảng quyền riêng tư của trang; trang sẽ hiện ở đây.</string>
+    <string name="fireproof_sites_remove">Gỡ</string>
+    <string name="fireproof_sites_remove_cd">Gỡ %1$s khỏi danh sách giữ lại</string>
+    <string name="fireproof_sites_remove_all">Gỡ tất cả</string>
+    <string name="fireproof_sites_remove_all_confirm_title">Gỡ mọi trang được giữ lại?</string>
+    <string name="fireproof_sites_remove_all_confirm_body">Lần đốt dữ liệu tiếp theo sẽ xoá cookie và dữ liệu của các trang này.</string>
+    <string name="settings_clear_category_fireproof_sites">Trang được giữ lại</string>
+    <string name="settings_clear_category_fireproof_sites_description">Các trang không còn được giữ lại khi đốt dữ liệu</string>
+    <string name="settings_about_notice_autoconsent">Quy tắc xử lý banner cookie lấy từ autoconsent của DuckDuckGo (https://github.com/duckduckgo/autoconsent), dùng theo giấy phép MPL 2.0.</string>
 </resources>

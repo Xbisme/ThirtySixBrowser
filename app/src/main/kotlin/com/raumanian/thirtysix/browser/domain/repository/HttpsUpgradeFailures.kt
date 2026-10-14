@@ -5,4 +5,7 @@ interface HttpsUpgradeFailures {
     fun markFailed(host: String)
 
     fun snapshot(): Set<String>
+
+    /** Spec 024 FR-003a — Fire forgets every failed host, so the next visit tries HTTPS again. */
+    fun clear()
 }

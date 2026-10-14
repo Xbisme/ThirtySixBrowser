@@ -215,4 +215,23 @@ object BrowserLimits {
 
     /** Spec 023 research R3 — host → registrable-domain results kept in memory. */
     const val REGISTRABLE_DOMAIN_CACHE_SIZE: Int = 2_048
+
+    /** Spec 024 FR-006 — how long the Fire overlay's grow-and-fade animation runs. */
+    const val FIRE_OVERLAY_MS: Int = 900
+
+    /**
+     * Spec 024 research R10 — the overlay stays at least this long, so a Fire run that finishes
+     * almost at once still reads as a deliberate action rather than a flicker.
+     */
+    const val FIRE_OVERLAY_MIN_MS: Long = 600L
+
+    /**
+     * Spec 024 research R3 — how long one per-site deletion may wait for the web engine's
+     * callback before Fire moves on to the next site. Bounded like [WEB_DATA_CLEAR_TIMEOUT_MS],
+     * so an engine that never answers cannot hold Fire forever.
+     */
+    const val SITE_DATA_DELETE_TIMEOUT_MS: Long = 5_000L
+
+    /** Spec 024 FR-026 — random bytes in the per-session fingerprinting secret (128 bits). */
+    const val FIRE_SECRET_BYTES: Int = 16
 }

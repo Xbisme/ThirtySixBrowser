@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * Spec 023 — the protections' state for one WebView: the page on screen, its blocked trackers and
@@ -50,6 +51,15 @@ class PageProtectionMonitor internal constructor(
 
     private val _status = MutableStateFlow(PageProtectionStatus.NOT_A_WEB_PAGE)
     val status: StateFlow<PageProtectionStatus> = _status.asStateFlow()
+
+    private val blockedHostList = MutableStateFlow<List<String>>(emptyList())
+
+    /**
+     * Spec 024 FR-016 — the distinct tracker hosts blocked on this page, in the order they were
+     * first blocked. Emits only when a new host joins (IO thread) and when a new page starts;
+     * collected only by the privacy dashboard (§V rule 3).
+     */
+    val blockedHostsFlow: StateFlow<List<String>> = blockedHostList.asStateFlow()
 
     /** The registrable domain of the page on screen, or `null` when no web page is shown. */
     val currentSite: String? get() = topSite
@@ -93,7 +103,10 @@ class PageProtectionMonitor internal constructor(
         val host = requestUrl.host?.lowercase()
         val top = topHost
         if (host == null || top == null || !shouldBlock(host, top)) return null
-        if (blocked.add(host)) _status.value = _status.value.copy(blockedTrackerCount = blocked.size)
+        if (blocked.add(host)) {
+            _status.value = _status.value.copy(blockedTrackerCount = blocked.size)
+            blockedHostList.update { it + host }
+        }
         return blockedResponse()
     }
 
@@ -159,6 +172,7 @@ class PageProtectionMonitor internal constructor(
 
     private fun enterPage(url: String) {
         blocked.clear()
+        blockedHostList.value = emptyList()
         setTop(url)
         _status.value = statusFor(url)
     }

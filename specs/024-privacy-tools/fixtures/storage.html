@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- Spec 024 fixture (quickstart G3/G4, T037–T040). Without ?check it stores five kinds of site
+     data; with ?check it reports which exist in the title: "check:js=1,ls=1,idb=1,cache=1,sw=1".
+     The HttpOnly cookie fp_persist is set by the server and is checked through CookieManager. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>storage</title>
+<p id="out">…</p>
+<script>
+// Written as ES2015 promise chains (no async/await): WebView 53 on the API 24 AVD lacks them.
+(function () {
+  function out(t) { document.title = t; document.getElementById('out').textContent = t; }
+  var check = location.search.indexOf('check') >= 0;
+  function idbHas() {
+    return new Promise(function (resolve) {
+      var req = indexedDB.open('fp_db');
+      req.onupgradeneeded = function () { req.transaction.abort(); resolve(false); };
+      req.onsuccess = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains('s')) { db.close(); resolve(false); return; }
+        var get = db.transaction('s').objectStore('s').get('k');
+        get.onsuccess = function () { db.close(); resolve(get.result === 'v'); };
+        get.onerror = function () { db.close(); resolve(false); };
+      };
+      req.onerror = function () { resolve(false); };
+    });
+  }
+  function cacheHas() { return 'caches' in window ? caches.has('fp_cache') : Promise.resolve(false); }
+  function swHas() {
+    return navigator.serviceWorker && navigator.serviceWorker.getRegistrations
+      ? navigator.serviceWorker.getRegistrations().then(function (r) { return r.length > 0; })
+      : Promise.resolve(false);
+  }
+  if (check) {
+    var js = document.cookie.indexOf('fp_js=1') >= 0;
+    var ls = localStorage.getItem('fp_ls') === '1';
+    Promise.all([idbHas(), cacheHas(), swHas()]).then(function (r) {
+      out('check:js=' + +js + ',ls=' + +ls + ',idb=' + +r[0] + ',cache=' + +r[1] + ',sw=' + +r[2]);
+    });
+    return;
+  }
+  document.cookie = 'fp_js=1; Max-Age=31536000; Path=/';
+  localStorage.setItem('fp_ls', '1');
+  new Promise(function (resolve) {
+    var req = indexedDB.open('fp_db', 1);
+    req.onupgradeneeded = function () { req.result.createObjectStore('s'); };
+    req.onsuccess = function () {
+      var tx = req.result.transaction('s', 'readwrite');
+      tx.objectStore('s').put('v', 'k');
+      tx.oncomplete = function () { req.result.close(); resolve(); };
+    };
+    req.onerror = function () { resolve(); };
+  }).then(function () {
+    return 'caches' in window
+      ? caches.open('fp_cache').then(function (c) { return c.put('/fp-entry', new Response('1')); })
+      : null;
+  }).then(function () {
+    if (!navigator.serviceWorker) return null;
+    return navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; })
+      .catch(function () { return null; });
+  }).then(function () { out('stored'); }, function () { out('stored'); });
+})();
+</script>

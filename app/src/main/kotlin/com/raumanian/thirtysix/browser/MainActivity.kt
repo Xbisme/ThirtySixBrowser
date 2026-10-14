@@ -11,6 +11,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.raumanian.thirtysix.browser.core.constants.NavArgs
+import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.domain.usecase.GetUserSettingsUseCase
@@ -51,6 +52,10 @@ class MainActivity : AppCompatActivity() {
      */
     @Inject
     lateinit var getUserSettings: GetUserSettingsUseCase
+
+    /** Spec 024 FR-007 — finishes an interrupted Fire run before the first tab is shown. */
+    @Inject
+    lateinit var fireCoordinator: FireCoordinator
 
     /** Spec 020 — hand-off of links, shares and searches from other apps to the UI (research R5). */
     @Inject
@@ -110,6 +115,9 @@ class MainActivity : AppCompatActivity() {
         // ⚠️ NOT via setKeepOnScreenCondition: Spec 017's INV-12 forbids that call outright —
         // its absence is what makes Spec 017's FR-008 ("never held open") true.
         lifecycleScope.launch {
+            // Spec 024 FR-007 — a Fire run stopped part-way finishes before any tab is shown. Only an
+            // interrupted run costs anything here: otherwise this is one DataStore read.
+            fireCoordinator.resumeIfInterrupted()
             val startDestination = if (getUserSettings().isOnboardingCompleted) {
                 AppDestination.Browser.route
             } else {

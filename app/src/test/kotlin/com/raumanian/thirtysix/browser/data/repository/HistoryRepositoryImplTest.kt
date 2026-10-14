@@ -45,6 +45,16 @@ class HistoryRepositoryImplTest {
     }
 
     @Test
+    fun `distinctHosts returns each recorded web host once`() = runTest {
+        repo.recordVisit("https://mail.example.com/inbox", "Inbox", 1000L)
+        repo.recordVisit("https://mail.example.com/sent", "Sent", 2000L)
+        repo.recordVisit("http://news.test/", "News", 3000L)
+        repo.recordVisit("about:blank", "", 4000L)
+
+        assertEquals(setOf("mail.example.com", "news.test"), repo.distinctHosts())
+    }
+
+    @Test
     fun `observeRecent maps the newest rows to domain entries`() = runTest {
         // Spec 019 T058a — the Room override of the interface default.
         repo.recordVisit("https://a.example", "A", 1000L)
