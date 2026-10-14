@@ -5,7 +5,7 @@ import android.util.Log
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptBundles
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.usecase.PruneOldHistoryUseCase
+import com.raumanian.thirtysix.browser.feature.history.domain.usecase.PruneOldHistoryUseCase
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope

@@ -28,13 +28,13 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
+import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedFakeHistoryRepository
+import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedImmediateDispatchers
+import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedNoopFaviconCacheForHistory
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetDynamicColorEnabledUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetTextSizeUseCase
-import com.raumanian.thirtysix.browser.presentation.history.InstrumentedFakeHistoryRepository
-import com.raumanian.thirtysix.browser.presentation.history.InstrumentedImmediateDispatchers
-import com.raumanian.thirtysix.browser.presentation.history.InstrumentedNoopFaviconCacheForHistory
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream

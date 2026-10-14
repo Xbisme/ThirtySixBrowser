@@ -13,6 +13,11 @@
         <error line="40" column="5" source="compose:modifier-missing-check" />
         <error line="47" column="5" source="compose:vm-forwarding-check" />
     </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/history/presentation/history/HistoryScreen.kt">
+        <error line="45" column="5" source="compose:modifier-missing-check" />
+        <error line="62" column="5" source="compose:vm-forwarding-check" />
+        <error line="78" column="9" source="compose:vm-forwarding-check" />
+    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/onboarding/presentation/onboarding/OnboardingScreen.kt">
         <error line="60" column="5" source="compose:modifier-missing-check" />
         <error line="71" column="5" source="compose:vm-forwarding-check" />
@@ -108,11 +113,6 @@
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/SiteJsDialog.kt">
         <error line="34" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/history/HistoryScreen.kt">
-        <error line="45" column="5" source="compose:modifier-missing-check" />
-        <error line="62" column="5" source="compose:vm-forwarding-check" />
-        <error line="78" column="9" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/fireproof/FireproofSitesScreen.kt">
         <error line="39" column="5" source="compose:modifier-missing-check" />

@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 /**
  * Spec 014 FR-021 — narrow seam over the Android system clipboard.
  *
- * Introduced so [com.raumanian.thirtysix.browser.presentation.history.HistoryViewModel]
+ * Introduced so [com.raumanian.thirtysix.browser.feature.history.presentation.history.HistoryViewModel]
  * can offer "Copy URL" without holding an Android `Context`, keeping its unit tests on
  * the plain JVM (no Robolectric). Mirrors the
  * [com.raumanian.thirtysix.browser.data.local.cache.FaviconCache] pattern from Spec 011:
