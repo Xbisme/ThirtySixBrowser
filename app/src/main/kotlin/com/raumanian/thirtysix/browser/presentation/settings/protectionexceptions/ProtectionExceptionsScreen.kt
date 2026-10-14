@@ -22,15 +22,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.ConfirmDialog
-import com.raumanian.thirtysix.browser.presentation.components.ListRow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
-import com.raumanian.thirtysix.browser.presentation.components.PillButton
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 /**
  * Spec 023 FR-015 — Settings → Privacy → Sites without protection. Each row turns protection
  * back on for one site; "Turn all back on" asks first. Built from Spec 019 components (design

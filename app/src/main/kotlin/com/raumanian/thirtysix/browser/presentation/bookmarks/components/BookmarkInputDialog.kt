@@ -11,10 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
-import com.raumanian.thirtysix.browser.presentation.components.PillButton
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
  * Spec 019 — the text-input dialog frame shared by the folder and bookmark dialogs: an
  * [AlertDialog] at radius 28 (`shapes.extraLarge`) on the raised surface, with the design

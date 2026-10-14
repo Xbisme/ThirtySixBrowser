@@ -25,12 +25,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.AddressSuggestion
 import com.raumanian.thirtysix.browser.domain.model.SuggestionSource
-import com.raumanian.thirtysix.browser.presentation.components.ListRow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 import kotlinx.coroutines.flow.StateFlow
 
 internal const val TEST_TAG_ADDRESS_SUGGESTIONS: String = "address_suggestions"

@@ -20,10 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 internal const val TEST_TAG_DOWNLOADS_EMPTY: String = "downloads_empty_state"
 
 /**

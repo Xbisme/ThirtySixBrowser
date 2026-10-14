@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveProtectionExceptionsUseCase
@@ -25,7 +26,6 @@ import com.raumanian.thirtysix.browser.presentation.settings.protectionexception
 import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.ProtectionExceptionsViewModel
 import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.TEST_TAG_PROTECTION_EXCEPTIONS_EMPTY
 import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.TEST_TAG_PROTECTION_EXCEPTIONS_TURN_ALL_ON
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

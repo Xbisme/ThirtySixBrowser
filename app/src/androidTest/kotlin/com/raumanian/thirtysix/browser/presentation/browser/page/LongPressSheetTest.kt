@@ -9,10 +9,10 @@ import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.LongPressAction
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule

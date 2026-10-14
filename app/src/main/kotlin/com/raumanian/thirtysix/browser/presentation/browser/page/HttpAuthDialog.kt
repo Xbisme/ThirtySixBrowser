@@ -18,9 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 /**
  * Spec 021 US6 / C2.3 — a site's basic/digest sign-in (FR-032). What is typed lives only in this
  * dialog's state and goes to this one request; it is never stored, and leaving the dialog drops

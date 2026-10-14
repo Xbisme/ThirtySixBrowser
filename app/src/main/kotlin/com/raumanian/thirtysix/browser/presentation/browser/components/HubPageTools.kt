@@ -18,13 +18,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.QuickTile
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.QuickTileState
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.QuickTileTone
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.presentation.browser.PageTool
-import com.raumanian.thirtysix.browser.presentation.components.QuickTile
-import com.raumanian.thirtysix.browser.presentation.components.QuickTileState
-import com.raumanian.thirtysix.browser.presentation.components.QuickTileTone
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 internal const val TEST_TAG_HUB_TOOL_FIND: String = "hub_tool_find"
 internal const val TEST_TAG_HUB_TOOL_SHARE: String = "hub_tool_share"
 internal const val TEST_TAG_HUB_TOOL_PRINT: String = "hub_tool_print"

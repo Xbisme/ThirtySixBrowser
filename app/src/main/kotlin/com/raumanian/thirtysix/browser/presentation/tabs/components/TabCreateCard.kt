@@ -25,12 +25,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.tabs.TabsMode
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-
 private const val DISABLED_ALPHA = 0.5f
 
 /**

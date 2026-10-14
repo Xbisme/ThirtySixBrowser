@@ -30,20 +30,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.DarkPrimary
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.DarkSurface
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.LightPrimary
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.LightSurface
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.presentation.settings.components.appLanguageLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
-import com.raumanian.thirtysix.browser.presentation.theme.DarkPrimary
-import com.raumanian.thirtysix.browser.presentation.theme.DarkSurface
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.LightPrimary
-import com.raumanian.thirtysix.browser.presentation.theme.LightSurface
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-
 private val ThemePreviewHeight = 96.dp
 private val ThemePreviewBar = 10.dp
 private const val THEME_PREVIEW_BAR_FRACTION = 0.6f

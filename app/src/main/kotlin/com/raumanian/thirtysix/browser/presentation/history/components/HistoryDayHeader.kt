@@ -8,8 +8,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.DateFormats
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SectionHeader
 import com.raumanian.thirtysix.browser.domain.model.HistoryDayBucket
-import com.raumanian.thirtysix.browser.presentation.components.SectionHeader
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 

@@ -13,13 +13,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.repository.WebDataCleaner
 import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CLEAR_CATEGORY_PREFIX
 import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CLEAR_CONFIRM
 import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CLEAR_DIALOG
 import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_CLEAR_PROGRESS
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Rule
 import org.junit.Test

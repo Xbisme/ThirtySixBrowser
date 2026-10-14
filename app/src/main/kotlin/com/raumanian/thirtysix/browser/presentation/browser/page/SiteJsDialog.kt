@@ -21,11 +21,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 /**
  * Spec 021 US6 / C2.2 — a page's alert / confirm / prompt, headed by the site that asks
  * (FR-029). From the page's second dialog a checkbox stops its further dialogs (FR-031).

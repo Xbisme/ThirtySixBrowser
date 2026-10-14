@@ -23,21 +23,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ChoiceDialog
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.presentation.browser.page.capitalizedForLocale
 import com.raumanian.thirtysix.browser.presentation.browser.page.iconRes
 import com.raumanian.thirtysix.browser.presentation.browser.page.labelRes
-import com.raumanian.thirtysix.browser.presentation.components.ChoiceDialog
-import com.raumanian.thirtysix.browser.presentation.components.ConfirmDialog
-import com.raumanian.thirtysix.browser.presentation.components.PillButton
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsIconTone
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSectionHeader
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsValueRow
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 /**
  * Spec 021 FR-009 / C2.7 — remembered site decisions, one group per site: tap a decision to
  * change it, remove one site, or remove every site after confirming. Nothing here is ever

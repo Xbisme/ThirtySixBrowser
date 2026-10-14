@@ -7,9 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.ConfirmDialog
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 /**
  * Spec 014 FR-024 / FR-026 — confirmation gate in front of the irreversible clear-all wipe,
  * drawn as the shared destructive [ConfirmDialog] (Spec 019 FR-045): the body names what is

@@ -31,6 +31,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.presentation.entry.rememberDefaultBrowserRequest
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
@@ -54,7 +55,6 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.historyR
 import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.textSizeLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

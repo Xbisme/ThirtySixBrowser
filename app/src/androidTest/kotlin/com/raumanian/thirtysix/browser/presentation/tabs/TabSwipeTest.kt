@@ -10,10 +10,10 @@ import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.presentation.tabs.components.TEST_TAG_TAB_CARD_PREFIX
 import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherCard
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

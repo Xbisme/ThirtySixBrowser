@@ -34,14 +34,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
-import com.raumanian.thirtysix.browser.presentation.components.PillButton
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-
 /**
  * Spec 016 US4 — choose what to clear, then confirm.
  *

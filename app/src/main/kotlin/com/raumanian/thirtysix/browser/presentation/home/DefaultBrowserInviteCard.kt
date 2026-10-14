@@ -19,13 +19,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.PillButton
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
  * Spec 020 contracts C3.5 — the Home invitation to make ThirtySix the default browser.
  *

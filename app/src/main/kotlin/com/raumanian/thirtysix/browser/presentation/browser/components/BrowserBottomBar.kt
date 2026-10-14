@@ -40,13 +40,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.presentation.theme.barShadow
-import com.raumanian.thirtysix.browser.presentation.theme.fabGlow
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.barShadow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.fabGlow
 internal const val TEST_TAG_NAV_HOME: String = "nav_home"
 internal const val TEST_TAG_NAV_SEARCH: String = "nav_search"
 internal const val TEST_TAG_NAV_NEW_TAB: String = "nav_new_tab"

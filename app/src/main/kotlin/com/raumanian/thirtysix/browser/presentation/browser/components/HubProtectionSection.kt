@@ -16,13 +16,12 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PrivacyStageBanner
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
-import com.raumanian.thirtysix.browser.presentation.components.ListRow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
-import com.raumanian.thirtysix.browser.presentation.components.PrivacyStageBanner
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 internal const val TEST_TAG_HUB_PROTECTION_SWITCH: String = "hub_protection_switch"
 internal const val TEST_TAG_HUB_NOT_SECURE: String = "hub_not_secure"
 

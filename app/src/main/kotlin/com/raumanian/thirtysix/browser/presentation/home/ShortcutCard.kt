@@ -32,14 +32,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SeededMeshArt
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.rememberFileImage
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.softShadow
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind
-import com.raumanian.thirtysix.browser.presentation.components.SeededMeshArt
-import com.raumanian.thirtysix.browser.presentation.components.rememberFileImage
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.presentation.theme.softShadow
-
 private val CardPadding = 10.dp
 private val TagPadding = 8.dp
 private val TagGap = 4.dp

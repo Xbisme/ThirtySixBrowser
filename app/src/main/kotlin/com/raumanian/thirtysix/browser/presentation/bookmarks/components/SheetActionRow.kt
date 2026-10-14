@@ -19,11 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowLead
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLead
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 /**
  * Spec 019 — one action in a bookmark/folder action sheet: a 44dp lead holding the action's
  * glyph and the label. [destructive] paints both in the error colours (Delete).

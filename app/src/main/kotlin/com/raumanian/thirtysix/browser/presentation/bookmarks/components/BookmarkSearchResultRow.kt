@@ -9,10 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLetter
 import com.raumanian.thirtysix.browser.domain.model.BookmarkSearchResult
-import com.raumanian.thirtysix.browser.presentation.components.ListRow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowLetter
-
 /**
  * Spec 013 FR-026 — search-result row showing a bookmark plus its folder
  * path inline so the user always knows where the bookmark lives.

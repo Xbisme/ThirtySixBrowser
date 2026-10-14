@@ -6,8 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.ChoiceDialog
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ChoiceDialog
 /**
  * Spec 016 — the shared body of every Settings chooser: a titled list of mutually exclusive
  * options, one of them selected. Spec 019 draws it with the design system's [ChoiceDialog]

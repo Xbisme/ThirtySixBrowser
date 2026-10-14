@@ -6,11 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.raumanian.thirtysix.browser.core.constants.NavArgs
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
+import com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect
 import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.UserSettings
@@ -25,8 +30,6 @@ import com.raumanian.thirtysix.browser.presentation.entry.LaunchCountPolicy
 import com.raumanian.thirtysix.browser.presentation.entry.PendingRequestState
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.navigation.AppNavGraph
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.presentation.util.SecureWindowEffect
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -63,6 +66,9 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var incomingIntentReader: IncomingIntentReader
+
+    @Inject
+    lateinit var dispatchers: DispatcherProvider
 
     /** Spec 020 FR-024a — counts launches toward the Home invitation's threshold. */
     @Inject
@@ -225,7 +231,9 @@ class MainActivity : AppCompatActivity() {
             // ignores it below Android 12, where dynamic color does not exist (research R9).
             ThirtySixTheme(darkTheme = darkTheme, dynamicColor = settings.isDynamicColorEnabled) {
                 SecureWindowEffect(secure = isIncognito)
-                AppNavGraph(startDestination = startDestination)
+                CompositionLocalProvider(LocalIoDispatcher provides dispatchers.io) {
+                    AppNavGraph(startDestination = startDestination)
+                }
             }
         }
     }

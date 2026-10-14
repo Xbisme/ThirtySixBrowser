@@ -15,16 +15,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLead
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLetter
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SheetFrame
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
-import com.raumanian.thirtysix.browser.presentation.components.ListRow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
-import com.raumanian.thirtysix.browser.presentation.components.ListRowLead
-import com.raumanian.thirtysix.browser.presentation.components.ListRowLetter
-import com.raumanian.thirtysix.browser.presentation.components.SheetFrame
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 /**
  * Spec 014 FR-018 / FR-022 — long-press action sheet for a single history row, in the shared
  * [SheetFrame] (Spec 019): the entry it acts on, then exactly three actions in the order the

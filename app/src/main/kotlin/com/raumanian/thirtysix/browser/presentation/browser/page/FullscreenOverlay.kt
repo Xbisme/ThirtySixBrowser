@@ -19,8 +19,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.raumanian.thirtysix.browser.presentation.util.findActivity
-
+import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 /**
  * Spec 021 US3 / research R4 — the page's fullscreen view over the whole browser screen: system
  * bars hidden (a swipe shows them briefly, FR-014), orientation following the phone (FR-015),

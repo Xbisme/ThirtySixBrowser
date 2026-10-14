@@ -44,13 +44,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.browser.FindInPageState
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.flow.StateFlow
 
 internal const val TEST_TAG_FIND_BAR: String = "find_bar"

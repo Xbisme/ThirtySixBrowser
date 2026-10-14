@@ -19,6 +19,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.data.local.entity.BookmarkEntity
 import com.raumanian.thirtysix.browser.data.local.entity.HistoryEntryEntity
@@ -31,7 +32,6 @@ import com.raumanian.thirtysix.browser.presentation.browser.LoadingState
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_ADDRESS_BAR
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

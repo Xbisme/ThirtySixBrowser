@@ -11,9 +11,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingContentHooks
-import com.raumanian.thirtysix.browser.presentation.util.findActivity
-
 /**
  * Spec 020 FR-006 — Back on a tab opened for another app's link, with no page history left,
  * closes that tab and returns the person to the app that sent the link (research R2/R7).

@@ -28,9 +28,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.domain.model.FireState
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

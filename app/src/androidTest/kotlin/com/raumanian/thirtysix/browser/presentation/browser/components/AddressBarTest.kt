@@ -16,9 +16,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
 import com.raumanian.thirtysix.browser.presentation.browser.LoadingState
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Rule

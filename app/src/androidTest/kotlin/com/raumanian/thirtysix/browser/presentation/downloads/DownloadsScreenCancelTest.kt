@@ -6,10 +6,10 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.DownloadFailureCause
 import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_DOWNLOAD_CANCEL
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

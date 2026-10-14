@@ -3,15 +3,18 @@
     <file name="src/androidTest/kotlin/com/raumanian/thirtysix/browser/protection/TestProtection.kt">
         <error line="104" column="9" source="compose:modifier-missing-check" />
     </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/core/presentation/designsystem/component/QuickTile.kt">
+        <error line="106" column="13" source="compose:multiple-emitters-check" />
+    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/BookmarksScreen.kt">
-        <error line="140" column="13" source="compose:vm-forwarding-check" />
-        <error line="144" column="5" source="compose:vm-forwarding-check" />
+        <error line="139" column="13" source="compose:vm-forwarding-check" />
+        <error line="143" column="5" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/components/AddOrEditBookmarkDialog.kt">
-        <error line="52" column="5" source="compose:modifier-missing-check" />
+        <error line="51" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/components/BookmarksTopBar.kt">
-        <error line="131" column="5" source="compose:parameter-naming" />
+        <error line="130" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/components/CreateOrRenameFolderDialog.kt">
         <error line="20" column="5" source="compose:modifier-missing-check" />
@@ -31,8 +34,8 @@
         <error line="409" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/DownloadPermissionGate.kt">
+        <error line="38" column="5" source="compose:parameter-naming" />
         <error line="39" column="5" source="compose:parameter-naming" />
-        <error line="40" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/QuickSettingsHost.kt">
         <error line="29" column="5" source="compose:lambda-param-in-effect" />
@@ -41,9 +44,9 @@
         <error line="49" column="5" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/components/BrowserTopBar.kt">
-        <error line="53" column="5" source="compose:parameter-naming" />
-        <error line="103" column="13" source="compose:multiple-emitters-check" />
-        <error line="106" column="5" source="compose:parameter-naming" />
+        <error line="52" column="5" source="compose:parameter-naming" />
+        <error line="102" column="13" source="compose:multiple-emitters-check" />
+        <error line="105" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/components/FindInPageBar.kt">
         <error line="132" column="80" source="compose:modifier-without-default-check" />
@@ -53,10 +56,10 @@
         <error line="54" column="44" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/components/HubPageTools.kt">
-        <error line="84" column="100" source="compose:modifier-without-default-check" />
+        <error line="83" column="100" source="compose:modifier-without-default-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/components/HubProtectionSection.kt">
-        <error line="41" column="5" source="compose:parameter-naming" />
+        <error line="40" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/components/PrivacyDashboardSheet.kt">
         <error line="54" column="5" source="compose:parameter-naming" />
@@ -68,19 +71,16 @@
         <error line="23" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/FullscreenOverlay.kt">
-        <error line="32" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/HttpAuthDialog.kt">
-        <error line="30" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/LongPressSheet.kt">
         <error line="31" column="5" source="compose:modifier-missing-check" />
     </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/SiteJsDialog.kt">
-        <error line="35" column="5" source="compose:modifier-missing-check" />
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/HttpAuthDialog.kt">
+        <error line="29" column="5" source="compose:modifier-missing-check" />
     </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/components/QuickTile.kt">
-        <error line="107" column="13" source="compose:multiple-emitters-check" />
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/LongPressSheet.kt">
+        <error line="30" column="5" source="compose:modifier-missing-check" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/SiteJsDialog.kt">
+        <error line="34" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/downloads/DownloadsScreen.kt">
         <error line="41" column="5" source="compose:modifier-missing-check" />
@@ -98,7 +98,7 @@
         <error line="243" column="65" source="compose:lambda-param-in-effect" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/onboarding/components/OnboardingSlideContent.kt">
-        <error line="217" column="56" source="compose:modifier-without-default-check" />
+        <error line="216" column="56" source="compose:modifier-without-default-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/SettingsScreen.kt">
         <error line="70" column="5" source="compose:modifier-missing-check" />
@@ -108,17 +108,17 @@
         <error line="308" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/components/SettingsRows.kt">
-        <error line="152" column="5" source="compose:modifier-without-default-check" />
+        <error line="151" column="5" source="compose:modifier-without-default-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/fireproof/FireproofSitesScreen.kt">
-        <error line="40" column="5" source="compose:modifier-missing-check" />
+        <error line="39" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/protectionexceptions/ProtectionExceptionsScreen.kt">
-        <error line="40" column="5" source="compose:modifier-missing-check" />
+        <error line="39" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/sitepermissions/SitePermissionsScreen.kt">
-        <error line="47" column="5" source="compose:modifier-missing-check" />
-        <error line="99" column="5" source="compose:vm-forwarding-check" />
+        <error line="46" column="5" source="compose:modifier-missing-check" />
+        <error line="98" column="5" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/TabsScreen.kt">
         <error line="96" column="5" source="compose:vm-forwarding-check" />
@@ -127,10 +127,10 @@
         <error line="266" column="67" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/CloseAllIncognitoConfirmDialog.kt">
-        <error line="18" column="5" source="compose:modifier-missing-check" />
+        <error line="17" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/CloseAllTabsConfirmDialog.kt">
-        <error line="17" column="5" source="compose:modifier-missing-check" />
+        <error line="16" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/TabSwitcherCard.kt">
         <error line="149" column="47" source="compose:modifier-without-default-check" />

@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
 /** One full-width button of a [SiteDialogFrame]. */
 data class SiteDialogAction(
     val label: String,

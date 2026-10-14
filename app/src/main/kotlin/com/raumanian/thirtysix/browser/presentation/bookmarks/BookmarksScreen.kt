@@ -36,6 +36,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SectionHeader
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.error.BookmarkUrlValidationError
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.AddOrEditBookmarkDialog
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.BookmarkActionSheet
@@ -51,13 +56,7 @@ import com.raumanian.thirtysix.browser.presentation.bookmarks.components.FolderC
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.FolderPickerSheet
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.FolderRow
 import com.raumanian.thirtysix.browser.presentation.bookmarks.components.NoSearchMatchesState
-import com.raumanian.thirtysix.browser.presentation.components.SectionHeader
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-
 private const val KEY_FOLDER_CHIPS = "folder_chips"
 private const val KEY_HEADER_FOLDERS = "header_folders"
 private const val KEY_HEADER_PAGES = "header_pages"

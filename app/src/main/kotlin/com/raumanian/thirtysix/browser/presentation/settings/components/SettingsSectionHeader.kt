@@ -8,10 +8,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.raumanian.thirtysix.browser.presentation.components.SectionHeader
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SectionHeader
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
  * Spec 016 / 019 FR-044 — a group title in the Settings list. Every group after the first is
  * separated from the one above by a hairline. The title is the shared [SectionHeader], which is

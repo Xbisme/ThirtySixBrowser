@@ -41,20 +41,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ThirtySixChip
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.FireState
 import com.raumanian.thirtysix.browser.presentation.browser.components.FireConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
-import com.raumanian.thirtysix.browser.presentation.components.ThirtySixChip
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.tabs.components.CloseAllIncognitoConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.tabs.components.CloseAllTabsConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.tabs.components.TabCreateCard
 import com.raumanian.thirtysix.browser.presentation.tabs.components.TabSwitcherCard
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 import java.io.File
 
 /**

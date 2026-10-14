@@ -22,14 +22,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
 import com.raumanian.thirtysix.browser.presentation.browser.LoadingState
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-
 internal const val TEST_TAG_BROWSER_TOP_BAR: String = "browser_top_bar"
 internal const val TEST_TAG_BROWSER_STAR_ICON: String = "browser_star_icon"
 internal const val TEST_TAG_BROWSER_RELOAD_STOP: String = "browser_reload_stop"

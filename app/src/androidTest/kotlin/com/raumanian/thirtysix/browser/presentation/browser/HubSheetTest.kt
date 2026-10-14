@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubPageToolsState
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
@@ -23,7 +24,6 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_HUB_TOOL_PRINT
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_HUB_TOOL_SHARE
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_HUB_TOOL_TEXT_SIZE
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

@@ -22,12 +22,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SheetFrame
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.presentation.browser.privacy.PageDashboardState
-import com.raumanian.thirtysix.browser.presentation.components.ListRow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon
-import com.raumanian.thirtysix.browser.presentation.components.SheetFrame
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 import kotlinx.coroutines.flow.StateFlow
 
 internal const val TEST_TAG_PRIVACY_DASHBOARD: String = "privacy_dashboard"

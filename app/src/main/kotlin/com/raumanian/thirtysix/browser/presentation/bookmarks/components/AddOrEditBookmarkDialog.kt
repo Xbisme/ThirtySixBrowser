@@ -30,12 +30,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.domain.validator.BookmarkUrlValidator
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 /**
  * Spec 013 — single dialog used for both manual-add (US7) and edit (US5).
  * Validates URL inline using [BookmarkUrlValidator]; rejects empty title +

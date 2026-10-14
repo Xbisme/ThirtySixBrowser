@@ -14,11 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.GreetingPeriod
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

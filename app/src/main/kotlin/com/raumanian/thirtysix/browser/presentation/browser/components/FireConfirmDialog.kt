@@ -7,9 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.ConfirmDialog
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 internal const val TEST_TAG_FIRE_CONFIRM: String = "fire_confirm_dialog"
 
 /**

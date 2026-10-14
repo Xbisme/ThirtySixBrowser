@@ -33,13 +33,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 /**
  * Spec 014 / Spec 019 — top of the History screen: a bar with Back and the clear-all icon,
  * the large "History" title, then the always-visible search well (FR-041).

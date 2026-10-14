@@ -32,16 +32,15 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLetter
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind
-import com.raumanian.thirtysix.browser.presentation.components.ListRow
-import com.raumanian.thirtysix.browser.presentation.components.ListRowLetter
-import com.raumanian.thirtysix.browser.presentation.components.PillButton
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
 import com.raumanian.thirtysix.browser.presentation.entry.rememberDefaultBrowserRequest
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-
 internal const val TEST_TAG_HOME_PAGE: String = "home_page"
 internal const val TEST_TAG_HOME_RECENT_TITLE: String = "home_recent_title"
 

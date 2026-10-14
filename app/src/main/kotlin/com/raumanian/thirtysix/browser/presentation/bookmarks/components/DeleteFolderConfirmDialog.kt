@@ -6,9 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.components.ConfirmDialog
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 /**
  * Spec 013 FR-020 — confirmation dialog for cascade-deleting a non-empty
  * folder. Body text uses a plurals resource so locales with non-trivial

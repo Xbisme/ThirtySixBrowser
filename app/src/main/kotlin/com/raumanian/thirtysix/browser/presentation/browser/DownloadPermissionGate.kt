@@ -17,8 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.presentation.util.findActivity
-
+import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 /**
  * Spec 015 FR-010 – FR-012 — the storage-permission gate in front of every download.
  *

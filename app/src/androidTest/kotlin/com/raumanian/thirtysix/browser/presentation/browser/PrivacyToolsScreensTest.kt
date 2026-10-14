@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.FireResult
 import com.raumanian.thirtysix.browser.domain.model.FireState
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
@@ -29,7 +30,6 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_FIRE_OVERLAY
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_HUB_FIRE
 import com.raumanian.thirtysix.browser.presentation.browser.privacy.PageDashboardState
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

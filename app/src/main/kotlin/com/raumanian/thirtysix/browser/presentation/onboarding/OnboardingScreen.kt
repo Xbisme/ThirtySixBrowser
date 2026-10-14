@@ -34,21 +34,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
-import com.raumanian.thirtysix.browser.presentation.components.MeshArt
-import com.raumanian.thirtysix.browser.presentation.components.PillButton
-import com.raumanian.thirtysix.browser.presentation.components.PillStyle
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.MeshArt
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.LanguageSlide
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.SearchEngineSlide
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.ThemeSlide
 import com.raumanian.thirtysix.browser.presentation.onboarding.components.WelcomeSlide
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Dimens
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.presentation.util.findActivity
 import kotlinx.coroutines.flow.collectLatest
 
 /**

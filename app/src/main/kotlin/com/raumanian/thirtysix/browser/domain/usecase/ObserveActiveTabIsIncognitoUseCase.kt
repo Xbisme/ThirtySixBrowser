@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
  *
  * Drives:
  *  - The `FLAG_SECURE` lifecycle binding in `MainActivity` via
- *    [com.raumanian.thirtysix.browser.presentation.util.SecureWindowEffect]
+ *    [com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect]
  *    (FR-016 / FR-016a).
  *  - The address-bar incognito indicator
  *    ([com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState.isIncognito]).

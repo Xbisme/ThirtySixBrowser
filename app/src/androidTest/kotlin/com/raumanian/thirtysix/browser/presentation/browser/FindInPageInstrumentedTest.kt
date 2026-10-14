@@ -13,13 +13,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_FIND_COUNT
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_FIND_FIELD
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_FIND_NEXT
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_FIND_PREVIOUS
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.testing.AssetPageServer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

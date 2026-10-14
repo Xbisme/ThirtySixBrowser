@@ -8,12 +8,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.presentation.history.components.TEST_TAG_HISTORY_NO_MATCHES
 import com.raumanian.thirtysix.browser.presentation.history.components.TEST_TAG_HISTORY_ROW_PREFIX
 import com.raumanian.thirtysix.browser.presentation.history.components.TEST_TAG_HISTORY_SEARCH_CLEAR
 import com.raumanian.thirtysix.browser.presentation.history.components.TEST_TAG_HISTORY_SEARCH_FIELD
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule

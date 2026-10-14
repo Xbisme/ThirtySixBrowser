@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test

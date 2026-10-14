@@ -13,7 +13,6 @@ internal val KNOWN_VIOLATIONS: Set<String> = setOf(
     "HiltTestActivity.kt",
     "MainActivity.kt",
     "ThirtySixApplication.kt",
-    "core/base/BaseViewModel.kt",
     "core/constants/AppConstants.kt",
     "core/constants/AppDefaults.kt",
     "core/constants/BrowserLimits.kt",
@@ -23,6 +22,10 @@ internal val KNOWN_VIOLATIONS: Set<String> = setOf(
     "core/constants/UrlConstants.kt",
     "core/constants/UrlPatterns.kt",
     "core/domain/util/UrlExtensions.kt",
+    "core/presentation/designsystem/theme/Color.kt",
+    "core/presentation/designsystem/theme/Elevation.kt",
+    "core/presentation/designsystem/theme/Theme.kt",
+    "core/presentation/util/SecureWindowEffect.kt",
     "data/local/cache/FaviconCache.kt",
     "data/local/cache/ScreenshotCache.kt",
     "data/local/clipboard/ClipboardWriter.kt",
@@ -186,7 +189,6 @@ internal val KNOWN_VIOLATIONS: Set<String> = setOf(
     "presentation/browser/protection/WebViewProtection.kt",
     "presentation/browser/suggestions/AddressSuggestionList.kt",
     "presentation/browser/suggestions/AddressSuggestionsViewModel.kt",
-    "presentation/components/FileImage.kt",
     "presentation/downloads/DownloadStatusPresentation.kt",
     "presentation/downloads/DownloadsViewModel.kt",
     "presentation/downloads/components/DeleteDownloadedFileConfirmDialog.kt",
@@ -219,11 +221,6 @@ internal val KNOWN_VIOLATIONS: Set<String> = setOf(
     "presentation/tabs/TabsUiState.kt",
     "presentation/tabs/TabsViewModel.kt",
     "presentation/tabs/components/TabSwitcherCard.kt",
-    "presentation/theme/Color.kt",
-    "presentation/theme/Elevation.kt",
-    "presentation/theme/Theme.kt",
-    "presentation/theme/ThirtySixColors.kt",
-    "presentation/util/SecureWindowEffect.kt",
 )
 
 internal fun productionScope(): KoScope = Konsist.scopeFromProduction(moduleName = "app").slice { file ->

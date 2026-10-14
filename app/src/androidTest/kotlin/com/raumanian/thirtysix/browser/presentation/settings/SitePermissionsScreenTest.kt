@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
@@ -21,7 +22,6 @@ import com.raumanian.thirtysix.browser.domain.usecase.SetSitePermissionUseCase
 import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsScreen
 import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsViewModel
 import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.TEST_TAG_SITE_PERMISSIONS_REMOVE_ALL
-import com.raumanian.thirtysix.browser.presentation.theme.ThirtySixTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

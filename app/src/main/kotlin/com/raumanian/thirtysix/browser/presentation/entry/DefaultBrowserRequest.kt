@@ -13,8 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import com.raumanian.thirtysix.browser.MainActivity
-import com.raumanian.thirtysix.browser.presentation.util.findActivity
-
+import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 /**
  * Spec 020 contracts C3.2 / research R8 — the action behind "make ThirtySix the default browser",
  * shared by the Settings row and the Home invitation.

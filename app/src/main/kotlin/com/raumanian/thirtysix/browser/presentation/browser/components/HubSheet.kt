@@ -24,14 +24,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.QuickTile
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.QuickTileTone
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RowBanner
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SheetFrame
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
-import com.raumanian.thirtysix.browser.presentation.components.QuickTile
-import com.raumanian.thirtysix.browser.presentation.components.QuickTileTone
-import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton
-import com.raumanian.thirtysix.browser.presentation.components.RowBanner
-import com.raumanian.thirtysix.browser.presentation.components.SheetFrame
-import com.raumanian.thirtysix.browser.presentation.theme.AppIcons
-import com.raumanian.thirtysix.browser.presentation.theme.Spacing
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
