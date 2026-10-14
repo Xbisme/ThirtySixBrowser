@@ -2,11 +2,11 @@ package com.raumanian.thirtysix.browser.presentation.browser.suggestions
 
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.domain.model.SuggestionSource
 import com.raumanian.thirtysix.browser.domain.usecase.FilterAddressSuggestionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.LoadAddressSuggestionsSourceUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

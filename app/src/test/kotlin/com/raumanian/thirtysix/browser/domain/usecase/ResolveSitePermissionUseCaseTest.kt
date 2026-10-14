@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability.Camera
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability.Location
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability.Microphone
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
-import com.raumanian.thirtysix.browser.testdoubles.FakeSitePermissionRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

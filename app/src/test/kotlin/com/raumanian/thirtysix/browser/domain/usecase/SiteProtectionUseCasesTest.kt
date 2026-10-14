@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.testdoubles.FakeProtectionExceptionRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

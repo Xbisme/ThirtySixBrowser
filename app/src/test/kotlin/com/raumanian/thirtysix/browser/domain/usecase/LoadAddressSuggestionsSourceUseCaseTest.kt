@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.domain.model.SuggestionSource
-import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

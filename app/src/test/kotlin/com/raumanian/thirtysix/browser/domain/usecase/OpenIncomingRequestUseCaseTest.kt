@@ -8,10 +8,10 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.model.IncomingTarget
 import com.raumanian.thirtysix.browser.domain.model.OpenOutcome
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

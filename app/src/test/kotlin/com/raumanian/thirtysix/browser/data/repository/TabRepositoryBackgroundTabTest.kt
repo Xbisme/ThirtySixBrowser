@@ -9,12 +9,12 @@ import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsRe
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeCookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoWebProfile
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
-import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoWebProfile
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

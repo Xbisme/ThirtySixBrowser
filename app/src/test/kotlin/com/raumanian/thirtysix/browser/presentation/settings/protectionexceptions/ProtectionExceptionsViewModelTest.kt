@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions
 
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveProtectionExceptionsUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeProtectionExceptionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

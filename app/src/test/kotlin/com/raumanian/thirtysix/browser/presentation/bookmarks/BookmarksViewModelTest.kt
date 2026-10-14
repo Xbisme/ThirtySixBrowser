@@ -7,6 +7,9 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsInc
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.CountFolderDescendantsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateFolderUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.DeleteBookmarkUseCase
@@ -19,9 +22,6 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveFolderPathUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RenameFolderUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SearchBookmarksUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateBookmarkUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

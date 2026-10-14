@@ -9,8 +9,8 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
@@ -56,8 +56,8 @@ class TabsViewModelTest {
 
     private fun newViewModel(
         repository: FakeTabRepository = FakeTabRepository(homeUrl = HOME_URL),
-        incognitoRepository: com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository =
-            com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository(),
+        incognitoRepository: com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository =
+            com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository(),
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
     ): TabsViewModel {
@@ -329,7 +329,7 @@ class TabsViewModelTest {
     @Test
     fun `closing the only incognito tab leaves exactly one normal home tab`() = runTest(testDispatcher) {
         val repository = FakeTabRepository(homeUrl = HOME_URL)
-        val incognitoRepo = com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository()
+        val incognitoRepo = com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository()
         // Pre-seed an incognito tab (negative id per R3) with a higher
         // lastActiveAt so it is the active tab in the merged Flow.
         incognitoRepo.emit(

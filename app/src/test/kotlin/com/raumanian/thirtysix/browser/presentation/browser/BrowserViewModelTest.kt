@@ -11,12 +11,12 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
 import java.net.URLEncoder
@@ -73,8 +73,8 @@ class BrowserViewModelTest {
         tabRepository: FakeTabRepository = FakeTabRepository(homeUrl = url),
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
-        bookmarkRepository: com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository =
-            com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository(),
+        bookmarkRepository: com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository =
+            com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository(),
         historyRepository: FakeHistoryRepository = FakeHistoryRepository(),
     ): BrowserViewModel {
         // Spec 011 — 4 use-case dependencies + 2 caches all back onto a

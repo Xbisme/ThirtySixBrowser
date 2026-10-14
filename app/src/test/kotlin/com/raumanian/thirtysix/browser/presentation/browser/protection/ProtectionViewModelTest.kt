@@ -4,11 +4,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptBundles
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.domain.usecase.SetSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSiteProtectionUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.privacy.PrivacyScriptInputs
-import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow

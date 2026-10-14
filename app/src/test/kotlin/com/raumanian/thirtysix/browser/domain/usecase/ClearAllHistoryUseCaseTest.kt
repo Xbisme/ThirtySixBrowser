@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

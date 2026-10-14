@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetentionChangeResult
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException

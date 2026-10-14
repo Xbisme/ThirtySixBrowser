@@ -9,10 +9,10 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUse
 import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllIncognitoTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers

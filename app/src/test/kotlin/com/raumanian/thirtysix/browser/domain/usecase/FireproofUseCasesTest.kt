@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

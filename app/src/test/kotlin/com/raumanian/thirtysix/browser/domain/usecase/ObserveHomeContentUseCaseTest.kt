@@ -4,10 +4,10 @@ import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind
-import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

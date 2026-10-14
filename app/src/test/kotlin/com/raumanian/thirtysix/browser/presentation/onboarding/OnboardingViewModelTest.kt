@@ -11,9 +11,9 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.domain.usecase.SetOnboardingCompletedUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
-import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

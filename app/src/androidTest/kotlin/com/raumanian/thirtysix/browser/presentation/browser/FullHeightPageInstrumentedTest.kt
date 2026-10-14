@@ -9,7 +9,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
-import com.raumanian.thirtysix.browser.testing.AssetPageServer
+import com.raumanian.thirtysix.browser.core.testing.AssetPageServer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger

@@ -14,13 +14,13 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.model.IncomingRequest
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.OpenIncomingRequestUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ResolveIncomingRequestUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers

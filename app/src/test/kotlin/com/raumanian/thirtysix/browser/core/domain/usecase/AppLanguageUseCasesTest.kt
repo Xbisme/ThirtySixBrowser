@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.core.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope

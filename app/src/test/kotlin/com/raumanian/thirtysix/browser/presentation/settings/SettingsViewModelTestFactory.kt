@@ -8,20 +8,20 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCas
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeCookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetTextSizeUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
-import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
-import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeProtectionExceptionRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeScreenshotCache
-import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeSitePermissionRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeWebDataCleaner
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -52,7 +52,7 @@ internal fun settingsViewModel(
         oneTimeGrants = OneTimeGrantStore(),
         protectionExceptions = FakeProtectionExceptionRepository(),
         incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
-        fireproofSites = com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository(),
+        fireproofSites = com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),

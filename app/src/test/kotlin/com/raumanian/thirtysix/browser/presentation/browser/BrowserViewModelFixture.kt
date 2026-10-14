@@ -8,18 +8,17 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeScreenshotCache
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
-
 /**
  * Spec 022 — one place that builds a [BrowserViewModel] over fakes, for the page-tools tests.
  * Older test classes keep their own builders; new ones use this, so a new constructor

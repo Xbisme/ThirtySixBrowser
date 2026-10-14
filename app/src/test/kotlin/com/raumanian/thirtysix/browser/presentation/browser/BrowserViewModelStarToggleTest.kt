@@ -12,13 +12,13 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
 import java.net.URLEncoder
@@ -149,11 +149,11 @@ class BrowserViewModelStarToggleTest {
             isUrlBookmarked = isUrlBookmarked,
             toggleBookmark = toggleBookmark,
             recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
-                com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+                com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository(),
             ),
             updateHistoryEntryTitle = com.raumanian.thirtysix.browser.domain.usecase
                 .UpdateHistoryEntryTitleUseCase(
-                    com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+                    com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository(),
                 ),
             startDownload = noOpStartDownloadUseCase(),
         )

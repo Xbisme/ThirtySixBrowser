@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
-import com.raumanian.thirtysix.browser.testing.AssetPageServer
+import com.raumanian.thirtysix.browser.core.testing.AssetPageServer
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.After
 import org.junit.Assert.assertFalse

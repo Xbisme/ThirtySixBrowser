@@ -11,13 +11,13 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.model.HistoryDayBucket
 import com.raumanian.thirtysix.browser.domain.usecase.ClearAllHistoryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.DeleteHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveHistoryEntriesUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit

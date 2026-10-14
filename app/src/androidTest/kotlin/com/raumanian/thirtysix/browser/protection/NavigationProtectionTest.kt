@@ -5,8 +5,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.webkit.WebViewCompat
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.testing.AssetPageServer
 import com.raumanian.thirtysix.browser.presentation.browser.protection.GpcHeaderInstaller
-import com.raumanian.thirtysix.browser.testing.AssetPageServer
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals

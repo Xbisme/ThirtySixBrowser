@@ -13,10 +13,10 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
 import java.net.URLEncoder
@@ -113,7 +113,7 @@ class BrowserViewModelIncognitoCacheGateTest {
     ): BrowserViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         // Spec 013 — star use cases. Self-contained fake repo; no impact on incognito tests.
-        val bookmarkRepo = com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository()
+        val bookmarkRepo = com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository()
         val addBookmark = com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase(bookmarkRepo)
         return BrowserViewModel(
             defaultHomeUrl = "https://normal.example.com",
@@ -131,11 +131,11 @@ class BrowserViewModelIncognitoCacheGateTest {
                 .ToggleBookmarkUseCase(bookmarkRepo, addBookmark),
             updateHistoryEntryTitle = com.raumanian.thirtysix.browser.domain.usecase
                 .UpdateHistoryEntryTitleUseCase(
-                    com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+                    com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository(),
                 ),
             recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase
                 .RecordHistoryEntryUseCase(
-                    com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository(),
+                    com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository(),
                 ),
             startDownload = noOpStartDownloadUseCase(),
         )

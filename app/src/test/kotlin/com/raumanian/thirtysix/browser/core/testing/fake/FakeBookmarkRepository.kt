@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.testdoubles
+package com.raumanian.thirtysix.browser.core.testing.fake
 
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount

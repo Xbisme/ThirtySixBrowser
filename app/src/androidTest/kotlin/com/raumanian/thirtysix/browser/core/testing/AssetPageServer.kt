@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.testing
+package com.raumanian.thirtysix.browser.core.testing
 
 import androidx.test.platform.app.InstrumentationRegistry
 import java.net.ServerSocket

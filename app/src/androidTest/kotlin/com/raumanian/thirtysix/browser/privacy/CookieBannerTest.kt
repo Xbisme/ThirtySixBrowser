@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.privacy
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.webkit.WebViewFeature
+import com.raumanian.thirtysix.browser.core.testing.AssetPageServer
 import com.raumanian.thirtysix.browser.protection.TestProtection
-import com.raumanian.thirtysix.browser.testing.AssetPageServer
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals

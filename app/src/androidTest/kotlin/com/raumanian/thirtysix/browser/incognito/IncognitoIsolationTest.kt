@@ -19,8 +19,8 @@ import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.AssetPageServer
 import com.raumanian.thirtysix.browser.protection.TestProtection
-import com.raumanian.thirtysix.browser.testing.AssetPageServer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

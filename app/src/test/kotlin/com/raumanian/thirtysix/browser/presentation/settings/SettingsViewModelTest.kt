@@ -6,11 +6,11 @@ import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
-import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
-import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeWebDataCleaner
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CompletableDeferred

@@ -10,11 +10,11 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsInc
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.DismissDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
-import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
-import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
