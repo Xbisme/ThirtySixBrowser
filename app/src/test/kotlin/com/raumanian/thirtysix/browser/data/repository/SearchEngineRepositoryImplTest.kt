@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
@@ -197,7 +197,7 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
 
     override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
 
-        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = error("not used in this test")
 }

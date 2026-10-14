@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention

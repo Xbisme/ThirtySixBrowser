@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.data.repository
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager

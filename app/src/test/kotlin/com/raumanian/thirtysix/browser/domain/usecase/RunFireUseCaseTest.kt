@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.fire.FireStepObserver
 import com.raumanian.thirtysix.browser.domain.model.Bookmark

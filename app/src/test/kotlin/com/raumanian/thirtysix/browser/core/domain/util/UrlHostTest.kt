@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.domain.privacy
+package com.raumanian.thirtysix.browser.core.domain.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.di
 
-import com.raumanian.thirtysix.browser.core.time.MonotonicClock
+import com.raumanian.thirtysix.browser.core.data.util.SystemMonotonicClock
+import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.data.platform.AndroidDefaultBrowserController
-import com.raumanian.thirtysix.browser.data.platform.SystemMonotonicClock
 import com.raumanian.thirtysix.browser.data.repository.DefaultBrowserInviteRepositoryImpl
 import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserInviteRepository

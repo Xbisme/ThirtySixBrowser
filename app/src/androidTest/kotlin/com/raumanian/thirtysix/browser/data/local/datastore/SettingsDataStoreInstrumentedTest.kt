@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.core.constants.StorageKeys
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import com.raumanian.thirtysix.browser.data.repository.SettingsRepositoryImpl
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention

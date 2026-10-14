@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.data.local.cache
 import android.content.Context
 import android.graphics.Bitmap
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
-import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.security.MessageDigest

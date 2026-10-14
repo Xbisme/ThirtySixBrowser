@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.result
+package com.raumanian.thirtysix.browser.core.domain.util
 
 import java.io.IOException
 import org.junit.Assert.assertEquals

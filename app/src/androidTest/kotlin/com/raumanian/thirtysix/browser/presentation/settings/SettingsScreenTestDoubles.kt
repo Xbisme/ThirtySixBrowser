@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.settings
 import android.graphics.Bitmap
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.isSelectable
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
@@ -84,7 +84,7 @@ internal class InstrumentedFakeSettingsRepository(
 
     override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
 
-        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         write { copy(isOnboardingCompleted = value) }
@@ -158,9 +158,9 @@ internal class InstrumentedFakeWebDataCleaner(
 internal object InstrumentedNoopFireproofSiteRepository : com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository {
     override fun observeAll() = kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.FireproofSite>())
     override fun currentSites(): Set<String> = emptySet()
-    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
-    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
-    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
+    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
+    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 }
 
 /** Spec 016 T077 — holds no incognito snapshot; the Settings screen only ever discards. */
@@ -260,9 +260,9 @@ internal object InstrumentedNoopProtectionExceptionRepository :
 
     override fun currentSites(): Set<String> = emptySet()
 
-    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 
-    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 
-    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 }

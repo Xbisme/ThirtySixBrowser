@@ -21,9 +21,9 @@ class ObserveFolderPathUseCaseTest {
     @Test
     fun `nested folder emits root-to-leaf chain`() = runTest {
         val repo = FakeBookmarkRepository()
-        val a = (repo.createFolder("A", null) as com.raumanian.thirtysix.browser.core.result.Result.Success).data
-        val b = (repo.createFolder("B", a) as com.raumanian.thirtysix.browser.core.result.Result.Success).data
-        val c = (repo.createFolder("C", b) as com.raumanian.thirtysix.browser.core.result.Result.Success).data
+        val a = (repo.createFolder("A", null) as com.raumanian.thirtysix.browser.core.domain.util.Result.Success).data
+        val b = (repo.createFolder("B", a) as com.raumanian.thirtysix.browser.core.domain.util.Result.Success).data
+        val c = (repo.createFolder("C", b) as com.raumanian.thirtysix.browser.core.domain.util.Result.Success).data
         val useCase = ObserveFolderPathUseCase(repo)
         useCase(c).test {
             val chain = awaitItem()

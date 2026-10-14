@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import com.raumanian.thirtysix.browser.data.repository.SettingsRepositoryImpl

@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.data.local.cookies
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest

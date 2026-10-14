@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.result
+package com.raumanian.thirtysix.browser.core.domain.util
 
 sealed class Result<out T> {
     data class Success<T>(val data: T) : Result<T>()

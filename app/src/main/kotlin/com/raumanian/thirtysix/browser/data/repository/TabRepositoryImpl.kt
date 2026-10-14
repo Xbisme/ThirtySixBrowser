@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.dao.TabDao
 import com.raumanian.thirtysix.browser.data.local.entity.TabEntity
 import com.raumanian.thirtysix.browser.data.mapper.toDomain

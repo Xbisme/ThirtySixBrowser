@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.repository
 
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 
 /**

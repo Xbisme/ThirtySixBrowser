@@ -22,7 +22,7 @@ internal val KNOWN_VIOLATIONS: Set<String> = setOf(
     "core/constants/StorageKeys.kt",
     "core/constants/UrlConstants.kt",
     "core/constants/UrlPatterns.kt",
-    "core/extensions/UrlExtensions.kt",
+    "core/domain/util/UrlExtensions.kt",
     "data/local/cache/FaviconCache.kt",
     "data/local/cache/ScreenshotCache.kt",
     "data/local/clipboard/ClipboardWriter.kt",

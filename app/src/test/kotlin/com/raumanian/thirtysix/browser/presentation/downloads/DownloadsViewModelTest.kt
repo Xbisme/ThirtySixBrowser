@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.presentation.downloads
 
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.clipboard.ClipboardWriter
 import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.domain.usecase.CancelDownloadUseCase

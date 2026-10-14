@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.presentation.history
 
 import android.graphics.Bitmap
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.clipboard.ClipboardWriter
 import com.raumanian.thirtysix.browser.domain.model.HistoryDayBucket

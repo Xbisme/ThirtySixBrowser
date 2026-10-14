@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.downloads
 
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.clipboard.ClipboardWriter
 import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.data.local.download.ExternalFileOpener

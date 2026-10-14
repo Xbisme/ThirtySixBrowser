@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.repository.SettingsRepositoryImpl
 import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
 import dagger.Binds

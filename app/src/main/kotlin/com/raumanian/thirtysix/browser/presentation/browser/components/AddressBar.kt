@@ -43,7 +43,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
 import com.raumanian.thirtysix.browser.presentation.components.ProgressLine
 import com.raumanian.thirtysix.browser.presentation.components.RoundIconButton

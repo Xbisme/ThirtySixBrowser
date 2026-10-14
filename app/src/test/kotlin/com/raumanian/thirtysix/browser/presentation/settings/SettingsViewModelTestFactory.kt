@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.settings
 
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase

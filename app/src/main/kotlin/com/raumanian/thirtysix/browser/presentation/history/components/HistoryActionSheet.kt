@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.presentation.components.ListRow
 import com.raumanian.thirtysix.browser.presentation.components.ListRowIcon

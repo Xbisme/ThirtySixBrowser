@@ -4,7 +4,7 @@ import android.webkit.WebView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.usecase.CloseIncognitoTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseTabUseCase

@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.di
+package com.raumanian.thirtysix.browser.core.di
 
 import dagger.Module
 import dagger.Provides

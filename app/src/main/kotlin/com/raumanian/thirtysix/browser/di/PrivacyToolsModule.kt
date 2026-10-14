@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.di
 
-import com.raumanian.thirtysix.browser.core.di.ApplicationScope
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.ApplicationScope
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptBundlesImpl
 import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptSessionImpl
 import com.raumanian.thirtysix.browser.data.repository.FireMarkerRepositoryImpl

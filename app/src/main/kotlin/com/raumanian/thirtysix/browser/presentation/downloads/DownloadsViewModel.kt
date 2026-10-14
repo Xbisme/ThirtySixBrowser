@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.clipboard.ClipboardWriter
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
 import com.raumanian.thirtysix.browser.domain.model.DownloadRecord

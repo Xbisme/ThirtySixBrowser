@@ -1,5 +1,6 @@
-package com.raumanian.thirtysix.browser.core.dispatcher
+package com.raumanian.thirtysix.browser.core.di
 
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

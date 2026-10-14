@@ -1,7 +1,7 @@
-package com.raumanian.thirtysix.browser.data.platform
+package com.raumanian.thirtysix.browser.core.data.util
 
 import android.os.SystemClock
-import com.raumanian.thirtysix.browser.core.time.MonotonicClock
+import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import javax.inject.Inject
 
 /** Spec 020 — [MonotonicClock] backed by the time since boot, which a clock change cannot move. */

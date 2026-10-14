@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.repository.TabRepository

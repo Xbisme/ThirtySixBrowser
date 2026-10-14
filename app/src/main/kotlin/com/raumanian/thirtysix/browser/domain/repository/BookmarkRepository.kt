@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.repository
 
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount
 import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
  * must `.flowOn(...)` if they need to render on Main.
  *
  * `suspend` methods are safe to call from any dispatcher; the implementation
- * switches to IO internally via [com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider.io].
+ * switches to IO internally via [com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider.io].
  */
 @Suppress("TooManyFunctions") // 18 functions span bookmark + folder CRUD; combined repo per research.md R1.
 interface BookmarkRepository {

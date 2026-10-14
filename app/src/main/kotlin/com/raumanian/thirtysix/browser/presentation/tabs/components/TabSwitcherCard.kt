@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
-import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.presentation.components.MeshArt
 import com.raumanian.thirtysix.browser.presentation.components.SeededMeshArt

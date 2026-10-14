@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.presentation.bookmarks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.error.BookmarkException
 import com.raumanian.thirtysix.browser.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder

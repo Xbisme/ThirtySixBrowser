@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.fire
 
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.model.FireState
 import com.raumanian.thirtysix.browser.domain.model.FireStep

@@ -31,7 +31,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.extensions.extractHostnameOrSelf
+import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind

@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.validator
 
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.error.BookmarkException
 import com.raumanian.thirtysix.browser.domain.error.BookmarkUrlValidationError
 import java.net.URI

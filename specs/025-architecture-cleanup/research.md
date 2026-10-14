@@ -89,10 +89,10 @@ Cross-feature presentation imports found: browser→tabs (`TabsErrorEvent`), bro
 
 | Today | Moves to |
 |---|---|
-| `core/result/Result`, `core/error/AppError`, `core/time/MonotonicClock`, `core/dispatcher/DispatcherProvider`, `core/di/ApplicationScope` (qualifier, pure `javax.inject`), `core/extensions/UrlExtensions`, `domain/privacy/UrlHost` | `core/domain/util/` |
+| `core/result/Result`, `core/time/MonotonicClock`, `core/dispatcher/DispatcherProvider`, `core/di/ApplicationScope` (qualifier, pure `javax.inject`), `core/extensions/UrlExtensions`, `domain/privacy/UrlHost` | `core/domain/util/` |
 | `core/dispatcher/DefaultDispatcherProvider` (names `Dispatchers.IO`) | `core/di/` |
 | `data/platform/SystemMonotonicClock` | `core/data/util/` |
-| `core/base/BaseViewModel`, `presentation/util/*` | `core/presentation/util/` |
+| `core/base/BaseViewModel`, `core/error/AppError` (maps `SQLiteException`, an Android type, and is used only by `BaseViewModel`), `presentation/util/*` | `core/presentation/util/` |
 | `presentation/theme/*` | `core/presentation/designsystem/theme/` |
 | `presentation/components/*` | `core/presentation/designsystem/component/` |
 | `core/constants/*` (11 objects) | split by owner: a value used by one feature moves into it (`AssetPaths` → `privacy`, its only users being the protection and script data sources); values used by several stay in `core/domain/util` (pure) or the design system (UI). `StorageKeys` splits by the repository that owns each key; key strings unchanged. |

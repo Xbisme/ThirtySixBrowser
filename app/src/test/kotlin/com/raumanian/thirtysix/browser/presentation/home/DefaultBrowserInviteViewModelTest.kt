@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.home
 
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserInviteRepository

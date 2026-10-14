@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
@@ -9,7 +10,6 @@ import com.raumanian.thirtysix.browser.domain.model.FireResult
 import com.raumanian.thirtysix.browser.domain.model.FireStep
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.domain.model.SiteDataPath
-import com.raumanian.thirtysix.browser.domain.privacy.urlHostOrNull
 import com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository

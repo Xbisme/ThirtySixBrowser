@@ -135,20 +135,4 @@
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/TabSwitcherCard.kt">
         <error line="149" column="47" source="compose:modifier-without-default-check" />
     </file>
-    <file name="src/test/kotlin/com/raumanian/thirtysix/browser/architecture/ArchitectureTest.kt">
-        <error line="3" column="1" source="standard:no-unused-imports" />
-        <error line="64" column="37" source="standard:trailing-comma-on-call-site" />
-    </file>
-    <file name="src/test/kotlin/com/raumanian/thirtysix/browser/architecture/CommentPolicyTest.kt">
-        <error line="14" column="119" source="standard:trailing-comma-on-call-site" />
-        <error line="21" column="101" source="standard:trailing-comma-on-call-site" />
-    </file>
-    <file name="src/test/kotlin/com/raumanian/thirtysix/browser/architecture/KonsistScope.kt">
-        <error line="12" column="52" source="standard:paren-spacing" />
-        <error line="12" column="52" source="standard:wrapping" />
-        <error line="12" column="53" source="standard:no-multi-spaces" />
-    </file>
-    <file name="src/test/kotlin/com/raumanian/thirtysix/browser/architecture/PlacementTest.kt">
-        <error line="61" column="75" source="standard:condition-wrapping" />
-    </file>
 </baseline>

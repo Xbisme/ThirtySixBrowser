@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.repository
 
+import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
-import com.raumanian.thirtysix.browser.domain.privacy.urlHostOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

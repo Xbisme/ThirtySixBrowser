@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.core.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.error.AppError
+import com.raumanian.thirtysix.browser.core.presentation.util.AppError
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

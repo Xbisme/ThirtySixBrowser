@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.repository
 
-import com.raumanian.thirtysix.browser.core.result.Result
-
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 /**
  * Spec 024 FR-007, INV-1 — the durable "a Fire run has started and not finished" marker. A narrow
  * repository of its own, like Spec 020's invite state, so the settings fakes and the user-settings

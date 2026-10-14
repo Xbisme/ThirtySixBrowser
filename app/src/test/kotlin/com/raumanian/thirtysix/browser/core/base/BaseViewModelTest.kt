@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.core.base
 
 import android.database.sqlite.SQLiteException
-import com.raumanian.thirtysix.browser.core.error.AppError
+import com.raumanian.thirtysix.browser.core.presentation.util.AppError
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers

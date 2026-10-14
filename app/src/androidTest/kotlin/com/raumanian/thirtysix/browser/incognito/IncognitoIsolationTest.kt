@@ -14,7 +14,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.webkit.ProfileStore
 import androidx.webkit.WebViewFeature
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
 import com.raumanian.thirtysix.browser.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository

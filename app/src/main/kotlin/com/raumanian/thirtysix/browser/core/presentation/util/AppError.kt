@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.error
+package com.raumanian.thirtysix.browser.core.presentation.util
 
 import android.database.sqlite.SQLiteException
 import java.io.IOException

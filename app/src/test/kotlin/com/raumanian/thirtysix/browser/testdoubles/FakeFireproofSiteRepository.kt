@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.FireproofSite
 import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository
 import java.time.Instant

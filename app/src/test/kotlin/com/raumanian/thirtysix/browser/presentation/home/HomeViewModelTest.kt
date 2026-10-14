@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.home
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.domain.model.GreetingPeriod
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.Tab

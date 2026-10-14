@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.di
+package com.raumanian.thirtysix.browser.core.domain.util
 
 import javax.inject.Qualifier
 

@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.test.platform.app.InstrumentationRegistry
-import com.raumanian.thirtysix.browser.core.dispatcher.DefaultDispatcherProvider
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.di.DefaultDispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptBundlesImpl
 import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptSessionImpl
 import com.raumanian.thirtysix.browser.data.local.protection.HttpsUpgradeFailureStore

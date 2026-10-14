@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.dispatcher
+package com.raumanian.thirtysix.browser.core.domain.util
 
 import kotlinx.coroutines.CoroutineDispatcher
 

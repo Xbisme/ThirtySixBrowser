@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.time
+package com.raumanian.thirtysix.browser.core.domain.util
 
 /**
  * Spec 020 research R6 — milliseconds from a clock that never jumps when the wall clock is

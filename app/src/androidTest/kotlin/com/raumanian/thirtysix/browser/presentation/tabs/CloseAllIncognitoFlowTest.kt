@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.tabs
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest

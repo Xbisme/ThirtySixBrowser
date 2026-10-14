@@ -11,7 +11,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.di.SettingsDataStoreProviderModule
@@ -240,15 +240,15 @@ private object OfflineErrorNoopBookmarkRepository :
     override suspend fun getBookmark(id: Long) = null
     override suspend fun countBookmarksByUrl(url: String) = 0
     override suspend fun addBookmark(bookmark: com.raumanian.thirtysix.browser.domain.model.Bookmark) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(0L)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(0L)
     override suspend fun updateBookmark(bookmark: com.raumanian.thirtysix.browser.domain.model.Bookmark) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override suspend fun deleteBookmark(id: Long) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override suspend fun deleteMostRecentBookmarkByUrl(url: String) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(0)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(0)
     override suspend fun moveBookmarkToFolder(bookmarkId: Long, newParentId: Long?) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override fun observeFoldersByParent(parentId: Long?) =
         kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.BookmarkFolder>())
     override fun observeAllFolders() =
@@ -258,13 +258,13 @@ private object OfflineErrorNoopBookmarkRepository :
     override suspend fun countDescendants(folderId: Long) =
         com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0)
     override suspend fun createFolder(name: String, parentId: Long?) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(0L)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(0L)
     override suspend fun renameFolder(folderId: Long, newName: String) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override suspend fun moveFolder(folderId: Long, newParentId: Long?) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(Unit)
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override suspend fun deleteFolderCascade(folderId: Long) =
-        com.raumanian.thirtysix.browser.core.result.Result.Success(
+        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(
             com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0),
         )
 }

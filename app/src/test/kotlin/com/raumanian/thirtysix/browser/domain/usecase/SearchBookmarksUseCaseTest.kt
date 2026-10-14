@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
 import kotlinx.coroutines.test.runTest

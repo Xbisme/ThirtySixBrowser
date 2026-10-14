@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.browser.protection
 import android.os.Handler
 import android.os.Looper
 import com.raumanian.thirtysix.browser.core.constants.NetworkTimeouts
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.domain.protection.NavigationPreparer
 import com.raumanian.thirtysix.browser.domain.protection.ProtectionMatchersHolder
 import com.raumanian.thirtysix.browser.domain.repository.HttpsUpgradeFailures

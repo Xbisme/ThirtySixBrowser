@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import androidx.room.withTransaction
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
-import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.dao.BookmarkDao
 import com.raumanian.thirtysix.browser.data.local.dao.BookmarkFolderDao
 import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
