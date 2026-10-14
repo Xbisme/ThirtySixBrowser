@@ -9,12 +9,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.BookmarksScreen
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.DownloadsScreen
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.HistoryScreen
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.OnboardingScreen
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SettingsScreen
 import com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions.SitePermissionsScreen
-import com.raumanian.thirtysix.browser.presentation.bookmarks.BookmarksScreen
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserScreen
 import com.raumanian.thirtysix.browser.presentation.entry.EntryEvent
 import com.raumanian.thirtysix.browser.presentation.entry.EntryPointViewModel

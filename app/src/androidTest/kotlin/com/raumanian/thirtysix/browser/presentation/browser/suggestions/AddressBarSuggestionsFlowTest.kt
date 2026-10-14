@@ -23,9 +23,9 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.Bookmar
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.HistoryEntryEntity
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.data.repository.BookmarkRepositoryImpl
 import com.raumanian.thirtysix.browser.domain.usecase.FilterAddressSuggestionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.LoadAddressSuggestionsSourceUseCase
+import com.raumanian.thirtysix.browser.feature.bookmarks.data.repository.BookmarkRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.history.data.repository.HistoryRepositoryImpl
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
 import com.raumanian.thirtysix.browser.presentation.browser.LoadingState

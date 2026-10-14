@@ -2,10 +2,10 @@ package com.raumanian.thirtysix.browser.core.testing.fake
 
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkException
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.error.BookmarkException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 
 /**
  * Spec 013 — in-memory fake honoring [BookmarkRepository] contract for use-case
- * and ViewModel tests. Mirrors [com.raumanian.thirtysix.browser.data.repository.BookmarkRepositoryImpl]
+ * and ViewModel tests. Mirrors [com.raumanian.thirtysix.browser.feature.bookmarks.data.repository.BookmarkRepositoryImpl]
  * cycle prevention + cascade delete logic in pure Kotlin.
  *
  * Thread-safety: tests are single-threaded by construction; the in-memory

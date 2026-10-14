@@ -9,6 +9,19 @@
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/core/presentation/designsystem/component/SettingsRows.kt">
         <error line="151" column="5" source="compose:modifier-without-default-check" />
     </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/bookmarks/presentation/bookmarks/BookmarksScreen.kt">
+        <error line="139" column="13" source="compose:vm-forwarding-check" />
+        <error line="143" column="5" source="compose:vm-forwarding-check" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/bookmarks/presentation/bookmarks/component/AddOrEditBookmarkDialog.kt">
+        <error line="51" column="5" source="compose:modifier-missing-check" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/bookmarks/presentation/bookmarks/component/BookmarksTopBar.kt">
+        <error line="130" column="5" source="compose:parameter-naming" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/bookmarks/presentation/bookmarks/component/CreateOrRenameFolderDialog.kt">
+        <error line="19" column="5" source="compose:modifier-missing-check" />
+    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/downloads/presentation/downloads/DownloadsScreen.kt">
         <error line="40" column="5" source="compose:modifier-missing-check" />
         <error line="47" column="5" source="compose:vm-forwarding-check" />
@@ -37,19 +50,6 @@
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/sitepermission/presentation/sitepermissions/SitePermissionsScreen.kt">
         <error line="46" column="5" source="compose:modifier-missing-check" />
         <error line="98" column="5" source="compose:vm-forwarding-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/BookmarksScreen.kt">
-        <error line="139" column="13" source="compose:vm-forwarding-check" />
-        <error line="143" column="5" source="compose:vm-forwarding-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/components/AddOrEditBookmarkDialog.kt">
-        <error line="51" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/components/BookmarksTopBar.kt">
-        <error line="130" column="5" source="compose:parameter-naming" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/components/CreateOrRenameFolderDialog.kt">
-        <error line="19" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/BrowserScreen.kt">
         <error line="120" column="9" source="compose:vm-injection-check" />
