@@ -146,7 +146,8 @@ ksp {
 
 // --- Detekt (Constitution §III No-Hardcode Rule, FR-018) ---------------------
 detekt {
-    config.setFrom(files("$rootDir/detekt.yml"))
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+    baseline = file("$rootDir/config/detekt/baseline.xml")
     buildUponDefaultConfig = true
     allRules = false
     ignoreFailures = false
@@ -169,7 +170,7 @@ kotlin {
 // The stability file always applies. Reports and metrics are written only when the
 // build is run with `-PcomposeReports`, so ordinary builds pay nothing for them.
 composeCompiler {
-    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("config/compose/stability.conf"))
     if (project.hasProperty("composeReports")) {
         reportsDestination = layout.buildDirectory.dir("compose_reports")
         metricsDestination = layout.buildDirectory.dir("compose_reports")

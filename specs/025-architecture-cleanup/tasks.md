@@ -46,10 +46,10 @@
 
 **Purpose**: move check configuration to the template's paths so the next phase only adds rules.
 
-- [ ] T006 `git mv detekt.yml config/detekt/detekt.yml` and update `app/build.gradle.kts` line `config.setFrom(files("$rootDir/detekt.yml"))` → `config.setFrom(files("$rootDir/config/detekt/detekt.yml"))`.
-- [ ] T007 `git mv compose_stability.conf config/compose/stability.conf`; update `stabilityConfigurationFiles.add(…)` in `app/build.gradle.kts`.
-- [ ] T008 `git mv app/detekt-baseline.xml config/detekt/baseline.xml`; set `baseline = file("$rootDir/config/detekt/baseline.xml")` in the `detekt {}` block of `app/build.gradle.kts`.
-- [ ] T009 Run G1; grep `.github/workflows/ci.yml` for any of the three old paths and update them. **Commit** `build(025): move check configs under config/`.
+- [X] T006 `git mv detekt.yml config/detekt/detekt.yml` and update `app/build.gradle.kts` line `config.setFrom(files("$rootDir/detekt.yml"))` → `config.setFrom(files("$rootDir/config/detekt/detekt.yml"))`.
+- [X] T007 `git mv compose_stability.conf config/compose/stability.conf`; update `stabilityConfigurationFiles.add(…)` in `app/build.gradle.kts`.
+- [X] T008 `git mv app/detekt-baseline.xml config/detekt/baseline.xml`; set `baseline = file("$rootDir/config/detekt/baseline.xml")` in the `detekt {}` block of `app/build.gradle.kts`.
+- [X] T009 Run G1; grep `.github/workflows/ci.yml` for any of the three old paths and update them. **Commit** `build(025): move check configs under config/`.
 
 ---
 
