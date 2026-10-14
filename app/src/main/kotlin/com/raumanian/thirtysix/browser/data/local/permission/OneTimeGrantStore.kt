@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.data.local.permission
 
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import javax.inject.Inject
 import javax.inject.Singleton
 

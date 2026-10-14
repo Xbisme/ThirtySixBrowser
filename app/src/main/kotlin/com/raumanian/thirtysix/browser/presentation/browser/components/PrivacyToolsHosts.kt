@@ -3,7 +3,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser.components
 
 import androidx.compose.runtime.Composable
-import com.raumanian.thirtysix.browser.domain.model.FireState
+import com.raumanian.thirtysix.browser.core.domain.model.FireState
 import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionViewModel
 

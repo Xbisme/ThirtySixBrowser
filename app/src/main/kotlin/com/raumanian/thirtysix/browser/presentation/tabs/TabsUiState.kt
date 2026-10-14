@@ -1,9 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.tabs
 
 import androidx.compose.runtime.Immutable
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
-import com.raumanian.thirtysix.browser.domain.model.Tab
-
 /**
  * Immutable UI snapshot for the tab switcher screen (Spec 011).
  *

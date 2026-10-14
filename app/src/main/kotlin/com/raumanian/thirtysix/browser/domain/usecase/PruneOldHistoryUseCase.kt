@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
-import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first

@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.usecase.ApplySitePermissionChoiceUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ResolveSitePermissionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SiteChoiceEffect

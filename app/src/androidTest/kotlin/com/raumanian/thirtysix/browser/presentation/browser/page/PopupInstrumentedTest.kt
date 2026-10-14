@@ -15,8 +15,8 @@ import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.MainActivity
 import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
-import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

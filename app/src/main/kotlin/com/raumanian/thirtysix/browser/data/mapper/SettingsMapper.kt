@@ -3,11 +3,11 @@ package com.raumanian.thirtysix.browser.data.mapper
 import androidx.datastore.preferences.core.Preferences
 import com.raumanian.thirtysix.browser.core.constants.AppDefaults
 import com.raumanian.thirtysix.browser.core.constants.StorageKeys
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.TextSize
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import javax.inject.Inject
 
 /**

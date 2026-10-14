@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.data.repository
 
+import com.raumanian.thirtysix.browser.core.domain.model.ProtectionData
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.data.local.protection.ProtectionDataSource
-import com.raumanian.thirtysix.browser.domain.model.ProtectionData
-import com.raumanian.thirtysix.browser.domain.repository.ProtectionDataRepository
 import javax.inject.Inject
 
 /** Spec 023 — [ProtectionDataRepository] over the bundled assets. */

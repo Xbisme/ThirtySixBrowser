@@ -1,9 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.LongPressAction
 import com.raumanian.thirtysix.browser.domain.model.LongPressMenu
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-
 /**
  * Spec 021 research R1 / data-model §3 — something a page asked of the browser that needs the
  * person. Built by the WebView clients, shown one at a time by `PageRequestHost`.

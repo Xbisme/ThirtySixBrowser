@@ -2,8 +2,8 @@ package com.raumanian.thirtysix.browser.data.local.cookies
 
 import android.util.Log
 import android.webkit.CookieManager
+import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume

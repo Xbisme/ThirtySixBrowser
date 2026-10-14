@@ -12,13 +12,13 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
 import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
-import com.raumanian.thirtysix.browser.domain.model.Tab
-import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
-import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
@@ -226,22 +226,22 @@ private object OfflineErrorNoopScreenshotCache : ScreenshotCache {
 }
 
 private object OfflineErrorNoopBookmarkRepository :
-    com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository {
+    com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository {
     override fun observeBookmarksByFolder(folderId: Long?) =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.Bookmark>())
     override fun observeBookmarksByUrl(url: String) =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.Bookmark>())
     override fun observeRecentBookmarks(limit: Int) =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
-    override suspend fun getAllBookmarks() = emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>()
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.Bookmark>())
+    override suspend fun getAllBookmarks() = emptyList<com.raumanian.thirtysix.browser.core.domain.model.Bookmark>()
 
     override fun searchBookmarks(query: String) =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.Bookmark>())
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.Bookmark>())
     override suspend fun getBookmark(id: Long) = null
     override suspend fun countBookmarksByUrl(url: String) = 0
-    override suspend fun addBookmark(bookmark: com.raumanian.thirtysix.browser.domain.model.Bookmark) =
+    override suspend fun addBookmark(bookmark: com.raumanian.thirtysix.browser.core.domain.model.Bookmark) =
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(0L)
-    override suspend fun updateBookmark(bookmark: com.raumanian.thirtysix.browser.domain.model.Bookmark) =
+    override suspend fun updateBookmark(bookmark: com.raumanian.thirtysix.browser.core.domain.model.Bookmark) =
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override suspend fun deleteBookmark(id: Long) =
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
@@ -250,13 +250,13 @@ private object OfflineErrorNoopBookmarkRepository :
     override suspend fun moveBookmarkToFolder(bookmarkId: Long, newParentId: Long?) =
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override fun observeFoldersByParent(parentId: Long?) =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.BookmarkFolder>())
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder>())
     override fun observeAllFolders() =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.BookmarkFolder>())
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder>())
     override suspend fun getFolder(id: Long) = null
-    override suspend fun getAncestorChain(folderId: Long) = emptyList<com.raumanian.thirtysix.browser.domain.model.BookmarkFolder>()
+    override suspend fun getAncestorChain(folderId: Long) = emptyList<com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder>()
     override suspend fun countDescendants(folderId: Long) =
-        com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0)
+        com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount(0, 0)
     override suspend fun createFolder(name: String, parentId: Long?) =
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(0L)
     override suspend fun renameFolder(folderId: Long, newName: String) =
@@ -265,7 +265,7 @@ private object OfflineErrorNoopBookmarkRepository :
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override suspend fun deleteFolderCascade(folderId: Long) =
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(
-            com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount(0, 0),
+            com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount(0, 0),
         )
 }
 
@@ -274,10 +274,10 @@ private object OfflineErrorNoopBookmarkRepository :
  * never fires (state seeded to Failed before any onLoadFinished can run).
  */
 private object OfflineErrorNoopHistoryRepository :
-    com.raumanian.thirtysix.browser.domain.repository.HistoryRepository {
+    com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository {
     override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
     override fun observeAll() =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.HistoryEntry>())
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry>())
     override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
     override suspend fun updateTitle(id: Long, title: String): Int = 0
     override suspend fun deleteById(id: Long): Int = 0

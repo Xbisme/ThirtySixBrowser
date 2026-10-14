@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

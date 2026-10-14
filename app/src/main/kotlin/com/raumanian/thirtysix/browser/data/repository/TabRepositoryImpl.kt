@@ -3,12 +3,12 @@ package com.raumanian.thirtysix.browser.data.repository
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.data.datasource.local.TabDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEntity
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.mapper.toDomain
-import com.raumanian.thirtysix.browser.domain.model.Tab
-import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.flow.Flow

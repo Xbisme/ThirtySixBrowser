@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.data.repository
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
-import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject

@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.bookmarks
 
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
-import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CountFolderDescendantsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateFolderUseCase

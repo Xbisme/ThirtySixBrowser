@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SiteProtectionExceptionEntity
-import com.raumanian.thirtysix.browser.domain.model.SiteProtectionException
+import com.raumanian.thirtysix.browser.core.domain.model.SiteProtectionException
 import java.time.Instant
 
 /** Spec 023 — Room row ↔ domain model for sites without protection. */

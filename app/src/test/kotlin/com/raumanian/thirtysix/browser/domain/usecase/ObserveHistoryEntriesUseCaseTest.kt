@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest

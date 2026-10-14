@@ -12,9 +12,9 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadFailureCause
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.domain.model.DownloadFailureCause
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_ACTION_COPY_LINK
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_ACTION_DELETE_FILE
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_ACTION_OPEN

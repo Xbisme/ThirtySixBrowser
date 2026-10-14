@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame

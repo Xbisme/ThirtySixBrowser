@@ -1,13 +1,13 @@
 package com.raumanian.thirtysix.browser.domain.fire
 
+import com.raumanian.thirtysix.browser.core.domain.model.FireState
+import com.raumanian.thirtysix.browser.core.domain.model.FireStep
+import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
+import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
-import com.raumanian.thirtysix.browser.domain.model.FireState
-import com.raumanian.thirtysix.browser.domain.model.FireStep
 import com.raumanian.thirtysix.browser.domain.repository.FireMarkerRepository
-import com.raumanian.thirtysix.browser.domain.repository.HttpsUpgradeFailures
-import com.raumanian.thirtysix.browser.domain.repository.PrivacyScriptSession
 import com.raumanian.thirtysix.browser.domain.usecase.RunFireUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager

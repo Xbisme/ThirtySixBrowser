@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

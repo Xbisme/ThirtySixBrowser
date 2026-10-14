@@ -2,11 +2,11 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.FireproofSiteDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.FireproofSiteEntity
+import com.raumanian.thirtysix.browser.core.domain.model.FireproofSite
+import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.mapper.toDomain
-import com.raumanian.thirtysix.browser.domain.model.FireproofSite
-import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

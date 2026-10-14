@@ -1,5 +1,8 @@
 package com.raumanian.thirtysix.browser.domain.model
 
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+
 /**
  * Spec 013 — search result row carrying a bookmark plus its folder path
  * (root → leaf, empty list when the bookmark is at the root).

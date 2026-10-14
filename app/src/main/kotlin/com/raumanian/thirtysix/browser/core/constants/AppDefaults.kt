@@ -1,15 +1,14 @@
 package com.raumanian.thirtysix.browser.core.constants
 
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.TextSize
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 /**
  * Application-wide default values for user-overridable settings (Spec 006 FR-018).
  *
  * Per Constitution §III No-Hardcode Rule: defaults live HERE, not inline at call
- * sites. Both [com.raumanian.thirtysix.browser.domain.model.UserSettings.DEFAULT]
+ * sites. Both [com.raumanian.thirtysix.browser.core.domain.model.UserSettings.DEFAULT]
  * and [com.raumanian.thirtysix.browser.data.mapper.SettingsMapper] read from
  * this object so a single edit propagates everywhere.
  *

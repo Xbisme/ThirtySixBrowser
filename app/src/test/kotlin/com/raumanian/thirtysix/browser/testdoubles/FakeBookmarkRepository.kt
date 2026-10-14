@@ -1,11 +1,11 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.error.BookmarkException
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
-import com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount
-import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
-import com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

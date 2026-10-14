@@ -4,9 +4,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.After

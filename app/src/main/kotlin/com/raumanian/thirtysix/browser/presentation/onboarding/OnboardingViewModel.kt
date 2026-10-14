@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase

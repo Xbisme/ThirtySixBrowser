@@ -8,8 +8,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 /**
  * Spec 016 US5 FR-020 — choose how long history is kept: exactly the four bounded windows, with
  * no "keep forever". Stateless: the caller decides whether a choice needs the FR-021 warning.

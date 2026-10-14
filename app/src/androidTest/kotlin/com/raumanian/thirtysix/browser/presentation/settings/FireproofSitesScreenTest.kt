@@ -7,10 +7,10 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.FireproofSite
+import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.domain.model.FireproofSite
-import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveFireproofSitesUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveFireproofSitesUseCase
 import com.raumanian.thirtysix.browser.presentation.settings.fireproof.FireproofSitesScreen

@@ -10,12 +10,12 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-import com.raumanian.thirtysix.browser.domain.model.SiteDecision
-import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
-import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveSitePermissionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveSitePermissionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSitePermissionUseCase

@@ -2,9 +2,8 @@ package com.raumanian.thirtysix.browser.data.local.download
 
 import android.app.DownloadManager
 import android.database.Cursor
-import com.raumanian.thirtysix.browser.domain.model.DownloadFailureCause
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
-
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadFailureCause
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 /**
  * Spec 015 — translation from the platform download service's cursor rows into
  * [DownloadStatus].

@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
+import com.raumanian.thirtysix.browser.core.domain.model.SiteProtectionException
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.model.SiteProtectionException
-import com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository
 import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

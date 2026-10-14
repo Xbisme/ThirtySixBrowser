@@ -4,12 +4,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.domain.model.Tab
-import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
-import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository

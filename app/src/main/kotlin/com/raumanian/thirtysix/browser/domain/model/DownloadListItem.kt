@@ -1,5 +1,8 @@
 package com.raumanian.thirtysix.browser.domain.model
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
+
 /**
  * Spec 015 — one [DownloadRecord] paired with its freshly-resolved [DownloadStatus].
  *

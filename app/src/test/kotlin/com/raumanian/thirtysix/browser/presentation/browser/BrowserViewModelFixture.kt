@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
-import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase

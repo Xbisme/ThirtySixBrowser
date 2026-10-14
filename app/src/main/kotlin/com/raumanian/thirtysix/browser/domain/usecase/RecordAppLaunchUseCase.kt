@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserInviteRepository
 import javax.inject.Inject
 
 /** Spec 020 FR-024a — counts one app launch, stopping at the invitation threshold. */

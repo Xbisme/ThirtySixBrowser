@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

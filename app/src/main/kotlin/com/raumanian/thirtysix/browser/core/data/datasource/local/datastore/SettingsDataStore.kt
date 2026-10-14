@@ -5,11 +5,11 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.raumanian.thirtysix.browser.core.constants.StorageKeys
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.TextSize
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton

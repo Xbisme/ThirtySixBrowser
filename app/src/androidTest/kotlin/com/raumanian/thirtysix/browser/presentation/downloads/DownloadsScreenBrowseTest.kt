@@ -6,8 +6,8 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_DOWNLOADS_EMPTY
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_DOWNLOAD_PROGRESS
 import com.raumanian.thirtysix.browser.presentation.downloads.components.TEST_TAG_DOWNLOAD_ROW

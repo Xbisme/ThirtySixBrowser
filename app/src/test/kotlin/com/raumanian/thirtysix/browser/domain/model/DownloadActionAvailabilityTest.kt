@@ -1,5 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.model
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadFailureCause
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

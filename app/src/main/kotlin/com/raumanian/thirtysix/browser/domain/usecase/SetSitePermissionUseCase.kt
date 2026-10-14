@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-import com.raumanian.thirtysix.browser.domain.model.SiteDecision
-import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
 import javax.inject.Inject
 
 /** Spec 021 FR-009 — changes one remembered decision from the Site permissions screen. */

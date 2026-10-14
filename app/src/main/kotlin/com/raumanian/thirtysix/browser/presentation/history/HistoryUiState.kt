@@ -1,8 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.history
 
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.domain.model.HistoryDayBucket
-import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
-
 /**
  * Spec 014 — immutable UI state for the HistoryScreen.
  *

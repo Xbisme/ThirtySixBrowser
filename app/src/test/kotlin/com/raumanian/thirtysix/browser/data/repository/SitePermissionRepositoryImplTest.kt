@@ -3,10 +3,10 @@ package com.raumanian.thirtysix.browser.data.repository
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

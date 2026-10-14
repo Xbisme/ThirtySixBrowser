@@ -1,14 +1,14 @@
 package com.raumanian.thirtysix.browser.presentation.browser.protection
 
+import com.raumanian.thirtysix.browser.core.domain.model.ProtectionData
+import com.raumanian.thirtysix.browser.core.domain.model.PublicSuffixRules
+import com.raumanian.thirtysix.browser.core.domain.model.TrackerHostSet
+import com.raumanian.thirtysix.browser.core.domain.model.TrackingParamRules
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.protection.HttpsUpgradeFailureStore
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.domain.model.ProtectionData
-import com.raumanian.thirtysix.browser.domain.model.PublicSuffixRules
-import com.raumanian.thirtysix.browser.domain.model.TrackerHostSet
-import com.raumanian.thirtysix.browser.domain.model.TrackingParamRules
 import com.raumanian.thirtysix.browser.domain.protection.ProtectionMatchersHolder
-import com.raumanian.thirtysix.browser.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.domain.usecase.IsSiteProtectedUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeProtectionExceptionRepository
 import kotlinx.coroutines.Dispatchers

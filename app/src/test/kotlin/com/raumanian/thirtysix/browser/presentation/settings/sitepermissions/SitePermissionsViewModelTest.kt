@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.settings.sitepermissions
 
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-import com.raumanian.thirtysix.browser.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveSitePermissionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveSitePermissionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSitePermissionUseCase

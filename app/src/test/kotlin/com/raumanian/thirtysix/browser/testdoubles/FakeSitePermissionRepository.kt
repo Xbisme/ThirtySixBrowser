@@ -1,11 +1,11 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-import com.raumanian.thirtysix.browser.domain.model.SiteDecision
-import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
-import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
-import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

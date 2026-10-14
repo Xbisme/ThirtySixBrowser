@@ -39,7 +39,7 @@ data class BrowserUiState(
     val isAddressBarFocused: Boolean = false,
     val tabsEvent: TabsErrorEvent? = null,
     /**
-     * Spec 012 — derived from the active tab's [com.raumanian.thirtysix.browser.domain.model.Tab.isIncognito]
+     * Spec 012 — derived from the active tab's [com.raumanian.thirtysix.browser.core.domain.model.Tab.isIncognito]
      * via [com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase].
      *
      * Drives:

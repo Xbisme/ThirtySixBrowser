@@ -4,11 +4,11 @@ import android.webkit.WebView
 import androidx.webkit.ScriptHandler
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoProtectionExceptions
+import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptBundles
+import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.domain.privacy.PrivacyScriptComposer
-import com.raumanian.thirtysix.browser.domain.repository.IncognitoProtectionExceptions
-import com.raumanian.thirtysix.browser.domain.repository.PrivacyScriptBundles
-import com.raumanian.thirtysix.browser.domain.repository.PrivacyScriptSession
-import com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

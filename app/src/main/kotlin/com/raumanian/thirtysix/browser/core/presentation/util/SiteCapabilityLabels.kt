@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 /** Spec 021 C2 — the capability's name as used inside a sentence ("camera"). */
 @StringRes
 fun SiteCapability.labelRes(): Int = when (this) {

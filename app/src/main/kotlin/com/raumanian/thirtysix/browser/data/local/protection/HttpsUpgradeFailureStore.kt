@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.data.local.protection
 
-import com.raumanian.thirtysix.browser.domain.repository.HttpsUpgradeFailures
+import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton

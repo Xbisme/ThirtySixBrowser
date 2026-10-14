@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.data.repository.TabRepositoryImpl
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

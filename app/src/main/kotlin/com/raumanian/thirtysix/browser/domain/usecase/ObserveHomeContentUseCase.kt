@@ -2,12 +2,12 @@ package com.raumanian.thirtysix.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.domain.model.HomeContent
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind
-import com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import java.net.URI
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

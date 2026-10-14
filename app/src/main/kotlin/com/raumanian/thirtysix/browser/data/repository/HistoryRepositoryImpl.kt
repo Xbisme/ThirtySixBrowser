@@ -2,11 +2,11 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.HistoryDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.HistoryEntryEntity
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
 import com.raumanian.thirtysix.browser.data.mapper.HistoryEntryMapper
-import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow

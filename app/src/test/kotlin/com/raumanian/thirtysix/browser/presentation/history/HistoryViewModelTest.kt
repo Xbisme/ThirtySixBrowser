@@ -2,12 +2,12 @@ package com.raumanian.thirtysix.browser.presentation.history
 
 import android.graphics.Bitmap
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.clipboard.ClipboardWriter
 import com.raumanian.thirtysix.browser.domain.model.HistoryDayBucket
-import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.domain.usecase.ClearAllHistoryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.DeleteHistoryEntryUseCase

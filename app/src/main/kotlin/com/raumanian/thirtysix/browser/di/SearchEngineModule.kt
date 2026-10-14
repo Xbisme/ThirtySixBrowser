@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.data.repository.SearchEngineRepositoryImpl
-import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
 import javax.inject.Inject
 
 /**

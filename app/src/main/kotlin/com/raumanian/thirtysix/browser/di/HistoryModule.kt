@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.data.repository.HistoryRepositoryImpl
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -1,8 +1,7 @@
 package com.raumanian.thirtysix.browser.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkEntity
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
-
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 /**
  * Spec 013 — Entity ↔ Domain converter for [BookmarkEntity] / [Bookmark].
  * Total round-trip: `toEntity(toDomain(e)) == e` for any valid entity.

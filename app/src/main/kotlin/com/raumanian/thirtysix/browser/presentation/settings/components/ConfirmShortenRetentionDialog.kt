@@ -7,9 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 /**
  * Spec 016 US5 FR-021 — the warning before a shorter retention window deletes history.
  *

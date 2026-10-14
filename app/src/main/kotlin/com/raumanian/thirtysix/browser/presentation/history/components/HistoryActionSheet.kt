@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
@@ -23,7 +24,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 /**
  * Spec 014 FR-018 / FR-022 — long-press action sheet for a single history row, in the shared
  * [SheetFrame] (Spec 019): the entry it acts on, then exactly three actions in the order the

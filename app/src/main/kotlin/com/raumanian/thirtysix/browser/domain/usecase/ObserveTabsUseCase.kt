@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.model.Tab
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

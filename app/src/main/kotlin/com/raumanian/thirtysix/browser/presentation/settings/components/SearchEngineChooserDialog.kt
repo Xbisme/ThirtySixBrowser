@@ -7,9 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.presentation.util.searchEngineLabel
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-
 /**
  * Spec 016 US2 — choose the engine that address-bar queries go to.
  *

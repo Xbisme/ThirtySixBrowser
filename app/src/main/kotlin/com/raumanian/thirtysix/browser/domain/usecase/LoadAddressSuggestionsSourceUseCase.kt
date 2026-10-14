@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.domain.model.AddressSuggestion
 import com.raumanian.thirtysix.browser.domain.model.AddressSuggestionSnapshot
 import com.raumanian.thirtysix.browser.domain.model.SuggestionSource
-import com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import javax.inject.Inject
 
 /**

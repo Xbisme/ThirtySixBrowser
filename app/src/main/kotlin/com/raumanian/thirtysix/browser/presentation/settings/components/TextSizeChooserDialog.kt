@@ -5,8 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.domain.model.TextSize
-
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
 /**
  * Spec 022 FR-029 / FR-030 — chooses the app-wide text size of web pages from the nine levels.
  * Opened from the Settings row and from the hub's Text size tile, through the same view model,

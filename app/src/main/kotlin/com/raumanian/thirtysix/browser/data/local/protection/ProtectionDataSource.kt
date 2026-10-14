@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import com.raumanian.thirtysix.browser.core.constants.AssetPaths
+import com.raumanian.thirtysix.browser.core.domain.model.ProtectionData
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.model.ProtectionData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

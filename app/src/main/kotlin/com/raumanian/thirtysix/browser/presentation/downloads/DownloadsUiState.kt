@@ -1,8 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.downloads
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-
 /**
  * Spec 015 — immutable state for the Downloads screen.
  *

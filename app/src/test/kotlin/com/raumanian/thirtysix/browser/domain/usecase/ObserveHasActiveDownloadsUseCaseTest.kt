@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

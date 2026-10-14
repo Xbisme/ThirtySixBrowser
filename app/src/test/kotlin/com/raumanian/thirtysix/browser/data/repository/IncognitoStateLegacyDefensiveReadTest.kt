@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.data.repository
 
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.domain.model.Tab
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository

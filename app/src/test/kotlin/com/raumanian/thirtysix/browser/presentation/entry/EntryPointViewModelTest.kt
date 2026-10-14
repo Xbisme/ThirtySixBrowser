@@ -4,13 +4,13 @@ import android.graphics.Bitmap
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.IncomingRequest
-import com.raumanian.thirtysix.browser.domain.model.Tab
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.domain.model.UserSettings
-import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase

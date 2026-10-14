@@ -3,10 +3,10 @@ package com.raumanian.thirtysix.browser.data.repository
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
@@ -264,8 +264,8 @@ class IncognitoTabRepositoryImplTest {
         // so the snapshot captures only the real page's origin.
         val withHome = FakeTabRepository(
             initialTabs = listOf(
-                com.raumanian.thirtysix.browser.domain.model.Tab(1, UrlConstants.HOME_PAGE_URL, "", 0, 0L, 2L),
-                com.raumanian.thirtysix.browser.domain.model.Tab(2, "https://real.example/", "R", 1, 0L, 1L),
+                com.raumanian.thirtysix.browser.core.domain.model.Tab(1, UrlConstants.HOME_PAGE_URL, "", 0, 0L, 2L),
+                com.raumanian.thirtysix.browser.core.domain.model.Tab(2, "https://real.example/", "R", 1, 0L, 1L),
             ),
         )
         val repo = IncognitoTabRepositoryImpl(

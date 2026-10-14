@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserController
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import javax.inject.Inject
 
 /** Spec 020 FR-020 / FR-022 — whether the system names this app its default browser, read now. */

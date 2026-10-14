@@ -37,9 +37,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
-import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink

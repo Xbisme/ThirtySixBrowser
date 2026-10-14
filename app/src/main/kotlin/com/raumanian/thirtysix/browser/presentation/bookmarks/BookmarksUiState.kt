@@ -1,7 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.bookmarks
 
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
-import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.domain.model.BookmarkSearchResult
 
 /**
@@ -29,7 +30,7 @@ data class BookmarksUiState(
     val searchQuery: String = "",
     val isSearchActive: Boolean = false,
     val searchResults: List<BookmarkSearchResult> = emptyList(),
-    val descendantCountForPendingDelete: com.raumanian.thirtysix.browser.domain.model.BookmarkDescendantCount? = null,
+    val descendantCountForPendingDelete: BookmarkDescendantCount? = null,
     /**
      * Spec 013 — full snapshot of all folders, used by FolderPickerSheet
      * (move bookmark / move folder) and the folder selector inside the

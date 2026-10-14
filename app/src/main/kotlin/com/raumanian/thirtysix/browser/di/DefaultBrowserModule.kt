@@ -1,11 +1,11 @@
 package com.raumanian.thirtysix.browser.di
 
 import com.raumanian.thirtysix.browser.core.data.util.SystemMonotonicClock
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.data.platform.AndroidDefaultBrowserController
 import com.raumanian.thirtysix.browser.data.repository.DefaultBrowserInviteRepositoryImpl
-import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserController
-import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserInviteRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -1,8 +1,7 @@
 package com.raumanian.thirtysix.browser.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEntity
-import com.raumanian.thirtysix.browser.domain.model.Tab
-
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 /**
  * Spec 011 — maps between Spec 005's [TabEntity] (Room) and the domain
  * [Tab] model.

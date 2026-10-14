@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.model.FireproofSite
-import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository
+import com.raumanian.thirtysix.browser.core.domain.model.FireproofSite
+import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

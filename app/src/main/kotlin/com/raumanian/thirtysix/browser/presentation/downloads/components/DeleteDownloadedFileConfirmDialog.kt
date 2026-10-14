@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
 internal const val TEST_TAG_DELETE_FILE_DIALOG: String = "download_delete_file_dialog"
 
 /**

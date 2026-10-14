@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageContext
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequestSink

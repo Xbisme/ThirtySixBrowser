@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.DownloadRecordDao
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.data.mapper.DownloadRecordMapper
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.data.local.locale
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.domain.repository.AppLanguageController
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageController
 import javax.inject.Inject
 import javax.inject.Singleton
 

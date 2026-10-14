@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.error
 
 /**
- * Spec 013 — typed exceptions surfaced by [com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository]
+ * Spec 013 — typed exceptions surfaced by [com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository]
  * inside `Result.Error(throwable)`. Use cases / view models map these to
  * `BookmarksErrorEvent` for UI presentation.
  */

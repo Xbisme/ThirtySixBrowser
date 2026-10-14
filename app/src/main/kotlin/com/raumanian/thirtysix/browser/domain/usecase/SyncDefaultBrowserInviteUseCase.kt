@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserController
-import com.raumanian.thirtysix.browser.domain.repository.DefaultBrowserInviteRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
 import javax.inject.Inject
 
 /**

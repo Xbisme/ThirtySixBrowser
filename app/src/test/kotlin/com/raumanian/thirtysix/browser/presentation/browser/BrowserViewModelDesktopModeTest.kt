@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
-import com.raumanian.thirtysix.browser.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

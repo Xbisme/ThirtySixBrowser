@@ -26,6 +26,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ProgressLine
@@ -36,7 +37,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.presentation.downloads.bytesSoFarOrNull
 import com.raumanian.thirtysix.browser.presentation.downloads.progressFractionOrNull
 import com.raumanian.thirtysix.browser.presentation.downloads.toLabelRes

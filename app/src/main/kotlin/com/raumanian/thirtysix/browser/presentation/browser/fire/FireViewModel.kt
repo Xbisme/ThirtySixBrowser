@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.browser.fire
 
 import androidx.lifecycle.ViewModel
+import com.raumanian.thirtysix.browser.core.domain.model.FireState
 import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
-import com.raumanian.thirtysix.browser.domain.model.FireState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow

@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.protection
 
-import com.raumanian.thirtysix.browser.domain.model.PublicSuffixRules
+import com.raumanian.thirtysix.browser.core.domain.model.PublicSuffixRules
 import java.util.concurrent.ConcurrentHashMap
 
 /**

@@ -1,14 +1,14 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.TextSize
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.domain.model.UserSettings
-import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow

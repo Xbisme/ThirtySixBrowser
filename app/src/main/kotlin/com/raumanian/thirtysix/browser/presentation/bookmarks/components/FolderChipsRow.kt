@@ -9,10 +9,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ThirtySixChip
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
 private const val CONTENT_TYPE_FOLDER_CHIP = "folder_chip"
 
 /**

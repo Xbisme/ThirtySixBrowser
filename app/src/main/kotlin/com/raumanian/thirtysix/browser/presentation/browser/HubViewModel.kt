@@ -2,8 +2,8 @@ package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.domain.usecase.CreateIncognitoTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveHasActiveDownloadsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

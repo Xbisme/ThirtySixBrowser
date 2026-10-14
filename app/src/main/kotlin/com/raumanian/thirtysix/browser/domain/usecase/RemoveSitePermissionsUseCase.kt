@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
 import javax.inject.Inject
 
 /** Spec 021 FR-009 — forgets one site's decisions ([origin]) or, with `null`, every site's. */

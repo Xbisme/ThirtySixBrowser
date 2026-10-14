@@ -1,9 +1,8 @@
 package com.raumanian.thirtysix.browser.domain.protection
 
-import com.raumanian.thirtysix.browser.domain.model.PublicSuffixRules
-import com.raumanian.thirtysix.browser.domain.model.TrackerHostSet
-import com.raumanian.thirtysix.browser.domain.model.TrackingParamRules
-
+import com.raumanian.thirtysix.browser.core.domain.model.PublicSuffixRules
+import com.raumanian.thirtysix.browser.core.domain.model.TrackerHostSet
+import com.raumanian.thirtysix.browser.core.domain.model.TrackingParamRules
 /** Small rule fixtures shared by the Spec 023 domain tests. */
 internal object ProtectionTestRules {
     val suffixes = PublicSuffixRules(

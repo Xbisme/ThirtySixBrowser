@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.data.repository
 
-import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import java.net.URI
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first

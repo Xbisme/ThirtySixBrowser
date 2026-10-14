@@ -7,9 +7,9 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.TabDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
+import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.After

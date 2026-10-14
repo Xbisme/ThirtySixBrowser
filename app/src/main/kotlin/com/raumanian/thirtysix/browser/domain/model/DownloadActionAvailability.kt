@@ -1,5 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.model
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
+
 /**
  * Spec 015 FR-030 / FR-034 / FR-034a — which action-sheet entries apply to an entry.
  *

@@ -7,9 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.presentation.util.themeModeLabel
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-
 /**
  * Spec 016 US1 — choose Light, Dark or follow the system.
  *

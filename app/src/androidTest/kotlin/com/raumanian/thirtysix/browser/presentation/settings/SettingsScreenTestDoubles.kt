@@ -3,26 +3,26 @@ package com.raumanian.thirtysix.browser.presentation.settings
 import android.graphics.Bitmap
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.isSelectable
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageController
+import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.data.local.permission.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
-import com.raumanian.thirtysix.browser.domain.model.SiteDataPath
-import com.raumanian.thirtysix.browser.domain.model.SiteDecision
-import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.domain.model.UserSettings
-import com.raumanian.thirtysix.browser.domain.repository.AppLanguageController
-import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
-import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
-import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
-import com.raumanian.thirtysix.browser.domain.repository.WebDataCleaner
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
@@ -82,7 +82,7 @@ internal class InstrumentedFakeSettingsRepository(
     override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
         write { copy(historyRetention = retention) }
 
-    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
+    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.core.domain.model.TextSize) =
 
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 
@@ -155,8 +155,8 @@ internal class InstrumentedFakeWebDataCleaner(
 }
 
 /** Spec 024 — an empty fireproof list; the Settings screen only ever clears it. */
-internal object InstrumentedNoopFireproofSiteRepository : com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository {
-    override fun observeAll() = kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.FireproofSite>())
+internal object InstrumentedNoopFireproofSiteRepository : com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository {
+    override fun observeAll() = kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.FireproofSite>())
     override fun currentSites(): Set<String> = emptySet()
     override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
     override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
@@ -254,9 +254,9 @@ internal object InstrumentedNoopSitePermissionRepository : SitePermissionReposit
 
 /** Spec 023 — the Settings tests never touch sites without protection. */
 internal object InstrumentedNoopProtectionExceptionRepository :
-    com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository {
+    com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository {
     override fun observeAll() =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.domain.model.SiteProtectionException>())
+        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.SiteProtectionException>())
 
     override fun currentSites(): Set<String> = emptySet()
 

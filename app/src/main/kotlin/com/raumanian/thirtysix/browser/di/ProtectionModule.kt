@@ -1,13 +1,13 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoProtectionExceptions
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.data.local.protection.HttpsUpgradeFailureStore
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.data.repository.ProtectionDataRepositoryImpl
 import com.raumanian.thirtysix.browser.data.repository.ProtectionExceptionRepositoryImpl
-import com.raumanian.thirtysix.browser.domain.repository.HttpsUpgradeFailures
-import com.raumanian.thirtysix.browser.domain.repository.IncognitoProtectionExceptions
-import com.raumanian.thirtysix.browser.domain.repository.ProtectionDataRepository
-import com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -12,11 +12,11 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.FireResult
+import com.raumanian.thirtysix.browser.core.domain.model.FireState
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.domain.model.FireResult
-import com.raumanian.thirtysix.browser.domain.model.FireState
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
-import com.raumanian.thirtysix.browser.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.domain.privacy.BlockedSiteGroup
 import com.raumanian.thirtysix.browser.presentation.browser.components.FireConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.browser.components.FireOverlay

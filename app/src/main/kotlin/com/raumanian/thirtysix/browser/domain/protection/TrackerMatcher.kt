@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.protection
 
-import com.raumanian.thirtysix.browser.domain.model.TrackerHostSet
-
+import com.raumanian.thirtysix.browser.core.domain.model.TrackerHostSet
 /**
  * Spec 023 data-model rule 3 — whether a request made by a page is blocked (FR-004, FR-004a,
  * FR-008). Called from WebView IO threads for every subresource: no I/O, no locks.

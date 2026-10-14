@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser.suggestions
 
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.domain.model.SuggestionSource
 import com.raumanian.thirtysix.browser.domain.usecase.FilterAddressSuggestionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.LoadAddressSuggestionsSourceUseCase

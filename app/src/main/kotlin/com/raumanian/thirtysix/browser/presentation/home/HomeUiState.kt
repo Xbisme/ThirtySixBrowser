@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.presentation.home
 
 import androidx.compose.runtime.Immutable
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.GreetingPeriod
-import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import java.io.File
 
 /** Spec 019 — everything the Home page draws (data-model §3). Immutable for skipping (§V rule 5). */

@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
-import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
-import com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

@@ -1,12 +1,12 @@
 package com.raumanian.thirtysix.browser.presentation.settings
 
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeSettingsRepository

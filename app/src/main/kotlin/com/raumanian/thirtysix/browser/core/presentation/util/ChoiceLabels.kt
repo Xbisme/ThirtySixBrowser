@@ -3,10 +3,9 @@ package com.raumanian.thirtysix.browser.core.presentation.util
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 /** The localized name of [mode], shared by the chooser and the Settings row (FR-003). */
 @Composable
 fun themeModeLabel(mode: ThemeMode): String = stringResource(

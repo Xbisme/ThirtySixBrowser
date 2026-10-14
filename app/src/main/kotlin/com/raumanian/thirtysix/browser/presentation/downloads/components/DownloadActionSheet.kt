@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLead
@@ -29,7 +30,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.DownloadActionAvailability
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
 internal const val TEST_TAG_DOWNLOAD_ACTION_SHEET: String = "download_action_sheet"
 internal const val TEST_TAG_ACTION_OPEN: String = "download_action_open"
 internal const val TEST_TAG_ACTION_COPY_LINK: String = "download_action_copy_link"

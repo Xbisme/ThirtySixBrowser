@@ -2,9 +2,9 @@ package com.raumanian.thirtysix.browser
 
 import android.app.Application
 import android.util.Log
+import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptBundles
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.repository.PrivacyScriptBundles
-import com.raumanian.thirtysix.browser.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.domain.usecase.PruneOldHistoryUseCase
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject

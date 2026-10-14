@@ -30,6 +30,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.DarkPrimary
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.DarkSurface
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
@@ -40,9 +43,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 import com.raumanian.thirtysix.browser.core.presentation.util.appLanguageLabel
 import com.raumanian.thirtysix.browser.core.presentation.util.searchEngineLabel
 import com.raumanian.thirtysix.browser.core.presentation.util.themeModeLabel
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 private val ThemePreviewHeight = 96.dp
 private val ThemePreviewBar = 10.dp
 private const val THEME_PREVIEW_BAR_FRACTION = 0.6f

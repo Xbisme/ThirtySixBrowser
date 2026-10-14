@@ -23,6 +23,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ChoiceDialog
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
@@ -31,8 +33,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
 import com.raumanian.thirtysix.browser.core.presentation.util.capitalizedForLocale
 import com.raumanian.thirtysix.browser.core.presentation.util.iconRes
 import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
-import com.raumanian.thirtysix.browser.domain.model.SiteDecision
-import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsIconTone
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSectionHeader
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar

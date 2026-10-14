@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.MeshArt
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
@@ -56,7 +57,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.softShadow
 import com.raumanian.thirtysix.browser.domain.model.GreetingPeriod
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 internal const val TEST_TAG_HOME_SEARCH: String = "home_search"
 internal const val TEST_TAG_HOME_GREETING: String = "home_greeting"
 

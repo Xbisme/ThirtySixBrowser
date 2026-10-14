@@ -1,12 +1,12 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.domain.model.UserSettings
-import com.raumanian.thirtysix.browser.domain.repository.SettingsRepository
 import java.net.URLEncoder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -195,7 +195,7 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
     override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
         error("not used in this test")
 
-    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.domain.model.TextSize) =
+    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.core.domain.model.TextSize) =
 
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 

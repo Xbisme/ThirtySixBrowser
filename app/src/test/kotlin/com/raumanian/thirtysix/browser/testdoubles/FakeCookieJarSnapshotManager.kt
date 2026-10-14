@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
-import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
-
+import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 /**
  * Spec 012 — hand-rolled fake of [CookieJarSnapshotManager] for unit tests.
  *

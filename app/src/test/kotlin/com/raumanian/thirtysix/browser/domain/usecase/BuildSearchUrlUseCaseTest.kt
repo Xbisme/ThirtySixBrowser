@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

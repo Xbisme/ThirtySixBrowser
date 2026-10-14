@@ -12,8 +12,8 @@ import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import com.raumanian.thirtysix.browser.domain.model.SiteCapability
-import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.presentation.browser.page.BlockedPopupCatcher
 import com.raumanian.thirtysix.browser.presentation.browser.page.DialogAdmission

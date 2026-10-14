@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.fire
 
-import com.raumanian.thirtysix.browser.domain.model.FireStep
+import com.raumanian.thirtysix.browser.core.domain.model.FireStep
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.delay

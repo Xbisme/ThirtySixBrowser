@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.domain.model.DownloadRequest
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
 import javax.inject.Inject
 
 /** Spec 015 — outcome of asking the platform to start a download. */

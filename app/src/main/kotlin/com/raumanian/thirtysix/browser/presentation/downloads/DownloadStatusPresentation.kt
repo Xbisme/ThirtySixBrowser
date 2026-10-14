@@ -2,9 +2,8 @@ package com.raumanian.thirtysix.browser.presentation.downloads
 
 import androidx.annotation.StringRes
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.domain.model.DownloadFailureCause
-import com.raumanian.thirtysix.browser.domain.model.DownloadStatus
-
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadFailureCause
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 /**
  * Spec 015 — the presentation-side mapping from domain status to localized text.
  *

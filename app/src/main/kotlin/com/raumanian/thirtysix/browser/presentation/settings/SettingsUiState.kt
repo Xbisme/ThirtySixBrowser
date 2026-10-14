@@ -1,13 +1,12 @@
 package com.raumanian.thirtysix.browser.presentation.settings
 
 import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
-import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
-import com.raumanian.thirtysix.browser.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.domain.model.TextSize
-import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-
 /**
  * Spec 016 — immutable state of the Settings screen (data-model §6).
  *

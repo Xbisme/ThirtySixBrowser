@@ -7,9 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.presentation.util.appLanguageLabel
-import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-
 /**
  * Spec 016 US3 — choose Follow system or one of the eight app languages.
  *

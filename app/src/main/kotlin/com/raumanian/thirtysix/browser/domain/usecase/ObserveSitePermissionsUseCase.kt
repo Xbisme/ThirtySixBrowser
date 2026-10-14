@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision
-import com.raumanian.thirtysix.browser.domain.repository.SitePermissionRepository
+import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

@@ -3,9 +3,9 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import android.graphics.Bitmap
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
-import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
@@ -620,7 +620,7 @@ class BrowserViewModelTest {
         // Pre-fill the FakeTabRepository to MAX_TABS.
         val repository = FakeTabRepository(homeUrl = "https://example.com")
         val seed = (1..com.raumanian.thirtysix.browser.core.constants.BrowserLimits.MAX_TABS).map { i ->
-            com.raumanian.thirtysix.browser.domain.model.Tab(
+            com.raumanian.thirtysix.browser.core.domain.model.Tab(
                 id = i.toLong(),
                 url = "https://t$i.com",
                 title = "",

@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.fire
 
+import com.raumanian.thirtysix.browser.core.domain.model.FireState
 import com.raumanian.thirtysix.browser.core.domain.util.ApplicationScope
-import com.raumanian.thirtysix.browser.domain.model.FireState
 import com.raumanian.thirtysix.browser.domain.repository.FireMarkerRepository
 import com.raumanian.thirtysix.browser.domain.usecase.RunFireUseCase
 import javax.inject.Inject

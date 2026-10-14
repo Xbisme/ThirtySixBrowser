@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import javax.inject.Inject
 
 /**

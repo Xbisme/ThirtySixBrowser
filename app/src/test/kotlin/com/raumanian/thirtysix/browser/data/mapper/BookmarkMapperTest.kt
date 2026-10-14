@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkEntity
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

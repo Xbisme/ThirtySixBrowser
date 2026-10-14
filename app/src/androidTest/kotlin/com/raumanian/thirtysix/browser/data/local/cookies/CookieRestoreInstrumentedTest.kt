@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.data.local.cookies
 import android.webkit.CookieManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.util.concurrent.CountDownLatch

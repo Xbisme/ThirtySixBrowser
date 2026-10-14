@@ -4,9 +4,9 @@ package com.raumanian.thirtysix.browser.presentation.bookmarks.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLetter
-import com.raumanian.thirtysix.browser.domain.model.Bookmark
 import java.net.URI
 
 /**

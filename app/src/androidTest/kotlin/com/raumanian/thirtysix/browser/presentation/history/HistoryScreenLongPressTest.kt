@@ -8,8 +8,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.presentation.history.components.TEST_TAG_HISTORY_ACTION_COPY_URL
 import com.raumanian.thirtysix.browser.presentation.history.components.TEST_TAG_HISTORY_ACTION_DELETE
 import com.raumanian.thirtysix.browser.presentation.history.components.TEST_TAG_HISTORY_ACTION_OPEN_IN_NEW_TAB

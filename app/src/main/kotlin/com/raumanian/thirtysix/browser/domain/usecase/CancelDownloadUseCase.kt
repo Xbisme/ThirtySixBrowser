@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
 import javax.inject.Inject
 
 /**

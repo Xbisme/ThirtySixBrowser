@@ -7,7 +7,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.room.withTransaction
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
-import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

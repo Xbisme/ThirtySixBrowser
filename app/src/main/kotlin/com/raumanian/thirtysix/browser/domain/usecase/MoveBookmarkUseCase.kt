@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.repository.BookmarkRepository
 import javax.inject.Inject
 
 /** Spec 013 FR-021 — moves a bookmark to a new folder (null = root). */

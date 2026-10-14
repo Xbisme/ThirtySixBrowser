@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.presentation.tabs
 
 import android.graphics.Bitmap
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
-import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllIncognitoTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseIncognitoTabUseCase

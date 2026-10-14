@@ -1,11 +1,11 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.data.local.download.AndroidDownloadManagerGateway
 import com.raumanian.thirtysix.browser.data.local.download.AndroidExternalFileOpener
 import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.data.local.download.ExternalFileOpener
 import com.raumanian.thirtysix.browser.data.repository.DownloadsRepositoryImpl
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

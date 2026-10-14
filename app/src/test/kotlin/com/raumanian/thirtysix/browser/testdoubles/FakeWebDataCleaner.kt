@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
-import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
-import com.raumanian.thirtysix.browser.domain.model.SiteDataPath
-import com.raumanian.thirtysix.browser.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
+import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
 import kotlinx.coroutines.CompletableDeferred
 
 /**
