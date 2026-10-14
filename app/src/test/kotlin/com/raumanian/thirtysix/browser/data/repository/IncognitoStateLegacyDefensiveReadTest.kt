@@ -6,6 +6,9 @@ import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtection
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoWebProfile
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -33,13 +36,20 @@ import org.junit.Test
  */
 class IncognitoStateLegacyDefensiveReadTest {
 
+    private val incognitoProfile = FakeIncognitoWebProfile()
+
     @Test
     fun `fresh repository observeTabs emits empty on cold start`() = runTest {
         val repository = IncognitoTabRepositoryImpl(
             cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
-            tabRepository = FakeTabRepository(),
+            snapshotOrigins = IncognitoSnapshotOrigins(
+                FakeTabRepository(),
+                FakeHistoryRepository(),
+                FakeFireproofSiteRepository(),
+            ),
             dispatchers = TestDispatcherProvider(),
             incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
+            incognitoProfile = incognitoProfile,
         )
         val first = repository.observeTabs().first()
         assertEquals("singleton constructed → empty state per FR-012", emptyList<Tab>(), first)
@@ -51,9 +61,14 @@ class IncognitoStateLegacyDefensiveReadTest {
         val poisoned = ThrowingTabRepository()
         val repository = IncognitoTabRepositoryImpl(
             cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
-            tabRepository = poisoned,
+            snapshotOrigins = IncognitoSnapshotOrigins(
+                poisoned,
+                FakeHistoryRepository(),
+                FakeFireproofSiteRepository(),
+            ),
             dispatchers = TestDispatcherProvider(),
             incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
+            incognitoProfile = incognitoProfile,
         )
 
         // Snapshot capture on 0→1 transition reads tabRepository.observeTabs().
@@ -72,9 +87,14 @@ class IncognitoStateLegacyDefensiveReadTest {
     fun `closeAll on a fresh repository is a safe no-op`() = runTest {
         val repository = IncognitoTabRepositoryImpl(
             cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
-            tabRepository = FakeTabRepository(),
+            snapshotOrigins = IncognitoSnapshotOrigins(
+                FakeTabRepository(),
+                FakeHistoryRepository(),
+                FakeFireproofSiteRepository(),
+            ),
             dispatchers = TestDispatcherProvider(),
             incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
+            incognitoProfile = incognitoProfile,
         )
 
         // Should NOT throw; state stays empty.

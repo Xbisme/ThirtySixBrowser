@@ -2,13 +2,17 @@ package com.raumanian.thirtysix.browser.fire
 
 import android.content.Context
 import android.webkit.CookieManager
+import android.webkit.WebView
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.webkit.CookieManagerCompat
+import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
 import com.raumanian.thirtysix.browser.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
 import com.raumanian.thirtysix.browser.domain.model.FireState
@@ -184,13 +188,20 @@ class FireDataTest {
         store(LOCAL)
         runBlocking {
             fireproof.add(LOCAL)
-            // Spec 012 keeps, across an incognito session, only the cookies of sites open in normal
-            // tabs (Implementation Notes, T040): the fireproof site is open in one, as it would be.
-            tabs.createTab(server.url(STORAGE, LOCAL))
             incognitoTabs.createTab("about:blank")
         }
+        // Written the way an incognito page writes it: into the incognito session's own profile
+        // where the engine has profiles, else into the shared jar (Spec 012's snapshot path).
         composeRule.runOnUiThread {
-            CookieManager.getInstance().setCookie(server.url(STORAGE, LOCAL), "$INCOGNITO=1; Max-Age=31536000; Path=/")
+            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            val incognitoPage = IncognitoProfiles.prepare(WebView(context), incognito = true)
+            val jar = if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+                WebViewCompat.getProfile(incognitoPage).cookieManager
+            } else {
+                CookieManager.getInstance()
+            }
+            jar.setCookie(server.url(STORAGE, LOCAL), "$INCOGNITO=1; Max-Age=31536000; Path=/")
+            incognitoPage.destroy()
         }
 
         runFire()

@@ -6,27 +6,36 @@ import androidx.webkit.CustomHeader
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Spec 023 research R5 — sends Global Privacy Control on every request, app-wide, where the
- * WebView supports profile headers. Installed once per process; the header then also reaches
- * page resources and service-worker requests (FR-030). It ignores per-site exceptions (FR-016).
+ * WebView supports profile headers. Installed once per WebView profile (normal browsing's, and
+ * each incognito session's own); the header then also reaches page resources and service-worker
+ * requests (FR-030). It ignores per-site exceptions (FR-016).
  */
 internal object GpcHeaderInstaller {
-    private val attempted = AtomicBoolean(false)
+    /** Whether the header was installed, by profile name. Main thread. */
+    private val outcomes = mutableMapOf<String, Boolean>()
 
-    @Volatile
-    var appWide: Boolean = false
-        private set
+    /** Every profile seen so far carries the header, so app-issued loads need not add it. */
+    val appWide: Boolean
+        get() = outcomes.isNotEmpty() && outcomes.values.all { it }
 
     /** Call on the main thread with any WebView. Returns whether the header is now app-wide. */
     fun install(webView: WebView): Boolean {
-        if (attempted.compareAndSet(false, true)) {
-            appWide = ORIGIN_RULE_SETS.any { rules -> tryAdd(webView, rules) }
+        val profileName = profileNameOf(webView)
+        if (profileName !in outcomes) {
+            outcomes[profileName] = ORIGIN_RULE_SETS.any { rules -> tryAdd(webView, rules) }
         }
         return appWide
     }
+
+    private fun profileNameOf(webView: WebView): String =
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+            runCatching { WebViewCompat.getProfile(webView).name }.getOrDefault(NO_PROFILE)
+        } else {
+            NO_PROFILE
+        }
 
     /** Extra headers for an app-issued `loadUrl` when the header is not app-wide. */
     fun headersForLoad(): Map<String, String> =
@@ -52,6 +61,7 @@ internal object GpcHeaderInstaller {
     }
 
     private const val TAG = "GpcHeader"
+    private const val NO_PROFILE = ""
 
     /** Research R5 — `*` first; if the engine rejects it, every http and https origin. */
     private val ORIGIN_RULE_SETS: List<Set<String>> = listOf(setOf("*"), setOf("https://*", "http://*"))

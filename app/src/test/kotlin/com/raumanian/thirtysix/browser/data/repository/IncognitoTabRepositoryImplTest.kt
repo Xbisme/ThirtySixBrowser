@@ -8,6 +8,9 @@ import com.raumanian.thirtysix.browser.core.result.Result
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoWebProfile
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -33,6 +36,10 @@ import org.junit.Test
  */
 class IncognitoTabRepositoryImplTest {
 
+    private val incognitoProfile = FakeIncognitoWebProfile()
+    private val history = FakeHistoryRepository()
+    private val fireproof = FakeFireproofSiteRepository(setOf("bank.test"))
+
     private lateinit var cookieManager: FakeCookieJarSnapshotManager
     private lateinit var tabRepository: FakeTabRepository
     private lateinit var repository: IncognitoTabRepositoryImpl
@@ -44,9 +51,10 @@ class IncognitoTabRepositoryImplTest {
         tabRepository = FakeTabRepository()
         repository = IncognitoTabRepositoryImpl(
             cookieJarSnapshotManager = cookieManager,
-            tabRepository = tabRepository,
+            snapshotOrigins = IncognitoSnapshotOrigins(tabRepository, history, fireproof),
             dispatchers = TestDispatcherProvider(),
             incognitoProtectionExceptions = protectionExceptions,
+            incognitoProfile = incognitoProfile,
         )
     }
 
@@ -262,9 +270,14 @@ class IncognitoTabRepositoryImplTest {
         )
         val repo = IncognitoTabRepositoryImpl(
             cookieJarSnapshotManager = cookieManager,
-            tabRepository = withHome,
+            snapshotOrigins = IncognitoSnapshotOrigins(
+                withHome,
+                FakeHistoryRepository(),
+                FakeFireproofSiteRepository(),
+            ),
             dispatchers = TestDispatcherProvider(),
             incognitoProtectionExceptions = protectionExceptions,
+            incognitoProfile = incognitoProfile,
         )
 
         repo.createTab(UrlConstants.HOME_PAGE_URL)
@@ -281,5 +294,57 @@ class IncognitoTabRepositoryImplTest {
         override val io = Dispatchers.Unconfined
         override val default = Dispatchers.Unconfined
         override val unconfined = Dispatchers.Unconfined
+    }
+
+    @Test
+    fun `the snapshot keeps every site in history and every fireproof site, not only open tabs`() = runTest {
+        history.recordVisit("https://mail.example.com/inbox", "", 1L)
+        history.recordVisit("http://old.test/page", "", 2L)
+
+        repository.createTab("https://a.com/")
+
+        val origins = cookieManager.lastCapturedOrigins
+        assertTrue(origins.containsAll(listOf("https://mail.example.com", "https://old.test", "http://old.test")))
+        assertTrue(origins.containsAll(listOf("https://bank.test", "https://www.bank.test")))
+    }
+
+    @Test
+    fun `with profile isolation a session begins and ends its own profile and never touches the jar`() = runTest {
+        incognitoProfile.isolated = true
+        val a = (repository.createTab("https://a.com/") as Result.Success).data
+        val b = (repository.createTab("https://b.com/") as Result.Success).data
+        assertEquals(1, incognitoProfile.begun)
+
+        repository.closeTab(a.id)
+        assertEquals("2 → 1 keeps the session", 0, incognitoProfile.ended)
+        repository.closeTab(b.id)
+
+        assertEquals(1, incognitoProfile.ended)
+        assertEquals("no snapshot taken", 0, cookieManager.captureCount)
+        assertEquals("normal cookies are never wiped", 0, cookieManager.restoreCount)
+    }
+
+    @Test
+    fun `closeAll ends an isolated session and clears incognito protection exceptions`() = runTest {
+        incognitoProfile.isolated = true
+        repository.createTab("https://a.com/")
+        protectionExceptions.add("a.com")
+
+        repository.closeAll()
+
+        assertEquals(1, incognitoProfile.ended)
+        assertEquals(0, cookieManager.restoreCount)
+        assertTrue(protectionExceptions.snapshot().isEmpty())
+    }
+
+    @Test
+    fun `a session keeps the path it began with even if detection changes`() = runTest {
+        val a = (repository.createTab("https://a.com/") as Result.Success).data
+        incognitoProfile.isolated = true
+
+        repository.closeTab(a.id)
+
+        assertEquals("began on the snapshot path, so it restores", 1, cookieManager.restoreCount)
+        assertEquals(0, incognitoProfile.ended)
     }
 }

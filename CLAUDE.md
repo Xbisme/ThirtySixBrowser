@@ -316,7 +316,14 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
     - `FireDataTest` expected Cache Storage and service workers gone; the fallback path keeps them (Spec 016 A17). It now checks them only where `DELETE_BROWSING_DATA` exists.
   - **🐞 PR #40 — blank `height: 100%` pages, present since Spec 007** (Excalidraw, tldraw, Google Maps, Leaflet, ECharts). `AndroidView` gives a view with no layout params `WRAP_CONTENT`, and a wrap-content WebView gets a 0 px layout viewport while `innerHeight` stays correct. The browser WebView now gets `MATCH_PARENT` params; the Compose modifier still sizes it. `FullHeightPageInstrumentedTest` fails on the old code ("body is 0.0 CSS px tall") and passes now.
   - **⚠️ The Galaxy A55 is the owner's personal phone, in use while plugged in.** Scripted taps and screenshots hit their chat apps twice; check `dumpsys window | grep mCurrentFocus` before automating on it, and prefer the AVDs.
-  - Open for the owner: G5 real sign-ins; the Spec 012 incognito cookie-restore limitation (fix or defer).
+  - Open for the owner: G5 real sign-ins.
+
+- 2026-10-14 (incognito isolation fix): 🐞 **Ending an incognito session no longer signs the person out of sites.** Spec 012 wiped the shared cookie jar and wrote back a snapshot of only the open normal tabs' sites, and storage written in incognito stayed in normal browsing.
+  - **Engines with `MULTI_PROFILE`** (A55 WebView 153, 16 KB AVD 133): each incognito session gets its own WebView profile (`data/local/webview/IncognitoProfiles`), with its own cookies, storage, cache and service workers. Normal browsing's jar is never touched.
+  - **⚠️ The engine keeps a profile "in use" for the rest of the process once a WebView used it**, so `deleteProfile` throws until then. At session end the profile is wiped (`removeAllCookies` + `deleteBrowsingData`); the emptied profile is deleted by the next process's first WebView. Each session has a unique profile name.
+  - Every incognito WebView gets the profile **before any other call** (`IncognitoProfiles.prepare` in the factory and for pop-ups; blocked-pop-up catchers take the opener's profile). GPC is now installed once **per profile**.
+  - **Older engines** (API 24/29 emulators) keep Spec 012's snapshot, now over `IncognitoSnapshotOrigins`: open tabs + every history host + fireproof sites (https/http, `www.`).
+  - `IncognitoIsolationTest`: fails on the old code ("signed out of a site visited before"), passes now; the profile test runs where `MULTI_PROFILE` exists. Unit 932/932; instrumented 189/189 on the 16 KB AVD; incognito/Fire/cookie tests also green on API 29.
 
 - 2026-10-13 (Spec 024 implementation): 🟢 **Spec 024 `privacy-tools` implemented on branch `024-privacy-tools`** — the last spec of Phase 6. Owner pre-specify decisions: §X design waiver, one spec, DuckDuckGo-style Fire, fireproof via dashboard + Settings, dashboard grouped by site (no licence-compatible owner data), autoconsent rules, basic fingerprinting.
 
@@ -340,7 +347,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
   - **Fireproof cookies survive via snapshot → per-site delete → wipe → restore**, using `CookieManagerCompat.getCookieInfo` (attributes kept) and `WebStorageCompat.deleteBrowsingDataForSite`. A host-only cookie is reported as `domain=<host>` without a dot, so the restore drops that attribute. WebView 53 has neither feature (fallback path, documented limits).
   - **The page-start scripts go through Spec 023's `ProtectionHooks`** (`PrivacyScriptInstaller`, `addDocumentStartJavaScript(…, "*")`). The prelude `{v,s,x}` is built from **local data only** (session secret, exceptions); the scripts stand down by the top-level page (`ancestorOrigins`). This is the only injection path; no bridge.
   - **autoconsent must stay `optOut` with `heuristicMode: 'off'`**: upstream `tier2` clicks Accept. Rebuild only with `tools/privacy-scripts/build.sh` (generic + frame rules, 201,669 B raw).
-  - **⚠️ Spec 012 limitation found (not fixed)**: an incognito session's cookie restore keeps only sites open in normal tabs, so it signs the person out of every other site, fireproof or not. Raised with the owner.
+  - **Spec 012 limitation found here — fixed 2026-10-14**: an incognito session's cookie restore kept only sites open in normal tabs, signing the person out of every other site. See the 2026-10-14 incognito-isolation entry.
   - **⚠️ Never install a pre-024 build over a 024 install** (Room v5 → v4 has no migration).
   - The dashboard state lives in `ProtectionViewModel` (it owns the shown page's monitor). WebView 53 rejects `async`/`await` in fixtures.
 

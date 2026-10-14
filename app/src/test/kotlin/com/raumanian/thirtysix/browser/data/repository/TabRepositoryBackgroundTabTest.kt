@@ -11,6 +11,9 @@ import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
+import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoWebProfile
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -25,13 +28,20 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class TabRepositoryBackgroundTabTest {
 
+    private val incognitoProfile = FakeIncognitoWebProfile()
+
     private val db: AppDatabase = inMemoryAppDatabase()
     private val tabs = TabRepositoryImpl(tabDao = db.tabDao(), homeUrl = HOME, dispatchers = Direct)
     private val incognito = IncognitoTabRepositoryImpl(
         cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
-        tabRepository = FakeTabRepository(),
+        snapshotOrigins = IncognitoSnapshotOrigins(
+            FakeTabRepository(),
+            FakeHistoryRepository(),
+            FakeFireproofSiteRepository(),
+        ),
         dispatchers = Direct,
         incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
+        incognitoProfile = incognitoProfile,
     )
 
     @After
