@@ -1,7 +1,6 @@
-package com.raumanian.thirtysix.browser.presentation.onboarding
+package com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding
 
 import androidx.lifecycle.SavedStateHandle
-import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
@@ -13,7 +12,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
-import com.raumanian.thirtysix.browser.domain.usecase.SetOnboardingCompletedUseCase
+import com.raumanian.thirtysix.browser.feature.onboarding.domain.usecase.SetOnboardingCompletedUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -6,7 +6,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.usecase.SetOnboardingCompletedUseCase
+import com.raumanian.thirtysix.browser.feature.onboarding.domain.usecase.SetOnboardingCompletedUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetDynamicColorEnabledUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

@@ -1,9 +1,8 @@
-package com.raumanian.thirtysix.browser.presentation.onboarding
+package com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
@@ -12,7 +11,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUs
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetOnboardingCompletedUseCase
+import com.raumanian.thirtysix.browser.feature.onboarding.domain.usecase.SetOnboardingCompletedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow

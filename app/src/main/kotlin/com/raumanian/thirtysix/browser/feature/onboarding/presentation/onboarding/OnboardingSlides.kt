@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.constants
+package com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding
 
 /**
  * Spec 018 — the onboarding flow's fixed slide sequence.

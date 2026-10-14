@@ -1,6 +1,5 @@
-package com.raumanian.thirtysix.browser.presentation.onboarding
+package com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding
 
-import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode

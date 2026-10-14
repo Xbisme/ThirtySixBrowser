@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:function-naming") // Composables are PascalCase by Compose convention.
 
-package com.raumanian.thirtysix.browser.presentation.onboarding.components
+package com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

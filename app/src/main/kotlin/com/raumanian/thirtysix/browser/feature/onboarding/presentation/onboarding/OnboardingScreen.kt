@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:function-naming") // Composables are PascalCase by Compose convention.
 
-package com.raumanian.thirtysix.browser.presentation.onboarding
+package com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -33,7 +33,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.MeshArt
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
@@ -44,11 +43,11 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
+import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.LanguageSlide
+import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.SearchEngineSlide
+import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.ThemeSlide
+import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.WelcomeSlide
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
-import com.raumanian.thirtysix.browser.presentation.onboarding.components.LanguageSlide
-import com.raumanian.thirtysix.browser.presentation.onboarding.components.SearchEngineSlide
-import com.raumanian.thirtysix.browser.presentation.onboarding.components.ThemeSlide
-import com.raumanian.thirtysix.browser.presentation.onboarding.components.WelcomeSlide
 import kotlinx.coroutines.flow.collectLatest
 
 /**

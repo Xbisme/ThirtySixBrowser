@@ -9,6 +9,15 @@
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/core/presentation/designsystem/component/SettingsRows.kt">
         <error line="151" column="5" source="compose:modifier-without-default-check" />
     </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/onboarding/presentation/onboarding/OnboardingScreen.kt">
+        <error line="60" column="5" source="compose:modifier-missing-check" />
+        <error line="71" column="5" source="compose:vm-forwarding-check" />
+        <error line="100" column="13" source="compose:vm-forwarding-check" />
+        <error line="242" column="65" source="compose:lambda-param-in-effect" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/onboarding/presentation/onboarding/component/OnboardingSlideContent.kt">
+        <error line="216" column="56" source="compose:modifier-without-default-check" />
+    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/settings/presentation/settings/SettingsScreen.kt">
         <error line="70" column="5" source="compose:modifier-missing-check" />
         <error line="90" column="5" source="compose:vm-forwarding-check" />
@@ -100,15 +109,6 @@
         <error line="45" column="5" source="compose:modifier-missing-check" />
         <error line="62" column="5" source="compose:vm-forwarding-check" />
         <error line="78" column="9" source="compose:vm-forwarding-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/onboarding/OnboardingScreen.kt">
-        <error line="61" column="5" source="compose:modifier-missing-check" />
-        <error line="72" column="5" source="compose:vm-forwarding-check" />
-        <error line="101" column="13" source="compose:vm-forwarding-check" />
-        <error line="243" column="65" source="compose:lambda-param-in-effect" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/onboarding/components/OnboardingSlideContent.kt">
-        <error line="216" column="56" source="compose:modifier-without-default-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/fireproof/FireproofSitesScreen.kt">
         <error line="39" column="5" source="compose:modifier-missing-check" />
