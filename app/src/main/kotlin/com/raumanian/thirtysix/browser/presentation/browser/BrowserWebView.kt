@@ -32,13 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
-import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
@@ -93,13 +90,13 @@ internal fun BrowserWebView(
     actions: WebViewActionsHandle,
     callbacks: BrowserWebViewCallbacks,
     navigationCallbacks: BrowserNavigationCallbacks,
+    incognitoProfile: IncognitoWebProfile,
     modifier: Modifier = Modifier,
     adopted: WebView? = null,
     textZoomPercent: Int = BrowserLimits.TEXT_SIZE_PERCENT_100,
     desktopMode: Boolean = false,
     protection: ProtectionHooks? = null,
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
     // Spec 021 research R5 — a page-created WebView is adopted by the first generation only; a
     // replacement after a renderer loss is built fresh.
     val adoptable = remember { arrayOf(adopted) }
@@ -111,18 +108,7 @@ internal fun BrowserWebView(
     val textZoom = rememberUpdatedState(textZoomPercent)
     LaunchedEffect(textZoomPercent) { host.current?.settings?.textZoom = textZoomPercent }
 
-    // Lifecycle: pause WebView when host stops, resume when started.
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE -> host.current?.onPause()
-                Lifecycle.Event.ON_RESUME -> host.current?.onResume()
-                else -> Unit
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
+    PauseWithLifecycle { host.current }
 
     // Spec 012 — capture the incognito flag at first composition. The flag
     // never changes within a single BrowserWebView instance lifetime (a tab
@@ -146,7 +132,7 @@ internal fun BrowserWebView(
             factory = { context ->
                 val toAdopt = adoptable[0].also { adoptable[0] = null }
                 // An incognito WebView gets the session's own profile before anything else touches it.
-                val fresh = toAdopt ?: IncognitoProfiles.prepare(WebView(context), state.isIncognito)
+                val fresh = toAdopt ?: WebViewProfiles.prepare(WebView(context), state.isIncognito, incognitoProfile)
                 val webView = preparePageTools(fresh, actions, textZoom.value, desktopMode)
                     // Without explicit params AndroidView lays the WebView out as WRAP_CONTENT, and
                     // Chromium then gives the page a layout viewport 0 px tall: pages sized with
@@ -162,6 +148,7 @@ internal fun BrowserWebView(
                     navigationCallbacks = navigationCallbacks,
                     host = host,
                     protection = guard[0],
+                    incognitoProfile = incognitoProfile,
                 ).also { wv ->
                     instance[0] = wv
                     host.current = wv
@@ -228,6 +215,7 @@ private fun buildConfiguredWebView(
     navigationCallbacks: BrowserNavigationCallbacks,
     host: WebViewHost,
     protection: WebViewProtection?,
+    incognitoProfile: IncognitoWebProfile,
 ): WebView = webView.also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
@@ -272,7 +260,8 @@ private fun buildConfiguredWebView(
         onReceivedTitle = navigationCallbacks.onTitleChange,
         onReceivedIcon = navigationCallbacks.onIconReceived,
         pageRequests = callbacks.pageRequests,
-        newPopupWebView = { context -> newPopupWebView(context, state.isIncognito) },
+        incognitoProfile = incognitoProfile,
+        newPopupWebView = { context -> newPopupWebView(context, state.isIncognito, incognitoProfile) },
     )
     wireActions(wv, actions, host, adopted, protection)
 
@@ -336,8 +325,12 @@ private fun WebView.loadProtected(url: String, protection: WebViewProtection?) {
 }
 
 /** Spec 021 research R5 — a WebView with the browser's settings for a window the page opened. */
-private fun newPopupWebView(context: android.content.Context, incognito: Boolean): WebView =
-    IncognitoProfiles.prepare(WebView(context), incognito).also { popup ->
+private fun newPopupWebView(
+    context: android.content.Context,
+    incognito: Boolean,
+    incognitoProfile: IncognitoWebProfile,
+): WebView =
+    WebViewProfiles.prepare(WebView(context), incognito, incognitoProfile).also { popup ->
         applySecuritySettings(popup)
         if (incognito) applyIncognitoSettings(popup)
         // Until its tab adopts it, the pop-up must load in place: a WebView with no client hands

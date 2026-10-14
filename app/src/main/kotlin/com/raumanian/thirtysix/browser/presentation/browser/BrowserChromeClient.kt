@@ -14,6 +14,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.presentation.browser.page.BlockedPopupCatcher
 import com.raumanian.thirtysix.browser.presentation.browser.page.DialogAdmission
@@ -33,6 +34,7 @@ internal class BrowserChromeClient(
     private val onReceivedTitle: (String) -> Unit,
     private val onReceivedIcon: (String, Bitmap) -> Unit,
     private val pageRequests: PageRequestSink,
+    private val incognitoProfile: IncognitoWebProfile,
     /** A WebView with the browser's settings, for a window the page opened (research R5). */
     private val newPopupWebView: (Context) -> WebView = ::WebView,
 ) : WebChromeClient() {
@@ -179,8 +181,12 @@ internal class BrowserChromeClient(
             PopupDecision.Blocked -> {
                 val generation = pageRequests.context()?.generation
                 BlockedPopupCatcher.attach(
-                    opener = requireNotNull(view),
-                    context = requireNotNull(context),
+                    // Shares the opener's profile, so an incognito page never reaches normal browsing's.
+                    catcher = WebViewProfiles.prepareLike(
+                        webView = WebView(requireNotNull(context)),
+                        opener = requireNotNull(view),
+                        profiles = incognitoProfile,
+                    ),
                     transport = requireNotNull(transport),
                     resultMsg = resultMsg,
                 ) { address -> generation?.let { pageRequests.onPopupBlocked(address, it) } }

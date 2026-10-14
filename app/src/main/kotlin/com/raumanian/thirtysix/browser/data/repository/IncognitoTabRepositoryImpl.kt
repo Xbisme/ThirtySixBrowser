@@ -5,10 +5,10 @@ import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoProtectionExceptions
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.webview.IncognitoWebProfile
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton

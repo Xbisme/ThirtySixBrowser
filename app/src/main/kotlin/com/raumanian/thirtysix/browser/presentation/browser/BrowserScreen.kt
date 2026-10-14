@@ -598,6 +598,8 @@ private fun BrowserContent(
         onGranted = viewModel::onDownloadRequested,
         onDenied = viewModel::onStoragePermissionDenied,
     )
+    val context = LocalContext.current
+    val incognitoProfile = remember(context) { context.incognitoWebProfile() }
     Box(modifier = modifier) {
         androidx.compose.runtime.key(activeTabId) {
             // Spec 021 research R5 — a tab a page opened adopts the page's WebView.
@@ -623,6 +625,7 @@ private fun BrowserContent(
                     onScreenshotReady = viewModel::onScreenshotReady,
                     onScrollDelta = onScrollDelta,
                 ),
+                incognitoProfile = incognitoProfile,
                 modifier = Modifier.fillMaxSize(),
                 adopted = adopted,
                 textZoomPercent = textZoomPercent,

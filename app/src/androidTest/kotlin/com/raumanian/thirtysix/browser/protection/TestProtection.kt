@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.test.platform.app.InstrumentationRegistry
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.di.DefaultDispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.model.ProtectionData
 import com.raumanian.thirtysix.browser.core.domain.model.PublicSuffixRules
@@ -103,6 +104,7 @@ internal class TestProtection(
     @Composable
     fun Content(url: String, incognito: Boolean = false) {
         BrowserWebView(
+            incognitoProfile = IncognitoProfiles,
             state = remember { BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle, isIncognito = incognito) },
             actions = actions,
             callbacks = BrowserWebViewCallbacks(

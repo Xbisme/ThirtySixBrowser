@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.testing.AssetPageServer
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.After
@@ -35,6 +36,7 @@ class DesktopModeInstrumentedTest {
         val url = server.url(PAGE)
         composeRule.setContent {
             BrowserWebView(
+                incognitoProfile = IncognitoProfiles,
                 state = remember { BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle) },
                 actions = actions,
                 callbacks = BrowserWebViewCallbacks(

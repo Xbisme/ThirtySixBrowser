@@ -1,34 +1,12 @@
-package com.raumanian.thirtysix.browser.data.local.webview
+package com.raumanian.thirtysix.browser.core.data.util
 
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.webkit.WebView
 import androidx.webkit.ProfileStore
 import androidx.webkit.WebStorageCompat
-import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
-
-/**
- * The incognito session's WebView profile, where the engine has profiles (`MULTI_PROFILE`).
- *
- * Spec 012 kept incognito apart by snapshotting the shared cookie jar, wiping it at the end of
- * the session and writing the snapshot back. Only the open normal tabs' sites were snapshotted,
- * so ending an incognito session signed the person out of every other site, and site storage
- * written in incognito stayed in normal browsing. With a profile of its own, incognito has its own
- * cookies, storage, cache and service workers; normal browsing's are never touched, and ending
- * the session deletes the profile.
- */
-interface IncognitoWebProfile {
-    /** Whether incognito WebViews get a profile of their own on this engine. */
-    fun isIsolated(): Boolean
-
-    /** The first incognito tab opens: later incognito WebViews use a fresh profile. */
-    fun beginSession()
-
-    /** The last incognito tab closed: everything the session's profile holds is wiped. */
-    fun endSession()
-}
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 
 /**
  * Process-wide, because `BrowserWebView` gives every new WebView its profile before anything
@@ -67,45 +45,16 @@ object IncognitoProfiles : IncognitoWebProfile {
         mainHandler.post { wipe(ended) }
     }
 
-    /**
-     * Gives a new WebView the current incognito profile. Call on the main thread straight after
-     * constructing it, before any other use. A normal WebView, or an engine without profiles,
-     * is returned untouched (Spec 012's snapshot path then keeps incognito apart). The first
-     * WebView of a process, normal or not, also deletes the profiles earlier processes left.
-     */
-    fun prepare(webView: WebView, incognito: Boolean): WebView {
-        if (isolated) {
-            collectLeftovers(current = sessionName)
-            if (incognito) attachSessionProfile(webView)
-        }
-        return webView
+    override fun sessionProfileName(): String =
+        sessionName ?: (NAME_PREFIX + System.nanoTime()).also { sessionName = it }
+
+    override fun collectLeftovers() {
+        collectLeftovers(current = sessionName)
     }
 
-    private fun attachSessionProfile(webView: WebView) {
-        val name = sessionName ?: (NAME_PREFIX + System.nanoTime()).also { sessionName = it }
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
-            runCatching {
-                ProfileStore.getInstance().getOrCreateProfile(name)
-                WebViewCompat.setProfile(webView, name)
-            }.onFailure { e -> Log.w(TAG, "could not give the WebView its incognito profile", e) }
-        }
-    }
+    override fun isSessionProfile(name: String): Boolean = name.startsWith(NAME_PREFIX)
 
-    /**
-     * A throw-away WebView handed to a page as a new window shares its opener's profile, so an
-     * incognito page never reaches normal browsing's profile through it. Main thread, before use.
-     */
-    fun prepareLike(webView: WebView, opener: WebView): WebView {
-        if (!isolated || !WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) return webView
-        runCatching {
-            val name = WebViewCompat.getProfile(opener).name
-            if (name.startsWith(NAME_PREFIX)) WebViewCompat.setProfile(webView, name)
-        }.onFailure { e -> Log.w(TAG, "could not match the opener's profile", e) }
-        return webView
-    }
-
-    /** Names of incognito profiles that still exist on disk; for tests and diagnostics. Main thread. */
-    fun existingProfileNames(): List<String> =
+    override fun existingProfileNames(): List<String> =
         if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
             runCatching { ProfileStore.getInstance().allProfileNames.filter { it.startsWith(NAME_PREFIX) } }
                 .getOrDefault(emptyList())

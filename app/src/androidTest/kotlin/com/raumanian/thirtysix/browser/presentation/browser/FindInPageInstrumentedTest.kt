@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageCallbacks
@@ -68,6 +69,7 @@ class FindInPageInstrumentedTest {
                         ),
                     )
                     BrowserWebView(
+                        incognitoProfile = IncognitoProfiles,
                         state = remember { BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle) },
                         actions = actions,
                         callbacks = BrowserWebViewCallbacks(

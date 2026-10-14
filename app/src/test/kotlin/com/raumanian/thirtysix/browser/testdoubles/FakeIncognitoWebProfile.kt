@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
-import com.raumanian.thirtysix.browser.data.local.webview.IncognitoWebProfile
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 
 /** Records incognito profile sessions. [isolated] `false` sends the repository down Spec 012's snapshot path. */
 class FakeIncognitoWebProfile(var isolated: Boolean = false) : IncognitoWebProfile {
@@ -18,4 +18,12 @@ class FakeIncognitoWebProfile(var isolated: Boolean = false) : IncognitoWebProfi
     override fun endSession() {
         ended++
     }
+
+    override fun sessionProfileName(): String = "fake-incognito-$begun"
+
+    override fun collectLeftovers() = Unit
+
+    override fun isSessionProfile(name: String): Boolean = name.startsWith("fake-incognito-")
+
+    override fun existingProfileNames(): List<String> = emptyList()
 }

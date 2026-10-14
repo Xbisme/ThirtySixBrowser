@@ -12,14 +12,15 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.webkit.CookieManagerCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.core.domain.model.FireState
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
 import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
+import com.raumanian.thirtysix.browser.presentation.browser.WebViewProfiles
 import com.raumanian.thirtysix.browser.protection.TestProtection
 import com.raumanian.thirtysix.browser.testing.AssetPageServer
 import dagger.Module
@@ -194,7 +195,8 @@ class FireDataTest {
         // where the engine has profiles, else into the shared jar (Spec 012's snapshot path).
         composeRule.runOnUiThread {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
-            val incognitoPage = IncognitoProfiles.prepare(WebView(context), incognito = true)
+            val incognitoPage =
+                WebViewProfiles.prepare(WebView(context), incognito = true, profiles = IncognitoProfiles)
             val jar = if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
                 WebViewCompat.getProfile(incognitoPage).cookieManager
             } else {

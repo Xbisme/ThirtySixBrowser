@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.testing.AssetPageServer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -41,6 +42,7 @@ class FullHeightPageInstrumentedTest {
         val url = server.url("fullheight.html")
         composeRule.setContent {
             BrowserWebView(
+                incognitoProfile = IncognitoProfiles,
                 state = remember { BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle) },
                 actions = remember { WebViewActionsHandle() },
                 callbacks = BrowserWebViewCallbacks(

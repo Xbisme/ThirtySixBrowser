@@ -1,6 +1,5 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
@@ -10,7 +9,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
 
 /**
  * Spec 021 research R5 — learns a blocked pop-up's address without loading it. A bare WebView
@@ -26,14 +24,12 @@ object BlockedPopupCatcher {
     // (Spec 016 finding, see BrowserWebViewClient).
     @android.annotation.SuppressLint("MissingOnRenderProcessGone")
     fun attach(
-        opener: WebView,
-        context: Context,
+        catcher: WebView,
         transport: WebView.WebViewTransport,
         resultMsg: Message,
         onAddress: (String?) -> Unit,
     ) {
         val handler = Handler(Looper.getMainLooper())
-        val catcher = IncognitoProfiles.prepareLike(WebView(context), opener)
         var reported = false
         val report: (String?) -> Unit = { address ->
             if (!reported) {

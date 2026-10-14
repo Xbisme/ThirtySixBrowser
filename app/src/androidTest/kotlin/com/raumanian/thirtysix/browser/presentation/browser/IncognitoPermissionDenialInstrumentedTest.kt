@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageContext
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
@@ -38,7 +39,7 @@ class IncognitoPermissionDenialInstrumentedTest {
         }
     }
 
-    private fun client(sink: PageRequestSink) = BrowserChromeClient({}, {}, { _, _ -> }, sink)
+    private fun client(sink: PageRequestSink) = BrowserChromeClient({}, {}, { _, _ -> }, sink, IncognitoProfiles)
 
     @Test
     fun noPage_refusesWithoutRetaining() {

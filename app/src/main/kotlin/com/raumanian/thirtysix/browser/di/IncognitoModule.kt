@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.data.local.cookies.CookieJarSnapshotManagerImpl
-import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
-import com.raumanian.thirtysix.browser.data.local.webview.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.data.repository.IncognitoTabRepositoryImpl
 import dagger.Binds
 import dagger.Module

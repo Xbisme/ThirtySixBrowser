@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.SystemClock
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import java.util.concurrent.CopyOnWriteArrayList
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -45,6 +46,7 @@ class BrowserWebViewRendererRecoveryTest {
         assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         composeRule.setContent {
             BrowserWebView(
+                incognitoProfile = IncognitoProfiles,
                 state = BrowserUiState(currentUrl = PAGE_URL, loadingState = LoadingState.Idle),
                 actions = actions,
                 callbacks = BrowserWebViewCallbacks(

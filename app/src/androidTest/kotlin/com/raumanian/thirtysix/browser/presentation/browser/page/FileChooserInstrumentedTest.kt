@@ -20,6 +20,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
+import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.usecase.ApplySitePermissionChoiceUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ResolveSitePermissionUseCase
@@ -71,6 +72,7 @@ class FileChooserInstrumentedTest {
         composeRule.setContent {
             val session = rememberPageSession(activeTabId = 1L, isIncognito = false, permissionGate = gate)
             BrowserWebView(
+                incognitoProfile = IncognitoProfiles,
                 state = remember { BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle) },
                 actions = remember { WebViewActionsHandle() },
                 callbacks = BrowserWebViewCallbacks(
