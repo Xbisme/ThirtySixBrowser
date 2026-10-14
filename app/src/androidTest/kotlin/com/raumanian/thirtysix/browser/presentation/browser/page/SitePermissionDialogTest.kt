@@ -13,7 +13,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.usecase.ApplySitePermissionChoiceUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ResolveSitePermissionUseCase
-import com.raumanian.thirtysix.browser.presentation.settings.InstrumentedNoopSitePermissionRepository
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.InstrumentedNoopSitePermissionRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule

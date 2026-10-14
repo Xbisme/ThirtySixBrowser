@@ -29,14 +29,14 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsIconTone
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsSectionHeader
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsTopBar
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsValueRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.util.capitalizedForLocale
 import com.raumanian.thirtysix.browser.core.presentation.util.iconRes
 import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
-import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsIconTone
-import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSectionHeader
-import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
-import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsValueRow
 /**
  * Spec 021 FR-009 / C2.7 — remembered site decisions, one group per site: tap a decision to
  * change it, remove one site, or remove every site after confirming. Nothing here is ever

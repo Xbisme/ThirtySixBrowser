@@ -27,9 +27,9 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowIcon
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsTopBar
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar
 /**
  * Spec 023 FR-015 — Settings → Privacy → Sites without protection. Each row turns protection
  * back on for one site; "Turn all back on" asks first. Built from Spec 019 components (design

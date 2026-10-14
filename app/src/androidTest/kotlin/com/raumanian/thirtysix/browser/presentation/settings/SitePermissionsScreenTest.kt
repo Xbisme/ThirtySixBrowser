@@ -19,6 +19,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveSitePermissionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveSitePermissionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSitePermissionUseCase
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SETTINGS_TEST_TIMEOUT_MS
 import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsScreen
 import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsViewModel
 import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.TEST_TAG_SITE_PERMISSIONS_REMOVE_ALL

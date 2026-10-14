@@ -8,11 +8,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SettingsDialogHost
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SettingsSnackbarEffect
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SettingsViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
-import com.raumanian.thirtysix.browser.presentation.settings.SettingsDialogHost
-import com.raumanian.thirtysix.browser.presentation.settings.SettingsSnackbarEffect
-import com.raumanian.thirtysix.browser.presentation.settings.SettingsViewModel
-
 /**
  * Spec 019 FR-031 — opens one of the existing Settings choosers over the browser when a hub
  * quick-setting tile is tapped. It reuses Spec 016's dialogs and their view model unchanged,

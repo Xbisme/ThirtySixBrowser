@@ -24,13 +24,13 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.usecase.ApplySitePermissionChoiceUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ResolveSitePermissionUseCase
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.InstrumentedNoopSitePermissionRepository
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserNavigationCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserWebView
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserWebViewCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.LoadingState
 import com.raumanian.thirtysix.browser.presentation.browser.WebViewActionsHandle
-import com.raumanian.thirtysix.browser.presentation.settings.InstrumentedNoopSitePermissionRepository
 import java.io.File
 import java.net.ServerSocket
 import java.util.concurrent.CopyOnWriteArrayList

@@ -16,12 +16,12 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveProtectionExceptionsUseCase
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.AboutSection
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.TEST_TAG_SETTINGS_ABOUT_NOTICE_PSL
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.TEST_TAG_SETTINGS_ABOUT_NOTICE_TRACKERS
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubProtectionSection
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_HUB_NOT_SECURE
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_HUB_PROTECTION_SWITCH
-import com.raumanian.thirtysix.browser.presentation.settings.components.AboutSection
-import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_ABOUT_NOTICE_PSL
-import com.raumanian.thirtysix.browser.presentation.settings.components.TEST_TAG_SETTINGS_ABOUT_NOTICE_TRACKERS
 import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.ProtectionExceptionsScreen
 import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.ProtectionExceptionsViewModel
 import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.TEST_TAG_PROTECTION_EXCEPTIONS_EMPTY

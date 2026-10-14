@@ -9,7 +9,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
  *
  * Per Constitution §III No-Hardcode Rule: defaults live HERE, not inline at call
  * sites. Both [com.raumanian.thirtysix.browser.core.domain.model.UserSettings.DEFAULT]
- * and [com.raumanian.thirtysix.browser.data.mapper.SettingsMapper] read from
+ * and [com.raumanian.thirtysix.browser.feature.settings.data.mapper.SettingsMapper] read from
  * this object so a single edit propagates everywhere.
  *
  * Spec 016 removed the language default: the app language is held by the platform's
