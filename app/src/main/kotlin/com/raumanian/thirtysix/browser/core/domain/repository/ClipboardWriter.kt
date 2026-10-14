@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.core.domain.repository
 
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
-
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 /**
  * Spec 014 FR-021 — narrow seam over the Android system clipboard.
  *

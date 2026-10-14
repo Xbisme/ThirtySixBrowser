@@ -7,8 +7,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

@@ -19,8 +19,8 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.domain.usecase.ApplySitePermissionChoiceUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ResolveSitePermissionUseCase

@@ -5,8 +5,7 @@
 
 package com.raumanian.thirtysix.browser.core.domain.model
 
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 enum class ThemeMode(val storageValue: String) {
     Light("light"),
     Dark("dark"),

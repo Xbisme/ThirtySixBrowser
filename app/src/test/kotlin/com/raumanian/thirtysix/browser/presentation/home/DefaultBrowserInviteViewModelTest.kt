@@ -1,6 +1,5 @@
 package com.raumanian.thirtysix.browser.presentation.home
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
@@ -8,6 +7,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.InviteState
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository

@@ -4,7 +4,7 @@ import android.net.Uri
 import android.webkit.WebResourceResponse
 import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.core.constants.NetworkTimeouts
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.domain.protection.HttpsUpgradePolicy
 import com.raumanian.thirtysix.browser.domain.protection.NavigationPreparer

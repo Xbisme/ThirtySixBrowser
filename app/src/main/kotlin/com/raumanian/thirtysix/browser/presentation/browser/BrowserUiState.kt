@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 /**
  * Immutable UI snapshot for the Browser screen.

@@ -3,13 +3,13 @@ package com.raumanian.thirtysix.browser.presentation.browser.page
 import android.webkit.WebView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseIncognitoTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.usecase.DecidePopupUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.PopupDecision

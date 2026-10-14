@@ -21,7 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.presentation.history.components.ClearAllHistoryConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.history.components.EmptyHistoryState
 import com.raumanian.thirtysix.browser.presentation.history.components.HistoryActionSheet

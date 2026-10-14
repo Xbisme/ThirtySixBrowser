@@ -2,9 +2,8 @@
 
 package com.raumanian.thirtysix.browser.core.domain.model
 
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 /**
  * Spec 016 FR-020 — how long browsing history is kept.
  *

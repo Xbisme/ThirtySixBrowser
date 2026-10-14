@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.core.domain.model
 
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

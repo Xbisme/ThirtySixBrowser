@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.data.repository
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.constants.StorageKeys
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
+import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.StorageKeys
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.InviteState
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import java.io.IOException
 import javax.inject.Inject

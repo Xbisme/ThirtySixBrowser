@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.constants
+package com.raumanian.thirtysix.browser.core.domain.util
 
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine

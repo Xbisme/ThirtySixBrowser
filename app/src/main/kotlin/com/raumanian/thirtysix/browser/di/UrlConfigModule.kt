@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.di
 
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

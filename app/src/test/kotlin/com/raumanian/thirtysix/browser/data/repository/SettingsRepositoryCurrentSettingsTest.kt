@@ -1,11 +1,11 @@
 package com.raumanian.thirtysix.browser.data.repository
 
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.createTestSettingsDataStore
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.usecase.GetUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

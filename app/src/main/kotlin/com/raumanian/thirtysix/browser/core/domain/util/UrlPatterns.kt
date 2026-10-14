@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.constants
+package com.raumanian.thirtysix.browser.core.domain.util
 
 /**
  * Regex constants for URL detection and address-bar input normalization

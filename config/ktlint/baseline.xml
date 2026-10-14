@@ -17,7 +17,7 @@
         <error line="130" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/components/CreateOrRenameFolderDialog.kt">
-        <error line="20" column="5" source="compose:modifier-missing-check" />
+        <error line="19" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/BrowserScreen.kt">
         <error line="120" column="9" source="compose:vm-injection-check" />

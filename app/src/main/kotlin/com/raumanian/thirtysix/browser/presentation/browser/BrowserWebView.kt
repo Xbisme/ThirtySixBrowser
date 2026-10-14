@@ -32,10 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.page.PageRequest
@@ -537,8 +537,8 @@ private class BrowserWebViewClient(
             //     header/visible-viewport portion of the page is captured.
             //  3. Scale the crop down to 480×270 with bilinear filtering
             //     (preserves aspect; no distortion).
-            val targetW = com.raumanian.thirtysix.browser.core.constants.AppConstants.SCREENSHOT_TARGET_WIDTH_PX
-            val targetH = com.raumanian.thirtysix.browser.core.constants.AppConstants.SCREENSHOT_TARGET_HEIGHT_PX
+            val targetW = com.raumanian.thirtysix.browser.core.domain.util.AppConstants.SCREENSHOT_TARGET_WIDTH_PX
+            val targetH = com.raumanian.thirtysix.browser.core.domain.util.AppConstants.SCREENSHOT_TARGET_HEIGHT_PX
             val cropHeight = ((view.width.toLong() * targetH) / targetW)
                 .toInt()
                 .coerceAtMost(view.height)

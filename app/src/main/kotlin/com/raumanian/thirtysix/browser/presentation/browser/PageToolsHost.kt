@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPageCallbacks
 
 /**

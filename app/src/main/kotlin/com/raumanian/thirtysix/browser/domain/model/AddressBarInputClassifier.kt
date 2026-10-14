@@ -1,8 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.model
 
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
-import com.raumanian.thirtysix.browser.core.constants.UrlPatterns
-
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.util.UrlPatterns
 private val urlHeuristicRegex = Regex(UrlPatterns.URL_HEURISTIC_REGEX)
 private val newlineRegex = Regex(UrlPatterns.ADDRESS_BAR_NEWLINE_REGEX)
 

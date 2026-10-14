@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
@@ -11,6 +10,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
@@ -619,7 +619,7 @@ class BrowserViewModelTest {
     fun `onLongPressNewTab at cap sets tabsEvent to MaxTabsReached`() = runTest(testDispatcher) {
         // Pre-fill the FakeTabRepository to MAX_TABS.
         val repository = FakeTabRepository(homeUrl = "https://example.com")
-        val seed = (1..com.raumanian.thirtysix.browser.core.constants.BrowserLimits.MAX_TABS).map { i ->
+        val seed = (1..com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits.MAX_TABS).map { i ->
             com.raumanian.thirtysix.browser.core.domain.model.Tab(
                 id = i.toLong(),
                 url = "https://t$i.com",

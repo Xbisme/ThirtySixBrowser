@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.core.domain.usecase
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.error.BookmarkException
 import com.raumanian.thirtysix.browser.domain.error.BookmarkUrlValidationError

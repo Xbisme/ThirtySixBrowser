@@ -40,8 +40,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.FireState
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ThirtySixChip

@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.protection
 
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.model.TrackingParamRules
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import java.net.URLDecoder
 
 /**

@@ -116,7 +116,7 @@ interface IncognitoTabRepository {
 /**
  * Sentinel exception carried by [Result.Error.throwable] when
  * [IncognitoTabRepository.createTab] fails because
- * [com.raumanian.thirtysix.browser.core.constants.BrowserLimits.MAX_INCOGNITO_TABS]
+ * [com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits.MAX_INCOGNITO_TABS]
  * is already reached.
  *
  * Mirrors [MaxTabsReachedException] from Spec 011 — same handling pattern,

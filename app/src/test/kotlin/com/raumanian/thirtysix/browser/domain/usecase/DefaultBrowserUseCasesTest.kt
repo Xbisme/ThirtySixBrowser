@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.InviteState
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

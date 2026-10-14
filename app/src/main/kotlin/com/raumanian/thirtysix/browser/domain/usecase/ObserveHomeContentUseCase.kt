@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.domain.model.HomeContent
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind

@@ -2,12 +2,12 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.TabDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.Dispatchers

@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.domain.protection
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.ProtectionData
 import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.domain.usecase.IsSiteProtectedUseCase
 import javax.inject.Inject
 import javax.inject.Singleton

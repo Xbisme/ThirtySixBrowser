@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.constants
+package com.raumanian.thirtysix.browser.core.domain.util
 
 /**
  * Centralized URL constants per Constitution §III No-Hardcode Rule.

@@ -2,9 +2,8 @@
 
 package com.raumanian.thirtysix.browser.core.domain.model
 
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 /**
  * Spec 022 data-model §1 — one text size for every page, as a percentage of the page's own size.
  *

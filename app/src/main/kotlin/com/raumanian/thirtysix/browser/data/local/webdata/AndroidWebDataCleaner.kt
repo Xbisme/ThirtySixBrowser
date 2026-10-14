@@ -9,10 +9,10 @@ import android.webkit.WebView
 import androidx.webkit.CookieManagerCompat
 import androidx.webkit.WebStorageCompat
 import androidx.webkit.WebViewFeature
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext

@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.constants
+package com.raumanian.thirtysix.browser.core.domain.util
 
 /**
  * Spec 011 — limits for the multi-tab system.

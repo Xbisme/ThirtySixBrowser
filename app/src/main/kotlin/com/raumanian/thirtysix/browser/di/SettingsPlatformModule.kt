@@ -2,9 +2,9 @@ package com.raumanian.thirtysix.browser.di
 
 import android.os.Build
 import com.raumanian.thirtysix.browser.BuildConfig
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageController
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.data.local.locale.AppCompatAppLanguageController
 import com.raumanian.thirtysix.browser.data.local.webdata.AndroidWebDataCleaner
 import dagger.Binds

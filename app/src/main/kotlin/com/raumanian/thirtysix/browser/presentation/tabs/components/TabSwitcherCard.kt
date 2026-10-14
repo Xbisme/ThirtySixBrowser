@@ -44,9 +44,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.MeshArt
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SeededMeshArt

@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.data.local.cache
 
 import android.content.Context
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File

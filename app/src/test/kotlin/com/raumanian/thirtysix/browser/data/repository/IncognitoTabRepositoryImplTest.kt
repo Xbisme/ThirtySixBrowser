@@ -1,11 +1,11 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository

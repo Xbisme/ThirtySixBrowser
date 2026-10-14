@@ -1,6 +1,5 @@
 package com.raumanian.thirtysix.browser.presentation.history
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
@@ -10,6 +9,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsInc
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository

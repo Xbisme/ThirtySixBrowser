@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.core.domain.model
 
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 /**
  * Immutable snapshot of all user preferences (Spec 006 FR-010).
  *

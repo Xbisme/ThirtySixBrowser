@@ -113,7 +113,7 @@ fun HistoryTopBar(
 /**
  * Spec 014 FR-011 / FR-016 — live search input, drawn as the rounded well the address bar
  * uses (Spec 019). Filtering itself is gated in the ViewModel at
- * [com.raumanian.thirtysix.browser.core.constants.BrowserLimits.SEARCH_MIN_CHARS]; this field
+ * [com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits.SEARCH_MIN_CHARS]; this field
  * simply reports every keystroke (no debounce, per Q4).
  */
 @Composable

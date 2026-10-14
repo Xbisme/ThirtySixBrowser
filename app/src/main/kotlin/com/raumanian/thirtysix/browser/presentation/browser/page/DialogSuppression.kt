@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 /** Whether a page's dialog is shown, and with the "Don't let this site show more dialogs" box. */
 sealed interface DialogAdmission {
     data class Show(val offerSuppress: Boolean) : DialogAdmission

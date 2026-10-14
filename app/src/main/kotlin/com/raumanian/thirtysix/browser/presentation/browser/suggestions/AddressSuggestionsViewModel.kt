@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.presentation.browser.suggestions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.domain.model.AddressSuggestionSnapshot
 import com.raumanian.thirtysix.browser.domain.usecase.FilterAddressSuggestionsUseCase

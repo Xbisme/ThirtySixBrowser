@@ -86,7 +86,7 @@ interface TabRepository {
 
 /**
  * Sentinel exception carried by `Result.Error.throwable` when
- * [TabRepository.createTab] fails because [com.raumanian.thirtysix.browser.core.constants.BrowserLimits.MAX_TABS]
+ * [TabRepository.createTab] fails because [com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits.MAX_TABS]
  * is already reached.
  *
  * Consumers detect via `(result as? Result.Error)?.throwable is MaxTabsReachedException`.

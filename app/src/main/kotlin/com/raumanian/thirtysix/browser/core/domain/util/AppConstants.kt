@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.constants
+package com.raumanian.thirtysix.browser.core.domain.util
 
 /**
  * App-wide constants stub for Spec 001.

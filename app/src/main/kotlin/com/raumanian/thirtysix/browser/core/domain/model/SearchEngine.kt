@@ -9,8 +9,7 @@
 
 package com.raumanian.thirtysix.browser.core.domain.model
 
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 enum class SearchEngine(val storageValue: String) {
     Google("google"),
     DuckDuckGo("duckduckgo"),

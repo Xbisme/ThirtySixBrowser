@@ -3,8 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.browser.protection
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
-
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 /**
  * Spec 023 — the protections as one WebView sees them. `BrowserWebView` routes its loads and its
  * `WebViewClient` callbacks through here; with no instance (tests that build a bare WebView)

@@ -1,12 +1,11 @@
 package com.raumanian.thirtysix.browser.core.data.datasource.local.datastore
 
 import androidx.datastore.preferences.core.edit
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-import com.raumanian.thirtysix.browser.core.constants.StorageKeys
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.TextSize
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import kotlinx.coroutines.CoroutineScope

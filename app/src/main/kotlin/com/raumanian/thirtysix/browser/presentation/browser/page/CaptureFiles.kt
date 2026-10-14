@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.browser.page
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import java.io.File
 
 /**

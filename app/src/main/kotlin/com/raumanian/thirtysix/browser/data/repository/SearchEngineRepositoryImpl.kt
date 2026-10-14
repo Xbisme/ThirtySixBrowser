@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.data.repository
 
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import java.net.URLEncoder
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first

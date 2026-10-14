@@ -5,8 +5,7 @@ import android.webkit.WebView
 import androidx.webkit.CustomHeader
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
-
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 /**
  * Spec 023 research R5 — sends Global Privacy Control on every request, app-wide, where the
  * WebView supports profile headers. Installed once per WebView profile (normal browsing's, and

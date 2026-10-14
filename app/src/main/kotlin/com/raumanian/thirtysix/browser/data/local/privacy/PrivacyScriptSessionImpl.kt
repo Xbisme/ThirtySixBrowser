@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.data.local.privacy
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton

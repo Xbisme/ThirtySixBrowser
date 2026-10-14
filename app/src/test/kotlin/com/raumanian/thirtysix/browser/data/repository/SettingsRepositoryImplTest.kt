@@ -1,12 +1,12 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.core.constants.AppDefaults
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.createTestSettingsDataStore
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

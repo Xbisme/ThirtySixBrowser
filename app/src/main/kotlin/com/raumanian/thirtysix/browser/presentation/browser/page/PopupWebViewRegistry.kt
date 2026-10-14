@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.presentation.browser.page
 
 import android.webkit.WebView
-import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import java.util.WeakHashMap
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject

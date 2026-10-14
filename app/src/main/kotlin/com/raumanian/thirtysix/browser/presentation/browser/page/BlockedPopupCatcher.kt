@@ -8,8 +8,7 @@ import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 /**
  * Spec 021 research R5 — learns a blocked pop-up's address without loading it. A bare WebView
  * (JavaScript off, never shown) is handed to the page; its first navigation is reported and

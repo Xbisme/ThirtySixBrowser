@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.core.testing.fake
 
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.Flow

@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
@@ -14,6 +13,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUs
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetentionChangeResult
