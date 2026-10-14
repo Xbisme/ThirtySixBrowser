@@ -27,9 +27,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 /**
- * Spec 019 — confirmation dialog (design system Dialog, confirm form): a pastel glyph, the
- * question as [title], one sentence on what will be lost ([body]), then a full-width button
- * naming the action above Cancel (FR-045). [destructive] paints the action `error`.
+ * Confirmation dialog: the question as [title], one sentence on what will be lost ([body]),
+ * then a full-width button naming the action above Cancel. [destructive] paints it `error`.
  */
 @Composable
 @Suppress("LongParameterList")

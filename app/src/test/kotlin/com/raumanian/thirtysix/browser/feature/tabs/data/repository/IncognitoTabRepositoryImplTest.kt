@@ -25,14 +25,8 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Spec 012 — T008 unit tests for [IncognitoTabRepositoryImpl] per
- * [contracts/IncognitoTabRepository.contract.md].
- *
- * Pure JVM, no Robolectric required: the impl never touches Android APIs
- * directly — `CookieJarSnapshotManager` is the platform seam and is replaced
- * here with [FakeCookieJarSnapshotManager]. `TabRepository` is replaced with
- * [FakeTabRepository] (in-memory, auto-seeds a home tab on first
- * subscription so origin enumeration on 0→1 transition has content to read).
+ * Pure JVM: [FakeCookieJarSnapshotManager] replaces the platform seam, and [FakeTabRepository]
+ * auto-seeds a home tab so origin enumeration at `0 → 1` has something to read.
  */
 class IncognitoTabRepositoryImplTest {
 
@@ -117,7 +111,7 @@ class IncognitoTabRepositoryImplTest {
         assertTrue("2→1 keeps the incognito choices", protectionExceptions.contains("a.com"))
 
         repository.closeTab(b.id)
-        assertFalse("1→0 ends them (Spec 023 FR-014)", protectionExceptions.contains("a.com"))
+        assertFalse("1→0 ends them", protectionExceptions.contains("a.com"))
     }
 
     @Test
@@ -260,7 +254,7 @@ class IncognitoTabRepositoryImplTest {
 
     @Test
     fun `11 - a tab on the Home page contributes no cookie origin`() = runTest {
-        // Spec 019 T066a / contracts C1a — the reserved Home address has a scheme but no host,
+        // The reserved Home address has a scheme but no host,
         // so the snapshot captures only the real page's origin.
         val withHome = FakeTabRepository(
             initialTabs = listOf(

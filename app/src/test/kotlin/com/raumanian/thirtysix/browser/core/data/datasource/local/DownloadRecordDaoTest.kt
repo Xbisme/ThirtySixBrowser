@@ -11,7 +11,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 015 — DAO surface for the `download_records` table added at schema v2. */
+/** DAO surface for the `download_records` table added at schema v2. */
+
 @RunWith(AndroidJUnit4::class)
 class DownloadRecordDaoTest {
 

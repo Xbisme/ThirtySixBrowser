@@ -14,7 +14,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 019 T041 — the five-slot bottom bar (FR-020); replaces Spec 008's NavigationBottomBarTest. */
+/** The five-slot bottom bar. */
 @RunWith(AndroidJUnit4::class)
 class BrowserBottomBarTest {
 
@@ -77,7 +77,7 @@ class BrowserBottomBarTest {
     @Test
     fun thereIsNoBackButton() {
         setBar()
-        // FR-020 / FR-021 — back is the system gesture; the bar never offers one.
+        // Back is the system gesture; the bar never offers one.
         composeRule.onNodeWithContentDescription("Back").assertDoesNotExist()
     }
 

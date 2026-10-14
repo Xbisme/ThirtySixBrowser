@@ -26,12 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 015 T093 (US5 / FR-030 – FR-035, FR-034a).
- *
- * The rendered counterpart to `DownloadActionAvailabilityTest`: that one proves the matrix
- * is computed correctly, this one proves the sheet actually honours it.
- */
+// The rendered counterpart to `DownloadActionAvailabilityTest`: the sheet honours the matrix.
 @RunWith(AndroidJUnit4::class)
 class DownloadsScreenActionSheetTest {
 
@@ -40,10 +35,7 @@ class DownloadsScreenActionSheetTest {
 
     private val completeRecord = instrumentedRecord(1L, "done.pdf")
 
-    /**
-     * Spec 019 — the dialog is the shared `ConfirmDialog`, which exposes no modifier for its
-     * action button, so the button is found by its label inside the tagged dialog.
-     */
+    // `ConfirmDialog` exposes no button modifier, so the button is found by label inside the tagged dialog.
     private fun deleteConfirmButton(): SemanticsNodeInteraction {
         val label = InstrumentationRegistry.getInstrumentation().targetContext
             .getString(R.string.downloads_delete_dialog_confirm)
@@ -81,7 +73,7 @@ class DownloadsScreenActionSheetTest {
 
         composeRule.onNodeWithTag(TEST_TAG_ACTION_COPY_LINK).assertIsDisplayed()
         composeRule.onNodeWithTag(TEST_TAG_ACTION_OPEN).assertDoesNotExist()
-        // FR-034b — the load-bearing assertion of the whole matrix.
+        // Remove is withheld while in flight: the load-bearing cell of the matrix.
         composeRule.onNodeWithTag(TEST_TAG_ACTION_REMOVE).assertDoesNotExist()
         composeRule.onNodeWithTag(TEST_TAG_ACTION_DELETE_FILE).assertDoesNotExist()
     }
@@ -107,7 +99,6 @@ class DownloadsScreenActionSheetTest {
 
     @Test
     fun deleteFile_requiresConfirmationBeforeAnythingIsRemoved() {
-        val repository = InstrumentedDownloadsRepository(listOf(completeRecord))
         val vm = instrumentedViewModel(
             records = listOf(completeRecord),
             statuses = mapOf(completeRecord.transferHandle to DownloadStatus.Complete()),

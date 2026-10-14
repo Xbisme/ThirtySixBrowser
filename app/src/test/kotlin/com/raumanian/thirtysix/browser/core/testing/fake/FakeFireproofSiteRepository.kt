@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
-/** Spec 024 — in-memory [FireproofSiteRepository]; [writes] counts every write (INV-4 checks). */
+/** In-memory [FireproofSiteRepository]; [writes] counts every write. */
 class FakeFireproofSiteRepository(initial: Set<String> = emptySet()) : FireproofSiteRepository {
     private val state = MutableStateFlow(initial.map { FireproofSite(it, Instant.EPOCH) })
     var writes: Int = 0

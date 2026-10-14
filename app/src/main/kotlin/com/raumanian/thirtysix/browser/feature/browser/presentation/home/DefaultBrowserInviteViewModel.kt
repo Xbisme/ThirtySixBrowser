@@ -20,15 +20,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Spec 020 FR-024 – FR-027 / data-model §8 — whether the Home page shows the invitation to make
- * ThirtySix the default browser.
- *
- * Shown only when: not dismissed, launched at least 3 times, not the default browser, not on an
- * incognito tab. The default-browser state is re-read on every resume (FR-022); finding that the
- * app has become the default hides the card and retires it for good (FR-026). Using the card's
- * action does not dismiss it — a declined confirmation leaves it in place (FR-027).
- *
- * Kept apart from `HomeViewModel` so the Home content and the invitation evolve independently.
+ * Shown only when not dismissed, launched at least 3 times, not the default browser and not in
+ * incognito. Becoming the default retires the card for good; a declined confirmation leaves it.
  */
 @HiltViewModel
 class DefaultBrowserInviteViewModel @Inject constructor(
@@ -55,14 +48,13 @@ class DefaultBrowserInviteViewModel @Inject constructor(
         .flowOn(dispatchers.default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), initialValue = false)
 
-    /** FR-022 / FR-026 — the person may have just changed the default; re-read and record it. */
+    /** The person may have just changed the default browser; re-read and record it. */
     fun onResume() {
         val nowDefault = isDefaultBrowser()
         isDefault.value = nowDefault
         if (nowDefault) viewModelScope.launch { syncInvite() }
     }
 
-    /** FR-025 — the close button. */
     fun onDismiss() {
         viewModelScope.launch { dismissInvite() }
     }

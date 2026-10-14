@@ -6,31 +6,17 @@ import java.net.URI
 import java.net.URISyntaxException
 
 /**
- * Spec 013 R5 — pure-Kotlin validator used by manual-add / edit flows
- * (FR-006 / FR-022). Lives in `domain/validator/` so it is callable from
- * use cases without crossing into the data layer.
- *
- * Algorithm:
- * 1. Trim leading / trailing whitespace.
- * 2. If the trimmed value does not start with `http://` / `https://`
- *    (case-insensitive), prepend `https://`.
- * 3. Parse via `java.net.URI` (JDK only — no Android imports).
- * 4. Reject when host is null/blank or scheme is not http(s).
- *
- * Returns the normalized URL on success.
+ * Validates a typed bookmark address: trims it, adds `https://` when no scheme was typed,
+ * and accepts only http(s) URLs with a host. Returns the normalized URL.
  */
 object BookmarkUrlValidator {
 
     private const val HTTPS_PREFIX: String = "https://"
 
-    /**
-     * Matches a URI scheme prefix (`scheme://`). Used to detect whether the user
-     * already typed a scheme so we can either accept it (http / https) or reject
-     * it (anything else) BEFORE auto-prepending `https://`.
-     */
+    // A typed scheme is checked before `https://` is prepended, so `ftp://x` is rejected, not wrapped.
     private val SCHEME_REGEX: Regex = Regex("^([a-zA-Z][a-zA-Z0-9+.-]*)://")
 
-    @Suppress("ReturnCount") // Each return models a distinct validation guard branch (see KDoc).
+    @Suppress("ReturnCount") // Each return is a distinct validation failure.
     fun validate(input: String): Result<String> {
         val trimmed = input.trim()
         if (trimmed.isEmpty()) {

@@ -4,12 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Spec 023 data-model — one site the person turned protection off for in normal browsing.
- *
- * Its table moves `AppDatabase.SCHEMA_VERSION` from 3 to 4, strictly additively. Incognito
- * exceptions are never written here (FR-014).
- */
+/** A site whose protection was turned off in normal browsing; incognito exceptions are never stored. */
 @Entity(tableName = SiteProtectionExceptionEntity.TABLE_NAME)
 data class SiteProtectionExceptionEntity(
     /** Registrable domain, lower-case ASCII (IDN as punycode). */

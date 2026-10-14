@@ -5,29 +5,19 @@ import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import javax.inject.Inject
 
 /**
- * Spec 014 — record one history entry for a successful page load.
- *
- * Enforces the FR-002 incognito-suppression rule: when [isIncognito] is true the call
- * is a no-op. Otherwise persists the visit at the current device time. Caller (the
- * `BrowserViewModel`) MUST invoke this only at the page-finish boundary; failed loads
- * MUST NOT call into here (FR-003).
- *
- * @return the new row id, or `0L` when the visit was suppressed as incognito. The
- *  caller keeps the id so a late-arriving page title can be patched onto the row via
- *  [UpdateHistoryEntryTitleUseCase].
+ * Records a successful page load; a no-op in incognito. Call it only when a page finishes, never
+ * for a failed load. Returns the row id, or [SUPPRESSED], so a late page title can be patched on.
  */
 class RecordHistoryEntryUseCase @Inject constructor(
     private val repository: HistoryRepository,
 ) {
     suspend operator fun invoke(url: String, title: String, isIncognito: Boolean): Long {
-        // Spec 019 R1 — the reserved Home address is never loaded, so it never reaches here;
-        // the second condition keeps it out of history even if that ever changes.
+        // The Home address is never loaded, so it should not arrive here; this keeps it out anyway.
         if (isIncognito || url == UrlConstants.HOME_PAGE_URL) return SUPPRESSED
         return repository.recordVisit(url, title, System.currentTimeMillis())
     }
 
     private companion object {
-        /** Sentinel returned when FR-002 suppressed the write. */
         const val SUPPRESSED = 0L
     }
 }

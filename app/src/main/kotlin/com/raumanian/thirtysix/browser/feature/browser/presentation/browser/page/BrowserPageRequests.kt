@@ -11,9 +11,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 /**
- * Spec 021 — the browser screen's page session: created once, told about every tab switch, and
- * disposed with the screen so nothing pending is left unanswered (INV-3, spec edge case "leaving
- * the browser screen with a request pending").
+ * The browser screen's page session: created once, told about every tab switch, and disposed with
+ * the screen so no pending request is left unanswered.
  */
 @Composable
 fun rememberPageSession(
@@ -36,7 +35,7 @@ fun rememberPageSession(
     return session
 }
 
-/** Spec 021 — renders the session's pending requests with every story's renderer. */
+/** Renders the session's pending requests. */
 @Composable
 fun BrowserPageRequests(
     session: PageSession,

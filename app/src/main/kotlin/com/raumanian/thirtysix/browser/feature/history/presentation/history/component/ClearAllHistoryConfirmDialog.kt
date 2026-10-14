@@ -9,12 +9,7 @@ import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
-/**
- * Spec 014 FR-024 / FR-026 — confirmation gate in front of the irreversible clear-all wipe,
- * drawn as the shared destructive [ConfirmDialog] (Spec 019 FR-045): the body names what is
- * lost and the full-width error-filled action sits above Cancel. Dismissal (tap-outside /
- * system back) routes to [onCancel], so cancelling by any route leaves history untouched.
- */
+// Every dismissal route goes to [onCancel], so cancelling any way leaves history untouched.
 @Composable
 fun ClearAllHistoryConfirmDialog(
     onConfirm: () -> Unit,
@@ -33,12 +28,7 @@ fun ClearAllHistoryConfirmDialog(
     )
 }
 
-/** Test tags exposed for instrumented tests driving the clear-all flow. */
 const val TEST_TAG_HISTORY_CLEAR_ALL_DIALOG: String = "history_clear_all_dialog"
 
-/**
- * Kept for source compatibility. [ConfirmDialog] exposes no per-button modifier, so this tag
- * is no longer attached; tests find the confirm button by its label inside
- * [TEST_TAG_HISTORY_CLEAR_ALL_DIALOG].
- */
+// Not attached: [ConfirmDialog] has no button modifier, so tests find the confirm button by label.
 const val TEST_TAG_HISTORY_CLEAR_ALL_CONFIRM: String = "history_clear_all_confirm"

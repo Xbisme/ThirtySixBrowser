@@ -6,10 +6,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 
-/**
- * Spec 021 research R3 — the intents a page's file input opens, and how their result becomes
- * the page's answer. Pure intent building, so it is tested without a WebView.
- */
+/** The intents a page's file input opens and how their result becomes the page's answer. */
 object FileChooserIntents {
     private const val ANY_TYPE = "*/*"
     private const val IMAGE_PREFIX = "image/"
@@ -29,7 +26,7 @@ object FileChooserIntents {
         }
         .distinct()
 
-    /** The system picker for [request] (FR-011): its accept types and, when asked, several files. */
+    /** The system picker with the page's accept types and, when asked, several files. */
     fun picker(request: FileChooserRequest): Intent {
         val types = mimeTypes(request)
         return Intent(Intent.ACTION_GET_CONTENT)
@@ -48,10 +45,7 @@ object FileChooserIntents {
         return request.captureRequested || mediaOnly
     }
 
-    /**
-     * Camera intents for [request] (FR-013): a photo written to [photoOutput] when images are
-     * accepted, a video (returned by the camera app) when videos are accepted.
-     */
+    /** A photo written to [photoOutput] when images are accepted; a video when videos are. */
     fun captures(request: FileChooserRequest, photoOutput: Uri): List<Intent> {
         val types = mimeTypes(request)
         val acceptsAll = types.isEmpty() || ANY_TYPE in types
@@ -66,7 +60,6 @@ object FileChooserIntents {
         )
     }
 
-    /** The picker alone, or a chooser that also offers [captures]. */
     fun chooser(picker: Intent, captures: List<Intent>, title: String): Intent =
         if (captures.isEmpty()) {
             picker
@@ -74,10 +67,7 @@ object FileChooserIntents {
             Intent.createChooser(picker, title).putExtra(Intent.EXTRA_INITIAL_INTENTS, captures.toTypedArray())
         }
 
-    /**
-     * The files to hand the page (FR-012): what the picker returned, else the photo when the
-     * camera wrote one, else `null` (cancel).
-     */
+    /** The files for the page: the picker's, else the photo the camera wrote, else `null` (cancel). */
     fun result(resultCode: Int, data: Intent?, photoOutput: Uri?, photoWritten: Boolean): Array<Uri>? {
         if (resultCode != Activity.RESULT_OK) return null
         val clip = data?.clipData

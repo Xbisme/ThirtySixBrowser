@@ -23,16 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 022 US2 — address suggestions while the person types, on the browser's address bar and on
- * the Home page's search field (research R5, R6).
- *
- * When editing starts, one snapshot of bookmarks and history is loaded off the main thread. Each
- * keystroke is then filtered in memory, also off the main thread, and a newer keystroke cancels
- * an older one (`mapLatest`). When editing ends the snapshot is dropped, so it costs memory only
- * while the person types.
- *
- * Nothing here writes anything, anywhere, and nothing reaches the network (FR-015, FR-022, I-8,
- * I-9). That is why typing in an incognito tab leaves no trace.
+ * One snapshot of bookmarks and history is loaded when editing starts and dropped when it ends;
+ * keystrokes filter it in memory off the main thread. Nothing is written and nothing reaches the
+ * network, so typing in incognito leaves no trace.
  */
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,7 +51,6 @@ class AddressSuggestionsViewModel @Inject constructor(
             initialValue = AddressSuggestionsUiState(),
         )
 
-    /** An address entry gained focus: load this session's snapshot once. */
     fun onEditingStarted() {
         if (snapshot.value != null || loadJob?.isActive == true) return
         loadJob = viewModelScope.launch {
@@ -66,18 +58,13 @@ class AddressSuggestionsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * The entry's text changed. [currentPageUrl] is the page's own address: a field still showing
-     * it unchanged suggests nothing (FR-021).
-     */
+    /** A field still showing the page's own address unchanged suggests nothing. */
     fun onTextChanged(text: String, currentPageUrl: String?) {
         input.value = Input(text, currentPageUrl)
     }
 
-    /** An address entry gained ([focused]) or lost focus: starts or ends a suggestion session. */
     fun onFocusChanged(focused: Boolean) = if (focused) onEditingStarted() else onEditingEnded()
 
-    /** Editing ended (submit, a suggestion chosen, focus lost): drop everything. */
     fun onEditingEnded() {
         loadJob?.cancel()
         loadJob = null

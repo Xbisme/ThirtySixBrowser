@@ -52,28 +52,18 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserUiState
-/** Test tag — `AddressBarTest` and any future instrumented test driving the bar. */
 internal const val TEST_TAG_ADDRESS_BAR: String = "address_bar"
 
-/** Test tag — trailing clear button, visible iff focused + non-empty. */
 internal const val TEST_TAG_ADDRESS_BAR_CLEAR: String = "address_bar_clear"
 
-/** Test tag — the page-load progress line on the well's bottom edge (FR-024). */
 internal const val TEST_TAG_PAGE_LOAD_PROGRESS: String = "page_load_progress"
 
 private const val HTTPS_PREFIX = "https://"
 private val FocusRing = 2.dp
 
 /**
- * Spec 009 — the address bar / omnibox; Spec 019 — restyled as the design system's compact
- * search well (SearchBar component, "Browsing" and "Focused" states).
- *
- * Display rules are Spec 009's, unchanged (FR-014–FR-018): unfocused shows only the hostname,
- * focused shows the full URL with everything selected, typing replaces it; IME Go submits;
- * the trailing clear button shows iff focused and non-empty and keeps focus.
- *
- * Leading glyph: the incognito mask in an incognito tab (FR-023), a lock for an `https` page,
- * otherwise the search glyph. Incognito wells are glass on the plum bar (FR-051).
+ * Unfocused shows only the hostname; focused shows the full URL, all selected, so typing replaces
+ * it. The leading glyph is the incognito mask, a lock for `https`, or search.
  */
 @Composable
 @Suppress("LongMethod", "LongParameterList")
@@ -86,10 +76,8 @@ internal fun AddressBar(
     focusRequester: FocusRequester? = null,
 ) {
     var fieldValue by remember { mutableStateOf(TextFieldValue(text = state.addressBarText)) }
-    // Spec 022 SC-003 — texts this field has reported but whose echo through the ViewModel has not
-    // come back yet. While the main thread is busy the echo of an earlier keystroke can arrive after
-    // later ones were typed; treating it as an outside change wrote the old text back and dropped
-    // the keystrokes typed since (found typing fast while 10,000 history rows loaded).
+    // Texts reported but not yet echoed back through the view model. A busy main thread can deliver
+    // an earlier keystroke's echo after later ones; taking it as an outside change dropped keystrokes.
     val pendingEchoes = remember { ArrayDeque<String>() }
     val report: (String) -> Unit = { text ->
         pendingEchoes.addLast(text)
@@ -98,9 +86,8 @@ internal fun AddressBar(
 
     LaunchedEffect(state.isAddressBarFocused) {
         if (state.isAddressBarFocused) {
-            // Spec 022 SC-003 — this runs a frame after focus. If typing has already started
-            // (seen once when typing began before the keyboard was up), selecting the whole
-            // address now would let the next keystroke replace what was typed.
+            // Runs a frame after focus: if typing already started, selecting all now would let the
+            // next keystroke replace what was typed.
             if (fieldValue.text.isEmpty()) {
                 val url = state.currentUrl
                 fieldValue = TextFieldValue(text = url, selection = TextRange(0, url.length))
@@ -194,15 +181,11 @@ internal fun AddressBar(
                             )
                         }
                     }
-                    // Spec 019 FR-024 — page-load progress on the well's bottom edge. [progress] is
-                    // read only inside ProgressLine's draw phase (contracts C6).
                 }
             },
         )
-        // Spec 019 FR-024 — page-load progress on the well's bottom edge, kept outside the text
-        // field so its label and tag are not merged into the field's semantics. Inset by the pill's
-        // corner radius so it runs along the flat part of the edge. [progress] is read only inside
-        // ProgressLine's draw phase (contracts C6).
+        // Outside the text field so its label and tag are not merged into the field's semantics;
+        // inset by the pill's radius to run along the flat edge. [progress] is read only when drawing.
         if (isLoading) {
             val loadingDescription = stringResource(R.string.browser_loading_a11y)
             ProgressLine(
@@ -219,7 +202,6 @@ internal fun AddressBar(
 
 private const val HINT_ALPHA = 0.7f
 
-/** Colours and glyph of the well for the current tab and focus state (FR-023, FR-051). */
 private data class AddressWellStyle(
     val content: Color,
     val hint: Color,

@@ -5,14 +5,13 @@ import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 sealed interface DialogAdmission {
     data class Show(val offerSuppress: Boolean) : DialogAdmission
 
-    /** The person stopped this page's dialogs: answered as cancelled, not shown (FR-031). */
+    /** The person stopped this page's dialogs: answered as cancelled, not shown. */
     data object Suppressed : DialogAdmission
 }
 
 /**
- * Spec 021 contracts C1.5 — flood control for a page's alert / confirm / prompt. Counted per
- * page (tab + generation): the second dialog offers the checkbox; once ticked, later dialogs
- * are cancelled silently until the page changes. Main thread only.
+ * Flood control for a page's alert / confirm / prompt, counted per page (tab + generation): the
+ * second dialog offers the checkbox; once ticked, later ones are cancelled until the page changes.
  */
 class DialogSuppression {
     private var page: Pair<Long, Long>? = null
@@ -26,7 +25,6 @@ class DialogSuppression {
         return DialogAdmission.Show(offerSuppress = count >= BrowserLimits.DIALOG_SUPPRESS_FROM_COUNT)
     }
 
-    /** The person ticked the box on a dialog of this page. */
     fun suppress(tabId: Long, generation: Long) {
         resetIfNewPage(tabId, generation)
         suppressed = true

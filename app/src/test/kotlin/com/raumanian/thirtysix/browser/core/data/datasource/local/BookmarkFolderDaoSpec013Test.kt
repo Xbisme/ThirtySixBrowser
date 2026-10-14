@@ -9,10 +9,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 013 — covers the 2 new methods added to [BookmarkFolderDao]:
- * `getDirectChildren`, `deleteById`.
- */
+/** [BookmarkFolderDao]'s `getDirectChildren` and `deleteById`. */
+
 @RunWith(AndroidJUnit4::class)
 class BookmarkFolderDaoSpec013Test {
 

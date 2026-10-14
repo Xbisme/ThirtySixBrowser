@@ -24,12 +24,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-/**
- * Spec 014 FR-018 / FR-022 — long-press action sheet for a single history row, in the shared
- * [SheetFrame] (Spec 019): the entry it acts on, then exactly three actions in the order the
- * spec fixes — **Open in new tab**, **Delete entry**, **Copy URL**. Dismissal (tap-outside,
- * drag or system back) routes through [onDismiss] and performs no action.
- */
+// Exactly three actions in a fixed order; every dismissal route performs no action.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("LongParameterList")
@@ -68,7 +63,6 @@ fun HistoryActionSheet(
     }
 }
 
-/** The destructive action, its glyph tinted `error` so it reads as one. */
 @Composable
 private fun DeleteActionRow(onDelete: () -> Unit) {
     ListRow(
@@ -89,7 +83,6 @@ private fun DeleteActionRow(onDelete: () -> Unit) {
     )
 }
 
-/** Test tags exposed for instrumented tests asserting sheet contents + order. */
 const val TEST_TAG_HISTORY_ACTION_SHEET: String = "history_action_sheet"
 const val TEST_TAG_HISTORY_ACTION_OPEN_IN_NEW_TAB: String = "history_action_open_in_new_tab"
 const val TEST_TAG_HISTORY_ACTION_DELETE: String = "history_action_delete"

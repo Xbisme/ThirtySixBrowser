@@ -24,21 +24,8 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 /**
- * Structural smoke for [SettingsDataStoreProviderModule] (Spec 006 SC-010).
- *
- * Invokes the @Provides method directly with a real Application context + a
- * minimal DispatcherProvider. Wires SettingsDataStore + SettingsMapper +
- * SettingsRepositoryImpl manually and verifies one observe + setter round-trip.
- *
- * Full @HiltAndroidTest end-to-end graph boot is deferred to Spec 016 when the
- * first ViewModel consumer materializes (heavier scaffolding than the data
- * layer alone justifies — same rationale as Spec 005's DatabaseModuleSmokeTest).
- *
- * Spec 016 — runs under a plain [Application]. Robolectric otherwise boots the manifest's
- * `ThirtySixApplication`, whose start-up retention sweep now reads settings through Hilt's
- * singleton DataStore on the very file this test opens with a second DataStore. The two raced,
- * failing intermittently with "There are multiple DataStores active for the same file". This
- * test is about the provider in isolation, so it should not boot the app's graph at all.
+ * Runs under a plain [Application]: ThirtySixApplication's start-up sweep would open Hilt's DataStore
+ * on the same file, failing with "multiple DataStores active for the same file".
  */
 @RunWith(AndroidJUnit4::class)
 @Config(application = Application::class)
@@ -54,8 +41,7 @@ class SettingsModuleSmokeTest {
 
     @After
     fun tearDown() {
-        // Provider creates a real DataStore file at <files>/datastore/<name>.preferences_pb;
-        // delete so subsequent test classes start clean.
+        // The provider creates a real DataStore file; delete it so later test classes start clean.
         val dataStoreFile = File(
             context.filesDir,
             "datastore/${AppConstants.SETTINGS_DATASTORE_FILE_NAME}.preferences_pb",

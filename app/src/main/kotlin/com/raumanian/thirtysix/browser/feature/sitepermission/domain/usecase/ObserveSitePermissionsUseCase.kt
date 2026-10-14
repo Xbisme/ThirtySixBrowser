@@ -5,7 +5,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepo
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Spec 021 FR-009 — every remembered site decision, for the Site permissions screen. */
 class ObserveSitePermissionsUseCase @Inject constructor(
     private val repository: SitePermissionRepository,
 ) {

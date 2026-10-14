@@ -10,13 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-/**
- * Spec 015 — Room-backed [DownloadsRepository].
- *
- * Depends only on its DAO and the dispatcher provider — never on another repository, and
- * notably **never on the platform gateway** (Constitution §IV). See the interface KDoc for
- * why that separation is deliberate.
- */
+// Room only: it never touches the platform gateway, which use cases join in.
 class DownloadsRepositoryImpl @Inject constructor(
     private val dao: DownloadRecordDao,
     private val dispatchers: DispatcherProvider,

@@ -19,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 019 T069 — swipe a tab card sideways to close it (clarification Q1, research R11). */
+/** Swiping a tab card sideways closes it. */
 @RunWith(AndroidJUnit4::class)
 class TabSwipeTest {
 

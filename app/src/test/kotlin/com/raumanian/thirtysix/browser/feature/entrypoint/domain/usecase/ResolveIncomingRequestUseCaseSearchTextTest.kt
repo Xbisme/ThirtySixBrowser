@@ -5,7 +5,6 @@ import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingT
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 020 T055 — every `SearchText` row of contracts C2 (FR-011, FR-012, FR-013). */
 class ResolveIncomingRequestUseCaseSearchTextTest {
 
     private val resolve = ResolveIncomingRequestUseCase()

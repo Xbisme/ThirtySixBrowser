@@ -5,7 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepos
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Spec 024 FR-012 — the fireproof sites, newest first. */
+/** The fireproof sites, newest first. */
 class ObserveFireproofSitesUseCase @Inject constructor(
     private val repository: FireproofSiteRepository,
 ) {

@@ -33,7 +33,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 023 T057, T072 and the hub section of T050 — the three new pieces of UI. */
+/** The protection hub section, the sites-without-protection list and the About notices. */
 @RunWith(AndroidJUnit4::class)
 class ProtectionScreensTest {
 
@@ -53,7 +53,10 @@ class ProtectionScreensTest {
     @Test
     fun hubShowsTheCountAndTheSwitchOnAWebPage() {
         val switched = mutableListOf<Boolean>()
-        hub(PageProtectionStatus(12, protectionOn = true, connectionSecure = true, isWebPage = true, site = "news.com"), switched)
+        hub(
+            PageProtectionStatus(12, protectionOn = true, connectionSecure = true, isWebPage = true, site = "news.com"),
+            switched,
+        )
 
         composeRule.onNodeWithText(resources.getQuantityString(R.plurals.hub_protection_trackers_blocked, 12, 12))
             .assertExists()
@@ -93,7 +96,8 @@ class ProtectionScreensTest {
 
         composeRule.onNodeWithText("a.com").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_PROTECTION_EXCEPTIONS_TURN_ALL_ON).performClick()
-        composeRule.onNode(hasText(resources.getString(R.string.protection_exceptions_turn_on)) and hasAnyAncestor(isDialog()))
+        val turnOn = resources.getString(R.string.protection_exceptions_turn_on)
+        composeRule.onNode(hasText(turnOn) and hasAnyAncestor(isDialog()))
             .performClick()
 
         composeRule.waitUntil(TestProtection.TIMEOUT_MS) { repository.currentSites().isEmpty() }

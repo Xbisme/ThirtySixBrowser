@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.core.testing.fake
 
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 
-/** Records incognito profile sessions. [isolated] `false` sends the repository down Spec 012's snapshot path. */
+/** Records incognito profile sessions. [isolated] `false` sends the repository down the cookie-snapshot path. */
 class FakeIncognitoWebProfile(var isolated: Boolean = false) : IncognitoWebProfile {
     var begun = 0
         private set

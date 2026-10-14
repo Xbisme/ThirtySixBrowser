@@ -17,10 +17,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Verifies SC-006: WAL journal mode permits concurrent multi-DAO writes without deadlock.
- *
- * Two coroutines insert into BookmarkDao + HistoryDao simultaneously; both writes must
- * complete within a 1-second budget and both rows must persist.
+ * WAL journal mode lets two coroutines write through BookmarkDao and HistoryDao at once
+ * without deadlock, and both rows persist.
  */
 @RunWith(AndroidJUnit4::class)
 class WalConcurrencyTest {
@@ -38,20 +36,17 @@ class WalConcurrencyTest {
     }
 
     /**
-     * Uses [runBlocking] (real time) rather than `runTest` (virtual time) because the
-     * concurrency claim under test is a real-wall-clock invariant: under WAL, two
-     * coroutines on different DAOs must NOT block each other beyond a real-time budget.
-     * `runTest`'s virtual scheduler would not exercise the actual SQLite writer lock.
+     * Uses [runBlocking] rather than `runTest`: the claim is about real wall-clock time, and a
+     * virtual scheduler would not exercise the actual SQLite writer lock.
      */
     @Test
     fun `concurrent inserts on different DAOs both succeed within 1s budget`() = runBlocking {
         val bookmarkDao = db.bookmarkDao()
         val historyDao = db.historyDao()
 
-        // Note on the budget: Robolectric's SQLite shadow is slower than on-device
-        // SQLite (JIT class-load + Java SQLite shim). 5 s gives plenty of headroom
-        // while still proving no deadlock; SC-006's "< 1 s" target is a Pixel 5
-        // production-device claim, not a Robolectric-JVM claim.
+        // Robolectric's SQLite shim is much slower than a device's, so 5 s only proves no deadlock;
+        // it is not the on-device latency target of under 1 s.
+
         withTimeout(5.seconds) {
             withContext(Dispatchers.IO) {
                 val a = async {

@@ -21,11 +21,9 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 /**
- * Spec 021 US3 / research R4 — the page's fullscreen view over the whole browser screen: system
- * bars hidden (a swipe shows them briefly, FR-014), orientation following the phone (FR-015),
- * Back leaving fullscreen first (FR-016). The WebView underneath is untouched, so leaving
- * restores the same page, scroll position and playback. An incognito window keeps
- * `FLAG_SECURE`, which covers this overlay too (FR-017).
+ * The page's fullscreen view over the whole screen: system bars hidden, orientation following the
+ * phone, Back leaving first. The WebView underneath is untouched, so leaving restores page, scroll
+ * and playback. An incognito window's `FLAG_SECURE` covers this overlay too.
  */
 @Composable
 fun FullscreenOverlay(

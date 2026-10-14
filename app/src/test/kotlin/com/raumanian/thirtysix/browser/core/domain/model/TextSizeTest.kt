@@ -3,7 +3,8 @@ package com.raumanian.thirtysix.browser.core.domain.model
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 022 data-model §1 — nine fixed levels; anything else decodes to 100% (I-1, I-2). */
+/** Nine fixed levels; anything else decodes to 100%. */
+
 class TextSizeTest {
 
     @Test

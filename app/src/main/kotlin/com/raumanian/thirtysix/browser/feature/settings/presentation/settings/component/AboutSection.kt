@@ -20,14 +20,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
- * Spec 016 US7 FR-034 – FR-036 — the app name, the installed version and the privacy statement.
- *
- * Plain text only: no links, licence list or rating prompt (spec A10), so everything here renders
- * the same with no network at all. Spec 019 leads it with a soft-primary icon like every other
- * row that has no hub tile (FR-044).
- *
- * Spec 023 FR-003 adds the open-source notices the bundled protection lists require, still as
- * plain text: addresses are written out, never opened.
+ * Plain text only, so it renders the same offline. The open-source notices the bundled lists'
+ * licences require write addresses out and never open them.
  */
 @Composable
 fun AboutSection(
@@ -83,7 +77,7 @@ fun AboutSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT_NOTICE_PSL),
         )
-        // Spec 024 FR-023 — the bundled cookie-banner rules (MPL-2.0, research R7).
+        // The bundled cookie-banner rules (MPL-2.0).
         Text(
             text = stringResource(R.string.settings_about_notice_autoconsent),
             style = MaterialTheme.typography.bodySmall,

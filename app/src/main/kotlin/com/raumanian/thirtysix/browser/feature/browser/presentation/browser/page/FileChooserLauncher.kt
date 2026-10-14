@@ -28,10 +28,9 @@ private sealed interface ChooserStage {
 }
 
 /**
- * Spec 021 US2 / research R3 — answers a page's file input with the system picker, plus the
- * camera when the page wants a capture (FR-011 – FR-013). The camera permission is requested at
- * this moment only; refusing it still leaves the picker (FR-013). The page is always answered,
- * including when no app can handle the picker.
+ * Answers a page's file input with the system picker, plus the camera when the page wants a
+ * capture. `CAMERA` is requested only then, and refusing it still leaves the picker. The page is
+ * always answered, even when no app can handle the picker.
  */
 @Composable
 fun FileChooserLauncher(request: PageRequest.FileChooser, done: () -> Unit) {

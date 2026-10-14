@@ -25,12 +25,7 @@ import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetTextSi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-/**
- * Spec 016 T030 — the one place a [SettingsViewModel] is assembled for JVM tests.
- *
- * Every parameter defaults to a fake, so a user story that adds a constructor parameter adds
- * one defaulted parameter here and no existing test changes.
- */
+/** Every parameter defaults to a fake, so a new constructor parameter changes no existing test. */
 @Suppress("LongParameterList")
 internal fun settingsViewModel(
     settingsRepository: FakeSettingsRepository = FakeSettingsRepository(),
@@ -77,10 +72,7 @@ internal fun settingsViewModel(
 
 internal const val TEST_APP_VERSION_NAME: String = "9.9.9-test"
 
-/**
- * Every dispatcher is `Dispatchers.Main`, which `SettingsViewModelTest` replaces with its test
- * dispatcher — so use-case hops run on the same scheduler `advanceUntilIdle` drives.
- */
+// Every dispatcher is Dispatchers.Main, which the test replaces, so advanceUntilIdle drives use-case hops too.
 private object MainDispatchers : DispatcherProvider {
     override val main: CoroutineDispatcher get() = Dispatchers.Main
     override val io: CoroutineDispatcher get() = Dispatchers.Main

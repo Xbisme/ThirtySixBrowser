@@ -37,23 +37,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Spec 014 — view model for the HistoryScreen.
- *
- * Surface built up across user stories:
- *  - **US1** — observe the persisted list, derive day-bucketed groups, dispatch
- *    tap-to-replace-active-tab via [UpdateActiveTabUrlAndTitleUseCase] (mirrors
- *    Spec 013 `BookmarksViewModel.onBookmarkTap`).
- *  - **US2** — live substring search over title-or-URL, gated at
- *    [BrowserLimits.SEARCH_MIN_CHARS] with no debounce (FR-011a / Q4).
- *  - **US3** — long-press action sheet: open in a new normal tab, delete a single
- *    row, copy the URL (FR-018 … FR-022).
- *  - **US4** — confirmed clear-all (FR-023 … FR-026).
- *
- * Coordinates use cases from two domains: history domain (Spec 014) + tabs domain
- * (Spec 011's [UpdateActiveTabUrlAndTitleUseCase] / [CreateTabUseCase]).
- * ViewModel-level use-case coordination — Constitution §IV compliant.
- */
 @HiltViewModel
 @Suppress("TooManyFunctions", "LongParameterList")
 class HistoryViewModel @Inject constructor(
@@ -72,12 +55,8 @@ class HistoryViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<HistoryUiState> = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
-    /**
-     * Spec 014 — one-shot snackbar channel. `replay = 0` so a re-subscribing Composable
-     * never re-shows a stale message; `DROP_OLDEST` with a 1-slot buffer so a burst of
-     * rapid actions surfaces the most recent outcome instead of suspending the emitter.
-     * Mirrors Spec 013's `bookmarkSnackbarEvent` channel policy.
-     */
+    // `replay = 0` so a re-subscribing Composable never re-shows a stale message; `DROP_OLDEST`
+    // with one slot so a burst of actions surfaces the latest outcome without suspending.
     private val _historySnackbarEvent: MutableSharedFlow<HistoryErrorEvent> = MutableSharedFlow(
         replay = 0,
         extraBufferCapacity = 1,
@@ -85,28 +64,18 @@ class HistoryViewModel @Inject constructor(
     )
     val historySnackbarEvent: SharedFlow<HistoryErrorEvent> = _historySnackbarEvent.asSharedFlow()
 
-    /** FR-011 — drives the filter half of the listing pipeline. */
     private val searchQueryFlow: MutableStateFlow<String> = MutableStateFlow("")
 
-    /** FR-010 — captured active tab id used by [onEntryTap]. */
     private var activeTabId: Long = 0L
 
-    /** FR-010a — captured incognito flag used by [onEntryTap]. */
     private var lastKnownIsIncognito: Boolean = false
 
     init {
-        // Listing pipeline: entries × query → filtered → bucketed. Recomputes on every
-        // repository emission AND every keystroke, so FR-017 (a new matching entry shows
-        // up under an active query) falls out of the combine for free.
+        // Re-derives on every repository emission and keystroke, so new matches appear under an active query.
         combine(observeHistoryEntries(), searchQueryFlow) { entries, query -> entries to query }
             .map { (entries, query) -> Derived(entries, groupByDay(filterEntries(entries, query))) }
-            // Filtering + day-bucketing is O(n) over the whole history, which at the
-            // SC-005 benchmark size (10 000 rows) is far too much work for the UI thread —
-            // `viewModelScope` dispatches on `Dispatchers.Main.immediate`, so before this
-            // `flowOn` every emission *and every keystroke* blocked rendering (measured on
-            // an API 36 emulator: p99 frame 450 ms on open, 200 ms while typing, 70 % janky).
-            // `flowOn` applies to the upstream only, so the derivation moves to the default
-            // dispatcher while the `onEach` state write below stays on the main thread.
+            // The O(n) filter and bucketing would block the UI thread on every keystroke at 10 000 rows;
+            // `flowOn` moves only the upstream, so the state write in `onEach` stays on main.
             .flowOn(dispatchers.default)
             .onEach { derived ->
                 _uiState.update { state ->
@@ -123,8 +92,6 @@ class HistoryViewModel @Inject constructor(
             .onEach { lastKnownIsIncognito = it }
             .launchIn(viewModelScope)
     }
-
-    // ──────── US1 — Open entry (FR-010 / FR-010a) ────────
 
     fun onEntryTap(entry: HistoryEntry) {
         viewModelScope.launch {
@@ -144,42 +111,29 @@ class HistoryViewModel @Inject constructor(
         _uiState.update { state -> state.copy(openUrl = null) }
     }
 
-    // ──────── US2 — Search (FR-011 … FR-017) ────────
-
-    /**
-     * FR-011a — the raw query is mirrored into state synchronously so the text field
-     * stays responsive, and pushed onto [searchQueryFlow] to re-drive the filter.
-     * Input longer than [BrowserLimits.MAX_HISTORY_QUERY_LENGTH] is truncated so the
-     * per-keystroke substring scan can never see a pathological query.
-     */
+    // Mirrored synchronously so the field stays responsive; truncated so the per-keystroke scan
+    // never sees a huge query.
     fun onSearchQueryChange(query: String) {
         val bounded = query.take(BrowserLimits.MAX_HISTORY_QUERY_LENGTH)
         _uiState.update { state -> state.copy(searchQuery = bounded) }
         searchQueryFlow.value = bounded
     }
 
-    /** FR-016 — clearing the field restores the full grouped list. */
     fun onSearchQueryClear() {
         onSearchQueryChange("")
     }
-
-    // ──────── US3 — Per-entry actions (FR-018 … FR-022) ────────
 
     fun onLongPressEntry(entry: HistoryEntry) {
         _uiState.update { state -> state.copy(pendingActionSheetTarget = entry) }
     }
 
-    /** FR-022 — tap-outside / system-back closes the sheet without acting. */
     fun onActionSheetDismiss() {
         _uiState.update { state -> state.copy(pendingActionSheetTarget = null) }
     }
 
     /**
-     * FR-019 / FR-019a / Q2 — always creates a **normal** tab, regardless of whether the
-     * currently-active tab is incognito. The new tab becomes active (see
-     * [CreateTabUseCase]), so the screen is dismissed via the [HistoryUiState.openUrl]
-     * signal on success. A cap-reached failure surfaces the existing Spec 011 message
-     * and leaves the screen open.
+     * Always opens a normal tab, even from an incognito one. On a cap failure the existing tab-cap
+     * message is shown and the screen stays open.
      */
     fun onOpenInNewTab(entry: HistoryEntry) {
         viewModelScope.launch {
@@ -197,7 +151,7 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    /** FR-020 — removes exactly the targeted row; sibling rows for the same URL stay. */
+    /** Removes exactly the targeted row; other visits to the same URL stay. */
     fun onDeleteEntry(entry: HistoryEntry) {
         viewModelScope.launch {
             _uiState.update { state -> state.copy(pendingActionSheetTarget = null) }
@@ -208,7 +162,6 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    /** FR-021 — copies the URL verbatim and confirms via snackbar. */
     fun onCopyUrl(entry: HistoryEntry) {
         _uiState.update { state -> state.copy(pendingActionSheetTarget = null) }
         if (clipboardWriter.copyUrl(entry.url)) {
@@ -216,18 +169,14 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    // ──────── US4 — Clear all (FR-023 … FR-026) ────────
-
     fun onClearAllRequested() {
         _uiState.update { state -> state.copy(isClearAllDialogVisible = true) }
     }
 
-    /** FR-026 — Cancel / tap-outside / system-back leaves history untouched. */
     fun onClearAllCancelled() {
         _uiState.update { state -> state.copy(isClearAllDialogVisible = false) }
     }
 
-    /** FR-025 — wipes every entry; the observer drives the screen to its empty state. */
     fun onClearAllConfirmed() {
         viewModelScope.launch {
             try {
@@ -241,20 +190,13 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    // ──────── Derivation helpers ────────
-
-    /** Result of one derivation pass, computed off the main thread. */
     private data class Derived(
         val entries: List<HistoryEntry>,
         val groups: List<HistoryUiState.DayGroup>,
     )
 
-    /**
-     * FR-011a / FR-012 / FR-013 — below the threshold the list passes through untouched.
-     * At or above it, matches are case-insensitive substrings of the title **or** the URL.
-     * `String.contains` treats every character literally, so SQL-ish input (`%`, `_`, `'`)
-     * carries no special meaning (FR-013).
-     */
+    // Below the threshold the list passes through. `String.contains` treats `%`, `_` and `'` literally,
+    // which is why search is never done in SQL `LIKE`.
     private fun filterEntries(entries: List<HistoryEntry>, query: String): List<HistoryEntry> {
         if (query.length < BrowserLimits.SEARCH_MIN_CHARS) return entries
         return entries.filter { entry ->
@@ -263,11 +205,7 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    /**
-     * FR-008 / FR-014 — buckets the (already reverse-chronological) list by local day.
-     * Bucketing preserves input order within each group, and a group is emitted only
-     * when it has at least one entry — so zero-match days disappear under an active query.
-     */
+    // Keeps input order within each day; days with no entries are dropped, so they vanish under a query.
     private fun groupByDay(entries: List<HistoryEntry>): List<HistoryUiState.DayGroup> {
         if (entries.isEmpty()) return emptyList()
         val zone = ZoneId.systemDefault()

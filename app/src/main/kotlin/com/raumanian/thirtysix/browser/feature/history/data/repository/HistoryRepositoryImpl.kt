@@ -13,10 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-/**
- * Spec 014 — implementation of [HistoryRepository]. Depends ONLY on the DAO and
- * a [DispatcherProvider] (no Repo→Repo per Constitution §IV).
- */
 @Singleton
 class HistoryRepositoryImpl @Inject constructor(
     private val dao: HistoryDao,
@@ -55,8 +51,7 @@ class HistoryRepositoryImpl @Inject constructor(
 
     override suspend fun pruneOlderThan(cutoffMillis: Long): Int =
         withContext(dispatchers.io) {
-            // `deleteInRange` is inclusive on both ends; epoch 0 as the lower bound covers
-            // every row ever written, and `cutoffMillis - 1` keeps the cutoff itself alive.
+            // `deleteInRange` is inclusive on both ends; `cutoffMillis - 1` keeps the cutoff itself.
             dao.deleteInRange(fromInclusive = 0L, toInclusive = cutoffMillis - 1L)
         }
 

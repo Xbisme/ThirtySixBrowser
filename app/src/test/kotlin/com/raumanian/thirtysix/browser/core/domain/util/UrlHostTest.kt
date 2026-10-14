@@ -4,7 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Spec 024 data-model step 1 — hosts of recorded addresses. */
+/** Hosts of recorded addresses. */
+
 class UrlHostTest {
     @Test
     fun `http and https hosts are returned lower-case`() {

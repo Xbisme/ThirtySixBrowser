@@ -3,13 +3,7 @@ package com.raumanian.thirtysix.browser.feature.tabs.domain.usecase
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import javax.inject.Inject
 
-/**
- * Spec 012 — close every incognito tab in one atomic operation.
- *
- * Triggered by the "Close all incognito" affordance in the tab switcher
- * (US5). The repository's [IncognitoTabRepository.closeAll] wipes the
- * in-memory state and restores the cookie jar snapshot exactly once.
- */
+/** Closes every incognito tab at once, ending the incognito session exactly once. */
 class CloseAllIncognitoTabsUseCase @Inject constructor(
     private val repository: IncognitoTabRepository,
 ) {

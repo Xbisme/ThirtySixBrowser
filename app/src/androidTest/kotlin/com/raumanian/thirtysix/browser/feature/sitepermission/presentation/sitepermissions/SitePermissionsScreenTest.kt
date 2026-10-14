@@ -27,7 +27,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 021 T026 / C2.7 — the Site permissions screen over an in-memory store. */
 @RunWith(AndroidJUnit4::class)
 class SitePermissionsScreenTest {
 

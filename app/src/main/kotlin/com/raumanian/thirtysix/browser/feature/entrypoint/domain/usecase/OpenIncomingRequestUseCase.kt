@@ -13,22 +13,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
 /**
- * Spec 020 research R6 / contracts C2 — opens content from another app in the browser.
- *
- *  1. A search becomes a URL with the user's chosen engine (Spec 010).
- *  2. The same final URL opened within 2 seconds is a duplicate and does nothing (FR-007).
- *  3. A new **normal** tab is created and becomes active (FR-003). Only the normal tab store is
- *     ever written (`isIncognito = false`), so incoming content never joins that session (FR-017).
- *  4. At the tab cap, the normal tab with the latest `lastActiveAt` is reused (FR-018). If it is
- *     already the active tab, the caller loads the URL into the live page; otherwise its stored
- *     address is set first and the tab is switched to, so the browser's tab-switch load opens
- *     the right page instead of racing it with the old one (research R6).
- *
- * Talks to the normal [TabRepository] directly — the tab use cases it would otherwise take each
- * only delegate to it, and the incognito store is deliberately out of reach.
- *
- * Remembers the last opened URL for the duplicate window, so the caller keeps one instance
- * for as long as it handles requests (the activity-scoped `EntryPointViewModel` does).
+ * Opens content from another app in a new normal tab; only the normal [TabRepository] is in reach,
+ * so incoming content never joins incognito. At the tab cap, the reused tab's address is set before
+ * switching so the tab-switch load does not race the old page. Holds the duplicate-window state,
+ * so keep one instance per activity.
  */
 class OpenIncomingRequestUseCase @Inject constructor(
     private val buildSearchUrl: BuildSearchUrlUseCase,

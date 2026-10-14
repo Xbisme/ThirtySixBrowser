@@ -9,16 +9,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Spec 016 — [AppLanguageController] over AndroidX's per-app language API (research R1).
- *
- * On Android 13+ AppCompat forwards both calls to the framework `LocaleManager`, which stores
- * the value and keeps it in sync with the system Settings app. Below Android 13 AppCompat keeps
- * the value itself, persisted through `AppLocalesMetadataHolderService` with
- * `autoStoreLocales = true` in the manifest, and applies it by recreating the
- * `AppCompatActivity`.
- *
- * Every platform call is wrapped in `runCatching`, so this seam never throws (FR-043).
- * Failures log only which operation failed — never a locale the user chose.
+ * Android 13+ stores the language in the framework LocaleManager; below that AppCompat persists it
+ * via autoStoreLocales in the manifest. Never throws, and never logs the chosen locale.
  */
 @Singleton
 class AppCompatAppLanguageController @Inject constructor() : AppLanguageController {

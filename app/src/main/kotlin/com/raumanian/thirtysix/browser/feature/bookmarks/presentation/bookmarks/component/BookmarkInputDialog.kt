@@ -16,10 +16,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
- * Spec 019 — the text-input dialog frame shared by the folder and bookmark dialogs: an
- * [AlertDialog] at radius 28 (`shapes.extraLarge`) on the raised surface, with the design
- * system's pill buttons (filled OK, text Cancel). The shared `ConfirmDialog`/`ChoiceDialog`
- * have no slot for input fields, so this stays AlertDialog-based.
+ * The text-input dialog frame shared by the folder and bookmark dialogs. `ConfirmDialog` and
+ * `ChoiceDialog` have no slot for input fields, so this one stays AlertDialog-based.
  */
 @Suppress("LongParameterList") // A dialog frame: title, confirm state, two actions, modifier and content.
 @Composable
@@ -59,7 +57,6 @@ internal fun BookmarkInputDialog(
     )
 }
 
-/** Spec 019 — corner shape of the input fields inside [BookmarkInputDialog]. */
 @Composable
 @ReadOnlyComposable
 internal fun bookmarkFieldShape(): Shape = MaterialTheme.shapes.medium

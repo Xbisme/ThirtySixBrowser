@@ -31,10 +31,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 022 T011 — find in page against `find.html` (exactly 50 matches of the test word), through
- * the real [BrowserWebView] and [FindInPageBar]. The state reducer mirrors
- * `BrowserViewModel.onFindQueryChanged` / `onFindResult`, which `BrowserViewModelFindTest` covers.
- * Back closing the bar is a `BrowserScreen` behaviour, checked at device gate G2.
+ * Find in page against `find.html` (exactly 50 matches) through the real [BrowserWebView] and
+ * [FindInPageBar]. The state reducer mirrors the view model's, which `BrowserViewModelFindTest` covers.
  */
 @RunWith(AndroidJUnit4::class)
 class FindInPageInstrumentedTest {

@@ -9,13 +9,6 @@ import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.presentation.util.searchEngineLabel
-/**
- * Spec 016 US2 — choose the engine that address-bar queries go to.
- *
- * Public and stateless on purpose: it knows nothing about any view model and reports the
- * choice through [onSelect], so Spec 018's onboarding can reuse it unchanged (FR-037,
- * research.md R14).
- */
 @Composable
 fun SearchEngineChooserDialog(
     selected: SearchEngine,

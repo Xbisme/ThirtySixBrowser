@@ -6,8 +6,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
 /**
- * Spec 023 FR-012 – FR-014 — turns protection on or off for [site]. A normal tab's choice is
- * saved; an incognito tab's choice lives only in memory and never touches the saved list.
+ * Turns protection on or off for [site]. A normal tab's choice is saved; an incognito tab's lives
+ * only in memory and never touches the saved list.
  */
 class SetSiteProtectionUseCase @Inject constructor(
     private val exceptions: ProtectionExceptionRepository,

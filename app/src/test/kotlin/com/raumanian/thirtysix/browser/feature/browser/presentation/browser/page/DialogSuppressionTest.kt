@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.pag
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 021 T054 — every row of contracts C1.5. */
+/** Suppressing a page's repeated dialogs, per page and per tab. */
 class DialogSuppressionTest {
 
     private val dialogs = DialogSuppression()

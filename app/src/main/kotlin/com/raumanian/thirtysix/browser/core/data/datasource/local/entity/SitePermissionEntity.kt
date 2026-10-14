@@ -4,11 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 
 /**
- * Spec 021 data-model §1 — one remembered decision for one site and one capability.
- *
- * Its table moves `AppDatabase.SCHEMA_VERSION` from 2 to 3, strictly additively: it references
- * no existing table. Normal tabs only — an incognito answer is never written (INV-1) — and https
- * origins only (INV-2). "Allow this time" is never stored (FR-003).
+ * One remembered decision for one https origin and capability. Incognito answers and
+ * "Allow this time" are never stored.
  */
 @Entity(
     tableName = SitePermissionEntity.TABLE_NAME,
@@ -27,7 +24,6 @@ data class SitePermissionEntity(
     @ColumnInfo(name = COL_DECISION)
     val decision: String,
 
-    /** Epoch millis of the last change. */
     @ColumnInfo(name = COL_DECIDED_AT)
     val decidedAt: Long,
 ) {

@@ -25,14 +25,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 009 — component-level Compose UI test for [AddressBar].
- *
- * Covers T016 (US1 IME submit), T037 (US4 clear button), and T040 (US5
- * hostname-vs-full-URL display + select-all on focus). Pure component test —
- * no WebView, no Hilt, no real navigation. Drives the bar with controlled
- * [BrowserUiState] and asserts visible text + callback firing.
- */
+/** [AddressBar] alone, driven by a controlled [BrowserUiState]: no WebView, no Hilt. */
 @RunWith(AndroidJUnit4::class)
 class AddressBarTest {
 
@@ -60,7 +53,7 @@ class AddressBarTest {
         }
     }
 
-    // ---------- US1 / T016 — initial render + IME submit ----------
+    // ---------- Initial render and IME submit ----------
 
     @Test
     fun initialState_unfocused_emptyUrl_showsPlaceholder() {
@@ -73,7 +66,7 @@ class AddressBarTest {
 
     @Test
     fun unfocused_withUrl_displaysHostnameOnly() {
-        // FR-014 — hostname-only when unfocused with a URL.
+        // Hostname only when unfocused with a URL.
         setBar(
             BrowserUiState(
                 currentUrl = "https://developer.android.com/jetpack/compose?utm=test",
@@ -86,8 +79,7 @@ class AddressBarTest {
 
     @Test
     fun unfocused_aboutBlank_fallsBackToFullUrl() {
-        // FR-016 — `about:blank` has no host → fall back to displaying the
-        // raw URL string.
+        // `about:blank` has no host, so the raw URL shows.
         setBar(BrowserUiState(currentUrl = "about:blank", loadingState = LoadingState.Loaded))
         composeRule.onNodeWithTag(TEST_TAG_ADDRESS_BAR)
             .assertTextEquals("about:blank")
@@ -95,8 +87,7 @@ class AddressBarTest {
 
     @Test
     fun imeAction_firesSubmit_onNonEmptyTyping() {
-        // T016 — IME Go fires onSubmit. Set focused state so the field accepts
-        // input + IME action. Type some text first, then trigger IME.
+        // Focused, so the field accepts input and the IME action.
         setBar(
             BrowserUiState(
                 currentUrl = "",
@@ -111,9 +102,7 @@ class AddressBarTest {
 
     @Test
     fun imeAction_firesSubmit_evenWhenInputIsEmpty() {
-        // FR-012 / FR-013a — Composable always fires onSubmit; the ViewModel
-        // is responsible for the empty no-op semantics. The Composable can't
-        // peek into classification.
+        // The bar always fires onSubmit; empty input is the view model's to ignore.
         setBar(
             BrowserUiState(
                 currentUrl = "",
@@ -126,11 +115,11 @@ class AddressBarTest {
         assertEquals(1, submitCount)
     }
 
-    // ---------- US4 / T037 — clear button visibility + tap ----------
+    // ---------- Clear button ----------
 
     @Test
     fun clearButton_invisible_whenUnfocused() {
-        // FR-023 — clear hidden when unfocused, even if text present.
+        // Clear is hidden when unfocused, even with text.
         setBar(
             BrowserUiState(
                 currentUrl = "https://example.com",
@@ -144,7 +133,7 @@ class AddressBarTest {
 
     @Test
     fun clearButton_invisible_whenFocusedAndEmpty() {
-        // FR-024 — clear hidden when focused but empty.
+        // Clear is hidden when focused but empty.
         setBar(
             BrowserUiState(
                 currentUrl = "",
@@ -158,8 +147,7 @@ class AddressBarTest {
 
     @Test
     fun clearButton_visible_andFiresCallback_whenFocusedAndNonEmpty() {
-        // FR-020 / FR-021 — clear visible iff focused + non-empty; tap fires
-        // onClear and (per ViewModel contract) preserves focus.
+        // Clear shows only when focused and non-empty; tapping it fires onClear.
         setBar(
             BrowserUiState(
                 currentUrl = "https://example.com",
@@ -173,7 +161,7 @@ class AddressBarTest {
         assertEquals(1, clearCount)
     }
 
-    // ---------- US5 / T040 — display + focus / placeholder ----------
+    // ---------- Display, focus and placeholder ----------
 
     @Test
     fun typingInputUpdatesViaCallback() {
@@ -206,7 +194,7 @@ class AddressBarTest {
         assertEquals("new", lastTextChange)
     }
 
-    // ---------- Spec 022 SC-003 — no dropped keystroke ----------
+    // ---------- No dropped keystroke ----------
 
     @Test
     fun lateEchoOfEarlierTyping_doesNotOverwriteNewerText_butAnOutsideChangeStillShows() {

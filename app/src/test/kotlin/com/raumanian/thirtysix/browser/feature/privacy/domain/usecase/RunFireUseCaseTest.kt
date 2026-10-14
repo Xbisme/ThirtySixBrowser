@@ -36,12 +36,7 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 024 T022 / T037 — [RunFireUseCase]: step order (INV-2, INV-3), failure boundaries, the two
- * site-data paths, what Fire keeps (INV-4, FR-004a, FR-008) and the session traces (FR-003a).
- *
- * Every fake shares one call log, so ordering across seams is observable.
- */
+// Every fake shares one call log, so ordering across seams is observable.
 class RunFireUseCaseTest {
 
     private val log = mutableListOf<String>()

@@ -16,12 +16,9 @@ import androidx.compose.ui.unit.Dp
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 /**
- * Spec 019 — page-load and download progress (design system ProgressBar).
- *
- * **Phase contract (Constitution v1.4.0 §V rules 1–2, contracts C6):** [progress] is a lambda and
- * is invoked only inside `drawBehind`, so a progress update invalidates one draw of this line
- * and recomposes nothing. Callers MUST pass a lambda that reads the state itself
- * (`{ state.value }`), never one that wraps a value already read in composition.
+ * Page-load and download progress. [progress] is read only inside `drawBehind`, so an update
+ * redraws this line without recomposing. Pass a lambda that reads the state itself
+ * (`{ state.value }`), not one wrapping a value already read in composition.
  */
 @Composable
 fun ProgressLine(

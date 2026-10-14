@@ -12,10 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.FindInPageCallbacks
-/**
- * Spec 022 — what each hub page tool does on the browser screen (FR-001). The hub has already
- * closed when this runs (FR-004).
- */
+/** What each hub page tool does; the hub has already closed when this runs. */
 @Composable
 internal fun rememberPageToolHandler(
     viewModel: BrowserViewModel,
@@ -27,7 +24,7 @@ internal fun rememberPageToolHandler(
         { tool ->
             when (tool) {
                 PageTool.Find -> {
-                    // FR-005 — the find bar replaces a top bar that is showing, not one slid away.
+                    // The find bar replaces a showing top bar, not one slid away.
                     chrome.show()
                     viewModel.onFindOpened()
                 }
@@ -40,11 +37,7 @@ internal fun rememberPageToolHandler(
     }
 }
 
-/**
- * Spec 022 US3 — the system share sheet with the page's address, and its title as the subject
- * when it has one (FR-023). Incognito is not consulted: sharing is the person's explicit action,
- * and nothing about it is recorded (FR-024).
- */
+/** Incognito is not consulted: sharing is the person's explicit action, and nothing about it is recorded. */
 @Composable
 internal fun rememberShareAction(viewModel: BrowserViewModel): () -> Unit {
     val context = LocalContext.current
@@ -66,10 +59,8 @@ internal fun rememberShareAction(viewModel: BrowserViewModel): () -> Unit {
 }
 
 /**
- * Spec 022 US1 — the find bar's actions. Typing updates the ViewModel and searches the page with
- * the text as the ViewModel stored it (cut at the length limit); Close clears the highlights
- * before closing (I-5). A navigation or tab switch closes the bar from the ViewModel instead:
- * the page whose matches were highlighted is gone by then.
+ * Searches with the text as the view model stored it (cut at the limit). A navigation or tab
+ * switch closes the bar from the view model instead, since the highlighted page is gone.
  */
 @Composable
 internal fun rememberFindCallbacks(
@@ -92,17 +83,14 @@ internal fun rememberFindCallbacks(
         )
     }
 
-/**
- * Spec 019 R7 / Spec 022 FR-005 — page scrolling slides the bars away, except while the find bar
- * is open: it stays put, so the page must not move the chrome underneath it.
- */
+/** Page scrolling slides the bars away, except while the find bar is open above them. */
 @Composable
 internal fun rememberScrollDeltaHandler(chrome: ChromeScrollState, isFinding: () -> Boolean): (Float) -> Unit {
     val finding = rememberUpdatedState(isFinding)
     return remember(chrome) { { delta -> if (!finding.value()) chrome.onScrollDelta(delta) } }
 }
 
-/** Spec 022 FR-005 — the find bar takes the top bar's place while open; Home shows neither. */
+/** The find bar takes the top bar's place while open; Home shows neither. */
 @Composable
 internal fun FindOrTopBar(
     findOpen: Boolean,
@@ -116,11 +104,9 @@ internal fun FindOrTopBar(
     }
 }
 
-/** Spec 022 FR-005 / I-7 — composes [content], the bottom bar, only while the find bar is closed. */
 @Composable
 internal fun UnlessFinding(findOpen: Boolean, content: @Composable () -> Unit) {
     if (!findOpen) content()
 }
 
-/** Spec 022 FR-005 — while finding the bars stay put, so the page is shortened by the find bar's height. */
 internal fun findBarPagePadding(findOpen: Boolean, findBarHeight: Dp): Dp = if (findOpen) findBarHeight else 0.dp

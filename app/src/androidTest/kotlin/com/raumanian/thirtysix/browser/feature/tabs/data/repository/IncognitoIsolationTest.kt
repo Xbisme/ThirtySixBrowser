@@ -46,11 +46,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Ending an incognito session must not sign the person out of sites (the Spec 012 limitation found
- * by Spec 024), and nothing written in incognito may reach normal browsing.
+ * Ending an incognito session must not sign the person out of sites, and nothing written in
+ * incognito may reach normal browsing.
  *
- * `storage.html` (Spec 024 fixture) stores five kinds of site data, and the server sets the
- * HttpOnly cookie `fp_persist`; `storage.html?check` reports what the page can still see.
+ * `storage.html` stores five kinds of site data, and the server sets the HttpOnly cookie
+ * `fp_persist`; `storage.html?check` reports what the page can still see.
  */
 @HiltAndroidTest
 @UninstallModules(SettingsDataStoreProviderModule::class)
@@ -149,7 +149,10 @@ class IncognitoIsolationTest {
             assertTrue(tab is Result.Success)
         }
 
-        assertTrue("signed out of a site visited before: ${normalCookie(LOOPBACK)}", PERSISTENT in normalCookie(LOOPBACK))
+        assertTrue(
+            "signed out of a site visited before: ${normalCookie(LOOPBACK)}",
+            PERSISTENT in normalCookie(LOOPBACK),
+        )
     }
 
     @Test
@@ -161,7 +164,10 @@ class IncognitoIsolationTest {
 
         store(LOCAL, incognito = true)
         assertTrue("the incognito page kept its own cookie", incognitoProfileCookies(LOCAL).isNotEmpty())
-        assertFalse("incognito cookie reached normal browsing: ${normalCookie(LOCAL)}", PERSISTENT in normalCookie(LOCAL))
+        assertFalse(
+            "incognito cookie reached normal browsing: ${normalCookie(LOCAL)}",
+            PERSISTENT in normalCookie(LOCAL),
+        )
         hide()
         runBlocking { incognitoTabs.closeAll() }
 

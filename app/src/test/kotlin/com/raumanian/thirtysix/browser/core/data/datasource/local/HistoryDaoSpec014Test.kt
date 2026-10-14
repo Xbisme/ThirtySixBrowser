@@ -11,9 +11,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 014 — covers the additive [HistoryDao.deleteById] surface AND re-asserts the
- * Spec 005 chronological-log invariant under repeat-visit (FR-004 / Q3).
+ * [HistoryDao.deleteById], and history staying a chronological log in which a repeat visit
+ * adds a new row.
  */
+
 @RunWith(AndroidJUnit4::class)
 class HistoryDaoSpec014Test {
 

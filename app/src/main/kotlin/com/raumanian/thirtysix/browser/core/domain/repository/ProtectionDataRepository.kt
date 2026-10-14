@@ -1,10 +1,7 @@
 package com.raumanian.thirtysix.browser.core.domain.repository
 
 import com.raumanian.thirtysix.browser.core.domain.model.ProtectionData
-/**
- * Spec 023 research R10 — the bundled protection lists. They are parsed once per process, off
- * the main thread, and never fetched from the network (Constitution §I, FR-001).
- */
+/** The protection lists bundled in the APK, parsed once per process off the main thread, never fetched. */
 interface ProtectionDataRepository {
     /** Starts parsing if it has not started. Never blocks. */
     fun preload()

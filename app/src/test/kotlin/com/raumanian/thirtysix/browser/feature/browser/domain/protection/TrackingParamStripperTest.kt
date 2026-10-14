@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
 
-/** SC-004's ten cases. */
+/** Tracking-parameter stripping: what is removed and what is left untouched. */
 class TrackingParamStripperTest {
     private val stripper = TrackingParamStripper(ProtectionTestRules.params)
 

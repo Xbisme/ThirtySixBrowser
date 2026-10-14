@@ -7,7 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 022 FR-014 / FR-017 — literal, case-insensitive matching on title or address, capped. */
+/** Literal, case-insensitive matching on title or address, capped. */
 class FilterAddressSuggestionsUseCaseTest {
 
     private val filter = FilterAddressSuggestionsUseCase()

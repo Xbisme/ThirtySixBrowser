@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.protection
 import com.raumanian.thirtysix.browser.core.domain.model.PublicSuffixRules
 import com.raumanian.thirtysix.browser.core.domain.model.TrackerHostSet
 import com.raumanian.thirtysix.browser.core.domain.model.TrackingParamRules
-/** Small rule fixtures shared by the Spec 023 domain tests. */
+/** Small rule fixtures shared by the protection domain tests. */
 internal object ProtectionTestRules {
     val suffixes = PublicSuffixRules(
         normal = setOf("com", "net", "org", "uk", "co.uk", "io", "github.io", "example", "ck", "test"),

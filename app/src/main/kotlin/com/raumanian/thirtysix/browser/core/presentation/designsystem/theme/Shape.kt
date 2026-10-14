@@ -1,5 +1,4 @@
-// Spec 019 — shape scale from the design system (research R3), replacing Spec 003's
-// Material 3 defaults. radius-xs 6 · sm 10 · md 14 · lg 20 · xl 28 · sheet 32 · full.
+// Shape scale from the design system: radius-xs 6 · sm 10 · md 14 · lg 20 · xl 28 · sheet 32 · full.
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 

@@ -6,10 +6,9 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressMen
 import javax.inject.Inject
 
 /**
- * Spec 021 contracts C1.4 — the long-press menu for what was pressed: link actions, image
- * actions, or both for an image inside a link (FR-018, FR-019). An address that is not http(s)
- * (`javascript:`, `data:`) only offers Copy (FR-023). `null` means no menu, so text selection
- * keeps working.
+ * The long-press menu for what was pressed: link actions, image actions, or both for an image in
+ * a link. A non-http(s) address (`javascript:`, `data:`) only offers Copy. `null` means no menu,
+ * so text selection keeps working.
  */
 class BuildLongPressMenuUseCase @Inject constructor() {
     operator fun invoke(hit: LongPressHit, linkUrl: String?, imageUrl: String?): LongPressMenu? {

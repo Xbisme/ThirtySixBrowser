@@ -22,13 +22,9 @@ private const val DYNAMIC_FAB_END_LIGHTEN = 0.25f
 val LocalThirtySixShapes = staticCompositionLocalOf { ThirtySixExtraShapes() }
 
 /**
- * App theme. Spec 019: violet brand (Color.kt) plus extended tokens (ThirtySixColors.kt).
- *
- * Under dynamic color (Android 12+) the wallpaper scheme supplies primary, its containers and
- * the surface roles; danger stays the brand's (FR-005). Of the extended tokens only the hero's
- * main glow and the action gradient follow the wallpaper — the hero's dark base, its rose glow,
- * the tile pastels, success and the incognito plum stay fixed, so the hero is always dark
- * (clarification Q2, INV-2).
+ * App theme. Under dynamic color the wallpaper supplies primary, its containers and the surfaces;
+ * of the extended tokens only the hero's main glow and the action gradient follow it, so danger,
+ * the pastels, the incognito plum and the hero's dark base stay fixed and the hero is always dark.
  */
 @Composable
 fun ThirtySixTheme(
@@ -75,7 +71,7 @@ fun ThirtySixTheme(
     }
 }
 
-/** Access to the design system's tokens that Material 3 has no slot for (contracts C7). */
+/** Access to the design system's tokens that Material 3 has no slot for. */
 object ThirtySixTheme {
     val colors: ThirtySixColors
         @Composable @ReadOnlyComposable

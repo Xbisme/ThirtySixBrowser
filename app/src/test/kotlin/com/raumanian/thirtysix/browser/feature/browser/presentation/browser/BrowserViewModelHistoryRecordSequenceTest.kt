@@ -37,19 +37,9 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Spec 014 FR-001 / FR-003 / FR-004 — replays the **real** WebView callback
- * sequences observed on device (emulator API 36, 2026-05-08) rather than the
- * idealised order the MVP pass assumed.
- *
- * Chromium's WebView drives, in order, for one navigation:
- *   `doUpdateVisitedHistory(newUrl)` → `onPageStarted(newUrl)` → progress ticks →
- *   `onProgressChanged(100)` → `onPageFinished(newUrl)`
- *
- * which maps onto `onUrlChanged` → `onLoadStarted` → `onProgressChanged` →
- * `onLoadFinished`. Crucially `onProgressChanged(100)` moves the state to
- * `Loaded` and `onUrlChanged` has already published the new URL — so any
- * "is this an idempotent re-fire?" check based on `(loadingState, currentUrl)`
- * is already satisfied by the time the genuine `onPageFinished` arrives.
+ * Replays the callback order WebView really uses for one navigation: `doUpdateVisitedHistory` →
+ * `onPageStarted` → progress → `onProgressChanged(100)` → `onPageFinished`. By the last step the
+ * state is already Loaded with the new URL, so recording cannot be inferred from that state.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelHistoryRecordSequenceTest {
@@ -73,7 +63,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
     }
 
     @Test
-    fun `second navigation is recorded (FR-001)`() = runTest {
+    fun `second navigation is recorded`() = runTest {
         val history = FakeHistoryRepository()
         val vm = newViewModel(history)
         advanceUntilIdle()
@@ -105,7 +95,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
     }
 
     @Test
-    fun `revisiting the same URL as a new navigation records a second row (FR-004)`() = runTest {
+    fun `revisiting the same URL as a new navigation records a second row`() = runTest {
         val history = FakeHistoryRepository()
         val vm = newViewModel(history)
         advanceUntilIdle()
@@ -119,7 +109,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
     }
 
     @Test
-    fun `a failed load is never recorded (FR-003)`() = runTest {
+    fun `a failed load is never recorded`() = runTest {
         val history = FakeHistoryRepository()
         val vm = newViewModel(history)
         advanceUntilIdle()

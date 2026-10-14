@@ -1,4 +1,4 @@
-/*! ThirtySix cookie-banner auto-decline (Spec 024).
+/*! ThirtySix cookie-banner auto-decline.
  * Contains @duckduckgo/autoconsent 16.51.0, (c) DuckDuckGo, Inc., licensed under the
  * Mozilla Public License 2.0 (https://mozilla.org/MPL/2.0/).
  * Source: https://github.com/duckduckgo/autoconsent/tree/v16.51.0

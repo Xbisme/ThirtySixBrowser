@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Spec 021 T028 / research R3 — the picker, the camera offer and the answer handed to the page. */
+/** The picker, the camera offer and the answer handed to the page. */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class)
 class FileChooserIntentsTest {

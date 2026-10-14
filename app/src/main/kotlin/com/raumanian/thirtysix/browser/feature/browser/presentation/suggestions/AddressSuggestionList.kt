@@ -37,13 +37,8 @@ internal const val TEST_TAG_ADDRESS_SUGGESTIONS: String = "address_suggestions"
 internal const val TEST_TAG_ADDRESS_SUGGESTION_ROW: String = "address_suggestion_row"
 
 /**
- * Spec 022 US2 — the suggestions under an address entry (FR-014, FR-018).
- *
- * It collects [stateFlow] itself, so each keystroke recomposes this list and nothing around it
- * (Constitution §V rule 3). It is a plain [Column] keyed by address rather than a lazy list: there
- * are at most six rows, and on the Home page it sits inside the page's own `LazyColumn`, where a
- * second lazy list in the same direction is not allowed (§V rule 6). Each row reads as "Bookmark:"
- * or "History:" plus title and address (FR-036). With no suggestion, nothing is drawn (FR-021).
+ * Collects [stateFlow] itself, so a keystroke recomposes only this list. A plain [Column], not a
+ * lazy list: at most six rows, and on Home it sits inside the page's own `LazyColumn`.
  */
 @Composable
 internal fun AddressSuggestionList(
@@ -67,10 +62,7 @@ internal fun AddressSuggestionList(
     }
 }
 
-/**
- * Spec 022 research R6 — on a web page the list floats over the page just under the top bar. It
- * scrolls within the space above the keyboard (§V rule 7), so a row is never hidden behind it.
- */
+/** On a web page the list floats under the top bar and scrolls within the space above the keyboard. */
 @Composable
 internal fun BrowserAddressSuggestions(
     visible: Boolean,

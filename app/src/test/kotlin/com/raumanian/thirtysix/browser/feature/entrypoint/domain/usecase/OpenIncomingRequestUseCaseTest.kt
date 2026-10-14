@@ -20,10 +20,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 020 T020 — every `OpenIncomingRequestUseCase` row of contracts C2
- * (FR-003, FR-007, FR-017, FR-018; INV-1, INV-5, INV-6).
- */
 class OpenIncomingRequestUseCaseTest {
 
     private var now = 10_000L
@@ -59,7 +55,7 @@ class OpenIncomingRequestUseCaseTest {
         val all = tabs.observeTabs().first()
         assertEquals(2, all.size)
         assertEquals("https://example.org/a", all.single { it.id == (outcome as OpenOutcome.OpenedInNewTab).tabId }.url)
-        // The use case has no path to the incognito store at all (INV-1); it stays empty.
+        // The use case has no path to the incognito store at all; it stays empty.
         assertEquals(0, incognito.getCount())
     }
 

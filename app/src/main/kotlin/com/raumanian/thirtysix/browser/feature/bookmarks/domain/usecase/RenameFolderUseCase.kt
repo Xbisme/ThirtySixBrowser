@@ -5,7 +5,6 @@ import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/** Spec 013 FR-016 — renames an existing folder. */
 class RenameFolderUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {

@@ -5,7 +5,8 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 024 FR-004a — Fire keeps only the one-time grants of fireproof sites. */
+/** Fire keeps only the one-time grants of fireproof sites. */
+
 class OneTimeGrantStoreTest {
     @Test
     fun `retainOnly keeps the grants whose origin is accepted`() {

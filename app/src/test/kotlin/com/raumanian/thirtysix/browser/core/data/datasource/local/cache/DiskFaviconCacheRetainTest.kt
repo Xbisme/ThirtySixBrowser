@@ -14,7 +14,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 024 T018 / FR-008 — Fire keeps only the icons of bookmarked and fireproof hosts. */
+/** Fire keeps only the icons of bookmarked and fireproof hosts. */
+
 @RunWith(AndroidJUnit4::class)
 class DiskFaviconCacheRetainTest {
     private val context: Context = ApplicationProvider.getApplicationContext()

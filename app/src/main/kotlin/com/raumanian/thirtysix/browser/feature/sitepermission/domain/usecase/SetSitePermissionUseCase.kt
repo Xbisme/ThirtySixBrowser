@@ -6,7 +6,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepo
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/** Spec 021 FR-009 — changes one remembered decision from the Site permissions screen. */
 class SetSitePermissionUseCase @Inject constructor(
     private val repository: SitePermissionRepository,
 ) {

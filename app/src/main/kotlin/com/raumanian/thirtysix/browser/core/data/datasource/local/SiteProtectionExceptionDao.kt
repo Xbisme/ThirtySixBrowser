@@ -6,7 +6,7 @@ import androidx.room.Upsert
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SiteProtectionExceptionEntity
 import kotlinx.coroutines.flow.Flow
 
-/** Spec 023 — sites without protection. One row per site; writing again replaces it. */
+/** Sites without protection. One row per site; writing again replaces it. */
 @Dao
 interface SiteProtectionExceptionDao {
     @Upsert

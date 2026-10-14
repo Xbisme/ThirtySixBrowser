@@ -20,14 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 014 T064 (US2 / FR-011a, FR-014, FR-015, FR-016, FR-017).
- *
- * Drives the search field on a pre-seeded list and asserts the min-character gate,
- * the filtered result set, day-header suppression for zero-match days, the
- * no-matches branch, restoration on clear, and live merge of a newly recorded
- * matching entry.
- */
 @RunWith(AndroidJUnit4::class)
 class HistoryScreenSearchTest {
 
@@ -61,7 +53,7 @@ class HistoryScreenSearchTest {
 
         composeRule.onNodeWithTag(TEST_TAG_HISTORY_ROW_PREFIX + "1").assertDoesNotExist()
         composeRule.onNodeWithTag(TEST_TAG_HISTORY_ROW_PREFIX + "2").assertIsDisplayed()
-        // FR-014 — the "Today" group has zero matches, so its header leaves the tree.
+        // The "Today" group has no matches, so its header leaves the tree.
         composeRule.onNodeWithText(TODAY_HEADER).assertDoesNotExist()
         composeRule.onNodeWithText(YESTERDAY_HEADER).assertIsDisplayed()
     }
@@ -99,7 +91,7 @@ class HistoryScreenSearchTest {
             repository.recordVisit("https://play.kotlinlang.org/", "Kotlin playground", now)
         }
 
-        // FR-017 — appears without the user re-triggering the search.
+        // Appears without the user re-triggering the search.
         composeRule.waitUntil(TEST_TIMEOUT_MS) {
             composeRule.onAllNodesWithTag(TEST_TAG_HISTORY_ROW_PREFIX + "3")
                 .fetchSemanticsNodes()

@@ -9,8 +9,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Spec 023 research R10 — builds the matchers once, after the bundled lists have loaded.
- * [matchersOrNull] never blocks (main thread); [awaitMatchers] is for background threads only.
+ * Builds the matchers once, after the bundled lists have loaded. [matchersOrNull] never blocks
+ * (main thread); [awaitMatchers] is for background threads only.
  */
 @Singleton
 class ProtectionMatchersHolder @Inject constructor(

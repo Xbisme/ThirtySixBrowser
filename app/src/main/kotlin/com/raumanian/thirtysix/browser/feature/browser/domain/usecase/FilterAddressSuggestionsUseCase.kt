@@ -5,12 +5,9 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.AddressSugge
 import javax.inject.Inject
 
 /**
- * Spec 022 FR-014 / FR-017 — the suggestions for what has been typed so far.
- *
- * A candidate matches when its title or address contains the text, ignoring case. `contains`
- * compares characters literally (`%`, `_`, `'` and `\` match only themselves) and folds case for
- * every script, which SQLite's ASCII-only `LOWER()` would not (research R5). The snapshot's order
- * is kept, and the scan stops at [limit].
+ * Suggestions whose title or address contains the typed text, ignoring case. `contains` is literal
+ * (`%`, `_`, `'`, `\` match only themselves) and folds case for every script, unlike SQLite's
+ * ASCII-only `LOWER()`. The snapshot's order is kept, and the scan stops at [limit].
  */
 class FilterAddressSuggestionsUseCase @Inject constructor() {
     operator fun invoke(snapshot: AddressSuggestionSnapshot, query: String, limit: Int): List<AddressSuggestion> {

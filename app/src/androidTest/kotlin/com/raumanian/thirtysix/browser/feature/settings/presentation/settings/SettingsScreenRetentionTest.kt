@@ -21,12 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 016 T089 (US5 / FR-020, FR-021).
- *
- * Drives [SettingsScreen] over in-memory settings and history. What a confirmed change deletes
- * is covered by `ChangeHistoryRetentionUseCaseTest` and, on device, by quickstart G7.
- */
+// What a confirmed change deletes is covered by ChangeHistoryRetentionUseCaseTest.
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenRetentionTest {
 
@@ -77,6 +72,6 @@ class SettingsScreenRetentionTest {
 
         composeRule.onAllNodesWithTag(TEST_TAG_SETTINGS_RETENTION_CONFIRM_DIALOG).assertCountEquals(0)
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_RETENTION_ROW).assertTextContains(label(HistoryRetention.Days90))
-        check(repository.current.historyRetention == HistoryRetention.Days90) { "FR-021 — cancel must not save" }
+        check(repository.current.historyRetention == HistoryRetention.Days90) { "cancel must not save" }
     }
 }

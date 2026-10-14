@@ -6,7 +6,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import javax.inject.Inject
 
-/** Spec 021 contracts C1.1 — what to do with a site's request. */
 sealed interface SitePermissionOutcome {
     data object Grant : SitePermissionOutcome
 
@@ -17,17 +16,12 @@ sealed interface SitePermissionOutcome {
 }
 
 /**
- * Spec 021 research R2 / contracts C1.1 — decides a camera / microphone / location request.
- *
- *  1. Not a secure page, or a capability outside the three → refused, no question (FR-007, FR-008).
- *  2. Incognito → remembered decisions are ignored; only this page's one-time grants count (FR-004).
- *  3. Normal → per capability: remembered allow or one-time grant → granted; remembered deny → the
- *     whole request is refused (one answer for a combined request, FR-005); else it is asked.
+ * Decides a camera / microphone / location request. Incognito counts only this page's one-time
+ * grants ([grantedOnce]); a remembered deny refuses the whole request.
  */
 class ResolveSitePermissionUseCase @Inject constructor(
     private val repository: SitePermissionRepository,
 ) {
-    /** [grantedOnce] answers whether this tab's current page holds a one-time grant. */
     suspend operator fun invoke(
         origin: String,
         capabilities: Set<SiteCapability>,

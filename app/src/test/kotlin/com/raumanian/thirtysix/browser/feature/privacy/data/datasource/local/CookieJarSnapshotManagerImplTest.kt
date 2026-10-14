@@ -15,16 +15,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T009 unit tests for [CookieJarSnapshotManagerImpl] per
- * [contracts/CookieJarSnapshotManager.contract.md].
- *
- * Uses Robolectric (`AndroidJUnit4` runner + `robolectric.properties` SDK 33
- * pin from Spec 005) to provide the platform `CookieManager` singleton; the
- * impl under test calls `CookieManager.getInstance()` directly and relies on
- * the shadow's in-memory store.
- *
- * Each test starts from a clean cookie store via `wipeCookieStore` in `@Before`
- * because `CookieManager.getInstance()` is process-global.
+ * Robolectric supplies the `CookieManager` singleton the impl calls directly; it is process-global,
+ * so every test starts from a wiped store.
  */
 @RunWith(AndroidJUnit4::class)
 class CookieJarSnapshotManagerImplTest {
@@ -71,8 +63,7 @@ class CookieJarSnapshotManagerImplTest {
         manager.captureSnapshot(listOf(ORIGIN_A))
         assertTrue(manager.hasSnapshot())
 
-        // Mutate the live jar — if a second capture mistakenly overwrote the
-        // snapshot, the next restore would write the new value back.
+        // If a second capture overwrote the snapshot, restore would write this new value back.
         cookieManager.setCookie(ORIGIN_A, "second=2")
         manager.captureSnapshot(listOf(ORIGIN_A))
 
@@ -106,7 +97,7 @@ class CookieJarSnapshotManagerImplTest {
         manager.restoreSnapshot()
 
         assertFalse("snapshot should be released after restore", manager.hasSnapshot())
-        // And a subsequent captureSnapshot succeeds (no longer blocked by idempotency).
+        // And a subsequent captureSnapshot is not blocked by idempotency.
         manager.captureSnapshot(listOf(ORIGIN_A))
         assertTrue(manager.hasSnapshot())
     }
@@ -119,8 +110,7 @@ class CookieJarSnapshotManagerImplTest {
         cookieManager.setCookie(ORIGIN_A, "normal=keep")
         manager.captureSnapshot(listOf(ORIGIN_A))
 
-        // Simulate incognito-session writes: a fresh cookie on origin A AND a
-        // cookie on origin B (which was NOT in the captured origins list).
+        // Incognito-session writes: a fresh cookie on A and one on B, which was not captured.
         cookieManager.setCookie(ORIGIN_A, "incognito=leak")
         cookieManager.setCookie(ORIGIN_B, "incognito=secret")
 
@@ -139,9 +129,7 @@ class CookieJarSnapshotManagerImplTest {
         manager.captureSnapshot(emptyList())
         assertTrue("snapshot held even when empty (acts as wipe-marker)", manager.hasSnapshot())
 
-        // Live cookie set during the empty session should be wiped on restore
-        // (because restore unconditionally calls removeAllCookies before
-        // writing the snapshot map back).
+        // Restore always wipes before writing back, so a cookie set in an empty session is gone.
         CookieManager.getInstance().setCookie(ORIGIN_A, "during=incognito")
         manager.restoreSnapshot()
 
@@ -152,12 +140,8 @@ class CookieJarSnapshotManagerImplTest {
     @Test
     fun `7 - restoreSnapshot tolerates malformed cookie pair without crashing`() = runTest {
         val cookieManager = CookieManager.getInstance()
-        // setCookie with a deliberately malformed value is graceful at the
-        // platform level (Android silently rejects), and the impl wraps each
-        // setCookie in runCatching for defence-in-depth. The test verifies the
-        // overall restore call returns without throwing even when the snapshot
-        // header contains an empty / whitespace pair (which the impl skips
-        // explicitly).
+        // The impl skips empty pairs and wraps each setCookie, so a whitespace-only pair in the
+        // header must not make restore throw.
         cookieManager.setCookie(ORIGIN_A, "valid=value")
         manager.captureSnapshot(listOf(ORIGIN_A))
         suspendRemoveAllCookies(cookieManager)

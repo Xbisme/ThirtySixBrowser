@@ -26,7 +26,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 023 T049 — the hub's view of the active WebView and the per-site switch. */
+/** The hub's view of the active WebView and the per-site switch. */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class ProtectionViewModelTest {

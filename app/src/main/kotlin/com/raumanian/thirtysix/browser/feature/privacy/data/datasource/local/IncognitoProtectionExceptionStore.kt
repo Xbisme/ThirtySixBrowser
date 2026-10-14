@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Spec 023 FR-014 — in-memory [IncognitoProtectionExceptions]; nothing here is ever persisted. */
+/** In-memory [IncognitoProtectionExceptions]; nothing here is ever persisted. */
 @Singleton
 class IncognitoProtectionExceptionStore @Inject constructor() : IncognitoProtectionExceptions {
     private val sites: MutableSet<String> = ConcurrentHashMap.newKeySet()

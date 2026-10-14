@@ -5,10 +5,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 010 — Verifies the [SearchEngine] enum extension (Google + DuckDuckGo
- * + Bing) and the unchanged `fromStorageValueOrDefault(...)` semantics.
- */
+/** [SearchEngine] entries (Google, DuckDuckGo, Bing) and `fromStorageValueOrDefault(...)`. */
+
 class SearchEngineTest {
 
     @Test

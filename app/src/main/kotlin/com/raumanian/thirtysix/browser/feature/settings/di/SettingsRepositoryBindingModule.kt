@@ -9,11 +9,6 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import kotlinx.coroutines.plus
 
-/**
- * Binds SettingsRepository → SettingsRepositoryImpl. Two modules in one file is
- * idiomatic Hilt when grouping by feature surface (object provider + abstract
- * @Binds cannot share a class).
- */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class SettingsRepositoryBindingModule {

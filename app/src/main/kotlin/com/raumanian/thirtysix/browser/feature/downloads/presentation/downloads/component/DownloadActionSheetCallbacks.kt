@@ -1,12 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component
 
-/**
- * Spec 015 — click bundle for [DownloadActionSheet].
- *
- * Follows the `NavigationBottomBarCallbacks` / `BrowserWebViewCallbacks` precedent: bundling
- * keeps the composable's parameter count under detekt's `LongParameterList.functionThreshold`,
- * and a data class is exempt from the rule outright, so the bundle can grow with the sheet.
- */
+// Bundled to stay under detekt's `LongParameterList`; data classes are exempt from it.
 data class DownloadActionSheetCallbacks(
     val onOpen: () -> Unit,
     val onCopyLink: () -> Unit,

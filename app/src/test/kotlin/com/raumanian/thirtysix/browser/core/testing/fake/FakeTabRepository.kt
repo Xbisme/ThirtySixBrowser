@@ -11,30 +11,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Spec 011 — hand-rolled in-memory fake of [TabRepository] for unit tests.
+ * In-memory [TabRepository] with the production contract: an empty store seeds one home tab,
+ * tabs are ordered by `lastActiveAt` descending then `id`, [createTab] fails at
+ * [BrowserLimits.MAX_TABS], and closing the last tab recreates a home tab.
  *
- * Mirrors the production contract:
- *  - [observeTabs] auto-seeds an empty list with one home tab on first
- *    subscription (FR-019 / R5).
- *  - Emissions are sorted by `lastActiveAt` DESC then `id` ASC (FR-014 / H1).
- *  - [createTab] enforces [BrowserLimits.MAX_TABS] via [MaxTabsReachedException]
- *    inside `Result.Error` (C2 / FR-016).
- *  - [closeTab] auto-recreates a fresh home tab when count would drop to 0
- *    (US3 #3 / R5).
- *
- * **NEW package** `testdoubles/` — first time this pattern appears in the
- * project. Justified because `TabUseCasesTest` and `TabsViewModelTest` (and
- * later `BrowserViewModelTest` extensions) all need an identical fake;
- * extracting once here avoids triplicating the in-memory state machine.
- *
- * @param homeUrl URL used for the auto-seeded fresh home tab when the
- *                repository is empty (Cold start) or after the last close
- *                (US3 #3). Defaults to `https://www.google.com/` to match
- *                Spec 008 production default.
- * @param initialTabs Optional seed list. When non-empty, the auto-seed-on-
- *                    empty rule is skipped on first subscription (since the
- *                    list is non-empty already). Useful for tests that want
- *                    to start with a specific tab roster.
+ * @param homeUrl address of the auto-created home tab.
+ * @param initialTabs seed list; when non-empty, no home tab is seeded.
  */
 class FakeTabRepository(
     private val homeUrl: String = "https://www.google.com/",

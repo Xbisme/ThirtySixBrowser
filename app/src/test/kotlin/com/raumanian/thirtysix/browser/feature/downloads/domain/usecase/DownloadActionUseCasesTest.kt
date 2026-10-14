@@ -13,15 +13,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 015 — the four per-entry actions (open · remove · delete · cancel).
- *
- * Grouped in one class because they share the same doubles and each is small; splitting
- * them would multiply setup without adding clarity.
- */
 class DownloadActionUseCasesTest {
-
-    // ---- FR-025 – FR-029 : open --------------------------------------------------
 
     @Test
     fun `open hands the recorded content URI to an external app`() = runTest {
@@ -35,7 +27,7 @@ class DownloadActionUseCasesTest {
     }
 
     @Test
-    fun `FR-028 - a download that has not finished is never opened`() = runTest {
+    fun `a download that has not finished is never opened`() = runTest {
         val opener = RecordingFileOpener()
 
         val result = OpenDownloadedFileUseCase(RecordingGateway(), opener)(
@@ -47,7 +39,7 @@ class DownloadActionUseCasesTest {
     }
 
     @Test
-    fun `FR-029 - a completed entry whose file is gone reports FileMissing`() = runTest {
+    fun `a completed entry whose file is gone reports FileMissing`() = runTest {
         // Gateway knows no files, so neither the recorded URI nor a fresh one is readable.
         val result = OpenDownloadedFileUseCase(RecordingGateway(), RecordingFileOpener())(testItem())
 
@@ -55,7 +47,7 @@ class DownloadActionUseCasesTest {
     }
 
     @Test
-    fun `FR-027 - a type nothing can handle reports NoAppAvailable rather than throwing`() = runTest {
+    fun `a type nothing can handle reports NoAppAvailable rather than throwing`() = runTest {
         val gateway = RecordingGateway().apply { addFile("content://downloads/10") }
 
         val result = OpenDownloadedFileUseCase(gateway, RecordingFileOpener(succeeds = false))(testItem())
@@ -63,13 +55,9 @@ class DownloadActionUseCasesTest {
         assertEquals(OpenDownloadResult.NoAppAvailable, result)
     }
 
-    /**
-     * FR-024b — a row the FR-024a fallback already resolved as missing must take FR-029's
-     * path, offering removal, rather than being told its transfer has not finished. Missing
-     * is a terminal state, so the "not complete" message would be simply false.
-     */
+    // A row already resolved as Missing is offered removal, not told its transfer has not finished.
     @Test
-    fun `FR-024b - a missing entry reports FileMissing rather than NotComplete`() = runTest {
+    fun `a missing entry reports FileMissing rather than NotComplete`() = runTest {
         val result = OpenDownloadedFileUseCase(RecordingGateway(), RecordingFileOpener())(
             testItem(status = DownloadStatus.Missing),
         )
@@ -91,10 +79,8 @@ class DownloadActionUseCasesTest {
         assertEquals("content://downloads/fresh", opener.opened.single().first)
     }
 
-    // ---- FR-031 / FR-034b : remove from list --------------------------------------
-
     @Test
-    fun `FR-031 - removing an entry deletes the row and leaves the file alone`() = runTest {
+    fun `removing an entry deletes the row and leaves the file alone`() = runTest {
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L)))
         val gateway = RecordingGateway()
 
@@ -106,7 +92,7 @@ class DownloadActionUseCasesTest {
     }
 
     @Test
-    fun `FR-034b - removing an in-flight entry is refused so no transfer is orphaned`() = runTest {
+    fun `removing an in-flight entry is refused so no transfer is orphaned`() = runTest {
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L)))
 
         val removed = RemoveDownloadRecordUseCase(repo)(
@@ -124,10 +110,8 @@ class DownloadActionUseCasesTest {
         assertFalse(RemoveDownloadRecordUseCase(repo)(testItem(record = testRecord(id = 99L))))
     }
 
-    // ---- FR-032 : delete file ------------------------------------------------------
-
     @Test
-    fun `FR-032 - deleting removes both the file and the row`() = runTest {
+    fun `deleting removes both the file and the row`() = runTest {
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L)))
         val gateway = RecordingGateway()
 
@@ -140,10 +124,8 @@ class DownloadActionUseCasesTest {
 
     @Test
     fun `a record with no stored URI is still deleted via its transfer handle`() = runTest {
-        // Regression, found on an API 24 emulator during the G1 gate: this used to short-
-        // circuit on `localUri == null` and delete only the row, so the app reported
-        // "File deleted" over a file that was still on disk. The handle is always present
-        // (FR-008b), so it — not the URI — is what the delete is keyed on.
+        // Regression: short-circuiting on `localUri == null` reported "File deleted" over a file still
+        // on disk. The delete is keyed on the always-present handle, not the URI.
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L, localUri = null)))
         val gateway = RecordingGateway()
 
@@ -153,7 +135,7 @@ class DownloadActionUseCasesTest {
     }
 
     @Test
-    fun `FR-032 - a delete the platform could not verify leaves the row alone`() = runTest {
+    fun `a delete the platform could not verify leaves the row alone`() = runTest {
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L)))
         val gateway = RecordingGateway(deleteSucceeds = false)
 
@@ -170,10 +152,8 @@ class DownloadActionUseCasesTest {
         assertEquals("the entry must stay visible", 1, repo.current.size)
     }
 
-    // ---- FR-036 – FR-039 : cancel ---------------------------------------------------
-
     @Test
-    fun `FR-037 - cancelling an in-flight transfer stops it and drops the row`() = runTest {
+    fun `cancelling an in-flight transfer stops it and drops the row`() = runTest {
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L)))
         val gateway = RecordingGateway()
         gateway.setStatus(10L, DownloadStatus.Running(5L, 100L))
@@ -188,7 +168,7 @@ class DownloadActionUseCasesTest {
     }
 
     @Test
-    fun `FR-039 - a cancel that lands after completion leaves the file and reports nothing`() = runTest {
+    fun `a cancel that lands after completion leaves the file and reports nothing`() = runTest {
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L)))
         val gateway = RecordingGateway()
         // The UI drew this row up to one poll interval ago; the transfer finished since.
@@ -213,7 +193,7 @@ class DownloadActionUseCasesTest {
     }
 
     @Test
-    fun `FR-038 - a failed platform cancel leaves the row intact`() = runTest {
+    fun `a failed platform cancel leaves the row intact`() = runTest {
         val repo = InMemoryDownloadsRepository(listOf(testRecord(id = 1L)))
         val gateway = RecordingGateway(cancelSucceeds = false)
         gateway.setStatus(10L, DownloadStatus.Running(1L, 10L))

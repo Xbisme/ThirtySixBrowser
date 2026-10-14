@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Spec 016 research R2 — AppCompat parent, see values/themes.xml. -->
+    <!-- AppCompat parent, see values/themes.xml. -->
     <style name="Theme.ThirtySix" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@color/window_background_dark</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <!-- Spec 017 — dark launch screen. Identical to values/themes.xml except for the
-         background; kept in this same file pair as Theme.ThirtySix so the two themes
-         cannot diverge across a future edit (INV-9). The parent is deliberately NOT
-         AppCompat — see the rationale in values/themes.xml. -->
+    <!-- Dark launch screen: only the background differs from values/themes.xml.
+         The parent is not AppCompat; see values/themes.xml. -->
     <style name="Theme.ThirtySix.Splash" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.ThirtySix</item>
         <item name="windowSplashScreenBackground">@color/window_background_dark</item>

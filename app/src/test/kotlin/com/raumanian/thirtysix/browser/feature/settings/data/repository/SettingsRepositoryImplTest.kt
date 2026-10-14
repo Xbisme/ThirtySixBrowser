@@ -18,14 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/**
- * SC-003 — When any caller writes a settings key, every consumer subscribed to
- * the settings stream observes the new value within one observation cycle of
- * the write completing.
- *
- * SC-010 / FR-015 — exercised here through the public Repository interface;
- * no direct DataStore access from a "view-layer" simulator.
- */
+/** A write reaches every subscriber within one observation cycle. */
 class SettingsRepositoryImplTest {
 
     @get:Rule val tempFolder = TemporaryFolder()
@@ -51,7 +44,7 @@ class SettingsRepositoryImplTest {
     fun observeSettings_emitsDefaults_then_emitsAfterWrite() = runTest {
         repository.observeSettings().test {
             val first = awaitItem()
-            // First emission should equal documented defaults (FR-008 / US2)
+            // First emission equals the documented defaults.
             assertEquals_appDefaults(first)
 
             repository.setThemeMode(ThemeMode.Dark)
@@ -85,7 +78,6 @@ class SettingsRepositoryImplTest {
         }
     }
 
-    /** Spec 016 FR-009 / FR-020 — both new setters reach observers through the repository. */
     @Test
     fun dynamicColorAndRetentionWrites_areObserved() = runTest {
         repository.observeSettings().test {

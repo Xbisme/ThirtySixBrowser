@@ -8,7 +8,7 @@ private const val HUE_RANGE = 360
 
 /**
  * A stable colour per site, from a hash of its host: the same site always gets the same mesh.
- * Replaces research R13's favicon average, which needed a bitmap decode per card (see tasks.md).
+ * A hash avoids decoding a favicon bitmap per card.
  */
 internal fun seedColorFor(host: String): Color =
     Color.hsv(

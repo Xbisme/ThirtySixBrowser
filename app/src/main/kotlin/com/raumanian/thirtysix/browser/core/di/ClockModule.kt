@@ -7,10 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import java.time.Clock
 import javax.inject.Singleton
 
-/**
- * Spec 019 (research R14) — the wall clock, injected so the Home greeting can be tested at
- * any time of day.
- */
+/** The wall clock, injected so the Home greeting can be tested at any time of day. */
 @Module
 @InstallIn(SingletonComponent::class)
 object ClockModule {

@@ -2,10 +2,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.com
 
 import com.raumanian.thirtysix.browser.core.presentation.util.QuickSetting
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.PageTool
-/**
- * Spec 019 FR-031 — every destination the hub reaches. The sheet closes itself before
- * invoking one (FR-032), so callers only navigate or act.
- */
+/** Every destination the hub reaches; the sheet closes itself before invoking one. */
 internal data class HubCallbacks(
     val onSettings: () -> Unit,
     val onBack: () -> Unit,
@@ -17,15 +14,10 @@ internal data class HubCallbacks(
     val onHistory: () -> Unit,
     val onBookmarks: () -> Unit,
     val onQuickSetting: (QuickSetting) -> Unit,
-    /** Spec 022 — a page tool was chosen (FR-001); the sheet has already closed (FR-004). */
     val onPageTool: (PageTool) -> Unit,
-    /** Spec 023 FR-012 — the per-site protection switch; the sheet has already closed. */
     val onProtectionSwitched: (on: Boolean) -> Unit = {},
-    /** Spec 024 FR-001 — the Fire tile; the sheet has already closed, the caller confirms. */
+    /** The caller confirms before anything is cleared. */
     val onFire: () -> Unit = {},
-    /**
-     * Spec 024 FR-015 — the blocked-tracker line on a web page opens the privacy dashboard. Home
-     * and the incognito start page keep [onPrivacy] (Settings), as before.
-     */
+    /** The blocked-tracker line on a web page; Home and the incognito page keep [onPrivacy]. */
     val onDashboard: () -> Unit = {},
 )

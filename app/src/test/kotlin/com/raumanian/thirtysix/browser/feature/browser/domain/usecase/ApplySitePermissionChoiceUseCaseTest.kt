@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 021 T010 — contracts C1.2 (INV-1: incognito never writes). */
+/** Applying a permission choice; incognito never writes a decision. */
 class ApplySitePermissionChoiceUseCaseTest {
 
     private val repo = FakeSitePermissionRepository()

@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 022 FR-016 — bookmarks first, then history; one entry per address (I-10, I-11). */
+/** Bookmarks first, then history; one entry per address. */
 class LoadAddressSuggestionsSourceUseCaseTest {
 
     private companion object {

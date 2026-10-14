@@ -59,41 +59,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 007 US2 — loading-indicator rendering branch of [BrowserScreen].
- *
- * Answers exactly one question: does the Compose binding between
- * `BrowserUiState.loadingState` and [components.BrowserLoadingIndicator] work —
- * indicator present while `Loading`, absent otherwise.
- *
- * **Why this lives in its own class instead of `BrowserScreenInstrumentedTest`.**
- * The assertion used to run there against a live `example.com` load, and it was
- * order-dependent: once a sibling test in that class had warmed the WebView's HTTP
- * cache, the `Loading` window closed faster than the assertion could observe it.
- * Confirmed 2026-05-08 — it reproduced on `main` (commit `954742a`) in a clean
- * worktree, on both an API 24 and an API 36 emulator, and on CI's API 29 runner,
- * while passing 3/3 in isolation. Waiting for the page to settle first was **not**
- * enough either: a settled WebView can still re-fire `onProgressChanged` /
- * `onPageFinished`, which flips the synthetic `Loading` straight back to `Loaded`,
- * and CI's software-rendered (`swiftshader_indirect`) emulator widens that window
- * enough to lose the race every time.
- *
- * So the WebView is removed from the equation entirely, reusing the seam
- * `BrowserScreenOfflineErrorTest` established: seed the ViewModel to
- * [LoadingState.Failed] **before** `setContent`, because
- * [BrowserWebView] skips its initial `loadUrl` in that state (see the conditional
- * in `buildConfiguredWebView`). The WebView is constructed but never loads
- * anything, so it emits no callbacks, and the state machine can be driven
- * deterministically — no network, no cache warmth, no ordering dependency.
- *
- * The live-load path stays covered by
- * `BrowserScreenInstrumentedTest.pageRenders_assertsDomContainsExampleDomain`, and
- * the platform's real callback ordering by `BrowserViewModelHistoryRecordSequenceTest`
- * on the JVM.
+ * The loading indicator shows while `Loading` and not otherwise. The view model is seeded to Failed
+ * before `setContent`, so the WebView never loads or fires a callback and the state is driven
+ * deterministically; against a live load, a warm cache or a late re-fire made the check flaky.
  */
 @HiltAndroidTest
-// Spec 022 — the browser screen now reads settings (text size), so each test needs its own
-// DataStore file: a fresh Hilt component per test would otherwise open a second one on the same
-// file ("multiple DataStores active"), as Spec 020 found for MainActivity tests.
+// The browser screen reads settings (text size), so each test gets its own DataStore file:
+// a fresh Hilt component per test would otherwise open a second one ("multiple DataStores active").
 @UninstallModules(SettingsDataStoreProviderModule::class)
 @RunWith(AndroidJUnit4::class)
 class BrowserScreenLoadingIndicatorTest {
@@ -105,7 +77,7 @@ class BrowserScreenLoadingIndicatorTest {
         @Singleton
         fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(
-                produceFile = { File(context.cacheDir, "spec022-settings-${System.nanoTime()}.preferences_pb") },
+                produceFile = { File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb") },
             )
     }
 
@@ -148,8 +120,7 @@ class BrowserScreenLoadingIndicatorTest {
                 ),
                 startDownload = instrumentedNoOpStartDownloadUseCase(),
             ).apply {
-                // Seeded BEFORE setContent so `BrowserWebView` skips its initial
-                // `loadUrl` — the WebView then never fires a single callback.
+                // Seeded before setContent so `BrowserWebView` skips its initial `loadUrl`.
                 onLoadStarted(SAMPLE_PAGE_URL)
                 onLoadFailed(ErrorReason.NetworkUnavailable)
             }
@@ -187,8 +158,7 @@ class BrowserScreenLoadingIndicatorTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun loadingIndicator_isAbsentWhileTheLoadHasFailed() {
-        // The seeded state is Failed, which is neither Loading nor Loaded — the
-        // indicator must not be rendered for it.
+        // Failed is neither Loading nor Loaded, so no indicator.
         composeRule.waitUntilDoesNotExist(
             matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
             timeoutMillis = INDICATOR_TIMEOUT_MS,
@@ -212,7 +182,7 @@ private object LoadingIndicatorNoopSearchEngineRepository : SearchEngineReposito
         error("loading-indicator test should not reach the search-URL build path")
 }
 
-/** Hot StateFlow (NOT flowOf) so `ObserveAllTabsUseCase.combine` stays subscribed. */
+/** Hot StateFlow, not flowOf, so `ObserveAllTabsUseCase.combine` stays subscribed. */
 private object LoadingIndicatorNoopTabRepository : TabRepository {
     private val state: MutableStateFlow<List<Tab>> = MutableStateFlow(emptyList())
     override fun observeTabs(): Flow<List<Tab>> = state
@@ -305,7 +275,7 @@ private object LoadingIndicatorNoopHistoryRepository :
     override suspend fun count(): Int = 0
 }
 
-/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+/** A real page address for tests; the app's default is the Home page. */
 private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"
 
 private val NoSlots = BrowserSlots(

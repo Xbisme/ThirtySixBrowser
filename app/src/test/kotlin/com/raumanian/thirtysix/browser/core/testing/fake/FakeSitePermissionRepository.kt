@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
-/** Spec 021 — in-memory [SitePermissionRepository] with the same https-only rule. */
+/** In-memory [SitePermissionRepository] with the same https-only rule. */
 class FakeSitePermissionRepository : SitePermissionRepository {
     val rows = MutableStateFlow<List<SitePermissionDecision>>(emptyList())
 

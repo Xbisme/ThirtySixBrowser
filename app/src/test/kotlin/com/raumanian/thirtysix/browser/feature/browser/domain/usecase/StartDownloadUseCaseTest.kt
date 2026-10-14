@@ -14,10 +14,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 015 — the write path's two invariants, pinned.
- *
- * Both failures this guards against are silent ones: a record with no backing transfer,
- * and a download that never starts without telling the user.
+ * The download write path's two invariants. Both failures this guards against are silent: a
+ * record with no backing transfer, and a download that never starts without telling the user.
  */
 class StartDownloadUseCaseTest {
 
@@ -48,7 +46,7 @@ class StartDownloadUseCaseTest {
     }
 
     @Test
-    fun `FR-008b - an unavailable service creates no record at all`() = runTest {
+    fun `an unavailable service creates no record at all`() = runTest {
         val gateway = FakeGateway(handle = null)
 
         val result = useCase(gateway)(
@@ -60,13 +58,13 @@ class StartDownloadUseCaseTest {
 
         assertEquals(StartDownloadResult.ServiceUnavailable, result)
         assertTrue(
-            "a record with no transfer handle would break the FR-024a inference",
+            "a record with no transfer handle would break the forgotten-handle inference",
             repository.inserted.isEmpty(),
         )
     }
 
     @Test
-    fun `FR-008b - the platform is asked before anything is persisted`() = runTest {
+    fun `the platform is asked before anything is persisted`() = runTest {
         val gateway = FakeGateway(handle = 7L)
 
         useCase(gateway)("https://example.com/a.zip", null, "application/zip", "UA")
@@ -79,7 +77,7 @@ class StartDownloadUseCaseTest {
     }
 
     @Test
-    fun `FR-005 - the name handed to the platform is the sanitised one`() = runTest {
+    fun `the name handed to the platform is the sanitised one`() = runTest {
         val gateway = FakeGateway(handle = 1L)
 
         useCase(gateway)(
@@ -94,7 +92,7 @@ class StartDownloadUseCaseTest {
     }
 
     @Test
-    fun `FR-014a - an incognito-origin download is recorded identically`() = runTest {
+    fun `an incognito-origin download is recorded identically`() = runTest {
         // There is deliberately no incognito parameter to pass: the use case cannot behave
         // differently because it is never told. This test documents that as intent.
         val gateway = FakeGateway(handle = 9L)
@@ -106,7 +104,7 @@ class StartDownloadUseCaseTest {
     }
 
     @Test
-    fun `FR-008 - one invocation enqueues at most once`() = runTest {
+    fun `one invocation enqueues at most once`() = runTest {
         val gateway = FakeGateway(handle = 5L)
 
         useCase(gateway)("https://example.com/a.bin", null, null, "UA")

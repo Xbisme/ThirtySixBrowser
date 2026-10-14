@@ -6,17 +6,13 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/**
- * Spec 013 FR-024..028 / R3 — global substring search; each result row gets
- * its folder path (root → leaf) inline for FR-026 display.
- */
+/** Global substring search; each result carries its folder path for inline display. */
 class SearchBookmarksUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {
     operator fun invoke(query: String): Flow<List<BookmarkSearchResult>> =
         repository.searchBookmarks(query).map { bookmarks ->
-            // R3 implementation note — augment each row with its ancestor chain.
-            // For 50 visible results × ~10-deep chain, this is ~500 reads per emission.
+            // One ancestor-chain read per result: ~500 reads for 50 results ten folders deep.
             bookmarks.map { b ->
                 val path = if (b.parentFolderId == null) {
                     emptyList()

@@ -35,14 +35,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
- * Spec 023 — a real [ProtectionEngine] over a small in-memory list, for instrumented tests that
- * host [BrowserWebView] directly (Spec 022 pattern; no Hilt). The tracker list holds the 12
- * `tracker-NN.test` hosts of `trackers.html` plus `127.0.0.1`, the one tracker that resolves.
+ * A real [ProtectionEngine] over a small in-memory list, for instrumented tests that host
+ * [BrowserWebView] directly, without Hilt. The tracker list holds the 12 `tracker-NN.test` hosts
+ * of `trackers.html` plus `127.0.0.1`, the one tracker that resolves.
  */
 internal class TestProtection(
-    /** Spec 024 — install the real page-start scripts (cookie banners, fingerprinting). */
+    /** Install the real page-start scripts (cookie banners, fingerprinting). */
     withScripts: Boolean = false,
-    /** Spec 024 — `false` keeps `127.0.0.1` off the tracker list, so cross-site frames load. */
+    /** `false` keeps `127.0.0.1` off the tracker list, so cross-site frames load. */
     blockResolvableTracker: Boolean = true,
 ) {
     val exceptions = InMemoryExceptions()
@@ -52,7 +52,7 @@ internal class TestProtection(
     val loadsFinished = AtomicInteger()
     val actions = WebViewActionsHandle()
 
-    /** Spec 024 — the page title, which the fixtures use to report their results. */
+    /** The page title, which the fixtures use to report their results. */
     val title = AtomicReference("")
 
     private val data = ProtectionData(
@@ -78,7 +78,7 @@ internal class TestProtection(
         dispatchers = DefaultDispatcherProvider(),
     )
 
-    /** Spec 024 — the real session and the app's bundled scripts. */
+    /** The real session and the app's bundled scripts. */
     val scriptSession = PrivacyScriptSessionImpl()
 
     val hooks = ProtectionHooks(
@@ -104,7 +104,9 @@ internal class TestProtection(
     ) {
         BrowserWebView(
             incognitoProfile = IncognitoProfiles,
-            state = remember { BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle, isIncognito = incognito) },
+            state = remember {
+                BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle, isIncognito = incognito)
+            },
             actions = actions,
             callbacks = BrowserWebViewCallbacks(
                 onLoadStarted = {},

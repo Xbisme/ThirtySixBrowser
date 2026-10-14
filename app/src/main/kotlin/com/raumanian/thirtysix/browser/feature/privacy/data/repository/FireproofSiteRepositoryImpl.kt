@@ -16,10 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 024 — [FireproofSiteRepository] over Room (`fireproof_sites`, schema v5).
- *
- * [currentSites] is an in-memory copy of the table, filled from the database once and then kept in
- * step by every write made here, as Spec 023's exception repository. Bound as a singleton.
+ * [currentSites] is an in-memory copy of `fireproof_sites`, loaded once and kept in step by every
+ * write made here, so it must stay a singleton.
  */
 class FireproofSiteRepositoryImpl @Inject constructor(
     private val dao: FireproofSiteDao,

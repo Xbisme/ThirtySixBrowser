@@ -32,15 +32,9 @@ internal const val TEST_TAG_HUB_TOOL_TEXT_SIZE: String = "hub_tool_text_size"
 
 private val TileGap = 10.dp
 
-/** Tiles per row: three fit at 360dp in German, five do not (research R9). */
+/** Three fit at 360dp in German; five do not. */
 private const val TILES_PER_ROW = 3
 
-/**
- * Spec 022 — what the hub's page-tools section needs to know about the page on screen.
- *
- * [available] comes from `PageToolsAvailability`; [isDesktopMode] is the active tab's mode
- * (FR-003); [textSizePercent] is the app-wide text size the Text size tile shows.
- */
 @Immutable
 internal data class HubPageToolsState(
     val available: Set<PageTool>,
@@ -49,10 +43,8 @@ internal data class HubPageToolsState(
 )
 
 /**
- * Spec 022 research R9 — the hub's page tools, in two rows: Find · Share · Print, then
- * Desktop site · Text size. A tool that is not available for this page is left out rather than
- * shown disabled (FR-002), so on Home the section is the Text size tile alone. Rows keep three
- * slots, so a short row's tiles stay the same width as a full row's.
+ * Find · Share · Print, then Desktop site · Text size. Unavailable tools are left out, not
+ * disabled; rows keep three slots so a short row's tiles match a full row's width.
  */
 @Composable
 internal fun HubPageTools(state: HubPageToolsState, onPageTool: (PageTool) -> Unit) {

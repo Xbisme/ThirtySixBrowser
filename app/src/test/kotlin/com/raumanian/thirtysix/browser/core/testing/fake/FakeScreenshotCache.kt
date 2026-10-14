@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Spec 016 — [ScreenshotCache] that records [clearAll] into a shared [callLog] and can be made
+ * [ScreenshotCache] that records [clearAll] into a shared [callLog] and can be made
  * to throw through [clearAllError]. Holds no previews; the other members are inert.
  */
 class FakeScreenshotCache(

@@ -71,20 +71,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
- * Spec 007–018 browser screen; Spec 019 rebuilt its chrome (research R7, R8, R12, R16).
- *
- * Layout: the WebView fills the screen; the top bar and the bottom bar float over it and each
- * pads itself by its system-bar inset (FR-008). As the page scrolls, [ChromeScrollState] slides
- * both bars away and shifts the WebView up to meet them. **Every one of those movements is read
- * inside a `graphicsLayer { }` lambda**, so a scroll frame redraws layers and recomposes nothing
- * (Constitution v1.4.0 §V rule 1).
- *
- * Page-load progress comes from [BrowserViewModel.loadProgress], collected into a [State] that
- * is **held, never delegated with `by`**, and handed down as `{ progress.value }` — so a progress
- * tick reaches only the progress line's draw phase (§V rules 2–3, research R8).
- *
- * Menu opens the hub ([HubSheet], FR-030); its quick-setting tiles open Spec 016's choosers via
- * [QuickSettingsHost]. Back is the system gesture (FR-021); there is no Back button on the bar.
+ * The browser: the WebView fills the screen and the bars float over it. Scroll offsets and load
+ * progress are read only inside `graphicsLayer`/draw lambdas, so scrolling and loading recompose nothing.
  */
 @Composable
 @Suppress("LongMethod") // Top-level host: wires bars, overlays, hub, effects and snackbars.
@@ -97,7 +85,7 @@ fun BrowserScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
-    // Held as State, NOT delegated: reading `.value` here would recompose on every tick.
+    // Held as State, not delegated: reading `.value` here would recompose on every tick.
     val progress: State<Float> = viewModel.loadProgress.collectAsStateWithLifecycle()
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -110,7 +98,7 @@ fun BrowserScreen(
     var quickSettingRequest by remember { mutableStateOf<QuickSetting?>(null) }
     var quickSettingsUsed by remember { mutableStateOf(false) }
 
-    // Spec 021 — requests the page makes of the browser (permissions, files, dialogs, …).
+    // Requests the page makes of the browser: permissions, files, dialogs.
     val popupTabs: PopupTabs = hiltViewModel()
     val pageSession = rememberPageSession(
         activeTabId = activeTab?.id,
@@ -120,27 +108,23 @@ fun BrowserScreen(
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
     HomeBackHandlers(state = state, viewModel = viewModel)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = slots.incomingContent)
-    // Spec 022 US1 — only whether the find bar is open is read here; its text and count are
-    // collected by the bar itself (§V rule 3).
+    // Only whether the find bar is open is read here; the bar collects its own text and count.
     val findOpen by remember(viewModel) {
         viewModel.findInPage.map { it.isOpen }.distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = false)
     val findCallbacks = rememberFindCallbacks(viewModel, webViewActions)
-    // Spec 022 US2 — address suggestions for the address bar and the Home search field.
     val suggestions: AddressSuggestionsViewModel = hiltViewModel()
-    // Spec 022 US4 — the app-wide text size: changes rarely, read by the WebView and the hub.
+    // The app-wide text size changes rarely; the WebView and the hub read it.
     val pageTextSize: PageTextSizeViewModel = hiltViewModel()
     val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
-    // Spec 023 — the privacy protections: the WebView reports its page, the hub reads it.
     val protection: ProtectionViewModel = hiltViewModel()
-    // Spec 024 US3 — survives rotation (FR-018); a language change no longer recreates the activity.
     var dashboardOpen by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(protection) {
-        // FR-012 — after the per-site switch the page reloads with the new setting.
+        // After the per-site switch the page reloads with the new setting.
         protection.reloadEvents.collect { webViewActions.reload() }
     }
     val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions, suggestions)
-    // FR-010 — composed after every other back handler, so Back closes the find bar first.
+    // Composed after every other back handler, so Back closes the find bar first.
     BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
     BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
     IncomingContentEffects(
@@ -151,11 +135,11 @@ fun BrowserScreen(
     HubEventEffect(hubViewModel = hubViewModel, snackbarHostState = snackbarHostState)
 
     LaunchedEffect(activeTab?.id) {
-        // Spec 011 — tab-switch driver: a fresh load on the key-recreated WebView.
+        // Tab switch: a fresh load on the re-keyed WebView.
         activeTab?.let { webViewActions.loadUrl(it.url) }
     }
     LaunchedEffect(state.loadingState, state.isAddressBarFocused) {
-        // FR-025 — the bars come back for a new load, an error and while typing.
+        // The bars come back for a new load, an error and while typing.
         if (state.loadingState !is LoadingState.Loaded || state.isAddressBarFocused) chrome.show()
     }
 
@@ -177,8 +161,8 @@ fun BrowserScreen(
             protection = protection.hooks,
             modifier = Modifier
                 .fillMaxSize()
-                // FR-005 — while finding, the bars do not slide away, so the page is shortened by the
-                // find bar's height: otherwise its last part would sit below the screen, unreachable.
+                // While finding, the bars stay put, so the page is shortened by the find bar's height:
+                // otherwise its end would sit below the screen, unreachable.
                 .padding(bottom = findBarPagePadding(findOpen, topInset))
                 .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
         )
@@ -246,7 +230,6 @@ fun BrowserScreen(
             stateFlow = suggestions.uiState,
             onPick = { suggestion -> addressBarCallbacks.onSuggestion(suggestion.url) },
         )
-        // FR-005 — no bottom bar while finding (I-7).
         UnlessFinding(findOpen) {
             BrowserBottomBar(
                 tabCount = tabCount,
@@ -273,7 +256,7 @@ fun BrowserScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = bottomInset),
         )
-        // Spec 021 US3 — above everything, bars included.
+        // Above everything, bars included.
         FullscreenOverlay(controller = pageSession.fullscreen)
     }
 
@@ -282,9 +265,8 @@ fun BrowserScreen(
         chrome = chrome,
         actions = PageToolActions(
             share = rememberShareAction(viewModel),
-            // Spec 022 FR-025 — flip the active tab's mode, then reconfigure and reload its page.
             toggleDesktopSite = { viewModel.onDesktopModeToggled()?.let(webViewActions.setDesktopMode) },
-            // Spec 022 FR-033 — offered only once the page has loaded (PageToolsAvailability).
+            // Offered only once the page has loaded.
             print = {
                 val title = viewModel.activeTab.value?.title
                 webViewActions.print(PrintJobName.of(title, viewModel.uiState.value.currentUrl))
@@ -315,7 +297,7 @@ fun BrowserScreen(
                 textSizePercent = textZoomPercent,
             ),
             onPageTool = pageToolHandler,
-            // FR-011 — nothing about protection on Home or the incognito start page.
+            // Nothing about protection on Home or the incognito start page.
             protectionFlow = if (state.isHomeContent) null else protection.status,
             onProtectionSwitch = protection::onProtectionSwitched,
             onFire = slots.fireButton.onClick,
@@ -332,7 +314,7 @@ fun BrowserScreen(
     if (quickSettingsUsed) {
         slots.quickSettings(quickSettingRequest, { quickSettingRequest = null }, snackbarHostState)
     }
-    // Spec 021 US4 — long-press downloads pass the same storage-permission gate as page downloads.
+    // Long-press downloads pass the same storage-permission gate as page downloads.
     val context = LocalContext.current
     val longPressDownload = rememberDownloadRequestHandler(
         onGrant = viewModel::onDownloadRequested,
@@ -352,10 +334,7 @@ fun BrowserScreen(
     PopupEffects(popups = popupTabs, snackbarHostState = snackbarHostState)
 }
 
-/**
- * Spec 019 FR-010 / FR-015 — the Home page in a normal tab, the incognito page in an incognito
- * one. The WebView stays alive underneath (research R1).
- */
+/** The Home page in a normal tab, the incognito page in an incognito one; the WebView stays alive underneath. */
 @Composable
 private fun HomeOverlay(
     isIncognito: Boolean,
@@ -376,7 +355,6 @@ private fun HomeOverlay(
     }
 }
 
-/** Spec 019 FR-030 — the hub sheet, wired to navigation, the WebView and the quick settings. */
 @Composable
 @Suppress("LongParameterList")
 private fun BrowserHub(
@@ -419,12 +397,7 @@ private fun BrowserHub(
     )
 }
 
-/**
- * Spec 008 + Spec 009 — system-back integration. [PredictiveBackHandler] is
- * enabled only when the WebView has back history; the in-screen [BackHandler]
- * ahead of it consumes the back gesture iff the address bar is focused
- * (clears focus + dismisses keyboard).
- */
+/** Back history goes to the WebView; a focused address bar consumes Back to clear focus first. */
 @Composable
 private fun BrowserBackHandlers(
     state: BrowserUiState,
@@ -443,9 +416,8 @@ private fun BrowserBackHandlers(
 }
 
 /**
- * Spec 019 (data-model §2) — Back over the Home overlay returns to the page underneath; Back on
- * a page opened from Home, with no page history left, returns to Home. Composed after
- * [BrowserBackHandlers] so these take precedence when enabled.
+ * Back over the Home overlay returns to the page underneath; Back on a page opened from Home,
+ * with no history left, returns to Home. Composed after [BrowserBackHandlers] to take precedence.
  */
 @Composable
 private fun HomeBackHandlers(state: BrowserUiState, viewModel: BrowserViewModel) {
@@ -455,7 +427,6 @@ private fun HomeBackHandlers(state: BrowserUiState, viewModel: BrowserViewModel)
     ) { viewModel.onBackWithoutHistory() }
 }
 
-/** Spec 019 contracts C1/C4 — what the Home page's search bar, cards and rows do. */
 @Composable
 private fun rememberHomeCallbacks(
     viewModel: BrowserViewModel,
@@ -489,14 +460,13 @@ private fun rememberHomeCallbacks(
             },
             onSeeAllHistory = slots.destinations.openHistory,
             onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
-            // Spec 022 R6 — Home's field starts empty, so it has no page address to compare with.
+            // Home's field starts empty, so there is no page address to compare with.
             onSearchTextChange = { text -> suggestions.onTextChanged(text, currentPageUrl = null) },
             onSearchFocusChange = { focused -> suggestions.onFocusChanged(focused) },
         )
     }
 }
 
-/** Spec 011 / 013 / 015 — one-shot snackbars from [BrowserUiState]; extracted from the host. */
 @Composable
 private fun BrowserSnackbarEffects(
     state: BrowserUiState,
@@ -543,7 +513,7 @@ private fun BrowserSnackbarEffects(
     }
 }
 
-/** Spec 019 — snackbars for hub actions that finish after the sheet has closed. */
+/** Snackbars for hub actions that finish after the sheet has closed. */
 @Composable
 private fun HubEventEffect(hubViewModel: HubViewModel, snackbarHostState: SnackbarHostState) {
     val maxIncognitoMessage = stringResource(R.string.tabs_error_max_incognito_tabs_reached)
@@ -556,11 +526,7 @@ private fun HubEventEffect(hubViewModel: HubViewModel, snackbarHostState: Snackb
     }
 }
 
-/**
- * Spec 007 / 011 / 015 — the always-mounted WebView, keyed by the active tab so Compose
- * disposes the previous instance on a switch (R8 of Spec 011). The error overlay and the bars
- * live in [BrowserScreen], not here.
- */
+/** The always-mounted WebView, keyed by the active tab so a switch disposes the previous one. */
 @Composable
 @Suppress("LongParameterList")
 private fun BrowserContent(
@@ -575,8 +541,7 @@ private fun BrowserContent(
     protection: ProtectionHooks,
     modifier: Modifier = Modifier,
 ) {
-    // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
-    // reaching the ViewModel. On API 29+ the gate is a straight pass-through.
+    // On API 29+ the storage-permission gate passes straight through.
     val onDownloadRequested = rememberDownloadRequestHandler(
         onGrant = viewModel::onDownloadRequested,
         onDeny = viewModel::onStoragePermissionDenied,
@@ -585,7 +550,7 @@ private fun BrowserContent(
     val incognitoProfile = remember(context) { context.incognitoWebProfile() }
     Box(modifier = modifier) {
         androidx.compose.runtime.key(activeTabId) {
-            // Spec 021 research R5 — a tab a page opened adopts the page's WebView.
+            // A tab a page opened adopts the page's WebView.
             val adopted = remember { takePopup() }
             BrowserWebView(
                 state = state,
@@ -619,11 +584,7 @@ private fun BrowserContent(
     }
 }
 
-/**
- * Spec 009 — wires the address-bar callbacks. The `onSubmit` lambda chain
- * implements FR-013a: dismiss keyboard → clear focus → load URL, in that
- * order, and only on non-empty submits.
- */
+/** On a non-empty submit: dismiss the keyboard, clear focus, then load, in that order. */
 @Composable
 private fun rememberAddressBarCallbacks(
     viewModel: BrowserViewModel,
@@ -652,7 +613,7 @@ private fun rememberAddressBarCallbacks(
             },
             onSubmit = submit,
             onClear = viewModel::onAddressBarClear,
-            // Spec 022 FR-019 — a chosen suggestion is submitted exactly like a typed address.
+            // A chosen suggestion is submitted exactly like a typed address.
             onSuggestion = { url ->
                 viewModel.onAddressBarTextChange(url)
                 submit()

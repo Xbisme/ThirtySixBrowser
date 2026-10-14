@@ -47,12 +47,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 024 T035 / T040 — Fire against real web-engine data (SC-002, FR-003, FR-010, FR-011).
- *
- * `storage.html` stores five kinds of site data (and the server sets the HttpOnly cookie
- * `fp_persist`) on two sites, `localhost` and `127.0.0.1`. Fire runs through the real coordinator,
- * use case and `AndroidWebDataCleaner`; the result is read back with `storage.html?check` and the
- * cookie store. The WebView is hosted directly (TestProtection, no scripts), as in Spec 023.
+ * Fire against real web-engine data. `storage.html` stores five kinds of site data (the server also
+ * sets the HttpOnly cookie `fp_persist`) on `localhost` and `127.0.0.1`; results are read back with
+ * `storage.html?check` and the cookie store. The WebView is hosted directly, with no scripts.
  */
 @HiltAndroidTest
 @UninstallModules(SettingsDataStoreProviderModule::class)
@@ -66,7 +63,7 @@ class FireDataTest {
         @Singleton
         fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(
-                produceFile = { File(context.cacheDir, "spec024-settings-${System.nanoTime()}.preferences_pb") },
+                produceFile = { File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb") },
             )
     }
 
@@ -138,8 +135,8 @@ class FireDataTest {
 
     /**
      * Every kind is gone on an engine with complete site-data removal. On older engines (the CI
-     * emulator's WebView 74) the fallback leaves Cache Storage and service workers (Spec 016 A17),
-     * so only the other kinds are checked there.
+     * emulator's WebView 74) the fallback leaves Cache Storage and service workers, so only the
+     * other kinds are checked there.
      */
     private fun assertCleared(host: String) {
         val found = check(host)
@@ -191,8 +188,8 @@ class FireDataTest {
             fireproof.add(LOCAL)
             incognitoTabs.createTab("about:blank")
         }
-        // Written the way an incognito page writes it: into the incognito session's own profile
-        // where the engine has profiles, else into the shared jar (Spec 012's snapshot path).
+        // Written the way an incognito page writes it: into the session's own profile where the
+        // engine has profiles, else into the shared jar (the snapshot path).
         composeRule.runOnUiThread {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             val incognitoPage =

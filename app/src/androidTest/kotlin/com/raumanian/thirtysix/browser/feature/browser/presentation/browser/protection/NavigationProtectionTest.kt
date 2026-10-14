@@ -18,9 +18,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 023 T063, T065, T068, T070 — what the server receives: local addresses are not upgraded,
- * tracking parameters never arrive, the GPC header does, and cross-site referrers stop at the
- * origin.
+ * What the server receives: local addresses are not upgraded, tracking parameters never arrive,
+ * the GPC header does, and cross-site referrers stop at the origin.
  */
 @RunWith(AndroidJUnit4::class)
 class NavigationProtectionTest {
@@ -45,7 +44,7 @@ class NavigationProtectionTest {
 
         val status = protection.monitor.get()!!.status.value
         assertTrue(status.isWebPage)
-        assertFalse("FR-022a", status.connectionSecure)
+        assertFalse(status.connectionSecure)
     }
 
     @Test
@@ -60,7 +59,7 @@ class NavigationProtectionTest {
         open("params.html?go=1") { server.headersFor("landing.html").isNotEmpty() }
 
         assertEquals("/landing.html?x=1", server.paths().first { it.startsWith("/landing.html") })
-        // FR-028 — the app re-issued this navigation itself, so it carries no referrer.
+        // The app re-issued this navigation itself, so it carries no referrer.
         assertNull(server.headersFor("landing.html").first()["referer"])
     }
 
@@ -76,7 +75,7 @@ class NavigationProtectionTest {
     @Test
     fun crossSiteRequestsSendAtMostTheOrigin() {
         // 127.0.0.1 is on the test tracker list; with protection off the image loads, and the
-        // referrer stays the engine's default either way (FR-016, FR-028).
+        // referrer stays the engine's default either way.
         runBlocking { protection.exceptions.add(TestProtection.PAGE_HOST) }
         open("referrer.html?secret=1") {
             server.headersFor("cross.gif").isNotEmpty() && server.headersFor("same.gif").isNotEmpty()
@@ -85,7 +84,7 @@ class NavigationProtectionTest {
         val origin = "http://${TestProtection.PAGE_HOST}:${server.port}/"
         assertEquals("${origin}referrer.html?secret=1", server.headersFor("same.gif").first()["referer"])
         // Engines before Chromium 85 default to sending the full address across sites, which the
-        // app cannot change for page resources (FR-029, research R6; CI's API 29 has WebView 74).
+        // app cannot change for page resources (CI's API 29 has WebView 74).
         assumeTrue("WebView older than 85", webViewMajorVersion() >= ORIGIN_ONLY_DEFAULT_SINCE)
         assertEquals(origin, server.headersFor("cross.gif").first()["referer"])
     }

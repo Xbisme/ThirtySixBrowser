@@ -30,9 +30,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 private const val DISABLED_ALPHA = 0.38f
 
 /**
- * Spec 019 — the design system's pill button. One filled button per view at most; danger
- * buttons name their action ("Clear all"), never "OK". No fixed width: labels must fit
- * German and Russian (FR-055).
+ * Pill button. Danger buttons name their action ("Clear all"), not "OK". No fixed width, so
+ * German and Russian labels fit.
  */
 @Composable
 @Suppress("LongParameterList", "CyclomaticComplexMethod")

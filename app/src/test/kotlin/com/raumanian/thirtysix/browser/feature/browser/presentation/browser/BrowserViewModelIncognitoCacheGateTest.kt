@@ -43,18 +43,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T010 cache-write-gate tests for [BrowserViewModel].
- *
- * Hosted in a separate file (not folded into [BrowserViewModelTest]) because
- * the gate assertions need real `android.graphics.Bitmap` instances to pass
- * through `onIconReceived` / `onScreenshotReady`, which in turn requires
- * Robolectric (`AndroidJUnit4` runner + SDK 33 pin from Spec 005). Keeping
- * [BrowserViewModelTest] pure-JVM preserves its fast execution profile —
- * Robolectric overhead is isolated to the 3 tests below.
- *
- * Verifies FR-009 (no screenshot cache writes for incognito) and FR-010 (no
- * favicon cache writes for incognito) plus a control test asserting the gate
- * does NOT regress the normal-tab cache write path.
+ * Incognito tabs write neither favicons nor screenshots to disk; normal tabs still do. Robolectric
+ * is needed for real `Bitmap`s, so these live apart from the pure-JVM [BrowserViewModelTest].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -72,14 +62,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         Dispatchers.resetMain()
     }
 
-    /**
-     * Build a VM where the active tab is forced to be incognito by seeding the
-     * [FakeIncognitoTabRepository] with a tab whose `lastActiveAt` exceeds the
-     * timestamps of the auto-seeded normal home tab in [FakeTabRepository].
-     * The merged-flow ordering rule (lastActiveAt DESC) then puts the incognito
-     * tab at the head, so [BrowserViewModel.uiState.isIncognito] resolves to
-     * `true` after `advanceUntilIdle()`.
-     */
+    /** The incognito tab is used most recently, so it heads the merged tab list and is active. */
     private fun newIncognitoActiveViewModel(
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
@@ -118,7 +101,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         screenshotCache: ScreenshotCache,
     ): BrowserViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
-        // Spec 013 — star use cases. Self-contained fake repo; no impact on incognito tests.
+        // Star use cases over a self-contained fake.
         val bookmarkRepo = FakeBookmarkRepository()
         val addBookmark = AddBookmarkUseCase(bookmarkRepo)
         return BrowserViewModel(
@@ -158,7 +141,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         advanceUntilIdle()
 
         assertEquals(
-            "FaviconCache.save MUST NOT be called for incognito tabs (FR-010)",
+            "FaviconCache.save MUST NOT be called for incognito tabs",
             0,
             recordingFavicon.saveCallCount,
         )
@@ -179,7 +162,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         advanceUntilIdle()
 
         assertEquals(
-            "ScreenshotCache.save MUST NOT be called for incognito tabs (FR-009)",
+            "ScreenshotCache.save MUST NOT be called for incognito tabs",
             0,
             recordingScreenshot.saveCallCount,
         )

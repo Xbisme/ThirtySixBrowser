@@ -25,26 +25,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 015 FR-017 — the project's **first** migration test.
- *
- * Spec 005 wrote down a strict no-destructive-migration policy and then never had to
- * exercise it, because no schema ever changed. This turns that policy from a comment into
- * something enforced: a database created at v1 and populated in all four original tables
- * must arrive at v2 with every row intact.
- *
- * **Why not `MigrationTestHelper`?** tasks.md T018 called for it, and `room-testing` is
- * already on the test classpath. It cannot work here: `MigrationTestHelper` loads the
- * exported schema from the instrumentation context's *assets*, and AGP does not merge an
- * assets source set for JVM unit tests (only `debug`/`androidTest` get a merge task), so
- * it raises `FileNotFoundException` for `…AppDatabase/1.json` no matter where the schema
- * directory is wired. The options were to move this test to `androidTest` — putting the
- * single most important test in this spec behind a device — or to drive the real
- * production open path instead. This does the latter, and loses nothing that matters:
- * opening a v1 file with the real [Room] builder runs the registered migration and then
- * validates the resulting schema against the compiled entity identity, so a
- * [Migration1To2] that drifts from [com.raumanian.thirtysix.browser.core.data.datasource.local.entity.DownloadRecordEntity]
- * still fails here rather than on a user's device. It arguably tests *more* than the
- * helper would, because it exercises the same builder configuration `DatabaseModule` ships.
+ * A database created at v1 and populated in all four original tables arrives at v2 with every
+ * row intact. Drives the real [Room] builder rather than `MigrationTestHelper`, which cannot
+ * load exported schemas in JVM unit tests; Room still validates the migrated schema on open.
  */
 @RunWith(AndroidJUnit4::class)
 class AppDatabaseMigrationTest {
@@ -75,8 +58,7 @@ class AppDatabaseMigrationTest {
         assertEquals("tabs lost", 2, db.countOf("tabs"))
         assertEquals("download_records should start empty", 0, db.downloadRecordDao().count())
 
-        // Values, not just row counts — a migration that recreated the tables empty would
-        // still pass a count check if it also re-seeded them.
+        // Values, not just row counts: a migration that recreated and re-seeded the tables passes a count.
         db.openHelper.readableDatabase.query("SELECT title, url FROM bookmarks").use { c ->
             assertTrue(c.moveToFirst())
             assertEquals("Example", c.getString(0))
@@ -276,10 +258,9 @@ class AppDatabaseMigrationTest {
         const val TEST_DB = "migration-test.db"
 
         /**
-         * Verbatim from the committed `app/schemas/…/1.json`. Reproducing the shipped v1
-         * schema exactly — indices included — is what makes the v2 validation meaningful;
-         * a sloppy approximation would fail validation for reasons unrelated to the
-         * migration under test.
+         * Verbatim from the committed `app/schemas/…/1.json`, indices included; an approximation
+         * would fail validation for reasons unrelated to the migration under test.
+
          */
         val VERSION_ONE_DDL = listOf(
             "CREATE TABLE IF NOT EXISTS `bookmark_folders` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +

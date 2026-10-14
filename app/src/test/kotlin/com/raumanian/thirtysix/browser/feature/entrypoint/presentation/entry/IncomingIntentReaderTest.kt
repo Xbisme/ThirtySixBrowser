@@ -10,7 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/** Spec 020 T011 — every action the manifest declares, and the inputs that must be ignored. */
+/** Every action the manifest declares, and the inputs that must be ignored. */
 @RunWith(RobolectricTestRunner::class)
 class IncomingIntentReaderTest {
 

@@ -26,12 +26,8 @@ internal const val TEST_TAG_HUB_PROTECTION_SWITCH: String = "hub_protection_swit
 internal const val TEST_TAG_HUB_NOT_SECURE: String = "hub_not_secure"
 
 /**
- * Spec 023 FR-011, FR-012, FR-022a — the hub's privacy block. On a web page it takes the place
- * of the plain privacy banner (analyze U3): the banner names the page's blocked-tracker count,
- * then the per-site switch, then — on an `http://` page — "Connection not secure". On Home and
- * the incognito start page only the original banner shows.
- *
- * Built from Spec 019 components (design waiver, spec Assumptions).
+ * On a web page: the blocked-tracker count, the per-site switch and, on `http://`, "Connection not
+ * secure". On Home and the incognito start page only the plain privacy banner shows.
  */
 @Composable
 internal fun HubProtectionSection(

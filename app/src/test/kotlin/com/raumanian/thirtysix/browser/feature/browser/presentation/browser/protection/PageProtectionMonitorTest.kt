@@ -12,7 +12,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 023 T037, T062 — blocking, counting and the HTTPS-upgrade lifecycle of one WebView. */
+/** Blocking, counting and the HTTPS-upgrade lifecycle of one WebView. */
 @RunWith(AndroidJUnit4::class)
 class PageProtectionMonitorTest {
     private val test = ProtectionTestEngine()
@@ -105,8 +105,8 @@ class PageProtectionMonitorTest {
 
     @Test
     fun `the http fallback waits for the error page to finish and is handed out once`() {
-        // Regression (Galaxy A55, 2 of 6 runs): a load started from the error callback, even
-        // posted, could be replaced by the error page's commit.
+        // A load started from the error callback, even posted, can be replaced by the error
+        // page's commit, so the fallback is handed out later.
         monitor.beginUpgrade(NavigationPreparer.Prepared("https://old.org/x", upgradedFrom = "http://old.org/x"))
         assertNull("nothing due before a failure", monitor.takeFallbackDue())
 
@@ -136,8 +136,8 @@ class PageProtectionMonitorTest {
 
     @Test
     fun `a cancelled load that never started does not end the attempt`() {
-        // Regression (16 KB AVD, neverssl.com): two loads in a row; the first, cancelled, still
-        // reports onPageFinished before the real attempt fails.
+        // Two loads in a row: the first, cancelled, still reports onPageFinished before the real
+        // attempt fails.
         monitor.beginUpgrade(NavigationPreparer.Prepared("https://old.org/", upgradedFrom = "http://old.org/"))
         monitor.onPageFinished("https://old.org/")
         monitor.onPageStarted("https://old.org/")

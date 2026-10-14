@@ -12,12 +12,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-/**
- * Spec 022 US4 — the app-wide text size, as the percentage the web engine takes (FR-031).
- *
- * A view model of its own, like Spec 021's `PopupTabs`, so `BrowserViewModel` does not grow a
- * settings dependency for one number. Only the WebView and the hub's Text size tile read it.
- */
+/** The app-wide text size, in its own view model so [BrowserViewModel] needs no settings dependency. */
 @HiltViewModel
 class PageTextSizeViewModel @Inject constructor(observeUserSettings: ObserveUserSettingsUseCase) : ViewModel() {
     val textZoomPercent: StateFlow<Int> = observeUserSettings()

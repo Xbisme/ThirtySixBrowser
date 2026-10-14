@@ -12,25 +12,20 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Spec 020 — bindings for the default-browser and entry-point feature. The relays and the
- * external-tab registry are `@Singleton @Inject constructor` classes and need no binding.
- */
+// The relays and the external-tab registry are `@Singleton @Inject constructor` classes and need no binding.
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DefaultBrowserModule {
 
-    /** Research R6 — the duplicate-link window (FR-007) needs a clock that ignores wall-clock changes. */
+    /** The duplicate-link window needs a clock that ignores wall-clock changes. */
     @Binds
     @Singleton
     abstract fun bindMonotonicClock(impl: SystemMonotonicClock): MonotonicClock
 
-    /** Research R8 — the system's default-browser state (FR-020, FR-022). */
     @Binds
     @Singleton
     abstract fun bindDefaultBrowserController(impl: AndroidDefaultBrowserController): DefaultBrowserController
 
-    /** Research R9 — the Home invitation's dismissed flag and launch count. */
     @Binds
     @Singleton
     abstract fun bindDefaultBrowserInviteRepository(

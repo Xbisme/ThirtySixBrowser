@@ -18,9 +18,7 @@ abstract class BaseViewModel : ViewModel() {
             } catch (e: CancellationException) {
                 throw e
             } catch (
-                // Intentional generic catch: this is the safety-net for ViewModel
-                // coroutines per FR-009/FR-009a. AppError.from(...) classifies the
-                // throwable into Network/Database/Unknown so callers see a typed error.
+                // Safety net for ViewModel coroutines; AppError.from(...) gives callers a typed error.
                 @Suppress("TooGenericExceptionCaught")
                 e: Throwable,
             ) {

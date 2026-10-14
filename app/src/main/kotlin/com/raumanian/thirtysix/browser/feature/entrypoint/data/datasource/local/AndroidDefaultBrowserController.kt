@@ -12,15 +12,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-/**
- * Spec 020 research R8 — reads the default-browser state from the system.
- *
- *  - API 29+: the browser role (`RoleManager.ROLE_BROWSER`), the system's own record.
- *  - API 24–28: which activity the system resolves a web link to by default. Package-visibility
- *    rules start at API 30, so this query sees the real default here.
- *
- * Every platform call is wrapped; a failure answers `false` (project seam convention).
- */
+// API 29+ asks for the browser role; below that, the default resolver of a web link, which is
+// reliable there because package-visibility filtering starts at API 30. Failures answer `false`.
 class AndroidDefaultBrowserController @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : DefaultBrowserController {

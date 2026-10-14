@@ -6,11 +6,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * Spec 010 — Verifies that [BuildSearchUrlUseCase] is a thin pass-through
- * over [SearchEngineRepository]. Per-engine + per-query coverage lives in
- * `SearchEngineRepositoryImplTest`; this file only enforces the delegation
- * contract.
+ * [BuildSearchUrlUseCase] only delegates to [SearchEngineRepository]; per-engine and per-query
+ * coverage lives in `SearchEngineRepositoryImplTest`.
  */
+
 class BuildSearchUrlUseCaseTest {
 
     @Test

@@ -34,7 +34,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 020 T048 — invitation visibility rules (FR-024 – FR-027, data-model §8). */
+/** When the default-browser invitation shows. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DefaultBrowserInviteViewModelTest {
 
@@ -138,7 +138,7 @@ class DefaultBrowserInviteViewModelTest {
 
         isDefault = false
         vm.onResume()
-        assertFalse("FR-026: no comeback once retired", vm.showInvite.value)
+        assertFalse("no comeback once retired", vm.showInvite.value)
     }
 
     @Test
@@ -147,7 +147,7 @@ class DefaultBrowserInviteViewModelTest {
         val vm = viewModel(repo)
         assertTrue(shown(vm))
 
-        vm.onResume() // e.g. the person declined the system confirmation (FR-027)
+        vm.onResume() // e.g. the person declined the system confirmation
 
         assertTrue(vm.showInvite.value)
         assertFalse(repo.state.value.dismissed)

@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Spec 021 T047 — every row of contracts C1.3. */
+/** Every pop-up decision: new tab, tab-limit message, or blocked. */
 class DecidePopupUseCaseTest {
 
     private val decide = DecidePopupUseCase()

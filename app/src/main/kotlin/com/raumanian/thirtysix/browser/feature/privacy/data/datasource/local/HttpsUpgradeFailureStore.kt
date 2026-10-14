@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Spec 023 FR-020 — in-memory [HttpsUpgradeFailures] for the life of the process. */
+/** In-memory [HttpsUpgradeFailures] for the life of the process. */
 @Singleton
 class HttpsUpgradeFailureStore @Inject constructor() : HttpsUpgradeFailures {
     private val hosts: MutableSet<String> = ConcurrentHashMap.newKeySet()

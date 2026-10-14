@@ -23,10 +23,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-/**
- * Spec 014 FR-027 / US5 — empty-state composition for the History screen: a soft
- * `primaryContainer` coin with the history glyph, a title and one line of body (Spec 019).
- */
 @Composable
 fun EmptyHistoryState(modifier: Modifier = Modifier) {
     Column(

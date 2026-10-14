@@ -7,13 +7,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 /**
- * Spec 013 FR-014 — emits the breadcrumb chain (root → leaf) for the
- * currently displayed folder. Empty list when the user is at root.
- *
- * NOTE: simple snapshot via the folder DAO — does NOT re-emit when an
- * ancestor is renamed. For v1.0 this is acceptable (renames are rare; a
- * navigation event refreshes the chain on the next folder change). A future
- * upgrade could observe the folder table and recompute on every emission.
+ * The breadcrumb chain (root first) for a folder; empty at the root. A snapshot: renaming an
+ * ancestor shows on the next folder change, not immediately.
  */
 class ObserveFolderPathUseCase @Inject constructor(
     private val repository: BookmarkRepository,

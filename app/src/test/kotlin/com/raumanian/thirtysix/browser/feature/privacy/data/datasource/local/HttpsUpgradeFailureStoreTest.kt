@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 023 FR-020 / Spec 024 FR-003a — failed upgrades are remembered until Fire clears them. */
+/** Failed upgrades are remembered until Fire clears them. */
 class HttpsUpgradeFailureStoreTest {
     @Test
     fun `failed hosts are remembered lower-case and cleared by clear`() {

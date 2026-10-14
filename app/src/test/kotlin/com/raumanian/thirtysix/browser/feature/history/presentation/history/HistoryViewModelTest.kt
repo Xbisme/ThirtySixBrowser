@@ -45,13 +45,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Spec 014 — [HistoryViewModel] behaviour across every user story.
- *
- * Covers T028 (US1 listing + tap-replace), T050 (US2 search threshold + literal
- * matching), T068 (US3 long-press actions), T085 (US4 clear-all dialog), and
- * T099 (US5 empty → non-empty reactivity).
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LargeClass")
 class HistoryViewModelTest {
@@ -71,8 +64,6 @@ class HistoryViewModelTest {
     fun tearDown() {
         Dispatchers.resetMain()
     }
-
-    // ──────── US1 — listing + tap-to-replace (T028) ────────
 
     @Test
     fun `entries flow drives groupedEntries in reverse-chronological order`() = runTest {
@@ -138,8 +129,6 @@ class HistoryViewModelTest {
         assertNull(vm.uiState.first { it.openUrl == null }.openUrl)
     }
 
-    // ──────── US2 — search (T050) ────────
-
     @Test
     fun `empty query shows the full list`() = runTest {
         val vm = seededViewModel()
@@ -150,7 +139,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `single-character query does not filter (FR-011a)`() = runTest {
+    fun `single-character query does not filter`() = runTest {
         val vm = seededViewModel()
         advanceUntilIdle()
 
@@ -191,7 +180,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `wildcard-looking characters are matched literally (FR-013)`() = runTest {
+    fun `wildcard-looking characters are matched literally`() = runTest {
         val repo = FakeHistoryRepository()
         repo.recordVisit("https://example.com/plain", "Plain page", now)
         repo.recordVisit("https://example.com/100%_off", "100%_off it's here", now)
@@ -227,7 +216,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `clearing the query restores the full grouped list (FR-016)`() = runTest {
+    fun `clearing the query restores the full grouped list`() = runTest {
         val vm = seededViewModel()
         advanceUntilIdle()
         vm.onSearchQueryChange("kotlin")
@@ -241,7 +230,7 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `a newly recorded matching entry joins the filtered list live (FR-017)`() = runTest {
+    fun `a newly recorded matching entry joins the filtered list live`() = runTest {
         val repo = FakeHistoryRepository()
         repo.recordVisit("https://kotlinlang.org", "Kotlin docs", now)
         val vm = newViewModel(repo)
@@ -257,8 +246,6 @@ class HistoryViewModelTest {
             .flatMap { it.entries }
         assertEquals(2, matched.size)
     }
-
-    // ──────── US3 — per-entry actions (T068) ────────
 
     @Test
     fun `long-press sets the action sheet target and dismiss clears it`() = runTest {
@@ -291,7 +278,7 @@ class HistoryViewModelTest {
 
         val normalTabs = tabRepo.observeTabs().first()
         assertTrue(
-            "the history URL must land in a NORMAL tab (Q2 / FR-019)",
+            "the history URL must land in a NORMAL tab",
             normalTabs.any { it.url == "https://example.com" },
         )
         assertNull(vm.uiState.value.pendingActionSheetTarget)
@@ -390,8 +377,6 @@ class HistoryViewModelTest {
         assertTrue(events.isEmpty())
     }
 
-    // ──────── US4 — clear all (T085) ────────
-
     @Test
     fun `clear-all requested shows the dialog and cancelling hides it`() = runTest {
         val repo = FakeHistoryRepository()
@@ -441,8 +426,6 @@ class HistoryViewModelTest {
         assertFalse(vm.uiState.value.isClearAllDialogVisible)
     }
 
-    // ──────── US5 — empty ↔ populated reactivity (T099) ────────
-
     @Test
     fun `groupedEntries flips from empty to a Today group when the first visit lands`() = runTest {
         val repo = FakeHistoryRepository()
@@ -458,13 +441,9 @@ class HistoryViewModelTest {
         assertNotNull(state.groupedEntries.single().entries.single())
     }
 
-    // ──────── Helpers ────────
-
     /**
-     * Starts collecting the one-shot snackbar channel and drains the scheduler so the
-     * collector is *actually subscribed* before the caller triggers an action. Without
-     * the drain, a synchronous emitter (such as `onCopyUrl`) would `tryEmit` into a
-     * channel with zero subscribers and the event would be dropped (replay = 0).
+     * Subscribes to the snackbar channel and drains the scheduler before the action: with
+     * `replay = 0`, a synchronous `tryEmit` into a channel with no subscriber is dropped.
      */
     private fun TestScope.collectEvents(
         vm: HistoryViewModel,
@@ -518,9 +497,7 @@ class HistoryViewModelTest {
         val copied: MutableList<String> = mutableListOf()
         val labels: MutableList<String> = mutableListOf()
 
-        // Spec 015 added the `label` parameter to ClipboardWriter (defaulted, so History's
-        // own call sites are unchanged). Recorded here too, so a future change that starts
-        // labelling history copies differently shows up rather than passing silently.
+        // Recorded so a change to how history copies are labelled shows up here.
         override fun copyUrl(url: String, label: String): Boolean {
             if (succeeds) {
                 copied += url

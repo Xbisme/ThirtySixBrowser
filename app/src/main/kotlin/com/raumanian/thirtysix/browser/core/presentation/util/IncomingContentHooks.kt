@@ -7,15 +7,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 
 /**
- * Spec 020 — what the browser screen needs from the entry-point feature, handed down from
- * `AppNavGraph` so the screen never creates its own `EntryPointViewModel` (research R5).
+ * Handed down from `AppNavGraph` so the browser screen never creates its own `EntryPointViewModel`.
  *
- * The defaults are inert, so previews and tests that build `BrowserScreen` directly need not
- * supply anything.
- *
- * @property loadInActiveTab URLs to load into the live page (tab cap reuse, research R6).
+ * @property loadInActiveTab URLs to load into the live page (reused tab at the tab cap).
  * @property messages string ids to show in the browser's snackbar (refused link, tab limit).
- * @property externalTabIds tabs opened for another app's link and not yet left (FR-006).
+ * @property externalTabIds tabs opened for another app's link and not yet left.
  * @property onLeaveExternalTab closes such a tab; the screen then returns the person to the sender.
  */
 @Immutable

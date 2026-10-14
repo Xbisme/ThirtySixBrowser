@@ -1,42 +1,21 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequestSink
-/**
- * Bundles the load-lifecycle callbacks `BrowserWebView` forwards to the
- * ViewModel.
- *
- * Spec 007 baseline: 4 callbacks (page lifecycle + progress + error).
- * Spec 008 added 2 history-state callbacks (total 6 = at threshold).
- * Spec 009 split: the 2 history-state callbacks moved into
- * [BrowserNavigationCallbacks] alongside the new `onUrlChange` callback,
- * leaving this bundle at its original Spec 007 size of 4 fields. Mirrors
- * Spec 008's `NavigationBottomBarCallbacks` extraction precedent.
- *
- * Spec 015 adds [onDownloadRequested] (5 fields). Still under detekt's
- * `LongParameterList.constructorThreshold = 7`, and the rule ignores data classes anyway.
- */
+/** The load-lifecycle callbacks `BrowserWebView` forwards to the view model. */
 internal data class BrowserWebViewCallbacks(
     val onLoadStarted: (String) -> Unit,
     val onProgressChanged: (Int) -> Unit,
     val onLoadFinished: (String) -> Unit,
     val onLoadFailed: (ErrorReason) -> Unit,
-    /**
-     * Spec 015 FR-001 — the web engine declined to render a resource and handed it back
-     * as a download. Fired from `WebView.setDownloadListener`; the content length the
-     * platform also supplies is dropped, since the size shown in the list is read from the
-     * platform at display time rather than captured here (FR-015).
-     */
+    // The content length is dropped: the downloads list reads the size from the platform when shown.
     val onDownloadRequested: (
         url: String,
         userAgent: String,
         contentDisposition: String?,
         mimeType: String?,
     ) -> Unit,
-    /**
-     * Spec 021 research R1 — where the page's requests (permissions, files, dialogs, windows,
-     * long-press) go. Inert by default so tests that build the WebView directly need nothing.
-     */
+    /** Inert by default, so tests that build the WebView directly need nothing. */
     val pageRequests: PageRequestSink = PageRequestSink.None,
-    /** Spec 022 FR-007 — find-in-page results: 0-based active match and the number of matches. */
+    /** 0-based active match and the number of matches. */
     val onFindResult: (activeOrdinal: Int, total: Int) -> Unit = { _, _ -> },
 )

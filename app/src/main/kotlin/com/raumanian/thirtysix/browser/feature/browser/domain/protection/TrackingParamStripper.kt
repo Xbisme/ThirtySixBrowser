@@ -5,9 +5,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import java.net.URLDecoder
 
 /**
- * Spec 023 data-model rule 4 — removes listed tracking parameters from an http/https address
- * (FR-024, FR-025). Works on the raw query string, so every kept parameter stays byte-identical
- * and in its original order; the fragment is never touched.
+ * Removes listed tracking parameters from an http/https address. Works on the raw query string,
+ * so every kept parameter stays byte-identical and in order; the fragment is never touched.
  */
 class TrackingParamStripper(private val rules: TrackingParamRules) {
 

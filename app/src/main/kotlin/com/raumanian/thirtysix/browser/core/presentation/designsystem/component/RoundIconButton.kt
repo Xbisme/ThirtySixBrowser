@@ -27,11 +27,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 private const val DISABLED_ALPHA = 0.38f
 
 /**
- * Spec 019 — the design system's round icon button (IconButton component): 44dp visual,
- * 48dp touch target, a spoken [contentDescription] always (FR-056).
- *
- * [RoundIconStyle.Ringed] sits on a surface, [RoundIconStyle.Bare] inside a bar,
- * [RoundIconStyle.Glass] on the hero or an image (translucent fill, no blur — research R5).
+ * Round icon button: 44dp visual, 48dp touch target, always a spoken [contentDescription].
  * Disabled buttons stay in place at reduced opacity so bars never shift.
  */
 @Composable

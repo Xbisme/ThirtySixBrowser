@@ -15,18 +15,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 011 (T040 / US2 / R9) — process-death restoration smoke test.
- *
- * Robolectric `ActivityScenario.recreate()` is the closest portable proxy
- * for Android's "process killed and re-launched" path. True SIGKILL recovery
- * is verified by the manual user-device gate M2 (deferred); this test
- * exercises the same code paths (`BrowserViewModel.init {}` re-collection
- * from a fresh ViewModel + `TabRepository.observeTabs` re-emission) that
- * matter for restoration.
- *
- * Asserts: after seeding 3 tabs through the production [TabRepository],
- * recreating the host activity preserves the tab list AND the active-tab
- * pointer (the tab with max `lastActiveAt`).
+ * Process-death smoke test: after seeding 3 tabs, recreating the activity keeps the tab list and
+ * the active tab (max `lastActiveAt`). `recreate()` exercises the same re-collection from a fresh
+ * ViewModel as a real restart; true SIGKILL recovery is checked by hand.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -54,9 +45,7 @@ class TabPersistenceProcessDeathTest {
         assertEquals(EXPECTED_TAB_COUNT, before.size)
         val activeBefore = before.first().id // sorted DESC by lastActiveAt → first is active
 
-        // Spec 011 R9 — ActivityScenario.recreate() exercises the
-        // BrowserViewModel.init { observeActiveTab() } re-collection from a
-        // fresh ViewModel instance. True SIGKILL is verified manually (M2).
+        // Re-runs BrowserViewModel.init { observeActiveTab() } in a fresh ViewModel.
         ActivityScenario.launch(HiltTestActivity::class.java).use { scenario ->
             scenario.recreate()
 

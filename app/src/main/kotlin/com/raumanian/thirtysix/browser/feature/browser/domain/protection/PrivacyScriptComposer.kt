@@ -1,15 +1,10 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.protection
 
 /**
- * Spec 024 research R5, contracts C18 — the text installed as the page-start script.
- *
- * Each bundled script is a function expression `(function(cfg){ … })`. The composer calls each one
- * with the same frozen settings object `{v, s, x}`, built here from **local data only**
- * (Constitution §II-1): `s` is the session secret, `x` the registrable domains with protection off.
- * Nothing is assigned to `window`, so a page cannot read the settings.
- *
- * Inputs are validated rather than trusted: the secret must be lower-case hex, and a site that is not
- * a plain host name (letters, digits, `-`, `.`) is dropped. Pure Kotlin.
+ * The page-start script: each bundled `(function(cfg){ … })` is called with one frozen settings
+ * object `{v, s, x}` built from local data only (`s` session secret, `x` sites with protection
+ * off). Nothing is assigned to `window`, so a page cannot read it. Inputs are validated: the
+ * secret must be lower-case hex, and a site that is not a plain host name is dropped.
  */
 object PrivacyScriptComposer {
     private const val VERSION = 1

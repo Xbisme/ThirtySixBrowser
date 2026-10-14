@@ -32,9 +32,8 @@ import kotlinx.coroutines.launch
 private enum class PermissionStage { Choose, System, Blocked }
 
 /**
- * Spec 021 US1 / C2.1 — asks the person about a site's camera / microphone / location request,
- * then, only after an allow choice, the Android permission (FR-002). A permanently denied Android
- * permission gets an explanation with Open settings (FR-006).
+ * Asks about a site's camera / microphone / location request, then, only after an allow, for the
+ * Android permission. A permanently denied one gets an explanation with Open settings.
  */
 @Composable
 fun SitePermissionDialog(request: PageRequest.Permission, gate: SitePermissionGate, done: () -> Unit) {
@@ -109,7 +108,7 @@ private fun ChooseDialog(request: PageRequest.Permission, onChoice: (SitePermiss
             SiteOrigin.display(request.origin),
             capabilityList(request.askedCapabilities),
         ),
-        // FR-004 — incognito never remembers, so "Always allow" is not offered.
+        // Incognito never remembers, so "Always allow" is not offered.
         actions = if (request.isIncognito) listOf(allowOnce, deny) else listOf(alwaysAllow, allowOnce, deny),
         onDismiss = { onChoice(SitePermissionChoice.Deny) },
         glyph = request.askedCapabilities.minByOrNull { it.ordinal }?.iconRes() ?: AppIcons.Shield,

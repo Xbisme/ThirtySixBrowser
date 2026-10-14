@@ -25,15 +25,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-/**
- * Spec 020 contracts C3.5 — the Home invitation to make ThirtySix the default browser.
- *
- * Built from the design system's banner idiom (the hub's row banner: `surfaceContainer`, extra
- * large corners, a display-face title) because the owner's design for it is still to come
- * (spec Assumptions, design waiver). Static content: nothing here reads frame-rate state (§V).
- *
- * The action does NOT dismiss the card (FR-025, FR-027); only [onDismiss] does.
- */
+/** Built from the hub's banner idiom until a dedicated design exists. Only [onDismiss] dismisses it. */
 @Composable
 fun DefaultBrowserInviteCard(onAction: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme

@@ -8,15 +8,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
 /**
- * Spec 012 snapshot path (engines without WebView profiles) — the origins whose cookies are set
- * aside when an incognito session begins and written back when it ends. Cookies of any other site
- * are lost at the end of the session there, so the set is as wide as the app knows: every normal
- * tab, plus `https` and `http` for every host in history and every fireproof site (and its
- * `www.`), so a site visited earlier or kept on purpose stays signed in.
- *
- * Reads three repositories at the moment the session begins (the documented Spec 012 exception
- * to "repositories never depend on repositories", kept in this one class). Every read is defensive:
- * a failed read keeps what the others returned, and malformed URLs are dropped.
+ * On engines without WebView profiles, the origins whose cookies are set aside when an incognito
+ * session begins and written back when it ends. Any other site's cookies are lost, so the set
+ * spans normal tabs, history hosts and fireproof sites; a failed read keeps the others' results.
  */
 class IncognitoSnapshotOrigins @Inject constructor(
     private val tabRepository: TabRepository,

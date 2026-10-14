@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** Spec 024 — [PrivacyScriptSession] backed by [SecureRandom]; never written anywhere. */
+/** [PrivacyScriptSession] backed by [SecureRandom]; never written anywhere. */
 @Singleton
 class PrivacyScriptSessionImpl @Inject constructor() : PrivacyScriptSession {
     private val random = SecureRandom()

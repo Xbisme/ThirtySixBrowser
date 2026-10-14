@@ -7,10 +7,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-/**
- * Spec 013 — combined Flow that emits both folders and bookmarks under the
- * current folder (FR-008 / FR-009). UI renders folders before bookmarks.
- */
+/** Folders and bookmarks directly under one folder, in one flow. */
 class ObserveBookmarksByFolderUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {

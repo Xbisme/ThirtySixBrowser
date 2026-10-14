@@ -22,20 +22,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 014 T047 (US1 / FR-001, FR-002, FR-004, FR-020, FR-025).
- *
- * On-device integration of the recorder path against **real SQLite**:
- * `RecordHistoryEntryUseCase` → `HistoryRepositoryImpl` → `HistoryEntryMapper` →
- * `HistoryDao` → Room. Verifies the incognito suppression gate, the repeat-visit
- * rule (separate rows, Q3), and that delete / clear-all propagate to the observer.
- *
- * > Deviates from the literal tasks.md T047 wording, which drove the assertion
- * > through a live `https://example.com` WebView load. The BrowserViewModel gating
- * > that sits above this path is already covered by four JVM unit cases in
- * > `BrowserViewModelTest`; loading a real page here would only add network flake
- * > (the same reason `BrowserScreenOfflineErrorTest` documents WebView setup as
- * > brittle) without testing anything the unit tests miss. What is genuinely
- * > device-specific — Room + SQLite persistence — is what this test exercises.
+ * The recorder path against real SQLite, use case → repository → mapper → DAO → Room. The
+ * ViewModel gating above it is covered by JVM tests; loading a real page here would only add
+ * network flake.
  */
 @RunWith(AndroidJUnit4::class)
 class HistoryRecorderIntegrationTest {

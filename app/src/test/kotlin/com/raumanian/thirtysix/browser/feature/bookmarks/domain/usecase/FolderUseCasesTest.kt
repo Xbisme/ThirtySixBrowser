@@ -9,10 +9,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 013 — covers CreateFolder / RenameFolder / MoveFolder / MoveBookmark
- * / UpdateBookmark use cases via the in-memory fake.
- */
 class FolderUseCasesTest {
 
     @Test

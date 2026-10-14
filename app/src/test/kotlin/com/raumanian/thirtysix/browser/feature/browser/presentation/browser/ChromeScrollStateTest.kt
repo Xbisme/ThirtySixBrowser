@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 019 T035 — contracts C2. */
 class ChromeScrollStateTest {
 
     @Test

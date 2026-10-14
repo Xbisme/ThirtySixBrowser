@@ -15,7 +15,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SheetTitle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-/** Spec 013 — long-press actions for a folder; Spec 019 — on [SheetFrame]. */
+/** Long-press actions for a folder. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("LongParameterList")

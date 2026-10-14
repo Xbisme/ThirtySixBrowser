@@ -4,12 +4,8 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepos
 import javax.inject.Inject
 
 /**
- * Spec 024 data-model "Fireproof matching rule" — whether [host] belongs to a fireproof site.
- *
- * Saved entries are registrable domains, so "the host's registrable domain is in the list" is the
- * same as "the host is an entry or a subdomain of one": a host always ends with its own registrable
- * domain, and `bob.github.io` never ends with `.alice.github.io`. The suffix test needs no public
- * suffix data, so it also works before Spec 023's lists have loaded. Synchronous; safe on any thread.
+ * Whether [host] belongs to a fireproof site. Entries are registrable domains, so a plain suffix
+ * test is exact and needs no public-suffix data (it works before the protection lists load).
  */
 class IsSiteFireproofUseCase @Inject constructor(
     private val repository: FireproofSiteRepository,

@@ -21,13 +21,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-/**
- * Spec 015 · Spec 019 FR-041 — top of the Downloads screen: a back button, then the large
- * screen title (`headlineSmall`, design system "large screen titles"). Consumes the status-bar
- * inset itself so the screen can draw edge to edge.
- *
- * Unlike History there is no clear-all action: bulk clearing of downloads is out of scope.
- */
+// Consumes the status-bar inset itself so the screen can draw edge to edge.
+// No clear-all action: bulk clearing of downloads is out of scope.
 @Composable
 fun DownloadsTopBar(onBackClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(

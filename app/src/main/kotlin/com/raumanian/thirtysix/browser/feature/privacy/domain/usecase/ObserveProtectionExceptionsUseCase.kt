@@ -5,7 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptio
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Spec 023 FR-015 — the sites without protection, newest first. */
+/** The sites without protection, newest first. */
 class ObserveProtectionExceptionsUseCase @Inject constructor(
     private val exceptions: ProtectionExceptionRepository,
 ) {

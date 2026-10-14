@@ -11,10 +11,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 internal const val TEST_TAG_FIRE_CONFIRM: String = "fire_confirm_dialog"
 
-/**
- * Spec 024 FR-002 — the confirmation every Fire run asks for: what is cleared and what is kept.
- * Cancel and Back dismiss it and change nothing (US1 #2).
- */
+/** What every Fire run clears and keeps; Cancel and Back change nothing. */
 @Composable
 internal fun FireConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     ConfirmDialog(

@@ -43,7 +43,7 @@ class ToggleBookmarkUseCaseTest {
         assertEquals(Result.Success(ToggleBookmarkResult.Removed), result)
         assertEquals(2, repo.countBookmarksByUrl("https://example.com"))
 
-        // Confirm "newest" (created at 300L) is the one deleted — verify Q4 semantic.
+        // Confirm "newest" (created at 300L) is the one deleted.
         // Repeatedly toggling will continue to remove most-recent.
         toggle(url = "https://example.com", fallbackTitle = "x")
         toggle(url = "https://example.com", fallbackTitle = "x")

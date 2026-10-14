@@ -49,12 +49,7 @@ import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboardin
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.WelcomeSlide
 import kotlinx.coroutines.flow.collectLatest
 
-/**
- * Spec 018 — the first-run onboarding flow.
- *
- * Shown instead of the browser when the first-run flag is unset; the decision is made in
- * `MainActivity` before this graph is built (research.md R2).
- */
+/** Shown instead of the browser while the first-run flag is unset; `MainActivity` decides before the graph is built. */
 @Composable
 fun OnboardingScreen(
     onFinish: () -> Unit,
@@ -64,22 +59,15 @@ fun OnboardingScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // ⚠️ Leaving MUST pop the onboarding route INCLUSIVELY, or Back from the browser's first
-    // page returns here — the flow is meant to appear once per install (FR-010a, SC-015).
-    // An assertion that "the browser is showing" would not catch a missing pop; SC-015 presses
-    // Back, and that is the check that matters.
+    // onFinish must pop the onboarding route inclusively, or Back from the browser returns here.
     LaunchedLeaveEffect(viewModel) { onFinish() }
 
-    // FR-002a — Back moves to the previous slide; on the FIRST slide it leaves the app, and
-    // leaving this way does NOT write the first-run flag, so the flow returns next launch
-    // (FR-012). Enabled unconditionally so the first-slide case is ours to handle rather than
-    // the system's default "finish the activity" with no say in it.
+    // On the first slide Back leaves the app without writing the first-run flag, so the flow returns next launch.
     BackHandler {
         if (!viewModel.onBack()) context.findActivity()?.finish()
     }
 
     val colors = ThirtySixTheme.colors
-    // Spec 019 FR-052 — the flow sits on the hero mesh in both themes.
     Box(modifier = modifier.fillMaxSize().background(colors.heroDeep)) {
         MeshArt(
             base = colors.heroDeep,
@@ -129,10 +117,6 @@ private fun SlideBody(
     }
 }
 
-/**
- * Back (from the second slide on), the step text and Skip — on EVERY slide, including the
- * first and the last (FR-014a).
- */
 @Composable
 private fun OnboardingTopBar(state: OnboardingUiState, onBack: () -> Unit, onSkip: () -> Unit) {
     val progress = stringResource(
@@ -161,7 +145,6 @@ private fun OnboardingTopBar(state: OnboardingUiState, onBack: () -> Unit, onSki
                 style = RoundIconStyle.Glass,
             )
         }
-        // FR-003 — where the user is in the sequence, and how long it is.
         Text(
             text = progress,
             style = MaterialTheme.typography.labelLarge,
@@ -179,14 +162,7 @@ private fun OnboardingTopBar(state: OnboardingUiState, onBack: () -> Unit, onSki
     }
 }
 
-/**
- * Page dots and the forward control.
- *
- * ⚠️ ONE forward control in ONE position across all four slides, relabelled on the last
- * (FR-002b, INV-12) — not two controls with one hidden, which would move focus order. The two
- * labels are separate strings: "Next" and "Start browsing" are different words, not a
- * substitution (INV-13).
- */
+// One forward control, relabelled on the last slide: two controls with one hidden would move focus order.
 @Composable
 private fun OnboardingControls(state: OnboardingUiState, onForward: () -> Unit) {
     Column(
@@ -242,6 +218,5 @@ private fun LaunchedLeaveEffect(viewModel: OnboardingViewModel, onLeave: () -> U
     }
 }
 
-/** Test tags for the two controls every slide carries. */
 const val TEST_TAG_ONBOARDING_SKIP: String = "onboarding_skip"
 const val TEST_TAG_ONBOARDING_FORWARD: String = "onboarding_forward"

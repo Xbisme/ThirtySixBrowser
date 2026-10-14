@@ -25,12 +25,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 016 T077 (US4 / FR-025, FR-026, FR-032).
- *
- * Drives [SettingsScreen] over in-memory seams, so nothing real is ever cleared. What gets
- * cleared on a real web engine is covered on device by quickstart G5 and G6.
- */
+// In-memory seams, so nothing real is ever cleared.
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenClearDataTest {
 
@@ -57,7 +52,7 @@ class SettingsScreenClearDataTest {
         openClearDialog()
 
         ClearBrowsingDataCategory.DEFAULT_SELECTION.forEach { categoryRow(it).assertIsOn() }
-        // Spec 021 FR-010a — site permissions are opt-in.
+        // Site permissions are opt-in.
         categoryRow(ClearBrowsingDataCategory.SitePermissions).assertIsOff()
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_CLEAR_CONFIRM).assertIsEnabled()
     }
@@ -83,7 +78,7 @@ class SettingsScreenClearDataTest {
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_CLEAR_CONFIRM).performClick()
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_CLEAR_PROGRESS).assertIsDisplayed()
 
-        // FR-032 — system back must not close a clear that is still running.
+        // System back must not close a clear that is still running.
         Espresso.pressBack()
         composeRule.waitForIdle()
 

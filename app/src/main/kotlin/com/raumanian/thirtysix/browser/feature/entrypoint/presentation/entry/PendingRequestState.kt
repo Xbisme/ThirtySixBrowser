@@ -1,11 +1,7 @@
 package com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry
 
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingRequest
-/**
- * Spec 020 research R3 — encodes an unconsumed [IncomingRequest] as two strings for the
- * activity's saved state, so a link that arrived during onboarding survives the system
- * reclaiming the app (FR-019). Pure Kotlin; the activity does the `Bundle` I/O.
- */
+/** Saved-state encoding of an unconsumed request, so a link that arrived during onboarding survives process death. */
 object PendingRequestState {
     private const val KIND_OPEN_ADDRESS = "open_address"
     private const val KIND_INTERPRET_TEXT = "interpret_text"

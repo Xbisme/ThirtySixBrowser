@@ -31,10 +31,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 /**
- * Spec 016 FR-003 — a setting whose current value is shown under its title. The whole row is
- * the touch target, at least the platform's minimum interactive size tall (FR-039), and
- * TalkBack reads title and value together because they share one clickable node.
- * Spec 019 adds the pastel icon lead and a trailing chevron (FR-044).
+ * A setting whose current value is shown under its title. Title and value share one clickable
+ * node so TalkBack reads them together.
  */
 @Composable
 @Suppress("LongParameterList")
@@ -63,9 +61,8 @@ fun SettingsValueRow(
 }
 
 /**
- * Spec 020 FR-021 — a setting shown for information only, such as "ThirtySix is your default
- * browser": no click, no chevron. Title and summary are merged into one node so TalkBack reads
- * them together.
+ * A setting shown for information only, such as "ThirtySix is your default browser". Title and
+ * summary are merged into one node so TalkBack reads them together.
  */
 @Composable
 fun SettingsInfoRow(
@@ -85,9 +82,8 @@ fun SettingsInfoRow(
 }
 
 /**
- * Spec 016 — a row that starts an action instead of showing a value, such as clearing browsing
- * data. The whole row is the touch target, at least the minimum interactive size tall (FR-039),
- * and announced as a button.
+ * A row that starts an action instead of showing a value, such as clearing browsing data,
+ * announced as a button.
  */
 @Composable
 fun SettingsActionRow(
@@ -114,9 +110,8 @@ fun SettingsActionRow(
 }
 
 /**
- * Spec 016 — an on/off setting. The row itself is `toggleable` with [Role.Switch], so TalkBack
- * announces the on/off state and a tap anywhere on the row flips it; the [Switch] is visual
- * only (`onCheckedChange = null`) to avoid a second, smaller focus target (FR-039).
+ * An on/off setting. The row itself is the toggle; the [Switch] is visual only
+ * (`onCheckedChange = null`) to avoid a second, smaller focus target.
  */
 @Composable
 @Suppress("LongParameterList")
@@ -179,7 +174,7 @@ private fun SettingsRowLayout(
     }
 }
 
-/** A Settings row's 40dp rounded icon square in its [tone] (FR-044). */
+/** A Settings row's rounded icon square in its [tone]. */
 @Composable
 fun SettingsIcon(
     @DrawableRes icon: Int,

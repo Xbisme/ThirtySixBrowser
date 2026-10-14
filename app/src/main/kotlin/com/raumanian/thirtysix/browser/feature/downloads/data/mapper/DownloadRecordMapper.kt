@@ -2,14 +2,7 @@ package com.raumanian.thirtysix.browser.feature.downloads.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.DownloadRecordEntity
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
-/**
- * Spec 015 — Entity ↔ Domain converter for [DownloadRecordEntity] / [DownloadRecord].
- *
- * Total round-trip: `toEntity(toDomain(e)) == e` for any valid entity. No defensive
- * validation is needed — every column except `local_uri` is NOT NULL, and `local_uri`'s
- * nullability is meaningful (null = still in flight) rather than a data-quality accident,
- * so it is carried through unchanged rather than coerced.
- */
+// A null `local_uri` means "still in flight", so it is carried through rather than coerced.
 object DownloadRecordMapper {
 
     fun toDomain(entity: DownloadRecordEntity): DownloadRecord =

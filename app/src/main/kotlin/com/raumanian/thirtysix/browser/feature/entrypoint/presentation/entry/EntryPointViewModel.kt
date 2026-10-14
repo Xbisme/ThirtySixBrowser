@@ -25,21 +25,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-/** Spec 020 — one-shot navigation signal from [EntryPointViewModel]. */
 sealed interface EntryEvent {
-    /** Bring the browser to the front, popping whatever screen is above it (FR-005). */
+    /** Bring the browser to the front, popping whatever screen is above it */
     data object ShowBrowser : EntryEvent
 }
 
 /**
- * Spec 020 research R5 / contracts C2 — opens what other apps send, once onboarding is done.
- *
- * Created ONCE, outside the `NavHost` in `AppNavGraph`, so it lives as long as the activity; no
- * destination may create a second instance (its events would go unseen). Messages for the
- * person go to [EntryMessageRelay], which the browser's snackbar host shows.
- *
- * While onboarding (Spec 018) is incomplete the request simply waits in the relay (FR-019); the
- * view model never writes the onboarding flag.
+ * Opens what other apps send once onboarding is done; until then the request waits in the relay.
+ * Created once, outside the `NavHost`: a second instance in a destination would have its events go unseen.
  */
 @HiltViewModel
 @Suppress("LongParameterList") // Hand-off pieces + the two use cases + tab store access; mirrors TabsViewModel.
@@ -76,10 +69,8 @@ class EntryPointViewModel @Inject constructor(
             .onEach { handlePending() }
             .launchIn(viewModelScope)
 
-        // Data-model §6 — whatever closed a tab (Back, close button, swipe, close all), its id
-        // leaves the registry, so a later tab can never inherit the "return to sender" Back.
-        // Only ids that were in an earlier list and are now gone are dropped: the tab store may
-        // emit a list that does not yet include a tab just created and marked.
+        // However a tab closed, its id leaves the registry so a later tab cannot inherit "return to sender".
+        // Only ids that disappear are dropped: the store may emit before a just-created tab is listed.
         var previousIds: Set<Long> = emptySet()
         observeTabs()
             .map { tabs -> tabs.mapTo(mutableSetOf()) { it.id } }
@@ -90,14 +81,14 @@ class EntryPointViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    /** FR-006 — Back on an untouched tab opened by another app closes it. */
+    /** Back on an untouched tab opened by another app closes it. */
     private fun leaveExternalTab(tabId: Long) {
         externalTabs.remove(tabId)
         viewModelScope.launch { closeTab(tabId) }
     }
 
     private suspend fun handlePending() {
-        // Taken before anything else, so a resubscription cannot open it twice (INV-3).
+        // Taken before anything else, so a resubscription cannot open it twice.
         val request = relay.take() ?: return
         when (val target = resolve(request)) {
             IncomingTarget.Rejected -> messages.show(R.string.entry_link_rejected)

@@ -30,12 +30,6 @@ import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component.EmptyDownloadsState
 private const val DOWNLOAD_ROW_CONTENT_TYPE = "download_row"
 
-/**
- * Spec 015 · Spec 019 FR-041 / FR-043 — the Downloads screen.
- *
- * A large title over open rows on the surface. Renders the list or the empty state, hosts
- * the long-press action sheet and the delete confirmation, and surfaces one-shot events.
- */
 @Composable
 fun DownloadsScreen(
     modifier: Modifier = Modifier,
@@ -61,9 +55,7 @@ fun DownloadsScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
             ) {
-                // Stable key — Constitution §V forbids index-only keys, which would make
-                // Compose animate a phantom move whenever a row is removed. One content type:
-                // every entry is the same row composable.
+                // Stable keys: index keys would make Compose animate a phantom move whenever a row is removed.
                 items(
                     items = state.items,
                     key = { it.record.id },
@@ -102,10 +94,6 @@ fun DownloadsScreen(
     }
 }
 
-/**
- * Extracted so [DownloadsScreen] stays under detekt's `LongMethod` ceiling, and because
- * resolving eight strings inline would bury the layout it belongs to.
- */
 @Composable
 private fun DownloadsSnackbarEffect(
     viewModel: DownloadsViewModel,
@@ -133,9 +121,7 @@ private fun DownloadsSnackbarEffect(
                 DownloadsEvent.DownloadCancelled -> cancelled
                 DownloadsEvent.OperationFailed -> failed
             }
-            // FR-029 / FR-024b — telling the user the file is gone is only half of it; the
-            // stale row has to be removable from the same message, or they are left with a
-            // list entry they were just told is meaningless and no way to act on it.
+            // The stale row must be removable from the same message that says the file is gone.
             val stale = event as? DownloadsEvent.FileMissing
             val result = snackbarHostState.showSnackbar(
                 message = message,

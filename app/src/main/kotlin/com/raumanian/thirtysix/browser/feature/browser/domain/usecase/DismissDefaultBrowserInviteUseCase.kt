@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInvi
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/** Spec 020 FR-025 — the person closed the invitation; it never returns on its own. */
+/** The person closed the invitation; it never returns on its own. */
 class DismissDefaultBrowserInviteUseCase @Inject constructor(
     private val repository: DefaultBrowserInviteRepository,
 ) {

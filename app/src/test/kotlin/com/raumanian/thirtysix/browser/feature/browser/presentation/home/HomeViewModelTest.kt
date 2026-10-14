@@ -34,7 +34,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 019 T056a — Constitution §VI: HomeViewModel state, greeting and dispatcher. */
+/** HomeViewModel state, greeting and dispatcher. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
 

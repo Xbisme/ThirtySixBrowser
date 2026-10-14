@@ -14,10 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-/**
- * Spec 023 — the browser screen's single entry point to the protections: it builds one
- * [PageProtectionMonitor] per WebView and prepares every address the app loads (research R7).
- */
+/** The browser screen's single entry point to the protections: one monitor per WebView. */
 @Singleton
 class ProtectionEngine @Inject constructor(
     internal val matchers: ProtectionMatchersHolder,
@@ -35,9 +32,8 @@ class ProtectionEngine @Inject constructor(
         matchers.matchersOrNull()?.preparer?.prepare(url, isIncognito)
 
     /**
-     * Main thread. Prepares [url] and hands the result to [load] on the main thread — at once when
-     * the lists are ready, otherwise after waiting for them on an IO thread (a cold start straight
-     * into a link). If they never arrive the address is loaded as given (fail open).
+     * Main thread. Hands the prepared address to [load] at once, or after waiting for the lists on
+     * an IO thread (a cold start into a link); if they never arrive, the address loads as is.
      */
     fun prepare(url: String, isIncognito: Boolean, load: (NavigationPreparer.Prepared) -> Unit) {
         prepareNow(url, isIncognito)?.let {

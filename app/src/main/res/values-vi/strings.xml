@@ -1,25 +1,25 @@
 <resources>
-    <!-- Spec 004 — Vietnamese (vi) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <!-- Vietnamese (vi) translation. Brand "ThirtySix" preserved in Latin -->
     <string name="app_name">Trình duyệt ThirtySix</string>
 
-    <!-- Spec 007 — Vietnamese (vi) translations for Browser loading + error UI. -->
+    <!-- Vietnamese (vi) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">Đang tải trang</string>
     <string name="browser_error_title">Không tải được trang</string>
     <string name="browser_error_offline_hint">Vui lòng kiểm tra kết nối Internet và thử lại.</string>
     <string name="browser_error_generic">Đã xảy ra lỗi. Vui lòng thử mở trang sau.</string>
 
-    <!-- Spec 008 — Vietnamese (vi) translations for navigation bottom-bar a11y. -->
+    <!-- Vietnamese (vi) translations for navigation bottom-bar a11y. -->
     <string name="browser_action_back">Lùi</string>
     <string name="browser_action_forward">Tiến</string>
     <string name="browser_action_reload">Tải lại trang</string>
     <string name="browser_action_stop">Dừng tải</string>
     <string name="browser_action_home">Trang chủ</string>
 
-    <!-- Spec 009 — Vietnamese (vi) translations for address-bar hint + clear button. -->
+    <!-- Vietnamese (vi) translations for address-bar hint + clear button. -->
     <string name="browser_address_bar_hint">Tìm kiếm hoặc nhập URL</string>
     <string name="browser_address_bar_clear_cd">Xóa thanh địa chỉ</string>
 
-    <!-- Spec 011 — Vietnamese (vi) translations for tabs management. -->
+    <!-- Vietnamese (vi) translations for tabs management. -->
     <string name="tabs_switcher_new_tab">Thẻ mới</string>
     <string name="tabs_switcher_close_all">Đóng tất cả thẻ</string>
     <string name="tabs_switcher_close_all_confirm">Đóng tất cả thẻ? Không thể hoàn tác.</string>
@@ -32,7 +32,7 @@
         <item quantity="other">%1$d thẻ</item>
     </plurals>
 
-    <!-- Spec 012 — Private / Incognito Mode. -->
+    <!-- Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Thẻ ẩn danh mới</string>
     <string name="tabs_a11y_incognito_glyph">Thẻ ẩn danh</string>
     <string name="tabs_error_max_incognito_tabs_reached">Đã đạt giới hạn %d thẻ ẩn danh</string>
@@ -41,13 +41,13 @@
     <string name="tabs_action_close_all_incognito">Đóng tất cả thẻ ẩn danh</string>
     <string name="tabs_close_all_incognito_confirm">Đóng tất cả %d thẻ ẩn danh?</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <!-- Bookmarks CRUD. US1 star icon strings. -->
     <string name="bookmark_action_star_add_cd">Thêm dấu trang cho trang này</string>
     <string name="bookmark_action_star_remove_cd">Xóa dấu trang khỏi trang này</string>
     <string name="bookmark_added_snackbar">Đã lưu dấu trang</string>
     <string name="bookmark_removed_snackbar">Đã xóa dấu trang</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <!-- Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Dấu trang</string>
     <string name="bookmarks_section_folders">Thư mục</string>
     <string name="bookmarks_section_pages">Trang</string>
@@ -56,7 +56,7 @@
     <string name="bookmarks_action_back_to_parent_cd">Lên thư mục cha</string>
     <string name="bookmarks_breadcrumb_root_label">Gốc</string>
 
-    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <!-- full bookmarks UI. -->
     <string name="bookmarks_action_new_folder_cd">Thư mục mới</string>
     <string name="bookmarks_dialog_create_folder_title">Thư mục mới</string>
     <string name="bookmarks_dialog_rename_folder_title">Đổi tên thư mục</string>
@@ -85,7 +85,7 @@
     <string name="bookmarks_action_add_cd">Thêm dấu trang</string>
     <string name="bookmarks_dialog_add_title">Thêm dấu trang</string>
 
-    <!-- Spec 014 — History view (Vietnamese). -->
+    <!-- History view (Vietnamese). -->
     <string name="history_screen_title">Lịch sử</string>
     <string name="history_action_back">Quay lại</string>
     <string name="history_day_today">Hôm nay</string>
@@ -94,13 +94,13 @@
     <string name="history_empty_body">Các trang bạn truy cập sẽ xuất hiện ở đây.</string>
     <string name="history_row_content_description">%1$s, %2$s, đã truy cập lúc %3$s</string>
 
-    <!-- Spec 014 US2 — search. -->
+    <!-- search. -->
     <string name="history_search_placeholder">Tìm trong lịch sử</string>
     <string name="history_search_clear_content_description">Xóa nội dung tìm kiếm</string>
     <string name="history_no_matches_title">Không có mục nào khớp với \"%1$s\"</string>
     <string name="history_no_matches_body">Hãy thử từ khóa khác hoặc kiểm tra lại chính tả.</string>
 
-    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <!-- long-press per-entry actions. -->
     <string name="history_action_open_in_new_tab">Mở trong tab mới</string>
     <string name="history_action_delete_entry">Xóa mục này</string>
     <string name="history_action_copy_url">Sao chép URL</string>
@@ -108,14 +108,14 @@
     <string name="history_snackbar_tab_cap_reached">Đã đạt số tab tối đa. Hãy đóng một tab để mở tab mới.</string>
     <string name="history_snackbar_deletion_failed">Không thể xóa mục này. Vui lòng thử lại.</string>
 
-    <!-- Spec 014 US4 — clear all. -->
+    <!-- clear all. -->
     <string name="history_action_clear_all">Xóa toàn bộ lịch sử</string>
     <string name="history_clear_all_dialog_title">Xóa toàn bộ lịch sử?</string>
     <string name="history_clear_all_dialog_body">Thao tác này sẽ xóa vĩnh viễn mọi trang trong lịch sử duyệt web. Không thể hoàn tác.</string>
     <string name="history_clear_all_dialog_confirm">Xóa</string>
     <string name="history_clear_all_dialog_cancel">Hủy</string>
 
-    <!-- Spec 015 — downloads (US1) -->
+    <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Đang tải %1$s</string>
     <string name="downloads_service_unavailable">Thiết bị này không dùng được tính năng tải xuống.</string>
     <string name="downloads_storage_permission_denied">Cần quyền truy cập bộ nhớ để lưu tệp tải về.</string>
@@ -125,7 +125,7 @@
     <string name="downloads_storage_permission_rationale_confirm">Tiếp tục</string>
     <string name="downloads_storage_permission_rationale_cancel">Để sau</string>
 
-    <!-- Spec 015 — downloads (US2-US7) -->
+    <!-- downloads (US2-US7) -->
     <string name="downloads_screen_title">Tải xuống</string>
     <string name="downloads_action_back">Quay lại</string>
     <string name="downloads_state_pending">Đang chờ</string>
@@ -159,7 +159,7 @@
     <string name="downloads_empty_body">Các tệp bạn tải về sẽ xuất hiện ở đây.</string>
     <string name="downloads_operation_failed">Đã xảy ra lỗi. Vui lòng thử lại.</string>
 
-    <!-- Spec 016 — Settings screen scaffold. -->
+    <!-- Settings screen scaffold. -->
     <string name="settings_screen_title">Cài đặt</string>
     <string name="settings_action_back">Quay lại</string>
     <string name="settings_action_cancel">Huỷ</string>
@@ -170,21 +170,21 @@
     <string name="settings_section_about">Giới thiệu</string>
     <string name="settings_error_not_saved">Không thể lưu cài đặt. Vui lòng thử lại.</string>
 
-    <!-- Spec 016 US1 — theme. -->
+    <!-- theme. -->
     <string name="settings_theme_title">Chủ đề</string>
     <string name="settings_theme_light">Sáng</string>
     <string name="settings_theme_dark">Tối</string>
     <string name="settings_theme_system">Theo hệ thống</string>
 
-    <!-- Spec 016 US2 — search engine. -->
+    <!-- search engine. -->
     <string name="settings_search_engine_title">Công cụ tìm kiếm</string>
 
-    <!-- Spec 016 US3 — app language. -->
+    <!-- app language. -->
     <string name="settings_language_title">Ngôn ngữ ứng dụng</string>
     <string name="settings_language_follow_system">Theo hệ thống</string>
     <string name="settings_error_language_not_applied">Không thể đổi ngôn ngữ. Vui lòng thử lại.</string>
 
-    <!-- Spec 016 US4 — clear browsing data. -->
+    <!-- clear browsing data. -->
     <string name="settings_clear_browsing_data_title">Xoá dữ liệu duyệt web</string>
     <string name="settings_clear_dialog_title">Xoá dữ liệu duyệt web?</string>
     <string name="settings_clear_category_history">Lịch sử duyệt web</string>
@@ -198,7 +198,7 @@
     <string name="settings_clear_done">Đã xoá dữ liệu duyệt web</string>
     <string name="settings_clear_partial_failure">Không thể xoá một số dữ liệu. Vui lòng thử lại.</string>
 
-    <!-- Spec 016 US5 — history retention. -->
+    <!-- history retention. -->
     <string name="settings_history_retention_title">Giữ lịch sử trong</string>
     <plurals name="settings_history_retention_days">
         <item quantity="other">%d ngày</item>
@@ -208,15 +208,14 @@
     <string name="settings_retention_shorten_confirm">Xoá</string>
     <string name="settings_retention_prune_deferred">Chưa thể xoá lịch sử cũ lúc này. Lịch sử đó sẽ bị xoá vào lần tới ứng dụng khởi động.</string>
 
-    <!-- Spec 016 US6 — dynamic color. -->
+    <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">Màu động</string>
     <string name="settings_dynamic_color_summary">Dùng màu từ hình nền của bạn</string>
 
-    <!-- Spec 016 US7 — About. -->
+    <!-- About. -->
     <string name="settings_about_version">Phiên bản %1$s</string>
     <string name="settings_about_privacy_statement">Ứng dụng này không thu thập dữ liệu cá nhân và không gửi bất cứ thứ gì đến máy chủ nào do ThirtySix vận hành. Lịch sử, dấu trang, tệp tải xuống và cài đặt của bạn chỉ lưu trên thiết bị này.</string>
-    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
-         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <!-- onboarding: the privacy statement and option labels are reused from Settings. -->
     <string name="onboarding_welcome_title">Chào mừng đến ThirtySix</string>
     <string name="onboarding_welcome_body">Một trình duyệt yên tĩnh, không cản đường bạn.</string>
     <string name="onboarding_language_title">Chọn ngôn ngữ</string>
@@ -230,7 +229,7 @@
     <string name="onboarding_action_skip">Bỏ qua</string>
     <string name="onboarding_progress_a11y">Bước %1$d trên %2$d</string>
 
-    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <!-- bottom bar and hub -->
     <string name="nav_search">Tìm kiếm</string>
     <string name="nav_tabs">Thẻ</string>
     <string name="nav_menu">Menu</string>
@@ -245,7 +244,7 @@
         <item quantity="other">Thẻ, %1$d thẻ đang mở</item>
     </plurals>
 
-    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <!-- Home page -->
     <string name="home_greeting_morning">Chào buổi sáng</string>
     <string name="home_greeting_afternoon">Chào buổi chiều</string>
     <string name="home_greeting_evening">Chào buổi tối</string>
@@ -256,7 +255,7 @@
     <string name="home_shortcut_tag_saved">Đã lưu</string>
     <string name="home_shortcut_tag_recent">Gần đây</string>
 
-    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <!-- incognito new-tab page -->
     <string name="incognito_page_title">Bạn đang duyệt web ẩn danh</string>
     <string name="incognito_page_subtitle">Người khác dùng điện thoại này sẽ không thấy bạn làm gì ở đây.</string>
     <string name="incognito_page_section_title">Khi bạn đóng tất cả thẻ ẩn danh</string>
@@ -265,11 +264,11 @@
     <string name="incognito_page_point_screenshots">Không thể chụp màn hình khi đang mở thẻ ẩn danh</string>
     <string name="incognito_page_footnote">Tệp bạn tải xuống và dấu trang bạn lưu vẫn được giữ lại. Các trang web và mạng của bạn vẫn có thể thấy bạn truy cập.</string>
 
-    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <!-- tab switcher modes -->
     <string name="tabs_chip_open">Đang mở</string>
     <string name="tabs_chip_incognito">Ẩn danh</string>
 
-    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <!-- default browser and entry points -->
     <string name="settings_section_general">Chung</string>
     <string name="settings_default_browser_title">Trình duyệt mặc định</string>
     <string name="settings_default_browser_summary_not_default">ThirtySix chưa phải trình duyệt mặc định. Chạm để đổi.</string>
@@ -283,7 +282,7 @@
     <string name="entry_tab_limit_reused">Đã đạt giới hạn thẻ — link được mở trong thẻ hiện tại</string>
     <string name="entry_default_browser_unavailable">Thiết bị này không cho đổi ứng dụng mặc định</string>
 
-    <!-- Spec 021 — web capabilities (contracts C2) -->
+    <!-- web capabilities -->
     <string name="site_capability_camera">camera</string>
     <string name="site_capability_microphone">micrô</string>
     <string name="site_capability_location">vị trí</string>
@@ -341,7 +340,7 @@
     <string name="settings_clear_category_site_permissions_description">Các trang sẽ hỏi lại quyền camera, micrô và vị trí</string>
     <string name="file_chooser_title">Chọn tệp</string>
 
-    <!-- Spec 022 — page tools -->
+    <!-- page tools -->
     <string name="hub_page_tools_title">Công cụ trang</string>
     <string name="hub_tile_find_in_page">Tìm trong trang</string>
     <string name="hub_tile_share">Chia sẻ</string>
@@ -361,7 +360,7 @@
     <string name="suggestion_bookmark_cd">Dấu trang: %1$s, %2$s</string>
     <string name="suggestion_history_cd">Lịch sử: %1$s, %2$s</string>
     <string name="share_page_title">Chia sẻ trang</string>
-    <!-- Spec 023 privacy protection -->
+    <!-- privacy protection -->
     <string name="hub_protection_site_title">Bảo vệ cho trang này</string>
     <string name="hub_protection_site_on">Chặn trình theo dõi, xoá thẻ theo dõi, ưu tiên kết nối an toàn</string>
     <string name="hub_protection_site_off">Đã tắt cho %1$s. Trình theo dõi có thể tải ở đây.</string>
@@ -383,7 +382,7 @@
     <plurals name="hub_protection_trackers_blocked">
         <item quantity="other">Đã chặn %1$d trình theo dõi trên trang này</item>
     </plurals>
-    <!-- Spec 024 privacy tools -->
+    <!-- privacy tools -->
     <string name="fire_action">Đốt dữ liệu</string>
     <string name="fire_action_tabs_cd">Đốt dữ liệu: đóng mọi tab và xoá dữ liệu duyệt web</string>
     <string name="fire_confirm_title">Đóng mọi tab và xoá dữ liệu?</string>

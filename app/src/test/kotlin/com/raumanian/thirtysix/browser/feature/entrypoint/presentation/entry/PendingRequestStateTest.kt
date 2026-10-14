@@ -5,7 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Spec 020 T014 — saved-state round trip for every request kind (research R3). */
 class PendingRequestStateTest {
 
     @Test

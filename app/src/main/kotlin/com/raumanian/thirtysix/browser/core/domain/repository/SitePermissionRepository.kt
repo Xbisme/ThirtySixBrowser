@@ -6,10 +6,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Spec 021 contracts C3.2 — remembered site decisions, kept on the device only (FR-010).
- * Only https origins are ever stored (INV-2); a `save` for another origin is refused.
- */
+/** Remembered site decisions, kept on the device only. Only https origins are stored; `save` refuses others. */
 interface SitePermissionRepository {
     fun observeAll(): Flow<List<SitePermissionDecision>>
 

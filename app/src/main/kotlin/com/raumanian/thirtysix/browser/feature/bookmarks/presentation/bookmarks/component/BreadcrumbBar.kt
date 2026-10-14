@@ -27,11 +27,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-/**
- * Spec 013 FR-014 — breadcrumb. Tappable segments: "Root › A › B › C". Tap a segment to
- * navigate to that level. Horizontal-scrolls when long. Spec 019 — chevron separators, the
- * current level in `onSurface`, ancestors in `primary`.
- */
+/** Tappable breadcrumb ("Root › A › B"); scrolls horizontally when long. */
 @Composable
 fun BreadcrumbBar(
     chain: List<BookmarkFolder>,

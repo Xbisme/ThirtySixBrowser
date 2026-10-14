@@ -16,8 +16,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 022 T053 / FR-025 — what the server sees: a desktop user agent from a tab built in desktop
- * mode, and the mobile one again after switching back (which reloads the page).
+ * What the server sees: a desktop user agent from a tab built in desktop mode, and the mobile one
+ * again after switching back (which reloads the page).
  */
 @RunWith(AndroidJUnit4::class)
 class DesktopModeInstrumentedTest {

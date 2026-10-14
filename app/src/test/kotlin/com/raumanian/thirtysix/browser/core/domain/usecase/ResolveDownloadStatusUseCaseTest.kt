@@ -13,11 +13,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 015 FR-024a – FR-024c — the fallback that the whole hybrid design rests on.
- *
- * The premise of the source-of-truth decision is that the platform forgets downloads on its
- * own schedule. These tests are what make "and then the row still says something sensible"
- * true rather than aspirational.
+ * The fallback for downloads the platform has forgotten on its own schedule: the row must
+ * still say something sensible once the platform handle no longer resolves.
  */
 class ResolveDownloadStatusUseCaseTest {
 
@@ -46,7 +43,7 @@ class ResolveDownloadStatusUseCaseTest {
     }
 
     @Test
-    fun `FR-024a - a forgotten handle with the file present resolves to Complete`() = runTest {
+    fun `a forgotten handle with the file present resolves to Complete`() = runTest {
         val useCase = ResolveDownloadStatusUseCase(
             FakeGateway(statuses = emptyMap(), existingFiles = setOf("content://d/10")),
             InMemoryDownloadsRepository(),
@@ -56,24 +53,14 @@ class ResolveDownloadStatusUseCaseTest {
     }
 
     /**
-     * The G8 regression.
-     *
-     * `pm clear com.android.providers.downloads` is the honest reproduction of "the platform
-     * forgot this transfer": the handle stops resolving **and so does the content URI that
-     * was recorded for it**, because that URI belongs to the provider whose data was just
-     * wiped. The file itself is untouched.
-     *
-     * The first version of this fallback answered presence by opening the recorded URI, so
-     * in exactly that situation it reported `Missing` for ten downloads whose files were all
-     * still sitting in the Downloads folder — the "present → Complete" branch was
-     * unreachable in the one scenario it was written for. Presence now asks the filesystem
-     * about the real file, which is what this pins.
+     * When the platform forgets a transfer, the recorded content URI dies with the provider's
+     * data while the file stays on disk, so presence must be answered from the real file.
      */
     @Test
-    fun `FR-024a - the file is found by name when the recorded URI has died with the provider`() =
+    fun `the file is found by name when the recorded URI has died with the provider`() =
         runTest {
             val useCase = ResolveDownloadStatusUseCase(
-                // The name is on disk; the recorded URI resolves to nothing any more.
+                // The name is on disk; the recorded URI resolves to nothing.
                 FakeGateway(statuses = emptyMap(), existingFiles = setOf("a.pdf")),
                 InMemoryDownloadsRepository(),
             )
@@ -85,7 +72,7 @@ class ResolveDownloadStatusUseCaseTest {
         }
 
     @Test
-    fun `FR-024a - a forgotten handle with no recorded URI still resolves by file name`() = runTest {
+    fun `a forgotten handle with no recorded URI still resolves by file name`() = runTest {
         val useCase = ResolveDownloadStatusUseCase(
             FakeGateway(statuses = emptyMap(), existingFiles = setOf("a.pdf")),
             InMemoryDownloadsRepository(),
@@ -94,16 +81,14 @@ class ResolveDownloadStatusUseCaseTest {
         assertEquals(DownloadStatus.Complete(), useCase(listOf(record(localUri = null))).single().status)
     }
 
-    // ---- FR-007 / FR-014 : the name the platform actually used ---------------------
-
     /**
-     * The platform renames colliding downloads rather than overwriting (FR-007), so the name
-     * on disk is not always the name that was requested. Until the resolved name is stored,
-     * three downloads of one filename display identically *and* — now that presence is
-     * answered by looking for the real file — all three probe for the same one.
+     * The platform renames colliding downloads rather than overwriting, so the name on disk can
+     * differ from the requested one; without storing it, three downloads of one filename would
+     * display identically and all probe for the same file.
      */
+
     @Test
-    fun `FR-007 - completion stores the name the platform actually used`() = runTest {
+    fun `completion stores the name the platform actually used`() = runTest {
         val repository = InMemoryDownloadsRepository()
         val id = repository.insert(record(localUri = null))
         val gateway = FakeGateway(
@@ -139,7 +124,7 @@ class ResolveDownloadStatusUseCaseTest {
     }
 
     @Test
-    fun `FR-024a - a forgotten handle with the file absent resolves to Missing`() = runTest {
+    fun `a forgotten handle with the file absent resolves to Missing`() = runTest {
         val useCase = ResolveDownloadStatusUseCase(
             FakeGateway(statuses = emptyMap(), existingFiles = emptySet()),
             InMemoryDownloadsRepository(),
@@ -149,14 +134,14 @@ class ResolveDownloadStatusUseCaseTest {
     }
 
     @Test
-    fun `FR-024a - a forgotten handle that never recorded a file resolves to Missing`() = runTest {
+    fun `a forgotten handle that never recorded a file resolves to Missing`() = runTest {
         val useCase = ResolveDownloadStatusUseCase(FakeGateway(statuses = emptyMap()), InMemoryDownloadsRepository())
 
         assertEquals(DownloadStatus.Missing, useCase(listOf(record(localUri = null))).single().status)
     }
 
     @Test
-    fun `FR-024a - the fallback NEVER yields an in-flight state`() = runTest {
+    fun `the fallback NEVER yields an in-flight state`() = runTest {
         // A transfer the platform has forgotten is not running, whatever the last thing we
         // saw claimed. This is the assertion that keeps a stale spinner off the screen.
         listOf(
@@ -173,7 +158,7 @@ class ResolveDownloadStatusUseCaseTest {
     }
 
     @Test
-    fun `FR-021 - a whole list resolves in one platform round trip`() = runTest {
+    fun `a whole list resolves in one platform round trip`() = runTest {
         val gateway = FakeGateway(
             statuses = (1L..5L).associate { it * 10 to DownloadStatus.Complete() },
         )

@@ -4,7 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SiteProtectionExceptionEntity
 /**
- * Spec 023 research R11 — adds `site_protection_exceptions`. Strictly additive: it names no
+ * Adds `site_protection_exceptions`. Strictly additive: it names no
  * existing table, so existing data cannot be touched by construction.
  */
 object Migration3To4 {

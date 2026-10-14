@@ -7,9 +7,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/**
- * Spec 015 — round-trip totality for [DownloadRecordMapper].
- */
 class DownloadRecordMapperTest {
 
     private val entity = DownloadRecordEntity(

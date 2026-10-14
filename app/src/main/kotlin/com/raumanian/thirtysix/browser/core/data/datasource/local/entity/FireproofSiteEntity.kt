@@ -4,12 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Spec 024 data-model — one site the person fireproofed in normal browsing.
- *
- * Its table moves `AppDatabase.SCHEMA_VERSION` from 4 to 5, strictly additively. Incognito
- * never fireproofs a site (FR-011).
- */
+/** A site fireproofed in normal browsing; incognito never fireproofs a site. */
 @Entity(tableName = FireproofSiteEntity.TABLE_NAME)
 data class FireproofSiteEntity(
     /** Registrable domain, lower-case ASCII (IDN as punycode). */

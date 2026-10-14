@@ -9,9 +9,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
 /**
- * Spec 021 FR-020 / FR-021 — the long-press "Open in new tab" / "Open in incognito tab": a tab
- * opened behind the active one, which stays active (research R9). At the cap the repository's
- * error comes back, for the existing tab-limit message.
+ * Long-press "Open in new tab" / "Open in incognito tab": a tab opened behind the active one,
+ * which stays active. At the cap the repository's error comes back for the tab-limit message.
  */
 class OpenInBackgroundTabUseCase @Inject constructor(
     private val tabs: TabRepository,

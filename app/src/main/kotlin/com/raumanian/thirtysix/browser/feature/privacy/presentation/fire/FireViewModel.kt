@@ -8,9 +8,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Spec 024 US1 — the Fire action for a screen. A thin pass-through: the run itself belongs to the
- * process-wide [FireCoordinator], so it finishes even if the screen that started it goes away, and
- * the browser and Tabs screens see the same state.
+ * Thin pass-through: the run belongs to the process-wide [FireCoordinator], so it finishes even if
+ * this screen goes away, and the browser and Tabs screens see the same state.
  */
 @HiltViewModel
 class FireViewModel @Inject constructor(

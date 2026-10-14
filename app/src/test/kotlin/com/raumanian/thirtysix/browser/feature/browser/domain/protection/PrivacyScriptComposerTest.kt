@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 024 T054 — the composed page-start script (research R5, Constitution §II-1). */
+/** The composed page-start script. */
 class PrivacyScriptComposerTest {
 
     @Test

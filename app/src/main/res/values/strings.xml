@@ -1,19 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">ThirtySix Browser</string>
-    <!-- Spec 002 — placeholder labels for the 7 navigation destinations. -->
-    <!-- Spec 004 — VI/DE/RU/KO/JA/ZH/FR translations live in values-<locale>/. -->
-    <!-- Spec 004 — Q1 clarification: app_name canonical = "ThirtySix Browser" (Play Store name). -->
-    <!-- Per FR-007 naming convention: feature_section_purpose. -->
+    <!-- placeholder labels for the 7 navigation destinations. -->
+    <!-- VI/DE/RU/KO/JA/ZH/FR translations live in values-<locale>/. -->
+    <!-- The Play Store name. -->
+    <!-- Keys follow feature_section_purpose. -->
     <!-- Future feature specs (e.g., 011 tabs-management) MAY rename *_screen_placeholder → semantic key (*_screen_title) when they implement the real Screen — must update all 8 locale files in same change. -->
 
-    <!-- Spec 018 — Onboarding flow. The placeholder key onboarding_screen_placeholder was
-         removed here and in all 7 locale files: OnboardingScreen is a real screen now, and an
-         unused key is build-blocking under warningsAsErrors (the precedent Spec 014 set).
-
-         No privacy-statement string is declared: FR-004 reuses settings_about_privacy_statement
-         verbatim, so the app's central privacy claim has exactly one wording (A9).
-         No option labels either: those come from Spec 016's themeModeLabel / searchEngineLabel /
-         appLanguageLabel, which is what keeps Settings and onboarding from disagreeing. -->
+    <!-- Onboarding reuses settings_about_privacy_statement and the Settings option labels,
+         so the two screens never word the same thing differently. -->
     <string name="onboarding_welcome_title">Welcome to ThirtySix</string>
     <string name="onboarding_welcome_body">A quiet browser that keeps out of your way.</string>
     <string name="onboarding_language_title">Choose your language</string>
@@ -22,33 +16,31 @@
     <string name="onboarding_theme_body">Follow your device, or pick one and stay with it.</string>
     <string name="onboarding_search_title">Pick a search engine</string>
     <string name="onboarding_search_body">Typing in the address bar searches with this.</string>
-    <!-- FR-002b: two separate resources, never one string with a placeholder — "Next" and
-         "Done" are different words, not a substitution, and a placeholder produces
-         untranslatable grammar across 8 locales. -->
+    <!-- Two resources, not one with a placeholder: "Next" and "Done" are different words. -->
     <string name="onboarding_action_next">Next</string>
     <string name="onboarding_action_start_browsing">Start browsing</string>
     <string name="onboarding_action_skip">Skip</string>
     <!-- %1$d = current slide, %2$d = total. Positional so locales may reorder. -->
     <string name="onboarding_progress_a11y">Step %1$d of %2$d</string>
 
-    <!-- Spec 007 — WebView Compose Wrapper. Loading state + error UI strings. -->
+    <!-- WebView Compose Wrapper. Loading state + error UI strings. -->
     <string name="browser_loading_a11y">Loading page</string>
     <string name="browser_error_title">Page didn\'t load</string>
     <string name="browser_error_offline_hint">Check your internet connection and try again.</string>
     <string name="browser_error_generic">Something went wrong. Try opening the page later.</string>
 
-    <!-- Spec 008 — Navigation Controls. Bottom-bar affordance content descriptions (a11y / TalkBack). -->
+    <!-- Navigation Controls. Bottom-bar affordance content descriptions (a11y / TalkBack). -->
     <string name="browser_action_back">Back</string>
     <string name="browser_action_forward">Forward</string>
     <string name="browser_action_reload">Reload page</string>
     <string name="browser_action_stop">Stop loading</string>
     <string name="browser_action_home">Home</string>
 
-    <!-- Spec 009 — Address Bar / Omnibox. Placeholder hint shown when the bar is unfocused with no URL loaded; clear-button content description (TalkBack). -->
+    <!-- Address Bar / Omnibox. Placeholder hint shown when the bar is unfocused with no URL loaded; clear-button content description (TalkBack). -->
     <string name="browser_address_bar_hint">Search or enter URL</string>
     <string name="browser_address_bar_clear_cd">Clear address bar</string>
 
-    <!-- Spec 011 — Tabs Management. Switcher screen + tab card + BrowserScreen new affordances + plural-aware count. -->
+    <!-- Tabs Management. Switcher screen + tab card + BrowserScreen new affordances + plural-aware count. -->
     <string name="tabs_switcher_new_tab">New tab</string>
     <string name="tabs_switcher_close_all">Close all tabs</string>
     <string name="tabs_switcher_close_all_confirm">Close all tabs? This cannot be undone.</string>
@@ -62,24 +54,24 @@
         <item quantity="other">%1$d tabs</item>
     </plurals>
 
-    <!-- Spec 012 — Private / Incognito Mode. New strings: incognito affordances, indicator, dialog, errors, a11y. -->
+    <!-- Private / Incognito Mode. New strings: incognito affordances, indicator, dialog, errors, a11y. -->
     <string name="tabs_action_new_incognito_tab">New incognito tab</string>
     <string name="tabs_a11y_incognito_glyph">Incognito tab</string>
-    <!-- Spec 012 — cap is MAX_INCOGNITO_TABS = 50 (always > 1), so the singular case is unreachable. Plural form intentionally omitted. -->
+    <!-- cap is MAX_INCOGNITO_TABS = 50 (always > 1), so the singular case is unreachable. Plural form intentionally omitted. -->
     <string name="tabs_error_max_incognito_tabs_reached" tools:ignore="PluralsCandidate">You\'ve reached the maximum of %d incognito tabs</string>
     <string name="tabs_a11y_incognito_card_placeholder">Incognito tab — content hidden for privacy</string>
     <string name="tabs_card_incognito_label">Incognito</string>
     <string name="tabs_action_close_all_incognito">Close all incognito</string>
-    <!-- Spec 012 — affordance only visible when count > 0; in practice users see this dialog with count ≥ 1, plural form is the rule. tools:ignore acknowledged in lint per project policy. -->
+    <!-- affordance only visible when count > 0; in practice users see this dialog with count ≥ 1, plural form is the rule. tools:ignore acknowledged in lint per project policy. -->
     <string name="tabs_close_all_incognito_confirm" tools:ignore="PluralsCandidate">Close all %d incognito tabs?</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US1: star icon on browser top bar (bookmark current page). -->
+    <!-- Bookmarks CRUD. US1: star icon on browser top bar (bookmark current page). -->
     <string name="bookmark_action_star_add_cd">Add bookmark for this page</string>
     <string name="bookmark_action_star_remove_cd">Remove bookmark for this page</string>
     <string name="bookmark_added_snackbar">Bookmark saved</string>
     <string name="bookmark_removed_snackbar">Bookmark removed</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US2: bookmarks screen list, breadcrumb, empty state. -->
+    <!-- Bookmarks CRUD. US2: bookmarks screen list, breadcrumb, empty state. -->
     <string name="bookmarks_screen_title">Bookmarks</string>
     <string name="bookmarks_section_folders">Folders</string>
     <string name="bookmarks_section_pages">Pages</string>
@@ -88,7 +80,7 @@
     <string name="bookmarks_action_back_to_parent_cd">Up to parent folder</string>
     <string name="bookmarks_breadcrumb_root_label">Root</string>
 
-    <!-- Spec 013 US3 — folder management. -->
+    <!-- folder management. -->
     <string name="bookmarks_action_new_folder_cd">New folder</string>
     <string name="bookmarks_dialog_create_folder_title">New folder</string>
     <string name="bookmarks_dialog_rename_folder_title">Rename folder</string>
@@ -99,11 +91,11 @@
     <string name="bookmarks_validation_folder_name_required">Folder name cannot be empty</string>
     <string name="bookmarks_error_folder_cycle">A folder cannot be moved into itself or its sub-folder.</string>
 
-    <!-- Spec 013 US4 — search. -->
+    <!-- search. -->
     <string name="bookmarks_action_search_cd">Search bookmarks</string>
     <string name="bookmarks_no_search_matches">No bookmarks match \"%1$s\"</string>
 
-    <!-- Spec 013 US5 — edit + actions. -->
+    <!-- edit + actions. -->
     <string name="bookmarks_action_open">Open</string>
     <string name="bookmarks_action_edit">Edit</string>
     <string name="bookmarks_action_delete">Delete</string>
@@ -114,7 +106,7 @@
     <string name="bookmarks_validation_url_required">URL cannot be empty</string>
     <string name="bookmarks_validation_url_invalid">Enter a valid http:// or https:// URL</string>
 
-    <!-- Spec 013 US6 — cascade-delete confirmation. -->
+    <!-- cascade-delete confirmation. -->
     <string name="bookmarks_confirm_delete_folder_title">Delete folder?</string>
     <string name="bookmarks_confirm_delete_folder_button">Delete folder and contents</string>
     <plurals name="bookmarks_confirm_delete_folder_body">
@@ -122,11 +114,11 @@
         <item quantity="other">This will permanently delete %1$d bookmarks and %2$d sub-folders.</item>
     </plurals>
 
-    <!-- Spec 013 US7 — manual add. -->
+    <!-- manual add. -->
     <string name="bookmarks_action_add_cd">Add bookmark</string>
     <string name="bookmarks_dialog_add_title">Add bookmark</string>
 
-    <!-- Spec 014 — History view. US1 surface; US2/US3/US4 keys appended in those phases. -->
+    <!-- History view. US1 surface; US2/US3/US4 keys appended in those phases. -->
     <string name="history_screen_title">History</string>
     <string name="history_action_back">Back</string>
     <string name="history_day_today">Today</string>
@@ -135,13 +127,13 @@
     <string name="history_empty_body">Pages you visit will appear here.</string>
     <string name="history_row_content_description">%1$s, %2$s, visited at %3$s</string>
 
-    <!-- Spec 014 US2 — search. -->
+    <!-- search. -->
     <string name="history_search_placeholder">Search history</string>
     <string name="history_search_clear_content_description">Clear search</string>
     <string name="history_no_matches_title">No history matches \"%1$s\"</string>
     <string name="history_no_matches_body">Try a different word, or check the spelling.</string>
 
-    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <!-- long-press per-entry actions. -->
     <string name="history_action_open_in_new_tab">Open in new tab</string>
     <string name="history_action_delete_entry">Delete entry</string>
     <string name="history_action_copy_url">Copy URL</string>
@@ -149,14 +141,14 @@
     <string name="history_snackbar_tab_cap_reached">Maximum number of tabs reached. Close a tab to open a new one.</string>
     <string name="history_snackbar_deletion_failed">Couldn\'t delete the entry. Please try again.</string>
 
-    <!-- Spec 014 US4 — clear all. -->
+    <!-- clear all. -->
     <string name="history_action_clear_all">Clear all history</string>
     <string name="history_clear_all_dialog_title">Clear all history?</string>
     <string name="history_clear_all_dialog_body">This permanently deletes every page in your browsing history. This can\'t be undone.</string>
     <string name="history_clear_all_dialog_confirm">Clear</string>
     <string name="history_clear_all_dialog_cancel">Cancel</string>
 
-    <!-- Spec 015 — downloads (US1) -->
+    <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Downloading %1$s</string>
     <string name="downloads_service_unavailable">Downloads aren\'t available on this device.</string>
     <string name="downloads_storage_permission_denied">Storage access is needed to save downloads.</string>
@@ -166,7 +158,7 @@
     <string name="downloads_storage_permission_rationale_confirm">Continue</string>
     <string name="downloads_storage_permission_rationale_cancel">Not now</string>
 
-    <!-- Spec 015 — downloads (US2-US7) -->
+    <!-- downloads (US2-US7) -->
     <string name="downloads_screen_title">Downloads</string>
     <string name="downloads_action_back">Back</string>
     <string name="downloads_state_pending">Waiting</string>
@@ -200,7 +192,7 @@
     <string name="downloads_empty_body">Files you download will appear here.</string>
     <string name="downloads_operation_failed">Something went wrong. Please try again.</string>
 
-    <!-- Spec 016 — Settings screen scaffold. -->
+    <!-- Settings screen scaffold. -->
     <string name="settings_screen_title">Settings</string>
     <string name="settings_action_back">Back</string>
     <string name="settings_action_cancel">Cancel</string>
@@ -211,23 +203,23 @@
     <string name="settings_section_about">About</string>
     <string name="settings_error_not_saved">Couldn\'t save the setting. Please try again.</string>
 
-    <!-- Spec 016 US1 — theme. -->
+    <!-- theme. -->
     <string name="settings_theme_title">Theme</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System default</string>
 
-    <!-- Spec 016 US2 — search engine. Brand names are identical in every locale, so they live here only. -->
+    <!-- search engine. Brand names are identical in every locale, so they live here only. -->
     <string name="settings_search_engine_title">Search engine</string>
     <string name="search_engine_name_google" translatable="false">Google</string>
     <string name="search_engine_name_duckduckgo" translatable="false">DuckDuckGo</string>
     <string name="search_engine_name_bing" translatable="false">Bing</string>
 
-    <!-- Spec 016 US3 — app language. -->
+    <!-- app language. -->
     <string name="settings_language_title">App language</string>
     <string name="settings_language_follow_system">Follow system</string>
     <string name="settings_error_language_not_applied">Couldn\'t change the language. Please try again.</string>
-    <!-- FR-014 — each language is listed by its own name, identical in every locale, so these live here only. -->
+    <!-- Each language is listed by its own name, identical in every locale, so these live here only. -->
     <string name="language_name_en" translatable="false">English</string>
     <string name="language_name_vi" translatable="false">Tiếng Việt</string>
     <string name="language_name_de" translatable="false">Deutsch</string>
@@ -237,7 +229,7 @@
     <string name="language_name_zh" translatable="false">中文</string>
     <string name="language_name_fr" translatable="false">Français</string>
 
-    <!-- Spec 016 US4 — clear browsing data. Cancel reuses settings_action_cancel. -->
+    <!-- clear browsing data. Cancel reuses settings_action_cancel. -->
     <string name="settings_clear_browsing_data_title">Clear browsing data</string>
     <string name="settings_clear_dialog_title">Clear browsing data?</string>
     <string name="settings_clear_category_history">Browsing history</string>
@@ -251,7 +243,7 @@
     <string name="settings_clear_done">Browsing data cleared</string>
     <string name="settings_clear_partial_failure">Some data couldn\'t be cleared. Please try again.</string>
 
-    <!-- Spec 016 US5 — history retention. The body names the new window, e.g. "30 days". -->
+    <!-- history retention. The body names the new window, e.g. "30 days". -->
     <string name="settings_history_retention_title">Keep history for</string>
     <plurals name="settings_history_retention_days">
         <item quantity="one">%d day</item>
@@ -262,15 +254,15 @@
     <string name="settings_retention_shorten_confirm">Delete</string>
     <string name="settings_retention_prune_deferred">Older history couldn\'t be deleted now. It will be removed the next time the app starts.</string>
 
-    <!-- Spec 016 US6 — dynamic color (Android 12+ only). -->
+    <!-- dynamic color (Android 12+ only). -->
     <string name="settings_dynamic_color_title">Dynamic color</string>
     <string name="settings_dynamic_color_summary">Use colors from your wallpaper</string>
 
-    <!-- Spec 016 US7 — About. The app name comes from app_name. -->
+    <!-- About. The app name comes from app_name. -->
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_privacy_statement">This app collects no personal data and sends nothing to any server run by ThirtySix. Your history, bookmarks, downloads and settings stay on this device.</string>
 
-    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <!-- bottom bar and hub -->
     <string name="nav_search">Search</string>
     <string name="nav_tabs">Tabs</string>
     <string name="nav_menu">Menu</string>
@@ -287,7 +279,7 @@
         <item quantity="other">Tabs, %1$d open</item>
     </plurals>
 
-    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <!-- Home page -->
     <string name="home_greeting_morning">Good morning</string>
     <string name="home_greeting_afternoon">Good afternoon</string>
     <string name="home_greeting_evening">Good evening</string>
@@ -298,7 +290,7 @@
     <string name="home_shortcut_tag_saved">Saved</string>
     <string name="home_shortcut_tag_recent">Recent</string>
 
-    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <!-- incognito new-tab page -->
     <string name="incognito_page_title">You\'re browsing privately</string>
     <string name="incognito_page_subtitle">Other people who use this phone won\'t see what you do here.</string>
     <string name="incognito_page_section_title">When you close all incognito tabs</string>
@@ -307,11 +299,11 @@
     <string name="incognito_page_point_screenshots">Screenshots are blocked while a private tab is open</string>
     <string name="incognito_page_footnote">Files you download and bookmarks you save are kept. Websites and your network can still see your visits.</string>
 
-    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <!-- tab switcher modes -->
     <string name="tabs_chip_open">Open</string>
     <string name="tabs_chip_incognito">Incognito</string>
 
-    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <!-- default browser and entry points -->
     <string name="settings_section_general">General</string>
     <string name="settings_default_browser_title">Default browser</string>
     <string name="settings_default_browser_summary_not_default">ThirtySix isn\'t your default browser. Tap to change.</string>
@@ -325,7 +317,7 @@
     <string name="entry_tab_limit_reused">Tab limit reached — opened in your current tab</string>
     <string name="entry_default_browser_unavailable">Default apps can\'t be changed on this device</string>
 
-    <!-- Spec 021 — web capabilities (contracts C2) -->
+    <!-- web capabilities -->
     <string name="site_capability_camera">camera</string>
     <string name="site_capability_microphone">microphone</string>
     <string name="site_capability_location">location</string>
@@ -383,7 +375,7 @@
     <string name="settings_clear_category_site_permissions_description">Sites will ask again for camera, microphone and location</string>
     <string name="file_chooser_title">Choose a file</string>
 
-    <!-- Spec 022 — page tools -->
+    <!-- page tools -->
     <string name="hub_page_tools_title">Page tools</string>
     <string name="hub_tile_find_in_page">Find in page</string>
     <string name="hub_tile_share">Share</string>
@@ -404,7 +396,7 @@
     <string name="suggestion_bookmark_cd">Bookmark: %1$s, %2$s</string>
     <string name="suggestion_history_cd">History: %1$s, %2$s</string>
     <string name="share_page_title">Share page</string>
-    <!-- Spec 023 privacy protection -->
+    <!-- privacy protection -->
     <string name="hub_protection_site_title">Protection for this site</string>
     <string name="hub_protection_site_on">Trackers blocked, tracking tags removed, secure connection tried first</string>
     <string name="hub_protection_site_off">Off for %1$s. Trackers can load here.</string>
@@ -427,7 +419,7 @@
         <item quantity="one">%1$d tracker blocked on this page</item>
         <item quantity="other">%1$d trackers blocked on this page</item>
     </plurals>
-    <!-- Spec 024 privacy tools -->
+    <!-- privacy tools -->
     <string name="fire_action">Fire</string>
     <string name="fire_action_tabs_cd">Fire: close all tabs and clear browsing data</string>
     <string name="fire_confirm_title">Close all tabs and clear data?</string>

@@ -1,32 +1,11 @@
 package com.raumanian.thirtysix.browser.core.domain.repository
 
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
-/**
- * Spec 014 FR-021 — narrow seam over the Android system clipboard.
- *
- * Introduced so [com.raumanian.thirtysix.browser.feature.history.presentation.history.HistoryViewModel]
- * can offer "Copy URL" without holding an Android `Context`, keeping its unit tests on
- * the plain JVM (no Robolectric). Mirrors the
- * [com.raumanian.thirtysix.browser.data.local.cache.FaviconCache] pattern from Spec 011:
- * interface + concrete implementation in one file, bound in
- * [com.raumanian.thirtysix.browser.core.di.ClipboardModule].
- *
- * > Deviates from tasks.md T067, which called for injecting `@ApplicationContext Context`
- * > straight into the ViewModel. The seam is behaviourally identical and strictly more
- * > testable, so the interface was preferred.
- */
+/** Seam over the system clipboard, so ViewModels stay testable on the plain JVM. */
 interface ClipboardWriter {
     /**
-     * Place [url] on the system clipboard as plain text.
-     *
-     * Spec 015 added [label], defaulted so every Spec 014 call site is unchanged. Android
-     * 13+ surfaces it in the system clipboard preview, so a copied download link can be
-     * told apart from a copied page address.
-     *
-     * @return `true` when the write reached the platform clipboard, `false` when the
-     *  service was unavailable or the platform rejected the write. Callers surface a
-     *  confirmation snackbar only on `true` — on Android 13+ the system shows its own
-     *  clipboard preview, but the in-app confirmation still covers older releases.
+     * Android 13+ shows [label] in its clipboard preview, telling a download link from a page
+     * address. Returns false when the service is unavailable or rejects the write.
      */
     fun copyUrl(url: String, label: String = AppConstants.CLIPBOARD_URL_LABEL): Boolean
 }

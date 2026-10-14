@@ -1,5 +1,5 @@
-// Spec 003 — Typography mapping: Poppins (heading) + Inter (body), bundled local in res/font/.
-// Override only fontFamily + fontWeight on Material3 default Typography; size/lineHeight/letterSpacing preserved.
+// Poppins (headings) + Inter (body), bundled in res/font/. Only fontFamily and fontWeight
+// override the Material 3 defaults; sizes, line heights and tracking are kept.
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 
@@ -30,7 +30,7 @@ internal val ThirtySixTypography = Typography(
     displayLarge = Default.displayLarge.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
     displayMedium = Default.displayMedium.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
     displaySmall = Default.displaySmall.copy(fontFamily = Poppins, fontWeight = FontWeight.SemiBold),
-    // Spec 019 — tighter tracking on display-face headings, per the design system's type group.
+    // Tighter tracking on display-face headings, per the design system.
     headlineLarge = Default.headlineLarge.copy(
         fontFamily = Poppins,
         fontWeight = FontWeight.SemiBold,

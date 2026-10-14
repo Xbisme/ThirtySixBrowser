@@ -17,7 +17,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 020 T040 / T042 — the invitation use cases, including FR-026's sync. */
+/** The default-browser invitation use cases, including the sync with the system role. */
 class DefaultBrowserUseCasesTest {
 
     private class FakeInviteRepository : DefaultBrowserInviteRepository {

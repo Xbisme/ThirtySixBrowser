@@ -28,11 +28,8 @@ private const val LETTER_ALPHA = 0.22f
 private const val LETTER_SIZE_SP = 72
 
 /**
- * Spec 019 — a three-colour mesh: the art of a shortcut or tab card with no screenshot
- * (seeded from the favicon colour, research R13), and the Home hero (data-model §3).
- *
- * Brushes are built in `drawWithCache` and rebuilt only when the size or colours change, so
- * the mesh is one cached draw (research R6). An optional faint [letter] sits on top.
+ * A three-colour mesh: the art of a shortcut or tab card with no screenshot, and the Home hero.
+ * Brushes are rebuilt only when the size or colours change, so the mesh is one cached draw.
  */
 @Composable
 fun MeshArt(

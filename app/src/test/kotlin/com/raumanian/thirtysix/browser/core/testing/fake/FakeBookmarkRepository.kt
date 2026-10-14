@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 
 /**
- * Spec 013 — in-memory fake honoring [BookmarkRepository] contract for use-case
+ * In-memory fake honoring the [BookmarkRepository] contract for use-case
  * and ViewModel tests. Mirrors [com.raumanian.thirtysix.browser.feature.bookmarks.data.repository.BookmarkRepositoryImpl]
  * cycle prevention + cascade delete logic in pure Kotlin.
  *

@@ -36,7 +36,7 @@ class AddBookmarkUseCaseTest {
     }
 
     @Test
-    fun `blank title falls back to url string per FR-007`() = runTest {
+    fun `blank title falls back to url string`() = runTest {
         val repo = FakeBookmarkRepository()
         val useCase = AddBookmarkUseCase(repo)
 

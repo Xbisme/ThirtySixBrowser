@@ -5,7 +5,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import javax.inject.Inject
 
-/** Spec 021 FR-001 — the three answers the permission dialog offers. */
 enum class SitePermissionChoice { AlwaysAllow, AllowOnce, Deny }
 
 /**
@@ -14,11 +13,7 @@ enum class SitePermissionChoice { AlwaysAllow, AllowOnce, Deny }
  */
 data class SiteChoiceEffect(val allowNow: Boolean, val grantOnce: Boolean)
 
-/**
- * Spec 021 contracts C1.2 — records the person's answer. Normal tabs remember Always allow and
- * Don't allow (FR-003); incognito tabs never write anything (FR-004, INV-1), so there every
- * allow is a one-time grant.
- */
+/** Records the answer; incognito never writes, so there every allow is a one-time grant. */
 class ApplySitePermissionChoiceUseCase @Inject constructor(
     private val repository: SitePermissionRepository,
 ) {

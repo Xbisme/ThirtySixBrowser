@@ -40,21 +40,16 @@ private val LabelGap = 6.dp
 private const val LABEL_MAX_LINES = 2
 
 /**
- * Spec 022 (contracts C16) — optional state of a [QuickTile], defaulted so existing tiles are
- * unchanged.
- * - [selected]: when non-null the tile is a switch. It shows the primary container when on, and
- *   TalkBack reads it as a switch with an "On" / "Off" state (FR-003, FR-036).
- * - [value]: a second line under the label, for example the current text size "125%".
+ * Optional state of a [QuickTile]. A non-null [selected] makes the tile a switch that TalkBack
+ * reads as "On" / "Off"; [value] is a second line under the label, such as "125%".
  */
 @Immutable
 data class QuickTileState(val selected: Boolean? = null, val value: String? = null)
 
 /**
- * Spec 019 — the hub's tiles (design system QuickTile): an icon well with the label underneath.
- * [QuickTileTone.Place] tiles are white with a hairline ring; pastel tiles are square and use a
- * filled icon in their matching ink. Labels wrap to two lines and hyphenate a single long word
- * rather than break it at an arbitrary character; a label that still splits badly gets a shorter
- * hub-specific string (`hub_tile_search_engine`, German "Suche"). Spec 022 adds [state].
+ * The hub's tiles: an icon well with the label underneath. Labels wrap to two lines and hyphenate
+ * a long word rather than break it anywhere; a label that still splits badly gets a shorter
+ * hub-specific string (`hub_tile_search_engine`, German "Suche").
  */
 @Composable
 @Suppress("LongParameterList") // Design-system tile: label, icon, tone, action, modifier, state.
@@ -102,7 +97,7 @@ fun QuickTile(
     }
 }
 
-/** The label, wrapping to two lines (FR-055), and the optional value line under it. */
+/** The label, wrapping to two lines, and the optional value line under it. */
 @Composable
 private fun ColumnScope.QuickTileLabels(label: String, value: String?) {
     Text(
@@ -112,7 +107,7 @@ private fun ColumnScope.QuickTileLabels(label: String, value: String?) {
         textAlign = TextAlign.Center,
         maxLines = LABEL_MAX_LINES,
         overflow = TextOverflow.Ellipsis,
-        // Fill the tile so a long label wraps instead of being clipped (FR-055).
+        // Fill the tile so a long label wraps instead of being clipped.
         modifier = Modifier.fillMaxWidth(),
     )
     if (value != null) {

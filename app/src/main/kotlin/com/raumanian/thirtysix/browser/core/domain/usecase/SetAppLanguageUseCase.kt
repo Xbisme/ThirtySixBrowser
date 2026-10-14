@@ -7,15 +7,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 016 FR-013 – FR-015 — switch the app language through the platform.
- *
- *  - Choosing the language the platform already holds returns `true` without calling it, so
- *    nothing is rebuilt and no page reloads (FR-006). This is also why the controller itself
- *    does not de-duplicate: on Android 13+ an identical request would still reach the framework.
- *  - Otherwise the change is applied on the main dispatcher, which the platform requires
- *    (research R1), and the result says whether it was accepted. `false` becomes
- *    `LanguageNotApplied` in the view model.
- *  - Never throws: the controller is total.
+ * Switches the app language on the main thread, as the platform requires; returns whether it was
+ * accepted. Re-choosing the current language returns `true` without a call, because on Android 13+
+ * an identical request would still reach the framework and rebuild the screen.
  */
 class SetAppLanguageUseCase @Inject constructor(
     private val controller: AppLanguageController,

@@ -6,12 +6,9 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.thread
 
 /**
- * Spec 022 — a one-thread HTTP server for instrumented tests. It serves the test APK's assets
- * (`app/src/androidTest/assets/`) at `http://127.0.0.1:<port>/<name>` and records each request's
- * `User-Agent` header.
- *
- * A server is needed because the WebView's file access is off (Spec 007 FR-013), and
- * `file:///android_asset/` would read the app's assets, not the test APK's.
+ * A one-thread HTTP server serving the test APK's assets at `http://127.0.0.1:<port>/<name>`.
+ * Needed because the WebView's file access is off, and `file:///android_asset/` would read the
+ * app's assets, not the test APK's.
  */
 class AssetPageServer : AutoCloseable {
     private val socket = ServerSocket(0)
@@ -22,13 +19,13 @@ class AssetPageServer : AutoCloseable {
     /** Every request so far as (path without query, `User-Agent`), in order. */
     val requests: MutableList<Pair<String, String>> = CopyOnWriteArrayList()
 
-    /** Spec 023 — every request so far: raw path with its query, and its headers (lower-case names). */
+    /** Every request so far: raw path with its query, and its headers (lower-case names). */
     val fullRequests: MutableList<Pair<String, Map<String, String>>> = CopyOnWriteArrayList()
 
-    /** Spec 023 — the raw paths (with query) of every request so far. */
+    /** The raw paths (with query) of every request so far. */
     fun paths(): List<String> = fullRequests.map { it.first }
 
-    /** Spec 023 — the headers of each request whose path (without query) is [name]. */
+    /** The headers of each request whose path (without query) is [name]. */
     fun headersFor(name: String): List<Map<String, String>> =
         fullRequests.filter { it.first.trimStart('/').substringBefore('?') == name }.map { it.second }
 
@@ -41,7 +38,7 @@ class AssetPageServer : AutoCloseable {
 
     fun url(name: String): String = "http://127.0.0.1:${socket.localPort}/$name"
 
-    /** Spec 023 — the same server under another host name (a different site to the matcher). */
+    /** The same server under another host name (a different site to the matcher). */
     fun url(name: String, host: String): String = "http://$host:${socket.localPort}/$name"
 
     val port: Int get() = socket.localPort
@@ -79,17 +76,18 @@ class AssetPageServer : AutoCloseable {
                     } else {
                         "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n"
                     }
-                    it.getOutputStream().write((head + "Connection: close\r\n\r\n").toByteArray() + (body ?: ByteArray(0)))
+                    val response = (head + "Connection: close\r\n\r\n").toByteArray()
+                    it.getOutputStream().write(response + (body ?: ByteArray(0)))
                 }
             }
         }
     }
 
-    /** Spec 024 — a service worker must be served as JavaScript, or registration fails. */
+    /** A service worker must be served as JavaScript, or registration fails. */
     private fun contentTypeOf(name: String): String =
         if (name.endsWith(".js")) "application/javascript; charset=utf-8" else "text/html; charset=utf-8"
 
-    /** Spec 024 — `storage.html` (not `?check`) also sets the persistent HttpOnly cookie of quickstart G4. */
+    /** `storage.html` (not `?check`) also sets a persistent HttpOnly cookie. */
     private fun extraHeadersFor(path: String): String =
         if (path.substringBefore('?').endsWith(STORAGE_FIXTURE) && !path.contains("check")) {
             "Set-Cookie: $PERSISTENT_COOKIE\r\nCache-Control: no-store\r\n"

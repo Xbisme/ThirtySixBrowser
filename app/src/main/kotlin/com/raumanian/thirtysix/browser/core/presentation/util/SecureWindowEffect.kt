@@ -8,27 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalView
 
-/**
- * Spec 012 (FR-016 / FR-016a) — toggles the platform "secure window" flag
- * (`WindowManager.LayoutParams.FLAG_SECURE`) on the host Activity in response
- * to the [secure] boolean.
- *
- * When `secure == true`:
- *  - The system "recents" overview thumbnail is BLANKED (no page content
- *    leaks to anyone who later peeks at recents).
- *  - User-initiated screenshots and screen recording are BLOCKED while the
- *    flag is set (Chrome's incognito posture; matches user expectation).
- *
- * Idempotency (FR-016a): both `addFlags` and `clearFlags` are platform
- * no-ops if the flag is already in the requested state. The keyed
- * [DisposableEffect] re-runs only when [secure] flips, and `onDispose`
- * defensively clears the flag so a teardown mid-incognito (process death
- * precursor) does not leave a recreated window with a stuck FLAG_SECURE.
- *
- * Caller (typical): `MainActivity` collects
- * `ObserveActiveTabIsIncognitoUseCase().collectAsStateWithLifecycle(false)`
- * and feeds the boolean here inside `ThirtySixTheme { … }`.
- */
+// FLAG_SECURE blanks the recents thumbnail and blocks screenshots while [secure], as Chrome's
+// incognito does. Disposal clears it so a recreated window never inherits a stuck flag.
 @Composable
 fun SecureWindowEffect(secure: Boolean) {
     val view = LocalView.current

@@ -16,9 +16,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
 private const val CONTENT_TYPE_FOLDER_CHIP = "folder_chip"
 
 /**
- * Spec 019 FR-042 — top-level folders as chips at the bookmarks root. A chip is only another
- * entry point to the existing "open folder" action: tapping one does exactly what tapping the
- * folder's row does ([onFolderClick]). Never selected — the root has no current folder.
+ * Top-level folders as chips at the bookmarks root; a chip does exactly what tapping the
+ * folder's row does ([onFolderClick]). Never selected: the root has no current folder.
  */
 @Composable
 fun FolderChipsRow(

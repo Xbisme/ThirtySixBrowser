@@ -10,7 +10,7 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.Bookmar
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-@Suppress("TooManyFunctions") // Spec 013 added 6 query/mutation methods on top of Spec 005 baseline.
+@Suppress("TooManyFunctions") // One DAO serves the folder tree, search, the star toggle and Home.
 interface BookmarkDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -25,10 +25,7 @@ interface BookmarkDao {
     @Query("SELECT * FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_ID} = :id")
     suspend fun getById(id: Long): BookmarkEntity?
 
-    /**
-     * All bookmarks under a given folder, ordered by sort_order ascending.
-     * Pass NULL to retrieve root-level bookmarks (parent_folder_id IS NULL).
-     */
+    /** Bookmarks in [folderId] by sort order; `null` gives the root level. */
     @Query(
         """
         SELECT * FROM ${BookmarkEntity.TABLE_NAME}
@@ -42,7 +39,6 @@ interface BookmarkDao {
     @Query("SELECT COUNT(*) FROM ${BookmarkEntity.TABLE_NAME}")
     suspend fun count(): Int
 
-    /** Spec 019 (data-model §4) — the [limit] most recently saved bookmarks, any folder. */
     @Query(
         """
         SELECT * FROM ${BookmarkEntity.TABLE_NAME}
@@ -52,17 +48,10 @@ interface BookmarkDao {
     )
     fun observeRecent(limit: Int): Flow<List<BookmarkEntity>>
 
-    /**
-     * Spec 013 — bookmarks whose URL matches exactly. Powers
-     * `IsUrlBookmarkedUseCase` (FR-002 star fill state) reactively.
-     */
     @Query("SELECT * FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_URL} = :url")
     fun observeByUrl(url: String): Flow<List<BookmarkEntity>>
 
-    /**
-     * Spec 022 data-model §4 — every bookmark, most recently saved first: the bookmark half of
-     * the address-suggestion snapshot. Takes no user text (FR-017).
-     */
+    /** For address suggestions, which filter in memory: no user text ever reaches a `LIKE` query. */
     @Query(
         """
         SELECT * FROM ${BookmarkEntity.TABLE_NAME}
@@ -71,15 +60,10 @@ interface BookmarkDao {
     )
     suspend fun getAllNewestFirst(): List<BookmarkEntity>
 
-    /** Spec 013 — synchronous count gate inside `ToggleBookmarkUseCase` (R9). */
     @Query("SELECT COUNT(*) FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_URL} = :url")
     suspend fun countByUrl(url: String): Int
 
-    /**
-     * Spec 013 — deletes the most recently created bookmark with the given URL.
-     * Used by the Q4 star-toggle "remove most recent" semantic. Returns the
-     * number of rows deleted (0 or 1).
-     */
+    /** Un-starring removes only the newest bookmark with [url]; older copies stay. */
     @Query(
         """
         DELETE FROM ${BookmarkEntity.TABLE_NAME}
@@ -94,11 +78,10 @@ interface BookmarkDao {
     )
     suspend fun deleteMostRecentByUrl(url: String): Int
 
-    /** Spec 013 — leaf delete used by the cascade-delete walk in R7. */
     @Query("DELETE FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_PARENT_FOLDER_ID} = :folderId")
     suspend fun deleteByParentFolder(folderId: Long): Int
 
-    /** Spec 013 — substring search across title + url, case-insensitive. */
+    /** Case-insensitive; `%` and `_` in [query] act as wildcards. */
     @Query(
         """
         SELECT * FROM ${BookmarkEntity.TABLE_NAME}
@@ -109,7 +92,6 @@ interface BookmarkDao {
     )
     fun searchByTitleOrUrl(query: String): Flow<List<BookmarkEntity>>
 
-    /** Spec 013 — count of bookmarks under a folder. Powers descendant tally (R8). */
     @Query("SELECT COUNT(*) FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_PARENT_FOLDER_ID} = :folderId")
     suspend fun countByFolder(folderId: Long): Int
 }

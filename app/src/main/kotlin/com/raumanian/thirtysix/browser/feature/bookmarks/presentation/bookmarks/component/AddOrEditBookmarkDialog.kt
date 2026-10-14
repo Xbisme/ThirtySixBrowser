@@ -36,15 +36,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
- * Spec 013 — single dialog used for both manual-add (US7) and edit (US5).
- * Validates URL inline using [BookmarkUrlValidator]; rejects empty title +
- * empty URL + malformed URL with localized error per FR-006 / FR-022.
- *
- * Folder selection: a row underneath the URL field shows the resolved path
- * (e.g. "Folder: Work / Project A" or "Folder: Root"). Tapping it opens an
- * inline FolderPickerSheet over the dialog.
- *
- * Spec 019 — on [BookmarkInputDialog]; the folder selector is a rounded well with a chevron.
+ * Add and edit share this dialog. The URL is validated inline with [BookmarkUrlValidator]; the
+ * folder row shows the resolved path and opens a [FolderPickerSheet] over the dialog.
  */
 @Composable
 @Suppress("LongMethod", "LongParameterList")
@@ -129,7 +122,6 @@ fun AddOrEditBookmarkDialog(
             label = { Text(stringResource(R.string.bookmarks_field_url_label)) },
             modifier = Modifier.fillMaxWidth(),
         )
-        // Folder selector — tap to open the FolderPickerSheet over this dialog.
         FolderSelectorRow(text = folderFieldText, onClick = { folderPickerOpen = true })
     }
 
@@ -189,11 +181,7 @@ private fun FolderSelectorRow(text: String, onClick: () -> Unit) {
     }
 }
 
-/**
- * Resolves the "root → leaf" path string for a given folder id by walking
- * the parent chain in [allFolders]. Returns null when [folderId] is null
- * (caller renders the localized "Root" label in that case).
- */
+/** The "root → leaf" path for [folderId]; null at the root, where the caller shows "Root". */
 @Suppress("ReturnCount")
 private fun resolveFolderLabel(folderId: Long?, allFolders: List<BookmarkFolder>): String? {
     if (folderId == null) return null

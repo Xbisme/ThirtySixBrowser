@@ -17,7 +17,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 023 T034 — sites without protection over Room, plus the in-memory snapshot. */
 @RunWith(AndroidJUnit4::class)
 class ProtectionExceptionRepositoryImplTest {
 

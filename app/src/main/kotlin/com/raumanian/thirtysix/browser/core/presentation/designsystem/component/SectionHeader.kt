@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 private val HeaderBottom = 6.dp
 
-/** Spec 019 — a list section header ("Today", "Folders", "Appearance"), announced as a heading. */
+/** A list section header ("Today", "Folders", "Appearance"), announced as a heading. */
 @Composable
 fun SectionHeader(text: String, modifier: Modifier = Modifier) {
     Text(

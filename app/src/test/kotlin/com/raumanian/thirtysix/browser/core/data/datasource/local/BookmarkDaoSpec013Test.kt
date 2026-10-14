@@ -12,10 +12,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 013 — covers the 6 new methods added to [BookmarkDao]: `observeByUrl`,
- * `countByUrl`, `deleteMostRecentByUrl`, `deleteByParentFolder`,
- * `searchByTitleOrUrl`, `countByFolder`.
+ * [BookmarkDao]'s `observeByUrl`, `countByUrl`, `deleteMostRecentByUrl`, `deleteByParentFolder`,
+ * `searchByTitleOrUrl` and `countByFolder`.
  */
+
 @RunWith(AndroidJUnit4::class)
 class BookmarkDaoSpec013Test {
 

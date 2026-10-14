@@ -21,12 +21,8 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 /**
- * Spec 018 T007 — the one-shot settings read, and the use case over it.
- *
- * This read exists so the start-up decision can be made before the navigation graph is built.
- * The distinction these tests pin is the one the whole feature hinges on: `currentSettings()`
- * returns what is actually PERSISTED, never `UserSettings.DEFAULT` as a placeholder. Returning
- * the defaults on a fresh install is correct — there, the defaults ARE the persisted truth.
+ * The start-up routing reads this before the navigation graph is built, so it must return what is
+ * persisted, never `UserSettings.DEFAULT` as a placeholder.
  */
 class SettingsRepositoryCurrentSettingsTest {
 
@@ -53,7 +49,7 @@ class SettingsRepositoryCurrentSettingsTest {
     fun `fresh install returns the documented defaults`() = runTest {
         val settings = repository.currentSettings()
 
-        // On a fresh install the defaults are not a placeholder — they are the truth.
+        // On a fresh install the defaults are not a placeholder; they are what is stored.
         assertEquals(AppDefaults.THEME_MODE, settings.themeMode)
         assertEquals(AppDefaults.SEARCH_ENGINE, settings.searchEngine)
         assertEquals(AppDefaults.IS_ONBOARDING_COMPLETED, settings.isOnboardingCompleted)

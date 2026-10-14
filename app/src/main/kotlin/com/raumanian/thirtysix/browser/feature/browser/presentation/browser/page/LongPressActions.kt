@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-/** What the browser screen tells the person after a long-press action (C2.4). */
+/** What the browser screen tells the person after a long-press action. */
 sealed interface LongPressEvent {
     data class OpenedInBackground(val tabId: Long, val incognito: Boolean) : LongPressEvent
 
@@ -24,9 +24,8 @@ sealed interface LongPressEvent {
 }
 
 /**
- * Spec 021 US4 — the long-press actions that change app state: a tab opened behind the active
- * one (FR-020, FR-021), Switch to it, and copying an address (FR-022). Sharing and downloading
- * are started by the screen, which owns the activity and the storage-permission gate.
+ * Long-press actions that change app state: a tab opened behind the active one, Switch to it, and
+ * copying an address. Sharing and downloading are started by the screen, which owns the activity.
  */
 @HiltViewModel
 class LongPressActions @Inject constructor(

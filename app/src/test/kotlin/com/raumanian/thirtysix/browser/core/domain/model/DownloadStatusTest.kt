@@ -6,9 +6,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 015 — pins the terminal/in-flight partition that FR-034a's action matrix and
- * FR-036a's cancel-control visibility both read. Defining it once is the only reason those
- * two rules cannot drift apart; this test is what keeps the definition honest.
+ * Pins the terminal/in-flight partition that both the row action matrix and the cancel
+ * control's visibility read; defining it once keeps those two rules from drifting apart.
  */
 class DownloadStatusTest {
 
@@ -66,10 +65,7 @@ class DownloadStatusTest {
 
     @Test
     fun `a completed download carries the size the platform reported`() {
-        // Regression, found on an API 24 emulator during the G1 gate: `Complete` was a
-        // data object carrying nothing, so the cursor mapper read the platform's total and
-        // threw it away. Every finished row — the common case — rendered "Unknown size",
-        // failing FR-020's requirement that each row show the file size.
+        // Every finished row must show its size, so `Complete` keeps the platform's total.
         val completed = DownloadStatus.Complete(totalBytes = 71L)
 
         assertEquals(71L, completed.totalBytes)
@@ -78,7 +74,8 @@ class DownloadStatusTest {
 
     @Test
     fun `a completed download with no reported size stays null rather than zero`() {
-        // The FR-024a fallback resolves a forgotten handle to Complete without a size;
+        // A handle the platform forgot resolves to Complete without a size;
+
         // null must survive so the UI says "unknown" instead of claiming 0 bytes.
         assertEquals(null, DownloadStatus.Complete().totalBytes)
     }

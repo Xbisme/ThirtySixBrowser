@@ -45,18 +45,8 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Spec 007 — pure JVM unit tests for [BrowserViewModel] (US1 happy-path scenarios).
- *
- * Failed-state tests live in T034 (US3 phase) once `ErrorReason` and
- * `LoadingState.Failed` exist. This test class restricts itself to
- * Idle / Loading / Loaded transitions per [contracts/browser-screen-contract.md].
- *
- * Spec 010 — query-branch tests now exercise a real [BuildSearchUrlUseCase]
- * backed by a [GoogleByteIdenticalRepository] fake. The fake reproduces the
- * exact `URLEncoder.encode(query, "UTF-8")` + `GOOGLE_SEARCH_URL_TEMPLATE`
- * formula Spec 009 used inline so SC-001 byte-identity holds at the ViewModel
- * boundary as well. The query branch now runs inside `viewModelScope.launch`
- * so query tests advance the [StandardTestDispatcher] before asserting.
+ * JVM tests for [BrowserViewModel]. Query submits run in `viewModelScope`, so those tests advance
+ * the dispatcher; [GoogleByteIdenticalRepository] pins the exact Google encoding.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelTest {
@@ -84,16 +74,13 @@ class BrowserViewModelTest {
             FakeBookmarkRepository(),
         historyRepository: FakeHistoryRepository = FakeHistoryRepository(),
     ): BrowserViewModel {
-        // Spec 011 — 4 use-case dependencies + 2 caches all back onto a
-        // single FakeTabRepository / Noop*Cache so existing Spec 007–010
-        // tests remain green by ignoring this seam (defaults provide a
-        // self-contained fake).
+        // Tab use cases and caches share one self-contained fake by default.
         val observeTabs = ObserveTabsUseCase(tabRepository)
         val incognitoRepo = FakeIncognitoTabRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
         val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
-        // Spec 013 — star-icon use cases. Defaults to a self-contained fake.
+        // Star-icon use cases; a self-contained fake by default.
         val isUrlBookmarked =
             IsUrlBookmarkedUseCase(bookmarkRepository)
         val addBookmark =
@@ -118,7 +105,7 @@ class BrowserViewModelTest {
         )
     }
 
-    /** Spec 011 favicon amendment — no-op [FaviconCache] for tests. */
+    /** No-op [FaviconCache] for tests. */
     private object NoopFaviconCache : FaviconCache {
         private val state = MutableStateFlow(0L)
         override val version: StateFlow<Long> = state.asStateFlow()
@@ -128,7 +115,7 @@ class BrowserViewModelTest {
         override fun fileFor(url: String): File? = null
     }
 
-    /** Spec 011 Q4 amendment — no-op [ScreenshotCache] for tests. */
+    /** No-op [ScreenshotCache] for tests. */
     private object NoopScreenshotCache : ScreenshotCache {
         private val state = MutableStateFlow(0L)
         override val version: StateFlow<Long> = state.asStateFlow()
@@ -138,11 +125,7 @@ class BrowserViewModelTest {
         override suspend fun clearAll() = Unit
     }
 
-    /**
-     * Test fake reproducing the exact Spec 009 inline-encoding formula so the
-     * Google query-path assertions stay byte-identical to the prior production
-     * behavior (SC-001 non-regression).
-     */
+    /** Reproduces `URLEncoder.encode(query, "UTF-8")` into the Google template, byte for byte. */
     private object GoogleByteIdenticalRepository : SearchEngineRepository {
         override suspend fun buildSearchUrl(query: String): String {
             val encoded = URLEncoder.encode(query, Charsets.UTF_8.name())
@@ -164,10 +147,7 @@ class BrowserViewModelTest {
     @Test
     fun `happy path Idle to Loading to Loaded via progress`() = runTest {
         val vm = newViewModel()
-        // Spec 009 — production wiring fires onUrlChange BEFORE onLoadStarted
-        // (see `BrowserWebViewClient.onPageStarted`). Mirror that order here
-        // since `onLoadStarted` no longer mutates `currentUrl` after the Spec
-        // 009 refactor.
+        // Production fires onUrlChange before onLoadStarted (see `onPageStarted`); mirror that order.
         vm.onUrlChanged("https://example.com")
         vm.onLoadStarted("https://example.com")
         vm.onProgressChanged(EARLY_PROGRESS)
@@ -236,7 +216,7 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onLoadStarted("https://example.com")
         vm.onLoadFinished("https://example.com")
-        vm.onLoadStarted("https://other.example.com") // simulating reload (Spec 008 will trigger this)
+        vm.onLoadStarted("https://other.example.com") // simulating a reload
         vm.onLoadFailed(ErrorReason.SslError)
         val state = vm.uiState.value
         assertTrue(state.loadingState is LoadingState.Failed)
@@ -269,7 +249,7 @@ class BrowserViewModelTest {
         assertEquals(0.99f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
 
-    // ---------- Spec 008 (T026) — canGoBack / canGoForward state mutators ----------
+    // ---------- canGoBack / canGoForward ----------
 
     @Test
     fun `initial canGoBack and canGoForward are false`() = runTest {
@@ -318,7 +298,7 @@ class BrowserViewModelTest {
         assertEquals(true, after.canGoForward) // forward retains its value
     }
 
-    // ---------- Spec 008 (T026) — onLoadStopped + homeUrl getter ----------
+    // ---------- onLoadStopped ----------
 
     @Test
     fun `onLoadStopped during Loading transitions to Loaded`() = runTest {
@@ -352,7 +332,7 @@ class BrowserViewModelTest {
         assertEquals(failed, vm.uiState.value)
     }
 
-    // ---------- Spec 009 (T009) — Foundational address-bar default state ----------
+    // ---------- Address bar defaults ----------
 
     @Test
     fun `initial address-bar text is empty and not focused`() = runTest {
@@ -362,7 +342,7 @@ class BrowserViewModelTest {
         assertEquals(false, state.isAddressBarFocused)
     }
 
-    // ---------- Spec 009 (T011) — onAddressBarTextChange / FocusChange / Submit (US1) ----------
+    // ---------- Address bar text, focus and submit ----------
 
     @Test
     fun `onAddressBarTextChange updates state`() = runTest {
@@ -419,14 +399,11 @@ class BrowserViewModelTest {
     }
 
     /**
-     * C1 remediation — FR-013 cancel-previous-load assertion. Two consecutive
-     * non-empty submits MUST forward both URLs to `loadUrl` in order. The
-     * underlying WebView platform contract guarantees the second `loadUrl`
-     * cancels the first; this test asserts the ViewModel does not coalesce
-     * or skip submissions.
+     * Two consecutive submits forward both URLs in order: the WebView cancels the first load,
+     * so the view model must not coalesce or skip submissions.
      */
     @Test
-    fun `two consecutive submits forward both URLs to loadUrl in order (FR-013)`() = runTest {
+    fun `two consecutive submits forward both URLs to loadUrl in order`() = runTest {
         val vm = newViewModel()
         val calls = mutableListOf<String>()
         val loadUrl: (String) -> Unit = { calls.add(it) }
@@ -441,7 +418,7 @@ class BrowserViewModelTest {
         assertEquals(listOf("https://first.com", "https://second.com"), calls)
     }
 
-    // ---------- Spec 009 (T020 — US2) — onAddressBarSubmit query path ----------
+    // ---------- Address bar query path ----------
 
     @Test
     fun `onAddressBarSubmit query input builds Google search URL`() = runTest(testDispatcher) {
@@ -477,7 +454,7 @@ class BrowserViewModelTest {
         assertEquals(listOf("https://www.google.com/search?q=%EC%95%88%EB%85%95"), calls)
     }
 
-    // ---------- Spec 010 — onAddressBarSubmit query path routes through BuildSearchUrlUseCase ----------
+    // ---------- Query path through BuildSearchUrlUseCase ----------
 
     @Test
     fun `query branch dispatches to BuildSearchUrlUseCase`() = runTest(testDispatcher) {
@@ -538,7 +515,7 @@ class BrowserViewModelTest {
         assertTrue(calls.isEmpty())
     }
 
-    // ---------- Spec 009 (T024 — US3) — onUrlChanged + onLoadStarted refactor ----------
+    // ---------- onUrlChanged and onLoadStarted ----------
 
     @Test
     fun `onUrlChanged updates currentUrl and does not affect addressBarText or focus`() = runTest {
@@ -552,13 +529,9 @@ class BrowserViewModelTest {
         assertEquals(true, state.isAddressBarFocused)
     }
 
-    /**
-     * Spec 009 refactor — `onLoadStarted` previously mutated `currentUrl`
-     * (Spec 007 behavior); the responsibility moved to [onUrlChanged]. This
-     * test asserts the refactor: `onLoadStarted` only flips loading state.
-     */
+    /** `onLoadStarted` only flips the loading state; [onUrlChanged] owns `currentUrl`. */
     @Test
-    fun `onLoadStarted no longer mutates currentUrl after Spec 009 refactor`() = runTest {
+    fun `onLoadStarted does not mutate currentUrl on load start`() = runTest {
         val vm = newViewModel("https://initial.example.com")
         vm.onLoadStarted("https://other.example.com")
         val state = vm.uiState.value
@@ -567,14 +540,11 @@ class BrowserViewModelTest {
     }
 
     /**
-     * C2 remediation — FR-019a immediacy. After submit, the WebView's
-     * `onPageStarted` callback fires synchronously; the test wires a stub
-     * `loadUrl` that calls `onUrlChanged(target)` directly to mirror that
-     * platform contract. Asserts `currentUrl` reflects the submitted target
-     * before any `onLoadFinished` callback fires.
+     * After submit the WebView's `onPageStarted` fires synchronously; the stub `loadUrl` mirrors it,
+     * so `currentUrl` shows the target before any `onLoadFinished`.
      */
     @Test
-    fun `submit triggers immediate currentUrl update via onUrlChanged (FR-019a)`() = runTest {
+    fun `submit triggers immediate currentUrl update via onUrlChanged`() = runTest {
         val vm = newViewModel("https://before.example.com")
         // Stub mirrors the real WebView's onPageStarted → onUrlChanged chain.
         val loadUrl: (String) -> Unit = { url -> vm.onUrlChanged(url) }
@@ -586,7 +556,7 @@ class BrowserViewModelTest {
         assertEquals("https://example.com", vm.uiState.value.currentUrl)
     }
 
-    // ---------- Spec 009 (T034 — US4) — onAddressBarClear ----------
+    // ---------- onAddressBarClear ----------
 
     @Test
     fun `onAddressBarClear empties text and preserves focus`() = runTest {
@@ -599,7 +569,7 @@ class BrowserViewModelTest {
         assertEquals(true, state.isAddressBarFocused)
     }
 
-    // ---------- Spec 011 (T024 — US1) — active-tab seeding + write-through ----------
+    // ---------- Active-tab seeding and write-through ----------
 
     @Test
     fun `init seeds currentUrl from the active tab once Flow emits`() = runTest(testDispatcher) {
@@ -660,7 +630,7 @@ class BrowserViewModelTest {
         assertEquals(null, vm.uiState.value.tabsEvent)
     }
 
-    // ──────── Spec 014 — history recording (FR-001 / FR-002 / FR-003 / FR-004) ────────
+    // ---------- History recording ----------
 
     @Test
     fun `onLoadFinished records one history entry on a fresh load`() = runTest(testDispatcher) {
@@ -709,7 +679,7 @@ class BrowserViewModelTest {
         }
 
     @Test
-    fun `onLoadFailed never invokes the recorder (FR-003 negative)`() =
+    fun `onLoadFailed never invokes the recorder`() =
         runTest(testDispatcher) {
             val historyRepo = FakeHistoryRepository()
             val vm = newViewModel(historyRepository = historyRepo)
@@ -720,7 +690,7 @@ class BrowserViewModelTest {
             assertEquals(0, historyRepo.recorded.size)
         }
 
-    // ---------- Spec 019 (T034) — progress isolation, Constitution v1.4.0 §V rule 3 ----------
+    // ---------- Progress kept out of uiState ----------
 
     @Test
     fun `fifty progress ticks emit fifty progress values and no uiState`() = runTest {
@@ -765,7 +735,7 @@ class BrowserViewModelTest {
         assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
 
-    // ---------- Spec 019 (T055) — Home inside a tab, contracts C1 / data-model §2 ----------
+    // ---------- Home inside a tab ----------
 
     @Test
     fun `a tab at the Home address shows Home content`() = runTest {
@@ -832,5 +802,5 @@ class BrowserViewModelTest {
     }
 }
 
-/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+/** A real page address for tests; the app's default is the Home page. */
 private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"

@@ -44,8 +44,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 021 T052 / FR-025 – FR-027 — windows a page opens, through the real `MainActivity`, tab
- * store and WebView. Pages come from a server inside the test; assertions are on the tab store.
+ * Windows a page opens, through the real `MainActivity`, tab store and WebView. Pages come from a
+ * server inside the test; assertions are on the tab store.
  */
 @HiltAndroidTest
 @UninstallModules(SettingsDataStoreProviderModule::class)
@@ -59,7 +59,7 @@ class PopupInstrumentedTest {
         @Singleton
         fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(
-                produceFile = { File(context.cacheDir, "spec021-settings-${System.nanoTime()}.preferences_pb") },
+                produceFile = { File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb") },
             )
     }
 
@@ -134,7 +134,7 @@ class PopupInstrumentedTest {
 
             delay(SETTLE_MS)
 
-            assertEquals("no tab for a pop-up the page opened itself (FR-026)", before + 1, tabRepository.getTabCount())
+            assertEquals("no tab for a pop-up the page opened itself", before + 1, tabRepository.getTabCount())
             assertTrue("the blocked address is never loaded", requested.none { it == "/child" })
         }
     }
@@ -151,7 +151,7 @@ class PopupInstrumentedTest {
             // The pop-up's own request proves its tab was opened; the intermediate "+2" count is
             // not asserted because the tab may open and close between two polls.
             assertTrue("the pop-up loads in its own tab", awaitRequest("/closer"))
-            assertEquals("window.close() closes the page-opened tab (FR-027)", before + 1, awaitTabCount(before + 1))
+            assertEquals("window.close() closes the page-opened tab", before + 1, awaitTabCount(before + 1))
             val active = tabRepository.observeTabs().first().maxBy { it.lastActiveAt }
             assertTrue("the opener is active again", active.url.endsWith("/opener"))
         }
@@ -191,8 +191,10 @@ class PopupInstrumentedTest {
         val PAGES = mapOf(
             "/link" to "$HEAD<a target='_blank' href='/child' $FULL>open</a></body></html>",
             "/auto" to "$HEAD<p>auto</p><script>window.open('/child');</script></body></html>",
-            "/opener" to "$HEAD<a href='#' $FULL onclick=\"window.open('/closer'); return false;\">open</a></body></html>",
-            "/closer" to "$HEAD<p>closing</p><script>setTimeout(function () { window.close(); }, 1000);</script></body></html>",
+            "/opener" to "$HEAD<a href='#' $FULL " +
+                "onclick=\"window.open('/closer'); return false;\">open</a></body></html>",
+            "/closer" to "$HEAD<p>closing</p>" +
+                "<script>setTimeout(function () { window.close(); }, 1000);</script></body></html>",
             "/child" to "$HEAD<p>child</p></body></html>",
         )
     }

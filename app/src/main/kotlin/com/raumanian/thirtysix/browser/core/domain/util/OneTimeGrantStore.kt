@@ -5,8 +5,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Spec 021 data-model §2 — "Allow this time" answers. In memory only: they belong to one tab's
- * current page and end when that page changes, the tab closes or the process ends (FR-003).
+ * "Allow this time" answers. In memory only: they belong to one tab's current page and end
+ * when that page changes, the tab closes or the process ends. Main thread only.
  */
 @Singleton
 class OneTimeGrantStore @Inject constructor() {
@@ -26,15 +26,11 @@ class OneTimeGrantStore @Inject constructor() {
         grants.removeAll { it.tabId == tabId }
     }
 
-    /**
-     * Spec 024 FR-004a — Fire keeps only the grants whose origin [keep] accepts (fireproof sites).
-     * Called on the main thread, like every other method here.
-     */
+    /** Fire keeps only the grants whose origin [keep] accepts (fireproof sites). */
     fun retainOnly(keep: (origin: String) -> Boolean) {
         grants.retainAll { keep(it.origin) }
     }
 
-    /** Clear browsing data with the Site permissions category (FR-010a). */
     fun clear() {
         grants.clear()
     }

@@ -43,9 +43,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 021 T032 / FR-011 – FR-012 — a page's file input, end to end through the real
- * [BrowserWebView], page session and [FileChooserLauncher]. The system picker is stubbed with
- * espresso-intents; the page reports what it received through its title.
+ * A page's file input, end to end through the real [BrowserWebView], page session and
+ * [FileChooserLauncher]. The system picker is stubbed with espresso-intents; the page reports
+ * what it received through its title.
  */
 @RunWith(AndroidJUnit4::class)
 class FileChooserInstrumentedTest {
@@ -108,7 +108,11 @@ class FileChooserInstrumentedTest {
     private fun shareable(name: String): Uri {
         val dir = File(context.cacheDir, AppConstants.CAPTURE_CACHE_DIR).apply { mkdirs() }
         val file = File(dir, name).apply { writeText(name) }
-        return FileProvider.getUriForFile(context, context.packageName + AppConstants.FILE_PROVIDER_AUTHORITY_SUFFIX, file)
+        return FileProvider.getUriForFile(
+            context,
+            context.packageName + AppConstants.FILE_PROVIDER_AUTHORITY_SUFFIX,
+            file,
+        )
     }
 
     private fun stubPicker(resultCode: Int, data: Intent?) {

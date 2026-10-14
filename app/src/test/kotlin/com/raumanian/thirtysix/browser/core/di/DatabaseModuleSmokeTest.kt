@@ -16,14 +16,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Structural smoke for [DatabaseModule] (Spec 005 SC-010).
- *
- * Invokes each `@Provides` method directly with a real Application context and asserts
- * each returned DAO is non-null and capable of one round-trip. Full `@HiltAndroidTest`
- * end-to-end graph boot is deferred to Spec 013 when the first ViewModel consumer
- * materialises (it requires Robolectric + Hilt's test runner integration which is
- * heavier scaffolding than the data layer alone justifies).
+ * Calls each `@Provides` method of [DatabaseModule] directly with a real Application context
+ * and checks every DAO can do one round-trip, without booting the full Hilt graph.
  */
+
 @RunWith(AndroidJUnit4::class)
 class DatabaseModuleSmokeTest {
 

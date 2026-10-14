@@ -17,12 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 016 T044 (US2 / FR-003, FR-006).
- *
- * Drives [SettingsScreen] over an in-memory repository and checks the search-engine row, that
- * the chooser offers exactly the three engines, and that a choice reaches the row.
- */
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenSearchEngineTest {
 

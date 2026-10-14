@@ -21,7 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 024 T046 — Settings → Privacy → Fireproof sites (FR-012). */
+/** Settings → Privacy → Fireproof sites. */
 @RunWith(AndroidJUnit4::class)
 class FireproofSitesScreenTest {
 

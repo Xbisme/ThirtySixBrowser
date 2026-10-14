@@ -13,10 +13,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 016 T082 — [ChangeHistoryRetentionUseCase]: write before prune, the three outcomes, and
- * SC-010's "nothing older than the window remains" for every one of the four windows.
- */
 class ChangeHistoryRetentionUseCaseTest {
 
     private val log = mutableListOf<String>()
@@ -64,7 +60,7 @@ class ChangeHistoryRetentionUseCaseTest {
         assertEquals(2, history.recorded.size)
     }
 
-    /** SC-010 — parameterised over all four windows with rows one hour either side of the cutoff. */
+    /** Every window, with rows one hour either side of the cutoff. */
     @Test
     fun `every window removes exactly the rows outside it`() = runTest {
         HistoryRetention.entries.forEach { retention ->

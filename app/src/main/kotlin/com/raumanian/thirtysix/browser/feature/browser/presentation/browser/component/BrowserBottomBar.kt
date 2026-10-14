@@ -58,13 +58,8 @@ private const val TAB_COUNT_FONT_SP = 11
 private val SlotLabelGap = 4.dp
 
 /**
- * Spec 019 — the browser's bottom bar (design system BottomBar): Home · Search · raised
- * gradient New tab · Tabs (count drawn in a rounded square) · Menu (FR-020). There is no Back
- * slot: back is the system gesture (FR-021).
- *
- * The bar pads itself by the navigation-bar inset (FR-008). It slides away on page scroll, but
- * that movement is applied by the caller in `graphicsLayer { }` from `ChromeScrollState`, so
- * nothing here takes a moving value and scrolling never recomposes the bar (contracts C6).
+ * Home · Search · New tab · Tabs · Menu; no Back slot, Back is the system gesture. The caller
+ * slides the bar in `graphicsLayer`, so nothing here takes a moving value.
  */
 @Composable
 internal fun BrowserBottomBar(

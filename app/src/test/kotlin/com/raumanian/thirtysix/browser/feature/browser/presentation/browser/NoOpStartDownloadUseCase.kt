@@ -11,16 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 /**
- * Spec 015 — inert [StartDownloadUseCase] for the four pre-existing `BrowserViewModel`
- * test classes, which gained a constructor parameter when the download pipeline landed.
- *
- * The gateway reports the platform as unavailable, so `StartDownloadUseCase` short-circuits
- * before touching the repository and nothing is ever recorded. That makes this genuinely
- * inert rather than merely quiet — a test that accidentally triggers a download cannot get
- * a false pass out of it.
- *
- * Download behaviour itself is covered by `StartDownloadUseCaseTest`; these four classes
- * only need the dependency to exist.
+ * Inert [StartDownloadUseCase]: the gateway reports the platform unavailable, so nothing is ever
+ * recorded and a test that triggers a download by accident cannot pass by it.
  */
 internal fun noOpStartDownloadUseCase(): StartDownloadUseCase = StartDownloadUseCase(
     gateway = InertDownloadManagerGateway,

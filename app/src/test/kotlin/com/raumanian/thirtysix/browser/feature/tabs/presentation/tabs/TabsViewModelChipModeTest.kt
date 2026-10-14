@@ -33,7 +33,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 019 T070 — the Open / Incognito chip modes of the tab switcher (FR-040, clarification Q3). */
+/** The Open / Incognito chip modes of the tab switcher. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TabsViewModelChipModeTest {
 

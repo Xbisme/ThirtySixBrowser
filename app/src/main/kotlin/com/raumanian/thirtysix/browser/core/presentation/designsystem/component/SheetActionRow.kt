@@ -23,11 +23,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 /**
- * Spec 019 — one action in a bookmark/folder action sheet: a 44dp lead holding the action's
- * glyph and the label. [destructive] paints both in the error colours (Delete).
- *
- * Kept local because the shared `ListRow` fixes its title colour to `onSurface`, so it cannot
- * show a destructive label.
+ * One action in an action sheet. Not a `ListRow`, whose title colour is fixed to `onSurface`
+ * and so cannot show a [destructive] label.
  */
 @Composable
 internal fun SheetActionRow(
@@ -65,7 +62,7 @@ internal fun SheetActionRow(
     }
 }
 
-/** Spec 019 — the title line at the top of an action sheet (the item's name). */
+/** The title line at the top of an action sheet (the item's name). */
 @Composable
 internal fun SheetTitle(text: String) {
     Text(

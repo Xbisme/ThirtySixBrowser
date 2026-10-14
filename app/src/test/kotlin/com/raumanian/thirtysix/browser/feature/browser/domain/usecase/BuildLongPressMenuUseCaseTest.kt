@@ -15,7 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Spec 021 T039 — every row of contracts C1.4. */
+/** Every row of the long-press menu for links, images and image links. */
 class BuildLongPressMenuUseCaseTest {
 
     private val build = BuildLongPressMenuUseCase()

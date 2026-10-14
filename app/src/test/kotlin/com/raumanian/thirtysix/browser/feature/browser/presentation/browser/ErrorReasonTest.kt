@@ -4,10 +4,6 @@ import com.raumanian.thirtysix.browser.R
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Spec 007 US3 — table-driven test of `ErrorReason.toUserMessageRes()`
- * mapping per research.md R6.
- */
 class ErrorReasonTest {
 
     @Test

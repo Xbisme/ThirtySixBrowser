@@ -20,14 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 014 T081 (US3 / FR-018, FR-019, FR-020, FR-021).
- *
- * Long-presses a row and verifies the sheet exposes exactly the three specified
- * actions, then exercises Delete (only the targeted row disappears), Open in new
- * tab (a **normal** tab is created), and Copy URL (the exact URL reaches the
- * clipboard seam).
- */
 @RunWith(AndroidJUnit4::class)
 class HistoryScreenLongPressTest {
 

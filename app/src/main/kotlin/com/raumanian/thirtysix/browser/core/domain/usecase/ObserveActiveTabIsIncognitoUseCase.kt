@@ -5,22 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-/**
- * Spec 012 — derived signal: is the currently-active tab incognito?
- *
- * Drives:
- *  - The `FLAG_SECURE` lifecycle binding in `MainActivity` via
- *    [com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect]
- *    (FR-016 / FR-016a).
- *  - The address-bar incognito indicator
- *    ([com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserUiState.isIncognito]).
- *  - The cache-write gate inside `BrowserViewModel.onIconReceived` /
- *    `onScreenshotReady` (FR-009 / FR-010).
- *
- * Source: head of [ObserveAllTabsUseCase] (the merged sort puts the most-
- * recently-active tab first). [distinctUntilChanged] avoids redundant
- * recomposition + redundant FLAG_SECURE flag flips.
- */
+/** Whether the active tab (the head of [ObserveAllTabsUseCase]) is incognito. */
 class ObserveActiveTabIsIncognitoUseCase @Inject constructor(
     private val observeAllTabs: ObserveAllTabsUseCase,
 ) {

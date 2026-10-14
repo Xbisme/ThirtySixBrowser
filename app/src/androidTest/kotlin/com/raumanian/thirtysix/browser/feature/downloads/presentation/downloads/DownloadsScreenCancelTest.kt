@@ -15,12 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 015 T100 (US6 / FR-036, FR-036a).
- *
- * The control's *presence* is the contract here: FR-036 requires one tap with no menu, and
- * FR-036a requires it gone the moment the entry reaches any terminal state.
- */
+// The cancel control is one tap with no menu, and gone once the entry reaches any terminal state.
 @RunWith(AndroidJUnit4::class)
 class DownloadsScreenCancelTest {
 
@@ -61,14 +56,8 @@ class DownloadsScreenCancelTest {
     }
 
     /**
-     * All four terminal states are rendered **together, in one composition**, rather than a
-     * state per iteration: `setContent` may be called only once per [composeRule], so the
-     * loop this started as threw `has already set content` on its second pass and only ever
-     * really checked `Complete`.
-     *
-     * The row-count assertion is not decoration. Without it "no cancel controls" would pass
-     * just as happily against an empty list, which is the failure mode this test exists to
-     * rule out.
+     * All terminal states render in one composition, since `setContent` may be called only once per
+     * [composeRule]. The row count guards against "no cancel controls" passing on an empty list.
      */
     @Test
     fun terminalRows_carryNoCancelControl() {

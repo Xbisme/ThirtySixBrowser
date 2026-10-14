@@ -30,11 +30,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsTopBar
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-/**
- * Spec 023 FR-015 — Settings → Privacy → Sites without protection. Each row turns protection
- * back on for one site; "Turn all back on" asks first. Built from Spec 019 components (design
- * waiver, spec Assumptions).
- */
+/** Settings → Privacy → Sites without protection. "Turn all back on" asks first. */
 @Composable
 fun ProtectionExceptionsScreen(
     modifier: Modifier = Modifier,

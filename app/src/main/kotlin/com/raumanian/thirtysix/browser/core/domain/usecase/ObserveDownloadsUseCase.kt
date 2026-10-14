@@ -6,12 +6,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Spec 015 FR-019 / FR-023 — observe the persisted half of the list, newest first.
- *
- * Deliberately does **not** resolve live status. Records change rarely (an insert per
- * download, a delete per removal) while status changes every second during a transfer;
- * keeping them on separate clocks is what lets the ViewModel re-poll status without
- * re-reading the database. [ResolveDownloadStatusUseCase] supplies the other half.
+ * The persisted download records, newest first, without live status: records change rarely while
+ * status changes every second, so [ResolveDownloadStatusUseCase] polls status separately.
  */
 class ObserveDownloadsUseCase @Inject constructor(
     private val repository: DownloadsRepository,

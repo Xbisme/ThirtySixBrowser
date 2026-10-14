@@ -22,11 +22,8 @@ private val HandleBottom = 6.dp
 private const val SCRIM_ALPHA = 0.35f
 
 /**
- * Spec 019 — the frame for the hub and every action sheet (design system BottomSheet):
- * `radius-sheet` top corners, raised surface, a slim handle. The drag offset is owned by
- * [ModalBottomSheet], which applies it in the layout phase, so dragging never recomposes
- * [content] (contracts C6). The sheet's default window insets keep content above the
- * navigation bar (FR-008).
+ * The frame for the hub and every action sheet. [ModalBottomSheet] applies the drag offset in
+ * the layout phase, so dragging never recomposes [content].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

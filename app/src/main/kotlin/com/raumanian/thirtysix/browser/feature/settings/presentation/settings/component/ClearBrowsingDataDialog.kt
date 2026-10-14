@@ -42,19 +42,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.feature.settings.domain.model.ClearBrowsingDataCategory
 /**
- * Spec 016 US4 — choose what to clear, then confirm.
- *
- *  - One checkbox row per category, with [Role.Checkbox] semantics and at least the minimum
- *    interactive size (FR-039). All three start selected; the caller owns [selection] (FR-025).
- *  - Confirm is disabled while nothing is selected (FR-026).
- *  - While [inProgress], a progress indicator shows, every control is disabled, and neither an
- *    outside tap nor system back closes the dialog, so a clear can be neither re-submitted nor
- *    abandoned midway (FR-032).
- *
- * Spec 019 FR-045 — styled as the design system's confirm dialog (peach glyph, title, then a
- * full-width danger button above Cancel). It keeps its own layout rather than wrapping
- * `ConfirmDialog` because that component cannot disable its buttons, tag them, or refuse
- * dismissal, all of which FR-026 and FR-032 need.
+ * While [inProgress] nothing can be pressed and the dialog cannot be dismissed, so a clear is never
+ * re-submitted or abandoned. Not built on ConfirmDialog, which cannot disable buttons or refuse dismissal.
  */
 @Composable
 @Suppress("LongParameterList", "LongMethod")
@@ -224,5 +213,5 @@ const val TEST_TAG_SETTINGS_CLEAR_DIALOG: String = "settings_clear_dialog"
 const val TEST_TAG_SETTINGS_CLEAR_CONFIRM: String = "settings_clear_confirm"
 const val TEST_TAG_SETTINGS_CLEAR_PROGRESS: String = "settings_clear_progress"
 
-/** Followed by the category's enum name, e.g. `settings_clear_category_History`. */
+// Followed by the category's enum name, e.g. settings_clear_category_History.
 const val TEST_TAG_SETTINGS_CLEAR_CATEGORY_PREFIX: String = "settings_clear_category_"

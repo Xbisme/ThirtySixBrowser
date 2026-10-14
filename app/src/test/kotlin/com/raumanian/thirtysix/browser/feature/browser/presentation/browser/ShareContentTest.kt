@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Spec 022 FR-023 — the address is the text; the title is the subject only when present. */
+/** The address is the text; the title is the subject only when present. */
 class ShareContentTest {
 
     @Test

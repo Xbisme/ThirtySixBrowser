@@ -33,13 +33,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Spec 011 — pure-JVM unit tests for [TabsViewModel] (US1 + partial US3 scope).
- *
- * Drives a [FakeTabRepository] (Spec 010 precedent for hand-rolled fakes) and
- * asserts state transitions over the [TabsUiState] StateFlow + the
- * `popBackEvent` SharedFlow (M3).
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TabsViewModelTest {
 
@@ -211,7 +204,7 @@ class TabsViewModelTest {
         }
     }
 
-    // ---------- Spec 011 (T043 / US3) — close + close-all + dialog flow ----------
+    // Close, close-all and the dialog flow.
 
     @Test
     fun `onCloseTab removes the targeted tab from the list`() = runTest(testDispatcher) {
@@ -316,22 +309,17 @@ class TabsViewModelTest {
         assertEquals(HOME_URL, tabs.single().url)
     }
 
-    // ---------- Spec 012 (T040a — US2 / Analyze remediation C3) — last-tab edge case ----------
+    // Last-tab edge case across normal and incognito.
 
     /**
-     * FR-005 across the both-kinds-empty boundary that Spec 012 newly enables.
-     *
-     * Scenario: starting from "1 normal home + 1 incognito" (the operational
-     * minimum since `TabRepository.observeTabs()` auto-seeds a home tab on
-     * first subscription per Spec 011 / R5), closing the incognito tab MUST
-     * leave the user with exactly 1 normal home tab — and that home tab MUST
-     * NOT have been duplicated or wiped during the close.
+     * From one auto-seeded normal home tab plus one incognito tab, closing the incognito tab
+     * leaves exactly that home tab: not duplicated, wiped or replaced.
      */
     @Test
     fun `closing the only incognito tab leaves exactly one normal home tab`() = runTest(testDispatcher) {
         val repository = FakeTabRepository(homeUrl = HOME_URL)
         val incognitoRepo = com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository()
-        // Pre-seed an incognito tab (negative id per R3) with a higher
+        // Pre-seed an incognito tab (negative id) with a higher
         // lastActiveAt so it is the active tab in the merged Flow.
         incognitoRepo.emit(
             listOf(

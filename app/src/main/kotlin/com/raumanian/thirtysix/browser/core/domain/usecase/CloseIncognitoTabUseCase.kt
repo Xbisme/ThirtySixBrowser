@@ -4,14 +4,8 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabReposi
 import javax.inject.Inject
 
 /**
- * Spec 012 — close a single incognito tab.
- *
- * Constitution §IV documented exception (see plan.md Complexity Tracking):
- * the close-of-last-incognito-tab transaction coordinates the in-memory tab
- * removal AND the cookie-jar snapshot restore as a single user-perceived
- * operation. Both side effects live inside [IncognitoTabRepository.closeTab]
- * (the repository serializes them under its own mutex), so the use case stays
- * thin — but the conceptual coordination is what the §IV exception covers.
+ * Closes one incognito tab. Closing the last one also ends the session's cookie isolation;
+ * [IncognitoTabRepository.closeTab] does both under its own mutex.
  */
 class CloseIncognitoTabUseCase @Inject constructor(
     private val repository: IncognitoTabRepository,

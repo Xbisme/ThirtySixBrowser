@@ -12,13 +12,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 016 T069 (Robolectric part) — ⚠️ non-negotiable privacy test for
- * [CookieJarSnapshotManagerImpl.discardSetAsideCookies].
- *
- * `hasSnapshot()` staying `true` after a discard is the observable sign that the snapshot became
- * `EMPTY` rather than `null` — the difference between "restore wipes and writes nothing back"
- * and "restore skips its wipe and leaks incognito cookies" (research R7). The instrumented half
- * in `CookieRestoreInstrumentedTest` proves the resulting cookie jar on a real device.
+ * `hasSnapshot()` staying `true` after a discard shows the snapshot became `EMPTY`, not `null`: the
+ * difference between "restore wipes and writes nothing back" and "restore skips its wipe and leaks
+ * incognito cookies". `CookieRestoreInstrumentedTest` checks the resulting jar on a device.
  */
 @RunWith(AndroidJUnit4::class)
 class CookieJarSnapshotManagerDiscardTest {

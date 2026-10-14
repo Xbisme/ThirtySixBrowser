@@ -14,15 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 /**
- * Spec 019 FR-013 – FR-015 — what the Home page shows (data-model §3, contracts C4).
- *
- * Shortcuts: open **normal** tabs except [activeTabId] (most recently active first), then the
- * most recently saved bookmarks, then the most recently visited sites; each address at most
- * once; the reserved Home address never; at most [BrowserLimits.HOME_SHORTCUT_LIMIT].
- * Recent rows: the newest [BrowserLimits.HOME_RECENT_LIMIT] history entries.
- *
- * Incognito tabs cannot appear: they live in a separate repository this use case never reads
- * (Spec 012), and incognito visits are never recorded in history.
+ * Home's shortcuts: open normal tabs except [activeTabId], then recent bookmarks, then recent
+ * visits; each address once, never the Home address. Recent rows are the newest history entries.
+ * Incognito never appears: its tabs live in a repository this never reads, and are not recorded.
  */
 class ObserveHomeContentUseCase @Inject constructor(
     private val tabRepository: TabRepository,
@@ -53,15 +47,11 @@ class ObserveHomeContentUseCase @Inject constructor(
         HomeContent(shortcuts = shortcuts, recent = history.take(BrowserLimits.HOME_RECENT_LIMIT))
     }
 
-    /**
-     * Same result as the address bar's `extractHostnameOrSelf` (raw host, `www.` kept), but via
-     * `java.net.URI` so this domain class stays free of Android types (Constitution §IV).
-     */
+    /** Same result as the address bar's `extractHostnameOrSelf`, without Android types. */
     private fun String.host(): String =
         runCatching { URI(this).host }.getOrNull()?.takeIf { it.isNotBlank() } ?: this
 
     private companion object {
-        /** Enough history to fill the shortcut row after tabs and bookmarks, plus the rows. */
         const val HISTORY_FETCH = BrowserLimits.HOME_SHORTCUT_LIMIT + BrowserLimits.HOME_RECENT_LIMIT
     }
 }

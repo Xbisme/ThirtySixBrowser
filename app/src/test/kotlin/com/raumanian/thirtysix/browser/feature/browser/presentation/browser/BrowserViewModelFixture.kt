@@ -19,11 +19,7 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookm
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-/**
- * Spec 022 — one place that builds a [BrowserViewModel] over fakes, for the page-tools tests.
- * Older test classes keep their own builders; new ones use this, so a new constructor
- * dependency is added here once.
- */
+/** Builds a [BrowserViewModel] over fakes, so a new constructor dependency is added in one place. */
 internal class BrowserViewModelFixture(
     val url: String = "https://example.com/",
     val tabs: FakeTabRepository = FakeTabRepository(homeUrl = url),

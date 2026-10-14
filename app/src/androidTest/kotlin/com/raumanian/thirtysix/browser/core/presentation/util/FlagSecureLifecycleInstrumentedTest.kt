@@ -15,15 +15,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T048 (US4 / FR-016, FR-016a).
- *
- * Verifies that [SecureWindowEffect]:
- *  - Sets `FLAG_SECURE` on the host Activity window when `secure = true`.
- *  - Clears `FLAG_SECURE` when the boolean flips back to `false`.
- *
- * Drives the effect with a [mutableStateOf] handle so the test can observe
- * both transitions inside a single Compose tree without recreating the
- * activity.
+ * [SecureWindowEffect] sets and clears `FLAG_SECURE`, driven by a [mutableStateOf] so both
+ * transitions happen in one Compose tree without recreating the activity.
  */
 @RunWith(AndroidJUnit4::class)
 class FlagSecureLifecycleInstrumentedTest {
@@ -54,7 +47,6 @@ class FlagSecureLifecycleInstrumentedTest {
         composeRule.runOnIdle {
             val window = (capturedView?.context as? Activity)?.window
             val flagsAfterOn = window?.attributes?.flags ?: 0
-            // Non-zero AND (flags & FLAG_SECURE) != 0 → flag is set.
             assertEquals(
                 "FLAG_SECURE set when secure=true",
                 WindowManager.LayoutParams.FLAG_SECURE,

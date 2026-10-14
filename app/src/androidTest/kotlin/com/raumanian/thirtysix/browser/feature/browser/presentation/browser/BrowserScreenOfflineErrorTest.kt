@@ -59,32 +59,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 007 US3 — error-state rendering smoke test.
- *
- * Mục đích: assert rằng khi `BrowserUiState.loadingState` chuyển sang
- * [LoadingState.Failed], [BrowserScreen] swap từ [BrowserWebView] sang
- * [components.BrowserErrorState] (ngừng render WebView).
- *
- * Lý do KHÔNG dùng real WebView load + invalid URL trigger:
- * - Earlier `@UninstallModules` + `FakeUrlConfigModule` swap (CI run 2026-05-01)
- *   timed out ngay cả với 15 s budget. Hai khả năng: (a) Hilt nested-module
- *   replace không thực sự swap binding ở androidTest, (b) Chromium WebView trên
- *   emulator API 29 không fire `onReceivedError(ERROR_HOST_LOOKUP)` đáng tin cậy
- *   cho `.invalid` TLD. Cả hai đều mất nhiều thời gian debug và tạo flake mù.
- * - Phần "WebViewClient → ErrorReason" mapping đã được cover deterministic ở
- *   `BrowserViewModelTest` (Failed transitions) + `ErrorReasonTest`
- *   (toUserMessageRes table) — JVM-only, không cần emulator network.
- * - SC-003 production scenario (airplane mode → localized error UI ≤ 5 s) vẫn
- *   được verify bằng Gate 7 step 4 (user manual on real device).
- *
- * Test này chỉ trả lời 1 câu hỏi đơn giản: rendering branch của BrowserScreen
- * khi `Failed` đúng không. Trigger qua `viewModel::onLoadFailed` trực tiếp →
- * không phụ thuộc network, deterministic, < 1 s ở real CI.
+ * With the state seeded to Failed, the screen shows the error UI instead of the WebView. A real
+ * failing load was unreliable on the emulator; the error mapping itself is covered by JVM tests.
  */
 @HiltAndroidTest
-// Spec 022 — the browser screen now reads settings (text size), so each test needs its own
-// DataStore file: a fresh Hilt component per test would otherwise open a second one on the same
-// file ("multiple DataStores active"), as Spec 020 found for MainActivity tests.
+// The browser screen reads settings (text size), so each test gets its own DataStore file:
+// a fresh Hilt component per test would otherwise open a second one ("multiple DataStores active").
 @UninstallModules(SettingsDataStoreProviderModule::class)
 @RunWith(AndroidJUnit4::class)
 class BrowserScreenOfflineErrorTest {
@@ -96,7 +76,7 @@ class BrowserScreenOfflineErrorTest {
         @Singleton
         fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(
-                produceFile = { File(context.cacheDir, "spec022-settings-${System.nanoTime()}.preferences_pb") },
+                produceFile = { File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb") },
             )
     }
 
@@ -112,17 +92,8 @@ class BrowserScreenOfflineErrorTest {
     fun setUp() {
         hiltRule.inject()
         composeRule.activity.runOnUiThread {
-            // Construct VM and seed it to Failed BEFORE setContent. Reasoning:
-            // BrowserScreen branches `when (loadingState)` and only constructs
-            // BrowserWebView when state is NOT Failed. Seeding upfront means
-            // the WebView is never created → no real network load → no race
-            // between WebView's onPageFinished and the test's assertion (which
-            // would re-transition Failed → Loaded and hide the error UI).
-            // Spec 010 — error-rendering test never invokes the address-bar
-            // Query branch, so a no-op `BuildSearchUrlUseCase` is sufficient.
-            // Spec 011 — error-rendering test does not exercise tab logic;
-            // a no-op TabRepository fake suffices for the 4 new use-case
-            // dependencies.
+            // Seeded to Failed before setContent: the WebView never loads, so nothing can flip the
+            // state back to Loaded before the assertion.
             val noopTabRepo = OfflineErrorNoopTabRepository
             val noopIncognitoRepo = OfflineErrorNoopIncognitoTabRepository
             val observeTabs = ObserveTabsUseCase(noopTabRepo)
@@ -170,28 +141,20 @@ class BrowserScreenOfflineErrorTest {
     }
 
     private companion object {
-        // Pure recomposition with state preseeded — well within 5 s. The
-        // earlier 15 s budget targeted real DNS NXDOMAIN, no longer applicable.
+        // Pure recomposition with the state pre-seeded; no network involved.
         const val ERROR_STATE_TIMEOUT_MS: Long = 5_000L
     }
 }
 
-/**
- * Spec 010 — file-private no-op [SearchEngineRepository] for the error-state
- * rendering test. Query branch is never reached.
- */
+/** No-op [SearchEngineRepository]: the query branch is never reached. */
 private object OfflineErrorNoopSearchEngineRepository : SearchEngineRepository {
     override suspend fun buildSearchUrl(query: String): String =
         error("instrumented test should not reach the search-URL build path")
 }
 
-/**
- * Spec 011 — file-private no-op [TabRepository] for the error-rendering test.
- * Mirrors the OfflineErrorNoopSearchEngineRepository pattern.
- */
+/** No-op [TabRepository] for the error-rendering test. */
 private object OfflineErrorNoopTabRepository : TabRepository {
-    // Spec 012 — hot StateFlow (NOT flowOf) so ObserveAllTabsUseCase.combine
-    // stays subscribed and Compose recomposer keeps receiving updates.
+    // Hot, never completing, so ObserveAllTabsUseCase.combine stays subscribed.
     private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
         kotlinx.coroutines.flow.MutableStateFlow(emptyList())
     override fun observeTabs(): Flow<List<Tab>> = state
@@ -204,7 +167,7 @@ private object OfflineErrorNoopTabRepository : TabRepository {
     override suspend fun getTabCount(): Int = 0
 }
 
-/** Spec 012 — no-op [IncognitoTabRepository] for the error-rendering test. */
+/** No-op [IncognitoTabRepository] for the error-rendering test. */
 private object OfflineErrorNoopIncognitoTabRepository : IncognitoTabRepository {
     private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
         kotlinx.coroutines.flow.MutableStateFlow(emptyList())
@@ -218,11 +181,7 @@ private object OfflineErrorNoopIncognitoTabRepository : IncognitoTabRepository {
     override suspend fun getCount(): Int = 0
 }
 
-/**
- * Spec 011 favicon amendment — no-op [FaviconCache] for the error-rendering
- * instrumented test. The test never triggers `onReceivedIcon` (loading
- * state seeded to Failed before WebView is constructed).
- */
+/** No-op [FaviconCache]: no WebView load, so no icon ever arrives. */
 private object OfflineErrorNoopFaviconCache : FaviconCache {
     private val state = MutableStateFlow(0L)
     override val version: StateFlow<Long> = state.asStateFlow()
@@ -285,10 +244,7 @@ private object OfflineErrorNoopBookmarkRepository :
         )
 }
 
-/**
- * Spec 014 — no-op [HistoryRepository] for the error-rendering test. Recorder
- * never fires (state seeded to Failed before any onLoadFinished can run).
- */
+/** No-op [HistoryRepository]: seeded to Failed, nothing is ever recorded. */
 private object OfflineErrorNoopHistoryRepository :
     HistoryRepository {
     override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
@@ -301,7 +257,7 @@ private object OfflineErrorNoopHistoryRepository :
     override suspend fun count(): Int = 0
 }
 
-/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+/** A real page address for tests; the app's default is the Home page. */
 private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"
 
 private val NoSlots = BrowserSlots(

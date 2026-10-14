@@ -12,7 +12,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Spec 020 T035 — invitation state over a real DataStore file (data-model §8, INV-8). */
+/** Invitation state over a real DataStore file. */
 class DefaultBrowserInviteRepositoryImplTest {
 
     @get:Rule

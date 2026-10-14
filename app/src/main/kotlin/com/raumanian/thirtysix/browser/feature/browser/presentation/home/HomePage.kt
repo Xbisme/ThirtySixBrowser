@@ -52,33 +52,28 @@ private const val TYPE_INVITE = "invite"
 private const val TYPE_HEADER = "header"
 private const val TYPE_RECENT = "recent"
 
-/** Spec 019 contracts C4 — what tapping things on the Home page does. */
 data class HomeCallbacks(
     val onSearchSubmit: (String) -> Unit,
     /** A Saved or Recent shortcut, or a recently visited row: load this address in the tab. */
     val onOpenUrl: (String) -> Unit,
     val onSeeAllHistory: () -> Unit,
     val onNewIncognitoTab: () -> Unit,
-    /** Spec 022 R6 — the search field's text, for address suggestions. */
     val onSearchTextChange: (String) -> Unit = {},
-    /** Spec 022 R6 — the search field gained or lost focus: a suggestion session starts or ends. */
+    /** Gaining or losing focus starts or ends a suggestion session. */
     val onSearchFocusChange: (Boolean) -> Unit = {},
 )
 
 /**
- * Spec 019 US2 — the Home page shown inside a tab (FR-010): the hero, then "Recently visited"
- * with "See all". One `LazyColumn`; every item has a stable key and a content type
- * (Constitution v1.4.0 §V rule 6). With no history the section is absent (FR-014), and with no
- * shortcuts the card row is absent — no empty boxes on a fresh install.
+ * The Home page inside a tab: the hero, then "Recently visited". With no history the section is
+ * absent, and with no shortcuts the card row is absent: no empty boxes on a fresh install.
  */
 @Composable
-@Suppress("LongParameterList") // Two injected view models (Home content, Spec 020 invitation) + layout inputs.
+@Suppress("LongParameterList") // Two injected view models (Home content, default-browser invite) + layout inputs.
 fun HomePage(
     callbacks: HomeCallbacks,
     searchFocus: FocusRequester,
     bottomPadding: Dp,
     modifier: Modifier = Modifier,
-    // Spec 022 R6 — address suggestions, drawn under the search field.
     searchSuggestions: @Composable () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
     inviteViewModel: DefaultBrowserInviteViewModel = hiltViewModel(),
@@ -129,7 +124,7 @@ fun HomeContent(
     bottomPadding: Dp,
     modifier: Modifier = Modifier,
     searchSuggestions: @Composable () -> Unit = {},
-    // Spec 020 FR-024 — the default-browser invitation, directly under the hero; null hides it.
+    // Directly under the hero; null hides it.
     inviteCard: (@Composable () -> Unit)? = null,
 ) {
     val listState = rememberLazyListState()

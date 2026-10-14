@@ -7,12 +7,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 015 FR-034a / FR-034b — the action matrix, asserted as the table the spec states.
- *
- * quickstart.md G5 checks the same five-by-four grid by hand on a device; this is its
- * automated counterpart, so a regression is caught at build time rather than at gate time.
- */
 class DownloadActionAvailabilityTest {
 
     private fun availability(status: DownloadStatus, filePresent: Boolean) =
@@ -28,7 +22,7 @@ class DownloadActionAvailabilityTest {
             val a = availability(status, filePresent = false)
             assertFalse("$status should not offer open", a.canOpen)
             assertTrue("$status should offer copy link", a.canCopyLink)
-            assertFalse("$status must NOT offer remove (FR-034b)", a.canRemoveFromList)
+            assertFalse("$status must NOT offer remove", a.canRemoveFromList)
             assertFalse("$status should not offer delete", a.canDeleteFile)
         }
     }
@@ -74,7 +68,7 @@ class DownloadActionAvailabilityTest {
     }
 
     @Test
-    fun `FR-034b - remove is withheld for every in-flight state and allowed for every terminal one`() {
+    fun `remove is withheld for every in-flight state and allowed for every terminal one`() {
         // The load-bearing cell of the whole matrix: it is what makes orphaning a running
         // transfer structurally impossible rather than merely unlikely.
         val inFlight = listOf(

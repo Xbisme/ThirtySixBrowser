@@ -1,9 +1,6 @@
 package com.raumanian.thirtysix.browser.core.domain.model
 
-/**
- * Spec 013 — total bookmarks + folders below a given folder, used to
- * populate the "Delete folder?" confirmation dialog body (FR-020).
- */
+/** Everything below a folder, shown in the "Delete folder?" confirmation. */
 data class BookmarkDescendantCount(
     val bookmarks: Int,
     val folders: Int,

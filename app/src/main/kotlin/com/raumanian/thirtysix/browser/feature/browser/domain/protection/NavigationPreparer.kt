@@ -1,10 +1,9 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.protection
 
 /**
- * Spec 023 data-model rule 6 — what the app actually loads for an address the person (or a
- * page) navigates to: tracking parameters removed, then upgraded to `https://` when possible,
- * unless the destination site is in the person's "without protection" list (FR-016, FR-018,
- * FR-024). Idempotent: `prepare(prepare(u).url) == prepare(u).url`.
+ * What the app actually loads for an address: tracking parameters removed, then upgraded to
+ * `https://` when possible, unless the site is in the "without protection" list.
+ * Idempotent: `prepare(prepare(u).url) == prepare(u).url`.
  */
 class NavigationPreparer(
     private val stripper: TrackingParamStripper,
@@ -12,8 +11,11 @@ class NavigationPreparer(
     private val isSiteProtected: (site: String, isIncognito: Boolean) -> Boolean,
     private val failedHosts: () -> Set<String>,
 ) {
-    /** @property upgradedFrom the stripped `http://` address when [url] is its HTTPS upgrade. */
-    data class Prepared(val url: String, val upgradedFrom: String?)
+    data class Prepared(
+        val url: String,
+        /** The stripped `http://` address when [url] is its HTTPS upgrade. */
+        val upgradedFrom: String?,
+    )
 
     fun prepare(url: String, isIncognito: Boolean): Prepared {
         val host = HttpsUpgradePolicy.hostOf(url)

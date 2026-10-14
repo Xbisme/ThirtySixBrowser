@@ -2,43 +2,28 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Spec 007 — WebView page load. Constitution v1.3.0 §II names these two as the app's
-         minimum permission set. -->
+    <!-- The minimum set: loading pages. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Spec 015 FR-009 – FR-013 — writing to the device's PUBLIC Downloads folder needed
-         this permission before Scoped Storage arrived in API 29, and this project's
-         minSdk is 24. The maxSdkVersion ceiling means it is absent from the effective
-         manifest on API 29+, so modern users never see it in the Play listing and it can
-         never be requested there; on API 24-28 it is requested at the moment of the first
-         download, never at launch.
-
-         This is the single documented deviation in Constitution v1.3.0 §II's permission table,
-         recorded in specs/015-downloads-manager/plan.md "Complexity Tracking".
-         MANAGE_EXTERNAL_STORAGE remains forbidden (FR-013) and is NOT declared.
-
-         POST_NOTIFICATIONS is deliberately NOT declared and MUST NOT be: Spec 015 gate G9
-         (Outcome A) confirmed on device that the system download service posts its
-         notifications under its own identity, so this app never needs the permission. -->
+    <!-- Writing to the public Downloads folder needs this before Scoped Storage (API 29); the
+         ceiling keeps it out of the effective manifest from API 29 on. Asked at the first download.
+         POST_NOTIFICATIONS is deliberately absent: the system download service notifies under its
+         own identity. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
-    <!-- Spec 021 FR-001 / FR-002 / FR-037 — a site's camera, microphone or location request.
-         Each is requested only after the person chose an allow option for that site (or chose
-         to take a photo for a file upload), never at launch. Listed in the Constitution's
-         permission table. -->
+    <!-- A site's camera, microphone or location request; asked only after the person allows the
+         site (or takes a photo for an upload), never at launch. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!-- Spec 021 — WebView's audio capture (WebRTC) requires this alongside RECORD_AUDIO
-         (PermissionRequest.RESOURCE_AUDIO_CAPTURE). A normal permission: granted at install,
-         never prompted. -->
+    <!-- WebView audio capture (WebRTC) needs this alongside RECORD_AUDIO. Normal permission. -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
-    <!-- Spec 021 research R10 — none of these is needed to install or use the browser. -->
+    <!-- None of these is needed to install or use the browser. -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.location" android:required="false" />
@@ -56,28 +41,14 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.ThirtySix"
         tools:targetApi="33">
-        <!-- Spec 021 (owner decision 2026-10-11) — usesCleartextTraffic: a browser has to open
-             http:// sites; with the Android 9+ default every one failed with
-             ERR_CLEARTEXT_NOT_PERMITTED (filed since Spec 015). Mixed content stays blocked:
-             an https page still cannot load http sub-resources (Spec 007 FR-018). -->
-        <!-- Spec 017 — the activity starts on the splash theme; installSplashScreen()
-             swaps in Theme.ThirtySix (its postSplashScreenTheme) before AppCompat builds
-             its delegate. The <application> theme above stays Theme.ThirtySix. -->
-        <!-- Spec 019 — the activity handles a language change itself (locale|layoutDirection), so
-             applying a language no longer recreates it: no black frames, no WebView rebuild.
-             AppCompat delivers onConfigurationChanged on every API level once the activity
-             declares these; Compose re-reads strings through LocalConfiguration.
-             screenLayout is needed too: the FIRST change away from "follow system" also reports
-             CONFIG_SCREEN_LAYOUT (seen on a Galaxy A55, Android 16), and leaving it out
-             recreated the activity on exactly that first choice. -->
-        <!-- Spec 020 research R2 — singleTask: one instance in ThirtySix's own task. With the default
-             launch mode every link from another app would start a second MainActivity inside the
-             sender's task (one recents entry and one WebView per link, FR-004). New links arrive
-             in onNewIntent; Back on an untouched external tab uses moveTaskToBack to return to the
-             sender (FR-006). -->
-        <!-- Spec 021 research R4 — rotation and size changes are handled in place too, so a
-             fullscreen video (and every page) keeps playing and scrolling through a rotation
-             instead of the activity, and its WebView, being rebuilt. -->
+        <!-- usesCleartextTraffic: a browser has to open http:// sites. Mixed content stays blocked. -->
+        <!-- Starts on the splash theme; installSplashScreen() swaps in Theme.ThirtySix before
+             AppCompat builds its delegate. -->
+        <!-- Language, rotation and size changes are handled in place, so the WebView is not rebuilt.
+             screenLayout is needed too: the first change away from "follow system" also reports
+             CONFIG_SCREEN_LAYOUT (seen on Android 16). -->
+        <!-- singleTask: otherwise each link from another app starts a MainActivity in the sender's
+             task. New links arrive in onNewIntent. -->
         <activity
             android:name=".MainActivity"
             android:configChanges="locale|layoutDirection|screenLayout|orientation|screenSize|smallestScreenSize|keyboardHidden"
@@ -90,7 +61,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Spec 020 FR-001 — marks the app as a browser for launchers and the system. -->
+            <!-- Marks the app as a browser for launchers and the system. -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -98,9 +69,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-            <!-- Spec 020 FR-001 / FR-002 — web links ONLY: http and https, any host. This is the
-                 filter that puts the app in "Open with" and makes it eligible for the browser
-                 role. No other scheme may ever be added here (contracts C1-1). -->
+            <!-- Web links only, http and https, any host: this filter puts the app in "Open with" and
+                 makes it eligible for the browser role. Never add another scheme. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -111,7 +81,7 @@
                 <data android:scheme="https" />
             </intent-filter>
 
-            <!-- Spec 020 FR-009 — plain text from another app's Share sheet. -->
+            <!-- Plain text from another app's Share sheet. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -120,7 +90,7 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
-            <!-- Spec 020 FR-011 — "Search with ThirtySix" in other apps' text-selection menu. -->
+            <!-- "Search with ThirtySix" in other apps' text-selection menu. -->
             <intent-filter android:label="@string/entry_process_text_label">
                 <action android:name="android.intent.action.PROCESS_TEXT" />
 
@@ -129,7 +99,7 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
-            <!-- Spec 020 FR-012 — the system's web-search request. -->
+            <!-- The system's web-search request. -->
             <intent-filter>
                 <action android:name="android.intent.action.WEB_SEARCH" />
 
@@ -137,8 +107,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Spec 021 research R3 — hands the camera app a place to write a photo for a page's file
-             upload. Not exported; only cache/capture/ is exposed (res/xml/file_paths.xml). -->
+        <!-- Gives the camera app a place to write a photo for a page's file upload. Only
+             cache/capture/ is exposed. -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -149,10 +119,8 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Spec 016 research R1 — lets AndroidX persist the in-app language on Android 7.0–12.
-             With autoStoreLocales, AppCompat saves the user's choice and re-applies it at start-up;
-             on Android 13+ the framework stores it instead. Disabled and not exported: the service
-             is never started, it only carries this metadata. -->
+        <!-- Lets AppCompat store and re-apply the in-app language below Android 13. Disabled: the
+             service only carries this metadata. -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"

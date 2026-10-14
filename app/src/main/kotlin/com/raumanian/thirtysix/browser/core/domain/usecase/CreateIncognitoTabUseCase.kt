@@ -5,13 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabReposi
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/**
- * Spec 012 — open a new incognito tab.
- *
- * Sibling to [CreateTabUseCase] (Spec 011, normal tabs). The cookie-snapshot
- * lifecycle (FR-011a) is hidden inside [IncognitoTabRepository.createTab];
- * callers see only the [Tab] result.
- */
+/** Opens a new incognito tab; the session's cookie isolation is handled inside the repository. */
 class CreateIncognitoTabUseCase @Inject constructor(
     private val repository: IncognitoTabRepository,
 ) {

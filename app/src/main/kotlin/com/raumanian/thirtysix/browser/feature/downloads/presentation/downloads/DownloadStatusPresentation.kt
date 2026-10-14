@@ -4,13 +4,7 @@ import androidx.annotation.StringRes
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadFailureCause
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
-/**
- * Spec 015 — the presentation-side mapping from domain status to localized text.
- *
- * Lives here rather than on the sealed classes themselves so `domain/model/` stays free of
- * Android imports (Constitution §IV). This is the same separation Spec 007 made between
- * `ErrorReason` and its `toUserMessageRes()` extension.
- */
+// Status-to-text mapping lives here so the domain models stay free of Android imports.
 @StringRes
 fun DownloadStatus.toLabelRes(): Int = when (this) {
     DownloadStatus.Pending -> R.string.downloads_state_pending
@@ -22,11 +16,7 @@ fun DownloadStatus.toLabelRes(): Int = when (this) {
     is DownloadStatus.Failed -> cause.toLabelRes()
 }
 
-/**
- * FR-022 — a failure names a cause the user can act on where one is known. Anything the
- * user cannot do something about collapses into the generic message rather than exposing a
- * platform error code.
- */
+// Causes the user cannot act on collapse into the generic message instead of a platform code.
 @StringRes
 fun DownloadFailureCause.toLabelRes(): Int = when (this) {
     DownloadFailureCause.InsufficientSpace -> R.string.downloads_failure_insufficient_space
@@ -34,10 +24,6 @@ fun DownloadFailureCause.toLabelRes(): Int = when (this) {
     DownloadFailureCause.Generic -> R.string.downloads_failure_generic
 }
 
-/**
- * Bytes transferred so far, or null when the status carries no byte counts.
- * Drives the size column while a transfer is live.
- */
 val DownloadStatus.bytesSoFarOrNull: Long?
     get() = when (this) {
         is DownloadStatus.Running -> bytesSoFar
@@ -45,12 +31,7 @@ val DownloadStatus.bytesSoFarOrNull: Long?
         else -> null
     }
 
-/**
- * Total size when the server declared one, else null.
- *
- * Null is meaningful: the UI must show **indeterminate** progress rather than inventing a
- * percentage against an unknown total.
- */
+// Null when the server declared no length: the UI then shows indeterminate progress.
 val DownloadStatus.totalBytesOrNull: Long?
     get() = when (this) {
         is DownloadStatus.Running -> totalBytes
@@ -59,7 +40,6 @@ val DownloadStatus.totalBytesOrNull: Long?
         else -> null
     }
 
-/** Fractional progress in `0f..1f`, or null when it cannot be known. */
 val DownloadStatus.progressFractionOrNull: Float?
     get() {
         val total = totalBytesOrNull ?: return null

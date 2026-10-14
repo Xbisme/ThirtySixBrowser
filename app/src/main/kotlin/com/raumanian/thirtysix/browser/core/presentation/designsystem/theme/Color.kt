@@ -1,12 +1,6 @@
-// Spec 019 — violet brand palette from the approved ThirtySix design system
-// (https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys, snapshot in specs/019-ui-redesign/assets/tokens.json).
-// Replaces Spec 003's Deep Teal palette. Token → Material 3 role mapping: research R2.
+// Violet brand palette from the ThirtySix design system (https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys).
 // Every text/surface pair here is ≥ 4.5:1 in both themes (checked by ThirtySixColorsTest).
-//
-// File-level @Suppress: hex color literals in this file ARE the constants per Constitution §III
-// (Color tokens live in `presentation/theme/`). Detekt's MagicNumber rule doesn't model domain
-// semantics — every consumer references these via MaterialTheme.colorScheme.* or ThirtySixTheme.colors.
-@file:Suppress("MagicNumber")
+@file:Suppress("MagicNumber") // The hex literals are the colour tokens themselves.
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 

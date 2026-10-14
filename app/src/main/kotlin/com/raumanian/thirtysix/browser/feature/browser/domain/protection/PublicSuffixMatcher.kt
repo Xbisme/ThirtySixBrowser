@@ -4,12 +4,9 @@ import com.raumanian.thirtysix.browser.core.domain.model.PublicSuffixRules
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Spec 023 data-model rule 1 — the registrable domain ("site") of a host, from the bundled
- * Public Suffix List. Two hosts are the same site when their registrable domains are equal
- * (FR-008).
- *
- * Thread-safe and lock-free: it is called from WebView IO threads for every request. Results
- * are cached; when the cache reaches [cacheSize] it is simply cleared.
+ * The registrable domain ("site") of a host, from the bundled Public Suffix List. Thread-safe
+ * and lock-free because WebView IO threads call it for every request; the cache is cleared
+ * when it reaches [cacheSize].
  */
 class PublicSuffixMatcher(
     private val rules: PublicSuffixRules,
@@ -37,14 +34,10 @@ class PublicSuffixMatcher(
         return if (suffixStart == 0) host else labels.subList(suffixStart - 1, labels.size).joinToString(".")
     }
 
-    /**
-     * Index of the first label of the longest matching public suffix. Without any match the
-     * implicit "*" rule applies: an unknown top-level label is the public suffix.
-     */
+    /** First label of the longest matching public suffix; with no match an unknown TLD is the suffix. */
     private fun publicSuffixStart(labels: List<String>): Int =
         labels.indices.firstNotNullOfOrNull { i -> suffixStartAt(labels, i) } ?: (labels.size - 1)
 
-    /** The suffix start if a rule matches the labels from [i] on, else `null`. */
     private fun suffixStartAt(labels: List<String>, i: Int): Int? {
         val candidate = labels.subList(i, labels.size).joinToString(".")
         val parent = labels.subList(minOf(i + 1, labels.size), labels.size).joinToString(".")

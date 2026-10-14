@@ -8,13 +8,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Spec 021 data-model §6 / research R5 — WebViews a page created for a window the person asked
- * for, waiting to be adopted by their tab, and which tab opened each one (so `window.close()`
- * can return to it, FR-027). Main thread only.
- *
- * A pop-up is registered **before** its tab exists, under a unique placeholder address that the
- * tab is created with: the tab can be composed as soon as the tab store emits, which may be
- * before the creating coroutine resumes, so keying by tab id would race.
+ * Page-created WebViews waiting for their tab, and which tab opened each. Registered before the
+ * tab exists, under a unique placeholder address, because the tab can compose before the creating
+ * coroutine resumes. Main thread only.
  */
 @Singleton
 class PopupWebViewRegistry @Inject constructor() {
@@ -34,12 +30,10 @@ class PopupWebViewRegistry @Inject constructor() {
         return address
     }
 
-    /** The tab created for [webView] exists now. */
     fun onTabCreated(webView: WebView, tabId: Long) {
         tabs[webView] = tabId
     }
 
-    /** The WebView waiting for a tab whose address is [tabUrl], handed over once. */
     fun take(tabUrl: String): WebView? = waiting.remove(tabUrl)
 
     /** The page-opened tab [webView] belongs to and the tab that opened it, or `null`. */
@@ -49,7 +43,6 @@ class PopupWebViewRegistry @Inject constructor() {
         return if (tab == null || opener == null) null else tab to opener
     }
 
-    /** The page closed [webView] before its tab existed; the tab is closed once created. */
     fun closeWhenCreated(webView: WebView) {
         closedEarly[webView] = true
     }

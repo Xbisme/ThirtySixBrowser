@@ -19,10 +19,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 013 — covers [BookmarkRepositoryImpl] full surface: CRUD, cycle prevention,
- * cascade delete, ancestor-chain walk, star-toggle most-recent semantics.
- */
+/** CRUD, cycle prevention, cascade delete, ancestor chains and star-toggle semantics. */
 @RunWith(AndroidJUnit4::class)
 class BookmarkRepositoryImplTest {
 
@@ -45,11 +42,9 @@ class BookmarkRepositoryImplTest {
         db.close()
     }
 
-    // ──────── Bookmark CRUD ────────
-
     @Test
     fun `observeRecentBookmarks returns the newest across folders`() = runTest {
-        // Spec 019 T058a — Home page "Saved" shortcuts.
+        // The Home page's "Saved" shortcuts.
         repo.addBookmark(bookmark(url = "https://old.com", title = "Old", createdAt = 1L))
         repo.addBookmark(bookmark(url = "https://new.com", title = "New", createdAt = 2L))
         repo.observeRecentBookmarks(limit = 1).test {
@@ -79,8 +74,6 @@ class BookmarkRepositoryImplTest {
         assertTrue((result as Result.Error).throwable is BookmarkException.BookmarkNotFound)
     }
 
-    // ──────── Star toggle most-recent semantics (R9 / Q4) ────────
-
     @Test
     fun `deleteMostRecentBookmarkByUrl removes only newest of three duplicates`() = runTest {
         val url = "https://multi.example.com"
@@ -92,8 +85,6 @@ class BookmarkRepositoryImplTest {
         assertEquals(Result.Success(1), deleted)
         assertEquals(2, repo.countBookmarksByUrl(url))
     }
-
-    // ──────── Folder CRUD ────────
 
     @Test
     fun `createFolder rejects unknown parent`() = runTest {
@@ -108,8 +99,6 @@ class BookmarkRepositoryImplTest {
         val childId = (repo.createFolder("Project", rootId) as Result.Success).data
         assertNotNull(repo.getFolder(childId))
     }
-
-    // ──────── Folder cycle prevention (R6) ────────
 
     @Test
     fun `moveFolder rejects self-parent`() = runTest {
@@ -139,8 +128,6 @@ class BookmarkRepositoryImplTest {
         assertEquals(b, repo.getFolder(a)?.parentId)
     }
 
-    // ──────── Ancestor chain (R6 / FR-014 / FR-026) ────────
-
     @Test
     fun `getAncestorChain returns root-to-leaf for 3 levels`() = runTest {
         val a = (repo.createFolder("A", null) as Result.Success).data
@@ -156,8 +143,6 @@ class BookmarkRepositoryImplTest {
         val chain = repo.getAncestorChain(9_999L)
         assertTrue(chain.isEmpty())
     }
-
-    // ──────── Cascade delete (R7) ────────
 
     @Test
     fun `deleteFolderCascade removes folder and all descendants atomically`() = runTest {
@@ -193,8 +178,6 @@ class BookmarkRepositoryImplTest {
         assertTrue(result is Result.Error)
         assertTrue((result as Result.Error).throwable is BookmarkException.FolderNotFound)
     }
-
-    // ──────── Descendant count (R8 / FR-020) ────────
 
     @Test
     fun `countDescendants on 4-level tree returns total recursive count`() = runTest {

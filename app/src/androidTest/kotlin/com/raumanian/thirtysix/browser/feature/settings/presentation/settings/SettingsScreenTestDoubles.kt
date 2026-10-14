@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.isSelectable
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
+import com.raumanian.thirtysix.browser.core.domain.model.FireproofSite
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
@@ -10,11 +11,15 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
+import com.raumanian.thirtysix.browser.core.domain.model.SiteProtectionException
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageController
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
@@ -47,14 +52,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /**
- * Spec 016 T031 — shared in-memory doubles for the Settings Compose UI tests.
- *
- * The tests drive [SettingsViewModel] directly rather than through Hilt, the pattern
- * `HistoryScreenTestDoubles` established: the screen takes its view model as a parameter, so
- * a hand-built instance over in-memory fakes keeps the tests fast and free of the WebView and
- * Room setup the project has documented as flaky. The JVM doubles in `src/test` are not
- * visible here, hence these copies; where History's instrumented doubles already fit, they are
- * reused. Each user story extends this file with what it needs.
+ * The tests build [SettingsViewModel] by hand instead of through Hilt, avoiding the flaky WebView and
+ * Room setup. The JVM doubles in src/test are not visible here, hence these copies.
  */
 internal class InstrumentedFakeSettingsRepository(
     initial: UserSettings = UserSettings.DEFAULT,
@@ -64,12 +63,11 @@ internal class InstrumentedFakeSettingsRepository(
 
     val current: UserSettings get() = state.value
 
-    /** When set, exactly one following write fails without changing state (FR-043). */
+    /** When set, exactly one following write fails without changing state. */
     var failNextWrite: Boolean = false
 
     override fun observeSettings(): Flow<UserSettings> = state.asStateFlow()
 
-    // Spec 018 — the one-shot read. Same snapshot observeSettings would emit.
     override suspend fun currentSettings(): UserSettings = state.value
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = write { copy(themeMode = mode) }
@@ -82,9 +80,9 @@ internal class InstrumentedFakeSettingsRepository(
     override suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit> =
         write { copy(historyRetention = retention) }
 
-    override suspend fun setTextSize(size: com.raumanian.thirtysix.browser.core.domain.model.TextSize) =
+    override suspend fun setTextSize(size: TextSize) =
 
-        com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
+        Result.Success(Unit)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         write { copy(isOnboardingCompleted = value) }
@@ -99,10 +97,7 @@ internal class InstrumentedFakeSettingsRepository(
     }
 }
 
-/**
- * Spec 016 T061 — an in-memory [AppLanguageController] that records every request instead of
- * asking the platform, so a test never recreates its own activity.
- */
+// Records requests instead of asking the platform, so a test never recreates its own activity.
 internal class InstrumentedFakeAppLanguageController(
     @Volatile var currentLanguage: AppLanguage = AppLanguage.FollowSystem,
 ) : AppLanguageController {
@@ -118,11 +113,7 @@ internal class InstrumentedFakeAppLanguageController(
     }
 }
 
-/**
- * Spec 016 T077 — a [WebDataCleaner] that never touches the real web engine. When [gate] is
- * given, the site-data step waits for it, which keeps a clear in progress for as long as a test
- * needs to prove the dialog cannot be dismissed.
- */
+// When [gate] is given, the site-data step waits for it, keeping a clear in progress as long as a test needs.
 internal class InstrumentedFakeWebDataCleaner(
     private val gate: CompletableDeferred<Unit>? = null,
 ) : WebDataCleaner {
@@ -154,16 +145,14 @@ internal class InstrumentedFakeWebDataCleaner(
     }
 }
 
-/** Spec 024 — an empty fireproof list; the Settings screen only ever clears it. */
-internal object InstrumentedNoopFireproofSiteRepository : com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository {
-    override fun observeAll() = kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.FireproofSite>())
+internal object InstrumentedNoopFireproofSiteRepository : FireproofSiteRepository {
+    override fun observeAll() = flowOf(emptyList<FireproofSite>())
     override fun currentSites(): Set<String> = emptySet()
-    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
-    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
-    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
+    override suspend fun add(site: String) = Result.Success(Unit)
+    override suspend fun remove(site: String) = Result.Success(Unit)
+    override suspend fun clearAll() = Result.Success(Unit)
 }
 
-/** Spec 016 T077 — holds no incognito snapshot; the Settings screen only ever discards. */
 internal object InstrumentedNoopCookieJarSnapshotManager : CookieJarSnapshotManager {
     override suspend fun captureSnapshot(origins: List<String>) = Unit
     override suspend fun restoreSnapshot() = Unit
@@ -171,7 +160,6 @@ internal object InstrumentedNoopCookieJarSnapshotManager : CookieJarSnapshotMana
     override suspend fun discardSetAsideCookies() = Unit
 }
 
-/** Spec 016 T077 — holds no tab previews. */
 internal object InstrumentedNoopScreenshotCache : ScreenshotCache {
     private val state = MutableStateFlow(0L)
     override val version: StateFlow<Long> = state.asStateFlow()
@@ -181,7 +169,6 @@ internal object InstrumentedNoopScreenshotCache : ScreenshotCache {
     override suspend fun clearAll() = Unit
 }
 
-/** Assembles a [SettingsViewModel] over the doubles above; every parameter has a default. */
 @Suppress("LongParameterList")
 internal fun settingsViewModel(
     settingsRepository: SettingsRepository = InstrumentedFakeSettingsRepository(),
@@ -231,14 +218,9 @@ internal const val INSTRUMENTED_APP_VERSION_NAME: String = "9.9.9-instrumented"
 
 internal const val SETTINGS_TEST_TIMEOUT_MS: Long = 10_000L
 
-/**
- * Spec 019 — an option row in any Settings chooser. The choosers are drawn with the shared
- * `ChoiceDialog`, whose rows carry no test tag, so an option is matched by what it is: a
- * selectable (radio) node. Nothing else on the Settings screen is selectable.
- */
+// ChoiceDialog rows carry no test tag, so an option is matched as a selectable node; nothing else is selectable.
 fun isSettingsChoiceOption(): SemanticsMatcher = isSelectable()
 
-/** Spec 021 — the clear-data dialog's site permissions category, with nothing stored. */
 internal object InstrumentedNoopSitePermissionRepository : SitePermissionRepository {
     override fun observeAll(): Flow<List<SitePermissionDecision>> = flowOf(emptyList())
 
@@ -252,17 +234,16 @@ internal object InstrumentedNoopSitePermissionRepository : SitePermissionReposit
     override suspend fun clearAll(): Result<Unit> = Result.Success(Unit)
 }
 
-/** Spec 023 — the Settings tests never touch sites without protection. */
 internal object InstrumentedNoopProtectionExceptionRepository :
-    com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository {
+    ProtectionExceptionRepository {
     override fun observeAll() =
-        kotlinx.coroutines.flow.flowOf(emptyList<com.raumanian.thirtysix.browser.core.domain.model.SiteProtectionException>())
+        flowOf(emptyList<SiteProtectionException>())
 
     override fun currentSites(): Set<String> = emptySet()
 
-    override suspend fun add(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
+    override suspend fun add(site: String) = Result.Success(Unit)
 
-    override suspend fun remove(site: String) = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
+    override suspend fun remove(site: String) = Result.Success(Unit)
 
-    override suspend fun clearAll() = com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
+    override suspend fun clearAll() = Result.Success(Unit)
 }

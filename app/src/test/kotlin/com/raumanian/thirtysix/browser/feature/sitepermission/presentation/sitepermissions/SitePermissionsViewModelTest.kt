@@ -19,7 +19,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 021 T026 / FR-009 — the Site permissions screen's state and actions. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SitePermissionsViewModelTest {
 

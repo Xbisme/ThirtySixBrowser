@@ -37,11 +37,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
 import com.raumanian.thirtysix.browser.core.presentation.util.capitalizedForLocale
 import com.raumanian.thirtysix.browser.core.presentation.util.iconRes
 import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
-/**
- * Spec 021 FR-009 / C2.7 — remembered site decisions, one group per site: tap a decision to
- * change it, remove one site, or remove every site after confirming. Nothing here is ever
- * written by an incognito tab (INV-1).
- */
+/** Remembered decisions grouped by site. Incognito tabs never write anything shown here. */
 @Composable
 fun SitePermissionsScreen(
     modifier: Modifier = Modifier,

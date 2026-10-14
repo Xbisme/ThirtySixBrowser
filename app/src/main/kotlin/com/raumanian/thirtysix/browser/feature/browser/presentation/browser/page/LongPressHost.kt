@@ -14,7 +14,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressAction
 import kotlinx.coroutines.launch
 
-/** Shows the menu and carries out the chosen action (FR-018 – FR-024). */
+/** Shows the menu and carries out the chosen action. */
 @Composable
 fun LongPressHost(request: PageRequest.LongPress, hooks: LongPressHooks, done: () -> Unit) {
     val context = LocalContext.current

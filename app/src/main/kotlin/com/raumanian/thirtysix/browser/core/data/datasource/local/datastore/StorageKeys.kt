@@ -5,65 +5,26 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 /**
- * DataStore Preferences keys — single source of truth (Spec 006 FR-017).
- *
- * SCHEMA EVOLUTION RULES (Spec 006 FR-019):
- *
- * 1. Once a key in this file has shipped to a user via a release build, its NAME
- *    MUST NOT be reused for a different meaning.
- * 2. Once a key in this file has shipped to a user, its stored VALUE TYPE MUST NOT
- *    change (e.g., String → Int requires a new key).
- * 3. To change semantics: introduce a NEW key, write a one-time migration that
- *    reads the old key, transforms, writes the new key, and clears the old key.
- *    The old key declaration MUST stay in this file marked @Deprecated until at
- *    least one full release cycle has passed.
- * 4. To remove a no-longer-used key: mark @Deprecated for one release cycle, then
- *    delete in the following release.
- *
- * The negative-path test SettingsMapperTest#renamedKey_returnsDefault_oldValueGone
- * codifies rule 1 by simulating a rename and asserting the documented "default
- * returned, old value not silently inherited" behavior.
- *
- * Spec 016 deleted `language_override` outright rather than deprecating it. Rules 1–4 bind
- * keys that have shipped to a user in a release build, and this one never did — the app
- * is unreleased and nothing ever read the value (specs/016-settings-screen/research.md R4).
+ * Settings keys. A key that has shipped in a release never changes name, meaning or value type:
+ * add a new key, migrate once, and keep the old one `@Deprecated` for a release before deleting it.
  */
 object StorageKeys {
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val SEARCH_ENGINE = stringPreferencesKey("search_engine")
     val IS_ONBOARDING_COMPLETED = booleanPreferencesKey("is_onboarding_completed")
 
-    /** Spec 016 FR-009 — whether Material dynamic color is applied on Android 12+. */
     val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
 
-    /** Spec 016 FR-020 — the history retention window, stored as its day count. */
     val HISTORY_RETENTION_DAYS = intPreferencesKey("history_retention_days")
 
-    /**
-     * Spec 020 FR-025 / FR-026 — whether the Home invitation to make ThirtySix the default
-     * browser was dismissed, or retired because the app was seen as the default. Absent → `false`.
-     * Never written back to `false` (data-model INV-8).
-     */
+    /** Also set once the app is seen as the default browser; never written back to `false`. */
     val DEFAULT_BROWSER_INVITE_DISMISSED = booleanPreferencesKey("default_browser_invite_dismissed")
 
-    /**
-     * Spec 020 FR-024a — app launches counted so far, stopping at
-     * `BrowserLimits.DEFAULT_BROWSER_INVITE_MIN_LAUNCHES`. Absent → `0`, so older installs need
-     * no migration.
-     */
+    /** Counts launches only up to `BrowserLimits.DEFAULT_BROWSER_INVITE_MIN_LAUNCHES`. */
     val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
 
-    /**
-     * Spec 022 FR-029 / FR-032 — the app-wide text size, stored as its percentage. Absent, or
-     * not one of the nine levels → 100 (data-model §1), so older installs need no migration.
-     * Clear browsing data does not touch it.
-     */
     val TEXT_ZOOM_PERCENT = intPreferencesKey("text_zoom_percent")
 
-    /**
-     * Spec 024 FR-007 — `true` from just before a Fire run's first destructive step until its last
-     * (data-model "DataStore — one key", INV-1). `true` at start-up means a run was interrupted and
-     * must finish before any tab is shown. Absent → `false`, so older installs need no migration.
-     */
+    /** Set across a Fire run; still `true` at start-up means the run must finish before any tab shows. */
     val FIRE_IN_PROGRESS = booleanPreferencesKey("fire_in_progress")
 }

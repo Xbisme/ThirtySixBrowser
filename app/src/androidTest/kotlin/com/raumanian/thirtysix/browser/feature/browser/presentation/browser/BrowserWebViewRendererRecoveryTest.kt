@@ -15,20 +15,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Renderer-process recovery in [BrowserWebView].
- *
- * Until this was handled, losing the web engine's renderer process — a crash, or the system
- * reclaiming it for memory — ended the whole app, every tab with it. Lint's
- * `MissingOnRenderProcessGone`, which arrived with `androidx.webkit` in Spec 016, is what
- * pointed at it.
- *
- * `chrome://crash` and `chrome://kill` are the web engine's own debug addresses. Loaded
- * through the WebView API, they crash or kill the renderer behind the page, which are the two
- * ways the platform reports the loss. The host is a bare [BrowserWebView] with recording
- * callbacks, so each assertion is about the WebView's own recovery and nothing else.
- *
- * API 26+ only: that is when the platform began reporting renderer loss. Below it the
- * renderer runs inside the app's own process, so there is nothing left to recover.
+ * Renderer-process recovery in a bare [BrowserWebView]. `chrome://crash` and `chrome://kill` crash
+ * or kill the renderer, the two ways the platform reports its loss. API 26+ only: below that the
+ * renderer runs inside the app's process.
  */
 @RunWith(AndroidJUnit4::class)
 class BrowserWebViewRendererRecoveryTest {

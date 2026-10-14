@@ -10,9 +10,8 @@ plugins {
     alias(libs.plugins.hilt.android)
 }
 
-// --- Signing config (Constitution §XI v1.2.0 — two-scope rule) ----------------
-// Distribution builds: read release keystore from local.properties OR env vars.
-// Local dev / CI iteration: fall back to debug keystore with mandatory warning.
+// Release keystore from local.properties or env vars; without one, local and CI builds fall back
+// to the debug keystore with a warning (never for distribution).
 val keystoreProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
@@ -38,7 +37,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        // Spec 007 — custom runner boots HiltTestApplication so @HiltAndroidTest works.
+        // Boots HiltTestApplication so @HiltAndroidTest works.
         testInstrumentationRunner = "com.raumanian.thirtysix.browser.HiltTestRunner"
     }
 
@@ -66,9 +65,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // Two-scope signing per Constitution §XI v1.2.0:
-            //   - release keystore present  → use it
-            //   - absent                    → fall back to debug keystore + warning (FR-013)
             signingConfig = if (hasReleaseKeystore) {
                 signingConfigs.getByName("releaseConfig")
             } else {
@@ -78,57 +74,43 @@ android {
     }
 
     // Java target 11 via Toolchain — Gradle auto-provisions JDK 11 for compilation
-    // regardless of the launcher JDK. (Spec 001 Q3 clarification + FR-006.)
+    // regardless of the launcher JDK.
 
-    // Spec 014 — core library desugaring brings `java.time` (LocalDate / Instant /
-    // DateTimeFormatter) to minSdk 24. Wired alongside the desugar_jdk_libs
-    // dependency declared with `coreLibraryDesugaring(...)` below.
+    // Desugaring brings `java.time` to minSdk 24.
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
 
     buildFeatures {
         compose = true
-        // Spec 016 R10 — generates BuildConfig.VERSION_NAME for the Settings About section.
-        // AGP 9 defaults this to false and no longer honours the gradle.properties flag.
+        // BuildConfig.VERSION_NAME for Settings › About; AGP 9 defaults this to false and ignores
+        // the gradle.properties flag.
         buildConfig = true
     }
 
-    // Spec 005 — Robolectric requires merged Android resources to be visible to
-    // unit tests so it can resolve manifest + res/ for Application context. The
-    // flag is non-deprecated (Robolectric 4.16.1) and required by every Room
-    // DAO test that calls ApplicationProvider.getApplicationContext().
+    // Robolectric needs the merged manifest and res/ to build an Application context.
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
         }
     }
 
-    // Constitution §III + Q4 clarification: Lint strict for ALL build types.
-    // No `lint-baseline.xml` — fix issues directly. (Different from Detekt baseline policy.)
+    // Lint is strict for every build type, with no baseline: issues are fixed, not recorded.
     lint {
         abortOnError = true
         warningsAsErrors = true
         checkReleaseBuilds = true
         checkDependencies = false
 
-        // AGP 9.x compatibility false positives — lint hasn't fully caught up with the
-        // `compileSdk { version = release(36) { minorApiLevel = 1 } }` DSL form. These
-        // checks compare against a hypothetical newer SDK (37) and ignore minorApiLevel.
-        // Constitution §X mandates targetSdk = 36 for v1.0. Re-evaluate when AGP/Lint
-        // ship support for the new DSL.
-        // `AndroidGradlePluginVersion` is also disabled because we intentionally pin
-        // AGP for Android Studio compat — lint nagging about non-latest is noise.
+        // Lint misreads the `release(36) { minorApiLevel = 1 }` DSL and compares against SDK 37;
+        // AGP is pinned on purpose for Android Studio compatibility.
         disable += listOf(
             "OldTargetApi",
             "GradleDependency",
             "AndroidGradlePluginVersion",
         )
 
-        // Spec 004 FR-008 / SC-005 / Q2 clarification — translation-completeness gate at error severity.
-        // Belt-and-suspenders on top of `warningsAsErrors = true`: if a future spec relaxes the global
-        // promotion, these specific checks remain build-blocking. `MissingTranslation` catches keys present
-        // in EN baseline but missing from any non-English locale; `ExtraTranslation` catches the reverse.
+        // Translation completeness stays build-blocking even if `warningsAsErrors` is ever relaxed.
         error += listOf(
             "MissingTranslation",
             "ExtraTranslation",
@@ -136,28 +118,20 @@ android {
     }
 }
 
-// --- Room schema export (Spec 005 FR-010) ------------------------------------
-// Schema JSON snapshots written to app/schemas/ on every build; tracked in git
-// (NOT .gitignored) so reviewers can audit schema evolution at PR time and
-// future migrations can diff against the prior version.
+// Room schema snapshots are committed so reviewers and migrations can diff schema versions.
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
-// --- Detekt (Constitution §III No-Hardcode Rule, FR-018) ---------------------
 detekt {
     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-    baseline = file("$rootDir/config/detekt/baseline.xml")
     source.setFrom("src/main/kotlin", "src/test/kotlin", "src/androidTest/kotlin", "src/debug/kotlin")
     buildUponDefaultConfig = true
     allRules = false
     ignoreFailures = false
-    // CV-05 mitigation: pin Detekt's bundled Kotlin analyzer independently of the
-    // project Kotlin version — Detekt 1.23.8 was built against Kotlin 2.0.21.
-    // Adjust if upstream releases a newer build supporting Kotlin 2.3.
+    // Detekt 1.23.8 analyses with its own bundled Kotlin 2.0.21, not the project's 2.3.
 }
 
-// --- ktlint (FR-019) ---------------------------------------------------------
 ktlint {
     android.set(true)
     ignoreFailures.set(false)
@@ -173,9 +147,7 @@ tasks.withType<Test>().configureEach {
     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) })
 }
 
-// --- Compose compiler (Spec 019 R9, Constitution v1.4.0 §V rule 5) ------------
-// The stability file always applies. Reports and metrics are written only when the
-// build is run with `-PcomposeReports`, so ordinary builds pay nothing for them.
+// Compose reports and metrics only with `-PcomposeReports`, so ordinary builds pay nothing.
 composeCompiler {
     stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("config/compose/stability.conf"))
     if (project.hasProperty("composeReports")) {
@@ -184,8 +156,7 @@ composeCompiler {
     }
 }
 
-// Print warning when release falls back to debug-signing (Constitution §XI v1.2.0 mandatory).
-// Use println so the message is visible at the default log level.
+// println so the warning is visible at the default log level.
 gradle.taskGraph.whenReady {
     if (allTasks.any { it.name == "packageRelease" } && !hasReleaseKeystore) {
         println(
@@ -197,7 +168,6 @@ gradle.taskGraph.whenReady {
 
 dependencies {
     ktlintRuleset(libs.compose.rules.ktlint)
-    // Spec 014 — core library desugaring runtime (build-time tool, NOT runtime lib).
     coreLibraryDesugaring(libs.android.desugar.jdk.libs)
 
     implementation(libs.androidx.core.ktx)
@@ -206,9 +176,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
 
-    // Spec 002 — Hilt DI + Navigation Compose + Lifecycle ViewModel Compose.
-    // KSP processor MUST use `hilt-compiler` artifact; `hilt-android-compiler`
-    // is the kapt-era artifact and silently produces no Hilt code with KSP.
+    // KSP needs `hilt-compiler`; the kapt-era `hilt-android-compiler` silently generates nothing.
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -216,26 +184,17 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
 
-    // Spec 005 — Room persistence layer. Pure Kotlin/Java (no .so); ksp processor
-    // artifact ID is `room-compiler` (works for both kapt and ksp wiring).
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    // Spec 006 — DataStore Preferences for user settings (theme, language, search engine,
-    // onboarding flag). Pure Kotlin, zero native libs.
+    // Ships libdatastore_shared_counter.so (16 KB-aligned), despite being a Kotlin library.
     implementation(libs.androidx.datastore.preferences)
 
-    // Spec 016 — in-app language switching on API 24–32 needs AppCompatActivity +
-    // AppCompatDelegate.setApplicationLocales (research.md R1). No native libraries.
+    // In-app language below Android 13 needs AppCompatDelegate.setApplicationLocales.
     implementation(libs.androidx.appcompat)
-    // Spec 016 — WebStorageCompat.deleteBrowsingData for complete site-data removal where
-    // the installed WebView supports it (research.md R5). No native libraries.
     implementation(libs.androidx.webkit)
 
-    // Spec 017 — SplashScreen compat backs the branded launch screen down to minSdk 24 and
-    // maps the splash attributes onto the platform API from Android 12 up
-    // (specs/017-splash-screen/research.md R1, R6). No native libraries.
     implementation(libs.androidx.core.splashscreen)
 
     testImplementation(libs.junit)
@@ -248,15 +207,11 @@ dependencies {
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    // Spec 007 — Espresso-Web for asserting WebView DOM in instrumented tests.
     androidTestImplementation(libs.androidx.espresso.web)
     androidTestImplementation(libs.androidx.espresso.intents)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    // Spec 007 — Hilt instrumented-test runtime. Required by @HiltAndroidTest +
-    // HiltAndroidRule + @TestInstallIn (TestUrlConfigModule swaps the default URL
-    // for the offline-error scenario). KSP processor must also run on androidTest
-    // sources to generate the test Hilt component.
+    // KSP must also run on androidTest sources to generate the test Hilt component.
     androidTestImplementation(libs.hilt.android.testing)
     kspAndroidTest(libs.hilt.compiler)
 

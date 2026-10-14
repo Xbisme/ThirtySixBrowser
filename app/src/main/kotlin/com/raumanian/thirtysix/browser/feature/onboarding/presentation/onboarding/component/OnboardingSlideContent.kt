@@ -47,13 +47,7 @@ private val ThemePreviewHeight = 96.dp
 private val ThemePreviewBar = 10.dp
 private const val THEME_PREVIEW_BAR_FRACTION = 0.6f
 
-/**
- * Spec 018's four slides, restyled by Spec 019 FR-052 for the hero: white type on the dark mesh,
- * choices as glass rows. Every slide scrolls — the language slide carries nine options and must
- * fit a small screen at a large font setting (Spec 018 FR-019, SC-011).
- *
- * Option labels come from Spec 016's public label functions (INV-8).
- */
+// Every slide scrolls: the language slide has nine options and must fit a small screen at a large font.
 @Composable
 private fun SlideScaffold(
     title: String,
@@ -85,12 +79,8 @@ private fun SlideScaffold(
     }
 }
 
-/**
- * FR-004 — the welcome slide states that the app collects nothing and sends nothing anywhere.
- *
- * ⚠️ It reuses `settings_about_privacy_statement` verbatim (INV-10): two wordings of the app's
- * central promise would drift, and it is also a Play Store data-safety commitment.
- */
+// Reuses settings_about_privacy_statement verbatim: two wordings of the privacy promise, which is also a
+// Play Store data-safety commitment, would drift apart.
 @Composable
 fun WelcomeSlide(modifier: Modifier = Modifier) {
     val colors = ThirtySixTheme.colors
@@ -112,7 +102,6 @@ fun WelcomeSlide(modifier: Modifier = Modifier) {
     }
 }
 
-/** FR-005 — "Follow system" plus the eight languages, each written in its own language. */
 @Composable
 fun LanguageSlide(
     selected: AppLanguage,
@@ -134,7 +123,6 @@ fun LanguageSlide(
     }
 }
 
-/** FR-007 — Light, Dark and System default, as three preview cards (FR-052). */
 @Composable
 fun ThemeSlide(
     selected: ThemeMode,
@@ -159,11 +147,7 @@ fun ThemeSlide(
     }
 }
 
-/**
- * A miniature of the browser in that theme, with its name below. The preview paints the
- * theme's own surface and primary — that is the point of a preview — so it uses the scheme
- * constants rather than the current theme's tokens.
- */
+// Paints the previewed theme's own colors, so it uses the scheme constants rather than the current theme.
 @Composable
 private fun ThemePreviewCard(
     mode: ThemeMode,
@@ -224,7 +208,6 @@ private fun PreviewHalf(surface: Color, accent: Color, modifier: Modifier = Modi
     }
 }
 
-/** FR-007 — Google, DuckDuckGo and Bing. */
 @Composable
 fun SearchEngineSlide(
     selected: SearchEngine,

@@ -4,10 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.FireproofSite
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Spec 024 FR-009 – FR-013 — the sites whose cookies and site data survive Fire. Normal browsing
- * only: incognito never fireproofs a site (FR-011).
- */
+/** Sites whose cookies and site data survive Fire. Normal browsing only. */
 interface FireproofSiteRepository {
     /** Newest first. */
     fun observeAll(): Flow<List<FireproofSite>>

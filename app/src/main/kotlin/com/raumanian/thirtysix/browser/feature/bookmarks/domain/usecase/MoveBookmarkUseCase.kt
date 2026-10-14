@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/** Spec 013 FR-021 — moves a bookmark to a new folder (null = root). */
+/** Moves a bookmark to a new folder (null = root). */
 class MoveBookmarkUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {

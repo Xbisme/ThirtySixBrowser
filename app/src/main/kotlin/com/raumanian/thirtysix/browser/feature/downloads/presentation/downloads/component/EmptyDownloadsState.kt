@@ -25,10 +25,6 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 internal const val TEST_TAG_DOWNLOADS_EMPTY: String = "downloads_empty_state"
 
-/**
- * Spec 015 FR-040 · Spec 019 — shown on a fresh install and after the last entry is removed:
- * the download glyph in a pastel well, a title and one line of explanation.
- */
 @Composable
 fun EmptyDownloadsState(modifier: Modifier = Modifier) {
     Column(

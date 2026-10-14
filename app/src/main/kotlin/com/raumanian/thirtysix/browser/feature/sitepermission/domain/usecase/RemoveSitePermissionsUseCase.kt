@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepo
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/** Spec 021 FR-009 — forgets one site's decisions ([origin]) or, with `null`, every site's. */
+/** A `null` [origin] forgets every site's decisions. */
 class RemoveSitePermissionsUseCase @Inject constructor(
     private val repository: SitePermissionRepository,
 ) {

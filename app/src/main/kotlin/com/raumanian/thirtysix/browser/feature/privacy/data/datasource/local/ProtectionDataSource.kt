@@ -16,9 +16,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
- * Spec 023 research R10 — parses the bundled protection assets once per process on the IO
- * dispatcher. The main thread never waits: it reads [currentDataOrNull]; WebView IO threads may
- * wait in [awaitData], bounded, and fail open.
+ * Parses the bundled protection assets once per process on the IO dispatcher. The main thread
+ * never waits ([currentDataOrNull]); WebView IO threads wait in [awaitData], bounded, and fail open.
  */
 @Singleton
 class ProtectionDataSource @Inject constructor(

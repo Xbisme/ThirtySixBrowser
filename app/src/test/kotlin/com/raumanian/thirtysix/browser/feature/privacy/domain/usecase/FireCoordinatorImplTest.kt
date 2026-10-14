@@ -31,7 +31,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 024 T023 — the marker (INV-1), the single-run gate (INV-5) and resume (FR-007). */
+/** The durable marker, the single-run gate and resuming an interrupted run. */
 class FireCoordinatorImplTest {
 
     private val marker = FakeMarker()

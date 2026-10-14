@@ -8,10 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /**
- * Spec 021 research R1 — shows the page's oldest pending request, one at a time (FR-035).
- *
- * Each variant is rendered by the user story that owns it. A variant with no renderer yet is
- * answered as cancelled straight away, so a page is never left waiting on the browser.
+ * Shows the page's oldest pending request, one at a time. A variant with no renderer is answered
+ * as cancelled at once, so a page is never left waiting.
  */
 @Composable
 fun PageRequestHost(queue: PageRequestQueue, renderers: PageRequestRenderers) {
@@ -28,9 +26,8 @@ fun PageRequestHost(queue: PageRequestQueue, renderers: PageRequestRenderers) {
 }
 
 /**
- * Spec 021 — the per-story renderers. [render] draws [request] and returns `true`, or returns
- * `false` when nothing renders that variant. Each renderer must call `done` once the request is
- * answered.
+ * The per-kind renderers. [render] draws [request] and returns `true`, or `false` when nothing
+ * renders that variant. Each renderer must call `done` once the request is answered.
  */
 fun interface PageRequestRenderers {
     @Composable

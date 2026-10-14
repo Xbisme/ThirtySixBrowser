@@ -46,7 +46,8 @@ class HistoryDaoTest {
 
     @Test
     fun `observeRecent emits the newest rows up to the limit`() = runTest {
-        // Spec 019 T058a — Home page "Recently visited" (data-model §4).
+        // Backs the Home page's "Recently visited" list.
+
         (1L..5L).forEach {
             historyDao.insert(HistoryEntryEntity(url = "https://$it.com", title = "$it", visitedAt = it * 100))
         }

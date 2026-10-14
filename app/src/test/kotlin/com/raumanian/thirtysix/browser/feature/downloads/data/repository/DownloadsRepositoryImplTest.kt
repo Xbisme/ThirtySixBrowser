@@ -18,7 +18,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 015 — [DownloadsRepositoryImpl] against real Room. */
 @RunWith(AndroidJUnit4::class)
 class DownloadsRepositoryImplTest {
 

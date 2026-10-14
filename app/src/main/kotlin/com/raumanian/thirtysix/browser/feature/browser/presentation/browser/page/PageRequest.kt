@@ -4,13 +4,9 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressAction
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressMenu
 /**
- * Spec 021 research R1 / data-model §3 — something a page asked of the browser that needs the
- * person. Built by the WebView clients, shown one at a time by `PageRequestHost`.
- *
- * Each request is tied to the tab and the page ([generation]) that made it; a request whose page
- * is gone is cancelled rather than shown over another page (FR-034). The platform callback is
- * hidden behind lambdas and settled **exactly once** — whichever of answer, cancel or staleness
- * comes first wins (data-model INV-3).
+ * Something a page asked of the browser that needs the person, tied to the tab and page
+ * ([generation]) that made it; a request whose page is gone is cancelled, not shown over another.
+ * The platform callback is settled exactly once: answer, cancel or staleness, whichever is first.
  */
 @Suppress("LongParameterList") // Each variant carries its page identity plus the platform answers.
 sealed class PageRequest(val tabId: Long, val generation: Long, val origin: String) {
@@ -25,10 +21,10 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
         answer()
     }
 
-    /** Answers the page as refused / cancelled (FR-034, FR-033). */
+    /** Answers the page as refused / cancelled. */
     abstract fun cancel()
 
-    /** Camera / microphone / location (FR-001). [followers] are identical requests merged into this one. */
+    /** Camera / microphone / location. [followers] are identical requests merged into this one. */
     class Permission(
         tabId: Long,
         generation: Long,
@@ -42,13 +38,10 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
     ) : PageRequest(tabId, generation, origin) {
         private val followers = mutableListOf<Permission>()
 
-        /** What the dialog asks about — the capabilities not already allowed (contracts C1.1 `Ask`). */
+        /** The capabilities the dialog asks about: those not already allowed. */
         var askedCapabilities: Set<SiteCapability> = capabilities
 
-        /**
-         * The site is already allowed but the app lacks the Android permission (revoked in system
-         * settings): only the system prompt is needed, not the app's dialog.
-         */
+        /** Already allowed but the Android permission was revoked: only the system prompt is needed. */
         var needsSystemPermissionOnly: Boolean = false
 
         fun grant() = settle {
@@ -63,7 +56,7 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
 
         override fun cancel() = deny()
 
-        /** The page withdrew the request itself: settled without answering (C3.1). */
+        /** The page withdrew the request itself: settled without answering. */
         fun withdraw() = settle {}
 
         fun isSameAs(other: Permission): Boolean =
@@ -77,7 +70,7 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
         }
     }
 
-    /** A page's file input (FR-011 – FR-013). The launcher answers with the chosen files or none. */
+    /** A page's file input; the launcher answers with the chosen files or none. */
     class FileChooser(
         tabId: Long,
         generation: Long,
@@ -90,7 +83,7 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
         override fun cancel() = answer(null)
     }
 
-    /** alert / confirm / prompt (FR-029). [showSuppress] from the second dialog on a page (FR-031). */
+    /** alert / confirm / prompt; [showSuppress] from the second dialog on a page. */
     class JsDialog(
         tabId: Long,
         generation: Long,
@@ -107,7 +100,7 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
         override fun cancel() = settle(onCancel)
     }
 
-    /** "Leave site?" (FR-030). Cancel means stay. */
+    /** "Leave site?". Cancel means stay. */
     class LeavePage(
         tabId: Long,
         generation: Long,
@@ -120,7 +113,7 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
         override fun cancel() = settle(onStay)
     }
 
-    /** HTTP authentication (FR-032). Credentials pass straight through and are never kept. */
+    /** HTTP authentication. Credentials pass straight through and are never kept. */
     class HttpAuth(
         tabId: Long,
         generation: Long,
@@ -135,7 +128,6 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
         override fun cancel() = settle(onCancel)
     }
 
-    /** Long-press on a link or an image (FR-018 – FR-024). */
     class LongPress(
         tabId: Long,
         generation: Long,
@@ -149,10 +141,10 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
     }
 }
 
-/** Spec 021 — the kind of JavaScript dialog a page showed. */
+/** The kind of JavaScript dialog a page showed. */
 enum class JsDialogKind { Alert, Confirm, Prompt }
 
-/** Spec 021 research R3 — what a page's file input asked for, free of platform types. */
+/** What a page's file input asked for, free of platform types. */
 data class FileChooserRequest(
     val acceptTypes: List<String>,
     val allowMultiple: Boolean,

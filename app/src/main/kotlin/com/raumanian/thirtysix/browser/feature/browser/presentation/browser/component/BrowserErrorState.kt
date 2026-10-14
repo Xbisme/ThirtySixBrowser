@@ -23,12 +23,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.ErrorReason
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.toUserMessageRes
-/**
- * Spec 007 US3 — full-screen error UI shown when [ErrorReason] is non-null.
- *
- * Replaces (does NOT overlay) the WebView surface. All colors / typography /
- * spacing flow through theme tokens (Constitution §III).
- */
+/** Full-screen error that replaces, not overlays, the WebView surface. */
 @Composable
 fun BrowserErrorState(
     reason: ErrorReason,

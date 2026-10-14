@@ -1,6 +1,5 @@
-// Spec 019 — every icon the redesign draws, one name per Material Symbol (research R4).
-// Feature code refers to `AppIcons.X`, never to a drawable name twice; the vectors live in
-// res/drawable/ic_<name>.xml (Material Symbols Rounded, weight 300, grade −25).
+// Every icon the app draws, one name per Material Symbol. Feature code refers to `AppIcons.X`;
+// the vectors live in res/drawable/ic_<name>.xml (Material Symbols Rounded, weight 300, grade −25).
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 
@@ -34,7 +33,7 @@ object AppIcons {
 
     @DrawableRes val ContentCopy = R.drawable.ic_content_copy
 
-    // Spec 021 — long-press share and the site capabilities.
+    // Long-press share and the site capabilities.
     @DrawableRes val Share = R.drawable.ic_share
 
     @DrawableRes val PhotoCamera = R.drawable.ic_photo_camera
@@ -125,10 +124,10 @@ object AppIcons {
 
     @DrawableRes val Warning = R.drawable.ic_warning
 
-    /** Spec 024 FR-001 — the Fire action in the hub and on the Tabs screen. */
+    /** The Fire action in the hub and on the Tabs screen. */
     @DrawableRes val Fire = R.drawable.ic_fire
 
-    // Spec 022 — page tools in the hub and the find bar.
+    // Page tools in the hub and the find bar.
     @DrawableRes val FindInPage = R.drawable.ic_find_in_page
 
     @DrawableRes val Print = R.drawable.ic_print

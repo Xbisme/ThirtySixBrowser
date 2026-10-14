@@ -6,7 +6,7 @@ import androidx.room.Upsert
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
 import kotlinx.coroutines.flow.Flow
 
-/** Spec 021 — remembered site decisions. One row per `(origin, capability)`; writing again replaces it. */
+/** Remembered site decisions. One row per `(origin, capability)`; writing again replaces it. */
 @Dao
 interface SitePermissionDao {
     @Upsert

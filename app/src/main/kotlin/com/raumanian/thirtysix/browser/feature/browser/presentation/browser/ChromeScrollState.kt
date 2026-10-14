@@ -10,12 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 /**
- * Spec 019 — how far the browsing bars have slid away (research R7, contracts C2).
- *
- * [offsetPx] is 0 when both bars are fully shown and [maxOffsetPx] when they are fully hidden.
- * It is snapshot state, but it MUST be read only inside `Modifier.offset { }` or
- * `graphicsLayer { }` (Constitution v1.4.0 §V rule 1): reading it in a composable body would
- * recompose the whole browser on every scroll frame. Scroll deltas allocate nothing.
+ * How far the bars have slid away, 0 (shown) to [maxOffsetPx] (hidden). Read it only inside
+ * `Modifier.offset { }` or `graphicsLayer { }`: a read in a composable body recomposes on every frame.
  */
 @Stable
 class ChromeScrollState(maxOffsetPx: Float) {
@@ -28,16 +24,14 @@ class ChromeScrollState(maxOffsetPx: Float) {
     var offsetPx: Float by mutableFloatStateOf(0f)
         private set
 
-    /** Fraction hidden, 0f..1f. Same read rules as [offsetPx]. */
     val hiddenFraction: Float
         get() = if (maxOffsetPx == 0f) 0f else offsetPx / maxOffsetPx
 
-    /** [dy] > 0 means the page content moved up (user scrolled down): hide the bars. */
+    /** [dy] > 0 means the user scrolled down: hide the bars. */
     fun onScrollDelta(dy: Float) {
         offsetPx = (offsetPx + dy).coerceIn(0f, maxOffsetPx)
     }
 
-    /** Bring both bars fully back. */
     fun show() {
         offsetPx = 0f
     }

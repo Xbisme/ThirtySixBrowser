@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.model
 import java.time.LocalTime
 
 /**
- * Spec 019 FR-011 — the Home page greeting by time of day (never a name: there is no account).
+ * The Home page greeting by time of day (never a name: there is no account).
  * Morning 05:00–11:59, afternoon 12:00–17:59, evening otherwise.
  */
 enum class GreetingPeriod {

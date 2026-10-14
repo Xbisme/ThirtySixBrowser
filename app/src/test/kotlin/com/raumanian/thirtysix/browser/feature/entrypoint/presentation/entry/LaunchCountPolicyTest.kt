@@ -4,7 +4,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 020 T041 — FR-024a's launch rule, all four combinations. */
 class LaunchCountPolicyTest {
 
     @Test

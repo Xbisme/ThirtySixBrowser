@@ -25,7 +25,6 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
-/** Spec 024 — fireproof sites, the Fire coordinator and the privacy-script session. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class PrivacyToolsModule {
@@ -54,7 +53,7 @@ abstract class PrivacyToolsModule {
     abstract fun bindFireStepObserver(impl: ConfigurableFireStepObserver): FireStepObserver
 
     companion object {
-        /** Spec 024 research R10 — lives as long as the process; a failing child never cancels it. */
+        /** Lives as long as the process; a failing child never cancels it. */
         @Provides
         @Singleton
         @ApplicationScope

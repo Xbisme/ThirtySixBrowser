@@ -33,10 +33,8 @@ import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.TabsMode
 private const val DISABLED_ALPHA = 0.5f
 
 /**
- * Spec 019 FR-040 — the one "create" card at the end of the grid, for the mode on screen: a
- * new tab in Open mode, a new incognito tab (on the plum surface) in Incognito mode. Same
- * height as a [TabSwitcherCard]. At the mode's tab cap it dims and stops responding
- * (Spec 011 FR-016, Spec 012 FR-004). Replaces Spec 011/012's two separate cards.
+ * The "create" card at the end of the grid for the mode on screen, as tall as a
+ * [TabSwitcherCard]. At the mode's tab cap it dims and stops responding.
  */
 @Composable
 fun TabCreateCard(

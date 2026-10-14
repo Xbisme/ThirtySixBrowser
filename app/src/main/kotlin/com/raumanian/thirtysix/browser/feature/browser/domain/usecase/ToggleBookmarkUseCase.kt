@@ -6,15 +6,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
 /**
- * Spec 013 R9 / Q4 — drives the star icon "toggle" behaviour on
- * [com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserScreen].
- *
- * If no bookmark exists for [url] → add one at root via [AddBookmarkUseCase].
- * If at least one exists → delete the most-recently-created entry, leaving
- * any manual duplicates untouched.
- *
- * Returns a [ToggleBookmarkResult] indicating which action the UI should
- * surface (snackbar message via [com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BookmarkSnackbarEvent]).
+ * The star icon's toggle: with no bookmark for [url], adds one at root; otherwise deletes the most
+ * recently created one, leaving manual duplicates untouched.
  */
 class ToggleBookmarkUseCase @Inject constructor(
     private val repository: BookmarkRepository,

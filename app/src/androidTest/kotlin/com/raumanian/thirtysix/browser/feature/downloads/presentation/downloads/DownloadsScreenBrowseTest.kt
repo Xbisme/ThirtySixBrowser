@@ -16,7 +16,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 015 T065 (US2 / FR-019 – FR-022, and US7 / FR-040). */
 @RunWith(AndroidJUnit4::class)
 class DownloadsScreenBrowseTest {
 
@@ -63,7 +62,10 @@ class DownloadsScreenBrowseTest {
         assertEquals(
             "exactly one row is transferring, so exactly one progress bar belongs on screen",
             1,
-            composeRule.onAllNodesWithTag(TEST_TAG_DOWNLOAD_PROGRESS, useUnmergedTree = true).fetchSemanticsNodes().size,
+            composeRule.onAllNodesWithTag(
+                TEST_TAG_DOWNLOAD_PROGRESS,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().size,
         )
     }
 

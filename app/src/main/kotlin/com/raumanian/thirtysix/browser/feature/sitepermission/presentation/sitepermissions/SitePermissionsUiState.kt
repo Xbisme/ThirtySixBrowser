@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.feature.sitepermission.presentation.site
 
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
-/** Spec 021 C2.7 — one site's remembered decisions, in the order camera, microphone, location. */
+/** Decisions in the order camera, microphone, location. */
 data class SitePermissionsSite(
     val origin: String,
     val decisions: List<Pair<SiteCapability, SiteDecision>>,

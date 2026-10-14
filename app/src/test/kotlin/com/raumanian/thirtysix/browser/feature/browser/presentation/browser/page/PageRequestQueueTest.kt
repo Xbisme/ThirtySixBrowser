@@ -6,7 +6,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Test
 
-/** Spec 021 T005 — queue order, staleness, merging and disposal (FR-034, FR-035, INV-3). */
+/** Queue order, staleness, merging and disposal. */
 class PageRequestQueueTest {
 
     private val answers = mutableListOf<String>()

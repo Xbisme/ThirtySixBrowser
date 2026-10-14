@@ -23,18 +23,15 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageContext
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequestSink
-/**
- * Forwards progress, page title (Spec 011 / M1) and favicon (Spec 011 favicon amendment), and
- * translates the page's requests into [PageRequest]s for the browser screen (Spec 021 C3.1).
- */
-@Suppress("TooManyFunctions") // One override per platform hook (Spec 021 C3.1); each only translates.
+/** Forwards progress, title and favicon, and turns the page's requests into [PageRequest]s. */
+@Suppress("TooManyFunctions") // One override per platform hook; each only translates.
 internal class BrowserChromeClient(
     private val onProgressChanged: (Int) -> Unit,
     private val onReceivedTitle: (String) -> Unit,
     private val onReceivedIcon: (String, Bitmap) -> Unit,
     private val pageRequests: PageRequestSink,
     private val incognitoProfile: IncognitoWebProfile,
-    /** A WebView with the browser's settings, for a window the page opened (research R5). */
+    /** A WebView with the browser's settings, for a window the page opened. */
     private val newPopupWebView: (Context) -> WebView = ::WebView,
 ) : WebChromeClient() {
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
@@ -50,7 +47,7 @@ internal class BrowserChromeClient(
         if (icon != null) onReceivedIcon(url, icon)
     }
 
-    /** Spec 021 FR-001 / FR-008 — camera and microphone; every other resource is refused. */
+    /** Camera and microphone; every other resource is refused. */
     override fun onPermissionRequest(request: PermissionRequest?) {
         request ?: return
         val context = pageRequests.context()
@@ -81,7 +78,7 @@ internal class BrowserChromeClient(
         pageRequests.onPermissionWithdrawn { it.token === request }
     }
 
-    /** Spec 021 FR-001 — location; never retained by the engine, the app keeps its own decision (INV-6). */
+    /** The engine never retains a location grant; the app keeps its own decision. */
     override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
         callback ?: return
         val context = pageRequests.context()
@@ -109,7 +106,7 @@ internal class BrowserChromeClient(
         pageRequests.onPermissionWithdrawn { it.capabilities == setOf(SiteCapability.Location) }
     }
 
-    /** Spec 021 FR-011 — a page's file input; the page is answered once, with files or `null`. */
+    /** A page's file input; the page is answered once, with files or `null`. */
     override fun onShowFileChooser(
         webView: WebView?,
         filePathCallback: ValueCallback<Array<Uri>>?,
@@ -147,7 +144,6 @@ internal class BrowserChromeClient(
         )
     }
 
-    /** Spec 021 FR-014 — the page asked for fullscreen (a video, usually). */
     override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
         callback ?: return
         if (view == null) callback.onCustomViewHidden() else pageRequests.onShowCustomView(view, callback)
@@ -156,9 +152,8 @@ internal class BrowserChromeClient(
     override fun onHideCustomView() = pageRequests.onHideCustomView()
 
     /**
-     * Spec 021 FR-025 / FR-026 — a new window. Allowed: a configured WebView goes to the page and
-     * becomes a new tab. Blocked: a throw-away WebView only learns the address for the notice's
-     * Open, then is destroyed without loading anything.
+     * Allowed: a configured WebView goes to the page and becomes a new tab. Blocked: a throw-away
+     * WebView only learns the address for the notice's Open, then is destroyed unloaded.
      */
     override fun onCreateWindow(
         view: WebView?,
@@ -199,11 +194,9 @@ internal class BrowserChromeClient(
         window?.let(pageRequests::onCloseWindow)
     }
 
-    /** Spec 021 FR-029 / FR-031 — `alert()`. */
     override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean =
         jsDialog(url, JsDialogKind.Alert, message, null, result, onConfirm = { result?.confirm() })
 
-    /** `confirm()`. */
     override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean =
         jsDialog(url, JsDialogKind.Confirm, message, null, result, onConfirm = { result?.confirm() })
 
@@ -218,7 +211,7 @@ internal class BrowserChromeClient(
         result?.confirm(text.orEmpty())
     }
 
-    /** Spec 021 FR-030 — "Leave site?". Never suppressed, so a page cannot trap the person. */
+    /** "Leave site?" is never suppressed, so a page cannot trap the person. */
     override fun onJsBeforeUnload(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
         result ?: return false
         val context = pageRequests.context()

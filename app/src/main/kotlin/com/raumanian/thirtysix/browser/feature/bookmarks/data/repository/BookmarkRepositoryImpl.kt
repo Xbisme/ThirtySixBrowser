@@ -20,12 +20,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 013 — single repository for bookmarks AND folders. See research.md R1
- * for the combined-repo justification (cascade transaction lives cleanly in
- * one repo without violating Constitution §IV).
- *
- * Cascade delete (R7) and folder cycle prevention (R6) are implemented here.
- * The [database] dependency is required for `withTransaction { ... }`.
+ * One repository for bookmarks and folders, so the cascade delete runs in a single transaction.
+ * Also rejects folder moves that would create a cycle.
  */
 @Singleton
 @Suppress("TooManyFunctions")
@@ -35,8 +31,6 @@ class BookmarkRepositoryImpl @Inject constructor(
     private val database: AppDatabase,
     private val dispatchers: DispatcherProvider,
 ) : BookmarkRepository {
-
-    // ──────── Bookmark queries ────────
 
     override fun observeBookmarksByFolder(folderId: Long?): Flow<List<Bookmark>> =
         bookmarkDao.observeByFolder(folderId).map { list -> list.map(BookmarkMapper::toDomain) }
@@ -58,8 +52,6 @@ class BookmarkRepositoryImpl @Inject constructor(
 
     override suspend fun countBookmarksByUrl(url: String): Int =
         withContext(dispatchers.io) { bookmarkDao.countByUrl(url) }
-
-    // ──────── Bookmark mutations ────────
 
     override suspend fun addBookmark(bookmark: Bookmark): Result<Long> =
         runCatchingResult {
@@ -95,8 +87,6 @@ class BookmarkRepositoryImpl @Inject constructor(
             }
             bookmarkDao.update(existing.copy(parentFolderId = newParentId))
         }
-
-    // ──────── Folder queries ────────
 
     override fun observeFoldersByParent(parentId: Long?): Flow<List<BookmarkFolder>> =
         folderDao.observeChildren(parentId).map { list -> list.map(BookmarkFolderMapper::toDomain) }
@@ -138,8 +128,6 @@ class BookmarkRepositoryImpl @Inject constructor(
         return BookmarkDescendantCount(bookmarks = bookmarks, folders = folders)
     }
 
-    // ──────── Folder mutations ────────
-
     override suspend fun createFolder(name: String, parentId: Long?): Result<Long> =
         runCatchingResult {
             if (parentId != null) {
@@ -173,7 +161,7 @@ class BookmarkRepositoryImpl @Inject constructor(
             if (newParentId != null) {
                 folderDao.getById(newParentId)
                     ?: throw BookmarkException.FolderNotFound(newParentId)
-                // Walk newParentId's ancestor chain — if folderId appears, reject (R6).
+                // Walk newParentId's ancestor chain; if folderId appears, reject.
                 var cursor: Long? = newParentId
                 val visited = HashSet<Long>()
                 while (cursor != null && cursor !in visited) {
@@ -205,9 +193,8 @@ class BookmarkRepositoryImpl @Inject constructor(
             deleteSubtreeDepthFirst(child.id)
             folderDao.deleteById(child.id)
         }
-        // Delete leaf bookmarks BEFORE the parent folder row is removed; the
-        // FK rule is SET NULL (Spec 005), so deleting the folder first would
-        // orphan the bookmarks at root rather than removing them.
+        // Delete the bookmarks before their folder: the FK rule is SET NULL, so deleting
+        // the folder first would move them to the root instead of removing them.
         bookmarkDao.deleteByParentFolder(folderId)
     }
 

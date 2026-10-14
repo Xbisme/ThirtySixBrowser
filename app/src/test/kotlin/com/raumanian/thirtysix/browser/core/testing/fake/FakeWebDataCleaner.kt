@@ -6,7 +6,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
 import kotlinx.coroutines.CompletableDeferred
 
 /**
- * Spec 016 T068 — in-memory [WebDataCleaner].
+ * In-memory [WebDataCleaner].
  *
  * Each call appends to [callLog], which a test can share with other fakes to assert ordering.
  * The outcome, the boolean result, or a thrown error are configurable per step. [siteDataGate],
@@ -36,13 +36,13 @@ class FakeWebDataCleaner(
         return webCacheResult
     }
 
-    /** Spec 024 — hosts [storageOrigins] reports. */
+    /** Hosts [storageOrigins] reports. */
     var origins: Set<String> = emptySet()
 
-    /** Spec 024 — what [clearExcept] returns; `null` means the cookie wipe failed. */
+    /** What [clearExcept] returns; `null` means the cookie wipe failed. */
     var clearExceptPath: SiteDataPath? = SiteDataPath.PerSite
 
-    /** Spec 024 — the arguments of the last [clearExcept] call (keepSites, candidateHosts). */
+    /** The arguments of the last [clearExcept] call (keepSites, candidateHosts). */
     var lastClearExcept: Pair<Set<String>, Set<String>>? = null
 
     override suspend fun storageOrigins(): Set<String> {

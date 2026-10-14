@@ -5,10 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.TrackerHostSet
 import com.raumanian.thirtysix.browser.core.domain.model.TrackingParamRules
 import java.net.IDN
 
-/**
- * Spec 023 data-model "Rule data" — parsers for the three bundled assets. Each skips blank
- * lines and comments and ignores malformed entries rather than failing the whole list.
- */
+// Each parser skips blank lines and comments and ignores malformed entries rather than failing the list.
 object ProtectionAssetParser {
     private const val HASH_COMMENT = "#"
     private const val PSL_COMMENT = "//"

@@ -33,7 +33,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 015 — [DownloadsViewModel]: ordering, polling lifecycle, and the action handlers. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DownloadsViewModelTest {
 
@@ -128,9 +127,8 @@ class DownloadsViewModelTest {
         val vm = viewModel(repository, gateway)
         vm.uiState.test {
             awaitItem()
-            // Deliberately NOT advanceUntilIdle: while something is in flight the loop
-            // reschedules itself forever by design, so "until idle" would never return.
-            // Bounded virtual-time advances are the only safe way to observe it.
+            // Not advanceUntilIdle: while something is in flight the loop reschedules itself forever,
+            // so only bounded virtual-time advances can observe it.
             runCurrent()
             val first = gateway.queryCount
 
@@ -168,7 +166,7 @@ class DownloadsViewModelTest {
     }
 
     @Test
-    fun `FR-032 - deleting a file requires the confirmation step`() = runTest(testDispatcher) {
+    fun `deleting a file requires the confirmation step`() = runTest(testDispatcher) {
         val record = testRecord(id = 1L, handle = 10L)
         val repository = InMemoryDownloadsRepository(listOf(record))
         val gateway = RecordingGateway().apply { setStatus(10L, DownloadStatus.Complete()) }
@@ -184,7 +182,7 @@ class DownloadsViewModelTest {
     }
 
     @Test
-    fun `FR-033 - copying the link emits LinkCopied`() = runTest(testDispatcher) {
+    fun `copying the link emits LinkCopied`() = runTest(testDispatcher) {
         val record = testRecord(id = 1L, handle = 10L)
         val clipboard = RecordingClipboard()
         val vm = viewModel(
@@ -203,7 +201,7 @@ class DownloadsViewModelTest {
     }
 
     @Test
-    fun `FR-034b - removing an in-flight entry reports failure and keeps the row`() =
+    fun `removing an in-flight entry reports failure and keeps the row`() =
         runTest(testDispatcher) {
             val record = testRecord(id = 1L, handle = 10L)
             val repository = InMemoryDownloadsRepository(listOf(record))
@@ -221,7 +219,7 @@ class DownloadsViewModelTest {
         }
 
     @Test
-    fun `FR-039 - cancelling an already-complete transfer emits nothing`() = runTest(testDispatcher) {
+    fun `cancelling an already-complete transfer emits nothing`() = runTest(testDispatcher) {
         val record = testRecord(id = 1L, handle = 10L)
         val gateway = RecordingGateway().apply { setStatus(10L, DownloadStatus.Complete()) }
         val vm = viewModel(InMemoryDownloadsRepository(listOf(record)), gateway)
@@ -235,7 +233,7 @@ class DownloadsViewModelTest {
     }
 
     @Test
-    fun `FR-028 - tapping an unfinished row reports that it is not complete`() = runTest(testDispatcher) {
+    fun `tapping an unfinished row reports that it is not complete`() = runTest(testDispatcher) {
         val record = testRecord(id = 1L, handle = 10L)
         val vm = viewModel(InMemoryDownloadsRepository(listOf(record)), RecordingGateway())
 
@@ -246,8 +244,6 @@ class DownloadsViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
-
-    // ---- doubles -------------------------------------------------------------------
 
     private class RecordingClipboard : ClipboardWriter {
         val copied = mutableListOf<String>()

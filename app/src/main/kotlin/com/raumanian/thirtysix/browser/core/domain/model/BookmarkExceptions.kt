@@ -1,21 +1,11 @@
 package com.raumanian.thirtysix.browser.core.domain.model
 
-/**
- * Spec 013 — typed exceptions surfaced by [com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository]
- * inside `Result.Error(throwable)`. Use cases / view models map these to
- * `BookmarksErrorEvent` for UI presentation.
- */
 sealed class BookmarkException(message: String) : Exception(message) {
     data class BookmarkNotFound(val id: Long) : BookmarkException("Bookmark id=$id not found")
 
     data class FolderNotFound(val id: Long) : BookmarkException("Folder id=$id not found")
 
-    /**
-     * Spec 013 R6 — attempt to move a folder into itself or one of its descendants.
-     *
-     * @property folderId the folder being moved.
-     * @property attemptedParentId the requested new parent (null = root).
-     */
+    /** Moving a folder into itself or a descendant. A null [attemptedParentId] is the root. */
     data class FolderCycle(
         val folderId: Long,
         val attemptedParentId: Long?,
@@ -27,10 +17,6 @@ sealed class BookmarkException(message: String) : Exception(message) {
         BookmarkException("URL validation failed: $reason")
 }
 
-/**
- * Spec 013 R5 — sealed variants for URL validation failures. Use cases /
- * view models map each variant to a localized inline error per FR-006.
- */
 sealed class BookmarkUrlValidationError {
     data object Empty : BookmarkUrlValidationError()
     data object InvalidScheme : BookmarkUrlValidationError()

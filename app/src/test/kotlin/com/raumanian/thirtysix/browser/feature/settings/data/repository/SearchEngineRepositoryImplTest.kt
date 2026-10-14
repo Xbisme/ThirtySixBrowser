@@ -16,24 +16,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 010 — Tests for [SearchEngineRepositoryImpl].
- *
- * Covers:
- * - SC-001 byte-identical Google output (US1, T009): the repo's URL for any
- *   query under Google MUST equal `String.format(GOOGLE_TEMPLATE, URLEncoder.encode(q, UTF-8))`.
- * - I1 unknown-storageValue fallback (US1, T010): when the persisted value is
- *   unknown, the enum falls back to Google and the URL is built accordingly.
- * - DuckDuckGo + Bing routes (US2, T018/T019): per-engine canonical URL.
- * - I4 read-on-submit semantics (US2, T020): mid-stream engine change is
- *   reflected on the next call.
- * - FR-014 encoding-engine-independence (US3, T024): the same encoded query
- *   substring appears across all 3 engine templates.
- *
- * Test double: hand-rolled [FakeSettingsRepository] backed by a
- * [MutableStateFlow] of [UserSettings]. Pattern reused from
- * `SettingsRepositoryImplTest` setup convention (no MockK).
- */
 class SearchEngineRepositoryImplTest {
 
     private fun newRepo(
@@ -44,7 +26,7 @@ class SearchEngineRepositoryImplTest {
         return repo to fake
     }
 
-    // --- US1 / T009: Google byte-identity for canonical inputs (SC-001) ---
+    // Google output must stay byte-identical to String.format(template, URLEncoder.encode(q, UTF-8)).
 
     @Test
     fun google_byteIdenticalToInlineFormula_forCanonicalInputs() = runTest {
@@ -70,8 +52,6 @@ class SearchEngineRepositoryImplTest {
         }
     }
 
-    // --- US1 / T010: unknown storageValue falls back to Google ---
-
     @Test
     fun unknownStorageValue_fallsBackToGoogle() = runTest {
         val unknownDefault = SearchEngine.fromStorageValueOrDefault("yandex")
@@ -84,8 +64,6 @@ class SearchEngineRepositoryImplTest {
             url.startsWith("https://www.google.com/search?q="),
         )
     }
-
-    // --- US2 / T018: DuckDuckGo route ---
 
     @Test
     fun duckDuckGo_producesCanonicalUrl() = runTest {
@@ -104,8 +82,6 @@ class SearchEngineRepositoryImplTest {
         }
     }
 
-    // --- US2 / T019: Bing route ---
-
     @Test
     fun bing_producesCanonicalUrl() = runTest {
         val (repo, _) = newRepo(initialEngine = SearchEngine.Bing)
@@ -123,7 +99,7 @@ class SearchEngineRepositoryImplTest {
         }
     }
 
-    // --- US2 / T020: read-on-submit semantics — change between calls ---
+    // The engine is read on every submit, so a change between calls applies.
 
     @Test
     fun engineChangeBetweenCalls_switchesTemplate() = runTest {
@@ -139,8 +115,6 @@ class SearchEngineRepositoryImplTest {
         val urlBing = repo.buildSearchUrl("foo")
         assertTrue(urlBing.startsWith("https://www.bing.com/search?q="))
     }
-
-    // --- US3 / T024: same encoding produced for every engine ---
 
     @Test
     fun encodingIsEngineIndependent_forUnicodeAndSpecialChars() = runTest {
@@ -165,11 +139,7 @@ class SearchEngineRepositoryImplTest {
     }
 }
 
-/**
- * Minimal in-memory [SettingsRepository] for repository-level tests. Only the
- * `searchEngine` field is varied; other fields stay at [UserSettings.DEFAULT].
- * Setters that aren't exercised throw to surface accidental misuse from tests.
- */
+// Setters that are not exercised throw, to surface accidental misuse.
 private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepository {
 
     private val state = MutableStateFlow(UserSettings.DEFAULT.copy(searchEngine = initialEngine))
@@ -180,7 +150,6 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
 
     override fun observeSettings(): Flow<UserSettings> = state.asStateFlow()
 
-    // Spec 018 — the one-shot read. Same snapshot observeSettings would emit.
     override suspend fun currentSettings(): UserSettings = state.value
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = error("not used in this test")

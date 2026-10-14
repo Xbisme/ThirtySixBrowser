@@ -41,10 +41,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Spec 013 — additive coverage for [BrowserViewModel] star-icon paths
- * (FR-001..003 + the canonical-most-recent semantics from R9 / Q4).
- */
+/** Star-icon paths of [BrowserViewModel]; the star reflects whether any bookmark has the URL. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelStarToggleTest {
 
@@ -186,5 +183,5 @@ class BrowserViewModelStarToggleTest {
     }
 }
 
-/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+/** A real page address for tests; the app's default is the Home page. */
 private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"

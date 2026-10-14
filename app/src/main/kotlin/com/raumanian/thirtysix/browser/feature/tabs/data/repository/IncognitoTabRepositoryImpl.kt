@@ -21,34 +21,13 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 012 — concrete [IncognitoTabRepository].
- *
- * In-memory state ([state]) sourced from a [MutableStateFlow], guarded by
- * [mutex] for all mutations. Process death = singleton dies = state reset to
- * empty (FR-012 satisfied by language semantics; no defensive disk read).
- *
- * ID-space: [nextId] decrements an [AtomicLong] starting at -1L; every
- * incognito tab gets a strictly negative Long id. Disjoint from Room's
- * positive auto-increment PKs. IDs are never reused (counter never resets
- * within a process lifetime).
- *
- * Cookie session lifecycle (FR-011a):
- *  - Where the engine has WebView profiles ([IncognitoWebProfile.isIsolated]), the session gets a
- *    profile of its own: `0 → 1` begins it, `1 → 0` ends it and its profile is deleted. Normal
- *    browsing's cookies and storage are never touched.
- *  - Otherwise (older engines) the shared jar is snapshotted: `0 → 1` calls
- *    [CookieJarSnapshotManager.captureSnapshot] with [IncognitoSnapshotOrigins] (normal tabs,
- *    history, fireproof sites), and `1 → 0` calls [CookieJarSnapshotManager.restoreSnapshot].
- *    Cookies of any other site are still lost at the end of the session there.
- *
- * Constitution §IV: this repository depends on [CookieJarSnapshotManager] and
- * [IncognitoWebProfile] (platform-state managers, NOT feature repositories). The
- * repository reads needed for the snapshot origins live in [IncognitoSnapshotOrigins]
- * (the documented Spec 012 exception, per
- * [plan.md Complexity Tracking](../../../../../../specs/012-private-incognito-mode/plan.md)).
+ * In-memory incognito tabs, so process death leaves none behind. Ids count down from -1 and are
+ * never reused, disjoint from Room's positive ids. Where the engine has profiles the session
+ * gets its own (`0 → 1` begins it, `1 → 0` ends it); otherwise the shared cookie jar is
+ * snapshotted over [IncognitoSnapshotOrigins] and restored at `1 → 0`.
  */
 @Singleton
-@Suppress("TooManyFunctions") // Spec 021 R9 adds createBackgroundTab; one function per contract member.
+@Suppress("TooManyFunctions") // One function per contract member.
 class IncognitoTabRepositoryImpl @Inject constructor(
     private val cookieJarSnapshotManager: CookieJarSnapshotManager,
     private val snapshotOrigins: IncognitoSnapshotOrigins,
@@ -83,9 +62,8 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                 if (state.value.size >= BrowserLimits.MAX_INCOGNITO_TABS) {
                     return@withLock Result.Error(throwable = MaxIncognitoTabsReachedException())
                 }
-                // 0 → 1 transition: capture snapshot BEFORE adding tab so any
-                // cookie write triggered by this incognito tab cannot bias the
-                // captured normal-tab cookie set.
+                // Snapshot before adding the tab, so no cookie this tab writes can enter
+                // the captured normal-browsing set.
                 if (state.value.isEmpty()) beginSession()
                 val now = System.currentTimeMillis()
                 val newTab = Tab(
@@ -127,9 +105,8 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                 val sizeBefore = state.value.size
                 state.value = state.value.filterNot { it.id == tabId }
                 val sizeAfter = state.value.size
-                // 1 → 0 transition: restore snapshot AFTER removing the tab so
-                // the live cookie jar wipe inside restoreSnapshot also clears
-                // any incognito-set cookies that this tab created.
+                // Restore after removing the tab, so the jar wipe inside the restore also
+                // clears the cookies this tab created.
                 if (sizeBefore > 0 && sizeAfter == 0) endSession()
             }
         }
@@ -160,7 +137,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
     private suspend fun endSession() {
         if (isolatedSession) incognitoProfile.endSession() else cookieJarSnapshotManager.restoreSnapshot()
         isolatedSession = false
-        // Spec 023 FR-014: incognito protection choices end with the session.
+        // Incognito protection choices end with the session.
         incognitoProtectionExceptions.clear()
     }
 }

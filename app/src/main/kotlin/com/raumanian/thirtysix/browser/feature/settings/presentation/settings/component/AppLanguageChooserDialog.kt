@@ -9,13 +9,7 @@ import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.presentation.util.appLanguageLabel
-/**
- * Spec 016 US3 — choose Follow system or one of the eight app languages.
- *
- * Nine options in [AppLanguage] order: the localized "Follow system" first, then each language
- * under its own name, so a user who cannot read the current language can still find theirs
- * (FR-014). Public and stateless for Spec 018's onboarding (FR-037, research.md R14).
- */
+// Each language is listed under its own name, so someone who cannot read the current language can find theirs.
 @Composable
 fun AppLanguageChooserDialog(
     selected: AppLanguage,

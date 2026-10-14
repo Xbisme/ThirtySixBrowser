@@ -36,10 +36,9 @@ private val OptionMinHeight = 52.dp
 private val OptionGap = 4.dp
 
 /**
- * Spec 019 — single-choice dialog (design system Dialog, choice form). Options are rounded rows;
- * the selected row is tinted `primaryContainer` with a check. Tapping an option reports it via
- * [onSelect] — there is no OK button (FR-045). Each row is a `selectable` radio for TalkBack.
- * Back, an outside tap and [cancelLabel] all route to [onDismiss].
+ * Single-choice dialog. Tapping an option reports it via [onSelect]; there is no OK button.
+ * Each row is a `selectable` radio for TalkBack. Back, an outside tap and [cancelLabel] all
+ * route to [onDismiss].
  */
 @Composable
 @Suppress("LongParameterList")

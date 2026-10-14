@@ -4,7 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.FireproofSiteEntity
 /**
- * Spec 024 research R12 — adds `fireproof_sites`. Strictly additive: it names no existing table,
+ * Adds `fireproof_sites`. Strictly additive: it names no existing table,
  * so existing data cannot be touched by construction.
  */
 object Migration4To5 {

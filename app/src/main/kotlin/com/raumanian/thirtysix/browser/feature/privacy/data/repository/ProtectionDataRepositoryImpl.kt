@@ -5,7 +5,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepo
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.ProtectionDataSource
 import javax.inject.Inject
 
-/** Spec 023 — [ProtectionDataRepository] over the bundled assets. */
 class ProtectionDataRepositoryImpl @Inject constructor(
     private val source: ProtectionDataSource,
 ) : ProtectionDataRepository {

@@ -12,12 +12,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 
 /**
- * Spec 019 FR-031 — whether any download is still in flight, for the hub's
- * "downloads in progress" button.
- *
- * Reuses Spec 015's join ([ResolveDownloadStatusUseCase]) and polling rule: the platform is
- * asked again only while something is in flight, and the loop ends as soon as nothing is.
- * The hub collects this only while it is open (analysis U2), so a closed hub polls nothing.
+ * Whether any download is still in flight, for the hub's "downloads in progress" button. The
+ * platform is polled only while something is in flight, and only while the hub collects this.
  */
 class ObserveHasActiveDownloadsUseCase @Inject constructor(
     private val observeDownloads: ObserveDownloadsUseCase,

@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 019 FR-031 — the hub's downloads-in-progress signal. */
+/** The hub's downloads-in-progress signal. */
 class ObserveHasActiveDownloadsUseCaseTest {
 
     private fun useCase(gateway: RecordingGateway, repository: InMemoryDownloadsRepository) =

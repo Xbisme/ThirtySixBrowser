@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Spec 017 — adaptive icon foreground. Replaces the project-template robot (FR-001).
-
-  Carries the mark's DISC AND NUMERALS, on the flat brand field supplied by
-  ic_launcher_background.xml. Derived from the same approved source as
-  ic_brand_mark.xml (INV-1); the geometry below is identical, only scaled.
-
-  Sizing: an adaptive-icon layer is 108dp, of which only the centre 72dp is guaranteed
-  visible under every device mask — circle, squircle, rounded square or teardrop. The
-  viewport is kept at 432 so the path data matches the splash mark exactly, and the
-  group scale of 0.985 lands the Ø268 disc at Ø66dp inside that 72dp safe zone, leaving
-  3dp of clearance on each side (FR-005, SC-009).
+  Adaptive icon foreground: the mark's disc and numerals over ic_launcher_background.xml.
+  Only the centre 72dp of the 108dp layer survives every mask; scale 0.985 puts the disc at
+  66dp inside it. Viewport 432 keeps the path data identical to the splash mark.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"

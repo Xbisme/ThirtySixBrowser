@@ -1,33 +1,13 @@
 package com.raumanian.thirtysix.browser.core.presentation.util
 
 /**
- * Spec 011 — one-shot transient event surface for the tab-management feature.
- *
- * Used by both [TabsUiState.errorEvent] (switcher's "new tab" card cap-reached)
- * AND [com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserUiState.tabsEvent]
- * (BrowserScreen long-press on the 5th BottomAppBar button cap-reached). One
- * shared sealed type so both surfaces have a single semantic for the
- * cap-reached snackbar message.
- *
- * Lives in its own file (not inside `TabsUiState.kt`) so detekt's
- * `MatchingDeclarationName` rule does not fire.
+ * One-shot tab-cap event, shared by the tab switcher and the browser screen so both show the
+ * same snackbar message.
  */
 sealed class TabsErrorEvent {
-    /**
-     * Emitted when [com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase]
-     * returns `Result.Error(MaxTabsReachedException())`. Consumers display the
-     * localized `R.string.browser_max_tabs_reached` text in a snackbar then
-     * call `consumeXxx()` to clear the event.
-     */
+    /** Creating a normal tab hit the tab cap; consumers clear the event once shown. */
     data object MaxTabsReached : TabsErrorEvent()
 
-    /**
-     * Spec 012 — emitted when
-     * [com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase]
-     * returns `Result.Error(MaxIncognitoTabsReachedException())`. Distinct
-     * from [MaxTabsReached] (Q1 clarification — independent caps require
-     * distinct localized error strings). Consumers display the localized
-     * `R.string.tabs_error_max_incognito_tabs_reached` text in a snackbar.
-     */
+    /** Creating an incognito tab hit its own, separate cap, which has its own message. */
     data object MaxIncognitoTabsReached : TabsErrorEvent()
 }

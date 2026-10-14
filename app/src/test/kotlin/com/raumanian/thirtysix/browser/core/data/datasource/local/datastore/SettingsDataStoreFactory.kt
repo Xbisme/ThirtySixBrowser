@@ -10,14 +10,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.plus
 
 /**
- * Test fixture: build a fresh DataStore<Preferences> backed by a real file under
- * the supplied directory. Pure JVM — no Robolectric (Spec 006 R8).
- *
- * Default scope uses Dispatchers.IO + SupervisorJob (real-time scheduling) so
- * tests can use runBlocking to assert against actual disk I/O. Tests using
- * runTest (virtual time) MUST pass their own scope built from the test
- * dispatcher; mixing virtual and real schedulers will hang the DataStore actor.
+ * Builds a fresh file-backed DataStore<Preferences> under [parentDir] on a real-time IO scope.
+ * Tests using `runTest` must pass a scope built from the test dispatcher: mixing virtual and
+ * real schedulers hangs the DataStore actor.
  */
+
 fun createTestSettingsDataStore(
     parentDir: File,
     fileName: String = "test.preferences_pb",

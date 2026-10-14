@@ -5,11 +5,8 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.PageProtecti
 import com.raumanian.thirtysix.browser.feature.browser.domain.protection.BlockedHostGrouper
 import com.raumanian.thirtysix.browser.feature.browser.domain.protection.BlockedSiteGroup
 /**
- * Spec 024 data-model "PageDashboardState" — what the privacy dashboard shows for the page on
- * screen (FR-016). There is no "cookie banner declined" line: nothing comes back from the page
- * (research R8).
- *
- * @property fireproof `null` in incognito, where the switch is not offered (FR-011).
+ * What the privacy dashboard shows for the page on screen. There is no "cookie banner declined"
+ * Line because nothing comes back from the page.
  */
 data class PageDashboardState(
     val site: String,
@@ -17,10 +14,11 @@ data class PageDashboardState(
     val protectionOn: Boolean,
     val blockedGroups: List<BlockedSiteGroup>,
     val totalBlockedHosts: Int,
+    /** `null` in incognito, where the switch is not offered. */
     val fireproof: Boolean?,
 ) {
     companion object {
-        /** `null` when no web page is shown (Home, the incognito start page): no dashboard (FR-015). */
+        /** `null` when no web page is shown (Home, the incognito start page): no dashboard. */
         fun of(
             status: PageProtectionStatus,
             blockedHosts: List<String>,

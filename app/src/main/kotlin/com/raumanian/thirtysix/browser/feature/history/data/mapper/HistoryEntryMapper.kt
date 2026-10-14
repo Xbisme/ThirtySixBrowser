@@ -2,11 +2,6 @@ package com.raumanian.thirtysix.browser.feature.history.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.HistoryEntryEntity
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
-/**
- * Spec 014 — Entity ↔ Domain converter for [HistoryEntryEntity] / [HistoryEntry].
- * Total round-trip: `toEntity(toDomain(e)) == e` for any valid entity. No
- * defensive validation needed — DB columns are NOT NULL.
- */
 object HistoryEntryMapper {
 
     fun toDomain(entity: HistoryEntryEntity): HistoryEntry =

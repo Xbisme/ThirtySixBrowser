@@ -6,9 +6,8 @@ import javax.inject.Singleton
 import kotlinx.coroutines.delay
 
 /**
- * Spec 024 T034 — waits [delayMs] before every Fire step; `0` (the default, and always in
- * release builds) waits for nothing. Only the debug source set's `FireStepDelayReceiver` ever
- * sets it, so quickstart G7 can stop the app between two known steps.
+ * Waits [delayMs] before every Fire step; `0` in release builds. Only the debug-only
+ * `FireStepDelayReceiver` sets it, to stop the app between two known steps in manual testing.
  */
 @Singleton
 class ConfigurableFireStepObserver @Inject constructor() : FireStepObserver {

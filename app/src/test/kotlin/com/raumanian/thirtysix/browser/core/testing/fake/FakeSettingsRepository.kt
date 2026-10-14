@@ -13,12 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Spec 016 T019 — shared in-memory [SettingsRepository] for view-model and use-case tests.
- *
- * Backed by a hot [MutableStateFlow] so observers see every accepted write. Each setter
- * records its name in [writes] — and in [callLog], when a test shares one log across several
- * fakes to assert ordering. [failNextWrite] makes exactly one following write return
- * `Result.Error(IOException)` without changing state, for FR-043 tests.
+ * Shared in-memory [SettingsRepository]. Each setter records its name in [writes] and in an
+ * optional shared [callLog]; [failNextWrite] makes exactly one following write return
+ * `Result.Error(IOException)` without changing state.
  */
 class FakeSettingsRepository(
     initial: UserSettings = UserSettings.DEFAULT,
@@ -37,7 +34,7 @@ class FakeSettingsRepository(
 
     override fun observeSettings(): Flow<UserSettings> = state.asStateFlow()
 
-    /** Spec 018 — the one-shot read. Returns the same snapshot [observeSettings] would emit. */
+    /** Returns the same snapshot [observeSettings] would emit. */
     override suspend fun currentSettings(): UserSettings = state.value
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> =

@@ -19,20 +19,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Spec 011 — concrete [TabRepository].
- *
- * Wraps Spec 005's [TabDao]. Adds three behaviors that the bare DAO does not
- * provide: (1) auto-seed on empty (FR-019 / R5), (2) `MAX(last_active_at)`-
- * derived active-tab pointer + DESC ordering by `lastActiveAt` then ASC by
- * `id` (FR-014 / R1 / H1) — done as a client-side resort because Spec 005's
- * `TabDao.observeAll()` orders by `position` ASC, (3) cap-guarded
- * [createTab] returning a [MaxTabsReachedException] sentinel inside
- * `Result.Error` (C2 / FR-016).
- *
- * Empty-state seeding + close-all atomicity are guarded by a single internal
- * [Mutex] to serialize concurrent collectors / writes (R5).
+ * Normal tabs over [TabDao], adding seeding of one home tab when empty, ordering by
+ * `lastActiveAt` descending then `id` (the DAO orders by `position`), and a cap that fails
+ * [createTab] with [MaxTabsReachedException]. Seeding and close-all share one [Mutex].
  */
-@Suppress("TooManyFunctions") // Spec 021 R9 adds createBackgroundTab; one function per contract member.
+@Suppress("TooManyFunctions") // One function per contract member.
 class TabRepositoryImpl @Inject constructor(
     private val tabDao: TabDao,
     @param:Named("default_home_url") private val homeUrl: String,
@@ -44,11 +35,8 @@ class TabRepositoryImpl @Inject constructor(
     override fun observeTabs(): Flow<List<Tab>> = tabDao.observeAll()
         .onStart { ensureAtLeastOneTab() }
         .map { entities ->
-            // Spec 012 FR-021 — defensive per-row mapping. If a future or
-            // downgraded build leaves behind a malformed row, mapNotNull +
-            // runCatching silently drops it instead of crashing the cold
-            // start path. Production rows always succeed; this is a forward-
-            // compatibility guard.
+            // A malformed row left by a newer or downgraded build is dropped rather than
+            // crashing cold start.
             entities
                 .mapNotNull { entity -> runCatching { entity.toDomain() }.getOrNull() }
                 .sortedWith(
@@ -119,7 +107,7 @@ class TabRepositoryImpl @Inject constructor(
         }
     }
 
-    /** Caller MUST hold [seedMutex]. Inserts a fresh home tab at position 0. */
+    /** Caller must hold [seedMutex]. Inserts a fresh home tab at position 0. */
     private suspend fun seedHomeTabLocked() {
         val now = System.currentTimeMillis()
         tabDao.insert(

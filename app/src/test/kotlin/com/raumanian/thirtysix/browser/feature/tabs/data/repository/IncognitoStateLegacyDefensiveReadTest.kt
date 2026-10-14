@@ -21,18 +21,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 012 — T042 (US3, FR-021).
- *
- * Forward-compatibility guard: the cold-start path for incognito state MUST
- * silently emit `emptyList()` and never propagate an exception, even when:
- *  - the singleton was just constructed (no in-memory state),
- *  - the injected [TabRepository] dependency would throw on its first read,
- *  - or origin enumeration on the 0→1 transition fails for any reason.
- *
- * The first assertion mirrors the FR-012 process-death guarantee (singleton
- * dies → state resets to empty); the second pair guard against future builds
- * that persist incognito state to disk (currently forbidden by FR-002 but
- * worth a defensive smoke test in case the contract changes).
+ * The incognito cold-start path emits `emptyList()` and never throws: on a fresh singleton, when
+ * [TabRepository] throws on first read, or when origin enumeration at `0 → 1` fails.
  */
 class IncognitoStateLegacyDefensiveReadTest {
 
@@ -52,12 +42,12 @@ class IncognitoStateLegacyDefensiveReadTest {
             incognitoProfile = incognitoProfile,
         )
         val first = repository.observeTabs().first()
-        assertEquals("singleton constructed → empty state per FR-012", emptyList<Tab>(), first)
+        assertEquals("singleton constructed → empty state", emptyList<Tab>(), first)
         assertEquals(0, repository.getCount())
     }
 
     @Test
-    fun `createTab still succeeds when TabRepository observe would throw - FR-021`() = runTest {
+    fun `createTab still succeeds when TabRepository observe would throw`() = runTest {
         val poisoned = ThrowingTabRepository()
         val repository = IncognitoTabRepositoryImpl(
             cookieJarSnapshotManager = FakeCookieJarSnapshotManager(),
@@ -73,7 +63,7 @@ class IncognitoStateLegacyDefensiveReadTest {
 
         // Snapshot capture on 0→1 transition reads tabRepository.observeTabs().
         // The impl wraps that read in runCatching so a thrown Flow degrades
-        // to an empty origins list — createTab MUST still succeed.
+        // to an empty origins list — createTab still succeeds.
         val result = repository.createTab("https://incognito.example.com/")
 
         assertTrue("createTab should succeed despite poisoned TabRepository", result is Result.Success)

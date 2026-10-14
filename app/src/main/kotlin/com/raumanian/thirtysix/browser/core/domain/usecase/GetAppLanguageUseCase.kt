@@ -5,11 +5,8 @@ import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageControl
 import javax.inject.Inject
 
 /**
- * Spec 016 FR-003, FR-016 — the app language the platform currently holds.
- *
- * Read through the platform seam, never through `SettingsRepository`: the platform is the
- * single source of truth, so a language changed from Android 13+ system settings is what this
- * returns the next time the Settings screen starts.
+ * The app language the platform currently holds. Read from the platform, not `SettingsRepository`,
+ * so a language changed in Android 13+ system settings is reflected here.
  */
 class GetAppLanguageUseCase @Inject constructor(private val controller: AppLanguageController) {
     operator fun invoke(): AppLanguage = controller.current()

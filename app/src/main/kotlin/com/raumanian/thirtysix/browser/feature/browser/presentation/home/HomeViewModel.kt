@@ -27,11 +27,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Spec 019 US2 — state for the Home page (contracts C4).
- *
- * The greeting comes from the injected [clock] and is recomputed in [onResume], never on a timer
- * (research R14). Building the shortcut list — including the file checks for cached screenshots
- * and favicons — runs on the default dispatcher, never on Main (Spec 014's lesson).
+ * The greeting is recomputed from [clock] in [onResume], never on a timer. Building shortcuts
+ * checks cached files, so it runs on the default dispatcher, never on Main.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList") // Three sources, two caches, a clock, one action, dispatchers.
@@ -76,12 +73,11 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState(greeting = greeting.value),
         )
 
-    /** FR-011 — refresh the greeting each time the Home page comes back on screen. */
     fun onResume() {
         greeting.value = currentGreeting()
     }
 
-    /** FR-013 / US2 scenario 5 — a Tab shortcut activates that tab; nothing is loaded. */
+    /** Activates that tab; nothing is loaded. */
     fun onTabShortcut(tabId: Long) {
         viewModelScope.launch { switchActiveTab(tabId) }
     }

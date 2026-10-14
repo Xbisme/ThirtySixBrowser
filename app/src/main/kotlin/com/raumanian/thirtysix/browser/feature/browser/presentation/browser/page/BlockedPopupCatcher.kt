@@ -10,17 +10,14 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 /**
- * Spec 021 research R5 — learns a blocked pop-up's address without loading it. A bare WebView
- * (JavaScript off, never shown) is handed to the page; its first navigation is reported and
- * stopped, then the WebView is destroyed. If the page names no address in time, `null` is
- * reported (the notice then has no Open).
+ * Learns a blocked pop-up's address without loading it: a bare, never-shown WebView with JavaScript
+ * off is handed to the page, and its first navigation is reported and stopped. No address in time
+ * reports `null`, so the notice has no Open.
  */
 object BlockedPopupCatcher {
     private const val BLANK = "about:blank"
 
-    // androidx.webkit's `MissingOnRenderProcessGone` also reports the `WebViewClient` constructor
-    // call, which in Kotlin includes this subclass's own superclass call; the override exists
-    // (Spec 016 finding, see BrowserWebViewClient).
+    // Lint's `MissingOnRenderProcessGone` also flags the superclass constructor call; the override exists.
     @android.annotation.SuppressLint("MissingOnRenderProcessGone")
     fun attach(
         catcher: WebView,

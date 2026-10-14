@@ -33,10 +33,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Spec 016 — [SettingsViewModel] behaviour. Each user story extends this class; every case
- * builds its view model through [settingsViewModel].
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
 
@@ -52,7 +48,7 @@ class SettingsViewModelTest {
         Dispatchers.resetMain()
     }
 
-    // ──────── Foundational (T030) ────────
+    // ──────── Foundational ────────
 
     @Test
     fun `initial state mirrors the documented defaults`() = runTest {
@@ -109,7 +105,7 @@ class SettingsViewModelTest {
         assertNull(viewModel.uiState.value.dialog)
     }
 
-    // ──────── US1 — theme (T036) ────────
+    // ──────── Theme ────────
 
     @Test
     fun `theme row opens the theme chooser`() = runTest {
@@ -146,7 +142,7 @@ class SettingsViewModelTest {
         viewModel.onThemeSelected(UserSettings.DEFAULT.themeMode)
         advanceUntilIdle()
 
-        assertTrue("FR-006", repository.writes.isEmpty())
+        assertTrue(repository.writes.isEmpty())
         assertNull(viewModel.uiState.value.dialog)
     }
 
@@ -164,7 +160,7 @@ class SettingsViewModelTest {
         assertEquals(UserSettings.DEFAULT.themeMode, viewModel.uiState.value.themeMode)
     }
 
-    // ──────── US2 — search engine (T043) ────────
+    // ──────── Search engine ────────
 
     @Test
     fun `search engine row opens the search engine chooser`() = runTest {
@@ -201,7 +197,7 @@ class SettingsViewModelTest {
         viewModel.onSearchEngineSelected(UserSettings.DEFAULT.searchEngine)
         advanceUntilIdle()
 
-        assertTrue("FR-006", repository.writes.isEmpty())
+        assertTrue(repository.writes.isEmpty())
         assertNull(viewModel.uiState.value.dialog)
     }
 
@@ -219,7 +215,7 @@ class SettingsViewModelTest {
         assertEquals(UserSettings.DEFAULT.searchEngine, viewModel.uiState.value.searchEngine)
     }
 
-    // ──────── US3 — app language (T060) ────────
+    // ──────── App language ────────
 
     @Test
     fun `the platform language is read when the view model is created`() = runTest {
@@ -236,7 +232,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel(appLanguageController = controller)
         advanceUntilIdle()
 
-        // Research R12 — e.g. changed from Android 13+ system settings while the app was away.
+        // E.g. changed in Android 13+ system settings while the app was away.
         controller.currentLanguage = AppLanguage.Japanese
         viewModel.onScreenStarted()
 
@@ -263,7 +259,7 @@ class SettingsViewModelTest {
         viewModel.onLanguageSelected(AppLanguage.German)
         advanceUntilIdle()
 
-        assertTrue("FR-006", controller.applied.isEmpty())
+        assertTrue(controller.applied.isEmpty())
         assertNull(viewModel.uiState.value.dialog)
     }
 
@@ -279,7 +275,7 @@ class SettingsViewModelTest {
 
         assertEquals(listOf(AppLanguage.French), controller.applied)
         assertEquals(AppLanguage.French, viewModel.uiState.value.appLanguage)
-        // Spec 019 — the chooser stays until the screen reports the language has landed.
+        // The chooser stays until the screen reports the language has landed.
         assertEquals(SettingsDialog.LanguageChooser, viewModel.uiState.value.dialog)
         viewModel.onLanguageApplied()
         assertNull(viewModel.uiState.value.dialog)
@@ -299,7 +295,7 @@ class SettingsViewModelTest {
         assertEquals(AppLanguage.English, viewModel.uiState.value.appLanguage)
     }
 
-    // ──────── US4 — clear browsing data (T076) ────────
+    // ──────── Clear browsing data ────────
 
     @Test
     fun `the clear dialog opens with the three default categories selected`() = runTest {
@@ -347,7 +343,7 @@ class SettingsViewModelTest {
         viewModel.onClearBrowsingDataConfirmed()
         advanceUntilIdle()
 
-        assertTrue("FR-026", log.isEmpty())
+        assertTrue(log.isEmpty())
         assertFalse(clearDialog(viewModel).inProgress)
     }
 
@@ -366,7 +362,7 @@ class SettingsViewModelTest {
         viewModel.onClearCategoryToggled(ClearBrowsingDataCategory.History)
         advanceUntilIdle()
 
-        assertTrue("FR-032", clearDialog(viewModel).inProgress)
+        assertTrue(clearDialog(viewModel).inProgress)
         assertEquals(ClearBrowsingDataCategory.DEFAULT_SELECTION, clearDialog(viewModel).selection)
         assertEquals(1, log.count { it == FakeWebDataCleaner.CALL_CLEAR_SITE_DATA })
 
@@ -416,7 +412,7 @@ class SettingsViewModelTest {
         assertNull(viewModel.uiState.value.dialog)
     }
 
-    // ──────── US5 — history retention (T088) ────────
+    // ──────── History retention ────────
 
     @Test
     fun `retention row opens the retention chooser`() = runTest {
@@ -439,7 +435,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(SettingsDialog.ConfirmShortenRetention(HistoryRetention.Days30), viewModel.uiState.value.dialog)
-        assertTrue("FR-021", repository.writes.isEmpty())
+        assertTrue(repository.writes.isEmpty())
     }
 
     @Test
@@ -452,7 +448,7 @@ class SettingsViewModelTest {
         viewModel.onRetentionSelected(HistoryRetention.Days180)
         advanceUntilIdle()
 
-        assertNull("FR-023", viewModel.uiState.value.dialog)
+        assertNull(viewModel.uiState.value.dialog)
         assertEquals(listOf(FakeSettingsRepository.CALL_SET_HISTORY_RETENTION), repository.writes)
         assertEquals(HistoryRetention.Days180, viewModel.uiState.value.historyRetention)
     }
@@ -468,7 +464,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.dialog)
-        assertTrue("FR-006", repository.writes.isEmpty())
+        assertTrue(repository.writes.isEmpty())
     }
 
     @Test
@@ -484,7 +480,7 @@ class SettingsViewModelTest {
 
         assertNull(viewModel.uiState.value.dialog)
         assertEquals(HistoryRetention.Days30, viewModel.uiState.value.historyRetention)
-        assertTrue("FR-022", history.recorded.isEmpty())
+        assertTrue(history.recorded.isEmpty())
     }
 
     @Test
@@ -533,11 +529,11 @@ class SettingsViewModelTest {
         assertEquals(HistoryRetention.Days180, viewModel.uiState.value.historyRetention)
     }
 
-    // ──────── US6 — dynamic color (T096) ────────
+    // ──────── Dynamic color ────────
 
     @Test
     fun `turning dynamic color on writes once`() = runTest {
-        // Spec 019 FR-005a — the default is off, so the first meaningful toggle turns it on.
+        // The default is off, so the first meaningful toggle turns it on.
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()

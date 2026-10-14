@@ -13,10 +13,7 @@ pluginManagement {
 }
 
 plugins {
-    // EXCEPTION to FR-002 (no version literals): settings-level plugins are resolved
-    // BEFORE the version catalog is loaded — referencing `libs.versions.foojay` here
-    // would create a chicken-and-egg. Inline literal is permitted for settings plugins
-    // only. See spec.md FR-002 note.
+    // Settings plugins resolve before the version catalog loads, so this one takes a literal version.
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 

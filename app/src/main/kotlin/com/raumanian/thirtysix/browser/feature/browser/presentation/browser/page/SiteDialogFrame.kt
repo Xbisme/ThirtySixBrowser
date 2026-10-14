@@ -29,10 +29,9 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
- * Spec 021 C2 — the frame every page-request dialog shares, built from Spec 019's dialog look
- * (design waiver): a glyph, the title naming the site, optional body text and content, then
- * stacked full-width buttons. Dismissing (outside tap, Back) calls [onDismiss], which answers the
- * page the way its cancel button would.
+ * The frame every page-request dialog shares: a glyph, the title naming the site, optional body
+ * and content, then stacked full-width buttons. Dismissing calls [onDismiss], which answers the
+ * page as its cancel button would.
  */
 @Composable
 @Suppress("LongParameterList")

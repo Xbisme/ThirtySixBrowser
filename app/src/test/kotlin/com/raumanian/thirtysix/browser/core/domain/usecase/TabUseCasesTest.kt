@@ -23,11 +23,8 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Spec 011 — exercises each use case against [FakeTabRepository].
- *
- * Verifies that each use case correctly delegates to the repository AND
- * preserves the repository's behavioral contracts (cap-guard, last-tab
- * recreate, last-active ordering).
+ * Each use case delegates to [FakeTabRepository] and keeps its contracts: the tab cap, recreating
+ * the last tab, and last-active ordering.
  */
 class TabUseCasesTest {
 
@@ -57,7 +54,8 @@ class TabUseCasesTest {
         updateTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(fake, fakeIncognito)
     }
 
-    /** Spec 011 Q4 amendment — no-op [ScreenshotCache] for the use-case tests. */
+    /** No-op [ScreenshotCache] for the use-case tests. */
+
     private object NoopScreenshotCache : ScreenshotCache {
         private val state = MutableStateFlow(0L)
         override val version: StateFlow<Long> = state.asStateFlow()

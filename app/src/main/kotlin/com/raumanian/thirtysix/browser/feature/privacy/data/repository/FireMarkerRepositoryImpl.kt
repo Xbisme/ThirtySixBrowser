@@ -9,7 +9,6 @@ import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
-/** Spec 024 — [FireMarkerRepository] over the existing settings DataStore file. */
 class FireMarkerRepositoryImpl @Inject constructor(
     private val dataStore: SettingsDataStore,
 ) : FireMarkerRepository {
@@ -17,7 +16,7 @@ class FireMarkerRepositoryImpl @Inject constructor(
     override suspend fun isFireInProgress(): Boolean = try {
         dataStore.data.first()[StorageKeys.FIRE_IN_PROGRESS] ?: false
     } catch (e: IOException) {
-        // Spec 006 posture: an unreadable file reads as the default.
+        // An unreadable file reads as the default.
         Log.w(LOG_TAG, "Reading the Fire marker failed", e)
         false
     }

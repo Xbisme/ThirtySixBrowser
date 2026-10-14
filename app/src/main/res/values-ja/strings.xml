@@ -1,25 +1,25 @@
 <resources>
-    <!-- Spec 004 — Japanese (ja) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <!-- Japanese (ja) translation. Brand "ThirtySix" preserved in Latin -->
     <string name="app_name">ThirtySix ブラウザ</string>
 
-    <!-- Spec 007 — Japanese (ja) translations for Browser loading + error UI. -->
+    <!-- Japanese (ja) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">ページを読み込み中</string>
     <string name="browser_error_title">ページを読み込めませんでした</string>
     <string name="browser_error_offline_hint">インターネット接続を確認してもう一度お試しください。</string>
     <string name="browser_error_generic">問題が発生しました。しばらくしてからお試しください。</string>
 
-    <!-- Spec 008 — Japanese (ja) translations for navigation bottom-bar a11y. -->
+    <!-- Japanese (ja) translations for navigation bottom-bar a11y. -->
     <string name="browser_action_back">戻る</string>
     <string name="browser_action_forward">進む</string>
     <string name="browser_action_reload">ページを再読み込み</string>
     <string name="browser_action_stop">読み込みを停止</string>
     <string name="browser_action_home">ホーム</string>
 
-    <!-- Spec 009 — Japanese (ja) translations for address-bar hint + clear button. -->
+    <!-- Japanese (ja) translations for address-bar hint + clear button. -->
     <string name="browser_address_bar_hint">検索またはURLを入力</string>
     <string name="browser_address_bar_clear_cd">アドレスバーをクリア</string>
 
-    <!-- Spec 011 — Japanese (ja) translations for tabs management. -->
+    <!-- Japanese (ja) translations for tabs management. -->
     <string name="tabs_switcher_new_tab">新しいタブ</string>
     <string name="tabs_switcher_close_all">すべてのタブを閉じる</string>
     <string name="tabs_switcher_close_all_confirm">すべてのタブを閉じますか?この操作は取り消せません。</string>
@@ -32,7 +32,7 @@
         <item quantity="other">%1$d 個のタブ</item>
     </plurals>
 
-    <!-- Spec 012 — Private / Incognito Mode. -->
+    <!-- Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">新しいシークレットタブ</string>
     <string name="tabs_a11y_incognito_glyph">シークレットタブ</string>
     <string name="tabs_error_max_incognito_tabs_reached">シークレットタブの上限 %d 個に達しました</string>
@@ -41,13 +41,13 @@
     <string name="tabs_action_close_all_incognito">すべてのシークレットタブを閉じる</string>
     <string name="tabs_close_all_incognito_confirm">%d 個のシークレットタブをすべて閉じますか？</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <!-- Bookmarks CRUD. US1 star icon strings. -->
     <string name="bookmark_action_star_add_cd">このページをブックマークに追加</string>
     <string name="bookmark_action_star_remove_cd">このページのブックマークを削除</string>
     <string name="bookmark_added_snackbar">ブックマークを保存しました</string>
     <string name="bookmark_removed_snackbar">ブックマークを削除しました</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <!-- Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">ブックマーク</string>
     <string name="bookmarks_section_folders">フォルダ</string>
     <string name="bookmarks_section_pages">ページ</string>
@@ -56,7 +56,7 @@
     <string name="bookmarks_action_back_to_parent_cd">親フォルダへ</string>
     <string name="bookmarks_breadcrumb_root_label">ルート</string>
 
-    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <!-- full bookmarks UI. -->
     <string name="bookmarks_action_new_folder_cd">新しいフォルダ</string>
     <string name="bookmarks_dialog_create_folder_title">新しいフォルダ</string>
     <string name="bookmarks_dialog_rename_folder_title">フォルダの名前を変更</string>
@@ -85,7 +85,7 @@
     <string name="bookmarks_action_add_cd">ブックマークを追加</string>
     <string name="bookmarks_dialog_add_title">ブックマークを追加</string>
 
-    <!-- Spec 014 — History view (Japanese). -->
+    <!-- History view (Japanese). -->
     <string name="history_screen_title">履歴</string>
     <string name="history_action_back">戻る</string>
     <string name="history_day_today">今日</string>
@@ -94,13 +94,13 @@
     <string name="history_empty_body">訪問したページがここに表示されます。</string>
     <string name="history_row_content_description">%1$s、%2$s、%3$s に訪問</string>
 
-    <!-- Spec 014 US2 — search. -->
+    <!-- search. -->
     <string name="history_search_placeholder">履歴を検索</string>
     <string name="history_search_clear_content_description">検索をクリア</string>
     <string name="history_no_matches_title">「%1$s」に一致する履歴はありません</string>
     <string name="history_no_matches_body">別のキーワードを試すか、つづりを確認してください。</string>
 
-    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <!-- long-press per-entry actions. -->
     <string name="history_action_open_in_new_tab">新しいタブで開く</string>
     <string name="history_action_delete_entry">この項目を削除</string>
     <string name="history_action_copy_url">URL をコピー</string>
@@ -108,14 +108,14 @@
     <string name="history_snackbar_tab_cap_reached">タブの上限に達しました。新しいタブを開くにはタブを 1 つ閉じてください。</string>
     <string name="history_snackbar_deletion_failed">項目を削除できませんでした。もう一度お試しください。</string>
 
-    <!-- Spec 014 US4 — clear all. -->
+    <!-- clear all. -->
     <string name="history_action_clear_all">履歴をすべて削除</string>
     <string name="history_clear_all_dialog_title">履歴をすべて削除しますか?</string>
     <string name="history_clear_all_dialog_body">閲覧履歴のすべてのページが完全に削除されます。この操作は取り消せません。</string>
     <string name="history_clear_all_dialog_confirm">削除</string>
     <string name="history_clear_all_dialog_cancel">キャンセル</string>
 
-    <!-- Spec 015 — downloads (US1) -->
+    <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">%1$s をダウンロード中</string>
     <string name="downloads_service_unavailable">この端末ではダウンロードを利用できません。</string>
     <string name="downloads_storage_permission_denied">ダウンロードを保存するにはストレージへのアクセスが必要です。</string>
@@ -125,7 +125,7 @@
     <string name="downloads_storage_permission_rationale_confirm">続行</string>
     <string name="downloads_storage_permission_rationale_cancel">後で</string>
 
-    <!-- Spec 015 — downloads (US2-US7) -->
+    <!-- downloads (US2-US7) -->
     <string name="downloads_screen_title">ダウンロード</string>
     <string name="downloads_action_back">戻る</string>
     <string name="downloads_state_pending">待機中</string>
@@ -159,7 +159,7 @@
     <string name="downloads_empty_body">ダウンロードしたファイルがここに表示されます。</string>
     <string name="downloads_operation_failed">問題が発生しました。もう一度お試しください。</string>
 
-    <!-- Spec 016 — Settings screen scaffold. -->
+    <!-- Settings screen scaffold. -->
     <string name="settings_screen_title">設定</string>
     <string name="settings_action_back">戻る</string>
     <string name="settings_action_cancel">キャンセル</string>
@@ -170,21 +170,21 @@
     <string name="settings_section_about">このアプリについて</string>
     <string name="settings_error_not_saved">設定を保存できませんでした。もう一度お試しください。</string>
 
-    <!-- Spec 016 US1 — theme. -->
+    <!-- theme. -->
     <string name="settings_theme_title">テーマ</string>
     <string name="settings_theme_light">ライト</string>
     <string name="settings_theme_dark">ダーク</string>
     <string name="settings_theme_system">システムのデフォルト</string>
 
-    <!-- Spec 016 US2 — search engine. -->
+    <!-- search engine. -->
     <string name="settings_search_engine_title">検索エンジン</string>
 
-    <!-- Spec 016 US3 — app language. -->
+    <!-- app language. -->
     <string name="settings_language_title">アプリの言語</string>
     <string name="settings_language_follow_system">システムの設定に従う</string>
     <string name="settings_error_language_not_applied">言語を変更できませんでした。もう一度お試しください。</string>
 
-    <!-- Spec 016 US4 — clear browsing data. -->
+    <!-- clear browsing data. -->
     <string name="settings_clear_browsing_data_title">閲覧履歴データの削除</string>
     <string name="settings_clear_dialog_title">閲覧履歴データを削除しますか？</string>
     <string name="settings_clear_category_history">閲覧履歴</string>
@@ -198,7 +198,7 @@
     <string name="settings_clear_done">閲覧履歴データを削除しました</string>
     <string name="settings_clear_partial_failure">一部のデータを削除できませんでした。もう一度お試しください。</string>
 
-    <!-- Spec 016 US5 — history retention. -->
+    <!-- history retention. -->
     <string name="settings_history_retention_title">履歴の保存期間</string>
     <plurals name="settings_history_retention_days">
         <item quantity="other">%d日</item>
@@ -208,15 +208,14 @@
     <string name="settings_retention_shorten_confirm">削除</string>
     <string name="settings_retention_prune_deferred">古い履歴を今は削除できませんでした。次回アプリを起動したときに削除されます。</string>
 
-    <!-- Spec 016 US6 — dynamic color. -->
+    <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">ダイナミック カラー</string>
     <string name="settings_dynamic_color_summary">壁紙の色を使用</string>
 
-    <!-- Spec 016 US7 — About. -->
+    <!-- About. -->
     <string name="settings_about_version">バージョン %1$s</string>
     <string name="settings_about_privacy_statement">このアプリは個人データを収集せず、ThirtySix が運営するサーバーには何も送信しません。履歴、ブックマーク、ダウンロード、設定はこのデバイスにのみ保存されます。</string>
-    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
-         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <!-- onboarding: the privacy statement and option labels are reused from Settings. -->
     <string name="onboarding_welcome_title">ThirtySix へようこそ</string>
     <string name="onboarding_welcome_body">邪魔をしない、静かなブラウザです。</string>
     <string name="onboarding_language_title">言語を選択</string>
@@ -230,7 +229,7 @@
     <string name="onboarding_action_skip">スキップ</string>
     <string name="onboarding_progress_a11y">%2$d 件中 %1$d 件目</string>
 
-    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <!-- bottom bar and hub -->
     <string name="nav_search">検索</string>
     <string name="nav_tabs">タブ</string>
     <string name="nav_menu">メニュー</string>
@@ -245,7 +244,7 @@
         <item quantity="other">タブ、%1$d 個開いています</item>
     </plurals>
 
-    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <!-- Home page -->
     <string name="home_greeting_morning">おはようございます</string>
     <string name="home_greeting_afternoon">こんにちは</string>
     <string name="home_greeting_evening">こんばんは</string>
@@ -256,7 +255,7 @@
     <string name="home_shortcut_tag_saved">保存済み</string>
     <string name="home_shortcut_tag_recent">最近</string>
 
-    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <!-- incognito new-tab page -->
     <string name="incognito_page_title">シークレットモードで閲覧中です</string>
     <string name="incognito_page_subtitle">このスマートフォンを使う他の人には、ここでの操作は表示されません。</string>
     <string name="incognito_page_section_title">シークレットタブをすべて閉じると</string>
@@ -265,11 +264,11 @@
     <string name="incognito_page_point_screenshots">シークレットタブを開いている間はスクリーンショットを撮れません</string>
     <string name="incognito_page_footnote">ダウンロードしたファイルと保存したブックマークは残ります。ウェブサイトやネットワークからはアクセスが見えます。</string>
 
-    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <!-- tab switcher modes -->
     <string name="tabs_chip_open">開いているタブ</string>
     <string name="tabs_chip_incognito">シークレット</string>
 
-    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <!-- default browser and entry points -->
     <string name="settings_section_general">一般</string>
     <string name="settings_default_browser_title">既定のブラウザ</string>
     <string name="settings_default_browser_summary_not_default">ThirtySix は既定のブラウザではありません。タップして変更します。</string>
@@ -283,7 +282,7 @@
     <string name="entry_tab_limit_reused">タブの上限に達したため、現在のタブで開きました</string>
     <string name="entry_default_browser_unavailable">この端末では既定のアプリを変更できません</string>
 
-    <!-- Spec 021 — web capabilities (contracts C2) -->
+    <!-- web capabilities -->
     <string name="site_capability_camera">カメラ</string>
     <string name="site_capability_microphone">マイク</string>
     <string name="site_capability_location">位置情報</string>
@@ -341,7 +340,7 @@
     <string name="settings_clear_category_site_permissions_description">サイトがカメラ、マイク、位置情報をもう一度確認します</string>
     <string name="file_chooser_title">ファイルを選択</string>
 
-    <!-- Spec 022 — page tools -->
+    <!-- page tools -->
     <string name="hub_page_tools_title">ページツール</string>
     <string name="hub_tile_find_in_page">ページ内検索</string>
     <string name="hub_tile_share">共有</string>
@@ -361,7 +360,7 @@
     <string name="suggestion_bookmark_cd">ブックマーク: %1$s、%2$s</string>
     <string name="suggestion_history_cd">履歴: %1$s、%2$s</string>
     <string name="share_page_title">ページを共有</string>
-    <!-- Spec 023 privacy protection -->
+    <!-- privacy protection -->
     <string name="hub_protection_site_title">このサイトの保護</string>
     <string name="hub_protection_site_on">トラッカーをブロックし、追跡タグを削除し、安全な接続を優先します</string>
     <string name="hub_protection_site_off">%1$s ではオフです。トラッカーが読み込まれる可能性があります。</string>
@@ -383,7 +382,7 @@
     <plurals name="hub_protection_trackers_blocked">
         <item quantity="other">このページで %1$d 件のトラッカーをブロック</item>
     </plurals>
-    <!-- Spec 024 privacy tools -->
+    <!-- privacy tools -->
     <string name="fire_action">ファイア</string>
     <string name="fire_action_tabs_cd">ファイア：すべてのタブを閉じて閲覧データを削除</string>
     <string name="fire_confirm_title">すべてのタブを閉じてデータを削除しますか？</string>

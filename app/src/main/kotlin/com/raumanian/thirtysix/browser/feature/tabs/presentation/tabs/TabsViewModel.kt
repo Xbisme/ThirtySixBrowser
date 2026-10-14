@@ -33,19 +33,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Spec 011 — owns the tab switcher screen state.
- *
- * Spec 012 update — sourced from [ObserveAllTabsUseCase] (the merged normal
- * + incognito Flow) instead of `ObserveTabsUseCase`. Adds:
- *  - [TabsUiState.incognitoTabCount] derived from the merged list.
- *  - [onNewIncognitoTabClick] / [onCloseAllIncognitoRequested] /
- *    [onCloseAllIncognitoDismissed] / [onCloseAllIncognitoConfirmed].
- *  - Branches [onCloseTab] by `tab.isIncognito` so incognito tab close
- *    flows through [closeIncognitoTab] (which triggers cookie restore on
- *    the 1→0 transition).
- *  - Surfaces [MaxIncognitoTabsReachedException] as a distinct
- *    [TabsErrorEvent.MaxIncognitoTabsReached] for the localized
- *    `tabs_error_max_incognito_tabs_reached` snackbar.
+ * Tab switcher state over the merged normal + incognito tab list. Incognito tabs have negative
+ * ids, so close and switch branch on the id's sign.
  */
 @HiltViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -63,33 +52,15 @@ class TabsViewModel @Inject constructor(
     private val screenshotCache: ScreenshotCache,
 ) : ViewModel() {
 
-    /**
-     * Spec 011 favicon amendment (2026-05-03) — re-emits when the
-     * [FaviconCache.version] counter bumps so `TabsScreen` re-composes its
-     * cards with freshly-cached favicons. Composables read the actual file
-     * via [faviconFor] which performs a synchronous existence check.
-     */
+    /** Bumps when a favicon is written, so cards re-read [faviconFor]. */
     val faviconVersion: kotlinx.coroutines.flow.StateFlow<Long> get() = faviconCache.version
 
-    /**
-     * Synchronous favicon lookup by URL. Returns the cached [File] if a
-     * favicon for the URL's host has been written, else `null`.
-     */
     fun faviconFor(url: String): File? = faviconCache.fileFor(url)
 
-    /**
-     * Spec 011 Q4 amendment (2026-05-03) — re-emits when the
-     * [ScreenshotCache.version] counter bumps so `TabsScreen` re-composes
-     * its cards with freshly-cached screenshots / cleared on close.
-     */
+    /** Bumps when a screenshot is written or deleted, so cards re-read [screenshotFor]. */
     val screenshotVersion: kotlinx.coroutines.flow.StateFlow<Long>
         get() = screenshotCache.version
 
-    /**
-     * Synchronous screenshot lookup by tab id. Returns the cached preview
-     * [File] if one has been captured, else `null` (card falls back to the
-     * deterministic colored placeholder).
-     */
     fun screenshotFor(tabId: Long): File? = screenshotCache.fileFor(tabId)
 
     private data class LocalState(
@@ -135,28 +106,9 @@ class TabsViewModel @Inject constructor(
 
     fun onTabClick(tabId: Long) {
         viewModelScope.launch {
-            // Spec 012 — incognito tabs use IncognitoTabRepository.switchActiveTab;
-            // normal tabs use TabRepository via SwitchActiveTabUseCase. Disambiguate
-            // by the negative-id invariant from research.md R3.
             if (tabId < 0L) {
-                // Active-tab switch for incognito is handled via
-                // IncognitoTabRepository directly through the same use case
-                // surface; we inject the use case at the same level.
-                // For simplicity we let the merged Flow re-derive the active
-                // pointer based on `lastActiveAt`. The repository's
-                // updateTabUrlAndTitle path already touches the timestamp on
-                // every navigation; here we only need to bump it when the
-                // user explicitly taps a tab in the switcher.
-                // Use a write to switchActiveTab on the incognito repo via
-                // the existing use case path — but SwitchActiveTabUseCase
-                // wraps TabRepository.switchActiveTab which only knows about
-                // normal tabs. For Spec 012, fall back to a no-op pop here:
-                // the tab is already being shown as the most-recently-active
-                // since we're tapping it, and the BrowserViewModel will
-                // collect activeTab via the merged Flow on the next
-                // recomposition.
-                // TODO(Spec 016 follow-up): if the UX shows stale active-tab
-                // for incognito, plumb through a SwitchActiveIncognitoTabUseCase.
+                // SwitchActiveTabUseCase only knows normal tabs, so tapping an incognito
+                // tab just closes the switcher without bumping its lastActiveAt.
                 _popBackEvent.tryEmit(Unit)
             } else {
                 switchActiveTab(tabId)
@@ -167,8 +119,6 @@ class TabsViewModel @Inject constructor(
 
     fun onCloseTab(tabId: Long) {
         viewModelScope.launch {
-            // Spec 012 — branch by tabId sign (R3: incognito tabs have
-            // negative ids).
             if (tabId < 0L) {
                 closeIncognitoTab(tabId)
             } else {
@@ -188,11 +138,6 @@ class TabsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Spec 012 — open a new incognito tab from the switcher's dedicated
-     * affordance (FR-001). On cap-reached, surfaces the distinct
-     * [TabsErrorEvent.MaxIncognitoTabsReached] event for the snackbar.
-     */
     fun onNewIncognitoTabClick() {
         viewModelScope.launch {
             val result = createIncognitoTab(homeUrl)
@@ -222,17 +167,14 @@ class TabsViewModel @Inject constructor(
         }
     }
 
-    /** Spec 012 — show the close-all-incognito confirmation dialog (US5). */
     fun onCloseAllIncognitoRequested() {
         localState.update { it.copy(isCloseAllIncognitoDialogVisible = true) }
     }
 
-    /** Spec 012 — dismiss the close-all-incognito confirmation dialog. */
     fun onCloseAllIncognitoDismissed() {
         localState.update { it.copy(isCloseAllIncognitoDialogVisible = false) }
     }
 
-    /** Spec 012 — execute close-all-incognito; wipes session state. */
     fun onCloseAllIncognitoConfirmed() {
         viewModelScope.launch {
             closeAllIncognitoTabs()
@@ -240,7 +182,7 @@ class TabsViewModel @Inject constructor(
         }
     }
 
-    /** Spec 019 FR-040 — a chip was tapped; create and close-all now act on this kind only. */
+    /** A chip was tapped; create and close-all act on this kind of tab only. */
     fun onModeSelected(mode: TabsMode) {
         localState.update { it.copy(modeOverride = mode) }
     }

@@ -19,20 +19,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 (T043 / US3 / FR-012) — process-death erases incognito tabs while
- * normal tabs are restored.
- *
- * Closest portable proxy for SIGKILL: [ActivityScenario.recreate] — it does
- * NOT replicate full process death (the [IncognitoTabRepository] singleton
- * survives `recreate`), so this test pairs the recreate exercise with an
- * additional invariant check: the in-memory `MutableStateFlow` state stays
- * empty if no incognito tab was ever created. True SIGKILL recovery is
- * verified by the manual user-device gate G2 (deferred per Spec 008/011
- * pattern).
- *
- * The complementary unit test [com.raumanian.thirtysix.browser.data.repository
- * .IncognitoStateLegacyDefensiveReadTest] covers the cold-start invariant on
- * a freshly-constructed singleton.
+ * Process death erases incognito tabs while normal tabs are restored. [ActivityScenario.recreate]
+ * is the portable proxy, but the [IncognitoTabRepository] singleton survives it, so the test also
+ * checks the state stays empty when no incognito tab was created. Real SIGKILL is checked by hand.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -59,18 +48,16 @@ class ProcessDeathIncognitoEraseInstrumentedTest {
 
     @After
     fun tearDown() = runBlocking {
-        // Same rationale as @Before — leave the shared state clean for the
-        // next test class (TabPersistenceProcessDeathTest from Spec 011 was
-        // observed failing on a leaked extra tab in CI).
+        // Same rationale as @Before: a leaked tab breaks the next test class's counts.
         tabRepository.closeAllTabs()
         if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
     }
 
     @Test(timeout = TEST_TIMEOUT_MS)
     fun recreate_preserves_normal_tabs_but_incognito_pool_remains_in_memory_only() = runBlocking {
-        // Cold start: incognito repo MUST be empty by FR-012 invariant.
+        // Cold start: the incognito repository is empty.
         assertTrue(
-            "incognito repo MUST start empty (FR-012)",
+            "incognito repo MUST start empty",
             incognitoRepository.observeTabs().first().isEmpty(),
         )
 
@@ -83,13 +70,12 @@ class ProcessDeathIncognitoEraseInstrumentedTest {
         ActivityScenario.launch(HiltTestActivity::class.java).use { scenario ->
             scenario.recreate()
 
-            // Normal tabs MUST be preserved through Activity recreate.
+            // Normal tabs survive Activity recreate.
             val normalAfter = tabRepository.observeTabs().first()
             assertEquals(normalBefore.size, normalAfter.size)
             assertEquals(normalBefore.map { it.id }.toSet(), normalAfter.map { it.id }.toSet())
 
-            // Incognito repo MUST still be empty (no incognito tabs ever
-            // created → no path that would have populated state).
+            // Still empty: no incognito tab was ever created.
             assertTrue(
                 "incognito repo stays empty across Activity recreate",
                 incognitoRepository.observeTabs().first().isEmpty(),

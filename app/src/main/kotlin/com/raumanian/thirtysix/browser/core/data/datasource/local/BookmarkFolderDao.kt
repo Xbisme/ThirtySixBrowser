@@ -41,10 +41,7 @@ interface BookmarkFolderDao {
     @Query("SELECT COUNT(*) FROM ${BookmarkFolderEntity.TABLE_NAME}")
     suspend fun count(): Int
 
-    /**
-     * Spec 013 — synchronous version of [observeChildren] for the depth-first
-     * cascade-delete walk in R7. Pass `null` to retrieve root-level folders.
-     */
+    /** One-shot [observeChildren] for the cascade-delete walk; `null` gives the root folders. */
     @Query(
         """
         SELECT * FROM ${BookmarkFolderEntity.TABLE_NAME}
@@ -54,11 +51,9 @@ interface BookmarkFolderDao {
     )
     suspend fun getDirectChildren(parentId: Long?): List<BookmarkFolderEntity>
 
-    /** Spec 013 — leaf delete used at the end of the cascade walk. */
     @Query("DELETE FROM ${BookmarkFolderEntity.TABLE_NAME} WHERE ${BookmarkFolderEntity.COL_ID} = :id")
     suspend fun deleteById(id: Long): Int
 
-    /** Spec 013 — full reactive snapshot for the folder-picker sheet. */
     @Query("SELECT * FROM ${BookmarkFolderEntity.TABLE_NAME}")
     fun observeAll(): Flow<List<BookmarkFolderEntity>>
 }

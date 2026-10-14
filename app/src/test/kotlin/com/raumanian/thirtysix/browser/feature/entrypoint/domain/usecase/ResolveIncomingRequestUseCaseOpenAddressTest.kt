@@ -5,7 +5,6 @@ import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingT
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 020 T019 — every `OpenAddress` row of contracts C2 (FR-015). */
 class ResolveIncomingRequestUseCaseOpenAddressTest {
 
     private val resolve = ResolveIncomingRequestUseCase()

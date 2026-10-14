@@ -38,9 +38,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 024 T036 / T046 / T052 — the new surfaces at component level, as Spec 019's HubSheetTest:
- * the hub's Fire tile and its blocked-tracker line, the Fire confirmation and overlay, and the
- * privacy dashboard's groups and switches. End-to-end data behaviour is FireDataTest.
+ * The hub's Fire tile and blocked-tracker line, the Fire confirmation and overlay, and the privacy
+ * dashboard, at component level. End-to-end data behaviour is in FireDataTest.
  */
 @RunWith(AndroidJUnit4::class)
 class PrivacyToolsScreensTest {

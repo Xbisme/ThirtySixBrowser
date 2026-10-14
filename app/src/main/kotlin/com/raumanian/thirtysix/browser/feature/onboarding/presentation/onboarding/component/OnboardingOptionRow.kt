@@ -26,15 +26,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 /**
- * Spec 018 — one selectable option on a choice slide; Spec 019 FR-052 restyle for the hero: a
- * glass row, and the chosen row raised to the light surface with a check.
- *
- * ⚠️ Deliberately NOT Spec 016's chooser rows: those live in dialogs, and FR-009 needs the
- * options on the slide itself (Spec 018 research R1). What is shared is the option lists and
- * Spec 016's public label functions, so Settings and onboarding never disagree (INV-8).
- *
- * The row carries the click and the selected state, so a screen reader announces one control
- * (FR-018).
+ * Not the Settings chooser rows, which live in dialogs; the option lists and label functions are
+ * shared instead. The row carries click and selected state, so a screen reader announces one control.
  */
 @Composable
 fun OnboardingOptionRow(

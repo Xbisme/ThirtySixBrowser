@@ -35,17 +35,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Spec 013 — view model for the BookmarksScreen.
- *
- * Surface incrementally built across user stories — see `BookmarksUiState`
- * KDoc for the per-US field map. All folder navigation, dialog dispatch,
- * search, and CRUD coordination live here.
- *
- * Coordinates use cases from two domains: bookmark domain (Spec 013) and
- * tabs domain (Spec 011's [UpdateActiveTabUrlAndTitleUseCase] for the
- * "open bookmark in active tab" path per FR-010). This is ViewModel-level
- * use-case coordination, not a Repo→Repo dependency — Constitution §IV
- * compliant.
+ * Bookmarks screen state. Tapping a bookmark loads it into the active tab through the tabs
+ * domain's use case, coordinated here rather than repository to repository.
  */
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,7 +60,6 @@ class BookmarksViewModel @Inject constructor(
     observeAllFolders: ObserveAllFoldersUseCase,
 ) : ViewModel() {
 
-    /** Spec 013 FR-010 — captured active-tab id used by `onBookmarkTap`. */
     private var activeTabId: Long = 0L
 
     private val _uiState: MutableStateFlow<BookmarksUiState> = MutableStateFlow(BookmarksUiState())
@@ -78,11 +68,9 @@ class BookmarksViewModel @Inject constructor(
     private val currentFolderIdFlow: MutableStateFlow<Long?> = MutableStateFlow(null)
     private val searchQueryFlow: MutableStateFlow<String> = MutableStateFlow("")
 
-    /** Spec 013 FR-010a — captures the active tab's incognito flag at tap time. */
     private var lastKnownIsIncognito: Boolean = false
 
     init {
-        // Listing pipeline: when current folder changes, refresh folders + bookmarks + breadcrumb.
         currentFolderIdFlow
             .flatMapLatest { folderId -> observeBookmarksByFolder(folderId) }
             .onEach { byFolder ->
@@ -101,7 +89,6 @@ class BookmarksViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        // Search pipeline: when query changes, run global search.
         searchQueryFlow
             .flatMapLatest { query ->
                 if (query.isBlank()) {
@@ -115,27 +102,21 @@ class BookmarksViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        // Spec 013 FR-010a — observe incognito flag continuously so a tap-bookmark dispatch
-        // always uses the latest value.
+        // Kept current so a tap never writes an incognito tab's URL as a normal one.
         observeActiveTabIsIncognito()
             .onEach { lastKnownIsIncognito = it }
             .launchIn(viewModelScope)
 
-        // Spec 013 FR-010 — capture active tab id so onBookmarkTap can update the
-        // currently-active tab's URL row when the user taps a bookmark.
         observeActiveTab()
             .onEach { tab -> activeTabId = tab?.id ?: 0L }
             .launchIn(viewModelScope)
 
-        // Spec 013 — full folder snapshot for FolderPickerSheet + AddOrEdit dialog.
         observeAllFolders()
             .onEach { all ->
                 _uiState.update { state -> state.copy(allFolders = all) }
             }
             .launchIn(viewModelScope)
     }
-
-    // ──────── Navigation ────────
 
     fun onFolderTap(folder: BookmarkFolder) {
         currentFolderIdFlow.value = folder.id
@@ -149,8 +130,6 @@ class BookmarksViewModel @Inject constructor(
     fun onBreadcrumbSegmentTap(folderId: Long?) {
         currentFolderIdFlow.value = folderId
     }
-
-    // ──────── Open bookmark (FR-010 / FR-010a) ────────
 
     fun onBookmarkTap(bookmark: Bookmark) {
         viewModelScope.launch {
@@ -170,8 +149,6 @@ class BookmarksViewModel @Inject constructor(
         _uiState.update { state -> state.copy(openUrl = null) }
     }
 
-    // ──────── Long-press → action sheets (US3+) ────────
-
     fun onLongPressBookmark(bookmark: Bookmark) {
         _uiState.update { it.copy(pendingDialog = PendingBookmarkDialog.BookmarkActions(bookmark)) }
     }
@@ -179,8 +156,6 @@ class BookmarksViewModel @Inject constructor(
     fun onLongPressFolder(folder: BookmarkFolder) {
         _uiState.update { it.copy(pendingDialog = PendingBookmarkDialog.FolderActions(folder)) }
     }
-
-    // ──────── Search (US4) ────────
 
     fun onSearchOpenClick() {
         _uiState.update { it.copy(isSearchActive = true) }
@@ -195,8 +170,6 @@ class BookmarksViewModel @Inject constructor(
         searchQueryFlow.value = query
         _uiState.update { it.copy(searchQuery = query) }
     }
-
-    // ──────── Dialog launches (US3 + US5 + US7) ────────
 
     fun onCreateFolderClick() {
         _uiState.update { it.copy(pendingDialog = PendingBookmarkDialog.CreateFolder(currentFolderIdFlow.value)) }
@@ -253,8 +226,6 @@ class BookmarksViewModel @Inject constructor(
             it.copy(pendingDialog = null, descendantCountForPendingDelete = null)
         }
     }
-
-    // ──────── Dialog confirmations ────────
 
     fun onConfirmCreateFolder(name: String, parentId: Long?) {
         viewModelScope.launch {
@@ -320,8 +291,6 @@ class BookmarksViewModel @Inject constructor(
     fun consumeErrorEvent() {
         _uiState.update { it.copy(errorEvent = null) }
     }
-
-    // ──────── Helpers ────────
 
     private fun mapErrorToEvent(result: Result<*>) {
         if (result is Result.Error) {

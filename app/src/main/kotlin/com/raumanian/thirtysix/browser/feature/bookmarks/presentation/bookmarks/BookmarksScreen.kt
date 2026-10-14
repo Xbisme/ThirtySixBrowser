@@ -67,13 +67,9 @@ private const val CONTENT_TYPE_BOOKMARK = "bookmark"
 private const val CONTENT_TYPE_SEARCH_RESULT = "search_result"
 
 /**
- * Spec 013 — bookmarks screen replacing the Spec 002 placeholder. Renders a
- * Scaffold with topBar, breadcrumb, list (or search / empty / no-match
- * states), FAB, and a single active dialog driven by [BookmarksUiState.pendingDialog].
- *
- * Spec 019 — large title over a search well, open rows under "Folders" / "Pages" section
- * headers, top-level folder chips at the root (FR-042), the breadcrumb inside folders, the
- * brand-gradient add button. Behaviour is Spec 013's, unchanged.
+ * Bookmarks: a title over a search well, folder chips at the root, a breadcrumb inside folders,
+ * the list (or search / empty / no-match states) and at most one dialog from
+ * [BookmarksUiState.pendingDialog].
  */
 @Composable
 @Suppress("LongMethod")
@@ -87,7 +83,7 @@ fun BookmarksScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Spec 013 — system back: walk up the folder tree first, then exit screen.
+    // System back walks up the folder tree first, then leaves the screen.
     BackHandler {
         if (state.currentFolderId != null) {
             viewModel.onBackToParent()
@@ -185,7 +181,7 @@ private fun BookmarksContent(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = ListBottomPadding),
             ) {
-                // Spec 019 FR-042 — top-level folders as chips, at the root only.
+                // Top-level folders as chips, at the root only.
                 if (state.currentFolderId == null && state.folders.isNotEmpty()) {
                     item(key = KEY_FOLDER_CHIPS, contentType = CONTENT_TYPE_CHIPS) {
                         FolderChipsRow(folders = state.folders, onFolderClick = viewModel::onFolderTap)
@@ -318,7 +314,7 @@ private fun BookmarksDialogs(
     }
 }
 
-/** Spec 019 — the add button in the brand gradient (the new-tab action's look). */
+/** The add button in the brand gradient (the new-tab action's look). */
 @Composable
 private fun BookmarksFab(onClick: () -> Unit) {
     val colors = ThirtySixTheme.colors
@@ -342,7 +338,6 @@ private fun BookmarksFab(onClick: () -> Unit) {
     }
 }
 
-/** Spec 013 — UI mapping table for [BookmarksErrorEvent] → string resource. */
 private fun BookmarksErrorEvent.toResId(): Int = when (this) {
     is BookmarksErrorEvent.InvalidUrl -> when (reason) {
         BookmarkUrlValidationError.Empty -> R.string.bookmarks_validation_url_required

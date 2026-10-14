@@ -5,13 +5,10 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 
 /**
- * Spec 021 research R5 — the client of a page-opened WebView until its tab adopts it. Its only
- * jobs: navigations load in place (a WebView with no client hands them to another app), and a
- * lost renderer destroys this WebView instead of ending the app.
+ * The client of a page-opened WebView until its tab adopts it: navigations load in place (with no
+ * client they go to another app), and a lost renderer destroys this WebView, not the app.
  */
-// androidx.webkit's `MissingOnRenderProcessGone` also reports the `WebViewClient` constructor
-// call, which in Kotlin includes this subclass's own superclass call; the override exists
-// (Spec 016 finding, see BrowserWebViewClient).
+// Lint's `MissingOnRenderProcessGone` also flags the superclass constructor call; the override exists.
 @android.annotation.SuppressLint("MissingOnRenderProcessGone")
 class PendingPopupWebViewClient : WebViewClient() {
     override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {

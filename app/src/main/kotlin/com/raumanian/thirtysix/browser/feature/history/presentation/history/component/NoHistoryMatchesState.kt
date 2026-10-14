@@ -24,12 +24,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-/**
- * Spec 014 FR-015 — rendered in place of the list when a threshold-meeting search
- * query matches zero entries. Distinct from [EmptyHistoryState], which means "there
- * is no history at all"; this one means "history exists, but nothing matches".
- * Drawn like [EmptyHistoryState], with a neutral search coin (Spec 019).
- */
+// History exists but nothing matches the query; [EmptyHistoryState] is "no history at all".
 @Composable
 fun NoHistoryMatchesState(query: String, modifier: Modifier = Modifier) {
     Column(
@@ -70,5 +65,4 @@ fun NoHistoryMatchesState(query: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** Test tag exposed for instrumented tests asserting the no-matches branch. */
 const val TEST_TAG_HISTORY_NO_MATCHES: String = "history_no_matches"

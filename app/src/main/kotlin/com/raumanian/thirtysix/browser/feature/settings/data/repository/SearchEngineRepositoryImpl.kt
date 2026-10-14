@@ -9,24 +9,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
 /**
- * Spec 010 — concrete [SearchEngineRepository].
- *
- * Reads the user's currently-persisted [SearchEngine] from [SettingsRepository]
- * once per call via `observeSettings().first()` (read-on-submit semantics; see
- * spec.md edge case "Engine preference changes mid-typing"), URL-encodes the
- * query as UTF-8, and substitutes it into the engine's documented template
- * from [UrlConstants].
- *
- * The Repository → Repository dependency on [SettingsRepository] is documented
- * as an accepted exception in the Spec 010 Complexity Tracking table (settings
- * is a project-wide configuration backbone, mirrors Spec 006's
- * `ObserveUserSettingsUseCase` pattern of reading from [SettingsRepository]
- * via the same flow).
- *
- * Encoding form (`URLEncoder.encode(query, "UTF-8")` — Java legacy form-encoder
- * that emits `+` for space) is intentionally identical to Spec 009's inline
- * implementation so SC-001's byte-identity contract holds for the Google
- * engine path.
+ * Reads the engine on every submit, so a change made while typing applies. Depending on
+ * [SettingsRepository] is an accepted exception: settings are the app-wide configuration backbone.
  */
 class SearchEngineRepositoryImpl @Inject constructor(
     private val settingsRepository: SettingsRepository,

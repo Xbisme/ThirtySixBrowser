@@ -26,9 +26,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
- * Spec 021 US6 / C2.2 — a page's alert / confirm / prompt, headed by the site that asks
- * (FR-029). From the page's second dialog a checkbox stops its further dialogs (FR-031).
- * Dismissing answers Cancel.
+ * A page's alert / confirm / prompt, headed by the asking site. From the page's second dialog a
+ * checkbox stops its further dialogs. Dismissing answers Cancel.
  */
 @Composable
 fun SiteJsDialog(
@@ -78,7 +77,7 @@ fun SiteJsDialog(
     }
 }
 
-/** Spec 021 FR-030 — "Leave site?"; dismissing stays. */
+/** "Leave site?"; dismissing stays. */
 @Composable
 fun SiteLeaveDialog(request: PageRequest.LeavePage, done: () -> Unit) {
     val stay = {

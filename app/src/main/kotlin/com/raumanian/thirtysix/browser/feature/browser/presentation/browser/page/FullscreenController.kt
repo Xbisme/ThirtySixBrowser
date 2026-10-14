@@ -7,15 +7,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Spec 021 research R4 — the page's fullscreen view (a video, usually) while it is shown. The
- * engine is told the view is gone exactly once, whichever side ends fullscreen first: the page,
- * Back (FR-016) or a tab switch. Main thread only.
+ * The page's fullscreen view while shown. The engine is told the view is gone exactly once,
+ * whichever side ends fullscreen first: the page, Back or a tab switch. Main thread only.
  */
 class FullscreenController {
     private val _view = MutableStateFlow<View?>(null)
     private var callback: CustomViewCallback? = null
 
-    /** The view to show over everything, or `null` when not in fullscreen. */
     val view: StateFlow<View?> = _view.asStateFlow()
 
     /** The page asked for fullscreen. A second request while one is shown is refused. */

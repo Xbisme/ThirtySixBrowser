@@ -19,7 +19,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 022 data-model §2 — desktop mode belongs to one tab and lives in memory only. */
+/** Desktop mode belongs to one tab and lives in memory only. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelDesktopModeTest {
 

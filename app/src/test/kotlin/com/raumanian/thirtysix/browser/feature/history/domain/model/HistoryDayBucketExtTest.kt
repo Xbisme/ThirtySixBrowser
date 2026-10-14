@@ -8,9 +8,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 014 R2 — pure-function bucketer.
- */
 class HistoryDayBucketExtTest {
 
     private val zone: ZoneId = ZoneId.of("UTC")

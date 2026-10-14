@@ -4,7 +4,7 @@ import java.time.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 019 T053 — FR-011 boundaries (data-model §3). */
+/** Greeting period boundaries. */
 class GreetingPeriodTest {
 
     @Test

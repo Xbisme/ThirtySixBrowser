@@ -7,20 +7,13 @@ import androidx.room.Query
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.DownloadRecordEntity
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Spec 015 — DAO for the `download_records` table introduced at schema v2.
- */
 @Dao
 interface DownloadRecordDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(record: DownloadRecordEntity): Long
 
-    /**
-     * Spec 015 FR-019 — newest first. `id DESC` is the tiebreaker so two records created
-     * in the same millisecond still have a stable, deterministic order; without it the
-     * list could reshuffle between emissions and Compose would animate a phantom move.
-     */
+    /** Newest first; `id` breaks same-millisecond ties so the list never reshuffles between emissions. */
     @Query(
         """
         SELECT * FROM ${DownloadRecordEntity.TABLE_NAME}
@@ -32,29 +25,14 @@ interface DownloadRecordDao {
     @Query("SELECT * FROM ${DownloadRecordEntity.TABLE_NAME} WHERE ${DownloadRecordEntity.COL_ID} = :id")
     suspend fun getById(id: Long): DownloadRecordEntity?
 
-    /**
-     * Spec 015 FR-014 — record where the finished file landed **and what it is actually
-     * called**, once the transfer completes.
-     *
-     * Both are durable metadata, not live transfer state, so this does not violate FR-015.
-     * The name is written alongside the URI because the platform de-duplicates colliding
-     * filenames (FR-007): three downloads of `dup.txt` land as `dup.txt`, `dup-1.txt` and
-     * `dup-2.txt`, and until the resolved name is stored every one of those rows both
-     * displays and probes for the same wrong file.
-     *
-     * @return rows updated: 0 if the record was removed in between, 1 otherwise.
-     */
+    /** Stores where the finished file landed and its final name: the platform renames colliding files. */
     @Query(
         "UPDATE ${DownloadRecordEntity.TABLE_NAME} SET ${DownloadRecordEntity.COL_LOCAL_URI} = :localUri, " +
             "${DownloadRecordEntity.COL_FILE_NAME} = :fileName WHERE ${DownloadRecordEntity.COL_ID} = :id",
     )
     suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String): Int
 
-    /**
-     * Spec 015 FR-031 — remove the record only. The downloaded file is untouched.
-     *
-     * @return rows removed: 0 if the id was already gone, 1 otherwise.
-     */
+    /** Removes the record only; the downloaded file stays. */
     @Query("DELETE FROM ${DownloadRecordEntity.TABLE_NAME} WHERE ${DownloadRecordEntity.COL_ID} = :id")
     suspend fun deleteById(id: Long): Int
 

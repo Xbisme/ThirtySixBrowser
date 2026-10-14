@@ -14,7 +14,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 019 T054 — FR-013 / FR-014 build rule (data-model §3). */
+/** How Home's shortcuts and recently visited list are built. */
 class ObserveHomeContentUseCaseTest {
 
     private fun tab(id: Long, url: String, lastActive: Long, incognito: Boolean = false) =

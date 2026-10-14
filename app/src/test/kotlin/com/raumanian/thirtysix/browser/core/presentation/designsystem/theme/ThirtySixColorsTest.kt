@@ -8,8 +8,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 019 — the violet palette's invariants (data-model §5) and the SC-009 contrast floor for
- * every text/surface pair the screens actually use, in both themes.
+ * The violet palette's invariants and the 4.5:1 contrast floor for every text/surface pair the
+ * screens actually use, in both themes.
  */
 class ThirtySixColorsTest {
 

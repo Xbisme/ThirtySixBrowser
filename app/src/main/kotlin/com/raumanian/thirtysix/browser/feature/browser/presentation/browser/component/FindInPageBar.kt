@@ -60,7 +60,6 @@ internal const val TEST_TAG_FIND_PREVIOUS: String = "find_previous"
 internal const val TEST_TAG_FIND_NEXT: String = "find_next"
 internal const val TEST_TAG_FIND_CLOSE: String = "find_close"
 
-/** Spec 022 — what the find bar reports; the screen forwards each to the ViewModel and the WebView. */
 internal data class FindInPageCallbacks(
     val onQueryChange: (String) -> Unit,
     val onPrevious: () -> Unit,
@@ -69,13 +68,8 @@ internal data class FindInPageCallbacks(
 )
 
 /**
- * Spec 022 US1 — the find bar, which takes the top bar's place while open (FR-005).
- *
- * It collects [stateFlow] itself, so a result per keystroke recomposes this bar and nothing
- * around it (Constitution §V rule 3). The field takes focus with the keyboard up (FR-006). The
- * count is a polite live region, so a screen reader hears it change (FR-036). Previous and Next
- * are disabled when nothing matches (FR-008). Like the top bar it replaces, it pads itself below
- * the status bar (§V rule 7).
+ * Collects [stateFlow] itself, so a result per keystroke recomposes only this bar. The count is a
+ * polite live region, so a screen reader hears it change.
  */
 @Composable
 internal fun FindInPageBar(
@@ -127,7 +121,6 @@ internal fun FindInPageBar(
     }
 }
 
-/** The search well: icon, text field, and the "current/total" count. */
 @Composable
 private fun FindField(state: FindInPageState, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme

@@ -13,17 +13,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T047 (US4 / FR-014, FR-024).
- *
- * Verifies the tab switcher card render branch for an incognito tab:
- *  - The screenshot preview MUST NOT appear (no leak of incognito page
- *    content even momentarily during composition).
- *  - The dedicated incognito placeholder (Lock glyph + surfaceVariant
- *    background) MUST be rendered in its place.
- *
- * Pure component test — no Hilt, no live tab repository, no WebView. Drives
- * `TabSwitcherCard` directly with a hand-built [Tab] instance carrying
- * `isIncognito = true`.
+ * An incognito tab card shows the incognito placeholder and never the screenshot, not even
+ * momentarily. Drives `TabSwitcherCard` directly, without Hilt or a WebView.
  */
 @RunWith(AndroidJUnit4::class)
 class IncognitoSwitcherCardInstrumentedTest {
@@ -43,11 +34,8 @@ class IncognitoSwitcherCardInstrumentedTest {
 
     @Test(timeout = TEST_TIMEOUT_MS)
     fun incognitoCard_rendersPlaceholderInsteadOfScreenshot() {
-        // Wrap in a Box with a fixed width so the Card's `aspectRatio(16:9)`
-        // preview gets non-zero layout dimensions. Without this, the default
-        // Compose host has a 0-width root and the Card collapses, defeating
-        // `assertIsDisplayed`. `assertExists` is used downstream to verify the
-        // node is in the tree regardless of layout.
+        // A fixed width gives the 16:9 preview a size; the default host's root is 0 wide,
+        // which collapses the card.
         composeRule.setContent {
             ThirtySixTheme {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -55,8 +43,7 @@ class IncognitoSwitcherCardInstrumentedTest {
                         tab = incognitoTab,
                         isActive = true,
                         faviconFile = null,
-                        // FR-009 / R6: callsite passes null for incognito; even if
-                        // it didn't, the card branch in TabPreviewArea ignores it.
+                        // Callers pass null for incognito; the card would ignore a file anyway.
                         screenshotFile = null,
                         onClick = {},
                         onCloseClick = {},
@@ -65,13 +52,8 @@ class IncognitoSwitcherCardInstrumentedTest {
             }
         }
 
-        // `useUnmergedTree = true` because the Card carries a
-        // `Modifier.semantics { contentDescription = ... }` that MERGES all
-        // descendant semantics into the parent in the default merged tree.
-        // The placeholder Box's testTag lives on the unmerged side; the
-        // assertion would otherwise fail with the exact diagnostic the
-        // emulator reported. The placeholder MUST exist somewhere in the
-        // tree — that's what we're verifying.
+        // The card's contentDescription merges its descendants, so the placeholder's tag
+        // is only in the unmerged tree.
         composeRule
             .onNodeWithTag(TEST_TAG_INCOGNITO_PLACEHOLDER, useUnmergedTree = true)
             .assertExists()

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
-/** Spec 023 — in-memory [ProtectionExceptionRepository]. */
 class FakeProtectionExceptionRepository : ProtectionExceptionRepository {
     private val rows = MutableStateFlow<List<SiteProtectionException>>(emptyList())
     private var clock = 0L

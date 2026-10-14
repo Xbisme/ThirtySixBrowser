@@ -46,14 +46,8 @@ internal const val TEST_TAG_HUB_FIRE: String = "hub_fire"
 private val TileGap = 10.dp
 
 /**
- * Spec 019 — the hub (design system BottomSheet), opened from Menu; it replaces the overflow
- * menu (FR-030). Settings, Back/Forward, the downloads-in-progress button (only while one
- * runs), the privacy banner, the incognito banner, the three libraries, and four quick
- * settings (FR-031). Any choice closes the sheet first, then acts (FR-032).
- *
- * [hasActiveDownloadsFlow] is collected only here, so the download status is polled only while
- * the hub is open (analysis U2). The sheet's own drag is applied by [SheetFrame] in the layout
- * phase, so dragging does not recompose this content (contracts C6).
+ * The hub, opened from Menu. Any choice closes the sheet first, then acts. Downloads status is
+ * collected only here, so it is polled only while the hub is open; the drag never recomposes it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +63,7 @@ internal fun HubSheet(
     protectionFlow: StateFlow<PageProtectionStatus>? = null,
 ) {
     val hasActiveDownloads by hasActiveDownloadsFlow.collectAsStateWithLifecycle()
-    // Spec 023 — collected only while the hub is open (§V rule 3).
+    // Collected only while the hub is open.
     val protection = protectionFlow?.collectAsStateWithLifecycle()?.value ?: PageProtectionStatus.NOT_A_WEB_PAGE
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -190,11 +184,11 @@ private fun HubPlaces(callbacks: HubCallbacks, closeThen: (() -> Unit) -> () -> 
             onClick = closeThen(callbacks.onBookmarks),
             modifier = Modifier.weight(1f),
         )
-        // Spec 024 FR-001 — Fire sits with the places: it acts on everything they hold.
+        // Fire sits with the places: it acts on everything they hold.
         QuickTile(
             label = stringResource(R.string.fire_action),
             icon = AppIcons.Fire,
-            // Same tone as the places, so the row keeps one tile height (device check, 16 KB AVD).
+            // Same tone as the places, so the row keeps one tile height.
             tone = QuickTileTone.Place,
             onClick = closeThen(callbacks.onFire),
             modifier = Modifier.weight(1f).testTag(TEST_TAG_HUB_FIRE),

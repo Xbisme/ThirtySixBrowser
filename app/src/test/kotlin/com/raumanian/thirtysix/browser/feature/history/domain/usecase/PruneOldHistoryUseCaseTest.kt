@@ -9,11 +9,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Spec 014 — [PruneOldHistoryUseCase] enforces the history retention window, which is what
- * keeps the history table (and therefore the History screen's in-memory list) bounded over
- * time. Spec 016 FR-024 — the window is the one persisted in settings, 90 days by default.
- */
 class PruneOldHistoryUseCaseTest {
 
     private val now = 10_000_000_000L

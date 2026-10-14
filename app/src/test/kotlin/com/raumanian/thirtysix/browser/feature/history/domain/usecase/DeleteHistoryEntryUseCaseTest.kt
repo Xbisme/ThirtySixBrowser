@@ -5,11 +5,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Spec 014 T066 — [DeleteHistoryEntryUseCase] is a pass-through onto
- * `HistoryRepository.deleteById`; these cases pin the row-count contract
- * (FR-020) and the "siblings for the same URL survive" invariant (Q3).
- */
 class DeleteHistoryEntryUseCaseTest {
 
     @Test
@@ -35,7 +30,7 @@ class DeleteHistoryEntryUseCaseTest {
     }
 
     @Test
-    fun `deleting one visit leaves other visits to the same URL intact (FR-020 Q3)`() = runTest {
+    fun `deleting one visit leaves other visits to the same URL intact`() = runTest {
         val repo = FakeHistoryRepository()
         val first = repo.recordVisit("https://example.com", "Example", 1_000L)
         repo.recordVisit("https://example.com", "Example", 2_000L)

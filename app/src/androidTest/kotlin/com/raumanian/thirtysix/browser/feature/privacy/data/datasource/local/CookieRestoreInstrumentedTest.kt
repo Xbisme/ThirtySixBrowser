@@ -18,20 +18,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T036 (US2 / FR-011a) — instrumented end-to-end of the cookie
- * snapshot/restore lifecycle on a real Android `CookieManager`.
- *
- * Test scenario (mirrors quickstart G1 step 7):
- *  1. Set a known cookie on `ORIGIN_NORMAL` representing the pre-incognito jar.
- *  2. Capture a snapshot via the production [CookieJarSnapshotManager].
- *  3. Set a fresh cookie on `ORIGIN_NORMAL` representing an incognito-session
- *     write that MUST be wiped on close-of-last.
- *  4. Restore the snapshot.
- *  5. Verify the original cookie is back AND the incognito-session cookie is
- *     gone.
- *
- * Hilt-injected manager exercises the production wiring (Singleton scope,
- * `runCatching` crash-safety, suspending `removeAllCookies` wrapper).
+ * Cookie snapshot and restore end to end on a real `CookieManager`, through the Hilt-injected
+ * production manager.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -46,8 +34,7 @@ class CookieRestoreInstrumentedTest {
     @Before
     fun setup() = runBlocking {
         hiltRule.inject()
-        // Force-clean the global cookie store before each run — CookieManager
-        // is process-global, prior tests in the same APK may have left state.
+        // CookieManager is process-global; earlier tests in the same APK may have left state.
         wipeCookieJarOnMainThread()
         // If a snapshot survived from a prior test, purge it.
         if (manager.hasSnapshot()) {
@@ -64,13 +51,11 @@ class CookieRestoreInstrumentedTest {
         cookieManager.setCookie(ORIGIN_NORMAL, "session=normal-keep")
         cookieManager.flush()
 
-        // 2. Capture snapshot — simulates the 0→1 incognito-tab transition
-        //    snapshot capture trigger inside IncognitoTabRepositoryImpl.
+        // 2. Capture, as on the first incognito tab.
         manager.captureSnapshot(listOf(ORIGIN_NORMAL))
         assertTrue("snapshot must be held after capture", manager.hasSnapshot())
 
-        // 3. Simulate an incognito-session cookie write that should be wiped
-        //    on close-of-last.
+        // 3. An incognito-session cookie write that should be wiped on close-of-last.
         cookieManager.setCookie(ORIGIN_NORMAL, "session=incognito-leak")
         cookieManager.setCookie(ORIGIN_INCOGNITO, "secret=should-disappear")
         cookieManager.flush()
@@ -97,11 +82,8 @@ class CookieRestoreInstrumentedTest {
     }
 
     /**
-     * Spec 016 T069 — ⚠️ non-negotiable privacy test (FR-030, research R7).
-     *
-     * The user clears cookies while an incognito session is open. Discarding the set-aside must
-     * leave restore still WIPING the jar — so the incognito write is gone — while writing NOTHING
-     * back — so the cookie the user cleared does not return when the last incognito tab closes.
+     * Clearing cookies during an incognito session: restore must still wipe the jar (the incognito
+     * write is gone) and write nothing back (the cleared cookie does not return).
      */
     @Test(timeout = TEST_TIMEOUT_MS)
     fun discard_then_restore_still_wipes_the_jar_and_writes_nothing_back() = runBlocking {
@@ -129,10 +111,8 @@ class CookieRestoreInstrumentedTest {
     }
 
     /**
-     * Spec 016 T069 — the observable proof that the discard left `EMPTY` behind rather than
-     * `null`: a second capture while `EMPTY` is held must stay a no-op. Had it replaced the
-     * snapshot, cookie B would be written back on restore. `hasSnapshot()` alone cannot tell
-     * the two apart.
+     * Proof that the discard left `EMPTY` rather than `null`: a second capture while `EMPTY` is held
+     * stays a no-op, otherwise cookie B would be written back on restore.
      */
     @Test(timeout = TEST_TIMEOUT_MS)
     fun a_capture_after_discard_cannot_bring_cookies_back() = runBlocking {
@@ -152,16 +132,8 @@ class CookieRestoreInstrumentedTest {
         assertFalse("cookie B must not be written back, got=$after", after.contains("second=later-b"))
     }
 
-    /**
-     * Wipe the global cookie jar synchronously. The callback variant of
-     * `CookieManager.removeAllCookies` is documented to require a thread
-     * with a Looper (the JavaScriptThread / WebView core thread); coroutine
-     * IO threads do NOT carry a Looper, which is why a direct
-     * `suspendCancellableCoroutine` wrapper is unsafe in instrumented tests.
-     * Production code wraps the call in `runCatching` so failures degrade to
-     * "cookies wiped" — the test does not have that fallback, so we hop
-     * onto the main thread (which has a Looper) for the cleanup helper.
-     */
+    // The callback form of removeAllCookies needs a thread with a Looper; the test has no
+    // runCatching fallback, so it hops to the main thread.
     private fun wipeCookieJarOnMainThread() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val latch = CountDownLatch(1)

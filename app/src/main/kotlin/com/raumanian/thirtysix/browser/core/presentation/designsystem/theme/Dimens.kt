@@ -1,5 +1,4 @@
-// Spec 019 — component sizes from the design system. Spacing between things stays in
-// [Spacing]; this file holds the sizes of things (Constitution §III: no inline magic dp).
+// Component sizes from the design system. Spacing between things stays in [Spacing].
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 
@@ -7,7 +6,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object Dimens {
-    /** Minimum touch target for every control (FR-056). */
+    /** Minimum touch target for every control. */
     val touchTarget: Dp = 48.dp
     val iconButton: Dp = 44.dp
     val icon: Dp = 24.dp

@@ -9,15 +9,9 @@ import androidx.webkit.WebViewFeature
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 
 /**
- * Process-wide, because `BrowserWebView` gives every new WebView its profile before anything
- * else touches it, and that composable has no injection. Hilt binds this object for the incognito
- * repository. Profile calls run on the main thread, as the platform requires.
- *
- * A session's profile has a unique name, so the next session never sees its data, and a WebView
- * still being torn down never shares a profile with it. The engine keeps a profile "in use" for
- * the rest of the process once a WebView has used it, so it cannot be deleted then: at the end of
- * the session everything inside it is wiped (cookies, storage, cache, service workers), and the
- * emptied profile itself is deleted in a later process, when its first incognito WebView is made.
+ * One uniquely named WebView profile per incognito session; an object because `BrowserWebView`
+ * assigns it with no injection. A used profile cannot be deleted in the same process, so an ended
+ * session is wiped now and its empty profile deleted by the next process. Main thread only.
  */
 object IncognitoProfiles : IncognitoWebProfile {
     private const val TAG = "IncognitoProfiles"

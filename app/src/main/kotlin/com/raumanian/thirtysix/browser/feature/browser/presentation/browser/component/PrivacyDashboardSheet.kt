@@ -3,6 +3,7 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,11 +41,8 @@ private const val CONTENT_TYPE_GROUP = "group"
 private const val CONTENT_TYPE_SWITCH = "switch"
 
 /**
- * Spec 024 US3 — the privacy dashboard for the page on screen, opened from the hub's
- * blocked-tracker line (FR-015). The site, whether the connection is encrypted, the blocked
- * tracker hosts grouped by site, the protection switch and — in normal tabs only — the fireproof
- * switch (FR-016). [dashboardFlow] is collected only here, so the sheet follows the page while
- * open (FR-018) without recomposing the browser. Built from Spec 019 components (design waiver).
+ * The privacy dashboard for the page on screen. [dashboardFlow] is collected only here, so the
+ * sheet follows the page without recomposing the browser. Fireproofing is offered in normal tabs only.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,24 +105,24 @@ internal fun PrivacyDashboardSheet(
     }
 }
 
-// Title and site are one lazy-list item; they stay siblings so the layout is unchanged.
-@Suppress("ktlint:compose:multiple-emitters-check")
 @Composable
-private fun DashboardTitle(state: PageDashboardState) {
-    Text(
-        text = stringResource(R.string.dashboard_title),
-        style = MaterialTheme.typography.titleLarge,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier
-            .padding(horizontal = Spacing.md)
-            .semantics { heading() },
-    )
-    Text(
-        text = state.site,
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = Spacing.md),
-    )
+private fun DashboardTitle(state: PageDashboardState, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(R.string.dashboard_title),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .padding(horizontal = Spacing.md)
+                .semantics { heading() },
+        )
+        Text(
+            text = state.site,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = Spacing.md),
+        )
+    }
 }
 
 @Composable

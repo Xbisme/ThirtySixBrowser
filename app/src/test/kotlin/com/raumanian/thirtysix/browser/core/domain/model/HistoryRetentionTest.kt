@@ -6,9 +6,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 016 T011 — [HistoryRetention] carries exactly the four FR-020 windows, orders them
- * for the FR-021 warning, and decodes any stored value it does not recognise to 90 days.
+ * [HistoryRetention] carries exactly the four windows, orders them for the shortening
+ * warning, and decodes any stored value it does not recognise to 90 days.
  */
+
 class HistoryRetentionTest {
 
     @Test
@@ -20,7 +21,7 @@ class HistoryRetentionTest {
     fun `isShorterThan is true only for a strictly smaller window`() {
         assertTrue(HistoryRetention.Days7.isShorterThan(HistoryRetention.Days30))
         assertTrue(HistoryRetention.Days90.isShorterThan(HistoryRetention.Days180))
-        assertFalse("equal is not shorter (FR-006)", HistoryRetention.Days90.isShorterThan(HistoryRetention.Days90))
+        assertFalse("equal is not shorter", HistoryRetention.Days90.isShorterThan(HistoryRetention.Days90))
         assertFalse(HistoryRetention.Days180.isShorterThan(HistoryRetention.Days7))
     }
 

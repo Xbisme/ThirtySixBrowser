@@ -21,9 +21,8 @@ import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 /**
- * Spec 021 US6 / C2.3 — a site's basic/digest sign-in (FR-032). What is typed lives only in this
- * dialog's state and goes to this one request; it is never stored, and leaving the dialog drops
- * it. Dismissing cancels.
+ * A site's basic/digest sign-in. What is typed lives only in this dialog's state and goes to this
+ * one request; it is never stored. Dismissing cancels.
  */
 @Composable
 fun HttpAuthDialog(

@@ -14,17 +14,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import com.raumanian.thirtysix.browser.MainActivity
 /**
- * Spec 020 contracts C3.2 / research R8 — the action behind "make ThirtySix the default browser",
- * shared by the Settings row and the Home invitation.
- *
- *  - Android 10+ with the browser role available and not held: the system's own confirmation
- *    (`RoleManager.createRequestRoleIntent`).
- *  - Otherwise, including Android 7–9: the system's default-apps settings screen.
- *  - If the device can open neither, [onUnavailable] runs so the person is told (FR-023).
- *
- * The result is ignored on purpose: the callers re-read the state on resume (FR-022), which also
- * covers a change made later in system settings. Before launching, the activity is told not to
- * count the return as an app launch (FR-024a).
+ * "Make ThirtySix the default browser": the role dialog where possible, else the default-apps
+ * screen, else [onUnavailable]. The result is ignored; callers re-read the state on resume,
+ * which also covers a change made later in system settings.
  */
 @Composable
 fun rememberDefaultBrowserRequest(onUnavailable: () -> Unit): () -> Unit {

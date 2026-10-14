@@ -7,12 +7,8 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 
 /**
- * Spec 022 research R2 — switches one WebView between the mobile and desktop page modes.
- *
- * Desktop mode sends [DesktopUserAgent]'s user agent, lays a page without a viewport tag out at
- * desktop width and zoomed out to fit, and, where the engine supports it, reports
- * `Sec-CH-UA-Mobile: ?0` with a desktop platform through user-agent client hints. Mobile mode
- * restores exactly what the WebView started with. Created with its WebView, before the first load.
+ * Desktop mode sends a desktop user agent and client hints and lays out viewport-less pages at
+ * desktop width; mobile mode restores the WebView's defaults. Created before the first load.
  */
 internal class DesktopModeController(private val webView: WebView) {
     private val mobileMetadata: UserAgentMetadata? =

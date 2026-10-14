@@ -11,25 +11,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T066 (FR-018) — external-intent crash safety guard.
- *
- * Verifies the production code path that runs inside
- * [BrowserWebView.shouldOverrideUrlLoading] when a non-`http(s)` URI is
- * encountered: parse → `runCatching { startActivity(...) }` → silent drop on
- * any failure. The contract is **never propagate platform exceptions to the
- * caller**.
- *
- * **Why no real `startActivity` call here**: an earlier draft invoked
- * `context.startActivity(intent)` for a `tel:` URI to assert the runCatching
- * wrapper absorbs `ActivityNotFoundException`. On the CI emulator API 29,
- * that leaked a system chooser dialog (or, when a default phone handler
- * existed, an external Activity launch) which obscured subsequent Compose
- * UI tests' input focus and hung them. The test now exercises the same
- * `runCatching` pattern shape with a synthetic exception, plus asserts that
- * `Intent` parsing for the production URI schemes succeeds without throwing.
- * The full real-device dispatch is verified by the manual G1 user-device
- * gate (already ✅) — the user opened a `tel:` link and confirmed the dialer
- * launched without crash.
+ * The `runCatching` shape that guards external-intent dispatch, with synthetic exceptions. A real
+ * `startActivity` here leaked a chooser or another app onto the CI emulator and hung later tests.
  */
 @RunWith(AndroidJUnit4::class)
 class ExternalIntentCrashSafetyInstrumentedTest {
@@ -54,10 +37,7 @@ class ExternalIntentCrashSafetyInstrumentedTest {
 
     @Test
     fun runCatching_pattern_absorbs_arbitrary_runtime_failure() {
-        // Defence in depth: even if a future platform throws something
-        // other than ActivityNotFoundException (e.g. SecurityException
-        // when target activity disallows external launch), runCatching
-        // MUST still absorb it.
+        // Something other than ActivityNotFoundException (e.g. SecurityException) must be absorbed too.
         val outcome = runCatching {
             throw SecurityException("simulated permission failure")
         }
@@ -66,11 +46,8 @@ class ExternalIntentCrashSafetyInstrumentedTest {
 
     @Test
     fun tel_intent_parses_without_throwing() {
-        // The production code calls `Intent.parseUri(...)` (or `Intent(ACTION_VIEW, Uri.parse(...))`)
-        // before runCatching wraps `startActivity`. Asserting the parse path
-        // is exception-free for the production-supported schemes guards
-        // against a regression where parse itself throws and bypasses the
-        // outer runCatching of the dispatch (which only wraps startActivity).
+        // Parsing happens outside the runCatching that wraps `startActivity`, so it must not throw
+        // for the supported schemes.
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("tel:0123456789"))
         assertEquals(Intent.ACTION_VIEW, intent.action)
         assertEquals("tel", intent.data?.scheme)

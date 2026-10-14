@@ -43,13 +43,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.BookmarksUiState
 /**
- * Spec 013 — top bar for the bookmarks screen; Spec 019 — restyled as a large title over a
- * rounded search well (the address well's look), inset below the status bar.
- *
- * Leading button: while searching it closes search (Spec 013's Clear); otherwise ArrowBack —
- * up to the parent folder when inside one, out of the screen at the root. The "new folder"
- * action shows only while not searching, as before. The search well replaces the old search
- * action: focusing it opens search, typing updates the query.
+ * A large title over a search well. The leading button closes search while searching; otherwise
+ * it goes up a folder, or leaves the screen at the root. Focusing the well opens search.
  */
 @Composable
 @Suppress("LongParameterList", "LongMethod")

@@ -19,12 +19,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Spec 019 — what the hub does beyond the browser's own state.
- *
- * Kept apart from [BrowserViewModel] on purpose (analysis U2): [hasActiveDownloads] is shared
- * `WhileSubscribed`, and only the open hub subscribes, so the platform download service is
- * polled only while the hub is on screen. The incognito banner's action lives here too, so the
- * browser's view model gains no new dependency.
+ * Apart from [BrowserViewModel] on purpose: only the open hub subscribes to [hasActiveDownloads],
+ * so the platform download service is polled only while the hub is on screen.
  */
 @HiltViewModel
 class HubViewModel @Inject constructor(
@@ -41,10 +37,9 @@ class HubViewModel @Inject constructor(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    /** One-shot outcomes for the browser's snackbar (replay 0, newest wins). */
     val events: SharedFlow<HubEvent> = _events.asSharedFlow()
 
-    /** "Browse without a trace" — opens a new incognito tab (Spec 012 cap applies). */
+    /** "Browse without a trace": opens a new incognito tab, within the incognito tab limit. */
     fun onNewIncognitoTab() {
         viewModelScope.launch {
             val result = createIncognitoTab(homeUrl)
@@ -59,8 +54,7 @@ class HubViewModel @Inject constructor(
     }
 }
 
-/** Spec 019 — one-shot results of hub actions. */
 sealed interface HubEvent {
-    /** Spec 012 FR-021 — the separate 50-tab incognito cap was hit. */
+    /** The separate incognito tab limit was hit. */
     data object MaxIncognitoTabsReached : HubEvent
 }

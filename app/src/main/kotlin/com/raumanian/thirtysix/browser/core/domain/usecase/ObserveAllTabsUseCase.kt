@@ -8,20 +8,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 /**
- * Spec 012 — merge the persistent normal-tab Flow with the in-memory
- * incognito-tab Flow into a single ordered list.
- *
- * Sort key (data-model.md merged-ordering):
- *  1. `lastActiveAt DESC` (most recently active first — drives the active
- *     tab pointer + switcher ordering)
- *  2. `isIncognito ASC` (when timestamps tie, normal tabs precede incognito —
- *     deterministic tiebreaker)
- *  3. `id ASC` (final tiebreaker — guarantees stable order in tests)
- *
- * The first element of the emitted list is the active tab. After the close
- * of the last incognito tab, the merged head naturally falls back to the
- * most-recently-active normal tab — no special-case logic in the consumer
- * (research.md R9).
+ * Normal and incognito tabs in one list whose head is the active tab: most recently active first,
+ * ties broken by normal before incognito, then by id. Closing the last incognito tab needs no
+ * special case: the head simply falls back to the most recent normal tab.
  */
 class ObserveAllTabsUseCase @Inject constructor(
     private val tabRepository: TabRepository,

@@ -8,12 +8,7 @@ import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
-/**
- * Spec 013 FR-020 — confirmation dialog for cascade-deleting a non-empty
- * folder. Body text uses a plurals resource so locales with non-trivial
- * pluralization rules render correctly. Spec 019 — on [ConfirmDialog]: the body names what
- * is lost and the full-width button names the action (FR-045).
- */
+/** Confirms cascade-deleting a non-empty folder; the body uses plurals for languages that need them. */
 @Composable
 fun DeleteFolderConfirmDialog(
     bookmarksCount: Int,

@@ -6,11 +6,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.TextSize
-/**
- * Spec 022 FR-029 / FR-030 — chooses the app-wide text size of web pages from the nine levels.
- * Opened from the Settings row and from the hub's Text size tile, through the same view model,
- * so the two can never disagree.
- */
 @Composable
 fun TextSizeChooserDialog(
     selected: TextSize,
@@ -29,7 +24,7 @@ fun TextSizeChooserDialog(
     )
 }
 
-/** The localized percentage of [size], e.g. "125%" or, in French, "125 %". */
+/** Locale-formatted, e.g. "125%" or, in French, "125 %". */
 @Composable
 fun textSizeLabel(size: TextSize): String = stringResource(R.string.text_size_level, size.percent)
 

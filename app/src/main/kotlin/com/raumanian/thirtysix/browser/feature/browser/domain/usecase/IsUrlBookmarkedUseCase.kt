@@ -5,10 +5,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/**
- * Spec 013 R9 — drives the BrowserScreen star-icon fill state. Returns `true`
- * iff at least one bookmark exists with the given URL (regardless of folder).
- */
+/** Whether any bookmark, in any folder, has this URL; drives the star icon. */
 class IsUrlBookmarkedUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {

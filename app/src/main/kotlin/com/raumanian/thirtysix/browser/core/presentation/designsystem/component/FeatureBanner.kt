@@ -39,7 +39,7 @@ private val HeroChipRadius = 16.dp
 private val StripPadding = 12.dp
 
 /** Positions of the stage banner's floating chiplets (design system FeatureBanner preview). */
-@Suppress("MagicNumber") // Offsets from the stage centre ARE the layout constants (design system preview).
+@Suppress("MagicNumber") // Offsets from the stage centre are the layout constants.
 private val Chiplets: List<Triple<Int, Dp, Dp>> = listOf(
     Triple(AppIcons.Cookie, (-112).dp, (-20).dp),
     Triple(AppIcons.History, (-60).dp, 24.dp),
@@ -48,9 +48,8 @@ private val Chiplets: List<Triple<Int, Dp, Dp>> = listOf(
 )
 
 /**
- * Spec 019 — the hub's privacy banner (design system FeatureBanner, stage form): static icon
- * chiplets around a phone glyph over a `primaryContainer` strip carrying [text] and a chevron.
- * Used once, for the privacy promise; the whole banner is one button.
+ * The hub's privacy banner: icon chiplets around a phone glyph over a strip carrying [text].
+ * The whole banner is one button.
  */
 @Composable
 fun PrivacyStageBanner(
@@ -137,8 +136,7 @@ private fun BannerStage() {
 }
 
 /**
- * Spec 019 — the row banner (design system FeatureBanner): a kicker in the display face, one
- * line of explanation and a gradient coin. Used for "Browse without a trace".
+ * The row banner: a kicker in the display face, one line of explanation and a gradient coin.
  */
 @Composable
 fun RowBanner(

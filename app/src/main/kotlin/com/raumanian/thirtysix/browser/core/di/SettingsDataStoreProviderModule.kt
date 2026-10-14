@@ -17,14 +17,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
 /**
- * Provides the application-scoped DataStore<Preferences> singleton (Spec 006).
- *
- * - Singleton REQUIRED by DataStore: creating two instances over the same file
- *   throws IllegalStateException at runtime.
- * - Scope = io dispatcher + SupervisorJob so one consumer's failure does not
- *   cancel the entire DataStore pipeline.
- * - File location resolved via Context.preferencesDataStoreFile(name) →
- *   <files-dir>/datastore/<name>.preferences_pb.
+ * A singleton because two DataStores over the same file throw at runtime. The SupervisorJob
+ * keeps one consumer's failure from cancelling the whole pipeline.
  */
 @Module
 @InstallIn(SingletonComponent::class)

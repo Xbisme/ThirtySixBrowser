@@ -1,20 +1,11 @@
-// Spec 016 — the app language as the Settings screen offers it (FR-013, FR-014).
-
 package com.raumanian.thirtysix.browser.core.domain.model
 
 import java.util.Locale
 
 /**
- * Spec 016 — "Follow system" plus the eight languages the app ships (data-model §3).
- *
- * Never persisted by the app: the platform's per-app language setting holds the value and is
- * the single source of truth (FR-016, FR-017). [tag] is the BCP-47 language tag handed to the
- * platform, or `null` for [FollowSystem], which corresponds to the platform holding no
- * app-specific language.
- *
- * Invariant: the eight non-null tags equal the `<locale>` entries of
- * `res/xml/locales_config.xml`. `AppLanguageTest` enforces it, so a locale added in one place
- * and not the other fails the build.
+ * Never persisted by the app: the platform's per-app language setting is the source of truth.
+ * [tag] is null for [FollowSystem]. The eight tags must equal `res/xml/locales_config.xml`'s
+ * entries; `AppLanguageTest` enforces it.
  */
 enum class AppLanguage(val tag: String?) {
     FollowSystem(null),
@@ -29,11 +20,7 @@ enum class AppLanguage(val tag: String?) {
     ;
 
     companion object {
-        /**
-         * Maps a platform-reported language tag to an entry by its **primary language subtag**,
-         * case-insensitively — so `zh-Hans-CN` is [Chinese] and `fr-CA` is [French]. A null,
-         * blank or unsupported tag is [FollowSystem] rather than a failure.
-         */
+        // Matches the primary subtag only, so `zh-Hans-CN` is Chinese and `fr-CA` French.
         fun fromLanguageTagOrFollowSystem(tag: String?): AppLanguage {
             if (tag.isNullOrBlank()) return FollowSystem
             val primary = Locale.forLanguageTag(tag).language

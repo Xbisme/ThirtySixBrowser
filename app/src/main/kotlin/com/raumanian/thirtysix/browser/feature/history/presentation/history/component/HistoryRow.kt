@@ -35,14 +35,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
- * Spec 014 FR-009 / FR-010 — single history row, drawn as the shared open [ListRow]
- * (Spec 019): favicon (or the host's first letter) · title over hostname · time of visit.
- * Title falls back to the URL's hostname when empty (FR-009 + edge-case handling).
- * Tap → [onClick] (replaces active tab); long-press → [onLongClick] (action sheet).
- *
- * The click is attached here rather than through [ListRow]'s own `onClick` so the row keeps
- * its spoken click label (title, host, time). The favicon is decoded off the main thread by
- * [rememberFileImage]; until then, or on a cache miss, the letter shows.
+ * The title falls back to the hostname when empty. The click is attached here rather than via
+ * [ListRow]'s `onClick` so the row keeps its spoken click label (title, host, time).
  */
 @Composable
 fun HistoryRow(
@@ -110,5 +104,4 @@ private fun FaviconOrLetter(file: File?, hostname: String) {
     }
 }
 
-/** Test-tag prefix exposed for instrumented tests asserting per-row presence. */
 const val TEST_TAG_HISTORY_ROW_PREFIX: String = "history_row_"

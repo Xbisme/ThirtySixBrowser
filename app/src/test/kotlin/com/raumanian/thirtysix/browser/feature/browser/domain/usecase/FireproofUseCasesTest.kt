@@ -11,7 +11,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 024 T015 — the fireproof-site rules (Constitution §VI). */
+/** The fireproof-site rules. */
 class FireproofUseCasesTest {
 
     private val repository = FakeFireproofSiteRepository()

@@ -24,15 +24,8 @@ private const val CONTENT_TYPE_FOLDER = "picker_folder"
 private const val KEY_ROOT = "picker_root"
 
 /**
- * Spec 013 R10 — folder picker bottom sheet; Spec 019 — on [SheetFrame] with open rows.
- *
- * Renders the synthetic "Root" entry plus all folders in [allFolders],
- * indented by depth (computed client-side from the parent chain).
- *
- * [excludeFolderIdAndDescendants] (optional) — when picking a destination
- * for a Move-folder operation, pass the folder being moved to filter out
- * itself + descendants up-front (UX guardrail; the use case still rejects
- * any cycle that slips through, so this is informational).
+ * A synthetic "Root" plus every folder, indented by depth. [excludeFolderIdAndDescendants] hides
+ * a moved folder and its subtree; the use case still rejects any cycle that slips through.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

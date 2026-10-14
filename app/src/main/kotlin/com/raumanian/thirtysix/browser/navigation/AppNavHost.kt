@@ -57,25 +57,7 @@ fun AppNavHost(
     }
 
     NavHost(navController = navController, startDestination = startDestination) {
-        browserScreen(
-            slots = {
-                BrowserSlots(
-                    fireButton = rememberFireButton(onConfirm = {}),
-                    fireOverlay = { FireOverlayHost() },
-                    quickSettings = { request, onConsumeRequest, snackbar ->
-                        QuickSettingsHost(request = request, onConsumeRequest = onConsumeRequest, snackbarHostState = snackbar)
-                    },
-                    incomingContent = entryPointViewModel.browserHooks,
-                    destinations = BrowserDestinations(
-                        openTabs = navController::navigateToTabs,
-                        openSettings = navController::navigateToSettings,
-                        openDownloads = navController::navigateToDownloads,
-                        openHistory = navController::navigateToHistory,
-                        openBookmarks = navController::navigateToBookmarks,
-                    ),
-                )
-            },
-        )
+        browserScreen(slots = { browserSlots(navController, entryPointViewModel) })
         tabsScreen(
             navController = navController,
             // Back to the browser first; its overlay shows the run.
@@ -106,6 +88,28 @@ fun AppNavHost(
         )
     }
 }
+
+@Composable
+private fun browserSlots(navController: NavHostController, entryPointViewModel: EntryPointViewModel) =
+    BrowserSlots(
+        fireButton = rememberFireButton(onConfirm = {}),
+        fireOverlay = { FireOverlayHost() },
+        quickSettings = { request, onConsumeRequest, snackbar ->
+            QuickSettingsHost(
+                request = request,
+                onConsumeRequest = onConsumeRequest,
+                snackbarHostState = snackbar,
+            )
+        },
+        incomingContent = entryPointViewModel.browserHooks,
+        destinations = BrowserDestinations(
+            openTabs = navController::navigateToTabs,
+            openSettings = navController::navigateToSettings,
+            openDownloads = navController::navigateToDownloads,
+            openHistory = navController::navigateToHistory,
+            openBookmarks = navController::navigateToBookmarks,
+        ),
+    )
 
 /**
  * Brings the browser to the front by popping the screens above it. Not

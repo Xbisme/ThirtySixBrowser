@@ -23,14 +23,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 015 T046 (US1 / FR-005, FR-008b) — the write path against **real Room on a device**,
- * through use case → repository → mapper → DAO.
- *
- * The JVM tests already cover the decision logic with fakes; what this adds is that the
- * record actually round-trips through SQLite on the `download_records` table the migration
- * created, on the API level under test.
- */
+// The write path against real Room on a device: use case → repository → mapper → DAO → SQLite.
 @RunWith(AndroidJUnit4::class)
 class DownloadStartIntegrationTest {
 
@@ -84,7 +77,7 @@ class DownloadStartIntegrationTest {
         val result = useCase("https://example.com/a.pdf", null, "application/pdf", "UA")
 
         assertEquals(StartDownloadResult.ServiceUnavailable, result)
-        assertEquals("FR-008b — a handle-less row must never exist", 0, db.downloadRecordDao().count())
+        assertEquals("a handle-less row must never exist", 0, db.downloadRecordDao().count())
     }
 
     @Test

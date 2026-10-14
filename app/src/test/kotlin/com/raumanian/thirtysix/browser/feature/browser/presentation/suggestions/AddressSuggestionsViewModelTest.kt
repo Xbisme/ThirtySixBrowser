@@ -23,7 +23,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 022 US2 — the suggestion ViewModel: one load per session, FR-021, writes nothing. */
+/** One load per session, nothing suggested for the unchanged page address, nothing written. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AddressSuggestionsViewModelTest {
 

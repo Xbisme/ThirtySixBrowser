@@ -5,10 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Spec 021 research R1 / data-model §3 — the page's pending requests, oldest first. Only the
- * [head] is ever shown, so at most one of this spec's dialogs is visible at a time (FR-035).
- *
- * Owned by the browser screen; used on the main thread only (WebView callbacks and Compose).
+ * The page's pending requests, oldest first; only [head] is shown, so one dialog at a time.
+ * Owned by the browser screen; main thread only.
  */
 class PageRequestQueue {
     private val items = ArrayDeque<PageRequest>()
@@ -32,7 +30,6 @@ class PageRequestQueue {
         publish()
     }
 
-    /** The head was answered by the person; show the next one. */
     fun complete(request: PageRequest) {
         items.remove(request)
         publish()
@@ -46,7 +43,7 @@ class PageRequestQueue {
         publish()
     }
 
-    /** Cancels every request that does not belong to [tabId]'s page [generation] (FR-034). */
+    /** Cancels every request that does not belong to [tabId]'s page [generation]. */
     fun dropStale(tabId: Long?, generation: Long) {
         val stale = items.filter { it.tabId != tabId || it.generation != generation }
         stale.forEach { it.cancel() }
@@ -54,7 +51,7 @@ class PageRequestQueue {
         publish()
     }
 
-    /** The browser screen is going away: nothing pending may stay unanswered (INV-3). */
+    /** The browser screen is going away: nothing pending may stay unanswered. */
     fun dispose() {
         items.forEach { it.cancel() }
         items.clear()

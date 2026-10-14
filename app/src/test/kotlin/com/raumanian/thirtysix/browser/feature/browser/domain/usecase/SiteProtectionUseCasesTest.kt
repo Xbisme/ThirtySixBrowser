@@ -11,7 +11,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 023 T035a, T047 — per-site protection in normal and incognito browsing. */
+/** Per-site protection in normal and incognito browsing. */
 class SiteProtectionUseCasesTest {
     private val repository = FakeProtectionExceptionRepository()
     private val incognito = IncognitoProtectionExceptionStore()
@@ -31,7 +31,7 @@ class SiteProtectionUseCasesTest {
         setProtection("shop.example", on = false, isIncognito = false)
 
         assertFalse(isProtected("shop.example", isIncognito = false))
-        assertTrue("incognito ignores the saved list (FR-014)", isProtected("shop.example", isIncognito = true))
+        assertTrue("incognito ignores the saved list", isProtected("shop.example", isIncognito = true))
         assertEquals(listOf("shop.example"), observe().first().map { it.site })
 
         setProtection("shop.example", on = true, isIncognito = false)

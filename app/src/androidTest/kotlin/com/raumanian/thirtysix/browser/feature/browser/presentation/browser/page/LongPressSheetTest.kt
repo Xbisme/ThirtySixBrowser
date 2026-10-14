@@ -19,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 021 T045 / C2.4 — the long-press sheet's header, rows, choice and Back. */
+/** The long-press sheet's header, rows, choice and Back. */
 @RunWith(AndroidJUnit4::class)
 class LongPressSheetTest {
 

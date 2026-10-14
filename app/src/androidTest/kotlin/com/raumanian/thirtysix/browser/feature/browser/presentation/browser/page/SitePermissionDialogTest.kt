@@ -20,7 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 021 T026 / C2.1 — the permission dialog's choices in normal and incognito tabs. */
+/** The permission dialog's choices in normal and incognito tabs. */
 @RunWith(AndroidJUnit4::class)
 class SitePermissionDialogTest {
 

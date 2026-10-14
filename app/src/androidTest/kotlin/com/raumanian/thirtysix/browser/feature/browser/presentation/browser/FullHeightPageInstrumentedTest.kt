@@ -21,9 +21,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * A page sized with `html, body { height: 100% }` fills the WebView. Without MATCH_PARENT layout
- * params the WebView was laid out as WRAP_CONTENT, so such pages (maps, drawing apps) got a body
- * 0 px tall and rendered blank.
+ * A page sized with `html, body { height: 100% }` fills the WebView. A WRAP_CONTENT WebView gives
+ * such pages (maps, drawing apps) a 0 px tall body, so they render blank.
  */
 @RunWith(AndroidJUnit4::class)
 class FullHeightPageInstrumentedTest {

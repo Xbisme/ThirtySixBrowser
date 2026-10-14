@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 022 research R9 — one case per row of the availability table. */
+/** One case per row of the availability table. */
 class PageToolsAvailabilityTest {
 
     @Test

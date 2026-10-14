@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInvi
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/** Spec 020 FR-024a — counts one app launch, stopping at the invitation threshold. */
+/** Counts one app launch, stopping at the invitation threshold. */
 class RecordAppLaunchUseCase @Inject constructor(
     private val repository: DefaultBrowserInviteRepository,
 ) {

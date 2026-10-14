@@ -2,9 +2,8 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.protection
 
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 /**
- * Spec 023 data-model rule 5 — the `https://` form of an `http://` address, or `null` when it
- * must not be upgraded (FR-018, FR-020, FR-022). Host, port, path, query and fragment are kept
- * exactly as written.
+ * The `https://` form of an `http://` address, or `null` when it must not be upgraded. Host,
+ * port, path, query and fragment are kept exactly as written.
  */
 object HttpsUpgradePolicy {
 

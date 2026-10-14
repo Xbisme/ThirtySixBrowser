@@ -43,14 +43,9 @@ private const val GLYPH_END_SCALE = 1.6f
 private const val FADE_FRACTION = 3
 
 /**
- * Spec 024 FR-006 — covers the screen while a Fire run is in progress, in a window above everything
- * (bars, sheets, dialogs), and consumes every touch. The fire glyph grows while the surface fades
- * in; once the run has finished and at least [BrowserLimits.FIRE_OVERLAY_MIN_MS] has passed, the
- * overlay fades out and calls [onFinished].
- *
- * Every animation is a Compose animation, which follows the system animator scale: with
- * animations off (reduced motion) the overlay simply appears and disappears. Animated values are
- * read only inside `graphicsLayer` (Constitution §V).
+ * Covers the screen in a window above everything and consumes every touch while Fire runs. Once the
+ * run has finished and [BrowserLimits.FIRE_OVERLAY_MIN_MS] has passed it fades out and calls
+ * [onFinished]. Compose animations follow the system animator scale, so reduced motion just shows and hides it.
  */
 @Composable
 internal fun FireOverlay(state: FireState, onFinish: () -> Unit) {

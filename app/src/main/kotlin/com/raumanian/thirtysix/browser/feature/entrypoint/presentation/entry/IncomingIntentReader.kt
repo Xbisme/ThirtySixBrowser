@@ -5,14 +5,7 @@ import android.content.Intent
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingRequest
 import javax.inject.Inject
 
-/**
- * Spec 020 research R4 / contracts C1 — turns an `Intent` from another app into an
- * [IncomingRequest]. The only place that touches `Intent` for this feature; every decision
- * about the content is made by the domain layer afterwards.
- *
- * Total: an unknown action, a missing extra or an extra of the wrong type yields `null`, and
- * nothing here throws. Nothing is logged (FR-016).
- */
+/** Turns an `Intent` into an [IncomingRequest]; anything unknown or malformed yields `null`, nothing is logged. */
 class IncomingIntentReader @Inject constructor() {
 
     fun read(intent: Intent?): IncomingRequest? {

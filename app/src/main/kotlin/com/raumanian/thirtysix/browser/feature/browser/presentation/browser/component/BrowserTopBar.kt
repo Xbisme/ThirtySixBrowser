@@ -38,12 +38,8 @@ private const val HTTP_PREFIX = "http://"
 private const val HTTPS_PREFIX = "https://"
 
 /**
- * Spec 019 — the browsing top bar (design system SearchBar inside `ts-topbar`): the compact
- * address well, the bookmark toggle and Reload — which becomes Stop while loading (FR-023).
- *
- * It pads itself by the status-bar inset, so the well never sits under the status bar
- * (FR-008; the defect Specs 009–018 shipped). An incognito tab paints the bar plum in both
- * themes (FR-051).
+ * Address well, bookmark toggle and Reload/Stop. Pads itself by the status-bar inset so the well
+ * never sits under the status bar; incognito paints it plum in both themes.
  */
 @Composable
 @Suppress("LongParameterList")
@@ -98,7 +94,6 @@ internal fun BrowserTopBar(
     }
 }
 
-/** The bookmark toggle (when the page can be bookmarked) and Reload/Stop (FR-023). */
 @Composable
 private fun RowScope.TopBarActions(
     state: BrowserUiState,
@@ -134,10 +129,7 @@ private fun RowScope.TopBarActions(
     )
 }
 
-/**
- * Spec 013 FR-004 — the star is hidden (not disabled) when the page cannot be bookmarked:
- * incognito tab, error state, or a non-http(s) address (research R11 of Spec 013).
- */
+/** The star is hidden, not disabled, in incognito, on an error, or for a non-http(s) address. */
 private fun canBookmarkCurrentPage(state: BrowserUiState): Boolean {
     val url = state.currentUrl
     val isHttp = url.startsWith(HTTP_PREFIX, ignoreCase = true) || url.startsWith(HTTPS_PREFIX, ignoreCase = true)

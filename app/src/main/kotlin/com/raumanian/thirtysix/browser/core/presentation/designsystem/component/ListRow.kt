@@ -33,10 +33,8 @@ private val RowGap = 14.dp
 private val RowMinHeight = 56.dp
 
 /**
- * Spec 019 — the one list row for History, Bookmarks, Downloads and search results (design
- * system ListRow): a 44dp leading square, one-line title, secondary line in `onSurfaceVariant`,
- * optional trailing slot. Open on the surface, no card, no divider. Long-press opens the item's
- * action sheet when [onLongClick] is given.
+ * The list row for History, Bookmarks, Downloads and search results: leading square, one-line
+ * title, secondary line, optional trailing slot.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

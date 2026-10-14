@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePer
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
-/** Spec 021 — a stored row, or `null` for a value this build does not know (forward compatibility). */
+/** `null` for a value this build does not know, e.g. one written by a newer version. */
 fun SitePermissionEntity.toDomainOrNull(): SitePermissionDecision? {
     val knownCapability = SiteCapability.fromStorage(capability)
     val knownDecision = SiteDecision.fromStorage(decision)

@@ -7,17 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ChoiceDialog
-/**
- * Spec 016 — the shared body of every Settings chooser: a titled list of mutually exclusive
- * options, one of them selected. Spec 019 draws it with the design system's [ChoiceDialog]
- * (selected row tinted, no OK button — FR-045).
- *
- * Choosing an option reports it through [onSelect] and nothing else — the caller decides what
- * happens next, which is what lets the public choosers stay stateless for Spec 018 (FR-037).
- * Each option is one `selectable` row with the radio-button role, so TalkBack announces it with
- * its selected state (FR-039). The options scroll, so nine languages still fit a small screen in
- * landscape. An outside tap, system back and Cancel all route to [onDismiss].
- */
+// The options scroll, so nine languages still fit a small screen in landscape.
 @Composable
 @Suppress("LongParameterList")
 internal fun <T> SingleChoiceDialog(

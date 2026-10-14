@@ -26,14 +26,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 016 T018 — DataStore read/write on a real device.
- *
- * Constitution §VI: "Instrumented tests MUST cover: Room DAOs, DataStore read/write, WebView
- * basic load". Every other settings test runs on the JVM, so this is the one that proves the
- * two Spec 016 keys persist and decode through the production repository on Android itself.
- *
- * Each test owns a throw-away preferences file in the instrumentation context's cache
- * directory, so tests never touch the app's real `thirtysix_settings` file or each other.
+ * DataStore read/write through the production repository on a real device; every other
+ * settings test runs on the JVM. Each test owns a throw-away preferences file, so tests never
+ * touch the app's real `thirtysix_settings` file or each other.
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsDataStoreInstrumentedTest {
@@ -87,7 +82,7 @@ class SettingsDataStoreInstrumentedTest {
     private companion object {
         const val TEST_TIMEOUT_MS: Long = 15_000L
 
-        /** A day count that is not one of the four Spec 016 windows. */
+        /** A day count that is not one of the four retention windows. */
         const val OUT_OF_SET_RETENTION_DAYS: Int = 45
     }
 }

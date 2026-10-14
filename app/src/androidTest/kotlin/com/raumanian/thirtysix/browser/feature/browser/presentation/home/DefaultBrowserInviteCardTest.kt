@@ -14,7 +14,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 020 T049 / contracts C3.5 — the Home invitation's two controls (FR-025, FR-030). */
+/** The Home invitation's two controls. */
 @RunWith(AndroidJUnit4::class)
 class DefaultBrowserInviteCardTest {
 
@@ -34,7 +34,7 @@ class DefaultBrowserInviteCardTest {
         composeRule.onNodeWithTag(TEST_TAG_HOME_DEFAULT_BROWSER_INVITE).assertIsDisplayed()
         composeRule.onNodeWithTag(TEST_TAG_HOME_DEFAULT_BROWSER_INVITE_ACTION).performClick()
         assertEquals(1, actions)
-        assertEquals("the action must not dismiss (FR-025)", 0, dismissals)
+        assertEquals("the action must not dismiss", 0, dismissals)
 
         composeRule.onNodeWithTag(TEST_TAG_HOME_DEFAULT_BROWSER_INVITE_DISMISS).performClick()
         assertEquals(1, dismissals)

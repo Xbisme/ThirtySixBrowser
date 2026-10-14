@@ -16,19 +16,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Spec 023 — the protections' state for one WebView: the page on screen, its blocked trackers and
- * a pending HTTPS upgrade.
- *
- * Threads: [onMainFrameRequest] and [onSubresource] run on WebView IO threads; everything else on
- * the main thread. Nothing here touches the database or blocks the main thread (data-model
- * invariant 2). [status] is read only by the hub (§V rule 3).
+ * The protections' state for one WebView: the page on screen, its blocked trackers and a pending
+ * HTTPS upgrade. [onMainFrameRequest] and [onSubresource] run on WebView IO threads, the rest on
+ * the main thread; nothing here touches the database.
  */
 @Suppress("TooManyFunctions") // One entry point per WebView callback it follows.
 class PageProtectionMonitor internal constructor(
     private val engine: ProtectionEngine,
     val isIncognito: Boolean,
 ) {
-    /** @property started the attempt's page has started (`onPageStarted`); only then can it finish. */
     private data class PendingUpgrade(val host: String, val httpUrl: String, val started: Boolean = false)
 
     private val blocked: MutableSet<String> = ConcurrentHashMap.newKeySet()
@@ -41,12 +37,10 @@ class PageProtectionMonitor internal constructor(
 
     @Volatile private var protectionOn: Boolean = true
 
-    /** A main-frame request was seen and its page has not started yet. */
     @Volatile private var awaitingCommit: Boolean = false
 
     @Volatile private var pending: PendingUpgrade? = null
 
-    /** The `http://` address to load once the failed attempt's error page has finished. */
     @Volatile private var fallbackDue: String? = null
 
     private val _status = MutableStateFlow(PageProtectionStatus.NOT_A_WEB_PAGE)
@@ -54,32 +48,19 @@ class PageProtectionMonitor internal constructor(
 
     private val blockedHostList = MutableStateFlow<List<String>>(emptyList())
 
-    /**
-     * Spec 024 FR-016 — the distinct tracker hosts blocked on this page, in the order they were
-     * first blocked. Emits only when a new host joins (IO thread) and when a new page starts;
-     * collected only by the privacy dashboard (§V rule 3).
-     */
+    /** Distinct tracker hosts blocked on this page, in order; collected only by the dashboard. */
     val blockedHostsFlow: StateFlow<List<String>> = blockedHostList.asStateFlow()
 
-    /** The registrable domain of the page on screen, or `null` when no web page is shown. */
     val currentSite: String? get() = topSite
 
-    /**
-     * IO thread — a new page load (also a reload) is starting: FR-010's per-page reset happens
-     * here, before any of the new page's resources can be blocked.
-     */
+    /** IO thread: a new load (or reload) starts; the per-page count resets before any resource. */
     fun onMainFrameRequest(url: String) {
-        // Off the main thread, so waiting for the lists here is allowed (research R10).
         engine.matchers.awaitMatchers(NetworkTimeouts.PROTECTION_DATA_LOAD_TIMEOUT_MS)
         awaitingCommit = true
         enterPage(url)
     }
 
-    /**
-     * Main thread, `onPageStarted`. After redirects the committed address may differ from the
-     * requested one: the page keeps its count but follows the new site. A restore from history
-     * that issued no request starts a fresh count.
-     */
+    /** Main thread. After redirects the page keeps its count but follows the committed site. */
     fun onPageStarted(url: String) {
         pending?.let { upgrade ->
             if (HttpsUpgradePolicy.hostOf(url) == upgrade.host) pending = upgrade.copy(started = true)
@@ -120,11 +101,7 @@ class PageProtectionMonitor internal constructor(
         pending = PendingUpgrade(host, http)
     }
 
-    /**
-     * A main-frame load failed (connection, certificate). When it was the pending HTTPS attempt,
-     * the host is remembered as failed and the original `http://` address is returned to load
-     * instead (FR-019, FR-020); otherwise `null`.
-     */
+    /** When the pending HTTPS attempt failed: marks the host failed and returns its `http://` address. */
     fun onMainFrameFailure(failedUrl: String?): String? {
         val upgrade = pending?.takeIf { failedUrl != null && isSecureAttempt(it, failedUrl) }
         if (upgrade != null) {
@@ -135,18 +112,14 @@ class PageProtectionMonitor internal constructor(
         return upgrade?.httpUrl
     }
 
-    /**
-     * `onPageFinished`: the `http://` address to load now, if a failed attempt is waiting for its
-     * error page to finish. Loading any earlier — even posted from the error callback — can be
-     * replaced by that error page's commit (found on a Galaxy A55, 2 of 6 runs).
-     */
+    /** The `http://` address to load once a failed attempt's error page has finished, or `null`. */
     fun takeFallbackDue(): String? = fallbackDue.also { fallbackDue = null }
 
     private fun isSecureAttempt(upgrade: PendingUpgrade, url: String): Boolean =
         url.startsWith(UrlConstants.HTTPS_SCHEME_PREFIX, ignoreCase = true) &&
             HttpsUpgradePolicy.hostOf(url) == upgrade.host
 
-    /** A redirect: `true` when the pending HTTPS attempt was sent back to `http://` (FR-019). */
+    /** A redirect: `true` when the pending HTTPS attempt was sent back to `http://`. */
     fun onRedirect(toUrl: String): Boolean {
         val isHttp = toUrl.substringBefore(':').lowercase() == UrlConstants.SCHEME_HTTP
         val upgrade = pending?.takeIf { isHttp && HttpsUpgradePolicy.hostOf(toUrl) == it.host }
@@ -158,16 +131,14 @@ class PageProtectionMonitor internal constructor(
     }
 
     /**
-     * `onPageFinished` for [url]: the pending attempt succeeded if its page had started and no
-     * error took it first. A load cancelled by a newer one also reports `onPageFinished`, but
-     * never started, so it does not end the attempt (found on the 16 KB AVD).
+     * The pending attempt succeeds only if its page had started: a load cancelled by a newer one
+     * also reports `onPageFinished` without ever starting.
      */
     fun onPageFinished(url: String?) {
         val upgrade = pending ?: return
         if (upgrade.started && url != null && HttpsUpgradePolicy.hostOf(url) == upgrade.host) pending = null
     }
 
-    /** Test hook. */
     fun blockedHosts(): Set<String> = blocked.toSet()
 
     private fun enterPage(url: String) {

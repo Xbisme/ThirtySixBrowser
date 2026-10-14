@@ -14,10 +14,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Spec 023 FR-015 — sites the person turned protection off for: turn one back on, or every one
- * after confirming. Incognito choices never appear here (FR-014).
- */
+/** Sites the person turned protection off for; incognito choices never appear here. */
 @HiltViewModel
 class ProtectionExceptionsViewModel @Inject constructor(
     observeExceptions: ObserveProtectionExceptionsUseCase,

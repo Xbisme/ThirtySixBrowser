@@ -5,17 +5,8 @@ import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.BookmarkSearchResult
 /**
- * Spec 013 — immutable UI state for the BookmarksScreen.
- *
- * Fields are introduced incrementally per user-story:
- *  - US2: navigation + listing (currentFolderId, breadcrumb, folders, bookmarks, isLoading, errorEvent, openUrl).
- *  - US3: dialog state (pendingDialog).
- *  - US4: search (searchQuery, isSearchActive, searchResults).
- *  - US6: cascade-delete count (descendantCountForPendingDelete).
- *
- * `openUrl` is a one-shot signal carrying a URL the user just tapped — the
- * Composable consumes it via a `LaunchedEffect`, fires a navigation back to
- * the browser screen, and clears it via [BookmarksViewModel.consumeOpenUrl].
+ * `openUrl` is a one-shot: the screen navigates back to the browser with it, then clears it via
+ * [BookmarksViewModel.consumeOpenUrl].
  */
 data class BookmarksUiState(
     val currentFolderId: Long? = null,
@@ -30,20 +21,11 @@ data class BookmarksUiState(
     val isSearchActive: Boolean = false,
     val searchResults: List<BookmarkSearchResult> = emptyList(),
     val descendantCountForPendingDelete: BookmarkDescendantCount? = null,
-    /**
-     * Spec 013 — full snapshot of all folders, used by FolderPickerSheet
-     * (move bookmark / move folder) and the folder selector inside the
-     * AddOrEdit bookmark dialog. Sorted alphabetically; depth/indentation
-     * computed by the consumer from the parent chain.
-     */
+    /** Every folder, sorted by name, for the folder pickers; they compute depth from the parent chain. */
     val allFolders: List<BookmarkFolder> = emptyList(),
 )
 
-/**
- * Spec 013 — sealed dialog state. The screen renders at most one dialog at
- * any time. Dispatch handled by [BookmarksViewModel.onDialogConfirm] /
- * [BookmarksViewModel.onDialogDismiss].
- */
+/** The one dialog on screen, if any. */
 sealed class PendingBookmarkDialog {
     data class CreateFolder(val parentId: Long?) : PendingBookmarkDialog()
     data class RenameFolder(val folderId: Long, val currentName: String) : PendingBookmarkDialog()

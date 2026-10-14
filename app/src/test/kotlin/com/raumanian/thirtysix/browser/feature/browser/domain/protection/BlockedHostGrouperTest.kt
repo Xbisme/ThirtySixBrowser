@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.protection
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 024 T047 — blocked hosts grouped by site (FR-016, clarified). */
+/** Blocked hosts grouped by site. */
 class BlockedHostGrouperTest {
     private val site: (String) -> String = { host -> host.split('.').takeLast(2).joinToString(".") }
 

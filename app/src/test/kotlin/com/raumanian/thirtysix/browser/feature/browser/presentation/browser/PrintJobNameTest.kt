@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 022 FR-033 — the job name is the title, else the hostname, else the address. */
+/** The job name is the title, else the hostname, else the address. */
 class PrintJobNameTest {
 
     @Test

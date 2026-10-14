@@ -5,11 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Spec 013 — flat snapshot of every folder. Powers the folder-picker UI for
- * Add bookmark / Move bookmark / Move folder. The UI computes depth-based
- * indentation client-side from the parent chain.
- */
+/** Every folder, flat; pickers compute indentation from the parent chain. */
 class ObserveAllFoldersUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {

@@ -14,16 +14,9 @@ private val webSchemes = setOf("http", "https")
 private const val TRAILING_PUNCTUATION = ".,;:!?)]}'\""
 
 /**
- * Spec 020 research R4 / contracts C2 — decides what content from another app means.
- *
- *  - `OpenAddress`: only an http/https address with an authority loads; anything else —
- *    another scheme, no host, unparseable, longer than 2,048 characters — is refused (FR-015).
- *    It is refused rather than truncated: a shortened address would load a different page.
- *  - `InterpretText`: a lone token the address bar would treat as an address opens it; else
- *    the first explicit `http(s)://` link in the text opens; else the text is searched (FR-010).
- *  - `SearchText`: always searched, even when it looks like an address (FR-011).
- *
- * Text is trimmed and cut to 2,048 characters before use (FR-013). Pure Kotlin.
+ * Decides what content from another app means. An address that is not http/https with a host, or
+ * is too long, is refused rather than truncated: a shortened address would load a different page.
+ * Shared text opens a lone address-like token, else its first explicit link, else is searched.
  */
 class ResolveIncomingRequestUseCase @Inject constructor() {
 
@@ -51,7 +44,7 @@ class ResolveIncomingRequestUseCase @Inject constructor() {
         return if (text.isEmpty()) IncomingTarget.Nothing else IncomingTarget.Search(text)
     }
 
-    /** The address a single token stands for, using the address bar's own rule (research R4). */
+    /** The address a single token stands for, using the address bar's own rule */
     private fun loneAddress(text: String): String? =
         text.takeUnless { it.any(Char::isWhitespace) }
             ?.let { classifyAddressBarInput(it) as? AddressBarSubmitResult.Url }

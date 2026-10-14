@@ -9,12 +9,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Production [ExternalFileOpener].
- *
- * The URI handed in is always a **content** URI supplied by the platform download service.
- * A `file://` URI would throw `FileUriExposedException` on every supported device, since
- * minSdk here is 24 — which is why the gateway is the only source of these values and this
- * class never constructs a path of its own.
+ * The URI is always a platform content URI: a `file://` URI throws `FileUriExposedException`
+ * on every supported API level, so this class never builds a path.
  */
 @Singleton
 class AndroidExternalFileOpener @Inject constructor(

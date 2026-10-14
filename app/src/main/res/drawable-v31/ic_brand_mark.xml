@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Spec 017 — ThirtySix brand mark, ANIMATED variant (Android 12 / API 31+ only).
-
-  Same resource name as res/drawable/ic_brand_mark.xml on purpose: Android selects this
-  file on API 31+ and the static one below, so FR-009 and FR-010 are satisfied by
-  resource qualifiers with NO runtime version check in Kotlin (INV-2, research.md R6).
-  Below API 31 the library's compat layer draws the icon into a layer-list as a plain
-  image, where an AnimatedVectorDrawable would render as a motionless first frame —
-  which is why this file must live in drawable-v31/ and not in drawable/.
-
-  Motion (A8): the disc scales in from 80%, the numerals fade in just behind it.
-  It is deliberately short and simple, and — importantly — it must look acceptable
-  TRUNCATED AT ANY POINT: the launch screen ends the moment the app can draw its first
-  frame and never waits for this to finish (FR-008, INV-12). Total motion is 440 ms,
-  well inside the ~583 ms this app's cold start measures, so the usual case plays out
-  fully. The disc starts at 80% opacity-free scale rather than at zero, so a frame cut
-  early still shows the whole mark slightly small rather than nothing; the numerals are
-  the only element that starts invisible, and they are legible from roughly 250 ms on.
-  If a future change made the app start dramatically faster, shorten the numeral
-  startOffset rather than holding the splash screen open.
-
-  Geometry and colours are identical to the static variant; both derive from
-  specs/017-splash-screen/assets/brand-mark-approved.svg (INV-1).
+  Animated mark, API 31+ only: below 31 the splash compat layer draws a still first frame.
+  Same name as the static drawable, so the qualifier picks it with no runtime check.
+  The splash ends at the app's first frame, so any truncated frame must still read as the
+  mark: the disc starts at 80% scale, the numerals fade in (440 ms total).
 -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt">

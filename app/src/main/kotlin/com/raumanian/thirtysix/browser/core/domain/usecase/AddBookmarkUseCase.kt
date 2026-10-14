@@ -10,14 +10,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
 /**
- * Spec 013 — adds a new bookmark. Validates URL via [BookmarkUrlValidator]
- * (R5), enforces title and URL length caps from [BrowserLimits], generates
- * `createdAt = System.currentTimeMillis()` and uses it as `sortOrder` (R-spec
- * "recent-first" ordering).
- *
- * @param url raw user input — auto-prepend / trim handled by validator.
- * @param title raw user input — non-blank requirement; falls back to URL on blank.
- * @param parentFolderId target folder, null = root.
+ * Adds a bookmark. The creation time doubles as `sortOrder`, so new bookmarks sort first.
+ * A blank [title] falls back to the URL; a null `parentFolderId` means the root.
  */
 class AddBookmarkUseCase @Inject constructor(
     private val repository: BookmarkRepository,

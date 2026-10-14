@@ -5,7 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.InviteState
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Spec 020 FR-024 — the invitation's dismissed flag and launch count. */
+/** The invitation's dismissed flag and launch count. */
 class ObserveDefaultBrowserInviteUseCase @Inject constructor(
     private val repository: DefaultBrowserInviteRepository,
 ) {

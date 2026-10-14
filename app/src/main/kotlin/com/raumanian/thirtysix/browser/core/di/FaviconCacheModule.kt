@@ -10,14 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Spec 011 favicon + screenshot amendments (2026-05-03) — binds the two
- * disk-backed cache interfaces to their concrete implementations.
- *
- * Sibling to [TabsModule]; one Hilt module per related-cache surface keeps
- * the project's discoverability convention. `@Singleton` so each cache
- * directory + the in-memory `version` StateFlow are shared per app process.
- */
+/** Singletons so each cache directory and its in-memory `version` flow are shared per process. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class FaviconCacheModule {

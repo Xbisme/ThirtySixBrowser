@@ -25,19 +25,17 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/** What the browser screen tells the person about a window a page tried to open (C2.5). */
+/** What the browser screen tells the person about a window a page tried to open. */
 sealed interface PopupEvent {
-    /** Blocked; [openUrl] non-null → the notice offers Open (FR-026a). */
+    /** Blocked; a non-null [openUrl] lets the notice offer Open. */
     data class Blocked(val openUrl: String?, val incognito: Boolean) : PopupEvent
 
     data object TabLimitReached : PopupEvent
 }
 
 /**
- * Spec 021 US5 / research R5 — new windows. A window the person asked for becomes a new active
- * tab that adopts the page-created WebView (so `window.opener` keeps working for sign-in
- * pop-ups); one the page opened on its own is blocked with a notice; `window.close()` from a
- * page-opened tab closes it and returns to its opener (FR-025 – FR-028).
+ * New windows: one the person asked for becomes a new active tab adopting the page-created WebView
+ * (so `window.opener` works for sign-in pop-ups); one the page opened itself is blocked.
  */
 @HiltViewModel
 @Suppress("LongParameterList") // One collaborator per tab operation.
@@ -61,11 +59,7 @@ class PopupTabs @Inject constructor(
     )
     val events: SharedFlow<PopupEvent> = _events.asSharedFlow()
 
-    /**
-     * Decides a window request from the page in [opener]. Returns the decision; for
-     * [PopupDecision.OpenInNewTab] the caller hands the page [popupWebView]'s result through the
-     * transport, and the tab is created here.
-     */
+    /** Decides a window request from [opener]'s page; for a new tab, the tab is created here. */
     fun decide(isUserGesture: Boolean, opener: PageContext): PopupDecision {
         val decision = decidePopup(isUserGesture, opener.isIncognito, atCap(opener.isIncognito))
         if (decision == PopupDecision.TabLimit) _events.tryEmit(PopupEvent.TabLimitReached)
@@ -91,12 +85,11 @@ class PopupTabs @Inject constructor(
         }
     }
 
-    /** A blocked window's address arrived (or not): the notice. */
     fun onBlocked(target: String?, opener: PageContext) {
         _events.tryEmit(PopupEvent.Blocked(decidePopup.openUrlFor(target), opener.isIncognito))
     }
 
-    /** Open from the blocked notice: once, as a new active tab (FR-026a). */
+    /** Open from the blocked notice: once, as a new active tab. */
     fun openBlocked(url: String, incognito: Boolean) {
         viewModelScope.launch {
             val created = if (incognito) createIncognitoTab(url) else createTab(url)
@@ -104,10 +97,9 @@ class PopupTabs @Inject constructor(
         }
     }
 
-    /** The WebView waiting for the tab at [tabUrl], if a page opened that tab. */
     fun take(tabUrl: String): WebView? = registry.take(tabUrl)
 
-    /** `window.close()` — only a page-opened tab closes; its opener becomes active (FR-027). */
+    /** `window.close()`: only a page-opened tab closes, and its opener becomes active. */
     fun onCloseWindow(window: WebView) {
         val popup = registry.popupOf(window)
         if (popup == null) {

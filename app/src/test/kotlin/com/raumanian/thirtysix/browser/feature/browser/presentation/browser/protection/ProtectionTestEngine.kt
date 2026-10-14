@@ -13,7 +13,7 @@ import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.Htt
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import kotlinx.coroutines.Dispatchers
 
-/** A [ProtectionEngine] over small in-memory rules, for the Spec 023 presentation tests. */
+/** A [ProtectionEngine] over small in-memory rules, for the protection presentation tests. */
 internal class ProtectionTestEngine(loaded: Boolean = true) {
     val exceptions = FakeProtectionExceptionRepository()
     val incognito = IncognitoProtectionExceptionStore()

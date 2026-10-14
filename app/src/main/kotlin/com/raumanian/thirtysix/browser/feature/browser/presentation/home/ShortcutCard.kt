@@ -46,11 +46,7 @@ private val TagGap = 4.dp
 private const val SCRIM_ALPHA = 0.45f
 private const val SHADOW_BLUR = 8f
 
-/**
- * Spec 019 FR-013 — an image card on the Home hero (design system ShortcutCard): the tab's
- * screenshot when there is one, otherwise a mesh seeded from the host; a glass tag saying
- * Tab / Saved / Recent; title and host at the bottom over a soft fade.
- */
+/** The tab's screenshot when there is one, otherwise a mesh seeded from the host. */
 @Composable
 fun ShortcutCard(
     item: HomeShortcutUi,

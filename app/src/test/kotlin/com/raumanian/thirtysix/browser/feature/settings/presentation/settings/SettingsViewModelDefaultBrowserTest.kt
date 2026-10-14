@@ -12,7 +12,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 020 T049 — the Settings row reflects the system state, re-read on demand (FR-020, FR-022). */
+/** The default-browser row reflects the system state, re-read on demand. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelDefaultBrowserTest {
 

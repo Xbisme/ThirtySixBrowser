@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-/** Spec 024 contracts C12 — the one process-wide entry point to Fire (INV-1, INV-5). */
+/** The one process-wide entry point to Fire. */
 interface FireCoordinator {
     val state: StateFlow<FireState>
 
@@ -29,10 +29,8 @@ interface FireCoordinator {
 }
 
 /**
- * Spec 024 research R10 — runs Fire in the application scope, so it finishes even when the screen
- * that started it goes away, behind a durable marker:
- *  - the marker is written, and the write awaited, before the first destructive step (INV-1);
- *  - it is cleared only after the last step, so a run stopped part-way is finished on the next start.
+ * Runs Fire in the application scope so it outlives the screen that started it, behind a durable
+ * marker written before the first destructive step and cleared after the last one.
  */
 @Singleton
 class FireCoordinatorImpl @Inject constructor(

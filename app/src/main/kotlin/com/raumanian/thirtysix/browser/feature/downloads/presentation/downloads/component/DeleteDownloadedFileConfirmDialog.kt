@@ -12,15 +12,8 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 internal const val TEST_TAG_DELETE_FILE_DIALOG: String = "download_delete_file_dialog"
 
 /**
- * Spec 015 FR-032 · Spec 019 FR-045 — deleting a file is irreversible, so it always goes
- * through this destructive [ConfirmDialog]: the body names the file (what is lost), and the
- * full-width action names the action above Cancel.
- *
- * The body names the file because "delete this file?" with three similarly-named downloads on
- * screen is not a question a user can answer confidently.
- *
- * The confirm button is found in tests by its label inside [TEST_TAG_DELETE_FILE_DIALOG]:
- * the shared [ConfirmDialog] exposes no modifier for its action button.
+ * The body names the file: "delete this file?" with several similar downloads on screen is not
+ * answerable. Tests find the confirm button by label: [ConfirmDialog] exposes no button modifier.
  */
 @Composable
 fun DeleteDownloadedFileConfirmDialog(

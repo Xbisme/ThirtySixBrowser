@@ -26,9 +26,7 @@ class SettingsRepositoryImpl @Inject constructor(
             .map(mapper::toDomain)
             .distinctUntilChanged()
 
-    // Spec 018 — first real value from the same source observeSettings uses, so the two can
-    // never disagree. `first()` suspends until DataStore has read from disk; on a fresh
-    // install that read legitimately yields the documented defaults, which IS the truth there.
+    // Same source as observeSettings, so the two never disagree; first() waits for the disk read.
     override suspend fun currentSettings(): UserSettings = mapper.toDomain(dataStore.data.first())
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> = dataStore.setThemeMode(mode)

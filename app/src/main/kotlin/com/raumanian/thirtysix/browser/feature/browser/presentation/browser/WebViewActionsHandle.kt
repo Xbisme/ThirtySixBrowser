@@ -1,27 +1,8 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 /**
- * Spec 008 — Compose-side imperative handle to the live `android.webkit.WebView`.
- *
- * Populated inside `BrowserWebView.factory { }` (each lambda field becomes a
- * thin wrapper around the `WebView` instance method). Consumed by:
- *  - `NavigationBottomBar` click handlers (Back / Forward / Reload-or-Stop / Home)
- *  - `PredictiveBackHandler` in `BrowserScreen` (system back gesture commit)
- *
- * Why a separate handle and not a ViewModel method? The ViewModel must NOT hold
- * a reference to `WebView` (Constitution §IV — `domain/` and `presentation/`
- * VMs are framework-light; `WebView` is a heavy Android UI primitive). The
- * handle lives in the Composable scope, captured into the `factory` closure,
- * and read from click handlers — `BrowserViewModel` only sees state-update
- * events flowing IN from the WebView callbacks, never imperative WebView calls.
- *
- * Default lambdas are no-op so the handle is safe to invoke before WebView
- * initialization (initial composition, before `factory` runs) and after the
- * WebView is destroyed.
- *
- * Mutability: each field is a `var` of `() -> Unit`. Reassignment happens
- * exactly once per WebView instantiation (inside `factory`); the lambdas
- * themselves are pure and reference the closure-captured `WebView` instance.
+ * Imperative calls into the live WebView, wired by its factory, so the view model never holds a
+ * WebView. Every action is a no-op until a WebView exists and after it is gone.
  */
 internal class WebViewActionsHandle {
     var goBack: () -> Unit = {}
@@ -29,33 +10,20 @@ internal class WebViewActionsHandle {
     var reload: () -> Unit = {}
     var stopLoading: () -> Unit = {}
 
-    /**
-     * Spec 009 — load an arbitrary URL (used by the address-bar omnibox submit
-     * path). Wired inside `BrowserWebView.factory` to `webView.loadUrl(url)`.
-     * Same lifecycle / closure semantics as the existing 5 lambdas.
-     */
     var loadUrl: (String) -> Unit = {}
 
-    /** Spec 022 FR-007 — highlights every match of the text; results arrive through the find listener. */
     var findAll: (String) -> Unit = {}
 
-    /** Spec 022 FR-008 — moves to the next (or previous) match, wrapping at both ends. */
     var findNext: (forward: Boolean) -> Unit = {}
 
-    /** Spec 022 FR-010 — removes every find highlight from the page. */
     var clearMatches: () -> Unit = {}
 
-    /** Spec 022 FR-025 — switches the page mode (research R2) and reloads the tab's address. */
+    /** Switches the page mode and reloads the tab's address. */
     var setDesktopMode: (Boolean) -> Unit = {}
 
-    /** Spec 022 FR-033 — opens the system print screen for the live page, under [jobName]. */
     var print: (jobName: String) -> Unit = {}
 
-    /**
-     * Points every action back at a no-op. Called when the renderer process behind the
-     * current WebView goes away: that WebView must not be used again, and the replacement
-     * `BrowserWebView` builds re-wires this handle as soon as it exists.
-     */
+    /** Called when the renderer is gone: that WebView must not be used again until a replacement re-wires this. */
     fun detach() {
         goBack = {}
         goForward = {}

@@ -10,7 +10,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 022 data-model §4 — the two one-shot reads behind address suggestions. */
+/** The two one-shot reads behind address suggestions. */
+
 @RunWith(AndroidJUnit4::class)
 class SuggestionSourceDaoTest {
 

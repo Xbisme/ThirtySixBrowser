@@ -20,10 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 022 T045 / FR-031 — a new text size reaches the live WebView without reloading the page,
- * and a WebView built afterwards starts with it.
- */
+/** A new text size reaches the live WebView without a reload, and a WebView built afterwards starts with it. */
 @RunWith(AndroidJUnit4::class)
 class TextZoomInstrumentedTest {
 

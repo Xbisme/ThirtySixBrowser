@@ -35,7 +35,7 @@ class BookmarkDaoTest {
 
     @Test
     fun `observeRecent returns the newest bookmarks across folders up to the limit`() = runTest {
-        // Spec 019 T058a — Home page "Saved" shortcuts (data-model §4).
+        // Backs the Home page's "Saved" shortcuts.
         (1L..4L).forEach {
             bookmarkDao.insert(BookmarkEntity(title = "B$it", url = "https://b$it.com", createdAt = it, sortOrder = 0L))
         }
@@ -152,7 +152,8 @@ class BookmarkDaoTest {
         // sanity: bookmark currently references parent folder
         assertEquals(folderId, bookmarkDao.getById(bookmarkId)!!.parentFolderId)
 
-        // delete parent → ON DELETE SET NULL fires
+        // Deleting the parent sets the foreign key to null.
+
         folderDao.delete(folderDao.getById(folderId)!!)
 
         val orphaned = bookmarkDao.getById(bookmarkId)

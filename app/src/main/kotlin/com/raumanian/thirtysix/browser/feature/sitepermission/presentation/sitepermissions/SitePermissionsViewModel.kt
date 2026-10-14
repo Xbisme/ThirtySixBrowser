@@ -18,10 +18,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Spec 021 FR-009 / C2.7 — the Site permissions screen: remembered decisions grouped by site,
- * change one, remove a site, remove all (after confirmation).
- */
 @HiltViewModel
 class SitePermissionsViewModel @Inject constructor(
     observeSitePermissions: ObserveSitePermissionsUseCase,

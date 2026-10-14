@@ -11,9 +11,8 @@ import androidx.compose.ui.Modifier
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
- * Spec 016 / 019 FR-044 — a group title in the Settings list. Every group after the first is
- * separated from the one above by a hairline. The title is the shared [SectionHeader], which is
- * marked as a heading so TalkBack users can jump between groups (FR-039).
+ * A group title in the Settings list, marked as a heading so TalkBack users can jump between
+ * groups. Every group after the first gets a hairline above it.
  */
 @Composable
 fun SettingsSectionHeader(

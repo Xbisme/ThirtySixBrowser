@@ -11,7 +11,7 @@ import org.junit.Assert.assertSame
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 023 T026 — loading the bundled lists once, off the caller's thread, failing open. */
+/** Loading the bundled lists once, off the caller's thread, failing open. */
 @RunWith(AndroidJUnit4::class)
 class ProtectionDataSourceTest {
     private val context: Context = ApplicationProvider.getApplicationContext()

@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
-/** Spec 020 T034 / contracts C3.1 — the default-browser read on both API branches (research R8). */
+/** The default-browser read on both API branches. */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class)
 class AndroidDefaultBrowserControllerTest {

@@ -24,8 +24,8 @@ import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressAction
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressMenu
 /**
- * Spec 021 US4 / C2.4 — the long-press menu: the address on one line (middle-ellipsized) and one
- * row per action. Back or a swipe closes it without acting.
+ * The long-press menu: the address on one line (middle-ellipsized) and one row per action. Back or
+ * a swipe closes it without acting.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

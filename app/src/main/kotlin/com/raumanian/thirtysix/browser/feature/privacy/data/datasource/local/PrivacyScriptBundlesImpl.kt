@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** Spec 024 — [PrivacyScriptBundles] read from `assets/privacy/` on the IO dispatcher. */
+/** [PrivacyScriptBundles] read from `assets/privacy/` on the IO dispatcher. */
 @Singleton
 class PrivacyScriptBundlesImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -36,7 +36,7 @@ class PrivacyScriptBundlesImpl @Inject constructor(
             state.value = try {
                 INSTALL_ORDER.map { path -> context.assets.open(path).bufferedReader().use { it.readText() } }
             } catch (e: IOException) {
-                // The protections stay off rather than breaking pages (FR-022's posture).
+                // The protections stay off rather than breaking pages.
                 Log.e(TAG, "privacy scripts failed to load", e)
                 emptyList()
             }

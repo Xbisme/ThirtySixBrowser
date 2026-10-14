@@ -14,41 +14,27 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Spec 020 data-model §4 — the one-slot hand-off from `MainActivity` to the UI.
- *
- * A newer request replaces an unconsumed older one (the person's latest tap wins). It is
- * process-scoped, so it survives a rotation while onboarding holds it (FR-019); the activity
- * also saves an unconsumed request so it survives process death (research R3).
- */
+/** One-slot hand-off from `MainActivity` to the UI; the latest request replaces an unconsumed older one. */
 @Singleton
 class IncomingRequestRelay @Inject constructor() {
     private val slot = MutableStateFlow<IncomingRequest?>(null)
 
-    /** The request waiting to be opened, or `null`. */
     val pending: StateFlow<IncomingRequest?> = slot.asStateFlow()
 
     fun submit(request: IncomingRequest) {
         slot.value = request
     }
 
-    /** Puts back a request saved before process death, only into an empty slot (research R3). */
     fun restoreIfEmpty(request: IncomingRequest) {
         slot.update { current -> current ?: request }
     }
 
-    /** Returns the waiting request and empties the slot, so it can be opened only once (INV-3). */
+    /** Returns the waiting request and empties the slot, so it can be opened only once. */
     fun take(): IncomingRequest? = slot.getAndUpdate { null }
 }
 
-/**
- * Spec 020 data-model §5 — a URL to load into the tab that is already active, used when the
- * tab cap made the app reuse a tab instead of creating one (research R6).
- *
- * A one-slot channel rather than a `SharedFlow`: on a cold start the browser screen may not be
- * collecting yet when the URL is sent, and a channel keeps it until it is received. One
- * consumer (`BrowserScreen`).
- */
+// A URL for the already-active tab when the tab cap forced a reuse. A channel, not a `SharedFlow`:
+// on a cold start the browser screen may not be collecting yet.
 @Singleton
 class ActiveTabNavigationRelay @Inject constructor() {
     private val urls = Channel<String>(capacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -60,11 +46,7 @@ class ActiveTabNavigationRelay @Inject constructor() {
     }
 }
 
-/**
- * Spec 020 data-model §5a — one-shot messages about incoming content (a refused link, the tab
- * limit). Shown by the browser's snackbar host so only one view model instance is involved
- * (research R5). A one-slot channel for the same cold-start reason as [ActiveTabNavigationRelay].
- */
+/** One-shot messages about incoming content; a channel for the same cold-start reason as [ActiveTabNavigationRelay]. */
 @Singleton
 class EntryMessageRelay @Inject constructor() {
     private val ids = Channel<Int>(capacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -76,11 +58,8 @@ class EntryMessageRelay @Inject constructor() {
     }
 }
 
-/**
- * Spec 020 data-model §6 — ids of tabs opened for a link from another app. Back on such a tab,
- * with no page history left, closes it and returns to the sending app (FR-006). In memory only:
- * after process death the tab simply behaves like any other.
- */
+// Tabs opened for another app's link: Back with no history left closes the tab and returns to the
+// sender. In memory only, so after process death the tab behaves like any other.
 @Singleton
 class ExternalTabRegistry @Inject constructor() {
     private val ids = MutableStateFlow<Set<Long>>(emptySet())
@@ -97,7 +76,6 @@ class ExternalTabRegistry @Inject constructor() {
 
     fun contains(tabId: Long): Boolean = tabId in ids.value
 
-    /** Drops ids of tabs that were closed, whatever closed them (data-model §6). */
     fun removeAll(closedTabIds: Set<Long>) {
         if (closedTabIds.isNotEmpty()) ids.update { it - closedTabIds }
     }

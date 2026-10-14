@@ -7,7 +7,6 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.GreetingPeri
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.HomeShortcut
 import java.io.File
 
-/** Spec 019 — everything the Home page draws (data-model §3). Immutable for skipping (§V rule 5). */
 @Immutable
 data class HomeUiState(
     val greeting: GreetingPeriod,
@@ -16,10 +15,7 @@ data class HomeUiState(
     val searchEngine: SearchEngine = SearchEngine.Google,
 )
 
-/**
- * A shortcut plus the cached images the card can show: the tab's screenshot (Spec 011) and the
- * site's favicon. Without a screenshot the card paints a mesh seeded from the host.
- */
+/** A shortcut plus its cached images; without a screenshot the card paints a mesh seeded from the host. */
 @Immutable
 data class HomeShortcutUi(
     val shortcut: HomeShortcut,

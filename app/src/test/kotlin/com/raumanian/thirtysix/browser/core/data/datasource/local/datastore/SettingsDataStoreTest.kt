@@ -24,25 +24,8 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 /**
- * Unit tests for [SettingsDataStore] — pure JVM (no Robolectric per Spec 006 R8).
- *
- * Each test creates a fresh DataStore in a new temp folder (via @Rule).
- * Tests that simulate "process restart" cancel the producing scope, then create
- * a second DataStore over the SAME file — DataStore guarantees readability of
- * previously persisted data across instances.
- *
- * Story coverage:
- *  - US1 (theme persist): writeThemeMode_then_freshReadReturnsThemeMode
- *  - US2 (first-launch defaults): defaultRead_returnsDocumentedDefaults
- *  - US4 (search engine persist + corrupted fallback):
- *        writeSearchEngine_*, corruptedSearchEngineDisk_fallsBackToDefault
- *  - US5 (onboarding flag): writeOnboardingCompleted_then_freshReadReturnsTrue
- *  - US6 (concurrent writes): concurrentWrites_differentKeys_bothPersist (100 reps),
- *        concurrentWrites_sameKey_lastWriterWins
- *  - Spec 016 (dynamic color + retention persist, out-of-set retention fallback):
- *        writeDynamicColorEnabled_*, writeHistoryRetention_*, outOfSetRetentionDisk_*
- *
- * Spec 016 removed the language cases along with the language value itself (research R4).
+ * [SettingsDataStore] on plain JVM. A "process restart" cancels the producing scope and opens a
+ * second DataStore over the same file.
  */
 class SettingsDataStoreTest {
 
@@ -50,7 +33,7 @@ class SettingsDataStoreTest {
 
     private val mapper = SettingsMapper()
 
-    // ----------------------------- US2 -------------------------------------
+    // First-launch defaults
 
     @Test
     fun defaultRead_returnsDocumentedDefaults() = runBlocking {
@@ -64,7 +47,7 @@ class SettingsDataStoreTest {
         assertEquals(AppDefaults.IS_ONBOARDING_COMPLETED, snapshot.isOnboardingCompleted)
     }
 
-    // ----------------------------- US1 -------------------------------------
+    // Theme
 
     @Test
     fun writeThemeMode_then_freshReadReturnsThemeMode() = runBlocking {
@@ -84,7 +67,7 @@ class SettingsDataStoreTest {
         secondScope.coroutineContext.job.cancelAndJoin()
     }
 
-    // ----------------------------- US4 -------------------------------------
+    // Search engine
 
     @Test
     fun writeSearchEngine_then_freshReadReturnsSearchEngine() = runBlocking {
@@ -110,10 +93,7 @@ class SettingsDataStoreTest {
 
         val s1 = CoroutineScope(SupervisorJob())
         val raw1 = createTestSettingsDataStore(folder, fileName, s1)
-        // Write an unrecognized engine value directly via raw edit (simulating
-        // a future build that wrote a not-yet-supported engine then user
-        // downgraded). Spec 010 added Google + DuckDuckGo + Bing; any value
-        // outside that set must round-trip to default.
+        // An engine a newer build wrote before a downgrade must read back as the default.
         raw1.edit { it[StorageKeys.SEARCH_ENGINE] = "yandex" }
         s1.coroutineContext.job.cancelAndJoin()
 
@@ -124,7 +104,7 @@ class SettingsDataStoreTest {
         s2.coroutineContext.job.cancelAndJoin()
     }
 
-    // ----------------------------- US5 -------------------------------------
+    // Onboarding flag
 
     @Test
     fun writeOnboardingCompleted_then_freshReadReturnsTrue() = runBlocking {
@@ -143,7 +123,7 @@ class SettingsDataStoreTest {
         s2.coroutineContext.job.cancelAndJoin()
     }
 
-    // ----------------------------- Spec 016 --------------------------------
+    // Dynamic color and history retention
 
     @Test
     fun writeDynamicColorEnabled_then_freshReadReturnsIt() = runBlocking {
@@ -210,12 +190,11 @@ class SettingsDataStoreTest {
         s2.coroutineContext.job.cancelAndJoin()
     }
 
-    // ----------------------------- US6 -------------------------------------
+    // Concurrent writes
 
     /**
-     * SC-004: 100 iterations of two-coroutine concurrent writes to two DIFFERENT
-     * keys MUST both persist. Uses runBlocking + real coroutines (not virtual time)
-     * to exercise the actual DataStore actor-style serializer.
+     * Concurrent writes to two different keys both persist, every time. Uses real coroutines,
+     * not virtual time, to exercise DataStore's actual serializer.
      */
     @Test
     fun concurrentWrites_differentKeys_bothPersist() = runBlocking {
@@ -268,12 +247,11 @@ class SettingsDataStoreTest {
     }
 
     private companion object {
-        // SC-004 demands 100% pass across at least 100 reps. Keep at 100; if
-        // the test becomes a CI bottleneck reduce to 50 with a corresponding
-        // SC clarification.
+        // Concurrent writes must pass every one of at least 100 repetitions.
         const val REPEAT_COUNT = 100
 
-        /** A day count that is not one of the four Spec 016 windows. */
+        /** A day count that is not one of the four retention windows. */
+
         const val OUT_OF_SET_RETENTION_DAYS = 45
     }
 }

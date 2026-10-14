@@ -22,29 +22,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * Spec 016 T078 — **debug-build-only** tab seeder for the clear-browsing-data gates
- * (quickstart G5 and G8, research R15).
- *
- * Tops the normal-tab count up to `min(count, BrowserLimits.MAX_TABS)`. It counts existing tabs
- * rather than creating `count` new ones, because the app always holds at least one tab and the
- * cap is 50 — creating 50 more would hit the cap. Each seeded tab gets a placeholder preview and
- * a site icon under its own host, so "Cached images and files" has real files to delete.
- *
- * Lives in `app/src/debug/`, like `HistorySeeder`, so the class does not exist in a release
- * build at all.
- *
- * Usage — with the debug build installed:
- * ```
- * # top up to 50 tabs
- * adb shell am broadcast -a com.raumanian.thirtysix.browser.debug.SEED_TABS \
- *   -n com.raumanian.thirtysix.browser.debug/com.raumanian.thirtysix.browser.dev.TabSeeder
- *
- * # top up to 10 tabs
- * adb shell am broadcast -a com.raumanian.thirtysix.browser.debug.SEED_TABS \
- *   -n com.raumanian.thirtysix.browser.debug/com.raumanian.thirtysix.browser.dev.TabSeeder --ei count 10
- *
- * adb logcat -s TabSeeder
- * ```
+ * Debug-only: tops normal tabs up to `--ei count N` (default the cap), each with a placeholder
+ * preview and site icon so "Cached images and files" has files to clear. It counts existing tabs
+ * because the app always holds at least one.
  */
 @AndroidEntryPoint
 class TabSeeder : BroadcastReceiver() {
@@ -80,9 +60,10 @@ class TabSeeder : BroadcastReceiver() {
         val goal = requested.coerceIn(1, BrowserLimits.MAX_TABS)
         var created = 0
         // Bounded by the cap, so a repository that stops counting new tabs cannot loop forever.
-        for (attempt in 0 until BrowserLimits.MAX_TABS) {
+        var stopped = false
+        repeat(BrowserLimits.MAX_TABS) {
             val total = tabRepository.getTabCount()
-            if (total >= goal) break
+            if (stopped || total >= goal) return@repeat
             val url = "https://seed-tab-$total.example.com/"
             when (val result = tabRepository.createTab(url)) {
                 is Result.Success -> {
@@ -99,7 +80,7 @@ class TabSeeder : BroadcastReceiver() {
                 }
                 is Result.Error -> {
                     Log.w(TAG, "createTab failed after $created new tabs; stopping", result.throwable)
-                    break
+                    stopped = true
                 }
             }
         }

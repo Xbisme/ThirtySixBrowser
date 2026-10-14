@@ -31,8 +31,7 @@ private val ChipPaddingHorizontal = 14.dp
 private val ChipIconGap = 6.dp
 
 /**
- * Spec 019 — the design system's Chip: a pill with a hairline ring; when [selected] it turns
- * `primaryContainer` with its leading icon. Announced as a selectable tab-like option.
+ * A chip, announced as a selectable tab-like option.
  */
 @Composable
 fun ThirtySixChip(

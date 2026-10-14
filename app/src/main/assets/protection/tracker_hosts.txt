@@ -1,4 +1,4 @@
-# ThirtySix Browser tracker and ad-server hosts (Spec 023).
+# ThirtySix Browser tracker and ad-server hosts.
 # Derived from EasyPrivacy and EasyList by The EasyList authors (https://easylist.to/),
 # used under CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
 # Modified: host-level subset; ad-server hosts limited to popular domains

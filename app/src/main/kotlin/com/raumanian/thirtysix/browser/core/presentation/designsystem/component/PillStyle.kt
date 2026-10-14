@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.component
 
-/** Spec 019 — the looks of [PillButton] (design system Button component). */
+/** The looks of [PillButton]. */
 enum class PillStyle {
     /** The one main action of a view, on `primary`. */
     Filled,

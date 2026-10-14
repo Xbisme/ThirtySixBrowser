@@ -23,7 +23,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 024 T013 — fireproof sites over Room, plus the in-memory snapshot. */
 @RunWith(AndroidJUnit4::class)
 class FireproofSiteRepositoryImplTest {
 

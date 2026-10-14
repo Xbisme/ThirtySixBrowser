@@ -4,19 +4,9 @@ import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import javax.inject.Inject
 
 /**
- * Spec 014 FR-001 (title backfill) — correct the title of a history row that was
- * recorded before its page announced a `<title>`.
- *
- * `WebChromeClient.onReceivedTitle` routinely fires *after*
- * `WebViewClient.onPageFinished`, so `RecordHistoryEntryUseCase` stores whatever title
- * was known at page-finish (often empty, which the row UI renders as the hostname per
- * FR-009) and `BrowserViewModel` calls this the moment the real title arrives for the
- * same navigation.
- *
- * A blank title is ignored rather than written, so a page that clears its title can
- * never blank out a row that already had a good one.
- *
- * @return rows updated — `0` when the row has since been deleted or [title] was blank.
+ * Patches the title of a history row recorded before its page announced one: `onReceivedTitle`
+ * often fires after `onPageFinished`. A blank title is ignored, so a page clearing its title never
+ * blanks a good row. Returns rows updated (`0` if deleted or blank).
  */
 class UpdateHistoryEntryTitleUseCase @Inject constructor(
     private val repository: HistoryRepository,

@@ -14,9 +14,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 014 — covers [HistoryRepositoryImpl] full surface.
- */
 @RunWith(AndroidJUnit4::class)
 class HistoryRepositoryImplTest {
 
@@ -56,7 +53,7 @@ class HistoryRepositoryImplTest {
 
     @Test
     fun `observeRecent maps the newest rows to domain entries`() = runTest {
-        // Spec 019 T058a — the Room override of the interface default.
+        // The Room override of the interface default.
         repo.recordVisit("https://a.example", "A", 1000L)
         repo.recordVisit("https://b.example", "B", 2000L)
         repo.recordVisit("https://c.example", "C", 3000L)

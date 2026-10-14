@@ -11,9 +11,8 @@ import java.io.File
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 019 — a cached image file (tab screenshot, favicon) decoded off the main thread. Starts
- * `null` and fills in once decoded; a missing or empty file stays `null`, so callers show
- * their fallback art instead of a broken image (spec edge case "preview missing").
+ * A cached image file (tab screenshot, favicon) decoded off the main thread. A missing or empty
+ * file stays `null`, so callers show their fallback art instead of a broken image.
  */
 @Composable
 fun rememberFileImage(file: File?): State<ImageBitmap?> {

@@ -7,9 +7,9 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import java.io.File
 
 /**
- * Spec 021 research R3 — photos taken for a page's file upload, in `cacheDir/capture/`. Only the
- * newest is kept: older ones are deleted when the next capture starts and when the browser
- * screen goes away (not on every navigation — a page may still be uploading the file then).
+ * Photos taken for a page's file upload, in `cacheDir/capture/`. Only the newest is kept; older
+ * ones go when the next capture starts or the browser screen leaves, not on navigation, since a
+ * page may still be uploading.
  */
 object CaptureFiles {
     private const val PREFIX = "capture-"

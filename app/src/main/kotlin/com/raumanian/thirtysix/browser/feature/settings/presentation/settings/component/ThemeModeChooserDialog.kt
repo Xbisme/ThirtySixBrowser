@@ -9,13 +9,6 @@ import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.presentation.util.themeModeLabel
-/**
- * Spec 016 US1 — choose Light, Dark or follow the system.
- *
- * Public and stateless on purpose: it knows nothing about any view model and reports the
- * choice through [onSelect], so Spec 018's onboarding can reuse it unchanged (FR-037,
- * research.md R14).
- */
 @Composable
 fun ThemeModeChooserDialog(
     selected: ThemeMode,

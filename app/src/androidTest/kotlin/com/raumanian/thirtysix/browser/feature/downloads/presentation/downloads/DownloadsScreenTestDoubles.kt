@@ -18,13 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/**
- * Spec 015 — shared doubles so the Compose tests can drive [DownloadsViewModel] directly.
- *
- * No Hilt and no WebView, mirroring `HistoryScreenTestDoubles` from Spec 014: the project
- * documents that setup as flaky, and none of these tests need a real graph to assert what
- * the screen renders.
- */
+// The tests drive [DownloadsViewModel] directly: no Hilt and no WebView, which are flaky to set up.
 
 internal fun instrumentedRecord(
     id: Long,
@@ -42,10 +36,7 @@ internal fun instrumentedRecord(
     localUri = localUri,
 )
 
-/**
- * Builds a view model over fixed records whose statuses the test dictates outright, so a
- * row's rendered state is a property of the test rather than of any real transfer.
- */
+// Statuses are dictated by the test, so a row's rendered state never depends on a real transfer.
 internal fun instrumentedViewModel(
     records: List<DownloadRecord>,
     statuses: Map<Long, DownloadStatus>,

@@ -23,12 +23,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 016 T068 — ⚠️ non-negotiable privacy test for [ClearBrowsingDataUseCase].
- *
- * Every fake writes into one shared call log, so ordering across seams is observable. The first
- * case is the one that must never regress: the incognito set-aside is discarded **before** the
- * cookie jar is wiped, otherwise closing the last incognito tab could write the cleared cookies
- * back (FR-030, research R7).
+ * Every fake writes into one shared call log, so ordering across seams is observable. The first case
+ * is a privacy guarantee: the incognito set-aside is discarded before the cookie jar is wiped.
  */
 class ClearBrowsingDataUseCaseTest {
 
@@ -120,7 +116,7 @@ class ClearBrowsingDataUseCaseTest {
         useCase(setOf(ClearBrowsingDataCategory.CookiesAndSiteData))
 
         assertEquals(
-            "FR-030 / R7 — discard MUST precede the wipe",
+            "discard MUST precede the wipe",
             listOf(FakeCookieJarSnapshotManager.CALL_DISCARD, FakeWebDataCleaner.CALL_CLEAR_SITE_DATA),
             log,
         )

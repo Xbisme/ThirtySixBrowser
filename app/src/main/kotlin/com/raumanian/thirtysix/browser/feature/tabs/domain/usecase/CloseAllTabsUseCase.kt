@@ -5,17 +5,8 @@ import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import javax.inject.Inject
 
 /**
- * Spec 011 — wipe every tab and create exactly one fresh home tab (US3 #4 /
- * FR-012). Atomic at the repository layer (Mutex-guarded — R5/R10).
- *
- * Triggered from the switcher's "Close all tabs" affordance after the user
- * confirms the destructive-action dialog (`CloseAllTabsConfirmDialog`).
- *
- * Spec 011 Q4 amendment (2026-05-03) — also wipes the entire screenshot
- * cache directory so disk usage drops to zero after close-all. The favicon
- * cache is intentionally NOT cleared (favicons are origin-scoped, useful
- * even after the tabs that loaded them are gone — they still apply when
- * the user revisits those origins).
+ * Replaces every tab with one fresh home tab and wipes the screenshot cache. Favicons stay:
+ * they are keyed by origin and still apply when the person revisits those sites.
  */
 class CloseAllTabsUseCase @Inject constructor(
     private val repository: TabRepository,

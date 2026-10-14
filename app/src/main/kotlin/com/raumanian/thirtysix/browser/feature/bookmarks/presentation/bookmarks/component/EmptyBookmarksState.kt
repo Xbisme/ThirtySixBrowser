@@ -22,7 +22,6 @@ import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-/** Spec 013 — empty state; Spec 019 — a pastel glyph well above the title and body. */
 @Composable
 fun EmptyBookmarksState(modifier: Modifier = Modifier) {
     Column(

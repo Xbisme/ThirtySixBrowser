@@ -1,20 +1,10 @@
 package com.raumanian.thirtysix.browser.core.domain.model
 
-/**
- * Spec 014 — domain representation of a single browsing-history entry.
- *
- * Pure Kotlin per Constitution §IV (no Android imports). Maps to / from
- * `com.raumanian.thirtysix.browser.core.data.datasource.local.entity.HistoryEntryEntity` via
- * `com.raumanian.thirtysix.browser.feature.history.data.mapper.HistoryEntryMapper`.
- *
- * @property id auto-generated primary key; `0L` when not yet persisted.
- * @property url final settled URL of a successful page load.
- * @property title page title at load completion; may be empty (FR-009 falls back to hostname).
- * @property visitedAt epoch milliseconds at write time (device local clock).
- */
 data class HistoryEntry(
     val id: Long,
+    /** Final settled URL of a successful page load. */
     val url: String,
+    /** May be empty; the hostname is shown instead. */
     val title: String,
     val visitedAt: Long,
 )

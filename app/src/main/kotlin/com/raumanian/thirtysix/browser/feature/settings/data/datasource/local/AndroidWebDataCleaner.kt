@@ -25,14 +25,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Spec 016 — [WebDataCleaner] over the platform web engine (research R5, R6).
- *
- * Total by construction: every platform call runs inside `runCatching`, so a failing or
- * missing web engine becomes a [SiteDataClearOutcome.Failed] or `false`, never a crash
- * (FR-043). Cancellation is the one thing that is rethrown.
- *
- * Logs only which path ran and how long it took — never a URL, a cookie or a stored value
- * (Constitution §I). Quickstart G5 reads these lines to record the path on each device.
+ * A failing or missing web engine becomes a failed outcome, never a crash; only cancellation is
+ * rethrown. Logs only the path taken and timings, never a URL, cookie or stored value.
  */
 @Singleton
 class AndroidWebDataCleaner @Inject constructor(
@@ -43,7 +37,7 @@ class AndroidWebDataCleaner @Inject constructor(
     override suspend fun clearCookiesAndSiteData(): SiteDataClearOutcome {
         val startedAt = SystemClock.elapsedRealtime()
         val outcome = runCatching {
-            // A completion callback that never arrives must not leave the dialog stuck (FR-032).
+            // A completion callback that never arrives must not leave the dialog stuck.
             withTimeoutOrNull(BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS) { clearSiteData() }
                 ?: SiteDataClearOutcome.Failed
         }.getOrElse { error ->
@@ -59,8 +53,7 @@ class AndroidWebDataCleaner @Inject constructor(
         val startedAt = SystemClock.elapsedRealtime()
         val cleared = runCatching {
             withContext(dispatchers.main) {
-                // Research R6 — the cache is per application, so a throwaway instance that never
-                // attaches to a window or loads a page is enough to empty it for every WebView.
+                // The cache is per application, so a throwaway WebView empties it for every WebView.
                 val webView = WebView(appContext)
                 try {
                     webView.clearCache(true)
@@ -114,7 +107,7 @@ class AndroidWebDataCleaner @Inject constructor(
             Log.w(LOG_TAG, "Clearing site data except fireproof sites failed", error)
             null
         }
-        // Counts only — never a host or a cookie (Constitution §I).
+        // Counts only, never a host or a cookie.
         Log.i(
             LOG_TAG,
             "fire site data: path=$path kept=${keepSites.size} candidates=${candidateHosts.size} " +
@@ -123,11 +116,8 @@ class AndroidWebDataCleaner @Inject constructor(
         return path
     }
 
-    /**
-     * Research R2 — the kept sites' cookies, keyed by (name, domain, path) so a cookie seen from
-     * several query addresses is written back once. With `GET_COOKIE_INFO` each entry is a full
-     * `Set-Cookie` string; without it only `name=value` is available (Spec 012 R1 limitation).
-     */
+    // Keyed by (name, domain, path) so a cookie seen from several addresses is written back once.
+    // Without GET_COOKIE_INFO only name=value is available, so attributes are lost.
     private suspend fun readCookies(hosts: Set<String>): Collection<KeptCookie> = withContext(dispatchers.main) {
         val manager = CookieManager.getInstance()
         val kept = LinkedHashMap<String, KeptCookie>()
@@ -159,11 +149,7 @@ class AndroidWebDataCleaner @Inject constructor(
         withContext(dispatchers.io) { manager.flush() }
     }
 
-    /**
-     * Research R3 — per-site deletion where the engine supports it, one site at a time and each
-     * bounded; otherwise the framework's per-origin deletion of storage (localStorage and service
-     * workers may survive there, FR-003b). Cookies are handled separately by the caller.
-     */
+    // Without DELETE_BROWSING_DATA, per-origin deletion may leave localStorage and service workers behind.
     private suspend fun deleteSiteDataExcept(hosts: Set<String>, isKept: (String) -> Boolean): SiteDataPath =
         withContext(dispatchers.main) {
             if (WebViewFeature.isFeatureSupported(WebViewFeature.DELETE_BROWSING_DATA)) {
@@ -202,11 +188,7 @@ class AndroidWebDataCleaner @Inject constructor(
         }
     }
 
-    /**
-     * Research R5 — the complete path where the installed web engine supports it, otherwise the
-     * framework fallback. The feature check and the guarded call share this one function so lint
-     * can see the guard.
-     */
+    // The feature check and the guarded call share one function so lint can see the guard.
     private suspend fun clearSiteData(): SiteDataClearOutcome = withContext(dispatchers.main) {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DELETE_BROWSING_DATA)) {
             suspendCancellableCoroutine { continuation ->
@@ -238,11 +220,8 @@ class AndroidWebDataCleaner @Inject constructor(
 }
 
 /**
- * Spec 024 research R2 — one cookie of a fireproof site, read before Fire and written back after.
- *
- * A host-only cookie is reported as `domain=<host>` without a leading dot (G1 spike); writing that
- * attribute back would widen it to every subdomain, so it is dropped and the cookie is set on its
- * own host. A `Secure` cookie is written back through `https`.
+ * A fireproof site's cookie, read before Fire and written back after. A host-only cookie is reported
+ * as `domain=<host>` without a dot; writing that back would widen it to every subdomain, so it is dropped.
  */
 internal data class KeptCookie(val key: String, val url: String, val restoreString: String) {
     companion object {

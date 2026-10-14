@@ -21,12 +21,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 011 — exercises [TabRepositoryImpl] over an in-memory Room AppDatabase.
- *
- * Robolectric provides the Android Context (Spec 005 wiring; SDK 33 pin via
- * `app/src/test/resources/robolectric.properties`).
- */
+/** Over an in-memory Room database; Robolectric is pinned to SDK 33 in `robolectric.properties`. */
 @RunWith(AndroidJUnit4::class)
 class TabRepositoryImplTest {
 

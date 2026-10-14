@@ -17,7 +17,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 021 T012 — remembered decisions over Room (data-model §1, INV-2). */
 @RunWith(AndroidJUnit4::class)
 class SitePermissionRepositoryImplTest {
 

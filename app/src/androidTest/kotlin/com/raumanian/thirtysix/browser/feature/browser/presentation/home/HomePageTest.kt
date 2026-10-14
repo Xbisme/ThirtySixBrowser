@@ -24,7 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 019 T056 — the Home page (FR-011, FR-013, FR-014). Drives the stateless [HomeContent]. */
+/** The Home page, through the stateless [HomeContent]. */
 @RunWith(AndroidJUnit4::class)
 class HomePageTest {
 

@@ -55,13 +55,8 @@ import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.
 import java.io.File
 
 /**
- * Spec 011 tab switcher, restyled by Spec 019 FR-040 (design system Tabs artboard): a large
- * plural-aware title ("5 tabs"), Open / Incognito chips that switch the mode (clarification
- * Q3 — the Incognito chip appears only while incognito tabs exist), one close-all action for
- * the mode on screen, and an adaptive grid of image cards — two columns at 360dp, more when
- * wider — ending with the mode's create card.
- *
- * NavController coupling (Spec 011 M3): [TabsViewModel.popBackEvent] pops back to the browser.
+ * Tab switcher: a plural-aware title, Open / Incognito mode chips, one close-all action for the
+ * mode on screen, and an adaptive grid of image cards ending with the mode's create card.
  */
 @Composable
 fun TabsScreen(
@@ -86,7 +81,7 @@ fun TabsScreen(
     )
     TabsConfirmDialogs(state = state, viewModel = viewModel)
 
-    // Spec 011 — favicon / screenshot saves bump these counters so cards re-read their files.
+    // Favicon / screenshot saves bump these counters so cards re-read their files.
     val faviconVersion by viewModel.faviconVersion.collectAsStateWithLifecycle()
     val screenshotVersion by viewModel.screenshotVersion.collectAsStateWithLifecycle()
 
@@ -198,7 +193,7 @@ private fun TabsHeader(
                 style = RoundIconStyle.Bare,
             )
             Spacer(modifier = Modifier.weight(1f))
-            // Spec 024 FR-001 — Fire, beside close-all; disabled while a run is in progress (INV-5).
+            // Disabled while a Fire run is in progress.
             RoundIconButton(
                 icon = AppIcons.Fire,
                 contentDescription = stringResource(R.string.fire_action_tabs_cd),
@@ -232,7 +227,7 @@ private fun TabsHeader(
     }
 }
 
-/** Open / Incognito chips; the Incognito chip appears only while incognito tabs exist (Q3). */
+/** Open / Incognito chips; the Incognito chip appears only while incognito tabs exist. */
 @Composable
 private fun ModeChips(incognito: Boolean, showIncognito: Boolean, onModeSelect: (TabsMode) -> Unit) {
     Row(
@@ -289,7 +284,7 @@ private fun TabsGrid(
         modifier = Modifier.fillMaxSize(),
     ) {
         items(items = state.visibleTabs, key = { tab -> tab.id }, contentType = { CONTENT_TYPE_TAB }) { tab ->
-            // Incognito cards never read the caches (Spec 012); the version pair re-reads files
+            // Incognito cards never read the caches; the version pair re-reads files
             // after a save without recomposing anything else.
             val files = remember(tab.id, tab.url, tab.isIncognito, faviconVersion, screenshotVersion) {
                 if (tab.isIncognito) null to null else faviconFor(tab.url) to screenshotFor(tab.id)
@@ -312,7 +307,6 @@ private fun TabsGrid(
 
 const val TEST_TAG_TABS_SCREEN: String = "tabs_screen"
 
-/** Spec 024 FR-001 — the Fire button in the Tabs header. */
 const val TEST_TAG_TABS_FIRE: String = "tabs_fire_action"
 const val TEST_TAG_CLOSE_ALL_ACTION: String = "tabs_close_all_action"
 const val TEST_TAG_CLOSE_ALL_INCOGNITO_ACTION: String = "tabs_close_all_incognito_action"

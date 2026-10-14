@@ -4,17 +4,9 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.DownloadRecordEntity
 /**
- * Spec 015 FR-016 — the project's **first** schema migration: v1 (Spec 005) → v2.
- *
- * Strictly additive. It creates `download_records` and its `created_at` index, and
- * **names no pre-existing table**: not `bookmarks`, not `bookmark_folders`, not
- * `history_entries`, not `tabs`. That property is not a stylistic preference — it is what
- * makes it structurally impossible for this migration to alter or lose existing user data,
- * which is exactly what Spec 005's strict-no-destructive policy was written to guarantee.
- *
- * The DDL below must match byte-for-byte what Room generates for
- * [DownloadRecordEntity], or `MigrationTestHelper` will fail the schema-identity check.
- * Any change to that entity must be mirrored here.
+ * Adds `download_records`. Strictly additive: it names no existing table, so user data cannot be
+ * touched. The DDL must match what Room generates for [DownloadRecordEntity], or Room's schema
+ * check fails on open; mirror any change to that entity here.
  */
 object Migration1To2 {
 

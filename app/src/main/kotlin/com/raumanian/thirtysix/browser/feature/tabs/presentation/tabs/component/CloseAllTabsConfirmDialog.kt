@@ -8,10 +8,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ConfirmDialog
-/**
- * Spec 011 FR-012 — confirm before closing every normal tab; Spec 019 FR-045 restyle on
- * [ConfirmDialog] (glyph, full-width danger action above Cancel).
- */
+/** Confirms before closing every normal tab. */
 @Composable
 fun CloseAllTabsConfirmDialog(
     onConfirm: () -> Unit,

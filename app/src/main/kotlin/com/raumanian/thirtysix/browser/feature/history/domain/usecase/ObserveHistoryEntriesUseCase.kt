@@ -5,10 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Spec 014 — observe the full history list, reverse-chronological. Backed by
- * [HistoryRepository.observeAll]; emits a fresh list on every committed insert/delete.
- */
+/** The full history, newest first; emits on every committed insert or delete. */
 class ObserveHistoryEntriesUseCase @Inject constructor(
     private val repository: HistoryRepository,
 ) {

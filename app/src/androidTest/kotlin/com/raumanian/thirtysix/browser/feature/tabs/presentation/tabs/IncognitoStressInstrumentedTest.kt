@@ -15,22 +15,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T067 (SC-005) — open/close stress test for the incognito tab
- * pipeline.
- *
- * Goal: verify the in-memory state machine + cookie snapshot/restore
- * lifecycle remain stable under repeated open/close cycles AND that no
- * runaway memory growth surfaces.
- *
- * **CI cycle count**: 30 (down from spec target 100). Each cycle exercises
- * `createTab` → `captureSnapshot` → `closeTab` → `restoreSnapshot` →
- * `removeAllCookies` (Main thread hop) — on a CI emulator (API 29, 2 GB
- * RAM) the 100-cycle target consistently hangs the runner. The full
- * 100-cycle SC-005 target is verified by the manual G5 user-device gate
- * (already ✅). The CI version retains the contract assertions (final
- * count == 0, heap delta < 2 MB) so any catastrophic regression still
- * surfaces. Hard timeout via `@Test(timeout = …)` fails fast if a future
- * change reintroduces a hang.
+ * Open/close stress for incognito tabs and their cookie snapshot/restore: the final count is 0
+ * and the heap grows under 2 MB. 30 cycles, because 100 hangs a 2 GB API 29 CI emulator; the
+ * 100-cycle run is checked by hand, and the test timeout fails fast if a hang returns.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -67,8 +54,7 @@ class IncognitoStressInstrumentedTest {
             incognitoRepository.closeTab(created.id)
         }
 
-        // Final state MUST be empty (last close on each cycle drops count
-        // back to 0; restore + capture cycle every iteration).
+        // Each cycle's last close drops the count back to 0.
         assertEquals(
             "incognito pool is empty after $STRESS_CYCLES cycles",
             0,

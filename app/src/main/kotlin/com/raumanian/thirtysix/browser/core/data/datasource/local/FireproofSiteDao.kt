@@ -6,7 +6,7 @@ import androidx.room.Upsert
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.FireproofSiteEntity
 import kotlinx.coroutines.flow.Flow
 
-/** Spec 024 — fireproof sites. One row per site; writing again replaces it. */
+/** Fireproof sites. One row per site; writing again replaces it. */
 @Dao
 interface FireproofSiteDao {
     @Upsert

@@ -28,17 +28,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Spec 018 — the onboarding view model.
- *
- * Covers the logic a JVM test can actually observe: slide movement, the last-slide boundary,
- * WHICH exits write the first-run flag, and that navigation writes no settings. The three
- * hardest properties of this feature are all pinned here:
- *
- *  - forward on the last slide completes rather than advancing (FR-002b)
- *  - back on the first slide neither moves nor completes (FR-002a, FR-012)
- *  - skip writes the flag and nothing else (FR-011, INV-7)
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 class OnboardingViewModelTest {
 
@@ -106,7 +95,7 @@ class OnboardingViewModelTest {
         assertEquals(OnboardingSlides.FIRST, vm.uiState.value.currentSlide)
     }
 
-    // ──────── Which exits write the first-run flag (INV-6) ────────
+    // ──────── Which exits write the first-run flag ────────
 
     @Test
     fun `back on the first slide does NOT write the first-run flag`() = runTest {
@@ -116,7 +105,7 @@ class OnboardingViewModelTest {
         vm.onBack()
         advanceUntilIdle()
 
-        // FR-012: leaving this way is not consent to never being asked again.
+        // Leaving this way is not consent to never being asked again.
         assertFalse(settings.current.isOnboardingCompleted)
         assertTrue(settings.writes.isEmpty())
     }
@@ -152,8 +141,7 @@ class OnboardingViewModelTest {
         vm.onSkip()
         advanceUntilIdle()
 
-        // A4 / INV-7: skip records that the user was asked, not a preference they never
-        // expressed. The defaults must be left as defaults, not written explicitly.
+        // Skip records that the person was asked; the defaults stay unwritten.
         assertEquals(ThemeMode.System, settings.current.themeMode)
         assertEquals(SearchEngine.Google, settings.current.searchEngine)
         assertEquals(
@@ -176,7 +164,7 @@ class OnboardingViewModelTest {
         }
     }
 
-    // ──────── Navigation writes nothing (INV-4) ────────
+    // ──────── Navigation writes nothing ────────
 
     @Test
     fun `moving between slides writes nothing to settings`() = runTest {
@@ -188,12 +176,11 @@ class OnboardingViewModelTest {
         vm.onBack()
         advanceUntilIdle()
 
-        // INV-4: the slide index is session state, not a setting. A user who force-quits
-        // mid-flow starts over rather than resuming where they left off.
+        // The slide index is session state, not a setting.
         assertTrue("navigation must not persist anything", settings.writes.isEmpty())
     }
 
-    // ──────── Save-on-select (FR-008) ────────
+    // ──────── Save-on-select ────────
 
     @Test
     fun `choosing a theme writes it immediately`() = runTest {
@@ -225,11 +212,11 @@ class OnboardingViewModelTest {
         vm.onThemeSelected(ThemeMode.Dark)
         advanceUntilIdle()
 
-        // INV-1: the state shows what is stored, not a locally held copy.
+        // The state shows what is stored, not a locally held copy.
         assertEquals(ThemeMode.Dark, vm.uiState.value.themeMode)
     }
 
-    // ──────── Language (FR-015a) ────────
+    // ──────── Language ────────
 
     @Test
     fun `choosing a different language applies it`() = runTest {
@@ -253,11 +240,11 @@ class OnboardingViewModelTest {
         vm.onLanguageSelected(AppLanguage.Vietnamese)
         advanceUntilIdle()
 
-        // FR-015a: a no-op must not cost an activity recreation and its black flash.
+        // A no-op must not cost an activity recreation and its black flash.
         assertEquals(appliedBefore, language.applied.size)
     }
 
-    // ──────── Position survives recreation (INV-2, INV-3) ────────
+    // ──────── Position survives recreation ────────
 
     @Test
     fun `slide position is restored from saved state`() = runTest {
@@ -265,8 +252,7 @@ class OnboardingViewModelTest {
 
         val vm = viewModel(savedState = savedState)
 
-        // INV-2: this is what makes a language change return the user to their slide rather
-        // than to the first one.
+        // This is what returns the person to their slide after a language change.
         assertEquals(OnboardingSlides.THEME, vm.uiState.value.currentSlide)
     }
 
@@ -285,7 +271,7 @@ class OnboardingViewModelTest {
         val tooHigh = SavedStateHandle(mapOf("onboarding_current_slide" to 99))
         val negative = SavedStateHandle(mapOf("onboarding_current_slide" to -5))
 
-        // INV-3: a corrupted or stale bundle must not render a slide that does not exist.
+        // A corrupted or stale bundle must not render a slide that does not exist.
         assertEquals(OnboardingSlides.LAST, viewModel(savedState = tooHigh).uiState.value.currentSlide)
         assertEquals(OnboardingSlides.FIRST, viewModel(savedState = negative).uiState.value.currentSlide)
     }

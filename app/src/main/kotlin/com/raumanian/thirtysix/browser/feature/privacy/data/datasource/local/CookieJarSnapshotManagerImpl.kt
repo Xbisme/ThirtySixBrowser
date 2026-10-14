@@ -14,28 +14,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 012 — public-API implementation of [CookieJarSnapshotManager].
- *
- * Strategy (research.md R1): per-origin `getCookie` / `setCookie` round-trip
- * over the public `android.webkit.CookieManager` API. Crash-safety is the
- * top-priority constraint per the user's brief — every platform call is
- * wrapped in `runCatching { … }` so the manager NEVER propagates exceptions.
- * Failures degrade to "cookies wiped" (privacy-stronger fallback).
- *
- * Concurrency:
- *  - Internal [Mutex] serializes capture + restore operations even if
- *    [IncognitoTabRepositoryImpl] (the primary caller) somehow lets two
- *    callers race. Defence-in-depth.
- *  - All platform calls hop to [DispatcherProvider.io] so the Main thread
- *    is never blocked on disk-flushing cookies.
- *
- * Bounded memory: snapshot ≤ `MAX_TABS = 50` origins × ~2 KB per cookie
- * header ≈ 100 KB worst case. Released entirely on restore.
- *
- * Process death: snapshot is held in memory only. Process termination loses
- * the snapshot — which is correct, because incognito tabs are also lost on
- * process death (FR-012), so there's no live incognito session that needs
- * its cookies preserved.
+ * Per-origin cookie snapshot over the public `CookieManager` API. Every platform call is wrapped,
+ * so failures degrade to "cookies wiped", the privacy-stronger outcome. Held in memory only:
+ * incognito tabs die with the process too, so there is nothing to restore after process death.
  */
 @Singleton
 class CookieJarSnapshotManagerImpl @Inject constructor(
@@ -50,9 +31,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
     override suspend fun captureSnapshot(origins: List<String>) =
         withContext(dispatchers.io) {
             mutex.withLock {
-                // Idempotency: if a snapshot already exists, do NOT overwrite.
-                // Guarantees a 0→1→2→1 incognito-tab sequence does not
-                // re-capture mid-session (FR-011a step 1).
+                // A snapshot is never overwritten, so opening a second incognito tab does not re-capture.
                 if (snapshot != null) return@withLock
                 val cookieManager = runCatching { CookieManager.getInstance() }
                     .getOrNull()
@@ -88,16 +67,10 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
                     snapshot = null
                     return@withLock
                 }
-                // Step 1: wipe live cookie jar (incl. any cookies set during
-                // incognito session). Suspending wrapper around the
-                // callback-based API.
+                // Wipe the live jar, including everything set during the incognito session.
                 runCatching { removeAllCookiesAwait(cookieManager) }
                 runCatching { cookieManager.flush() }
-                // Step 2: write snapshot entries back. NB cookie attributes
-                // (Domain/Path/Expires/Secure/HttpOnly/SameSite) are NOT
-                // preserved by `getCookie → setCookie` round-trip; restored
-                // cookies revert to default attributes (research.md R1
-                // documented limitation).
+                // Write back; attributes are lost in the round-trip (see CookieJarSnapshot).
                 held.entries.forEach { (origin, header) ->
                     header.split(COOKIE_PAIR_DELIMITER).forEach { pair ->
                         val trimmed = pair.trim()
@@ -116,12 +89,8 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
     override fun hasSnapshot(): Boolean = snapshot != null
 
     /**
-     * Spec 016 FR-030 — replaces a held snapshot with [CookieJarSnapshot.EMPTY], never with
-     * `null`. [restoreSnapshot] returns early when nothing is held, so `null` would make the end
-     * of the incognito session skip its wipe and leak incognito cookies into normal browsing;
-     * `EMPTY` keeps the wipe and removes only the write-back (research R7). It also keeps
-     * [captureSnapshot] a no-op for the rest of the session, so the cleared cookies cannot be
-     * re-captured by the next incognito tab.
+     * Holds [CookieJarSnapshot.EMPTY], never `null`: with `null`, [restoreSnapshot] would skip its
+     * wipe and leak incognito cookies into normal browsing. `EMPTY` also keeps capture a no-op.
      */
     override suspend fun discardSetAsideCookies() {
         mutex.withLock {
@@ -129,19 +98,8 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
         }
     }
 
-    /**
-     * Suspending wrapper around [CookieManager.removeAllCookies] callback API.
-     *
-     * Platform requirement (Android API 29 / older WebView builds): the
-     * callback variant of `removeAllCookies` MUST be invoked on a thread that
-     * carries a `Looper` — otherwise [AwCookieManager] throws
-     * `IllegalStateException: removeAllCookies must be called on a thread with
-     * a running Looper.` The IO dispatcher does NOT carry a Looper, so we hop
-     * onto [Dispatchers.Main] (the immediate variant when already on Main, to
-     * minimise dispatch overhead) for the platform call. Newer Android
-     * versions are more permissive but the explicit hop is harmless and
-     * portable across all supported API levels (24 .. 36).
-     */
+    // The callback form of removeAllCookies throws on a thread without a Looper (API 29, older
+    // WebView), and the IO dispatcher has none, so the call hops to Main.
     private suspend fun removeAllCookiesAwait(cookieManager: CookieManager) {
         withContext(Dispatchers.Main.immediate) {
             suspendCancellableCoroutine<Unit> { continuation ->

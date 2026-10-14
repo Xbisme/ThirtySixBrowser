@@ -4,15 +4,7 @@ import android.app.DownloadManager
 import android.database.Cursor
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadFailureCause
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
-/**
- * Spec 015 — translation from the platform download service's cursor rows into
- * [DownloadStatus].
- *
- * Split out of [AndroidDownloadManagerGateway] so that class stays within detekt's
- * `TooManyFunctions` threshold, and because this is genuinely a separate concern: the
- * gateway decides *when* to talk to the platform, this decides what the platform's answer
- * means.
- */
+// What the platform download service's cursor rows mean, as a [DownloadStatus].
 internal object DownloadStatusCursorMapper {
 
     fun readAll(cursor: Cursor): Map<Long, DownloadStatus> {
@@ -53,8 +45,7 @@ internal object DownloadStatusCursorMapper {
         DownloadManager.ERROR_UNHANDLED_HTTP_CODE,
         DownloadManager.ERROR_CANNOT_RESUME,
         -> DownloadFailureCause.NetworkFailure
-        // Every other platform reason collapses here rather than surfacing an error code
-        // the user cannot act on (FR-022).
+        // Other platform reasons collapse here rather than surface a code the user cannot act on.
         else -> DownloadFailureCause.Generic
     }
 }

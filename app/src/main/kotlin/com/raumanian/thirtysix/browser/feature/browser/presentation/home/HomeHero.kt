@@ -65,14 +65,7 @@ private val EngineDisc = 28.dp
 private const val COLLAPSE_DISTANCE_FRACTION = 0.6f
 private const val PARALLAX = 0.4f
 
-/**
- * Spec 019 FR-011 / FR-013 — the Home hero (design system Hero): a dark mesh in both themes,
- * the brand mark, a glass "new incognito tab" button, the greeting, one privacy line, the
- * floating search bar and the shortcut cards.
- *
- * Collapse on scroll reads [listState] **only inside `graphicsLayer { }`** (research R6), so
- * scrolling the Home page fades and lifts the hero without recomposing it.
- */
+/** Collapse on scroll reads [listState] only inside `graphicsLayer { }`, so the hero never recomposes for it. */
 @Composable
 @Suppress("LongParameterList")
 fun HomeHero(
@@ -158,7 +151,6 @@ private fun HeroTopRow(onNewIncognitoTab: () -> Unit) {
     }
 }
 
-/** Time-of-day greeting and the one privacy line (FR-011). */
 @Composable
 private fun HeroGreeting(greeting: GreetingPeriod) {
     val colors = ThirtySixTheme.colors
@@ -177,10 +169,7 @@ private fun HeroGreeting(greeting: GreetingPeriod) {
     }
 }
 
-/**
- * Spec 022 research R6 — what the Home search field reports for address suggestions, and the
- * suggestion list drawn under it. The defaults do nothing, so the hero works without them.
- */
+/** Address-suggestion hooks for the Home search field; the defaults do nothing. */
 @Immutable
 data class HomeSearchHooks(
     val onTextChange: (String) -> Unit = {},
@@ -188,7 +177,7 @@ data class HomeSearchHooks(
     val suggestions: @Composable () -> Unit = {},
 )
 
-/** The white floating search pill; submits exactly as the address bar does (FR-012). */
+/** Submits exactly as the address bar does. */
 @Composable
 private fun HomeSearchBar(
     engine: SearchEngine,

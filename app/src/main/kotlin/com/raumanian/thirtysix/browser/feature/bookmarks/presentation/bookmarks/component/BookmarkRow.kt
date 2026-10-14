@@ -9,10 +9,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLetter
 import java.net.URI
 
-/**
- * Spec 013 — a bookmark row; Spec 019 — an open [ListRow] led by the host's first letter,
- * hostname as the secondary line. Tap opens, long-press opens the action sheet.
- */
+/** A bookmark row led by the host's first letter; tap opens, long-press opens the action sheet. */
 @Composable
 fun BookmarkRow(
     bookmark: Bookmark,

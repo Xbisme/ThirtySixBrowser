@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-/** Spec 020 — [DefaultBrowserInviteRepository] over the existing settings DataStore file. */
 class DefaultBrowserInviteRepositoryImpl @Inject constructor(
     private val dataStore: SettingsDataStore,
 ) : DefaultBrowserInviteRepository {
@@ -25,7 +24,7 @@ class DefaultBrowserInviteRepositoryImpl @Inject constructor(
                 launchCount = prefs[StorageKeys.APP_LAUNCH_COUNT] ?: 0,
             )
         }
-        // An unreadable file reads as the defaults rather than ending the flow (Spec 006 posture).
+        // An unreadable file reads as the defaults rather than ending the flow .
         .catch { error -> if (error is IOException) emit(InviteState.DEFAULT) else throw error }
         .distinctUntilChanged()
 

@@ -18,7 +18,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 022 data-model §3 — the find-in-page state machine. */
+/** The find-in-page state machine. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelFindTest {
 

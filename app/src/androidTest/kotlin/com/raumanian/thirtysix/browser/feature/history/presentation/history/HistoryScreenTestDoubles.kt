@@ -28,18 +28,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Spec 014 — shared in-memory doubles for the three `HistoryScreen` Compose UI tests
- * (browse / search / long-press).
- *
- * These tests drive [HistoryViewModel] directly rather than through Hilt: the screen
- * accepts the ViewModel as a parameter, so a hand-built instance over in-memory
- * repositories keeps the tests fast and free of the WebView + Room setup the project
- * has documented as flaky (see `BrowserScreenOfflineErrorTest` KDoc). Real-SQLite
- * coverage of the same repository lives in [HistoryRecorderIntegrationTest].
- *
- * All flows are hot [MutableStateFlow]s (never `flowOf`) because
- * [ObserveAllTabsUseCase] combines the normal + incognito streams and needs both to
- * stay subscribed — the same trap Spec 012's instrumented doubles documented.
+ * The tests build [HistoryViewModel] over in-memory doubles instead of Hilt, avoiding the flaky
+ * WebView and Room setup. Flows are hot [MutableStateFlow]s, never `flowOf`, because
+ * [ObserveAllTabsUseCase] combines two streams that must both stay subscribed.
  */
 internal class InstrumentedFakeHistoryRepository(
     seed: List<HistoryEntry> = emptyList(),
@@ -134,7 +125,7 @@ internal object InstrumentedNoopIncognitoRepository : IncognitoTabRepository {
     private val state: MutableStateFlow<List<Tab>> = MutableStateFlow(emptyList())
     override fun observeTabs(): Flow<List<Tab>> = state.asStateFlow()
     override suspend fun createTab(url: String): Result<Tab> =
-        error("history screen must never create an incognito tab (Q2 / FR-019)")
+        error("history screen must never create an incognito tab")
     override suspend fun switchActiveTab(tabId: Long) = Unit
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
     override suspend fun closeTab(tabId: Long) = Unit
@@ -146,7 +137,6 @@ internal object InstrumentedNoopIncognitoRepository : IncognitoTabRepository {
 internal class InstrumentedRecordingClipboardWriter : ClipboardWriter {
     val copied: MutableList<String> = mutableListOf()
 
-    // Spec 015 added the defaulted `label` parameter to ClipboardWriter.
     override fun copyUrl(url: String, label: String): Boolean {
         copied += url
         return true

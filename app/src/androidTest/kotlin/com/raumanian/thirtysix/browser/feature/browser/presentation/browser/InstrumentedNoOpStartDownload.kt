@@ -10,13 +10,7 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.StartDownl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-/**
- * Spec 015 — inert [StartDownloadUseCase] for the three pre-existing instrumented
- * `BrowserScreen` tests, which gained a constructor parameter when downloads landed.
- *
- * The gateway reports the platform as unavailable, so the use case short-circuits before
- * reaching the repository: no real download can be started from a UI test by accident.
- */
+/** Inert [StartDownloadUseCase]: the platform reports unavailable, so no UI test can start a download. */
 internal fun instrumentedNoOpStartDownloadUseCase(): StartDownloadUseCase = StartDownloadUseCase(
     gateway = InstrumentedInertGateway,
     repository = InstrumentedInertDownloadsRepository,

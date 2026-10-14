@@ -51,7 +51,6 @@ internal const val TEST_TAG_DOWNLOAD_ROW: String = "download_row"
 internal const val TEST_TAG_DOWNLOAD_CANCEL: String = "download_cancel"
 internal const val TEST_TAG_DOWNLOAD_PROGRESS: String = "download_progress"
 
-/** One sweep of the indeterminate line when the server declared no length. */
 private const val INDETERMINATE_SWEEP_MS: Int = 1_200
 
 private const val MIME_IMAGE = "image/"
@@ -59,14 +58,8 @@ private const val MIME_VIDEO = "video/"
 private val ARCHIVE_MIME_MARKERS = listOf("zip", "compressed", "x-tar", "x-7z", "x-rar", "gzip")
 
 /**
- * Spec 015 FR-020 – FR-022, FR-036 · Spec 019 FR-043 — one open row of the Downloads list.
- *
- * Shows filename, then the state **as a word** coloured as a secondary cue (complete →
- * `positive`, failed / missing → `error`, in flight → neutral), size and start time. A
- * transfer still in flight also shows live progress and a **one-tap cancel control**
- * (FR-036); that control is absent on every terminal state (FR-036a), which it derives from
- * the single `isTerminal` definition rather than re-deciding for itself. There is no retry
- * action (FR-001).
+ * State is shown as a word, with colour only as a secondary cue. The cancel control appears only
+ * while in flight, derived from `isTerminal` rather than decided here. There is no retry action.
  */
 @Composable
 fun DownloadRow(
@@ -96,7 +89,6 @@ fun DownloadRow(
 
     ListRow(
         title = item.record.fileName,
-        // The summary is rendered in [below] so the state word can carry its own colour.
         subtitle = "",
         leading = { ListRowIcon(icon = fileTypeIcon(item.record.mimeType)) },
         onClick = onClick,
@@ -117,7 +109,6 @@ fun DownloadRow(
             }
         },
         trailing = if (status.isInFlight) {
-            // FR-036 / FR-036a — present only while in flight, gone on every terminal state.
             {
                 RoundIconButton(
                     icon = AppIcons.Close,
@@ -134,7 +125,7 @@ fun DownloadRow(
     )
 }
 
-/** FR-043 — colour is the secondary cue; the word always carries the meaning. */
+/** Colour is the secondary cue; the word always carries the meaning. */
 @Composable
 private fun DownloadStatus.stateColor(): Color = when (this) {
     is DownloadStatus.Complete -> ThirtySixTheme.colors.positive
@@ -154,12 +145,8 @@ private fun fileTypeIcon(mimeType: String): Int {
 }
 
 /**
- * Determinate when the server declared a length, an indeterminate sweep otherwise — never a
- * fabricated percentage against an unknown total.
- *
- * Phase discipline (Constitution §V, contracts C6): [ProgressLine] invokes the lambda only in
- * `drawBehind`. The sweep is a held `State` read inside that lambda, so animating it redraws
- * one line and recomposes nothing.
+ * Indeterminate sweep when the total is unknown, never a fabricated percentage. The sweep is read
+ * only in [ProgressLine]'s `drawBehind`, so animating it redraws without recomposing.
  */
 @Composable
 private fun DownloadProgress(status: DownloadStatus, modifier: Modifier = Modifier) {
@@ -192,12 +179,7 @@ private fun DownloadProgress(status: DownloadStatus, modifier: Modifier = Modifi
     }
 }
 
-/**
- * FR-050 — locale-formatted start time.
- *
- * Uses the compose-observable locale bridge rather than `Locale.getDefault()`, which the
- * `NonObservableLocale` lint rule rejects inside a Composable — the trap Spec 014 hit.
- */
+// Compose-observable locale bridge: `Locale.getDefault()` is rejected by `NonObservableLocale` in a Composable.
 @Composable
 private fun rememberFormattedTime(epochMillis: Long): String {
     val locale = Locale.forLanguageTag(androidx.compose.ui.text.intl.Locale.current.toLanguageTag())
@@ -208,17 +190,12 @@ private fun rememberFormattedTime(epochMillis: Long): String {
     return formatter.format(Instant.ofEpochMilli(epochMillis))
 }
 
-/**
- * FR-020 / FR-050 — locale-formatted size. While transferring, shows progress against the
- * total when one is known; falls back to a localized "unknown size" rather than showing a
- * misleading zero.
- */
 @Composable
 private fun formattedSize(context: android.content.Context, status: DownloadStatus): String {
     val soFar = status.bytesSoFarOrNull
     val total = status.totalBytesOrNull
     return when {
-        // A completed transfer reports only a total; showing "71 B / 71 B" would be noise.
+        // A completed transfer reports only a total; "71 B / 71 B" would be noise.
         status is DownloadStatus.Complete -> total?.let { Formatter.formatFileSize(context, it) }
             ?: stringResource(R.string.downloads_size_unknown)
         soFar != null && total != null ->

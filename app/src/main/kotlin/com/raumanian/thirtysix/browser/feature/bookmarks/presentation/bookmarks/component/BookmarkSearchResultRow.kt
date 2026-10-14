@@ -12,11 +12,7 @@ import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLetter
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.BookmarkSearchResult
-/**
- * Spec 013 FR-026 — search-result row showing a bookmark plus its folder
- * path inline so the user always knows where the bookmark lives.
- * Spec 019 — an open [ListRow]; the path sits under the hostname.
- */
+/** A search result with its folder path under the hostname, so the person knows where it lives. */
 @Composable
 fun BookmarkSearchResultRow(
     result: BookmarkSearchResult,

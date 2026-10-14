@@ -4,25 +4,24 @@ import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 
 /**
- * Spec 019 FR-013 — one shortcut card on the Home page (data-model §3). Derived from data the
- * app already stores; nothing about a shortcut is persisted.
- *
- * @property stableKey lazy-list key: `tab:<id>`, `bookmark:<id>` or `history:<id>`.
- * @property tabId set only for [ShortcutKind.Tab] — tapping activates that tab instead of loading.
+ * One shortcut card on the Home page, derived from data the app already stores; nothing about a
+ * Shortcut is persisted.
  */
 data class HomeShortcut(
+    /** Lazy-list key: `tab:<id>`, `bookmark:<id>` or `history:<id>`. */
     val stableKey: String,
     val kind: ShortcutKind,
     val title: String,
     val url: String,
     val host: String,
+    /** Set only for [ShortcutKind.Tab] — tapping activates that tab instead of loading. */
     val tabId: Long? = null,
 )
 
 /** Which kind of shortcut a card is, shown as its tag and used as its lazy `contentType`. */
 enum class ShortcutKind { Tab, Saved, Recent }
 
-/** Spec 019 FR-013 / FR-014 — everything the Home page lists. */
+/** Everything the Home page lists. */
 data class HomeContent(
     val shortcuts: List<HomeShortcut>,
     val recent: List<HistoryEntry>,

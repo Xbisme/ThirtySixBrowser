@@ -31,16 +31,7 @@ import com.raumanian.thirtysix.browser.feature.history.presentation.history.comp
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.component.HistoryTopBar
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.component.NoHistoryMatchesState
 
-/**
- * Spec 014 / Spec 019 — History screen: top bar (back · clear-all · large title · search
- * well, inset-aware), the grouped list of open rows under section headers with its two
- * zero-result branches, the long-press action sheet, the clear-all confirmation dialog, and
- * a snackbar host for one-shot action feedback.
- *
- * `FaviconCache` is exposed via the ViewModel (rather than via Hilt entry points
- * or a separate Composable parameter) so test seams stay simple — instrumented
- * tests can swap the VM with a fake whose `faviconCache` field returns a noop.
- */
+// `FaviconCache` comes through the ViewModel so instrumented tests can swap in a no-op fake.
 @Composable
 fun HistoryScreen(
     modifier: Modifier = Modifier,
@@ -52,9 +43,7 @@ fun HistoryScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Spec 014 FR-010 / FR-019 — when the ViewModel signals a tap-replace (or a
-    // successful open-in-new-tab), pop back to BrowserScreen so the user immediately
-    // sees the URL load in the now-active tab.
+    // After a tap-replace or open-in-new-tab, pop back so the page loads in front of the user.
     LaunchedEffect(state.openUrl) {
         if (state.openUrl != null) {
             showBrowser()
@@ -107,14 +96,11 @@ fun HistoryScreen(
     }
 }
 
-// Spec 019 FR-041 / Constitution §V — headers and rows recycle only among their own kind.
+// Headers and rows recycle only among their own kind.
 private const val CONTENT_TYPE_DAY_HEADER = "history_day_header"
 private const val CONTENT_TYPE_ROW = "history_row"
 
-/**
- * Spec 014 FR-009 / FR-015 / FR-027 — three mutually-exclusive list branches:
- * nothing recorded at all, nothing matching an active query, or the grouped list.
- */
+// Three exclusive branches: nothing recorded, nothing matching the query, or the grouped list.
 @Composable
 private fun HistoryContent(
     state: HistoryUiState,
@@ -150,11 +136,7 @@ private fun HistoryContent(
     }
 }
 
-/**
- * Spec 014 FR-019a / FR-020 / FR-021 — collects the one-shot snackbar channel and
- * resolves each event to its localized message. Kept in its own Composable so the
- * `stringResource` lookups stay inside composition while `collect` runs in an effect.
- */
+// Its own Composable so `stringResource` lookups stay in composition while `collect` runs in an effect.
 @Composable
 private fun HistorySnackbarEffect(
     viewModel: HistoryViewModel,

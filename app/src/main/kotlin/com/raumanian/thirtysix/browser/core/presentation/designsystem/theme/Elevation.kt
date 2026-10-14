@@ -1,7 +1,5 @@
-// Spec 019 — the design system's soft, upward-bar and FAB-glow shadows (research R3).
-// Material's elevation shadow cannot express a two-layer soft shadow or a coloured glow, so
-// these draw a blurred shadow layer behind the element. The draw happens once per frame the
-// element is drawn; nothing here reads changing state, so it never causes recomposition.
+// Material's elevation shadow cannot express a soft two-layer shadow or a coloured glow, so these
+// draw a blurred shadow layer behind the element.
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 
@@ -28,10 +26,7 @@ private val FabBlur = 28.dp
 private val FabOffsetY = 10.dp
 private val FallbackElevation = 6.dp
 
-/**
- * A blurred shadow of [shape] in [color], drawn behind the element. On API 28+ the blur is a
- * hardware `setShadowLayer`; below that the platform elevation shadow is the fallback.
- */
+/** A blurred shadow of [shape]; below API 28 the platform elevation shadow stands in. */
 fun Modifier.dropShadow(shape: Shape, color: Color, blur: Dp, offsetY: Dp): Modifier =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         drawBehind {
@@ -46,7 +41,6 @@ fun Modifier.dropShadow(shape: Shape, color: Color, blur: Dp, offsetY: Dp): Modi
         shadow(elevation = FallbackElevation, shape = shape, clip = false)
     }
 
-/** The search bar, shortcut and tab cards, dialogs. */
 fun Modifier.softShadow(shape: Shape, color: Color): Modifier =
     dropShadow(shape, color, SoftBlur, SoftOffsetY)
 
@@ -54,6 +48,5 @@ fun Modifier.softShadow(shape: Shape, color: Color): Modifier =
 fun Modifier.barShadow(shape: Shape, color: Color): Modifier =
     dropShadow(shape, color, SoftBlur, BarOffsetY)
 
-/** The new-tab action's violet glow. */
 fun Modifier.fabGlow(shape: Shape, color: Color): Modifier =
     dropShadow(shape, color, FabBlur, FabOffsetY)

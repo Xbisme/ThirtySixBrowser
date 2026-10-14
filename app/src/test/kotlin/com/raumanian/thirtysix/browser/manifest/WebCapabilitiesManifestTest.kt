@@ -12,8 +12,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Spec 021 T022 / contracts C3.3 — the four site-capability permissions are declared, the matching
- * hardware is optional, and no other dangerous permission sneaks in (FR-037, Constitution §II).
+ * The four site-capability permissions are declared, the matching hardware is optional, and no
+ * other dangerous permission sneaks in.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class)
@@ -44,7 +44,7 @@ class WebCapabilitiesManifestTest {
     @Test
     fun `no permission beyond the Constitution table is declared`() {
         // Robolectric has no framework permission metadata, so the check is an exact allow-list:
-        // the Constitution §II table, plus the library-added signature permission scoped to this app.
+        // the project's permission table, plus the library-added signature permission scoped to this app.
         val allowed = siteCapabilityPermissions + setOf(
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE,

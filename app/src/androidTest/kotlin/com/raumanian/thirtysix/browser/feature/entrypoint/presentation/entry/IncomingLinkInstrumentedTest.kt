@@ -38,16 +38,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 020 — incoming content delivered to the real `MainActivity` (FR-003, FR-004, FR-008, FR-010).
- *
- * Asserts on the tab store rather than on page content, so the tests do not depend on the
- * network: a link from another app must create exactly one tab, a second delivery to the running
- * instance exactly one more, and a recreation none.
- *
- * Each test gets its own Hilt singleton component, so the production DataStore module would open
- * a second DataStore on the same file while the previous test's is still alive ("multiple
- * DataStores active"). It is replaced here by one backed by a fresh file per component; the real
- * settings repository still runs on top of it.
+ * Asserts on the tab store rather than page content, so the tests need no network. The production
+ * DataStore module is replaced by one with a fresh file per Hilt component: each test gets its own
+ * component, and a second DataStore on the same file fails with "multiple DataStores active".
  */
 @HiltAndroidTest
 @UninstallModules(SettingsDataStoreProviderModule::class)
@@ -61,7 +54,7 @@ class IncomingLinkInstrumentedTest {
         @Singleton
         fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(
-                produceFile = { File(context.cacheDir, "spec020-settings-${System.nanoTime()}.preferences_pb") },
+                produceFile = { File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb") },
             )
     }
 
@@ -111,7 +104,7 @@ class IncomingLinkInstrumentedTest {
 
             scenario.recreate()
             delay(SETTLE_MS)
-            assertEquals("recreation must not reopen the link (FR-008)", before + 1, tabCount())
+            assertEquals("recreation must not reopen the link", before + 1, tabCount())
         }
     }
 
@@ -122,10 +115,8 @@ class IncomingLinkInstrumentedTest {
         ActivityScenario.launch<MainActivity>(link).use { scenario ->
             assertEquals(before + 1, awaitTabCount(before + 1))
 
-            // singleTask: the running activity receives it in onNewIntent (FR-004). Driven through
-            // the instrumentation API, which calls exactly that callback. The SAME intent is reused
-            // because ActivityScenario finds its activity by comparing getIntent() to the launch
-            // intent; onNewIntent's setIntent with a different address would lose track of it.
+            // singleTask: the running activity receives it in onNewIntent. The same intent is reused because
+            // ActivityScenario finds its activity by comparing getIntent() to the launch intent.
             val deliver = {
                 scenario.onActivity { activity ->
                     InstrumentationRegistry.getInstrumentation().callActivityOnNewIntent(activity, Intent(link))
@@ -133,7 +124,7 @@ class IncomingLinkInstrumentedTest {
             }
             deliver()
             delay(SETTLE_MS)
-            assertEquals("same link within 2 s is one tab (FR-007)", before + 1, tabCount())
+            assertEquals("same link within 2 s is one tab", before + 1, tabCount())
 
             delay(DUPLICATE_WINDOW_PASSED_MS)
             deliver()

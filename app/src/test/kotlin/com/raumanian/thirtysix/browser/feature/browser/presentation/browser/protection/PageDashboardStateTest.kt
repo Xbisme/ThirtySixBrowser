@@ -6,7 +6,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 024 T051 — what the dashboard shows (FR-015, FR-016, FR-011). */
+/** What the privacy dashboard shows. */
 class PageDashboardStateTest {
     private val site: (String) -> String = { host -> host.split('.').takeLast(2).joinToString(".") }
     private val web = PageProtectionStatus(

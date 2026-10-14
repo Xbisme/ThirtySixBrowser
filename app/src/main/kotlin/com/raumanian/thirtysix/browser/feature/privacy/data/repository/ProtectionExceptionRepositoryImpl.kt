@@ -16,10 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 023 — [ProtectionExceptionRepository] over Room (`site_protection_exceptions`, schema v4).
- *
- * WebView IO threads read [currentSites], an in-memory copy of the table: it is filled from the
- * database once, then kept in step by every write made here (research R11). Bound as a singleton.
+ * WebView IO threads read [currentSites], an in-memory copy of `site_protection_exceptions` loaded
+ * once and kept in step by every write made here, so it must stay a singleton.
  */
 class ProtectionExceptionRepositoryImpl @Inject constructor(
     private val dao: SiteProtectionExceptionDao,

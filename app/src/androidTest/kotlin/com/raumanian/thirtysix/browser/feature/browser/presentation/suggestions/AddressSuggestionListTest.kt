@@ -16,7 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 022 T031 — the suggestion list on its own: rows, title fallback, tap, empty. */
+/** The suggestion list on its own: rows, title fallback, tap, empty. */
 @RunWith(AndroidJUnit4::class)
 class AddressSuggestionListTest {
 

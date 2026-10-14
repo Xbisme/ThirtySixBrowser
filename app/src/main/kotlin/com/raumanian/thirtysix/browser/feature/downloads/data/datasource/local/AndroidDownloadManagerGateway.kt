@@ -12,9 +12,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Production [DownloadManagerGateway] backed by [DownloadManager].
- */
 @Singleton
 class AndroidDownloadManagerGateway @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -31,7 +28,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
             if (request.mimeType.isNotEmpty()) setMimeType(request.mimeType)
             if (request.userAgent.isNotEmpty()) addRequestHeader(HEADER_USER_AGENT, request.userAgent)
             request.referer?.takeIf { it.isNotEmpty() }?.let { addRequestHeader(HEADER_REFERER, it) }
-            // FR-047 — the platform renders progress and completion; this app composes none.
+            // The platform renders progress and completion notifications; the app composes none.
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         }
         manager.enqueue(platformRequest)
@@ -60,16 +57,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
         downloadManager?.getUriForDownloadedFile(transferHandle)?.toString()
     }.getOrNull()
 
-    /**
-     * Presence is checked against the **real file** first, and only then against the
-     * content URI.
-     *
-     * The order is the whole point. The recorded URI belongs to the platform's download
-     * provider, so it stops resolving at the exact moment the provider forgets the
-     * transfer — which is precisely the situation FR-024a's fallback is for. Checking the
-     * URI first made that branch unreachable: every forgotten download reported `Missing`
-     * even with the file sitting in the Downloads folder. Found at gate G8.
-     */
+    // Real file first, URI second: the URI stops resolving once the provider forgets the transfer.
     override suspend fun fileExists(localUri: String?, fileName: String): Boolean =
         DownloadedFileProbe.exists(context, localUri, fileName)
 
@@ -82,20 +70,12 @@ class AndroidDownloadManagerGateway @Inject constructor(
         }
     }.getOrNull()
 
-    /**
-     * Deleting used to be `contentResolver.delete(localUri)` and to return whatever row
-     * count that produced. On an API 24 emulator that returned 1 — the provider's row was
-     * removed — while the file itself stayed in the public Downloads folder, so the app
-     * showed "File deleted" over a file that was still there. Two fixes, both necessary:
-     * ask the platform to `remove` the download (which is what actually deletes the file it
-     * manages), and then **verify** rather than trust the return value.
-     */
+    // `remove` is what deletes a managed file (a provider-row delete can leave it on disk), so verify.
     override suspend fun deleteFile(transferHandle: Long, fileName: String): Boolean =
         runCatching {
             downloadManager?.remove(transferHandle)
             val file = DownloadedFileProbe.publicDownloadFile(fileName)
             if (file.exists()) file.delete()
-            // The only answer that matters: is it gone?
             !file.exists()
         }.getOrDefault(false)
 
@@ -103,10 +83,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
         downloadManager != null && !isDownloadProviderDisabled()
     }.getOrDefault(false)
 
-    /**
-     * `setFilterById` is vararg-only on the platform side, so the spread is forced; the
-     * copy it makes is of at most a few hundred longs (A14's envelope) once per poll.
-     */
+    // `setFilterById` is vararg-only, so the spread copy is forced.
     @Suppress("SpreadOperator")
     private fun buildQuery(transferHandles: List<Long>): DownloadManager.Query =
         DownloadManager.Query().setFilterById(*transferHandles.toLongArray())

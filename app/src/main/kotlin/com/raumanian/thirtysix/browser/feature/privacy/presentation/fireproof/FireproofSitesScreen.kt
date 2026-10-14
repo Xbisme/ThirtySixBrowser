@@ -30,11 +30,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsTopBar
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
-/**
- * Spec 024 FR-012 — Settings → Privacy → Fireproof sites. Each row removes one site; "Remove all"
- * asks first; an empty list explains how to add one. Built from Spec 019 components (design
- * waiver, spec Assumptions).
- */
+/** Settings → Privacy → Fireproof sites. "Remove all" asks first. */
 @Composable
 fun FireproofSitesScreen(
     modifier: Modifier = Modifier,

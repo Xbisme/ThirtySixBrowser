@@ -16,17 +16,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 012 — T058 (US5 / FR-006).
- *
- * End-to-end-on-the-data-layer assertion that "close all incognito tabs"
- * wipes every incognito tab AND triggers the cookie snapshot restore. The
- * UI affordance + dialog are covered by the manual G4 user-device gate;
- * this test exercises the underlying use-case path that the dialog's
- * "Confirm" button invokes.
- *
- * Pure data-layer: opens 3 incognito tabs through the production
- * [IncognitoTabRepository], calls `closeAll()`, asserts the in-memory state
- * is empty.
+ * Data-layer check of the path behind the close-all-incognito dialog's Confirm: opens three
+ * incognito tabs through the production [IncognitoTabRepository], closes all, expects none left.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)

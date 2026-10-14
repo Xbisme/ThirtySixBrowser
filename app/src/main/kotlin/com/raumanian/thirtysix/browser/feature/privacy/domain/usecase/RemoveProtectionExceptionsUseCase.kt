@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptio
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/** Spec 023 FR-015 — Settings removes one site without protection, or all when [site] is null. */
+/** Removes one site without protection, or all when [site] is `null`. */
 class RemoveProtectionExceptionsUseCase @Inject constructor(
     private val exceptions: ProtectionExceptionRepository,
 ) {

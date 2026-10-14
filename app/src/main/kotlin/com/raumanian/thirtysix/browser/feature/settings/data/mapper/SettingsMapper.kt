@@ -11,20 +11,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import javax.inject.Inject
 
 /**
- * Maps a raw [Preferences] snapshot to the typed domain [UserSettings] (Spec 006).
- *
- * Per FR-008: missing keys → documented defaults from [AppDefaults].
- * Per FR-009: unknown enum values (theme / search engine) → documented defaults
- * via the per-enum `fromStorageValueOrDefault(...)` companion methods.
- *
- * Spec 016 decoding rules (data-model §1):
- *  - missing `dynamic_color_enabled` → `true`;
- *  - missing `history_retention_days`, or any stored integer that is not exactly one of the
- *    four day counts → 90 days, via [HistoryRetention.fromDaysOrDefault]. A corrupt or
- *    future value can therefore never produce an unbounded or out-of-set window.
- *
- * Spec 022 (data-model §1): missing `text_zoom_percent`, or any value that is not one of the nine
- * levels → 100%, via [TextSize.fromPercentOrDefault].
+ * Missing or unknown stored values decode to the defaults, so a corrupt value or one written by a
+ * newer build can never yield an out-of-set retention window or text size.
  */
 class SettingsMapper @Inject constructor() {
 

@@ -9,24 +9,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * Spec 021 data-model §4 — the page the browser screen is showing, and its generation: a number
- * that moves on every new main-frame navigation and every tab switch. Requests, one-time grants
- * and dialog suppression are tied to it, so anything belonging to a page that is gone is dropped
- * (FR-034).
- *
- * Owned by the browser screen, used on the main thread only.
+ * The page on screen and its generation, which moves on every main-frame navigation and tab
+ * switch. Requests, one-time grants and dialog suppression are tied to it, so anything from a
+ * page that is gone is dropped. Main thread only.
  */
-@Suppress("TooManyFunctions") // One entry point per kind of page request (C3.1).
+@Suppress("TooManyFunctions") // One entry point per kind of page request.
 class PageSession(
     val queue: PageRequestQueue,
     private val scope: CoroutineScope? = null,
     private val permissionGate: SitePermissionGate? = null,
     private val popups: PopupTabs? = null,
 ) : PageRequestSink {
-    /** Spec 021 research R4 — the page's fullscreen view, ended by a tab switch. */
+    /** The page's fullscreen view, ended by a tab switch. */
     val fullscreen = FullscreenController()
 
-    /** Spec 021 C1.5 — the current page's dialog flood control. */
+    /** The current page's dialog flood control. */
     val dialogs = DialogSuppression()
 
     private var tabId: Long? = null

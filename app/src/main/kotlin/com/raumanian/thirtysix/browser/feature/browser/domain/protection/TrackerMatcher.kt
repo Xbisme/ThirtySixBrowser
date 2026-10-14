@@ -2,8 +2,8 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.protection
 
 import com.raumanian.thirtysix.browser.core.domain.model.TrackerHostSet
 /**
- * Spec 023 data-model rule 3 — whether a request made by a page is blocked (FR-004, FR-004a,
- * FR-008). Called from WebView IO threads for every subresource: no I/O, no locks.
+ * Whether a request made by a page is blocked. Called from WebView IO threads for every
+ * subresource: no I/O, no locks.
  */
 class TrackerMatcher(
     private val trackers: TrackerHostSet,
@@ -24,9 +24,8 @@ class TrackerMatcher(
 
     companion object {
         /**
-         * Research R3 / FR-004a — hosts serving content the person chose to see (embedded
-         * video and maps, sign-in, public CDNs). Checked before the tracker list so a future
-         * list refresh can never block them.
+         * Hosts serving content the person chose to see (embedded video and maps, sign-in,
+         * public CDNs). Checked before the tracker list so a list refresh can never block them.
          */
         val NEVER_BLOCK_HOSTS: Set<String> = setOf(
             "accounts.google.com",

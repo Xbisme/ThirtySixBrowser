@@ -47,9 +47,8 @@ private val PointIconGap = 12.dp
 private const val FOOTNOTE_ALPHA = 0.75f
 
 /**
- * Spec 019 FR-050 — what an empty incognito tab shows instead of the Home page (FR-015): what is
- * and is not kept, on the plum incognito surface in both themes (FR-051). Every statement here
- * describes what Spec 012 actually does; nothing personal from normal tabs is shown.
+ * What an empty incognito tab shows instead of Home. Every statement must match what incognito
+ * actually does; nothing personal from normal tabs is shown.
  */
 @Composable
 fun IncognitoPage(bottomPadding: Dp, modifier: Modifier = Modifier) {

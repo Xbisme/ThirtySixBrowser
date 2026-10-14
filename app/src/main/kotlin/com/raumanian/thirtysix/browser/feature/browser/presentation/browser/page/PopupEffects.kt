@@ -11,9 +11,8 @@ import com.raumanian.thirtysix.browser.R
 import kotlinx.coroutines.launch
 
 /**
- * Spec 021 C2.5 — the blocked pop-up notice (with Open when an address is known, FR-026a) and
- * the tab-limit message for a window that cannot open (FR-028). A notice, not a dialog: the page
- * keeps working underneath.
+ * The blocked pop-up notice (with Open when an address is known) and the tab-limit message. A
+ * notice, not a dialog: the page keeps working underneath.
  */
 @Composable
 fun PopupEffects(popups: PopupTabs, snackbarHostState: SnackbarHostState) {

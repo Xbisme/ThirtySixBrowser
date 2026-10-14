@@ -1,15 +1,9 @@
-# ThirtySixBrowser Detekt config (Spec 001 baseline, generated 2026-05-01)
+# ThirtySixBrowser Detekt config.
 #
-# Spec compliance:
-#   - FR-018:  MagicNumber rule active for production code, excludes test sources
-#              (default `excludes` already covers **/test/**, **/androidTest/**, etc.)
-#   - C8 / Constitution §III trivial whitelist:
-#              MagicNumber.ignoreNumbers = ['-1', '0', '1', '2']  (default — DO NOT shrink)
-#   - FR-020:  detekt-baseline.xml may be generated for one-time template-code violations;
-#              baseline MUST NOT cover violations introduced after Spec 001.
-#
-# Project config rule: only deviate from default when a spec mandates it. Always cite the
-# FR / SC / Q answer in a comment when overriding a default.
+#   - MagicNumber applies to production code; the default `excludes` cover test sources.
+#   - MagicNumber.ignoreNumbers stays at the default ['-1', '0', '1', '2'].
+#   - The baseline covers only the original template code, never new violations.
+#   - Deviate from a default only with a comment giving the reason.
 #
 build:
   maxIssues: 0
@@ -350,7 +344,7 @@ naming:
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
     functionPattern: '[a-z][a-zA-Z0-9]*'
     excludeClassPattern: '$^'
-    # Spec 002: @Composable functions are PascalCase by Compose convention
+    # @Composable functions are PascalCase by Compose convention
     # (https://developer.android.com/jetpack/compose/api-guidelines#naming).
     # ktlint already exempts via @file:Suppress in source files; align Detekt similarly.
     ignoreAnnotated: ['Composable']

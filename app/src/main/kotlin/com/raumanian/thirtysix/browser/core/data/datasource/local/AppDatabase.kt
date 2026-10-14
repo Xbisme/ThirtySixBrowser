@@ -39,14 +39,8 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "thirtysix_browser.db"
 
-        /**
-         * Spec 015 raised this from 1 to 2 by adding `download_records` — the project's
-         * first real migration. Any further bump MUST ship a registered [androidx.room.migration.Migration]
-         * and a committed schema export; `fallbackToDestructiveMigration*` remains banned.
-         * Spec 021 raised it to 3 by adding `site_permissions` (Migration2To3).
-         * Spec 023 raised it to 4 by adding `site_protection_exceptions` (Migration3To4).
-         * Spec 024 raised it to 5 by adding `fireproof_sites` (Migration4To5).
-         */
+        // Every bump needs a registered additive Migration and a committed schema export;
+        // destructive fallback is never used, so user data always survives an upgrade.
         const val SCHEMA_VERSION = 5
     }
 }

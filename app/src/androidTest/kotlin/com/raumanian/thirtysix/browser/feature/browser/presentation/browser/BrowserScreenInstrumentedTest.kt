@@ -64,29 +64,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 007 — end-to-end pipeline verification for the Browser screen.
- *
- * - T021 asserts the page DOM contains "Example Domain" (FR-012, SC-005).
- * - T021b asserts SC-004: configuration change preserves `currentUrl` in
- *   `BrowserUiState` (no URL revert across activity recreation).
- *
- * Spec 008 (T023a) — decoupled from the production [SAMPLE_PAGE_URL]
- * value. Spec 008 changes that constant from `https://example.com` →
- * `https://www.google.com/`; this test continues to assert against the
- * `<h1>Example Domain</h1>` DOM element by constructing a [BrowserViewModel]
- * directly with the literal `https://example.com` URL (mirrors
- * `BrowserScreenOfflineErrorTest` which uses the same manual-VM-construction
- * pattern instead of `@TestInstallIn`-based Hilt module replacement).
- *
- * US2 / US3 render-branch coverage lives in sibling classes that seed the
- * ViewModel before `setContent` so no live WebView load can race the assertion:
- * `BrowserScreenLoadingIndicatorTest` (T026) and `BrowserScreenOfflineErrorTest`
- * (T036). This class keeps only assertions that genuinely need a real page load.
+ * Browser screen assertions that need a real page load: the page renders, and a configuration
+ * change keeps `currentUrl`. Render branches that must not race a live load are tested with a
+ * seeded view model in `BrowserScreenLoadingIndicatorTest` and `BrowserScreenOfflineErrorTest`.
  */
 @HiltAndroidTest
-// Spec 022 — the browser screen now reads settings (text size), so each test needs its own
-// DataStore file: a fresh Hilt component per test would otherwise open a second one on the same
-// file ("multiple DataStores active"), as Spec 020 found for MainActivity tests.
+// The browser screen reads settings (text size), so each test gets its own DataStore file:
+// a fresh Hilt component per test would otherwise open a second one ("multiple DataStores active").
 @UninstallModules(SettingsDataStoreProviderModule::class)
 @RunWith(AndroidJUnit4::class)
 class BrowserScreenInstrumentedTest {
@@ -98,7 +82,7 @@ class BrowserScreenInstrumentedTest {
         @Singleton
         fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(
-                produceFile = { File(context.cacheDir, "spec022-settings-${System.nanoTime()}.preferences_pb") },
+                produceFile = { File(context.cacheDir, "settings-${System.nanoTime()}.preferences_pb") },
             )
     }
 
@@ -114,21 +98,8 @@ class BrowserScreenInstrumentedTest {
     fun setUp() {
         hiltRule.inject()
         composeRule.activity.runOnUiThread {
-            // Spec 008 (T023a) — manual VM construction with the literal
-            // example.com URL keeps assertions on `<h1>Example Domain</h1>`
-            // stable regardless of SAMPLE_PAGE_URL value
-            // (Spec 008 changed the production constant to Google). VM is
-            // class-scoped so the rotation test can re-attach it after
-            // activity recreate, preserving the same UiState.
-            // Spec 010 — instrumented tests do not exercise the address-bar
-            // query path, so a no-op `BuildSearchUrlUseCase` is sufficient.
-            // The Query branch in `BrowserViewModel.onAddressBarSubmit` is
-            // never invoked under this test's WebView load-only flow.
-            // Spec 011 — instrumented tests do not exercise tab logic, so a
-            // no-op TabRepository fake is sufficient for the 4 new use-case
-            // dependencies. Mirrors the InstrumentedNoopSearchEngineRepository
-            // pattern (Spec 010). Construction is verbose because we wire 4
-            // use cases against a single shared no-op repo instance.
+            // Built by hand with a fixed example.com URL and no-op repositories; class-scoped so the
+            // rotation test can re-attach the same view model after the activity is recreated.
             val noopTabRepo = InstrumentedNoopTabRepository
             val noopIncognitoRepo = InstrumentedNoopIncognitoTabRepository
             val observeTabs = ObserveTabsUseCase(noopTabRepo)
@@ -165,7 +136,7 @@ class BrowserScreenInstrumentedTest {
 
     @Test
     fun pageRenders_assertsDomContainsExampleDomain() {
-        // T021 — Espresso-Web atom waits for JS-ready state, then checks <h1> text.
+        // The Espresso-Web atom waits for the JS-ready state, then checks the page text.
         onWebView(isAssignableFrom(WebView::class.java))
             .withElement(findElement(Locator.TAG_NAME, "body"))
             .check(webMatches(getText(), containsString(PAGE_TEXT)))
@@ -173,10 +144,7 @@ class BrowserScreenInstrumentedTest {
 
     @Test
     fun rotation_preservesCurrentUrlInUiState() {
-        // T021b — SC-004: simulate configuration change. The same VM instance
-        // is re-attached after recreate (Spec 008 T023a refactor); its
-        // MutableStateFlow holds currentUrl, so the WebView re-renders the
-        // same URL successfully after activity recreation.
+        // Configuration change: the same view model is re-attached, so the same URL renders again.
         composeRule.waitForIdle()
 
         composeRule.activityRule.scenario.recreate()
@@ -197,45 +165,25 @@ class BrowserScreenInstrumentedTest {
     }
 
     private companion object {
-        // Spec 008 (T023a) — pinned to https://example.com for the "Example Domain"
-        // h1 assertion, decoupled from production SAMPLE_PAGE_URL
-        // which Spec 008 redirected to Google homepage.
+        // Pinned to example.com for the page-text assertion, independent of the app's defaults.
         const val TEST_PAGE_URL: String = "https://example.com"
 
-        // example.com dropped its <h1>Example Domain</h1> in 2026 (the page is now a short
-        // multilingual notice with only <title>Example Domain), so the render check reads text
-        // that is in the body today.
+        // example.com has no <h1>Example Domain</h1>, so the check reads body text.
         const val PAGE_TEXT: String = "documentation examples"
 
-        // CI emulator budget — NOT the user-facing SC-002 production target
-        // (200 ms). See test method KDoc above.
+        // A CI emulator budget, not the production loading target.
     }
 }
 
-/**
- * Spec 010 — file-private no-op [SearchEngineRepository] for the WebView-load-only
- * instrumented test. The Query branch of `BrowserViewModel.onAddressBarSubmit` is
- * never invoked here, so this stub never executes.
- */
+/** No-op [SearchEngineRepository]: the query branch is never reached here. */
 private object InstrumentedNoopSearchEngineRepository : SearchEngineRepository {
     override suspend fun buildSearchUrl(query: String): String =
         error("instrumented test should not reach the search-URL build path")
 }
 
-/**
- * Spec 011 — file-private no-op [TabRepository] for the WebView-load-only
- * instrumented test. Emits an empty tab list (`Tab?` = null in
- * `ObserveActiveTabUseCase`) so `BrowserViewModel.activeTabFlow` stays at
- * `null` and the `init {}` collectors do not mutate state. All write methods
- * are no-ops. Matches the InstrumentedNoopSearchEngineRepository pattern.
- */
+/** No-op [TabRepository]: no active tab, so the view model's collectors leave state alone. */
 private object InstrumentedNoopTabRepository : TabRepository {
-    // Spec 012 — `combine(...)` inside `ObserveAllTabsUseCase` requires both
-    // upstreams to remain HOT (never complete) so the merged flow keeps
-    // emitting on demand. `flowOf(emptyList())` completes after one emission
-    // which can leave downstream collectors in a stale state and starve the
-    // Compose recomposer of subsequent updates — switched to a hot
-    // `MutableStateFlow` mirroring the unit-test `FakeTabRepository` pattern.
+    // Hot, never completing: `ObserveAllTabsUseCase` combines upstreams that must stay subscribed.
     private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
         kotlinx.coroutines.flow.MutableStateFlow(emptyList())
     override fun observeTabs(): Flow<List<Tab>> = state
@@ -248,11 +196,7 @@ private object InstrumentedNoopTabRepository : TabRepository {
     override suspend fun getTabCount(): Int = 0
 }
 
-/**
- * Spec 012 — file-private no-op [IncognitoTabRepository] mirroring the
- * [InstrumentedNoopTabRepository] pattern. Hot `MutableStateFlow` (NOT
- * `flowOf`) so `ObserveAllTabsUseCase.combine(...)` stays subscribed.
- */
+/** No-op [IncognitoTabRepository]; hot for the same reason as [InstrumentedNoopTabRepository]. */
 private object InstrumentedNoopIncognitoTabRepository : IncognitoTabRepository {
     private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
         kotlinx.coroutines.flow.MutableStateFlow(emptyList())
@@ -266,11 +210,7 @@ private object InstrumentedNoopIncognitoTabRepository : IncognitoTabRepository {
     override suspend fun getCount(): Int = 0
 }
 
-/**
- * Spec 011 favicon amendment — no-op [FaviconCache] for the WebView-load
- * instrumented test. `onReceivedIcon` may fire as the page loads but the
- * test never asserts on the cache; recording is a no-op.
- */
+/** No-op [FaviconCache]: icons may arrive while the page loads, but nothing is asserted on them. */
 private object InstrumentedNoopFaviconCache : FaviconCache {
     private val state = MutableStateFlow(0L)
     override val version: StateFlow<Long> = state.asStateFlow()
@@ -280,10 +220,7 @@ private object InstrumentedNoopFaviconCache : FaviconCache {
     override fun fileFor(url: String): File? = null
 }
 
-/**
- * Spec 011 Q4 amendment — no-op [ScreenshotCache] for the WebView-load
- * instrumented test.
- */
+/** No-op [ScreenshotCache]. */
 private object InstrumentedNoopScreenshotCache : ScreenshotCache {
     private val state = MutableStateFlow(0L)
     override val version: StateFlow<Long> = state.asStateFlow()
@@ -293,11 +230,7 @@ private object InstrumentedNoopScreenshotCache : ScreenshotCache {
     override suspend fun clearAll() = Unit
 }
 
-/**
- * Spec 013 — no-op [com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository]
- * for the instrumented BrowserScreen tests; star-icon path is exercised in
- * dedicated `BrowserScreenStarIconTest`, not here.
- */
+/** No-op bookmark repository; the star icon has its own test. */
 private object InstrumentedNoopBookmarkRepository :
     BookmarkRepository {
     override fun observeBookmarksByFolder(folderId: Long?) =
@@ -332,7 +265,7 @@ private object InstrumentedNoopBookmarkRepository :
         Result.Success(BookmarkDescendantCount(0, 0))
 }
 
-/** Spec 014 — no-op [HistoryRepository] for the instrumented test. */
+/** No-op [HistoryRepository]. */
 private object InstrumentedNoopHistoryRepository :
     HistoryRepository {
     override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
@@ -344,9 +277,6 @@ private object InstrumentedNoopHistoryRepository :
     override suspend fun clearAll(): Int = 0
     override suspend fun count(): Int = 0
 }
-
-/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
-private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"
 
 private val NoSlots = BrowserSlots(
     fireButton = FireButton(enabled = true, onClick = {}),

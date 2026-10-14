@@ -8,14 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 
 /**
- * Spec 014 — minimal in-memory [HistoryRepository] for ViewModel-level tests.
- * Records visits into a backing list flow; supports observing, deleting by id,
- * clearing, and counting. Sufficient for any test that needs to verify the
- * recorder fires (or doesn't fire) without standing up a real Room DB.
- *
- * Spec 016 — [clearAll] and [pruneOlderThan] append to an optional [callLog] shared with other
- * fakes, and can be made to throw through [clearAllError] / [pruneError], for the ordering and
- * failure-boundary tests of `ClearBrowsingDataUseCase` and `ChangeHistoryRetentionUseCase`.
+ * In-memory [HistoryRepository]. [clearAll] and [pruneOlderThan] append to an optional
+ * [callLog] shared with other fakes, so tests can assert ordering and failures.
  */
 class FakeHistoryRepository(
     private val callLog: MutableList<String> = mutableListOf(),

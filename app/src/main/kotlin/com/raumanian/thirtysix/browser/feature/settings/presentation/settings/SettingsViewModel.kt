@@ -37,20 +37,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Spec 016 — view model for the Settings screen.
- *
- * Mirrors the persisted `UserSettings` snapshot into [uiState], owns which dialog is open,
- * and reports one-shot outcomes on [events]. Every change goes through a domain use case —
- * never a repository — per Constitution §IV; each user story adds its use cases and handlers.
- *
- * The two platform facts arrive as injected values rather than being read from `Build` or
- * `BuildConfig` here, so every branch is testable on the JVM (research.md R9, R10).
+ * Mirrors the persisted settings into [uiState], owns which dialog is open and reports one-shot
+ * outcomes on [events]. Platform facts are injected rather than read from `Build`, so every
+ * branch is testable on the JVM.
  */
 @HiltViewModel
-// Coordinates one use case per setting across seven user stories, so both the constructor and
-// the handler count grow past detekt's defaults by design — the same trade-off HistoryViewModel
-// documents for the screens that aggregate several domains.
-@Suppress("TooManyFunctions", "LongParameterList")
+@Suppress("TooManyFunctions", "LongParameterList") // one use case and handler per setting
 class SettingsViewModel @Inject constructor(
     observeUserSettings: ObserveUserSettingsUseCase,
     private val setThemeMode: SetThemeModeUseCase,
@@ -76,11 +68,7 @@ class SettingsViewModel @Inject constructor(
     )
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    /**
-     * One-shot outcomes. `replay = 0` so a re-subscribing Composable never re-shows a stale
-     * message; `DROP_OLDEST` with a one-slot buffer so a burst surfaces the latest outcome
-     * without suspending the emitter — the Spec 013 channel policy Specs 014 and 015 reused.
-     */
+    // No replay, so a re-subscribing screen never re-shows a stale message; a burst keeps the latest.
     private val _events: MutableSharedFlow<SettingsEvent> = MutableSharedFlow(
         replay = 0,
         extraBufferCapacity = 1,
@@ -104,21 +92,12 @@ class SettingsViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    /**
-     * Research R12 — called each time the screen enters STARTED. A language change, in-app or
-     * from Android 13+ system settings, recreates the activity but keeps this view model, so a
-     * value read only at creation would go stale exactly when it matters (FR-016).
-     */
+    // The language can change in system settings while this view model lives on, so re-read it on every start.
     fun onScreenStarted() {
         refreshAppLanguage()
     }
 
-    /** Closes whichever dialog is open. Outside tap, system back and Cancel all end up here. */
-    /**
-     * Spec 020 FR-022 — re-read whether ThirtySix is the default browser. Called on every resume:
-     * the system's confirmation is a translucent screen, so returning from it resumes the
-     * activity without starting it again.
-     */
+    // Called on resume: the system's default-browser dialog is translucent, so the activity is never restarted.
     fun refreshDefaultBrowser() {
         _uiState.update { it.copy(isDefaultBrowser = isDefaultBrowser()) }
     }
@@ -127,59 +106,42 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(dialog = null) }
     }
 
-    // ──────── US1 — theme ────────
-
     fun onThemeRowClick() {
         openDialog(SettingsDialog.ThemeChooser)
     }
 
-    /** FR-006 — re-selecting the current mode closes the chooser and writes nothing. */
     fun onThemeSelected(mode: ThemeMode) {
         dismissDialog()
         if (mode == _uiState.value.themeMode) return
         persist { setThemeMode(mode) }
     }
 
-    // ──────── Spec 022 US4 — text size ────────
-
     fun onTextSizeRowClick() {
         openDialog(SettingsDialog.TextSizeChooser)
     }
 
-    /** Spec 022 FR-030 — re-selecting the current level closes the chooser and writes nothing. */
     fun onTextSizeSelected(size: TextSize) {
         dismissDialog()
         if (size == _uiState.value.textSize) return
         persist { setTextSize(size) }
     }
 
-    // ──────── US2 — search engine ────────
-
     fun onSearchEngineRowClick() {
         openDialog(SettingsDialog.SearchEngineChooser)
     }
 
-    /** FR-006 — re-selecting the current engine closes the chooser and writes nothing. */
     fun onSearchEngineSelected(engine: SearchEngine) {
         dismissDialog()
         if (engine == _uiState.value.searchEngine) return
         persist { setSearchEngine(engine) }
     }
 
-    // ──────── US3 — app language ────────
-
     fun onLanguageRowClick() {
         openDialog(SettingsDialog.LanguageChooser)
     }
 
-    /**
-     * FR-013 – FR-015. The use case skips the platform when [language] is already held
-     * (FR-006), and then the dialog closes at once.
-     *
-     * Spec 019 — otherwise the dialog stays open until the screen reports the new language has
-     * landed ([onLanguageApplied]). Closing it first showed the old language for a frame or
-     * three before the new one arrived, which read as a flicker.
-     */
+    // The chooser stays open until the screen reports the new language has landed (onLanguageApplied);
+    // closing it first shows the old language for a few frames, which reads as a flicker.
     fun onLanguageSelected(language: AppLanguage) {
         if (language == _uiState.value.appLanguage) {
             dismissDialog()
@@ -194,14 +156,11 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    /** Spec 019 — the new language is on screen (or the wait timed out): close the chooser. */
+    /** The new language is on screen, or the wait timed out. */
     fun onLanguageApplied() {
         dismissDialog()
     }
 
-    // ──────── US4 — clear browsing data ────────
-
-    /** FR-025 — the dialog opens with every category selected. */
     fun onClearBrowsingDataRowClick() {
         openDialog(
             SettingsDialog.ClearBrowsingData(
@@ -211,7 +170,7 @@ class SettingsViewModel @Inject constructor(
         )
     }
 
-    /** Flips one category. Ignored while a clear runs, so the selection cannot change mid-way. */
+    // Ignored while a clear runs, so the selection cannot change mid-way.
     fun onClearCategoryToggled(category: ClearBrowsingDataCategory) {
         _uiState.update { state ->
             val dialog = state.dialog as? SettingsDialog.ClearBrowsingData
@@ -225,11 +184,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * FR-026, FR-032, FR-033 — runs the clear exactly once. Ignored while nothing is selected or
-     * a clear is already running. The dialog stays open, in progress, until the clear finishes,
-     * then closes and reports the outcome.
-     */
+    // Runs the clear exactly once; the dialog stays open, in progress, until it finishes.
     fun onClearBrowsingDataConfirmed() {
         val dialog = _uiState.value.dialog as? SettingsDialog.ClearBrowsingData
         if (dialog == null || dialog.inProgress || dialog.selection.isEmpty()) return
@@ -247,23 +202,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    /** FR-032 — a running clear cannot be dismissed; an idle dialog closes like any other. */
+    // A running clear cannot be dismissed.
     fun onClearBrowsingDataDismissed() {
         val dialog = _uiState.value.dialog as? SettingsDialog.ClearBrowsingData
         if (dialog?.inProgress == true) return
         dismissDialog()
     }
 
-    // ──────── US5 — history retention ────────
-
     fun onRetentionRowClick() {
         openDialog(SettingsDialog.RetentionChooser)
     }
 
-    /**
-     * FR-006 the same window changes nothing; FR-021 a shorter one asks first, because it
-     * deletes history; FR-023 a longer one applies at once.
-     */
+    // A shorter window deletes history, so it asks first; a longer one applies at once.
     fun onRetentionSelected(retention: HistoryRetention) {
         val current = _uiState.value.historyRetention
         when {
@@ -282,20 +232,14 @@ class SettingsViewModel @Inject constructor(
         applyRetention(dialog.target)
     }
 
-    /** FR-021 — cancelling the warning leaves both the window and the history untouched. */
     fun onShortenRetentionCancelled() {
         dismissDialog()
     }
 
-    // ──────── US6 — dynamic color ────────
-
-    /** FR-009 — a no-op when unchanged; a failed write is reported (FR-043). */
     fun onDynamicColorToggled(enabled: Boolean) {
         if (enabled == _uiState.value.isDynamicColorEnabled) return
         persist { setDynamicColorEnabled(enabled) }
     }
-
-    // ──────── shared ────────
 
     private fun openDialog(dialog: SettingsDialog) {
         _uiState.update { it.copy(dialog = dialog) }
@@ -315,11 +259,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * FR-043 — runs one settings write. A failure leaves the previous value in effect, because
-     * the state only ever follows the persisted snapshot, and is reported as
-     * [SettingsEvent.SettingNotSaved].
-     */
+    // A failed write leaves the previous value on screen, because the state only follows the persisted snapshot.
     private fun persist(write: suspend () -> Result<Unit>) {
         viewModelScope.launch {
             if (write() is Result.Error) _events.tryEmit(SettingsEvent.SettingNotSaved)

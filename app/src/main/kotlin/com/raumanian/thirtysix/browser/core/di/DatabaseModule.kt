@@ -30,11 +30,8 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DATABASE_NAME)
-            // No fallbackToDestructiveMigration*: strict-no-destructive policy (FR-009).
-            // No setJournalMode: rely on Room's WRITE_AHEAD_LOGGING default (FR-007 / R8).
-            // Spec 015 FR-016: v1 -> v2 registered explicitly. Every future migration is
-            // appended here; omitting one makes Room throw rather than destroy data, which
-            // is the behaviour the strict policy is protecting.
+            // No destructive fallback: a missing migration makes Room throw instead of wiping
+            // user data. WAL comes from Room's default journal mode.
             .addMigrations(
                 Migration1To2.MIGRATION_1_2,
                 Migration2To3.MIGRATION_2_3,

@@ -7,13 +7,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Spec 012 — T011 smoke test.
- *
- * Verifies that the `isIncognito` property added in Phase 2 (T004) defaults to
- * `false` so all Spec 011 fixtures and tests stay backwards-compatible, and
- * that an explicit `isIncognito = true` participates in equality the same way
- * any other `data class` field does.
+ * `isIncognito` defaults to `false`, and an explicit `true` takes part in equality like any
+ * other field.
  */
+
 class TabModelIncognitoFlagTest {
 
     private fun newTab(isIncognito: Boolean? = null): Tab {
@@ -34,7 +31,7 @@ class TabModelIncognitoFlagTest {
     }
 
     @Test
-    fun `default-flag tab equals legacy-style construction (Spec 011 backwards compat)`() {
+    fun `default-flag tab equals legacy-style construction (backwards compat)`() {
         val legacy = newTab()
         val reconstructed = Tab(
             id = 1L,

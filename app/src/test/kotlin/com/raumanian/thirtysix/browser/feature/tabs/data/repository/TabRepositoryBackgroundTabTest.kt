@@ -24,7 +24,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 021 T041 / research R9 — a tab opened behind the active one, normal and incognito. */
+/** A tab opened behind the active one, normal and incognito. */
 @RunWith(AndroidJUnit4::class)
 class TabRepositoryBackgroundTabTest {
 

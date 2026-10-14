@@ -18,12 +18,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 016 T037 (US1 / FR-003, FR-006).
- *
- * Drives [SettingsScreen] over an in-memory repository — no Hilt, no WebView — and checks the
- * theme row, the chooser's options and selection, and that a choice reaches the row.
- */
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenThemeTest {
 

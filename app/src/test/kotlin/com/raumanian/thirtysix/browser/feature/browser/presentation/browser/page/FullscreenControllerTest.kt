@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Spec 021 T037 / research R4 — fullscreen state, the engine told once, a tab switch ends it. */
+/** Fullscreen state, the engine told once, a tab switch ends it. */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class)
 class FullscreenControllerTest {

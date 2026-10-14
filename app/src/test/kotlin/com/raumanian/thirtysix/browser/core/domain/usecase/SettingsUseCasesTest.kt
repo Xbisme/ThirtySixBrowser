@@ -16,11 +16,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Verifies the settings use cases are pure delegations to [SettingsRepository] (Spec 006).
- * Uses a hand-rolled FakeSettingsRepository (no MockK in classpath).
- *
- * Spec 016 removed the Spec 006 language use case with its value (research R4); the language now goes
- * through `AppLanguageController`, covered by `AppLanguageUseCasesTest`.
+ * The settings use cases are pure delegations to [SettingsRepository]. The app language goes
+ * through `AppLanguageController` instead, covered by `AppLanguageUseCasesTest`.
  */
 class SettingsUseCasesTest {
 
@@ -29,7 +26,6 @@ class SettingsUseCasesTest {
     @Test
     fun observeUserSettingsUseCase_delegatesToRepository() {
         val useCase = ObserveUserSettingsUseCase(fake)
-        // The flow comes through unchanged
         assertEquals(fake.observeFlow, useCase())
     }
 
@@ -77,8 +73,8 @@ private class FakeSettingsRepository : SettingsRepository {
 
     override fun observeSettings(): Flow<UserSettings> = observeFlow
 
-    // Spec 018 — the one-shot read; this fake is only exercised through the observer,
-    // so the documented defaults are the honest answer here.
+    // Only exercised through the observer, so the defaults are the honest answer here.
+
     override suspend fun currentSettings(): UserSettings = UserSettings.DEFAULT
 
     override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> {

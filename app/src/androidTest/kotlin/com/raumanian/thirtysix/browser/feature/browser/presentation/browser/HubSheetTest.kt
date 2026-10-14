@@ -31,7 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 019 T036 — the hub (FR-030 – FR-032); replaces Spec 015's BrowserOverflowMenuTest. */
+/** The hub sheet. */
 @RunWith(AndroidJUnit4::class)
 class HubSheetTest {
 
@@ -80,7 +80,7 @@ class HubSheetTest {
     private fun awaitCall(expected: String) {
         composeRule.waitUntil(TIMEOUT_MS) { calls.isNotEmpty() }
         assertEquals(listOf(expected), calls)
-        assertTrue("the hub closes before acting (FR-032)", dismissed >= 1)
+        assertTrue("the hub closes before acting", dismissed >= 1)
     }
 
     @Test
@@ -148,7 +148,11 @@ class HubSheetTest {
     @Test
     fun pageTools_onHome_onlyTextSizeShows() {
         setHub(
-            pageTools = HubPageToolsState(available = setOf(PageTool.TextSize), isDesktopMode = false, textSizePercent = TEXT_SIZE),
+            pageTools = HubPageToolsState(
+                available = setOf(PageTool.TextSize),
+                isDesktopMode = false,
+                textSizePercent = TEXT_SIZE,
+            ),
         )
         listOf(TEST_TAG_HUB_TOOL_FIND, TEST_TAG_HUB_TOOL_SHARE, TEST_TAG_HUB_TOOL_PRINT, TEST_TAG_HUB_TOOL_DESKTOP)
             .forEach { composeRule.onNodeWithTag(it).assertDoesNotExist() }
@@ -158,7 +162,11 @@ class HubSheetTest {
     @Test
     fun desktopTile_isASwitch_reflectingTheTabsMode() {
         setHub(
-            pageTools = HubPageToolsState(available = PageTool.entries.toSet(), isDesktopMode = true, textSizePercent = TEXT_SIZE),
+            pageTools = HubPageToolsState(
+                available = PageTool.entries.toSet(),
+                isDesktopMode = true,
+                textSizePercent = TEXT_SIZE,
+            ),
         )
         composeRule.onNodeWithTag(TEST_TAG_HUB_TOOL_DESKTOP).performScrollTo().assertIsOn()
     }

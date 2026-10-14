@@ -1,12 +1,11 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component
 
-/** Spec 019 — what each slot of [BrowserBottomBar] does (FR-020). */
 internal data class BrowserBottomBarCallbacks(
     val onHome: () -> Unit,
     val onSearch: () -> Unit,
     val onNewTab: () -> Unit,
     val onTabs: () -> Unit,
-    /** Spec 011 Q2 — long-press on Tabs still opens a new tab inline. */
+    /** Long-press on Tabs opens a new tab directly. */
     val onTabsLongPress: () -> Unit,
     val onMenu: () -> Unit,
 )

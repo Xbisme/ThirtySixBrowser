@@ -1,8 +1,3 @@
-// Spec 003 — Theme mode enum (originally `presentation/theme/`).
-// Spec 006 — Relocated to `domain/model/` because theme mode is a domain concept
-// (a user preference). Persistence layer lives in `data/local/datastore/`; the
-// presentation layer (Spec 003 ThirtySixTheme) only renders the chosen mode.
-
 package com.raumanian.thirtysix.browser.core.domain.model
 
 import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
@@ -13,14 +8,7 @@ enum class ThemeMode(val storageValue: String) {
     ;
 
     companion object {
-        /**
-         * Map an on-disk storage value back to a ThemeMode variant.
-         *
-         * Falls back to [AppDefaults.THEME_MODE] when:
-         *  - value is null (key absent on disk → first-launch default)
-         *  - value does not match any known variant (FR-009 unknown-enum fallback,
-         *    e.g., user downgraded from a future build that wrote `"midnight"`)
-         */
+        // An unknown value (e.g. written by a newer build) falls back to the default.
         fun fromStorageValueOrDefault(value: String?): ThemeMode =
             entries.firstOrNull { it.storageValue == value } ?: AppDefaults.THEME_MODE
     }

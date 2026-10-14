@@ -43,10 +43,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 022 T031a — the address bar input flow with suggestions (Constitution §VI): the real
- * [AddressBar], suggestion list and [AddressSuggestionsViewModel], over real repositories on an
- * in-memory Room database. Submitting is recorded instead of loading a page; the browser screen
- * wires the same two calls to the WebView.
+ * The real [AddressBar], suggestion list and [AddressSuggestionsViewModel] over real repositories
+ * on an in-memory Room database. Submitting is recorded instead of loading a page.
  */
 @RunWith(AndroidJUnit4::class)
 class AddressBarSuggestionsFlowTest {
@@ -66,13 +64,11 @@ class AddressBarSuggestionsFlowTest {
 
     @Before
     fun setUp() {
-        database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), AppDatabase::class.java).build()
-        runBlocking {
-            database.bookmarkDao().insert(
-                BookmarkEntity(title = "Kotlin docs", url = BOOKMARK, parentFolderId = null, createdAt = 1L, sortOrder = 1L),
-            )
-            database.historyDao().insert(HistoryEntryEntity(0L, HISTORY, "News", 2L))
-        }
+        database = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            AppDatabase::class.java,
+        ).build()
+        seed()
         val viewModel = AddressSuggestionsViewModel(
             loadSource = LoadAddressSuggestionsSourceUseCase(
                 BookmarkRepositoryImpl(database.bookmarkDao(), database.bookmarkFolderDao(), database, dispatchers),
@@ -114,6 +110,21 @@ class AddressBarSuggestionsFlowTest {
                     )
                 }
             }
+        }
+    }
+
+    private fun seed() {
+        runBlocking {
+            database.bookmarkDao().insert(
+                BookmarkEntity(
+                    title = "Kotlin docs",
+                    url = BOOKMARK,
+                    parentFolderId = null,
+                    createdAt = 1L,
+                    sortOrder = 1L,
+                ),
+            )
+            database.historyDao().insert(HistoryEntryEntity(0L, HISTORY, "News", 2L))
         }
     }
 

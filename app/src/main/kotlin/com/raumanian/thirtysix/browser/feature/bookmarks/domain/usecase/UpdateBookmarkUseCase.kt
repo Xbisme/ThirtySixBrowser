@@ -7,11 +7,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/**
- * Spec 013 FR-021 / FR-022 — edits a bookmark's title, URL, and parent
- * folder. Validates URL via [BookmarkUrlValidator]; title falls back to URL
- * on blank.
- */
+/** Edits title, URL and folder; a blank title falls back to the URL. */
 class UpdateBookmarkUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {

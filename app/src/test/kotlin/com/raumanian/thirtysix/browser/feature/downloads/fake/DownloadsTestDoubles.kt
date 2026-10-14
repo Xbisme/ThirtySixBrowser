@@ -10,8 +10,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ExternalFileOpener
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/** Spec 015 — shared doubles for the download use-case tests. */
-
 internal fun testRecord(
     id: Long = 1L,
     handle: Long = 10L,
@@ -33,10 +31,7 @@ internal fun testItem(
     record: DownloadRecord = testRecord(),
 ) = DownloadListItem(record = record, status = status)
 
-/**
- * Configurable gateway that records what it was asked to do, so tests can assert on
- * *absence* of a call as readily as on its result.
- */
+// Records what it was asked, so tests can assert the absence of a call as well as its result.
 internal open class RecordingGateway(
     private val statuses: MutableMap<Long, DownloadStatus> = mutableMapOf(),
     private val existingFiles: MutableSet<String> = mutableSetOf(),
@@ -68,10 +63,7 @@ internal open class RecordingGateway(
     override suspend fun contentUriFor(transferHandle: Long): String? = contentUri
     override suspend fun resolvedFileNameFor(transferHandle: Long): String? = resolvedNames[transferHandle]
 
-    /**
-     * Mirrors production: the set may hold a **file name** (the file is on disk) or a
-     * recorded **URI**, and either one counts as present.
-     */
+    // As in production, the set may hold a file name or a recorded URI; either counts as present.
     override suspend fun fileExists(localUri: String?, fileName: String): Boolean =
         fileName in existingFiles || localUri in existingFiles
 

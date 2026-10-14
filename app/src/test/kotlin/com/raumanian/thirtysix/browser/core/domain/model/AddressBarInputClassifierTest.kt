@@ -3,14 +3,10 @@ package com.raumanian.thirtysix.browser.core.domain.model
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Spec 009 (T010 + T019) — pure JVM unit tests for [classifyAddressBarInput].
- * Table-driven coverage of the URL/query heuristic, scheme prepend, trim,
- * newline strip, and explicitly-accepted v1 trade-offs.
- */
+/** URL/query heuristic, scheme prepend, trimming, newline stripping and the accepted trade-offs. */
 class AddressBarInputClassifierTest {
 
-    // ----------------- URL classification (T010 — US1) -----------------
+    // URL classification
 
     @Test
     fun `url with https scheme stays as-is`() {
@@ -62,8 +58,6 @@ class AddressBarInputClassifierTest {
 
     @Test
     fun `embedded newline is replaced with space then trimmed`() {
-        // "developer.android.com\n" becomes "developer.android.com " after
-        // newline replacement, then trimmed to "developer.android.com".
         assertEquals(
             AddressBarSubmitResult.Url("https://developer.android.com"),
             classifyAddressBarInput("developer.android.com\n"),
@@ -72,9 +66,7 @@ class AddressBarInputClassifierTest {
 
     @Test
     fun `package-name-shaped input is classified as URL false-positive`() {
-        // Spec edge case — accepted v1 trade-off. The string contains a dot
-        // so the heuristic classifies it as a URL even though a user typing
-        // "kotlin.coroutines" might have meant a search query.
+        // Accepted trade-off: any input with a dot is a URL, though "kotlin.coroutines" may be a query.
         assertEquals(
             AddressBarSubmitResult.Url("https://kotlin.coroutines"),
             classifyAddressBarInput("kotlin.coroutines"),
@@ -89,7 +81,7 @@ class AddressBarInputClassifierTest {
         )
     }
 
-    // ----------------- Empty / whitespace (T010 — US1) -----------------
+    // Empty / whitespace
 
     @Test
     fun `empty string is classified as Empty`() {
@@ -106,7 +98,7 @@ class AddressBarInputClassifierTest {
         assertEquals(AddressBarSubmitResult.Empty, classifyAddressBarInput("\n\n"))
     }
 
-    // ----------------- Query classification (T019 — US2) -----------------
+    // Query classification
 
     @Test
     fun `single-word non-dotted input is classified as Query`() {
@@ -126,7 +118,8 @@ class AddressBarInputClassifierTest {
 
     @Test
     fun `localhost without dot is classified as Query (accepted v1 trade-off)`() {
-        // Spec edge case: `localhost` has no dot → query, not URL.
+        // `localhost` has no dot, so it is a query, not a URL.
+
         assertEquals(
             AddressBarSubmitResult.Query("localhost"),
             classifyAddressBarInput("localhost"),

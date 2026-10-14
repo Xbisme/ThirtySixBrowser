@@ -37,16 +37,8 @@ internal const val TEST_TAG_ACTION_REMOVE: String = "download_action_remove"
 internal const val TEST_TAG_ACTION_DELETE_FILE: String = "download_action_delete_file"
 
 /**
- * Spec 015 FR-030 / FR-034a · Spec 019 — long-press action sheet on the shared [SheetFrame].
- *
- * Renders in the fixed FR-030 order — open · copy link · remove from list · delete file —
- * but shows only the entries the [DownloadActionAvailability] matrix allows for this entry's
- * current state. The matrix is a pure domain function with its own tests, so what the sheet
- * offers and what the tests assert cannot drift apart. "Delete file" carries the destructive
- * peach well, matching the confirmation dialog it opens.
- *
- * The sheet dismisses natively on outside-tap and system back (FR-035), so no dismiss
- * affordance — and therefore no dismiss string — is added.
+ * Fixed order — open · copy link · remove from list · delete file — showing only what
+ * [DownloadActionAvailability] allows. Dismisses natively, so it has no dismiss affordance.
  */
 @Composable
 fun DownloadActionSheet(
@@ -56,8 +48,7 @@ fun DownloadActionSheet(
 ) {
     val availability = DownloadActionAvailability.forStatus(
         status = item.status,
-        // The status resolution already established presence: anything the platform or the
-        // fallback calls Complete has a file, and Missing explicitly does not.
+        // Status resolution already settled presence: Complete has a file, Missing does not.
         fileIsPresent = item.status is DownloadStatus.Complete,
     )
 

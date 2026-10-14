@@ -16,7 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-/** Spec 021 research R2 — the Android permissions each capability needs. Location: either grant counts. */
+/** The Android permissions each capability needs. Location: either grant counts. */
 fun SiteCapability.androidPermissions(): List<String> = when (this) {
     SiteCapability.Camera -> listOf(Manifest.permission.CAMERA)
     SiteCapability.Microphone -> listOf(Manifest.permission.RECORD_AUDIO)
@@ -27,9 +27,8 @@ fun SiteCapability.androidPermissions(): List<String> = when (this) {
 }
 
 /**
- * Spec 021 research R2 — decides site permission requests for the browser screen: the stored and
- * one-time decisions (domain use cases) and whether the app already holds the Android permission.
- * Holds no platform callback object; requests are passed in and answered by the caller.
+ * Decides site permission requests for the browser screen from stored and one-time decisions and
+ * the Android permissions held. Holds no platform callback; the caller answers the request.
  */
 @HiltViewModel
 class SitePermissionGate @Inject constructor(
@@ -63,6 +62,6 @@ class SitePermissionGate @Inject constructor(
         }
     }
 
-    /** A tab's page changed: its one-time grants end (FR-003). */
+    /** A tab's page changed: its one-time grants end. */
     fun onPageChanged(tabId: Long) = oneTimeGrants.dropForTab(tabId)
 }

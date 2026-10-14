@@ -5,10 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 
-/**
- * Spec 013 FR-012 — creates a folder under [parentId] (null = root).
- * Validates non-blank name + length cap.
- */
+/** Creates a folder under [parentId] (null = root); the name must be non-blank and within the length cap. */
 class CreateFolderUseCase @Inject constructor(
     private val repository: BookmarkRepository,
 ) {

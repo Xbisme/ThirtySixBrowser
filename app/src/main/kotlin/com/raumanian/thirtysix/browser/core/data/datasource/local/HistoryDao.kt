@@ -9,7 +9,7 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.History
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-@Suppress("TooManyFunctions") // Spec 019 added observeRecent for the Home page on top of Specs 005/014.
+@Suppress("TooManyFunctions") // One DAO serves the history list, Home, suggestions, Fire and retention.
 interface HistoryDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -21,9 +21,6 @@ interface HistoryDao {
     @Query("SELECT * FROM ${HistoryEntryEntity.TABLE_NAME} WHERE ${HistoryEntryEntity.COL_ID} = :id")
     suspend fun getById(id: Long): HistoryEntryEntity?
 
-    /**
-     * Most-recent-first paginated history list (relies on `index_history_entries_visited_at`).
-     */
     @Query(
         """
         SELECT * FROM ${HistoryEntryEntity.TABLE_NAME}
@@ -42,13 +39,8 @@ interface HistoryDao {
     fun observeAll(): Flow<List<HistoryEntryEntity>>
 
     /**
-     * Spec 022 data-model §4 — one row per address, the one from its most recent visit, newest
-     * first: the history half of the address-suggestion snapshot.
-     *
-     * One pass with `GROUP BY` instead of a correlated subquery, which would scan the table once
-     * per row. With a lone `MAX()` aggregate, SQLite takes the other columns from the row that
-     * holds the maximum (documented "bare column" behaviour). No user text reaches this query, so
-     * there is no `LIKE` anywhere on the suggestion path (FR-017).
+     * Each address's latest visit, newest first, for suggestions. With a lone `MAX()`, SQLite takes the
+     * bare columns from the row holding the maximum, so one `GROUP BY` pass replaces a correlated subquery.
      */
     @Query(
         """
@@ -61,14 +53,10 @@ interface HistoryDao {
     )
     suspend fun getLatestVisitPerUrl(): List<HistoryEntryEntity>
 
-    /** Spec 024 data-model step 1 — every distinct recorded address, for Fire's host collection. */
     @Query("SELECT DISTINCT ${HistoryEntryEntity.COL_URL} FROM ${HistoryEntryEntity.TABLE_NAME}")
     suspend fun getDistinctUrls(): List<String>
 
-    /**
-     * Spec 019 (data-model §4) — the newest [limit] visits for the Home page. Served by the
-     * existing `visited_at` index, so it never scans the whole table the way [observeAll] does.
-     */
+    /** Served by the `visited_at` index, so unlike [observeAll] it never reads the whole table. */
     @Query(
         """
         SELECT * FROM ${HistoryEntryEntity.TABLE_NAME}
@@ -78,9 +66,6 @@ interface HistoryDao {
     )
     fun observeRecent(limit: Int): Flow<List<HistoryEntryEntity>>
 
-    /**
-     * Range delete (for "Clear last hour / today / all"). Pass MIN/MAX to clear all.
-     */
     @Query(
         """
         DELETE FROM ${HistoryEntryEntity.TABLE_NAME}
@@ -95,22 +80,10 @@ interface HistoryDao {
     @Query("SELECT COUNT(*) FROM ${HistoryEntryEntity.TABLE_NAME}")
     suspend fun count(): Int
 
-    /**
-     * Spec 014 FR-020 — single-row delete by id. Cleaner ergonomics than the
-     * `getById(id) → delete(entity)` round-trip the existing [delete] needs.
-     * Returns the number of rows removed: 0 if id no longer present, 1 if removed.
-     */
     @Query("DELETE FROM ${HistoryEntryEntity.TABLE_NAME} WHERE ${HistoryEntryEntity.COL_ID} = :id")
     suspend fun deleteById(id: Long): Int
 
-    /**
-     * Spec 014 FR-001 (title backfill) — patch the title of an already-recorded row.
-     *
-     * `WebChromeClient.onReceivedTitle` frequently arrives *after*
-     * `WebViewClient.onPageFinished`, so the row is inserted with whatever title was
-     * known at page-finish (often empty) and corrected here the moment the real title
-     * lands. Returns rows updated: 0 if the row was deleted in between, 1 otherwise.
-     */
+    /** The page title often arrives after page-finish, so rows are recorded first and their title patched here. */
     @Query(
         "UPDATE ${HistoryEntryEntity.TABLE_NAME} SET ${HistoryEntryEntity.COL_TITLE} = :title " +
             "WHERE ${HistoryEntryEntity.COL_ID} = :id",

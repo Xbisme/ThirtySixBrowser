@@ -5,32 +5,13 @@ import java.net.URLDecoder
 import javax.inject.Inject
 
 /**
- * Spec 015 FR-004 / FR-005 — turn whatever the server offered into a filename that is
- * safe to write.
- *
- * Two stages, deliberately separate:
- *  1. **Derive** a candidate — the `Content-Disposition` filename, else the address's last
- *     path segment, else a generated fallback (FR-004).
- *  2. **Sanitise unconditionally** (FR-005). Stage 2 does not trust stage 1, whichever
- *     branch produced the value. Every candidate is attacker-influenced: a server controls
- *     the header outright and largely controls the URL.
- *
- * **Why pure Kotlin rather than the platform's filename helper.** research.md R8 proposed
- * deriving with the platform helper and sanitising afterwards, noting the helper "is not a
- * security boundary". Deriving here instead keeps this use case free of Android imports,
- * which matters twice over: Constitution §IV requires a pure domain layer, and SC-015
- * demands a six-case hostile-input proof that should run on the plain JVM rather than
- * behind a device. The header grammar involved is small and stable, so the platform helper
- * was buying convenience, not correctness.
+ * Turns what the server offered into a safe filename: derive (Content-Disposition, then the last
+ * path segment, then a fallback), then always sanitise, since every candidate is attacker-influenced.
+ * Pure Kotlin rather than the platform helper, so the hostile-name tests run on the JVM.
  */
 class SanitizeDownloadFileNameUseCase @Inject constructor() {
 
-    /**
-     * @param contentDisposition the raw header value, or null when absent.
-     * @param url the address being downloaded.
-     * @return a plain single-segment filename: never blank, never containing a path
-     *   separator, never a parent-directory reference.
-     */
+    /** Returns a single-segment filename: never blank, no separator, no parent reference. */
     operator fun invoke(contentDisposition: String?, url: String): String {
         val candidate = deriveFromDisposition(contentDisposition)
             ?: deriveFromUrl(url)
@@ -38,11 +19,7 @@ class SanitizeDownloadFileNameUseCase @Inject constructor() {
         return sanitize(candidate)
     }
 
-    /**
-     * RFC 5987's `filename*=UTF-8''name` wins over the plain form when both appear, which
-     * is what the RFC requires and what servers assume. Evaluated lazily so a malformed
-     * extended form still falls through to the quoted one.
-     */
+    /** RFC 5987's `filename*=` wins over the plain form; lazily, so a malformed one falls through. */
     private fun deriveFromDisposition(header: String?): String? {
         if (header.isNullOrBlank()) return null
         val candidates = sequenceOf(
@@ -53,11 +30,7 @@ class SanitizeDownloadFileNameUseCase @Inject constructor() {
         return candidates.mapNotNull { it() }.firstOrNull { it.isNotBlank() }
     }
 
-    /**
-     * The address contributes a name only when it actually has a path. Without this guard
-     * `https://example.com` would yield `example.com`, naming the file after the host —
-     * legal, but misleading enough that the generated fallback is the better answer.
-     */
+    /** Only an address with a path names the file; `https://example.com` would name it after the host. */
     private fun deriveFromUrl(url: String): String? {
         val withoutScheme = url.substringAfter("://", missingDelimiterValue = url)
         if (!withoutScheme.contains('/')) return null
@@ -70,12 +43,8 @@ class SanitizeDownloadFileNameUseCase @Inject constructor() {
     }
 
     /**
-     * Reduce any candidate to a single, harmless path component.
-     *
-     * Order matters: separators are stripped *before* the dot handling, so a value like
-     * `../../etc/passwd` collapses to `passwd` rather than being rejected outright. A user
-     * who asked for a download should get their file whenever a safe name is derivable,
-     * not an error message.
+     * Separators are stripped before dot handling, so `../../etc/passwd` becomes `passwd`
+     * instead of an error: the person gets their file whenever a safe name exists.
      */
     private fun sanitize(raw: String): String {
         val lastSegment = raw
@@ -90,11 +59,7 @@ class SanitizeDownloadFileNameUseCase @Inject constructor() {
         return bound(safe)
     }
 
-    /**
-     * Bound the length while keeping the extension, so a truncated name still opens with
-     * the right app. The cap matches the per-component limit of every filesystem Android
-     * ships on, so the sanitiser never emits a name the platform will reject.
-     */
+    /** Bounds the length but keeps the extension; the cap is every Android filesystem's limit. */
     private fun bound(name: String): String {
         val max = BrowserLimits.MAX_DOWNLOAD_FILENAME_LENGTH
         val extension = name.substringAfterLast('.', missingDelimiterValue = "")

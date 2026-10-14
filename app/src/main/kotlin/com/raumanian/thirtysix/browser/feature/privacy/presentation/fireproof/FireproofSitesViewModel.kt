@@ -14,10 +14,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * Spec 024 FR-012 — fireproof sites: remove one, or every one after confirming. Incognito never
- * fireproofs a site (FR-011), so only normal-browsing choices appear here.
- */
+/** Incognito never fireproofs a site, so only normal-browsing choices appear here. */
 @HiltViewModel
 class FireproofSitesViewModel @Inject constructor(
     observeSites: ObserveFireproofSitesUseCase,

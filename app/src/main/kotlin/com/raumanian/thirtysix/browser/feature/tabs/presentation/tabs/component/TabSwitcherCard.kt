@@ -63,18 +63,9 @@ import kotlin.math.sign
 private const val SCRIM_ALPHA = 0.55f
 
 /**
- * Spec 019 FR-040 — an image tab card (design system TabCard): the page preview fills the card,
- * the title and favicon sit over a dark fade at the bottom, and a glass close button sits top
- * right. The active tab gets a 2dp `primary` ring with a 2dp gap.
- *
- * - No screenshot yet → a mesh seeded from the host with its first letter.
- * - A tab on the Home page → the hero mesh, "New tab" and the brand mark (data-model §3).
- * - An incognito tab → the plum incognito surface, never a screenshot or its title (Spec 012).
- *
- * Swipe sideways to close (clarification Q1): the offset is a float state read **only in
- * `graphicsLayer { }`**, so dragging a card never recomposes it or the grid (research R11, §V
- * rule 1). Past [BrowserLimits.TAB_SWIPE_CLOSE_FRACTION] of the card's width it flies out and
- * [onCloseClick] fires once; short of it, it springs back.
+ * An image tab card. Without a screenshot it shows a mesh seeded from the host; an incognito
+ * tab shows the plum surface and never its screenshot or title. Swiping past
+ * [BrowserLimits.TAB_SWIPE_CLOSE_FRACTION] of the width closes it; shorter springs back.
  */
 @Suppress("LongParameterList")
 @Composable
@@ -95,7 +86,7 @@ fun TabSwitcherCard(
     }
     val hostname = if (isHome) "" else tab.url.extractHostnameOrSelf()
     val a11y = if (tab.isIncognito) {
-        // Spec 012 FR-025 — an incognito card never speaks its title or host.
+        // An incognito card never speaks its title or host.
         stringResource(R.string.tabs_a11y_incognito_card_placeholder)
     } else {
         listOf(displayTitle, hostname).filter { it.isNotEmpty() }.joinToString(", ")
@@ -143,7 +134,7 @@ fun TabSwitcherCard(
 
 /**
  * Horizontal swipe-to-close. The offset is written by the gesture and read only in
- * `graphicsLayer { }` (draw phase), so a drag never recomposes the card (research R11).
+ * `graphicsLayer { }` (draw phase), so a drag never recomposes the card or the grid.
  */
 @Composable
 private fun SwipeToClose(onClose: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {

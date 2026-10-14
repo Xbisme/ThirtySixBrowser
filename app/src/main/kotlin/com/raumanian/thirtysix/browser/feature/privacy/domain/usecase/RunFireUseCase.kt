@@ -26,19 +26,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 /**
- * Spec 024 FR-003 – FR-008 — one Fire run: data-model "Fire run" steps 1–10, in order.
- *
- * Coordinates repositories and platform seams, which is the use-case layer's job under
- * Constitution §IV, exactly like [ClearBrowsingDataUseCase]. The order is load-bearing:
- *  - candidate hosts are collected before anything that holds them is cleared (INV-3);
- *  - incognito ends before any cookie is read, so the live jar is back to its pre-incognito state
- *    and no incognito cookie can be kept for a fireproof site (INV-2, FR-011);
- *  - tabs go before anything slow, so an interrupted run never brings an old tab back (FR-007).
- *
- * Every step runs in its own failure boundary: a failed step is reported in [FireResult] and the
- * next step still runs. Every step is idempotent, so the coordinator can re-run a whole interrupted
- * run on the next start. Bookmarks, downloads, settings, sites without protection and the
- * fireproof list are never written (INV-4). Cancellation is rethrown.
+ * One Fire run. The step order is load-bearing (hosts first, incognito before cookies, tabs before
+ * anything slow). Each step has its own failure boundary and is idempotent, so an interrupted run
+ * can be re-run whole. Bookmarks, downloads, settings and both site lists are never written.
  */
 @Suppress("LongParameterList") // One collaborator per kind of data Fire clears or keeps.
 class RunFireUseCase @Inject constructor(
@@ -64,32 +54,30 @@ class RunFireUseCase @Inject constructor(
         val keepSites = fireproofSites.currentSites()
         val isKept: (String) -> Boolean = { host -> IsSiteFireproofUseCase.matches(host, keepSites) }
 
-        // 1 — candidate hosts (INV-3). Read before anything that holds them is cleared.
+        // Candidate hosts are read before anything that holds them is cleared.
         val collected = run(FireStep.CollectHosts, failed) { collectHosts() }
         val hosts = collected?.hosts.orEmpty()
 
-        // 2 — incognito ends first: its teardown restores the pre-incognito cookie jar (INV-2).
+        // Incognito ends first: its teardown restores the pre-incognito cookie jar.
         run(FireStep.CloseIncognito, failed) { incognitoTabs.closeAll() }
 
-        // 3 (+10) — every normal tab goes; closeAllTabs leaves exactly one fresh Home tab (Spec 011).
+        // closeAllTabs leaves exactly one fresh Home tab.
         run(FireStep.CloseTabs, failed) {
             screenshots.clearAll()
             tabs.closeAllTabs()
         }
 
-        // 4 — history, in full (spec Assumptions).
         run(FireStep.History, failed) { history.clearAll() }
 
-        // 5, 6 — cookies, site data and the web page cache, keeping fireproof sites (research R2–R4).
+        // Cookies, site data and the web page cache, keeping fireproof sites.
         val path = clearSiteData(keepSites, hosts, isKept, failed)
 
-        // 7 — remembered and one-time site permissions, except fireproof sites' (FR-004a).
         run(FireStep.SitePermissions, failed) { clearPermissions(collected?.permissionOrigins.orEmpty(), isKept) }
 
-        // 8 — site icons, except bookmarked hosts' and fireproof sites' (FR-008).
+        // Site icons, except bookmarked hosts' and fireproof sites'.
         run(FireStep.Favicons, failed) { favicons.retainOnly(iconsToKeep(keepSites, hosts, isKept)) }
 
-        // 9 — in-memory session traces, so nothing links visits before and after Fire (FR-003a).
+        // In-memory session traces, so nothing links visits before and after Fire.
         run(FireStep.SessionTraces, failed) {
             httpsFailures.clear()
             scriptSession.regenerate()
@@ -119,7 +107,7 @@ class RunFireUseCase @Inject constructor(
         failed: MutableSet<FireStep>,
     ): SiteDataPath? {
         val path = run(FireStep.CookiesAndSiteData, failed) {
-            // Spec 016 R7 — never leave a set-aside incognito snapshot that could be written back.
+            // Never leave a set-aside incognito snapshot that could be written back.
             cookieJar.discardSetAsideCookies()
             if (keepSites.isEmpty()) {
                 when (webDataCleaner.clearCookiesAndSiteData()) {
@@ -132,7 +120,7 @@ class RunFireUseCase @Inject constructor(
             }
         }
         if (path == null) failed += FireStep.CookiesAndSiteData
-        // The web page cache, unless the complete path already emptied it (Spec 016 A16).
+        // The web page cache, unless the complete path already emptied it.
         if (path != SiteDataPath.Complete) {
             val cleared = run(FireStep.WebCache, failed) { webDataCleaner.clearWebCache() } == true
             if (!cleared) failed += FireStep.WebCache

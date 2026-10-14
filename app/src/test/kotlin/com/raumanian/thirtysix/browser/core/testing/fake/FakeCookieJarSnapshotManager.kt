@@ -2,15 +2,9 @@ package com.raumanian.thirtysix.browser.core.testing.fake
 
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 /**
- * Spec 012 — hand-rolled fake of [CookieJarSnapshotManager] for unit tests.
- *
- * Tracks invocation history (capture / restore counts + last-captured origins)
- * for assertion in `IncognitoTabRepositoryImplTest` and `TabsViewModelTest`
- * without touching the platform `CookieManager` (which would require
- * Robolectric).
- *
- * Spec 016 T065 — adds [discardSetAsideCookies] and an optional [callLog] shared with other
- * fakes, so `ClearBrowsingDataUseCaseTest` can assert the discard runs before the cookie wipe.
+ * Fake [CookieJarSnapshotManager] that counts captures and restores without the platform
+ * `CookieManager`. An optional [callLog] shared with other fakes lets a test assert the discard
+ * runs before the cookie wipe.
  */
 class FakeCookieJarSnapshotManager(
     private val callLog: MutableList<String> = mutableListOf(),

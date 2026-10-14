@@ -9,7 +9,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 021 T009 — rows 1–10 of contracts C1.1. */
+/** Resolving a site's permission request from stored and one-time decisions. */
 class ResolveSitePermissionUseCaseTest {
 
     private val repo = FakeSitePermissionRepository()

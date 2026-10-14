@@ -41,9 +41,8 @@ class DiskFaviconCache @Inject constructor(
             file.outputStream().use(writeImage)
             versionState.update { it + 1 }
         } catch (e: java.io.IOException) {
-            // Disk full / permission denied — favicon falls back to the
-            // deterministic placeholder; no crash, no retry.
-            android.util.Log.w(LOG_TAG, "Failed to write a favicon", e) // Spec 021 FR-036: no address in logs.
+            // The placeholder icon stands in; the address is never logged.
+            android.util.Log.w(LOG_TAG, "Failed to write a favicon", e)
         }
     }
 
@@ -55,7 +54,7 @@ class DiskFaviconCache @Inject constructor(
 
     override suspend fun clearAll() = withContext(dispatchers.io) {
         cacheDir.listFiles()?.forEach { file ->
-            // The file name derives from a visited host, so it is deliberately not logged (§I).
+            // The file name derives from a visited host, so it is deliberately not logged.
             if (!file.delete()) android.util.Log.w(LOG_TAG, "Failed to delete a cached favicon")
         }
         versionState.update { it + 1 }
@@ -64,7 +63,7 @@ class DiskFaviconCache @Inject constructor(
     override suspend fun retainOnly(hosts: Set<String>) = withContext(dispatchers.io) {
         val keep = hosts.mapNotNullTo(HashSet()) { host -> keyFor(host)?.let { "$it.png" } }
         cacheDir.listFiles()?.forEach { file ->
-            // As in clearAll: the name derives from a visited host and is never logged (§I).
+            // As in clearAll: the name derives from a visited host and is never logged.
             if (file.name !in keep && !file.delete()) android.util.Log.w(LOG_TAG, "Failed to delete a cached favicon")
         }
         versionState.update { it + 1 }

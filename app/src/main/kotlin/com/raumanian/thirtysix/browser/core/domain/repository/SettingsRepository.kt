@@ -9,62 +9,27 @@ import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Persistence-backed user settings (Spec 006 FR-015, amended by Spec 016).
- *
- * Unchanged conventions from Spec 006:
- *  - Setters return `Result<Unit>`; a disk-write failure is `Result.Error(IOException)`,
- *    never a thrown exception. `CancellationException` is not caught.
- *  - [observeSettings] emits one coherent [UserSettings] snapshot whenever any key changes,
- *    with `distinctUntilChanged` applied.
- *  - The implementation depends only on `SettingsDataStore` and `SettingsMapper` — never on
- *    another repository and never on a platform service (Constitution §IV).
- *
- * Deliberately absent: any language accessor. A second, app-owned copy of the language
- * would go stale the moment the user changed it from Android 13+ system settings (FR-016);
- * the platform seam `AppLanguageController` owns it instead.
+ * Setters report a failed write as `Result.Error`, never by throwing. There is no language accessor:
+ * the platform owns the app language, and a copy here would go stale.
  */
 interface SettingsRepository {
 
     fun observeSettings(): Flow<UserSettings>
 
-    /**
-     * Spec 018 — the current settings, read once.
-     *
-     * Suspends until a real value is available and never returns [UserSettings.DEFAULT] as a
-     * placeholder. Added because the start-up decision has to know whether onboarding is
-     * complete BEFORE the navigation graph is built.
-     *
-     * Why [observeSettings] cannot serve that: collected with
-     * `collectAsStateWithLifecycle(initialValue = UserSettings.DEFAULT)`, the first emission
-     * carries `isOnboardingCompleted = false` (the documented default). `NavHost` captures its
-     * `startDestination` at first composition, so routing on that first emission sends EVERY
-     * launch to onboarding — not as a one-frame flash, but as the graph's actual start route
-     * (Spec 018 research.md R2).
-     *
-     * Callers that need to follow changes keep using [observeSettings]; this is only for
-     * deciding something before any UI exists.
-     */
+    /** Suspends for a real value, never the default; start-up routing reads it before the nav graph exists. */
     suspend fun currentSettings(): UserSettings
 
     suspend fun setThemeMode(mode: ThemeMode): Result<Unit>
 
-    /**
-     * Spec 016 FR-009. Persisted on every Android version; consulted only on Android 12+
-     * (FR-010). The capability check belongs to the presentation layer, not here.
-     */
+    /** Persisted on every version; only Android 12+ consults it. */
     suspend fun setDynamicColorEnabled(enabled: Boolean): Result<Unit>
 
     suspend fun setSearchEngine(engine: SearchEngine): Result<Unit>
 
-    /**
-     * Spec 016 FR-020. Stores the window's day count. Writes the value only — pruning is the
-     * caller's concern (`ChangeHistoryRetentionUseCase`), because a repository must not depend
-     * on `HistoryRepository`.
-     */
+    /** Writes the value only; pruning belongs to the caller, as a repository cannot depend on another. */
     suspend fun setHistoryRetention(retention: HistoryRetention): Result<Unit>
 
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit>
 
-    /** Spec 022 FR-029 / FR-032 — the app-wide text size of web pages. */
     suspend fun setTextSize(size: TextSize): Result<Unit>
 }

@@ -14,7 +14,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/** Spec 023 — privacy protection data, exceptions and in-memory stores. */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ProtectionModule {

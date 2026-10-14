@@ -15,10 +15,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 024 T060, FR-024 — the bundled cookie-banner script refuses on every covered consent tool,
- * never accepts, and stands down when the site's protection is off. Each fixture records the button
- * clicked in its title (`choice:<value>`). Skipped on web engines without page-start scripts
- * (FR-022), such as CI's API 29 emulator.
+ * The bundled cookie-banner script refuses on every covered consent tool, never accepts, and
+ * stands down when the site's protection is off. Each fixture records the clicked button in its
+ * title (`choice:<value>`). Skipped on engines without page-start scripts, such as API 29's.
  */
 @RunWith(AndroidJUnit4::class)
 class CookieBannerTest {

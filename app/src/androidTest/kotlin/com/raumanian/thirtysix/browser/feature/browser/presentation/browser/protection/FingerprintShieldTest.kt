@@ -17,11 +17,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 024 T062, US5 — the basic fingerprinting shield on `fingerprint.html`, which reports its
- * read-outs as JSON in the title: same site → same values, another site → different values, the
- * top-level page decides inside a cross-site frame (FR-020), Fire's new secret changes them
- * (FR-003a), protection off gives the real values, battery is withheld and device ids are empty.
- * Skipped on web engines without page-start scripts (FR-022).
+ * The basic fingerprinting shield on `fingerprint.html`, which reports its read-outs as JSON in
+ * the title: same site → same values, another site → different values, the top-level page decides
+ * inside a cross-site frame, Fire's new secret changes them, protection off gives the real values,
+ * battery is withheld and device ids are empty. Skipped on engines without page-start scripts.
  */
 @RunWith(AndroidJUnit4::class)
 class FingerprintShieldTest {

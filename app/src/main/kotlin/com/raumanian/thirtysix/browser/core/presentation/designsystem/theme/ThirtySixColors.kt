@@ -1,6 +1,5 @@
-// Spec 019 — design-system tokens that have no Material 3 role (research R2).
-// Read through `ThirtySixTheme.colors`, never as literals in feature code (Constitution §III).
-@file:Suppress("MagicNumber")
+// Design-system tokens that have no Material 3 role. Read through `ThirtySixTheme.colors`.
+@file:Suppress("MagicNumber") // The hex literals are the colour tokens themselves.
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 
@@ -9,9 +8,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
- * Extended colour tokens. Light and dark instances below; [ThirtySixTheme] swaps the
- * hero glow and action gradient for wallpaper-derived values under dynamic color, and
- * keeps everything else fixed (FR-005, clarification Q2).
+ * Extended colour tokens. Under dynamic color [ThirtySixTheme] swaps the hero glow and action
+ * gradient for wallpaper-derived values and keeps everything else fixed.
  */
 @Immutable
 data class ThirtySixColors(
@@ -41,7 +39,7 @@ data class ThirtySixColors(
     val glow: Color,
 )
 
-// INV-3 — the incognito plum is identical in both themes so incognito never reads as dark mode.
+// The incognito plum is identical in both themes so incognito never reads as dark mode.
 private val SurfaceIncognito = Color(0xFF17112B)
 private val OnIncognito = Color(0xFFEDE7FE)
 private val OnGlass = Color(0xFFFFFFFF)

@@ -7,20 +7,16 @@ import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 /**
- * Spec 023 research R5 — sends Global Privacy Control on every request, app-wide, where the
- * WebView supports profile headers. Installed once per WebView profile (normal browsing's, and
- * each incognito session's own); the header then also reaches page resources and service-worker
- * requests (FR-030). It ignores per-site exceptions (FR-016).
+ * Global Privacy Control on every request, set once per WebView profile where profile headers
+ * exist, so page resources and service workers get it too. Ignores per-site exceptions.
  */
 internal object GpcHeaderInstaller {
-    /** Whether the header was installed, by profile name. Main thread. */
     private val outcomes = mutableMapOf<String, Boolean>()
 
     /** Every profile seen so far carries the header, so app-issued loads need not add it. */
     val appWide: Boolean
         get() = outcomes.isNotEmpty() && outcomes.values.all { it }
 
-    /** Call on the main thread with any WebView. Returns whether the header is now app-wide. */
     fun install(webView: WebView): Boolean {
         val profileName = profileNameOf(webView)
         if (profileName !in outcomes) {
@@ -62,6 +58,6 @@ internal object GpcHeaderInstaller {
     private const val TAG = "GpcHeader"
     private const val NO_PROFILE = ""
 
-    /** Research R5 — `*` first; if the engine rejects it, every http and https origin. */
+    /** `*` first; if the engine rejects it, every http and https origin. */
     private val ORIGIN_RULE_SETS: List<Set<String>> = listOf(setOf("*"), setOf("https://*", "http://*"))
 }

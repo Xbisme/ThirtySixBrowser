@@ -24,9 +24,8 @@ import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /**
- * Spec 016 FR-002 / Spec 019 FR-044 — the back affordance that returns to the browser, over the
- * large "Settings" title. The bar pads itself below the status bar, since the app draws
- * edge to edge.
+ * Back to the browser over the large "Settings" title. The bar pads itself below the status
+ * bar, since the app draws edge to edge.
  */
 @Composable
 fun SettingsTopBar(

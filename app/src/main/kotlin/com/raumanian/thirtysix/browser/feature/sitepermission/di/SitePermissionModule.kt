@@ -8,7 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/** Spec 021 — remembered site permission decisions (research R8). */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class SitePermissionModule {

@@ -17,12 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 016 T101 (US7 / FR-034, FR-035).
- *
- * The version is injected, so the assertion compares against exactly what was passed in. The
- * on-device comparison with `dumpsys package` is quickstart G9.
- */
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenAboutTest {
 

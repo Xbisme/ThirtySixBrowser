@@ -4,7 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
 /**
- * Spec 021 research R8 — adds `site_permissions`. Strictly additive: it names no existing table,
+ * Adds `site_permissions`. Strictly additive: it names no existing table,
  * so existing data cannot be touched by construction.
  */
 object Migration2To3 {

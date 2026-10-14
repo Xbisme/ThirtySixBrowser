@@ -10,12 +10,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Production [ClipboardWriter] backed by [ClipboardManager].
- *
- * Every platform call is wrapped in `runCatching` — the same crash-resilience posture
- * Spec 012's `CookieJarSnapshotManager` adopted for system-service calls, since OEM
- * builds have been observed to throw from clipboard writes when another app holds
- * clipboard focus.
+ * [ClipboardWriter] backed by [ClipboardManager]. Wrapped in `runCatching` because some OEM builds
+ * throw from clipboard writes while another app holds clipboard focus.
  */
 @Singleton
 class AndroidClipboardWriter @Inject constructor(

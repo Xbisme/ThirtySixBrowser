@@ -16,15 +16,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 014 T048 (US1 / FR-008, FR-009, FR-010).
- *
- * Pre-seeds a history list spanning today + yesterday and drives [HistoryScreen]
- * directly (no Hilt, no WebView) to verify:
- *  - day-section headers render for both buckets,
- *  - every seeded row is present,
- *  - tapping a row rewrites the active tab's URL (the "replace active tab" contract).
- */
 @RunWith(AndroidJUnit4::class)
 class HistoryScreenBrowseTest {
 

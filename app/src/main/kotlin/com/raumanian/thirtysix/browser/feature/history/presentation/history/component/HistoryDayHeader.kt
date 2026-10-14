@@ -13,12 +13,6 @@ import com.raumanian.thirtysix.browser.feature.history.presentation.history.Date
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/**
- * Spec 014 FR-008 / FR-029 — section header rendered above each [HistoryDayBucket]
- * group, drawn as the shared [SectionHeader] (Spec 019). Discrete buckets render localized
- * strings; [HistoryDayBucket.OnDate] uses `DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)`
- * against the current configuration locale so the format follows user conventions.
- */
 @Composable
 fun HistoryDayHeader(
     bucket: HistoryDayBucket,
@@ -28,8 +22,7 @@ fun HistoryDayHeader(
         HistoryDayBucket.Today -> stringResource(R.string.history_day_today)
         HistoryDayBucket.Yesterday -> stringResource(R.string.history_day_yesterday)
         is HistoryDayBucket.OnDate -> {
-            // Spec 014 FR-029 — read locale from Compose-observable source so the header
-            // recomposes when the user switches device language at runtime.
+            // Compose-observable locale, so the header recomposes when the language changes at runtime.
             val locale: Locale = Locale.forLanguageTag(ComposeLocale.current.toLanguageTag())
             DateTimeFormatter
                 .ofLocalizedDate(DateFormats.HISTORY_DAY_HEADER_STYLE)

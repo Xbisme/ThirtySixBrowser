@@ -8,13 +8,9 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.SuggestionSo
 import javax.inject.Inject
 
 /**
- * Spec 022 FR-015 / FR-016 — the candidates for one editing session, read once from what is
- * already on the device and nothing else.
- *
- * Bookmarks come first, newest saved first; then history, newest visit first. An address appears
- * once (I-10): the newest bookmark of a duplicated address wins, and a bookmarked address is left
- * out of the history half (I-11). Combining two repositories here keeps them independent of each
- * other (Constitution §IV).
+ * The candidates for one editing session, read once from on-device data only: bookmarks, newest
+ * first, then history, newest first. An address appears once: the newest bookmark of a duplicate
+ * wins, and a bookmarked address is left out of the history half.
  */
 class LoadAddressSuggestionsSourceUseCase @Inject constructor(
     private val bookmarks: BookmarkRepository,

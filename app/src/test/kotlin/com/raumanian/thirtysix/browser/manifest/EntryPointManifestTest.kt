@@ -17,11 +17,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Spec 020 T013 / contracts C1 — the merged manifest declares ThirtySix a browser for http and
- * https only (FR-001, FR-002) and keeps a single instance (FR-004).
- *
- * Runs under a plain [Application] so Robolectric does not boot the Hilt application and its
- * start-up sweep (the Spec 016 `SettingsModuleSmokeTest` finding).
+ * The merged manifest declares ThirtySix a browser for http and https only, with a single instance.
+ * A plain [Application], so Robolectric does not boot the Hilt application and its start-up sweep.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class)

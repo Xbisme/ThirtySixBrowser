@@ -13,13 +13,8 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Spec 015 — binds the two halves of the hybrid source of truth.
- *
- * [DownloadsRepository] owns the persisted half; [DownloadManagerGateway] owns the live
- * half. They are deliberately separate bindings joined only at the use-case layer, so no
- * repository ever depends on an Android system service (Constitution §IV).
- *
- * `AppDatabase` and `DownloadRecordDao` come from the Spec 005 `DatabaseModule`.
+ * Binds the persisted half ([DownloadsRepository]) and the live half ([DownloadManagerGateway])
+ * separately; they meet only in use cases, so no repository depends on an Android system service.
  */
 @Module
 @InstallIn(SingletonComponent::class)

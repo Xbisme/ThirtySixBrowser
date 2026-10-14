@@ -6,7 +6,7 @@ import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
-/** The localized name of [mode], shared by the chooser and the Settings row (FR-003). */
+/** The localized name of [mode], shared by the chooser and the Settings row. */
 @Composable
 fun themeModeLabel(mode: ThemeMode): String = stringResource(
     when (mode) {
@@ -31,7 +31,7 @@ fun searchEngineLabel(engine: SearchEngine): String = stringResource(
 
 /**
  * The label for [language]: the localized "Follow system", or the language's endonym, which
- * reads the same in every locale (research R11).
+ * reads the same in every locale.
  */
 @Composable
 fun appLanguageLabel(language: AppLanguage): String = stringResource(

@@ -13,9 +13,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Spec 023 T044 (analyze C1), SC-001 — blocking proven two ways: the monitor saw every listed
- * host, and the one tracker that *does* resolve (`127.0.0.1`, a different site from `localhost`)
- * never reached the server while protection was on, and did once the site was excepted.
+ * Blocking proven two ways: the monitor saw every listed host, and the one tracker that *does*
+ * resolve (`127.0.0.1`, a different site from `localhost`) never reached the server while
+ * protection was on, and did once the site was excepted.
  */
 @RunWith(AndroidJUnit4::class)
 class TrackerBlockingTest {

@@ -5,9 +5,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Spec 016 T047 — [AppLanguage] tag mapping, and parity with the locales the app declares.
- */
+/** [AppLanguage] tag mapping, and parity with the locales the app declares. */
 class AppLanguageTest {
 
     @Test
@@ -35,10 +33,8 @@ class AppLanguageTest {
         }
     }
 
-    /**
-     * Data-model §3 invariant. JVM unit tests run with the `app/` module as their working
-     * directory, so the source-tree file is readable directly.
-     */
+    // JVM unit tests run with `app/` as the working directory, so the source-tree file is readable.
+
     @Test
     fun `the eight tags equal the locales declared in locales_config`() {
         val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(File(LOCALES_CONFIG_PATH))

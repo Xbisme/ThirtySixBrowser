@@ -8,11 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Spec 013 — binds [BookmarkRepository] to [BookmarkRepositoryImpl] at the
- * application graph. `AppDatabase` and DAOs are already provided by the
- * existing Spec 005 `DatabaseModule`; no DI changes there.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class BookmarkModule {

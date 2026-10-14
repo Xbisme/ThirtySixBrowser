@@ -19,19 +19,9 @@ import androidx.core.content.ContextCompat
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 /**
- * Spec 015 FR-010 – FR-012 — the storage-permission gate in front of every download.
- *
- * Android 10 (API 29) and newer write to the public Downloads folder without any
- * permission, so on those devices this gate is a straight pass-through and **no permission
- * is ever requested** (FR-011, SC-005). Only Android 7.0–9.0 — where the legacy
- * external-storage write permission is genuinely required — see a prompt, and only at the
- * moment of the first download rather than at launch, which is what keeps the app honest
- * about Constitution §I's "MUST NOT request runtime permissions it does not actively use".
- *
- * Returns the lambda `BrowserWebView`'s download listener should call. The gate is
- * deliberately the *caller* of the ViewModel rather than something the ViewModel consults:
- * only the composition can launch a permission request, and pushing that knowledge into the
- * ViewModel would drag an `Activity` across the layer boundary.
+ * Storage permission in front of every download, asked only on Android 7–9 and only at the first
+ * download; from API 29 it passes straight through. It lives in composition, the only place that
+ * can launch a permission request, and calls the view model rather than being consulted by it.
  */
 @Composable
 internal fun rememberDownloadRequestHandler(
@@ -40,13 +30,10 @@ internal fun rememberDownloadRequestHandler(
 ): (String, String, String?, String?) -> Unit {
     val context = LocalContext.current
 
-    // Held across the permission round trip so the download the user actually asked for is
-    // the one that starts once they grant. Dropping it would silently swallow the request.
+    // Held across the permission round trip so the download the person asked for starts once granted.
     val pending = remember { mutableStateOf<PendingDownload?>(null) }
 
-    // FR-010 — shown before re-requesting, which is the point at which the platform's own
-    // dialog stops being self-explanatory: the user has already said no once and needs to
-    // know why the browser is asking again.
+    // Shown before re-requesting: the person already said no once and needs to know why we ask again.
     val showRationale = remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
@@ -57,9 +44,7 @@ internal fun rememberDownloadRequestHandler(
         when {
             granted && request != null ->
                 onGrant(request.url, request.userAgent, request.contentDisposition, request.mimeType)
-            // A denial with the rationale flag now false means the platform will not show
-            // the dialog again, so the message must point at system settings instead of
-            // re-prompting into a void (FR-012).
+            // No rationale after a denial means the platform will not ask again: point at system settings.
             else -> onDeny(!context.shouldShowStorageRationale())
         }
     }
@@ -98,7 +83,6 @@ internal fun rememberDownloadRequestHandler(
     }
 }
 
-/** Spec 015 FR-010 — the explanation shown before re-requesting storage access. */
 @Composable
 private fun StoragePermissionRationaleDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
@@ -125,11 +109,7 @@ private data class PendingDownload(
     val mimeType: String?,
 )
 
-/**
- * True only on Android 7.0–9.0. From API 29 the public Downloads folder is writable
- * without a permission, and the manifest declaration carries a `maxSdkVersion` ceiling so
- * the permission does not even exist to request there.
- */
+// From API 29 Downloads is writable without permission, and the manifest caps the declaration there.
 private fun isLegacyStoragePermissionRequired(): Boolean =
     Build.VERSION.SDK_INT <= Build.VERSION_CODES.P
 

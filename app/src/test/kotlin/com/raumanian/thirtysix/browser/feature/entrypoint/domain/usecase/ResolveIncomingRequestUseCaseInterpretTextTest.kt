@@ -5,7 +5,6 @@ import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingT
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Spec 020 T051 — every `InterpretText` row of contracts C2 (FR-010, FR-013). */
 class ResolveIncomingRequestUseCaseInterpretTextTest {
 
     private val resolve = ResolveIncomingRequestUseCase()

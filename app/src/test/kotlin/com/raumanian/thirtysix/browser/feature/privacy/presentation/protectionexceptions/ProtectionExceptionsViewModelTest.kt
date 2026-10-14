@@ -16,7 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 023 T053 — Settings → Privacy → Sites without protection. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProtectionExceptionsViewModelTest {
     private val repository = FakeProtectionExceptionRepository()

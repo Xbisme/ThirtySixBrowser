@@ -39,14 +39,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-/**
- * Spec 014 / Spec 019 — top of the History screen: a bar with Back and the clear-all icon,
- * the large "History" title, then the always-visible search well (FR-041).
- *
- * It pads itself by the status-bar inset so nothing sits under the status bar (FR-008,
- * Constitution §V). The clear-all affordance is visible whenever at least one entry exists
- * and hidden when none do (Spec 014 FR-023).
- */
+// Pads itself by the status-bar inset so nothing sits under the status bar.
 @Composable
 @Suppress("LongParameterList")
 fun HistoryTopBar(
@@ -79,7 +72,6 @@ fun HistoryTopBar(
                 modifier = Modifier.testTag(TEST_TAG_HISTORY_BACK),
             )
             Spacer(modifier = Modifier.weight(1f))
-            // Spec 014 FR-023 — hidden entirely when there is nothing to clear.
             if (hasEntries) {
                 RoundIconButton(
                     icon = AppIcons.DeleteSweep,
@@ -110,12 +102,7 @@ fun HistoryTopBar(
     }
 }
 
-/**
- * Spec 014 FR-011 / FR-016 — live search input, drawn as the rounded well the address bar
- * uses (Spec 019). Filtering itself is gated in the ViewModel at
- * [com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits.SEARCH_MIN_CHARS]; this field
- * simply reports every keystroke (no debounce, per Q4).
- */
+// Reports every keystroke with no debounce; the ViewModel applies the minimum-length gate.
 @Composable
 private fun HistorySearchWell(
     searchQuery: String,

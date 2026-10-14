@@ -41,7 +41,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Spec 020 T021 — the `EntryPointViewModel` table of contracts C2 (FR-019; INV-3, INV-4, INV-7). */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EntryPointViewModelTest {
 

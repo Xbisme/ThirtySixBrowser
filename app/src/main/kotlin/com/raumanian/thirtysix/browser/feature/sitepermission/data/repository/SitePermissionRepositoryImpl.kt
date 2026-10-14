@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-/** Spec 021 — [SitePermissionRepository] over Room (`site_permissions`, schema v3). */
 class SitePermissionRepositoryImpl @Inject constructor(
     private val dao: SitePermissionDao,
     private val dispatchers: DispatcherProvider,

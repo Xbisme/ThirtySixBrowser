@@ -14,7 +14,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 020 T049 / contracts C3.4 — the "Default browser" row in both states (FR-020, FR-021). */
 @RunWith(AndroidJUnit4::class)
 class SettingsDefaultBrowserRowTest {
 

@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 022 research R2 — the desktop user agent, from default WebView user agents of API 24/29/36. */
+/** The desktop user agent, from default WebView user agents of API 24, 29 and 36. */
 class DesktopUserAgentTest {
 
     @Test

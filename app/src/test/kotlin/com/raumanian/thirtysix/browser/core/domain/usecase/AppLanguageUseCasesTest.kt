@@ -12,9 +12,8 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Spec 016 T052 — [GetAppLanguageUseCase] and [SetAppLanguageUseCase].
- */
+/** [GetAppLanguageUseCase] and [SetAppLanguageUseCase]. */
+
 class AppLanguageUseCasesTest {
 
     @Test
@@ -31,7 +30,7 @@ class AppLanguageUseCasesTest {
         val accepted = setAppLanguage(controller)(AppLanguage.German)
 
         assertTrue(accepted)
-        assertTrue("FR-006", controller.applied.isEmpty())
+        assertTrue(controller.applied.isEmpty())
     }
 
     @Test

@@ -58,14 +58,6 @@ import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.co
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * Spec 016 — the Settings screen.
- *
- * Replaces the Spec 002 placeholder. One scrolling list under a large title, in four
- * hairline-separated groups — Appearance, Language and search, Privacy, About (Spec 019
- * FR-044) — each row leading with an icon in its hub tile's colour. Dialogs live in
- * [SettingsDialogHost]. Back, from the top bar or the system, returns to the browser.
- */
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
@@ -77,13 +69,12 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val navigateBack: () -> Unit = { navController.popBackStack() }
 
-    // Research R12 — re-read the platform language whenever the screen becomes visible.
+    // The language may have changed in system settings while the screen was hidden.
     LifecycleStartEffect(viewModel) {
         viewModel.onScreenStarted()
         onStopOrDispose { }
     }
-    // Spec 020 FR-022 — on RESUME, not start: the system's default-browser confirmation is a
-    // translucent screen, so coming back from it resumes this screen without starting it.
+    // On resume, not start: the system's default-browser confirmation is translucent.
     LifecycleResumeEffect(viewModel) {
         viewModel.refreshDefaultBrowser()
         onPauseOrDispose { }
@@ -131,11 +122,7 @@ private fun LazyListScope.sectionHeader(key: String, @StringRes titleRes: Int, s
     }
 }
 
-/**
- * Spec 020 FR-020 / FR-021 — first section: whether ThirtySix is the default browser. When it is
- * not, the row opens the system's confirmation (or default-apps screen); when it is, the row is
- * information only.
- */
+// When ThirtySix is already the default browser the row is information only.
 private fun LazyListScope.generalSection(state: SettingsUiState, onMakeDefault: () -> Unit) {
     sectionHeader(key = KEY_SECTION_GENERAL, titleRes = R.string.settings_section_general, showDivider = false)
     item(key = KEY_ROW_DEFAULT_BROWSER, contentType = CONTENT_TYPE_ROW) {
@@ -174,7 +161,6 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_THEME_ROW),
         )
     }
-    // Spec 022 FR-030 — the app-wide text size of web pages.
     item(key = KEY_ROW_TEXT_SIZE, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_text_size_title),
@@ -185,7 +171,7 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_TEXT_SIZE_ROW),
         )
     }
-    // FR-010 — dynamic color does not exist below Android 12, so neither does its control.
+    // Dynamic color does not exist below Android 12, so neither does its control.
     if (state.isDynamicColorSupported) {
         item(key = KEY_ROW_DYNAMIC_COLOR, contentType = CONTENT_TYPE_SWITCH_ROW) {
             SettingsSwitchRow(
@@ -201,7 +187,6 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
     }
 }
 
-/** Spec 019 FR-044 — language and search engine share one group. */
 private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, viewModel: SettingsViewModel) {
     sectionHeader(key = KEY_SECTION_LANGUAGE_AND_SEARCH, titleRes = R.string.settings_section_language_and_search)
     item(key = KEY_ROW_LANGUAGE, contentType = CONTENT_TYPE_ROW) {
@@ -244,7 +229,6 @@ private fun LazyListScope.privacySection(
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_RETENTION_ROW),
         )
     }
-    // Spec 021 FR-009.
     item(key = KEY_ROW_SITE_PERMISSIONS, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_site_permissions),
@@ -255,7 +239,6 @@ private fun LazyListScope.privacySection(
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_SITE_PERMISSIONS_ROW),
         )
     }
-    // Spec 023 FR-015.
     item(key = KEY_ROW_PROTECTION_EXCEPTIONS, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_protection_exceptions),
@@ -266,7 +249,6 @@ private fun LazyListScope.privacySection(
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_PROTECTION_EXCEPTIONS_ROW),
         )
     }
-    // Spec 024 FR-012.
     item(key = KEY_ROW_FIREPROOF_SITES, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
             title = stringResource(R.string.settings_fireproof_sites),
@@ -299,9 +281,8 @@ private fun LazyListScope.aboutSection(state: SettingsUiState) {
 }
 
 /**
- * Spec 019 — keeps the language chooser on screen until the new configuration arrives, then
- * closes it in that same frame, so the user sees one change: chooser → screen in the new
- * language. The configuration is read in composition on purpose — it changes once per choice.
+ * Keeps the language chooser open until the new configuration arrives, then closes it in that
+ * frame, so the person sees one change. Reading the configuration in composition is deliberate.
  */
 @Composable
 private fun LanguageChooserHost(
@@ -333,7 +314,6 @@ private fun LanguageChooserHost(
     )
 }
 
-/** Renders whichever dialog [SettingsUiState.dialog] names — at most one at a time. */
 @Composable
 internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewModel) {
     when (val dialog = state.dialog) {
@@ -379,10 +359,6 @@ internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewM
     }
 }
 
-/**
- * Maps each one-shot [SettingsEvent] to a localized snackbar. Extracted so [SettingsScreen]
- * stays under detekt's `LongMethod` ceiling as the stories add events.
- */
 @Composable
 internal fun SettingsSnackbarEffect(
     viewModel: SettingsViewModel,
@@ -408,7 +384,6 @@ internal fun SettingsSnackbarEffect(
     }
 }
 
-// Stable LazyColumn keys — Constitution §V forbids index-only keys.
 private const val KEY_SECTION_GENERAL: String = "section_general"
 private const val KEY_SECTION_APPEARANCE: String = "section_appearance"
 private const val KEY_SECTION_LANGUAGE_AND_SEARCH: String = "section_language_and_search"

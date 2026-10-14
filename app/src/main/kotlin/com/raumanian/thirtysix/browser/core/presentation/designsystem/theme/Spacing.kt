@@ -1,5 +1,4 @@
-// Spec 003 — 5-token Dp scale (4dp base, Material standard).
-// Use for padding/margin/spacer; size for icons/avatars uses literal .dp per spec FR-010.
+// Padding, margin and spacer scale on a 4dp base. Sizes of icons and avatars live in Dimens.
 
 package com.raumanian.thirtysix.browser.core.presentation.designsystem.theme
 

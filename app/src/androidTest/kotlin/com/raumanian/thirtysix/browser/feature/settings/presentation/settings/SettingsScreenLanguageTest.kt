@@ -15,12 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 016 T061 (US3 / FR-003, FR-013, FR-014).
- *
- * Drives [SettingsScreen] over an in-memory language controller, so no test ever recreates its
- * own activity. The platform round trip itself is covered on device by quickstart G4.
- */
+// An in-memory language controller, so no test ever recreates its own activity.
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenLanguageTest {
 
@@ -40,7 +35,7 @@ class SettingsScreenLanguageTest {
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW).assertTextContains(JAPANESE_ENDONYM)
     }
 
-    /** FR-014 — the eight names are the endonyms whatever language the test device runs in. */
+    /** The eight names are endonyms whatever language the test device runs in. */
     @Test(timeout = SETTINGS_TEST_TIMEOUT_MS)
     fun chooser_listsFollowSystemAndTheEightEndonyms() {
         render(InstrumentedFakeAppLanguageController())

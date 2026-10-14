@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
-/** Spec 013 — create/rename folder dialog; Spec 019 — on [BookmarkInputDialog]. */
 @Composable
 fun CreateOrRenameFolderDialog(
     title: String,

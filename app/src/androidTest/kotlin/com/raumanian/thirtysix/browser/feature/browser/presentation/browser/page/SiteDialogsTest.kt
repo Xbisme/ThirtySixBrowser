@@ -19,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Spec 021 T058 / C2.2–C2.3 — JS dialogs, leave-page and HTTP sign-in answers. */
+/** JS dialogs, leave-page and HTTP sign-in answers. */
 @RunWith(AndroidJUnit4::class)
 class SiteDialogsTest {
 
@@ -104,7 +104,13 @@ class SiteDialogsTest {
 
     @Test
     fun leavePage_leaveAndStay() {
-        val request = PageRequest.LeavePage(1L, 1L, "https://example.org", { answers += "leave" }, { answers += "stay" })
+        val request = PageRequest.LeavePage(
+            1L,
+            1L,
+            "https://example.org",
+            { answers += "leave" },
+            { answers += "stay" },
+        )
         composeRule.setContent { ThirtySixTheme { SiteLeaveDialog(request) { answers += "done" } } }
 
         composeRule.onNodeWithText(text(R.string.site_leave_leave)).performClick()
@@ -135,7 +141,15 @@ class SiteDialogsTest {
 
     @Test
     fun httpAuth_cancel() {
-        val request = PageRequest.HttpAuth(1L, 1L, "a", "a", null, { _, _ -> answers += "proceed" }, { answers += "cancel" })
+        val request = PageRequest.HttpAuth(
+            1L,
+            1L,
+            "a",
+            "a",
+            null,
+            { _, _ -> answers += "proceed" },
+            { answers += "cancel" },
+        )
         composeRule.setContent { ThirtySixTheme { HttpAuthDialog(request) { answers += "done" } } }
 
         composeRule.onNodeWithText(text(R.string.http_auth_cancel)).performClick()

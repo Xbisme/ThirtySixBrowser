@@ -21,11 +21,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Verifies database configuration invariants:
- *
- *  - **FR-007 / SC-006-prerequisite**: WAL journal mode active by default.
- *  - **FR-009 / SC-004**: opening with a higher schema version against existing
- *    on-disk data without a Migration class FAILS FAST and does NOT destroy data.
+ * WAL journal mode is on by default, and opening existing data at a higher schema version
+ * without a migration fails fast without destroying the data.
  */
 @RunWith(AndroidJUnit4::class)
 class AppDatabaseConfigTest {
@@ -73,8 +70,7 @@ class AppDatabaseConfigTest {
         assertTrue(insertedId > 0L)
         dbV1.close()
 
-        // 2) Open the SAME file with a schema declared one version AHEAD of production —
-        //    same entities, no migration registered. Room must throw IllegalStateException.
+        // 2) Open the same file with a schema one version ahead of production and no migration.
         val dbV2Builder = Room.databaseBuilder(
             context,
             AppDatabaseFutureVersionFixture::class.java,
@@ -83,7 +79,7 @@ class AppDatabaseConfigTest {
         var threw: IllegalStateException? = null
         try {
             val dbV2 = dbV2Builder.build()
-            // Trigger actual open (Room is lazy)
+            // Room opens lazily.
             dbV2.openHelper.writableDatabase
             dbV2.close()
             fail("opening v2 schema without migration should have thrown IllegalStateException")
@@ -91,14 +87,13 @@ class AppDatabaseConfigTest {
             threw = e
         }
         assertNotNull("Room must refuse to open without a migration", threw)
-        // Document the exception via the message; the SwallowedException detekt rule
-        // is satisfied because we surface the original cause if assertion later fails.
+        // The message assertion surfaces the original cause, which satisfies detekt's SwallowedException.
         assertTrue(
             "expected migration-related message, got <${threw!!.message}>",
             threw.message?.contains("migration", ignoreCase = true) == true,
         )
 
-        // 3) Reopen as v1 — the original row MUST still be there (data not destroyed).
+        // 3) Reopen as v1: the original row is still there.
         val dbV1Again = Room.databaseBuilder(context, AppDatabase::class.java, dbFile.absolutePath).build()
         val survivor = dbV1Again.bookmarkDao().getById(insertedId)
         assertNotNull("data MUST be preserved across the failed v2 open", survivor)
@@ -109,17 +104,11 @@ class AppDatabaseConfigTest {
     }
 
     /**
-     * Future-version fixture — the production entity set at a version **ahead of**
-     * [AppDatabase.SCHEMA_VERSION], with no migration registered. Used purely to drive the
-     * negative-path assertion above.
-     *
-     * > Spec 015 note: this was `version = 2` and named `AppDatabaseV2Fixture` while
-     * > production sat at v1. Spec 015 moved production to v2, at which point the fixture
-     * > stopped meaning "a future version" and started meaning "the same version with a
-     * > different shape" — so Room raised an identity-mismatch error instead of a
-     * > missing-migration error and the message assertion failed. Deriving the version from
-     * > [AppDatabase.SCHEMA_VERSION] means it can never drift out of date again.
+     * The production entities one version ahead of [AppDatabase.SCHEMA_VERSION], with no
+     * migration. The version is derived so it stays ahead: at the same version Room raises an
+     * identity mismatch instead of the missing-migration error asserted above.
      */
+
     @Database(
         entities = [
             BookmarkEntity::class,

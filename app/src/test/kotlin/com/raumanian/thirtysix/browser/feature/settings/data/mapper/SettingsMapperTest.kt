@@ -12,18 +12,11 @@ import com.raumanian.thirtysix.browser.feature.tabs.data.mapper.toDomain
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Pure-JVM tests for [SettingsMapper]. Builds in-memory MutablePreferences
- * fixtures via mutablePreferencesOf() — no DataStore needed.
- *
- * Spec 016 removed the language cases with the language value (research R4) and added the
- * decoding rules for dynamic color and history retention (data-model §1).
- */
 class SettingsMapperTest {
 
     private val mapper = SettingsMapper()
 
-    // ----------------------------- US2: defaults --------------------------
+    // ----------------------------- defaults -------------------------------
 
     @Test
     fun emptyPrefs_returnsAllDefaults() {
@@ -35,7 +28,7 @@ class SettingsMapperTest {
         assertEquals(AppDefaults.IS_ONBOARDING_COMPLETED, snapshot.isOnboardingCompleted)
     }
 
-    // ----------------------------- FR-009 fallback ------------------------
+    // ----------------------------- unknown-value fallback -----------------
 
     @Test
     fun unknownThemeValue_fallsBackToDefault() {
@@ -46,18 +39,17 @@ class SettingsMapperTest {
 
     @Test
     fun unknownSearchEngineValue_fallsBackToDefault() {
-        // Spec 010 added Google + DuckDuckGo + Bing; this fixture uses a
-        // still-unknown engine name to exercise the fallback.
+        // An engine name this build does not know.
         val prefs = mutablePreferencesOf().toMutablePreferences()
         prefs[StorageKeys.SEARCH_ENGINE] = "yandex"
         assertEquals(AppDefaults.SEARCH_ENGINE, mapper.toDomain(prefs).searchEngine)
     }
 
-    // ----------------------------- Spec 016: decoding rules --------------
+    // ----------------------------- decoding rules -------------------------
 
     @Test
     fun missingDynamicColor_isFalse() {
-        // Spec 019 FR-005a — the default flipped to off; only an unset key falls back to it.
+        // Only an unset key falls back to the default, which is off.
         assertEquals(false, mapper.toDomain(mutablePreferencesOf()).isDynamicColorEnabled)
     }
 
@@ -113,20 +105,13 @@ class SettingsMapperTest {
         assertEquals(TextSize.Percent150, mapper.toDomain(prefs).textSize)
     }
 
-    // ----------------------------- US7 / FR-019: schema rule --------------
+    // ----------------------------- schema rule ----------------------------
 
-    /**
-     * Negative-path: simulate a key rename. A future build wrote the value under
-     * an OLD key name (`theme_mode_old`) which the current build does not read.
-     * The current build's documented behavior is "default returned, old value
-     * NOT silently inherited". This test codifies that rule.
-     */
+    // A value under a key this build does not read (a rename) yields the default; it is not inherited.
     @Test
     fun renamedKey_returnsDefault_oldValueGone() {
         val prefs = mutablePreferencesOf().toMutablePreferences()
-        // Old key the current code does NOT read (simulating rename)
         prefs[stringPreferencesKey("theme_mode_old")] = ThemeMode.Dark.storageValue
-        // No write under the canonical StorageKeys.THEME_MODE
         val snapshot = mapper.toDomain(prefs)
         assertEquals(
             "Old key value MUST NOT silently bleed into the new key — got ${snapshot.themeMode}",
@@ -155,10 +140,10 @@ class SettingsMapperTest {
     }
 
     private companion object {
-        /** A day count that is not one of the four Spec 016 windows. */
+        /** A day count that is not one of the four windows. */
         const val OUT_OF_SET_RETENTION_DAYS = 45
     }
 }
 
-/** Spec 022 — a percentage that is not one of the nine text size levels. */
+/** A percentage that is not one of the nine text size levels. */
 private const val OUT_OF_SET_TEXT_SIZE_PERCENT: Int = 130

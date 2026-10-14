@@ -11,12 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Spec 016 T096 (US6 / FR-009, FR-010).
- *
- * The capability flag is injected, so both branches run on any test device regardless of its
- * Android version. Whether the palette really changes is checked on device by quickstart G2.
- */
+// The capability flag is injected, so both branches run on any test device.
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenDynamicColorTest {
 
@@ -43,7 +38,7 @@ class SettingsScreenDynamicColorTest {
             }
         }
 
-        // Spec 019 FR-005a — dynamic color now starts off, so the toggle turns it on.
+        // Dynamic color starts off, so the toggle turns it on.
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).assertIsOff()
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).performClick()
         composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { repository.current.isDynamicColorEnabled }

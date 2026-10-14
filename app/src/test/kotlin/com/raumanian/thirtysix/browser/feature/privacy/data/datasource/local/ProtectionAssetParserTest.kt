@@ -7,7 +7,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Spec 023 T024 — the three bundled-asset parsers, plus a check of the real committed assets. */
+/** The three bundled-asset parsers, plus a check of the real committed assets. */
 class ProtectionAssetParserTest {
 
     @Test
