@@ -12,8 +12,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.webkit.CookieManagerCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
-import com.raumanian.thirtysix.browser.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
 import com.raumanian.thirtysix.browser.domain.model.FireState
 import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository

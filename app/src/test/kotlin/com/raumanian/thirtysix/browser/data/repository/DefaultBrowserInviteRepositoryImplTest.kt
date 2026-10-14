@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.data.local.datastore.SettingsDataStore
-import com.raumanian.thirtysix.browser.data.local.datastore.createTestSettingsDataStore
+import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
+import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.createTestSettingsDataStore
 import com.raumanian.thirtysix.browser.domain.repository.InviteState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.data.repository
 
+import com.raumanian.thirtysix.browser.core.data.datasource.local.SiteProtectionExceptionDao
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SiteProtectionExceptionEntity
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.dao.SiteProtectionExceptionDao
-import com.raumanian.thirtysix.browser.data.local.entity.SiteProtectionExceptionEntity
 import com.raumanian.thirtysix.browser.data.mapper.toDomain
 import com.raumanian.thirtysix.browser.domain.model.SiteProtectionException
 import com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository

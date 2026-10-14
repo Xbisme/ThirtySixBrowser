@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.data.mapper
 
-import com.raumanian.thirtysix.browser.data.local.entity.TabEntity
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEntity
 import com.raumanian.thirtysix.browser.domain.model.Tab
 
 /**

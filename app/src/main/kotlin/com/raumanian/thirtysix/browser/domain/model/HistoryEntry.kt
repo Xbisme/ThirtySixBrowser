@@ -4,7 +4,7 @@ package com.raumanian.thirtysix.browser.domain.model
  * Spec 014 — domain representation of a single browsing-history entry.
  *
  * Pure Kotlin per Constitution §IV (no Android imports). Maps to / from
- * `com.raumanian.thirtysix.browser.data.local.entity.HistoryEntryEntity` via
+ * `com.raumanian.thirtysix.browser.core.data.datasource.local.entity.HistoryEntryEntity` via
  * `com.raumanian.thirtysix.browser.data.mapper.HistoryEntryMapper`.
  *
  * @property id auto-generated primary key; `0L` when not yet persisted.

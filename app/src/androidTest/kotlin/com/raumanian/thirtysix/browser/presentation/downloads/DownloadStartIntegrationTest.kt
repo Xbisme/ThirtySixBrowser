@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.presentation.downloads
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.data.repository.DownloadsRepositoryImpl
 import com.raumanian.thirtysix.browser.domain.model.DownloadRequest

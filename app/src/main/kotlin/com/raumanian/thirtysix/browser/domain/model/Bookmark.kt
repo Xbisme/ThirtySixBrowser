@@ -4,7 +4,7 @@ package com.raumanian.thirtysix.browser.domain.model
  * Spec 013 — domain representation of a saved bookmark.
  *
  * Pure Kotlin per Constitution §IV (no Android imports). Maps to / from
- * `com.raumanian.thirtysix.browser.data.local.entity.BookmarkEntity` via
+ * `com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkEntity` via
  * `com.raumanian.thirtysix.browser.data.mapper.BookmarkMapper`.
  *
  * @property id auto-generated primary key; `0L` when not yet persisted.

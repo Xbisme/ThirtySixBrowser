@@ -2,8 +2,8 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-import com.raumanian.thirtysix.browser.data.local.datastore.SettingsDataStore
-import com.raumanian.thirtysix.browser.data.local.datastore.createTestSettingsDataStore
+import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
+import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.createTestSettingsDataStore
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode

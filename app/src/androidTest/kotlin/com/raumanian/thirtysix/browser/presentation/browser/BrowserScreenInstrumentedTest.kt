@@ -16,10 +16,10 @@ import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
+import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
-import com.raumanian.thirtysix.browser.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.domain.repository.SearchEngineRepository

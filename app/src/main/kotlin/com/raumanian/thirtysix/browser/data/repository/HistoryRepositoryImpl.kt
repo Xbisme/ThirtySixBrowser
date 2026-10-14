@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.data.repository
 
+import com.raumanian.thirtysix.browser.core.data.datasource.local.HistoryDao
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.HistoryEntryEntity
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
-import com.raumanian.thirtysix.browser.data.local.dao.HistoryDao
-import com.raumanian.thirtysix.browser.data.local.entity.HistoryEntryEntity
 import com.raumanian.thirtysix.browser.data.mapper.HistoryEntryMapper
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository

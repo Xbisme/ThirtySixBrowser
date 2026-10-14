@@ -1,11 +1,11 @@
 package com.raumanian.thirtysix.browser.data.repository
 
 import androidx.room.withTransaction
+import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
+import com.raumanian.thirtysix.browser.core.data.datasource.local.BookmarkDao
+import com.raumanian.thirtysix.browser.core.data.datasource.local.BookmarkFolderDao
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.dao.BookmarkDao
-import com.raumanian.thirtysix.browser.data.local.dao.BookmarkFolderDao
-import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.data.mapper.BookmarkFolderMapper
 import com.raumanian.thirtysix.browser.data.mapper.BookmarkMapper
 import com.raumanian.thirtysix.browser.domain.error.BookmarkException
@@ -148,7 +148,7 @@ class BookmarkRepositoryImpl @Inject constructor(
             }
             val now = System.currentTimeMillis()
             folderDao.insert(
-                com.raumanian.thirtysix.browser.data.local.entity.BookmarkFolderEntity(
+                com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkFolderEntity(
                     name = name,
                     parentId = parentId,
                     createdAt = now,

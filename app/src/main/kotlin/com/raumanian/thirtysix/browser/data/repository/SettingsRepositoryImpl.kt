@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.data.repository
 
+import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.datastore.SettingsDataStore
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
 import com.raumanian.thirtysix.browser.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine

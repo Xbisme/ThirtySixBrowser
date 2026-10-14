@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.data.mapper
 
-import com.raumanian.thirtysix.browser.data.local.entity.SitePermissionEntity
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
 import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.domain.model.SitePermissionDecision

@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.data.mapper
 
-import com.raumanian.thirtysix.browser.data.local.entity.BookmarkFolderEntity
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkFolderEntity
 import com.raumanian.thirtysix.browser.domain.model.BookmarkFolder
 
 /**

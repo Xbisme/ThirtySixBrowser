@@ -2,9 +2,9 @@ package com.raumanian.thirtysix.browser.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
+import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.data.local.dao.inMemoryAppDatabase
-import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
 import kotlinx.coroutines.Dispatchers
