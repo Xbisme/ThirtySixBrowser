@@ -37,6 +37,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
+import com.raumanian.thirtysix.browser.data.local.webview.IncognitoProfiles
 import com.raumanian.thirtysix.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.domain.usecase.BuildLongPressMenuUseCase
@@ -143,9 +144,10 @@ internal fun BrowserWebView(
         AndroidView(
             modifier = modifier,
             factory = { context ->
-                val toAdopt = adoptable[0]
-                adoptable[0] = null
-                val webView = preparePageTools(toAdopt ?: WebView(context), actions, textZoom.value, desktopMode)
+                val toAdopt = adoptable[0].also { adoptable[0] = null }
+                // An incognito WebView gets the session's own profile before anything else touches it.
+                val fresh = toAdopt ?: IncognitoProfiles.prepare(WebView(context), state.isIncognito)
+                val webView = preparePageTools(fresh, actions, textZoom.value, desktopMode)
                     // Without explicit params AndroidView lays the WebView out as WRAP_CONTENT, and
                     // Chromium then gives the page a layout viewport 0 px tall: pages sized with
                     // `height: 100%` (maps, drawing apps) render blank. The modifier still sizes it.
@@ -335,7 +337,7 @@ private fun WebView.loadProtected(url: String, protection: WebViewProtection?) {
 
 /** Spec 021 research R5 — a WebView with the browser's settings for a window the page opened. */
 private fun newPopupWebView(context: android.content.Context, incognito: Boolean): WebView =
-    WebView(context).also { popup ->
+    IncognitoProfiles.prepare(WebView(context), incognito).also { popup ->
         applySecuritySettings(popup)
         if (incognito) applyIncognitoSettings(popup)
         // Until its tab adopts it, the pop-up must load in place: a WebView with no client hands

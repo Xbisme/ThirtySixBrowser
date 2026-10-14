@@ -3,20 +3,18 @@ package com.raumanian.thirtysix.browser.data.repository
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.result.Result
+import com.raumanian.thirtysix.browser.data.local.webview.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.domain.model.Tab
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.domain.repository.IncognitoProtectionExceptions
 import com.raumanian.thirtysix.browser.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.domain.repository.MaxIncognitoTabsReachedException
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
-import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -35,34 +33,36 @@ import kotlinx.coroutines.withContext
  * within a process lifetime).
  *
  * Cookie session lifecycle (FR-011a):
- *  - Transition `0 → 1` (first incognito tab): [createTab] calls
- *    [CookieJarSnapshotManager.captureSnapshot] with origins enumerated
- *    from currently-persisted normal tabs (via [tabRepository.observeTabs]).
- *  - Transition `1 → 0` (last incognito tab closed): [closeTab] / [closeAll]
- *    call [CookieJarSnapshotManager.restoreSnapshot].
+ *  - Where the engine has WebView profiles ([IncognitoWebProfile.isIsolated]), the session gets a
+ *    profile of its own: `0 → 1` begins it, `1 → 0` ends it and its profile is deleted. Normal
+ *    browsing's cookies and storage are never touched.
+ *  - Otherwise (older engines) the shared jar is snapshotted: `0 → 1` calls
+ *    [CookieJarSnapshotManager.captureSnapshot] with [IncognitoSnapshotOrigins] (normal tabs,
+ *    history, fireproof sites), and `1 → 0` calls [CookieJarSnapshotManager.restoreSnapshot].
+ *    Cookies of any other site are still lost at the end of the session there.
  *
- * Constitution §IV: this repository depends on [CookieJarSnapshotManager]
- * (a CoreService-style platform-state manager, NOT a feature repository) and
- * on [TabRepository] (read-only, only for origin enumeration at snapshot
- * capture time). The latter is a Repository → Repository read; per
- * [plan.md Complexity Tracking](../../../../../../specs/012-private-incognito-mode/plan.md),
- * the cross-feature glue normally lives at the use-case layer, BUT this
- * specific read is gated by the snapshot-capture protocol which is
- * inseparable from the createTab transaction. Documented exception, same
- * pattern as Spec 011 `UpdateActiveTabUrlAndTitleUseCase`.
+ * Constitution §IV: this repository depends on [CookieJarSnapshotManager] and
+ * [IncognitoWebProfile] (platform-state managers, NOT feature repositories). The
+ * repository reads needed for the snapshot origins live in [IncognitoSnapshotOrigins]
+ * (the documented Spec 012 exception, per
+ * [plan.md Complexity Tracking](../../../../../../specs/012-private-incognito-mode/plan.md)).
  */
 @Singleton
 @Suppress("TooManyFunctions") // Spec 021 R9 adds createBackgroundTab; one function per contract member.
 class IncognitoTabRepositoryImpl @Inject constructor(
     private val cookieJarSnapshotManager: CookieJarSnapshotManager,
-    private val tabRepository: TabRepository,
+    private val snapshotOrigins: IncognitoSnapshotOrigins,
     private val dispatchers: DispatcherProvider,
     private val incognitoProtectionExceptions: IncognitoProtectionExceptions,
+    private val incognitoProfile: IncognitoWebProfile,
 ) : IncognitoTabRepository {
 
     private val state: MutableStateFlow<List<Tab>> = MutableStateFlow(emptyList())
     private val nextId: AtomicLong = AtomicLong(0L)
     private val mutex: Mutex = Mutex()
+
+    /** Whether the running session uses its own profile; decided when it begins. Guarded by [mutex]. */
+    private var isolatedSession = false
 
     override fun observeTabs(): Flow<List<Tab>> = state.asStateFlow()
         .map { list ->
@@ -86,10 +86,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                 // 0 → 1 transition: capture snapshot BEFORE adding tab so any
                 // cookie write triggered by this incognito tab cannot bias the
                 // captured normal-tab cookie set.
-                if (state.value.isEmpty()) {
-                    val origins = enumerateNormalTabOrigins()
-                    cookieJarSnapshotManager.captureSnapshot(origins)
-                }
+                if (state.value.isEmpty()) beginSession()
                 val now = System.currentTimeMillis()
                 val newTab = Tab(
                     id = nextId.decrementAndGet(),
@@ -133,11 +130,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                 // 1 → 0 transition: restore snapshot AFTER removing the tab so
                 // the live cookie jar wipe inside restoreSnapshot also clears
                 // any incognito-set cookies that this tab created.
-                if (sizeBefore > 0 && sizeAfter == 0) {
-                    cookieJarSnapshotManager.restoreSnapshot()
-                    // Spec 023 FR-014: incognito protection choices end with the session.
-                    incognitoProtectionExceptions.clear()
-                }
+                if (sizeBefore > 0 && sizeAfter == 0) endSession()
             }
         }
 
@@ -146,31 +139,28 @@ class IncognitoTabRepositoryImpl @Inject constructor(
             mutex.withLock {
                 if (state.value.isEmpty()) return@withLock
                 state.value = emptyList()
-                cookieJarSnapshotManager.restoreSnapshot()
-                incognitoProtectionExceptions.clear()
+                endSession()
             }
         }
 
     override suspend fun getCount(): Int = state.value.size
 
-    /**
-     * Enumerate the unique origins (scheme + host + port) of all currently-
-     * persisted normal tabs. Used for the snapshot-capture origin list.
-     *
-     * Bounded by [BrowserLimits.MAX_TABS]; typical N ≤ 10 in practice.
-     * Defensive `runCatching` — malformed URLs are silently dropped.
-     */
-    private suspend fun enumerateNormalTabOrigins(): List<String> = runCatching {
-        tabRepository.observeTabs().first()
-            .mapNotNull { tab -> originOf(tab.url) }
-            .distinct()
-    }.getOrElse { emptyList() }
+    /** `0 → 1`: a profile of its own where the engine has profiles, else the jar snapshot. */
+    private suspend fun beginSession() {
+        // Feature detection loads the WebView provider: done on the main thread.
+        isolatedSession = withContext(dispatchers.main) { incognitoProfile.isIsolated() }
+        if (isolatedSession) {
+            incognitoProfile.beginSession()
+        } else {
+            cookieJarSnapshotManager.captureSnapshot(snapshotOrigins.collect())
+        }
+    }
 
-    private fun originOf(url: String): String? = runCatching {
-        val uri = URI(url)
-        val scheme = uri.scheme ?: return null
-        val host = uri.host ?: return null
-        val port = uri.port
-        if (port == -1) "$scheme://$host" else "$scheme://$host:$port"
-    }.getOrNull()
+    /** `1 → 0`: the session's cookies and storage go; normal browsing keeps its own. */
+    private suspend fun endSession() {
+        if (isolatedSession) incognitoProfile.endSession() else cookieJarSnapshotManager.restoreSnapshot()
+        isolatedSession = false
+        // Spec 023 FR-014: incognito protection choices end with the session.
+        incognitoProtectionExceptions.clear()
+    }
 }
