@@ -14,7 +14,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteReposi
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoWebProfile
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

@@ -21,13 +21,13 @@ import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
 import com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect
-import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
 import com.raumanian.thirtysix.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.RecordAppLaunchUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingIntentReader
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingRequestRelay
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.LaunchCountPolicy
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.PendingRequestState
+import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.FireCoordinator
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.navigation.AppNavGraph
 import dagger.hilt.android.AndroidEntryPoint

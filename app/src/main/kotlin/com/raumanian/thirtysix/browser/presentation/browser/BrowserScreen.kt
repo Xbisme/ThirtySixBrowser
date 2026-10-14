@@ -42,6 +42,7 @@ import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.util.IncomingContentHooks
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.FireViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.components.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBar
 import com.raumanian.thirtysix.browser.presentation.browser.components.BrowserBottomBarCallbacks
@@ -53,7 +54,6 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.HubPageTo
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
 import com.raumanian.thirtysix.browser.presentation.browser.components.PrivacyToolsHosts
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
-import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
 import com.raumanian.thirtysix.browser.presentation.browser.page.FullscreenOverlay
 import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressActions

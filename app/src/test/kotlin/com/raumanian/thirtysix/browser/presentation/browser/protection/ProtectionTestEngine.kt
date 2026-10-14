@@ -7,10 +7,10 @@ import com.raumanian.thirtysix.browser.core.domain.model.TrackingParamRules
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
-import com.raumanian.thirtysix.browser.data.local.protection.HttpsUpgradeFailureStore
-import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.protection.ProtectionMatchersHolder
 import com.raumanian.thirtysix.browser.domain.usecase.IsSiteProtectedUseCase
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.HttpsUpgradeFailureStore
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import kotlinx.coroutines.Dispatchers
 
 /** A [ProtectionEngine] over small in-memory rules, for the Spec 023 presentation tests. */

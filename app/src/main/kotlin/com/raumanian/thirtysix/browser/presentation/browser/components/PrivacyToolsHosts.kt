@@ -4,7 +4,9 @@ package com.raumanian.thirtysix.browser.presentation.browser.components
 
 import androidx.compose.runtime.Composable
 import com.raumanian.thirtysix.browser.core.domain.model.FireState
-import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.FireConfirmDialog
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.FireOverlay
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.FireViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.protection.ProtectionViewModel
 
 /**

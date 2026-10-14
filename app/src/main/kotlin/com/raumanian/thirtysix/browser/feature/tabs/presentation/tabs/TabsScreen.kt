@@ -25,9 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +38,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.domain.model.FireState
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.RoundIconStyle
@@ -48,13 +45,12 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.CloseAllIncognitoConfirmDialog
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.CloseAllTabsConfirmDialog
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.TabCreateCard
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.TabSwitcherCard
-import com.raumanian.thirtysix.browser.presentation.browser.components.FireConfirmDialog
-import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import java.io.File
 
@@ -70,16 +66,12 @@ import java.io.File
 @Composable
 fun TabsScreen(
     navController: NavHostController,
+    fireButton: FireButton,
     modifier: Modifier = Modifier,
     viewModel: TabsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
-    val maxIncognitoMessage = stringResource(
-        R.string.tabs_error_max_incognito_tabs_reached,
-        BrowserLimits.MAX_INCOGNITO_TABS,
-    )
 
     LaunchedEffect(viewModel) {
         viewModel.popBackEvent.collect {
@@ -89,8 +81,6 @@ fun TabsScreen(
 
     TabsErrorEventEffect(
         errorEvent = state.errorEvent,
-        maxTabsMessage = maxTabsMessage,
-        maxIncognitoMessage = maxIncognitoMessage,
         snackbarHostState = snackbarHostState,
         consumeErrorEvent = viewModel::consumeErrorEvent,
     )
@@ -109,6 +99,7 @@ fun TabsScreen(
             TabsHeader(
                 state = state,
                 navController = navController,
+                fire = fireButton,
                 onModeSelected = viewModel::onModeSelected,
                 onCloseAll = if (state.mode == TabsMode.Incognito) {
                     viewModel::onCloseAllIncognitoRequested
@@ -137,39 +128,17 @@ fun TabsScreen(
     }
 }
 
-/** Spec 024 FR-001 — the Tabs header's Fire button; disabled while a run is in progress (INV-5). */
-private data class TabsFireButton(val enabled: Boolean, val onClick: () -> Unit)
-
-/** Spec 024 FR-001, FR-002 — the Tabs header's Fire button and the confirmation it opens. */
-@Composable
-private fun rememberTabsFire(
-    navController: NavHostController,
-    fire: FireViewModel = hiltViewModel(),
-): TabsFireButton {
-    val fireState by fire.state.collectAsStateWithLifecycle()
-    var confirmOpen by rememberSaveable { mutableStateOf(false) }
-    if (confirmOpen) {
-        FireConfirmDialog(
-            onConfirm = {
-                confirmOpen = false
-                // Research R10 — back to the browser first; its overlay shows the run.
-                navController.popBackStack(AppDestination.Browser.route, inclusive = false)
-                fire.fire()
-            },
-            onDismiss = { confirmOpen = false },
-        )
-    }
-    return TabsFireButton(enabled = fireState == FireState.Idle, onClick = { confirmOpen = true })
-}
-
 @Composable
 private fun TabsErrorEventEffect(
     errorEvent: TabsErrorEvent?,
-    maxTabsMessage: String,
-    maxIncognitoMessage: String,
     snackbarHostState: SnackbarHostState,
     consumeErrorEvent: () -> Unit,
 ) {
+    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
+    val maxIncognitoMessage = stringResource(
+        R.string.tabs_error_max_incognito_tabs_reached,
+        BrowserLimits.MAX_INCOGNITO_TABS,
+    )
     LaunchedEffect(errorEvent) {
         when (errorEvent) {
             is TabsErrorEvent.MaxTabsReached -> {
@@ -207,10 +176,10 @@ private fun TabsConfirmDialogs(state: TabsUiState, viewModel: TabsViewModel) {
 private fun TabsHeader(
     state: TabsUiState,
     navController: NavHostController,
+    fire: FireButton,
     onModeSelected: (TabsMode) -> Unit,
     onCloseAll: () -> Unit,
 ) {
-    val fire = rememberTabsFire(navController = navController)
     val incognito = state.mode == TabsMode.Incognito
     Column(
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),

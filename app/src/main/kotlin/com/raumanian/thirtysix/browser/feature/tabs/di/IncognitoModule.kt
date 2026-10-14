@@ -1,14 +1,9 @@
 package com.raumanian.thirtysix.browser.feature.tabs.di
 
-import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
-import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
-import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
-import com.raumanian.thirtysix.browser.data.local.cookies.CookieJarSnapshotManagerImpl
 import com.raumanian.thirtysix.browser.feature.tabs.data.repository.IncognitoTabRepositoryImpl
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -30,16 +25,4 @@ abstract class IncognitoModule {
     abstract fun bindIncognitoTabRepository(
         impl: IncognitoTabRepositoryImpl,
     ): IncognitoTabRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindCookieJarSnapshotManager(
-        impl: CookieJarSnapshotManagerImpl,
-    ): CookieJarSnapshotManager
-
-    companion object {
-        /** The incognito session's WebView profile; one process-wide object (see [IncognitoProfiles]). */
-        @Provides
-        fun provideIncognitoWebProfile(): IncognitoWebProfile = IncognitoProfiles
-    }
 }

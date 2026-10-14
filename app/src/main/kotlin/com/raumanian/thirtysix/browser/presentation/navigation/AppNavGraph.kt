@@ -15,12 +15,13 @@ import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.Ent
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.EntryPointViewModel
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.HistoryScreen
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.OnboardingScreen
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.rememberFireButton
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fireproof.FireproofSitesScreen
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions.ProtectionExceptionsScreen
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SettingsScreen
 import com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions.SitePermissionsScreen
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.TabsScreen
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserScreen
-import com.raumanian.thirtysix.browser.presentation.settings.fireproof.FireproofSitesScreen
-import com.raumanian.thirtysix.browser.presentation.settings.protectionexceptions.ProtectionExceptionsScreen
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
@@ -47,7 +48,15 @@ fun AppNavGraph(
         composable(AppDestination.Browser.route) {
             BrowserScreen(navController = navController, incomingContent = entryPointViewModel.browserHooks)
         }
-        composable(AppDestination.Tabs.route) { TabsScreen(navController = navController) }
+        composable(AppDestination.Tabs.route) {
+            TabsScreen(
+                navController = navController,
+                // Back to the browser first; its overlay shows the run.
+                fireButton = rememberFireButton(
+                    onConfirm = { navController.popBackStack(AppDestination.Browser.route, inclusive = false) },
+                ),
+            )
+        }
         composable(AppDestination.Bookmarks.route) { BookmarksScreen(navController = navController) }
         composable(AppDestination.History.route) { HistoryScreen(navController = navController) }
         composable(AppDestination.Downloads.route) { DownloadsScreen(navController = navController) }

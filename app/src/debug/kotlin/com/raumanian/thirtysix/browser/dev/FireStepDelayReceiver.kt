@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.raumanian.thirtysix.browser.domain.fire.ConfigurableFireStepObserver
+import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.ConfigurableFireStepObserver
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

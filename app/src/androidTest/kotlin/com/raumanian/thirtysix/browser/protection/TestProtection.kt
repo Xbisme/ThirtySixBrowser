@@ -15,12 +15,12 @@ import com.raumanian.thirtysix.browser.core.domain.model.TrackingParamRules
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptBundlesImpl
-import com.raumanian.thirtysix.browser.data.local.privacy.PrivacyScriptSessionImpl
-import com.raumanian.thirtysix.browser.data.local.protection.HttpsUpgradeFailureStore
-import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.protection.ProtectionMatchersHolder
 import com.raumanian.thirtysix.browser.domain.usecase.IsSiteProtectedUseCase
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.HttpsUpgradeFailureStore
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.PrivacyScriptBundlesImpl
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.PrivacyScriptSessionImpl
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserNavigationCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState
 import com.raumanian.thirtysix.browser.presentation.browser.BrowserWebView

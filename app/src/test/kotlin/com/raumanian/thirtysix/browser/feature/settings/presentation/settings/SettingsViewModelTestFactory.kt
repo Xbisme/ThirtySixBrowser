@@ -17,7 +17,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
-import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ClearBrowsingDataUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetDynamicColorEnabledUseCase

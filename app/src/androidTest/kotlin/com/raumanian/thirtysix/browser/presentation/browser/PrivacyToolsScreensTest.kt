@@ -18,8 +18,9 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.domain.privacy.BlockedSiteGroup
-import com.raumanian.thirtysix.browser.presentation.browser.components.FireConfirmDialog
-import com.raumanian.thirtysix.browser.presentation.browser.components.FireOverlay
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.FireConfirmDialog
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.FireOverlay
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.TEST_TAG_FIRE_OVERLAY
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubPageToolsState
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
@@ -27,7 +28,6 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.PrivacyDa
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_DASHBOARD_FIREPROOF_SWITCH
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_DASHBOARD_GROUP
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_DASHBOARD_PROTECTION_SWITCH
-import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_FIRE_OVERLAY
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_HUB_FIRE
 import com.raumanian.thirtysix.browser.presentation.browser.privacy.PageDashboardState
 import kotlinx.coroutines.flow.MutableStateFlow
