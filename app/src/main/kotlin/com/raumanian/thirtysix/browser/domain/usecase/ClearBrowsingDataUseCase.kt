@@ -2,16 +2,16 @@ package com.raumanian.thirtysix.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoProtectionExceptions
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataResult
 import javax.inject.Inject

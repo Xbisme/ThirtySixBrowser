@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import javax.inject.Inject
 
 /**

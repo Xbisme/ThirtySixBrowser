@@ -1,9 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
-import android.graphics.Bitmap
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
@@ -21,6 +20,7 @@ import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
+import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -200,7 +200,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
     private object NoopFaviconCache : FaviconCache {
         private val state = MutableStateFlow(0L)
         override val version: StateFlow<Long> = state.asStateFlow()
-        override suspend fun save(url: String, bitmap: Bitmap) = Unit
+        override suspend fun save(url: String, writeImage: (OutputStream) -> Unit) = Unit
         override suspend fun clearAll() = Unit
         override suspend fun retainOnly(hosts: Set<String>) = Unit
         override fun fileFor(url: String): File? = null
@@ -209,7 +209,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
     private object NoopScreenshotCache : ScreenshotCache {
         private val state = MutableStateFlow(0L)
         override val version: StateFlow<Long> = state.asStateFlow()
-        override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+        override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) = Unit
         override fun fileFor(tabId: Long): File? = null
         override suspend fun delete(tabId: Long) = Unit
         override suspend fun clearAll() = Unit

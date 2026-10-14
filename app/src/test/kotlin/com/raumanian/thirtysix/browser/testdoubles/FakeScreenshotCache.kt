@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
-import android.graphics.Bitmap
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import java.io.File
+import java.io.OutputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +21,7 @@ class FakeScreenshotCache(
 
     var clearAllError: Throwable? = null
 
-    override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+    override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) = Unit
 
     override fun fileFor(tabId: Long): File? = null
 

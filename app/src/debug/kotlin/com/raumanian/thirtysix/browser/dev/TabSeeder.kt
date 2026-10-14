@@ -9,10 +9,12 @@ import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.raumanian.thirtysix.browser.core.constants.AppConstants
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
+import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -83,13 +85,13 @@ class TabSeeder : BroadcastReceiver() {
                 is Result.Success -> {
                     screenshotCache.save(
                         tabId = result.data.id,
-                        bitmap = placeholder(
+                        writeImage = placeholder(
                             width = AppConstants.SCREENSHOT_TARGET_WIDTH_PX,
                             height = AppConstants.SCREENSHOT_TARGET_HEIGHT_PX,
                             index = total,
-                        ),
+                        ).webpWriter(),
                     )
-                    faviconCache.save(url, placeholder(ICON_SIZE_PX, ICON_SIZE_PX, total))
+                    faviconCache.save(url, placeholder(ICON_SIZE_PX, ICON_SIZE_PX, total).pngWriter())
                     created++
                 }
                 is Result.Error -> {

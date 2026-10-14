@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
+import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
 import com.raumanian.thirtysix.browser.domain.model.AddressBarSubmitResult
 import com.raumanian.thirtysix.browser.domain.model.classifyAddressBarInput
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
@@ -671,7 +673,7 @@ class BrowserViewModel @Inject constructor(
         // across the normal/incognito boundary).
         if (_uiState.value.isIncognito) return
         viewModelScope.launch {
-            faviconCache.save(url, icon)
+            faviconCache.save(url, icon.pngWriter())
         }
     }
 
@@ -693,7 +695,7 @@ class BrowserViewModel @Inject constructor(
         if (_uiState.value.isIncognito) return
         val tabId = activeTabFlow.value?.id ?: return
         viewModelScope.launch {
-            screenshotCache.save(tabId, bitmap)
+            screenshotCache.save(tabId, bitmap.webpWriter())
         }
     }
 

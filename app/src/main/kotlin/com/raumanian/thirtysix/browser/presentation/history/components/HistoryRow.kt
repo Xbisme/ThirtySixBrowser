@@ -21,13 +21,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.DateFormats
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLead
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.ListRowLetter
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.rememberFileImage
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import java.io.File
 import java.time.Instant
 import java.time.ZoneId

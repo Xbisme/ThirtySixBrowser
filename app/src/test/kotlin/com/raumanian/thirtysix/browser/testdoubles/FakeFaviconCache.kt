@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.testdoubles
 
-import android.graphics.Bitmap
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import java.io.File
+import java.io.OutputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +21,7 @@ class FakeFaviconCache(
 
     var clearAllError: Throwable? = null
 
-    override suspend fun save(url: String, bitmap: Bitmap) = Unit
+    override suspend fun save(url: String, writeImage: (OutputStream) -> Unit) = Unit
 
     override fun fileFor(url: String): File? = null
 

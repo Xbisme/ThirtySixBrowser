@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -23,9 +24,9 @@ class DiskFaviconCacheRetainTest {
         val cache = DiskFaviconCache(context, TestDispatchers)
         cache.clearAll()
         val bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
-        cache.save("https://bookmarked.example/page", bitmap)
-        cache.save("https://mail.fireproof.example/", bitmap)
-        cache.save("https://visited.test/", bitmap)
+        cache.save("https://bookmarked.example/page", bitmap.pngWriter())
+        cache.save("https://mail.fireproof.example/", bitmap.pngWriter())
+        cache.save("https://visited.test/", bitmap.pngWriter())
         val before = cache.version.value
 
         cache.retainOnly(setOf("bookmarked.example", "mail.fireproof.example"))

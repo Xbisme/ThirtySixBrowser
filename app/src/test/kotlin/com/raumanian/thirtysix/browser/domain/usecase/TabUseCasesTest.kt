@@ -1,14 +1,14 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
-import android.graphics.Bitmap
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
+import java.io.OutputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,7 +60,7 @@ class TabUseCasesTest {
     private object NoopScreenshotCache : ScreenshotCache {
         private val state = MutableStateFlow(0L)
         override val version: StateFlow<Long> = state.asStateFlow()
-        override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+        override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) = Unit
         override fun fileFor(tabId: Long): File? = null
         override suspend fun delete(tabId: Long) = Unit
         override suspend fun clearAll() = Unit

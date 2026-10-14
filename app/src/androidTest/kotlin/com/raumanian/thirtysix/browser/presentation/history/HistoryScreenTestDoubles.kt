@@ -1,15 +1,14 @@
 package com.raumanian.thirtysix.browser.presentation.history
 
-import android.graphics.Bitmap
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
 import com.raumanian.thirtysix.browser.domain.usecase.ClearAllHistoryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.DeleteHistoryEntryUseCase
@@ -19,6 +18,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveHistoryEntriesUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import java.io.File
+import java.io.OutputStream
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -156,7 +156,7 @@ internal class InstrumentedRecordingClipboardWriter : ClipboardWriter {
 internal object InstrumentedNoopFaviconCacheForHistory : FaviconCache {
     private val state = MutableStateFlow(0L)
     override val version: StateFlow<Long> = state.asStateFlow()
-    override suspend fun save(url: String, bitmap: Bitmap) = Unit
+    override suspend fun save(url: String, writeImage: (OutputStream) -> Unit) = Unit
     override suspend fun clearAll() = Unit
     override suspend fun retainOnly(hosts: Set<String>) = Unit
     override fun fileFor(url: String): File? = null

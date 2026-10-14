@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.data.local.cache.DiskFaviconCache
 import com.raumanian.thirtysix.browser.data.local.cache.DiskScreenshotCache
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

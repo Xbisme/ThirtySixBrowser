@@ -57,7 +57,7 @@ Found by scanning: `domain/` imports `data/` in 9 use cases (`FaviconCache`, `Sc
 
 | Contract | Android type in signature | Change |
 |---|---|---|
-| `FaviconCache`, `ScreenshotCache` | `save(…, Bitmap)` | `save(…, ByteArray)` with already-encoded bytes. Encoding (same format and quality) moves to a presentation helper run on an injected dispatcher. `fileFor` keeps `java.io.File` (allowed in domain). |
+| `FaviconCache`, `ScreenshotCache` | `save(…, Bitmap)` | `save(…, writeImage: (OutputStream) -> Unit)`: the cache still opens the file and runs the writer on its IO dispatcher, so encoding happens in the same place, at the same time, into the same file. `Bitmap.pngWriter()` / `webpWriter()` in `core/presentation/util` carry the format and quality (PNG 100, WebP 75). Chosen over the `ByteArray` first planned, which would have moved encoding onto the caller's thread and held the whole image in memory. `fileFor` keeps `java.io.File` (allowed in domain). |
 | `DownloadManagerGateway`, `ExternalFileOpener`, `ClipboardWriter` | none (only the impl uses Android) | split the interface out of the impl's file |
 | `OneTimeGrantStore` | none (pure class) | moves as is to `core/domain` (no interface needed — it has no platform dependency) |
 | `IncognitoWebProfile` / `IncognitoProfiles` | `prepare(WebView, …)` | split: session lifecycle (`ProfileStore`, begin/end, `activeProfileName(): String?`) stays a data impl of the domain contract; attaching a profile to a `WebView` (`WebViewCompat.setProfile`) moves to `browser/presentation` and reads the profile name from the injected contract. Call order (profile set before any other WebView call) is unchanged. |

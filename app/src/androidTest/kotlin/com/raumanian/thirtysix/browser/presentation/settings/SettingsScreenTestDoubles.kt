@@ -1,6 +1,5 @@
 package com.raumanian.thirtysix.browser.presentation.settings
 
-import android.graphics.Bitmap
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.isSelectable
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
@@ -16,12 +15,12 @@ import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageController
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
@@ -38,6 +37,7 @@ import com.raumanian.thirtysix.browser.presentation.history.InstrumentedImmediat
 import com.raumanian.thirtysix.browser.presentation.history.InstrumentedNoopFaviconCacheForHistory
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.util.Collections
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
@@ -175,7 +175,7 @@ internal object InstrumentedNoopCookieJarSnapshotManager : CookieJarSnapshotMana
 internal object InstrumentedNoopScreenshotCache : ScreenshotCache {
     private val state = MutableStateFlow(0L)
     override val version: StateFlow<Long> = state.asStateFlow()
-    override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+    override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) = Unit
     override fun fileFor(tabId: Long): File? = null
     override suspend fun delete(tabId: Long) = Unit
     override suspend fun clearAll() = Unit

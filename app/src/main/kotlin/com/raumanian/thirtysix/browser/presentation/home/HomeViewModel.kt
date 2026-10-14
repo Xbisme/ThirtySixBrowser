@@ -2,9 +2,9 @@ package com.raumanian.thirtysix.browser.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.model.GreetingPeriod
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveHomeContentUseCase

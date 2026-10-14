@@ -1,9 +1,8 @@
 package com.raumanian.thirtysix.browser.presentation.tabs
 
-import android.graphics.Bitmap
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllIncognitoTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CloseIncognitoTabUseCase
@@ -15,6 +14,7 @@ import com.raumanian.thirtysix.browser.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
+import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -131,7 +131,7 @@ class TabsViewModelChipModeTest {
 
     private object NoopFavicons : FaviconCache {
         override val version: StateFlow<Long> = MutableStateFlow(0L)
-        override suspend fun save(url: String, bitmap: Bitmap) = Unit
+        override suspend fun save(url: String, writeImage: (OutputStream) -> Unit) = Unit
         override suspend fun clearAll() = Unit
         override suspend fun retainOnly(hosts: Set<String>) = Unit
         override fun fileFor(url: String): File? = null
@@ -139,7 +139,7 @@ class TabsViewModelChipModeTest {
 
     private object NoopScreenshots : ScreenshotCache {
         override val version: StateFlow<Long> = MutableStateFlow(0L)
-        override suspend fun save(tabId: Long, bitmap: Bitmap) = Unit
+        override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) = Unit
         override fun fileFor(tabId: Long): File? = null
         override suspend fun delete(tabId: Long) = Unit
         override suspend fun clearAll() = Unit
