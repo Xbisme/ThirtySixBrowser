@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.di
 
+import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.data.local.clipboard.AndroidClipboardWriter
-import com.raumanian.thirtysix.browser.data.local.clipboard.ClipboardWriter
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

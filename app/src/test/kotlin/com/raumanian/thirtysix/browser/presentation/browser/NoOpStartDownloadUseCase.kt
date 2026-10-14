@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
-import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.domain.usecase.SanitizeDownloadFileNameUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.StartDownloadUseCase
 import kotlinx.coroutines.flow.Flow

@@ -3,9 +3,9 @@ package com.raumanian.thirtysix.browser.domain.usecase
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
-import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
-import com.raumanian.thirtysix.browser.data.local.download.ExternalFileOpener
+import com.raumanian.thirtysix.browser.core.domain.repository.ExternalFileOpener
 import com.raumanian.thirtysix.browser.domain.model.DownloadListItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

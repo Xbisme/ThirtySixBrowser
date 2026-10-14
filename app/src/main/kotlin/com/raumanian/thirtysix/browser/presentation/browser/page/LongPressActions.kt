@@ -2,8 +2,8 @@ package com.raumanian.thirtysix.browser.presentation.browser.page
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.local.clipboard.ClipboardWriter
 import com.raumanian.thirtysix.browser.domain.usecase.OpenInBackgroundTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SwitchToTabUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.data.local.permission
+package com.raumanian.thirtysix.browser.core.domain.util
 
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import org.junit.Assert.assertFalse

@@ -4,7 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.DownloadFailureCause
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
-import com.raumanian.thirtysix.browser.data.local.download.DownloadManagerGateway
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
