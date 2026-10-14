@@ -10,8 +10,8 @@
         <error line="151" column="5" source="compose:modifier-without-default-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/bookmarks/presentation/bookmarks/BookmarksScreen.kt">
-        <error line="139" column="13" source="compose:vm-forwarding-check" />
-        <error line="143" column="5" source="compose:vm-forwarding-check" />
+        <error line="141" column="13" source="compose:vm-forwarding-check" />
+        <error line="145" column="5" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/bookmarks/presentation/bookmarks/component/AddOrEditBookmarkDialog.kt">
         <error line="51" column="5" source="compose:modifier-missing-check" />
@@ -23,17 +23,17 @@
         <error line="19" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/browser/presentation/browser/BrowserScreen.kt">
-        <error line="118" column="9" source="compose:vm-injection-check" />
-        <error line="125" column="5" source="compose:vm-forwarding-check" />
-        <error line="134" column="9" source="compose:vm-injection-check" />
-        <error line="136" column="9" source="compose:vm-injection-check" />
-        <error line="139" column="9" source="compose:vm-injection-check" />
-        <error line="149" column="5" source="compose:vm-forwarding-check" />
-        <error line="155" column="5" source="compose:vm-forwarding-check" />
-        <error line="172" column="9" source="compose:vm-forwarding-check" />
-        <error line="306" column="9" source="compose:vm-forwarding-check" />
-        <error line="345" column="9" source="compose:vm-injection-check" />
-        <error line="396" column="5" source="compose:parameter-naming" />
+        <error line="114" column="9" source="compose:vm-injection-check" />
+        <error line="121" column="5" source="compose:vm-forwarding-check" />
+        <error line="130" column="9" source="compose:vm-injection-check" />
+        <error line="132" column="9" source="compose:vm-injection-check" />
+        <error line="135" column="9" source="compose:vm-injection-check" />
+        <error line="145" column="5" source="compose:vm-forwarding-check" />
+        <error line="151" column="5" source="compose:vm-forwarding-check" />
+        <error line="168" column="9" source="compose:vm-forwarding-check" />
+        <error line="302" column="9" source="compose:vm-forwarding-check" />
+        <error line="341" column="9" source="compose:vm-injection-check" />
+        <error line="392" column="5" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/browser/presentation/browser/DownloadPermissionGate.kt">
         <error line="38" column="5" source="compose:parameter-naming" />
@@ -79,14 +79,14 @@
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/history/presentation/history/HistoryScreen.kt">
         <error line="45" column="5" source="compose:modifier-missing-check" />
-        <error line="62" column="5" source="compose:vm-forwarding-check" />
-        <error line="78" column="9" source="compose:vm-forwarding-check" />
+        <error line="64" column="5" source="compose:vm-forwarding-check" />
+        <error line="80" column="9" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/onboarding/presentation/onboarding/OnboardingScreen.kt">
-        <error line="60" column="5" source="compose:modifier-missing-check" />
-        <error line="71" column="5" source="compose:vm-forwarding-check" />
-        <error line="100" column="13" source="compose:vm-forwarding-check" />
-        <error line="242" column="65" source="compose:lambda-param-in-effect" />
+        <error line="58" column="5" source="compose:modifier-missing-check" />
+        <error line="69" column="5" source="compose:vm-forwarding-check" />
+        <error line="94" column="13" source="compose:vm-forwarding-check" />
+        <error line="236" column="65" source="compose:lambda-param-in-effect" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/onboarding/presentation/onboarding/component/OnboardingSlideContent.kt">
         <error line="216" column="56" source="compose:modifier-without-default-check" />
@@ -108,7 +108,7 @@
         <error line="45" column="5" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/settings/presentation/settings/SettingsScreen.kt">
-        <error line="70" column="5" source="compose:modifier-missing-check" />
+        <error line="69" column="5" source="compose:modifier-missing-check" />
         <error line="90" column="5" source="compose:vm-forwarding-check" />
         <error line="123" column="5" source="compose:vm-forwarding-check" />
         <error line="308" column="5" source="compose:lambda-param-in-effect" />

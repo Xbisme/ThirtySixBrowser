@@ -54,7 +54,6 @@ import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.co
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.ThemeModeChooserDialog
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.historyRetentionLabel
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.textSizeLabel
-import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -70,6 +69,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     navController: NavHostController = rememberNavController(),
     viewModel: SettingsViewModel = hiltViewModel(),
+    destinations: SettingsDestinations = SettingsDestinations(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -112,9 +112,9 @@ fun SettingsScreen(
             privacySection(
                 state = state,
                 viewModel = viewModel,
-                onSitePermissions = { navController.navigate(AppDestination.SitePermissions.route) },
-                onProtectionExceptions = { navController.navigate(AppDestination.ProtectionExceptions.route) },
-                onFireproofSites = { navController.navigate(AppDestination.FireproofSites.route) },
+                onSitePermissions = destinations.onSitePermissions,
+                onProtectionExceptions = destinations.onProtectionExceptions,
+                onFireproofSites = destinations.onFireproofSites,
             )
             aboutSection(state = state)
         }

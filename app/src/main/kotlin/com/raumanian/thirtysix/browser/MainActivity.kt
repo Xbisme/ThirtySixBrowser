@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.raumanian.thirtysix.browser.core.constants.NavArgs
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.usecase.GetUserSettingsUseCase
@@ -22,14 +21,16 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
 import com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
+import com.raumanian.thirtysix.browser.feature.browser.presentation.navigation.BROWSER_ROUTE
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.RecordAppLaunchUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingIntentReader
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingRequestRelay
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.LaunchCountPolicy
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.PendingRequestState
+import com.raumanian.thirtysix.browser.feature.onboarding.presentation.navigation.ONBOARDING_ROUTE
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.FireCoordinator
-import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
-import com.raumanian.thirtysix.browser.presentation.navigation.AppNavGraph
+import com.raumanian.thirtysix.browser.navigation.AppNavHost
+import com.raumanian.thirtysix.browser.navigation.NavArgs
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -125,9 +126,9 @@ class MainActivity : AppCompatActivity() {
             // interrupted run costs anything here: otherwise this is one DataStore read.
             fireCoordinator.resumeIfInterrupted()
             val startDestination = if (getUserSettings().isOnboardingCompleted) {
-                AppDestination.Browser.route
+                BROWSER_ROUTE
             } else {
-                AppDestination.Onboarding.route
+                ONBOARDING_ROUTE
             }
             renderApp(startDestination)
         }
@@ -232,7 +233,7 @@ class MainActivity : AppCompatActivity() {
             ThirtySixTheme(darkTheme = darkTheme, dynamicColor = settings.isDynamicColorEnabled) {
                 SecureWindowEffect(secure = isIncognito)
                 CompositionLocalProvider(LocalIoDispatcher provides dispatchers.io) {
-                    AppNavGraph(startDestination = startDestination)
+                    AppNavHost(startDestination = startDestination)
                 }
             }
         }

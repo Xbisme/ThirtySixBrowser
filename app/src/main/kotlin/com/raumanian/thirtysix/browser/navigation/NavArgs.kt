@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.core.constants
+package com.raumanian.thirtysix.browser.navigation
 
 /** Bundle and navigation argument keys — single source of truth (Constitution §III). */
 object NavArgs {

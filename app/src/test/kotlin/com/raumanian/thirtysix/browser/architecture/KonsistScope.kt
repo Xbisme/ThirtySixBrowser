@@ -207,7 +207,6 @@ internal val KNOWN_VIOLATIONS: Set<String> = setOf(
     "feature/tabs/presentation/tabs/TabsUiState.kt",
     "feature/tabs/presentation/tabs/TabsViewModel.kt",
     "feature/tabs/presentation/tabs/component/TabSwitcherCard.kt",
-    "presentation/navigation/AppNavGraph.kt",
 )
 
 internal fun productionScope(): KoScope = Konsist.scopeFromProduction(moduleName = "app").slice { file ->

@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -29,7 +30,6 @@ import com.raumanian.thirtysix.browser.feature.history.presentation.history.comp
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.component.HistoryRow
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.component.HistoryTopBar
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.component.NoHistoryMatchesState
-import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 
 /**
  * Spec 014 / Spec 019 — History screen: top bar (back · clear-all · large title · search
@@ -45,7 +45,9 @@ import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 fun HistoryScreen(
     navController: NavHostController = rememberNavController(),
     viewModel: HistoryViewModel = hiltViewModel(),
+    onShowBrowser: () -> Unit = {},
 ) {
+    val showBrowser by rememberUpdatedState(onShowBrowser)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -54,7 +56,7 @@ fun HistoryScreen(
     // sees the URL load in the now-active tab.
     LaunchedEffect(state.openUrl) {
         if (state.openUrl != null) {
-            navController.popBackStack(AppDestination.Browser.route, inclusive = false)
+            showBrowser()
             viewModel.consumeOpenUrl()
         }
     }

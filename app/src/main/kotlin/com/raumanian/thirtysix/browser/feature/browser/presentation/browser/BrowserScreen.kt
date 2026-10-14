@@ -36,8 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.util.QuickSetting
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
@@ -68,7 +66,6 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.incognito.In
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionList
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionsViewModel
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.BrowserAddressSuggestions
-import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -94,7 +91,6 @@ import kotlinx.coroutines.flow.map
 fun BrowserScreen(
     slots: BrowserSlots,
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
     viewModel: BrowserViewModel = hiltViewModel(),
     hubViewModel: HubViewModel = hiltViewModel(),
 ) {
@@ -194,7 +190,7 @@ fun BrowserScreen(
         }
         if (state.isHomeContent) {
             val homeCallbacks =
-                rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, navController, suggestions)
+                rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, slots, suggestions)
             HomeOverlay(
                 isIncognito = state.isIncognito,
                 callbacks = homeCallbacks,
@@ -263,7 +259,7 @@ fun BrowserScreen(
                         if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
                     },
                     onNewTab = viewModel::onLongPressNewTab,
-                    onTabs = { navController.navigate(AppDestination.Tabs.route) },
+                    onTabs = slots.destinations.openTabs,
                     onTabsLongPress = viewModel::onLongPressNewTab,
                     onMenu = { hubOpen = true },
                 ),
@@ -307,7 +303,7 @@ fun BrowserScreen(
             state = state,
             hubViewModel = hubViewModel,
             webViewActions = webViewActions,
-            navController = navController,
+            slots = slots,
             onDismiss = { hubOpen = false },
             onQuickSetting = { setting ->
                 quickSettingsUsed = true
@@ -387,7 +383,7 @@ private fun BrowserHub(
     state: BrowserUiState,
     hubViewModel: HubViewModel,
     webViewActions: WebViewActionsHandle,
-    navController: NavHostController,
+    slots: BrowserSlots,
     onDismiss: () -> Unit,
     onQuickSetting: (QuickSetting) -> Unit,
     pageTools: HubPageToolsState,
@@ -403,15 +399,15 @@ private fun BrowserHub(
         onDismiss = onDismiss,
         hasActiveDownloadsFlow = hubViewModel.hasActiveDownloads,
         callbacks = HubCallbacks(
-            onSettings = { navController.navigate(AppDestination.Settings.route) },
+            onSettings = slots.destinations.openSettings,
             onBack = { webViewActions.goBack() },
             onForward = { webViewActions.goForward() },
-            onDownloadsInProgress = { navController.navigate(AppDestination.Downloads.route) },
-            onPrivacy = { navController.navigate(AppDestination.Settings.route) },
+            onDownloadsInProgress = slots.destinations.openDownloads,
+            onPrivacy = slots.destinations.openSettings,
             onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
-            onDownloads = { navController.navigate(AppDestination.Downloads.route) },
-            onHistory = { navController.navigate(AppDestination.History.route) },
-            onBookmarks = { navController.navigate(AppDestination.Bookmarks.route) },
+            onDownloads = slots.destinations.openDownloads,
+            onHistory = slots.destinations.openHistory,
+            onBookmarks = slots.destinations.openBookmarks,
             onQuickSetting = onQuickSetting,
             onPageTool = onPageTool,
             onProtectionSwitched = onProtectionSwitched,
@@ -465,7 +461,7 @@ private fun rememberHomeCallbacks(
     viewModel: BrowserViewModel,
     hubViewModel: HubViewModel,
     webViewActions: WebViewActionsHandle,
-    navController: NavHostController,
+    slots: BrowserSlots,
     suggestions: AddressSuggestionsViewModel,
 ): HomeCallbacks {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -474,7 +470,7 @@ private fun rememberHomeCallbacks(
         viewModel,
         hubViewModel,
         webViewActions,
-        navController,
+        slots,
         keyboardController,
         focusManager,
         suggestions,
@@ -491,7 +487,7 @@ private fun rememberHomeCallbacks(
                 viewModel.onNavigateFromHome()
                 webViewActions.loadUrl(url)
             },
-            onSeeAllHistory = { navController.navigate(AppDestination.History.route) },
+            onSeeAllHistory = slots.destinations.openHistory,
             onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
             // Spec 022 R6 — Home's field starts empty, so it has no page address to compare with.
             onSearchTextChange = { text -> suggestions.onTextChanged(text, currentPageUrl = null) },

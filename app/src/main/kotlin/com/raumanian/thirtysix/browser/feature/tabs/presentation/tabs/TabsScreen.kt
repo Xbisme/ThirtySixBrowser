@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +52,6 @@ import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.CloseAllTabsConfirmDialog
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.TabCreateCard
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.TabSwitcherCard
-import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import java.io.File
 
 /**
@@ -68,15 +68,15 @@ fun TabsScreen(
     navController: NavHostController,
     fireButton: FireButton,
     modifier: Modifier = Modifier,
+    onShowBrowser: () -> Unit = {},
     viewModel: TabsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val showBrowser by rememberUpdatedState(onShowBrowser)
     LaunchedEffect(viewModel) {
-        viewModel.popBackEvent.collect {
-            navController.popBackStack(AppDestination.Browser.route, inclusive = false)
-        }
+        viewModel.popBackEvent.collect { showBrowser() }
     }
 
     TabsErrorEventEffect(

@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,7 +57,6 @@ import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.
 import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.component.FolderPickerSheet
 import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.component.FolderRow
 import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.component.NoSearchMatchesState
-import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 private const val KEY_FOLDER_CHIPS = "folder_chips"
 private const val KEY_HEADER_FOLDERS = "header_folders"
 private const val KEY_HEADER_PAGES = "header_pages"
@@ -81,7 +81,9 @@ fun BookmarksScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: BookmarksViewModel = hiltViewModel(),
+    onShowBrowser: () -> Unit = {},
 ) {
+    val showBrowser by rememberUpdatedState(onShowBrowser)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -96,7 +98,7 @@ fun BookmarksScreen(
 
     LaunchedEffect(state.openUrl) {
         if (state.openUrl != null) {
-            navController.popBackStack(AppDestination.Browser.route, inclusive = false)
+            showBrowser()
             viewModel.consumeOpenUrl()
         }
     }

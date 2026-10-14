@@ -14,4 +14,15 @@ class BrowserSlots(
     val fireOverlay: @Composable () -> Unit,
     val quickSettings: @Composable (request: QuickSetting?, onRequestHandled: () -> Unit, snackbar: SnackbarHostState) -> Unit,
     val incomingContent: IncomingContentHooks = IncomingContentHooks(),
+    val destinations: BrowserDestinations = BrowserDestinations(),
+)
+
+/** Screens of other features that the browser opens. */
+@Immutable
+data class BrowserDestinations(
+    val openTabs: () -> Unit = {},
+    val openSettings: () -> Unit = {},
+    val openDownloads: () -> Unit = {},
+    val openHistory: () -> Unit = {},
+    val openBookmarks: () -> Unit = {},
 )

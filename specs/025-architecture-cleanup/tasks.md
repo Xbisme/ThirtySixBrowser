@@ -106,12 +106,12 @@ Each feature task moves the listed main files to `F/<f>/` with the template sub-
 - [X] T036 [US3] **entrypoint** — `M/presentation/entry/**` (except `DefaultBrowserRequest.kt`, moved in T019) → `F/entrypoint/presentation/entry/`; use cases `OpenIncomingRequest`, `ResolveIncomingRequest`, `RecordAppLaunch` (called from `MainActivity`; root may import a feature) → `F/entrypoint/domain/usecase/`; model `IncomingRequest`. The three invite use cases (`DismissDefaultBrowserInvite`, `ObserveDefaultBrowserInvite`, `SyncDefaultBrowserInvite`) are called only by Home's `DefaultBrowserInviteViewModel` and move with browser in T038; their contract `DefaultBrowserInviteRepository` is already in core (T021); `M/data/platform/AndroidDefaultBrowserController.kt`, `M/data/repository/DefaultBrowserInviteRepositoryImpl.kt`; `M/di/DefaultBrowserModule.kt`. `IncomingContentHooks` is a plain data class built by `EntryPointViewModel` and read by the browser, so it went to `core/presentation/util` as the contract between the two (no view-model change needed).
 - [X] T037 [US3] **privacy** — Fire: `M/domain/fire/*`, `RunFireUseCase`, `M/presentation/browser/fire/FireViewModel.kt`, `M/presentation/browser/components/{FireConfirmDialog,FireOverlay}.kt` → `F/privacy/presentation/fire/`, `M/data/repository/FireMarkerRepositoryImpl.kt`; fireproof: `M/presentation/settings/fireproof/**` → `F/privacy/presentation/fireproof/`, `RemoveFireproofSites` use case (`IsSiteFireproof`, `SetSiteFireproof` are browser-only, T038), `M/data/repository/FireproofSiteRepositoryImpl.kt`, `M/data/mapper/FireproofSiteMapper.kt`; protection: `M/presentation/settings/protectionexceptions/**` → `F/privacy/presentation/protectionexceptions/`, `ObserveProtectionExceptions`, `RemoveProtectionExceptions` use cases (`M/domain/protection/*` is browser-only and moves in T038), `M/data/local/protection/*` → `F/privacy/data/datasource/local/` with the `AssetPaths` constants handed over in T027, `FireMarkerRepository` contract → `F/privacy/domain/repository/`, `M/data/repository/{ProtectionDataRepositoryImpl,ProtectionExceptionRepositoryImpl}.kt`, `M/data/mapper/SiteProtectionExceptionMapper.kt`; scripts: `M/data/local/privacy/*` (`PrivacyScriptComposer` and `BlockedHostGrouper` are browser-only and move in T038); cookies: `M/data/local/cookies/*`; DI: `M/di/{PrivacyToolsModule,ProtectionModule}.kt`, `bindCookieJarSnapshotManager`/`provideIncognitoWebProfile` from `M/di/IncognitoModule.kt`. `provideApplicationScope` → `C/di/`. Tests: `UT/domain/{fire,privacy,protection}`, `IT/{fire,privacy,protection}` → `UT/feature/privacy/…`, `IT/feature/privacy/…` (core parts to `UT/core/…`).
 - [X] T038 [US3] **browser** — everything left in `M/presentation/browser/**`, `M/presentation/home/**`, `M/presentation/incognito/**` → `F/browser/presentation/{browser,home,incognito,suggestions,page,protection}/` per data-model.md; remaining use cases (`BuildLongPressMenu`, `BuildSearchUrl`, `DecidePopup`, `FilterAddressSuggestions`, `LoadAddressSuggestionsSource`, `ObserveHomeContent`, `OpenInBackgroundTab`, `RecordHistoryEntry`, `UpdateHistoryEntryTitle`, `IsUrlBookmarked`, `ToggleBookmark`, `StartDownload`, `ObserveHasActiveDownloads`, `SanitizeDownloadFileName`, `IsSiteProtected`, `SetSiteProtection`, `IsSiteFireproof`, `SetSiteFireproof`, `ApplySitePermissionChoice`, `ResolveSitePermission`, `SwitchToTab`, `DismissDefaultBrowserInvite`, `ObserveDefaultBrowserInvite`, `SyncDefaultBrowserInvite`) → `F/browser/domain/usecase/`; `M/domain/protection/*` → `F/browser/domain/protection/`; `M/domain/privacy/{PrivacyScriptComposer,BlockedHostGrouper}.kt` → `F/browser/domain/model/`; remaining models (`AddressBarInputClassifier`, `AddressBarSubmitResult`, `AddressSuggestion`, `GreetingPeriod`, `HomeShortcut`, `LongPressMenu`, `PageProtectionStatus`) → `F/browser/domain/model/`; `IncomingContentHooks` (from entrypoint) → `F/browser/presentation/browser/`; `M/di/UrlConfigModule.kt` → `F/browser/di/`. The hub's quick settings takes a `quickSettings: @Composable () -> Unit` slot and the hub's Fire tile calls `onFireRequested` (filled at root in T039) instead of importing `SettingsViewModel`/`SettingsDialogHost`/`SettingsSnackbarEffect` and Fire UI. Tests: `UT/presentation/{browser,home}/**`, `IT/presentation/{browser,home,util}/**` → `…/feature/browser/…`.
-- [ ] T039 [US3] **root navigation** (research R5, R6) — each feature gets `F/<f>/presentation/navigation/<F>Navigation.kt` with its route string copied from `M/presentation/navigation/AppDestination.kt` (unchanged), `NavGraphBuilder.<f>Screen(…)` and `NavController.navigateTo<F>()`; `M/presentation/navigation/AppNavGraph.kt` → `M/navigation/AppNavHost.kt` composing them; delete `AppDestination.kt`. Root fills the slots: `quickSettings` with the settings feature's quick-settings composable, `onFireRequested` for browser hub and Tabs with one Fire host (`FireConfirmDialog` + `FireOverlay` + `FireViewModel`) placed in `AppNavHost`; root adapts `EntryPointViewModel` to `IncomingContentHooks`. Instrumented suite + quickstart G10 smoke (Fire from hub and from Tabs, quick settings, link from another app).
+- [X] T039 [US3] **root navigation** (research R5, R6) — each feature gets `F/<f>/presentation/navigation/<F>Navigation.kt` with its route string copied from `M/presentation/navigation/AppDestination.kt` (unchanged), `NavGraphBuilder.<f>Screen(…)` and `NavController.navigateTo<F>()`; `M/presentation/navigation/AppNavGraph.kt` → `M/navigation/AppNavHost.kt` composing them; delete `AppDestination.kt`. Root fills the slots: `quickSettings` with the settings feature's quick-settings composable, `onFireRequested` for browser hub and Tabs with one Fire host (`FireConfirmDialog` + `FireOverlay` + `FireViewModel`) placed in `AppNavHost`; root adapts `EntryPointViewModel` to `IncomingContentHooks`. Instrumented suite + quickstart G10 smoke (Fire from hub and from Tabs, quick settings, link from another app).
 ### 4c. Compose-rules findings
 
 - [ ] T040 [US2] Fix every compose-rules finding left in `config/ktlint/baseline.xml`, one commit per folder group (the same groups as T044–T052), signature-only changes (parameter order with `modifier` first optional, naming, `@Composable` defaults); never in a move or comment commit. Each commit removes its baseline lines and passes G1 and the instrumented suite. Also fix here any non-layout Konsist entry found in T014. **Commit** per group `style(025): compose rules in <folder>`.
 
-- [ ] T041 [US3] Delete the now-empty `M/data/`, `M/domain/`, `M/presentation/`, `M/di/`, `M/core/{base,constants,dispatcher,error,extensions,result,time}` and the matching empty test folders; run quickstart G3. Fill the "Spec 026 — screens without `onAction`" table at the end of this file (every `*ViewModel` with more than one public `fun on…`). **Commit** `refactor(025): root navigation`.
+- [X] T041 [US3] Delete the now-empty `M/data/`, `M/domain/`, `M/presentation/`, `M/di/`, `M/core/{base,constants,dispatcher,error,extensions,result,time}` and the matching empty test folders; run quickstart G3. Fill the "Spec 026 — screens without `onAction`" table at the end of this file (every `*ViewModel` with more than one public `fun on…`). **Commit** `refactor(025): root navigation`.
 
 - [ ] T042 [US2] Rename the domain model `DownloadRequest` (fails "domain models are not data types") to `DownloadOrder` in its file and every use; no behaviour change. **Commit** `refactor(025): DownloadRequest is a domain model`.
 - [ ] T043 [US2] The debug seeders `app/src/debug/kotlin/…/dev/{DownloadSeeder,HistorySeeder,TabSeeder}.kt` name `Dispatchers.IO`; inject `DispatcherProvider` (they are `@AndroidEntryPoint`) and use its IO dispatcher. **Commit** `refactor(025): seeders use the injected dispatcher`.
@@ -278,13 +278,66 @@ Findings while wiring the checks (template gaps, also to report back to the temp
 
 ## Spec 026 — forwarding use cases (T029–T038)
 
+Found by a script on `77982fe`+T039: `invoke` whose whole body is one call on a constructor property. Spec 026 re-checks each before removing it.
+
 | Use case | Forwards to | Feature |
 |---|---|---|
+| `BuildSearchUrlUseCase` | `repository.buildSearchUrl` | core |
+| `CloseIncognitoTabUseCase` | `repository.closeTab` | core |
+| `CreateIncognitoTabUseCase` | `repository.createTab` | core |
+| `CreateTabUseCase` | `repository.createTab` | core |
+| `GetAppLanguageUseCase` | `controller.current` | core |
+| `GetUserSettingsUseCase` | `repository.currentSettings` | core |
+| `IsDefaultBrowserUseCase` | `controller.isDefaultBrowser` | core |
+| `ObserveDownloadsUseCase` | `repository.observeAll` | core |
+| `ObserveFireproofSitesUseCase` | `repository.observeAll` | core |
+| `ObserveTabsUseCase` | `repository.observeTabs` | core |
+| `ObserveUserSettingsUseCase` | `repository.observeSettings` | core |
+| `SetSearchEngineUseCase` | `repository.setSearchEngine` | core |
+| `SetThemeModeUseCase` | `repository.setThemeMode` | core |
+| `SwitchActiveTabUseCase` | `repository.switchActiveTab` | core |
+| `CountFolderDescendantsUseCase` | `repository.countDescendants` | bookmarks |
+| `DeleteBookmarkUseCase` | `repository.deleteBookmark` | bookmarks |
+| `DeleteFolderUseCase` | `repository.deleteFolderCascade` | bookmarks |
+| `MoveBookmarkUseCase` | `repository.moveBookmarkToFolder` | bookmarks |
+| `MoveFolderUseCase` | `repository.moveFolder` | bookmarks |
+| `ObserveAllFoldersUseCase` | `repository.observeAllFolders` | bookmarks |
+| `DismissDefaultBrowserInviteUseCase` | `repository.markInviteDismissed` | browser |
+| `ObserveDefaultBrowserInviteUseCase` | `repository.observeInviteState` | browser |
+| `RecordAppLaunchUseCase` | `repository.recordLaunch` | entrypoint |
+| `ClearAllHistoryUseCase` | `repository.clearAll` | history |
+| `DeleteHistoryEntryUseCase` | `repository.deleteById` | history |
+| `ObserveHistoryEntriesUseCase` | `repository.observeAll` | history |
+| `SetOnboardingCompletedUseCase` | `repository.setOnboardingCompleted` | onboarding |
+| `ObserveProtectionExceptionsUseCase` | `exceptions.observeAll` | privacy |
+| `SetDynamicColorEnabledUseCase` | `repository.setDynamicColorEnabled` | settings |
+| `SetTextSizeUseCase` | `repository.setTextSize` | settings |
+| `ObserveSitePermissionsUseCase` | `repository.observeAll` | sitepermission |
+| `SetSitePermissionUseCase` | `repository.save` | sitepermission |
+| `CloseAllIncognitoTabsUseCase` | `repository.closeAll` | tabs |
 
 ## Spec 026 — screens without `onAction` (T041)
 
 | View model | Public `on…` functions |
 |---|---|
+| `BookmarksViewModel` (bookmarks) | 27 public functions, 25 `on…` |
+| `BrowserViewModel` (browser) | 33 public functions, 29 `on…` |
+| `HubViewModel` (browser) | 1 public functions, 1 `on…` |
+| `PageTextSizeViewModel` (browser) | 0 public functions, 0 `on…` |
+| `ProtectionViewModel` (browser) | 5 public functions, 2 `on…` |
+| `DefaultBrowserInviteViewModel` (browser) | 2 public functions, 2 `on…` |
+| `HomeViewModel` (browser) | 2 public functions, 2 `on…` |
+| `AddressSuggestionsViewModel` (browser) | 4 public functions, 4 `on…` |
+| `DownloadsViewModel` (downloads) | 9 public functions, 9 `on…` |
+| `EntryPointViewModel` (entrypoint) | 0 public functions, 0 `on…` |
+| `HistoryViewModel` (history) | 12 public functions, 11 `on…` |
+| `OnboardingViewModel` (onboarding) | 6 public functions, 6 `on…` |
+| `FireViewModel` (privacy) | 2 public functions, 0 `on…` |
+| `FireproofSitesViewModel` (privacy) | 4 public functions, 4 `on…` |
+| `ProtectionExceptionsViewModel` (privacy) | 4 public functions, 4 `on…` |
+| `SettingsViewModel` (settings) | 21 public functions, 19 `on…` |
+| `SitePermissionsViewModel` (sitepermission) | 7 public functions, 7 `on…` |
+| `TabsViewModel` (tabs) | 14 public functions, 11 `on…` |
 
 ## Facts to keep (T055)
 
@@ -300,6 +353,7 @@ Findings while wiring the checks (template gaps, also to report back to the temp
 | T038 (browser) | `G9_API36_Clean`, cold-booted, animations off, full instrumented | **189/189** |
 | T038 investigation | same AVD | `PopupInstrumentedTest` had failed ~20 % on the branch vs 0/23 on `main`. Bisect pointed at T024, but the AVD had been left with animations **on** (1.0) and had run for hours (system Bluetooth crash). After a cold boot with all three animation scales at 0, interleaved runs gave **main 16/16, branch 16/16**. Environmental; checkpoints now cold-boot this AVD with animations off |
 | T038 stability | Compose compiler | `config/compose/stability.conf` still named `…browser.domain.model.*`; models had moved, so they were no longer declared stable. Now `core.domain.model.*` and `feature.*.domain.model.*` |
+| T039 (root navigation) | G9 AVD, cold-booted, animations off | instrumented **189/189**; smoke on a debug build: Skip onboarding → Home, Back leaves the app (onboarding popped); hub → Downloads, History, Bookmarks, Tabs, Settings; Settings → Site permissions, Sites without protection, Fireproof sites; a link from another app opens a new tab; Quick settings → Theme opens its chooser; Fire from the hub and from Tabs both end on Home |
 | T023 check | same AVD, debug build, wikipedia.org | `cache/favicons/*.png` = PNG 48×48 RGBA; `cache/screenshots/*.webp` = WebP — same formats as before the writer change |
 
 ## Results (T053, T063–T065)

@@ -31,7 +31,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.MeshArt
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
@@ -47,7 +46,6 @@ import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboardin
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.SearchEngineSlide
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.ThemeSlide
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.WelcomeSlide
-import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -58,7 +56,7 @@ import kotlinx.coroutines.flow.collectLatest
  */
 @Composable
 fun OnboardingScreen(
-    navController: NavHostController,
+    onFinish: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,11 +66,7 @@ fun OnboardingScreen(
     // page returns here — the flow is meant to appear once per install (FR-010a, SC-015).
     // An assertion that "the browser is showing" would not catch a missing pop; SC-015 presses
     // Back, and that is the check that matters.
-    LaunchedLeaveEffect(viewModel) {
-        navController.navigate(AppDestination.Browser.route) {
-            popUpTo(AppDestination.Onboarding.route) { inclusive = true }
-        }
-    }
+    LaunchedLeaveEffect(viewModel) { onFinish() }
 
     // FR-002a — Back moves to the previous slide; on the FIRST slide it leaves the app, and
     // leaving this way does NOT write the first-run flag, so the flow returns next launch
