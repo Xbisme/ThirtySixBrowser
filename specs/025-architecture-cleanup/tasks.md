@@ -90,7 +90,7 @@
 - [X] T025 [US3] Move the use cases called by two or more features' screens (research R2) from `M/domain/usecase/` to `C/domain/usecase/`: `CreateTab`, `CloseTab`, `CloseIncognitoTab`, `CreateIncognitoTab`, `SwitchActiveTab`, `ObserveTabs`, `ObserveAllTabs`, `ObserveActiveTab`, `ObserveActiveTabIsIncognito`, `UpdateActiveTabUrlAndTitle`, `AddBookmark`, `ObserveUserSettings`, `GetUserSettings`, `GetAppLanguage`, `SetAppLanguage`, `SetSearchEngine`, `SetThemeMode`, `IsDefaultBrowser`, `ObserveFireproofSites` (`…UseCase.kt`); move their tests from `UT/domain/usecase/`.
 - [X] T026 [US3] Move fakes of core contracts `UT/testdoubles/*.kt` → `UT/core/testing/fake/`, (the project has no `MainDispatcherRule`: tests call `Dispatchers.setMain` themselves, which Spec 026 can unify). Move `IT/testing/*` → `IT/core/testing/`.
 - [X] T027 [US3] Split `M/core/constants/*` by owner (research R7): for each constant, if one feature uses it, leave it in a temporary `C/domain/util/` file and note it in the "Constants to hand over" table at the end of this file for the feature commit; if several features use it, move it to `C/domain/util/` (pure values), `C/presentation/designsystem/theme/` (UI values) or `C/data/datasource/local/` (`StorageKeys`). `AssetPaths` is handed to `privacy` (only `ProtectionDataSource` and `PrivacyScriptBundlesImpl` use it). Key strings and values unchanged.
-- [ ] T028 [US3] Run G1 and the instrumented suite on the 16 KB AVD (`adb shell am force-stop com.raumanian.thirtysix.browser.debug` first). Remove allowlist entries for files that now pass. **Commit** `refactor(025): core layer`.
+- [X] T028 [US3] Run G1 and the instrumented suite on the 16 KB AVD (`adb shell am force-stop com.raumanian.thirtysix.browser.debug` first). Remove allowlist entries for files that now pass. **Commit** `refactor(025): core layer`.
 
 ### 4b. Features, leaf first (one commit each)
 
@@ -290,6 +290,14 @@ Findings while wiring the checks (template gaps, also to report back to the temp
 
 | Fact (old source) | Destination |
 |---|---|
+
+## Checkpoint results
+
+| When | Where | Result |
+|---|---|---|
+| T028 (core layer done, `88140f1`) | G1 local | ✅ detekt, ktlint, lint, 949 unit tests, debug + release builds, 16 KB |
+| T028 | `G9_API36_Clean` (WebView 134), full instrumented | 188/189; `SiteDialogsTest#back_cancels` timed out waiting for window focus (`RootViewWithoutFocusException`) and passed 2/2 run alone. The 16 KB AVD holds T005's seeded baseline until T061, so checkpoints run on this AVD |
+| T023 check | same AVD, debug build, wikipedia.org | `cache/favicons/*.png` = PNG 48×48 RGBA; `cache/screenshots/*.webp` = WebP — same formats as before the writer change |
 
 ## Results (T053, T063–T065)
 
