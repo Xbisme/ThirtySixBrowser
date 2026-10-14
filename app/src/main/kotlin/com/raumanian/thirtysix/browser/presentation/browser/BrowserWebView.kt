@@ -8,6 +8,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.print.PrintManager
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
@@ -144,6 +146,10 @@ internal fun BrowserWebView(
                 val toAdopt = adoptable[0]
                 adoptable[0] = null
                 val webView = preparePageTools(toAdopt ?: WebView(context), actions, textZoom.value, desktopMode)
+                    // Without explicit params AndroidView lays the WebView out as WRAP_CONTENT, and
+                    // Chromium then gives the page a layout viewport 0 px tall: pages sized with
+                    // `height: 100%` (maps, drawing apps) render blank. The modifier still sizes it.
+                    .apply { layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT) }
                 guard[0] = protection?.protect(webView, state.isIncognito)
                 buildConfiguredWebView(
                     webView = webView,

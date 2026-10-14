@@ -1,0 +1,75 @@
+{
+    "name": "scmp",
+    "vendorUrl": "https://www.scmp.com/",
+    "runContext": {
+        "urlPattern": "^https://(www\\.)?scmp\\.com/"
+    },
+    "prehideSelectors": ["[data-qa=\"GDPRBanner-Container\"]"],
+    "detectCmp": [
+        {
+            "any": [{ "exists": "[data-qa=\"GDPRBanner-Container\"] [data-qa=\"GDPRBanner-Button\"]" }, { "exists": ".fc-consent-root" }]
+        }
+    ],
+    "detectPopup": [
+        {
+            "any": [
+                { "visible": "[data-qa=\"GDPRBanner-Container\"] [data-qa=\"GDPRBanner-Button\"]" },
+                { "visible": ".fc-consent-root .fc-dialog-container" }
+            ]
+        }
+    ],
+    "optIn": [
+        {
+            "waitForVisible": ".fc-consent-root .fc-dialog-container",
+            "timeout": 4000,
+            "optional": true
+        },
+        {
+            "if": {
+                "visible": ".fc-consent-root .fc-dialog-container"
+            },
+            "then": [
+                {
+                    "click": ".fc-cta-consent"
+                }
+            ]
+        },
+        {
+            "waitForThenClick": "[data-qa=\"GDPRBanner-Button\"]"
+        }
+    ],
+    "optOut": [
+        {
+            "waitForVisible": ".fc-consent-root .fc-dialog-container",
+            "timeout": 4000,
+            "optional": true
+        },
+        {
+            "if": {
+                "visible": ".fc-consent-root .fc-dialog-container"
+            },
+            "then": [
+                {
+                    "click": ".fc-cta-do-not-consent,.fc-cta-manage-options"
+                },
+                {
+                    "click": ".fc-preference-consent:checked,.fc-preference-legitimate-interest:checked",
+                    "all": true,
+                    "optional": true
+                },
+                {
+                    "click": ".fc-confirm-choices",
+                    "optional": true
+                }
+            ]
+        },
+        {
+            "waitForVisible": "[data-qa=\"GDPRBanner-Container\"] [data-qa=\"GDPRBanner-Button\"]",
+            "timeout": 3000,
+            "optional": true
+        },
+        {
+            "hide": "[data-qa=\"GDPRBanner-Container\"]"
+        }
+    ]
+}
