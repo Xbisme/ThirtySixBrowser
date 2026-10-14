@@ -28,11 +28,11 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.util.capitalizedForLocale
+import com.raumanian.thirtysix.browser.core.presentation.util.iconRes
+import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
 import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
-import com.raumanian.thirtysix.browser.presentation.browser.page.capitalizedForLocale
-import com.raumanian.thirtysix.browser.presentation.browser.page.iconRes
-import com.raumanian.thirtysix.browser.presentation.browser.page.labelRes
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsIconTone
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsSectionHeader
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsTopBar

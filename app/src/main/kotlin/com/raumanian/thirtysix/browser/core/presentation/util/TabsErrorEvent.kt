@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.presentation.tabs
+package com.raumanian.thirtysix.browser.core.presentation.util
 
 /**
  * Spec 011 — one-shot transient event surface for the tab-management feature.

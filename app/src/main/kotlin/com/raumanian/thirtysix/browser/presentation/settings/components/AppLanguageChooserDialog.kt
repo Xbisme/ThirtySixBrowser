@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.util.appLanguageLabel
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 
 /**
@@ -33,24 +34,5 @@ fun AppLanguageChooserDialog(
         modifier = modifier.testTag(TEST_TAG_SETTINGS_LANGUAGE_DIALOG),
     )
 }
-
-/**
- * The label for [language]: the localized "Follow system", or the language's endonym, which
- * reads the same in every locale (research R11).
- */
-@Composable
-fun appLanguageLabel(language: AppLanguage): String = stringResource(
-    when (language) {
-        AppLanguage.FollowSystem -> R.string.settings_language_follow_system
-        AppLanguage.English -> R.string.language_name_en
-        AppLanguage.Vietnamese -> R.string.language_name_vi
-        AppLanguage.German -> R.string.language_name_de
-        AppLanguage.Russian -> R.string.language_name_ru
-        AppLanguage.Korean -> R.string.language_name_ko
-        AppLanguage.Japanese -> R.string.language_name_ja
-        AppLanguage.Chinese -> R.string.language_name_zh
-        AppLanguage.French -> R.string.language_name_fr
-    },
-)
 
 const val TEST_TAG_SETTINGS_LANGUAGE_DIALOG: String = "settings_language_dialog"

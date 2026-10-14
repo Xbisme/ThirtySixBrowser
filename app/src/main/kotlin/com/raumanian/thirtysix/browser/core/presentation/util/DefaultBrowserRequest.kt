@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.presentation.entry
+package com.raumanian.thirtysix.browser.core.presentation.util
 
 import android.app.role.RoleManager
 import android.content.ActivityNotFoundException
@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import com.raumanian.thirtysix.browser.MainActivity
-import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 /**
  * Spec 020 contracts C3.2 / research R8 — the action behind "make ThirtySix the default browser",
  * shared by the Settings row and the Home invitation.

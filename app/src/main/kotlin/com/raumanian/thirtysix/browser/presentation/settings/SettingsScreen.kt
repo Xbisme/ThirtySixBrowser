@@ -32,8 +32,11 @@ import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.util.appLanguageLabel
+import com.raumanian.thirtysix.browser.core.presentation.util.rememberDefaultBrowserRequest
+import com.raumanian.thirtysix.browser.core.presentation.util.searchEngineLabel
+import com.raumanian.thirtysix.browser.core.presentation.util.themeModeLabel
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.presentation.entry.rememberDefaultBrowserRequest
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.settings.components.AboutSection
 import com.raumanian.thirtysix.browser.presentation.settings.components.AppLanguageChooserDialog
@@ -50,11 +53,8 @@ import com.raumanian.thirtysix.browser.presentation.settings.components.Settings
 import com.raumanian.thirtysix.browser.presentation.settings.components.SettingsValueRow
 import com.raumanian.thirtysix.browser.presentation.settings.components.TextSizeChooserDialog
 import com.raumanian.thirtysix.browser.presentation.settings.components.ThemeModeChooserDialog
-import com.raumanian.thirtysix.browser.presentation.settings.components.appLanguageLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.historyRetentionLabel
-import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
 import com.raumanian.thirtysix.browser.presentation.settings.components.textSizeLabel
-import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

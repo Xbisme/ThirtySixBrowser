@@ -50,12 +50,12 @@ import com.raumanian.thirtysix.browser.core.domain.util.extractHostnameOrSelf
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.MeshArt
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SeededMeshArt
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.rememberFileImage
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.seedColorFor
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.domain.model.Tab
-import com.raumanian.thirtysix.browser.presentation.home.seedColorFor
 import java.io.File
 import kotlin.math.abs
 import kotlin.math.sign

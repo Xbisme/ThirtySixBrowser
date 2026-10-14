@@ -20,7 +20,10 @@ import androidx.core.app.ActivityCompat
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
+import com.raumanian.thirtysix.browser.core.presentation.util.capabilityList
+import com.raumanian.thirtysix.browser.core.presentation.util.capitalizedForLocale
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
+import com.raumanian.thirtysix.browser.core.presentation.util.iconRes
 import com.raumanian.thirtysix.browser.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.domain.usecase.SitePermissionChoice

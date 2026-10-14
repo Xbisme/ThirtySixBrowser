@@ -37,10 +37,10 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillStyle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.util.rememberDefaultBrowserRequest
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.domain.model.HomeShortcut
 import com.raumanian.thirtysix.browser.domain.model.ShortcutKind
-import com.raumanian.thirtysix.browser.presentation.entry.rememberDefaultBrowserRequest
 internal const val TEST_TAG_HOME_PAGE: String = "home_page"
 internal const val TEST_TAG_HOME_RECENT_TITLE: String = "home_recent_title"
 

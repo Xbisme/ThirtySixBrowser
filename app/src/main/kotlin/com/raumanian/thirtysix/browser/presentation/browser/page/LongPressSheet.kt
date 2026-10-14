@@ -15,12 +15,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SheetActionRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SheetFrame
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.util.iconRes
+import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
 import com.raumanian.thirtysix.browser.domain.model.LongPressAction
 import com.raumanian.thirtysix.browser.domain.model.LongPressMenu
-import com.raumanian.thirtysix.browser.presentation.bookmarks.components.SheetActionRow
 /**
  * Spec 021 US4 / C2.4 — the long-press menu: the address on one line (middle-ellipsized) and one
  * row per action. Back or a swipe closes it without acting.

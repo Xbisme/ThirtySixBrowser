@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.util.themeModeLabel
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
 
 /**
@@ -33,15 +34,5 @@ fun ThemeModeChooserDialog(
         modifier = modifier.testTag(TEST_TAG_SETTINGS_THEME_DIALOG),
     )
 }
-
-/** The localized name of [mode], shared by the chooser and the Settings row (FR-003). */
-@Composable
-fun themeModeLabel(mode: ThemeMode): String = stringResource(
-    when (mode) {
-        ThemeMode.Light -> R.string.settings_theme_light
-        ThemeMode.Dark -> R.string.settings_theme_dark
-        ThemeMode.System -> R.string.settings_theme_system
-    },
-)
 
 const val TEST_TAG_SETTINGS_THEME_DIALOG: String = "settings_theme_dialog"

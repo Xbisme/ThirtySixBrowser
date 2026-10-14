@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.util.searchEngineLabel
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 
 /**
@@ -33,18 +34,5 @@ fun SearchEngineChooserDialog(
         modifier = modifier.testTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_DIALOG),
     )
 }
-
-/**
- * The display name of [engine]. Brand names are not translated, so these resources exist in
- * the default locale only (`translatable="false"`).
- */
-@Composable
-fun searchEngineLabel(engine: SearchEngine): String = stringResource(
-    when (engine) {
-        SearchEngine.Google -> R.string.search_engine_name_google
-        SearchEngine.DuckDuckGo -> R.string.search_engine_name_duckduckgo
-        SearchEngine.Bing -> R.string.search_engine_name_bing
-    },
-)
 
 const val TEST_TAG_SETTINGS_SEARCH_ENGINE_DIALOG: String = "settings_search_engine_dialog"

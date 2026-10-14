@@ -47,6 +47,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.domain.model.FireState
 import com.raumanian.thirtysix.browser.presentation.browser.components.FireConfirmDialog
 import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel

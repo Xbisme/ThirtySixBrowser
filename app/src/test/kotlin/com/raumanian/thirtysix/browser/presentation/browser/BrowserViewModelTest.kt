@@ -637,7 +637,7 @@ class BrowserViewModelTest {
         advanceUntilIdle()
 
         assertEquals(
-            com.raumanian.thirtysix.browser.presentation.tabs.TabsErrorEvent.MaxTabsReached,
+            com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent.MaxTabsReached,
             vm.uiState.value.tabsEvent,
         )
     }

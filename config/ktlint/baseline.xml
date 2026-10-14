@@ -77,7 +77,7 @@
         <error line="29" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/LongPressSheet.kt">
-        <error line="30" column="5" source="compose:modifier-missing-check" />
+        <error line="32" column="5" source="compose:modifier-missing-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/page/SiteJsDialog.kt">
         <error line="34" column="5" source="compose:modifier-missing-check" />
@@ -121,10 +121,10 @@
         <error line="98" column="5" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/TabsScreen.kt">
-        <error line="96" column="5" source="compose:vm-forwarding-check" />
-        <error line="170" column="5" source="compose:lambda-param-in-effect" />
-        <error line="209" column="5" source="compose:parameter-naming" />
-        <error line="266" column="67" source="compose:parameter-naming" />
+        <error line="97" column="5" source="compose:vm-forwarding-check" />
+        <error line="171" column="5" source="compose:lambda-param-in-effect" />
+        <error line="210" column="5" source="compose:parameter-naming" />
+        <error line="267" column="67" source="compose:parameter-naming" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/CloseAllIncognitoConfirmDialog.kt">
         <error line="17" column="5" source="compose:modifier-missing-check" />

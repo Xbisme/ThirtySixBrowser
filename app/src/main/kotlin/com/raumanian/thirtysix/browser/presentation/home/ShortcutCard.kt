@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SeededMeshArt
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.rememberFileImage
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.seedColorFor
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
@@ -44,9 +45,6 @@ private val TagPadding = 8.dp
 private val TagGap = 4.dp
 private const val SCRIM_ALPHA = 0.45f
 private const val SHADOW_BLUR = 8f
-private const val SEED_SATURATION = 0.55f
-private const val SEED_VALUE = 0.72f
-private const val HUE_RANGE = 360
 
 /**
  * Spec 019 FR-013 — an image card on the Home hero (design system ShortcutCard): the tab's
@@ -149,14 +147,3 @@ private fun KindTag(kind: ShortcutKind) {
         Text(text = stringResource(label), style = MaterialTheme.typography.labelSmall, color = colors.onGlass)
     }
 }
-
-/**
- * A stable colour per site, from a hash of its host: the same site always gets the same mesh.
- * Replaces research R13's favicon average, which needed a bitmap decode per card (see tasks.md).
- */
-internal fun seedColorFor(host: String): Color =
-    Color.hsv(
-        hue = Math.floorMod(host.hashCode(), HUE_RANGE).toFloat(),
-        saturation = SEED_SATURATION,
-        value = SEED_VALUE,
-    )

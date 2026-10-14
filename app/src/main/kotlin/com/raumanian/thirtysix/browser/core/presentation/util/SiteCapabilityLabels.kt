@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.presentation.browser.page
+package com.raumanian.thirtysix.browser.core.presentation.util
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes

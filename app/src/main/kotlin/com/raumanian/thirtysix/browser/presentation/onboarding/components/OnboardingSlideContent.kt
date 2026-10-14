@@ -37,12 +37,12 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Ligh
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.LightSurface
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.core.presentation.util.appLanguageLabel
+import com.raumanian.thirtysix.browser.core.presentation.util.searchEngineLabel
+import com.raumanian.thirtysix.browser.core.presentation.util.themeModeLabel
 import com.raumanian.thirtysix.browser.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.presentation.settings.components.appLanguageLabel
-import com.raumanian.thirtysix.browser.presentation.settings.components.searchEngineLabel
-import com.raumanian.thirtysix.browser.presentation.settings.components.themeModeLabel
 private val ThemePreviewHeight = 96.dp
 private val ThemePreviewBar = 10.dp
 private const val THEME_PREVIEW_BAR_FRACTION = 0.6f
