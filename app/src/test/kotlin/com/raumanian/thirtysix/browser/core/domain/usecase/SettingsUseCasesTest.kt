@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.domain.usecase
+package com.raumanian.thirtysix.browser.core.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
@@ -6,6 +6,8 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.SetOnboardingCompletedUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking

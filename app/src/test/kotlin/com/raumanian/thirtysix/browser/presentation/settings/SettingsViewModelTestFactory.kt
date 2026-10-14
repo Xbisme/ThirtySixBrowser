@@ -1,18 +1,18 @@
 package com.raumanian.thirtysix.browser.presentation.settings
 
+import com.raumanian.thirtysix.browser.core.domain.usecase.GetAppLanguageUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.data.local.protection.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ClearBrowsingDataUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.IsDefaultBrowserUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetDynamicColorEnabledUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetSearchEngineUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetTextSizeUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeAppLanguageController
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache

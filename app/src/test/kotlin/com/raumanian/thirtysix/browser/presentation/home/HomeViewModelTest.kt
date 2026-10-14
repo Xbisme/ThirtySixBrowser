@@ -3,13 +3,13 @@ package com.raumanian.thirtysix.browser.presentation.home
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.domain.model.GreetingPeriod
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveHomeContentUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository

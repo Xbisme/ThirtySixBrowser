@@ -14,7 +14,7 @@ package com.raumanian.thirtysix.browser.core.presentation.util
  */
 sealed class TabsErrorEvent {
     /**
-     * Emitted when [com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase]
+     * Emitted when [com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase]
      * returns `Result.Error(MaxTabsReachedException())`. Consumers display the
      * localized `R.string.browser_max_tabs_reached` text in a snackbar then
      * call `consumeXxx()` to clear the event.
@@ -23,7 +23,7 @@ sealed class TabsErrorEvent {
 
     /**
      * Spec 012 — emitted when
-     * [com.raumanian.thirtysix.browser.domain.usecase.CreateIncognitoTabUseCase]
+     * [com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase]
      * returns `Result.Error(MaxIncognitoTabsReachedException())`. Distinct
      * from [MaxTabsReached] (Q1 clarification — independent caps require
      * distinct localized error strings). Consumers display the localized

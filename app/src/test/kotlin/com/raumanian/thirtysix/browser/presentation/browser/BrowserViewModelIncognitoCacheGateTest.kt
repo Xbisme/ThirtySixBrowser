@@ -7,13 +7,13 @@ import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
@@ -114,7 +114,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         // Spec 013 — star use cases. Self-contained fake repo; no impact on incognito tests.
         val bookmarkRepo = com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository()
-        val addBookmark = com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(bookmarkRepo)
+        val addBookmark = com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase(bookmarkRepo)
         return BrowserViewModel(
             defaultHomeUrl = "https://normal.example.com",
             buildSearchUrl = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),

@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.presentation.browser
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.constants.AppDefaults
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted

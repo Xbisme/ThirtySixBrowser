@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.domain.usecase
+package com.raumanian.thirtysix.browser.core.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository

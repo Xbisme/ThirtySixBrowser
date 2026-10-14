@@ -5,14 +5,14 @@ import com.raumanian.thirtysix.browser.core.constants.UrlConstants
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository
@@ -90,7 +90,7 @@ class BrowserViewModelTest {
         val isUrlBookmarked =
             com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase(bookmarkRepository)
         val addBookmark =
-            com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(bookmarkRepository)
+            com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase(bookmarkRepository)
         val toggleBookmark =
             com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase(bookmarkRepository, addBookmark)
         return BrowserViewModel(

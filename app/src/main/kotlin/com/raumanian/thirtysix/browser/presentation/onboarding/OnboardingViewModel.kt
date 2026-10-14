@@ -7,12 +7,12 @@ import com.raumanian.thirtysix.browser.core.constants.OnboardingSlides
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.domain.usecase.GetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetAppLanguageUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.GetAppLanguageUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetOnboardingCompletedUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetSearchEngineUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetThemeModeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow

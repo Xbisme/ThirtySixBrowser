@@ -1,17 +1,17 @@
 package com.raumanian.thirtysix.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache

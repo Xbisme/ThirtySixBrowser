@@ -14,14 +14,14 @@ import androidx.lifecycle.lifecycleScope
 import com.raumanian.thirtysix.browser.core.constants.NavArgs
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
+import com.raumanian.thirtysix.browser.core.domain.usecase.GetUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
 import com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect
 import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
-import com.raumanian.thirtysix.browser.domain.usecase.GetUserSettingsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RecordAppLaunchUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.presentation.entry.IncomingIntentReader

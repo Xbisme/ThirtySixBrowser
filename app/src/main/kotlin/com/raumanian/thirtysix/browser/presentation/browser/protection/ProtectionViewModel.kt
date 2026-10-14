@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.presentation.browser.protection
 import android.webkit.WebView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveFireproofSitesUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSiteProtectionUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.privacy.PageDashboardState

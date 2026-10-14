@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.presentation.settings.fireproof
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveFireproofSitesUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RemoveFireproofSitesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

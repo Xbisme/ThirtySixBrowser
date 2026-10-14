@@ -2,22 +2,22 @@ package com.raumanian.thirtysix.browser.presentation.bookmarks
 
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
-import com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CountFolderDescendantsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.CreateFolderUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.DeleteBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.DeleteFolderUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.MoveBookmarkUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.MoveFolderUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllFoldersUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveBookmarksByFolderUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ObserveFolderPathUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.RenameFolderUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SearchBookmarksUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateBookmarkUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeIncognitoTabRepository

@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.domain.usecase
+package com.raumanian.thirtysix.browser.core.domain.usecase
 
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

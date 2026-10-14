@@ -5,8 +5,8 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.Sett
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.createTestSettingsDataStore
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.usecase.GetUserSettingsUseCase
 import com.raumanian.thirtysix.browser.data.mapper.SettingsMapper
-import com.raumanian.thirtysix.browser.domain.usecase.GetUserSettingsUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel

@@ -3,11 +3,11 @@ package com.raumanian.thirtysix.browser.presentation.entry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.model.IncomingTarget
 import com.raumanian.thirtysix.browser.domain.model.OpenOutcome
-import com.raumanian.thirtysix.browser.domain.usecase.CloseTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.OpenIncomingRequestUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.ResolveIncomingRequestUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -5,11 +5,11 @@ import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.CloseTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeTabRepository
 import java.io.File
 import java.io.OutputStream
@@ -61,19 +61,19 @@ class TabsViewModelTest {
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
     ): TabsViewModel {
-        val observeAllTabs = com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase(
+        val observeAllTabs = com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase(
             repository,
             incognitoRepository,
         )
         return TabsViewModel(
             observeAllTabs = observeAllTabs,
             createTab = CreateTabUseCase(repository, HOME_URL),
-            createIncognitoTab = com.raumanian.thirtysix.browser.domain.usecase.CreateIncognitoTabUseCase(
+            createIncognitoTab = com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase(
                 incognitoRepository,
             ),
             switchActiveTab = SwitchActiveTabUseCase(repository),
             closeTab = CloseTabUseCase(repository, screenshotCache),
-            closeIncognitoTab = com.raumanian.thirtysix.browser.domain.usecase.CloseIncognitoTabUseCase(
+            closeIncognitoTab = com.raumanian.thirtysix.browser.core.domain.usecase.CloseIncognitoTabUseCase(
                 incognitoRepository,
             ),
             closeAllTabs = CloseAllTabsUseCase(repository, screenshotCache),

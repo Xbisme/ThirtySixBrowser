@@ -8,7 +8,7 @@ import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
  *
  * - [tabs] — full tab list, ordered by `lastActiveAt` DESC then `id` ASC
  *   (FR-014 / R1 / H1). Sourced from
- *   [com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase].
+ *   [com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase].
  * - [activeTabId] — derived as `tabs.maxByOrNull { it.lastActiveAt }?.id`.
  *   Drives the active-tab visual indicator on each `TabSwitcherCard`.
  * - [isCloseAllDialogVisible] — UI-only flag toggled by

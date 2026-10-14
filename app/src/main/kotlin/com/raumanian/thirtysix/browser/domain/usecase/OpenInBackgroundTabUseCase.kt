@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.domain.usecase
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first

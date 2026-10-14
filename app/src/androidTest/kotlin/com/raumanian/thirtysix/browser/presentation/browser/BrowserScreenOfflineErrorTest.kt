@@ -17,14 +17,14 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabReposi
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.CreateTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveTabsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.presentation.browser.components.TEST_TAG_BROWSER_ERROR_STATE
 import dagger.Module
@@ -129,7 +129,7 @@ class BrowserScreenOfflineErrorTest {
                 isUrlBookmarked = com.raumanian.thirtysix.browser.domain.usecase.IsUrlBookmarkedUseCase(OfflineErrorNoopBookmarkRepository),
                 toggleBookmark = com.raumanian.thirtysix.browser.domain.usecase.ToggleBookmarkUseCase(
                     OfflineErrorNoopBookmarkRepository,
-                    com.raumanian.thirtysix.browser.domain.usecase.AddBookmarkUseCase(OfflineErrorNoopBookmarkRepository),
+                    com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase(OfflineErrorNoopBookmarkRepository),
                 ),
                 recordHistoryEntry = com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase(
                     OfflineErrorNoopHistoryRepository,

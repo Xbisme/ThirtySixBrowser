@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
 import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

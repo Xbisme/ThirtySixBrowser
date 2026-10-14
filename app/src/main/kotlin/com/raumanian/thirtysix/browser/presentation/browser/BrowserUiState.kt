@@ -40,7 +40,7 @@ data class BrowserUiState(
     val tabsEvent: TabsErrorEvent? = null,
     /**
      * Spec 012 — derived from the active tab's [com.raumanian.thirtysix.browser.core.domain.model.Tab.isIncognito]
-     * via [com.raumanian.thirtysix.browser.domain.usecase.ObserveActiveTabIsIncognitoUseCase].
+     * via [com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase].
      *
      * Drives:
      *  - The address-bar incognito indicator (FR-015).
