@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.presentation.settings.sitepermissions
+package com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions
 
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision

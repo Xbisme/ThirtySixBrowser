@@ -1,7 +1,7 @@
-package com.raumanian.thirtysix.browser.di
+package com.raumanian.thirtysix.browser.feature.sitepermission.di
 
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
-import com.raumanian.thirtysix.browser.data.repository.SitePermissionRepositoryImpl
+import com.raumanian.thirtysix.browser.feature.sitepermission.data.repository.SitePermissionRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

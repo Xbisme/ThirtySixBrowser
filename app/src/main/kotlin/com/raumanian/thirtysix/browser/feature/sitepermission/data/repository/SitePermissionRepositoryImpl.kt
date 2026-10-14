@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.data.repository
+package com.raumanian.thirtysix.browser.feature.sitepermission.data.repository
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.SitePermissionDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
@@ -9,7 +9,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.data.mapper.toDomainOrNull
+import com.raumanian.thirtysix.browser.feature.sitepermission.data.mapper.toDomainOrNull
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

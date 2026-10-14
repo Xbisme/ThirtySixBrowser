@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.presentation.settings
+package com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -16,13 +16,10 @@ import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveSitePermissionsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.RemoveSitePermissionsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetSitePermissionUseCase
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SETTINGS_TEST_TIMEOUT_MS
-import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsScreen
-import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.SitePermissionsViewModel
-import com.raumanian.thirtysix.browser.presentation.settings.sitepermissions.TEST_TAG_SITE_PERMISSIONS_REMOVE_ALL
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.ObserveSitePermissionsUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.RemoveSitePermissionsUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.SetSitePermissionUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

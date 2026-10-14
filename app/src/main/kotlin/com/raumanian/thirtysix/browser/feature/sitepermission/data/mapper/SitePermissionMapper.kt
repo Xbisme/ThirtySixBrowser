@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.data.mapper
+package com.raumanian.thirtysix.browser.feature.sitepermission.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability

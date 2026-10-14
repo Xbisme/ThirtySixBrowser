@@ -1,11 +1,11 @@
-package com.raumanian.thirtysix.browser.presentation.settings.sitepermissions
+package com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions
 
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveSitePermissionsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.RemoveSitePermissionsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetSitePermissionUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.ObserveSitePermissionsUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.RemoveSitePermissionsUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.SetSitePermissionUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

@@ -25,6 +25,10 @@
         <error line="308" column="5" source="compose:lambda-param-in-effect" />
         <error line="308" column="5" source="compose:parameter-naming" />
     </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/sitepermission/presentation/sitepermissions/SitePermissionsScreen.kt">
+        <error line="46" column="5" source="compose:modifier-missing-check" />
+        <error line="98" column="5" source="compose:vm-forwarding-check" />
+    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/bookmarks/BookmarksScreen.kt">
         <error line="139" column="13" source="compose:vm-forwarding-check" />
         <error line="143" column="5" source="compose:vm-forwarding-check" />
@@ -115,10 +119,6 @@
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/protectionexceptions/ProtectionExceptionsScreen.kt">
         <error line="39" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/sitepermissions/SitePermissionsScreen.kt">
-        <error line="46" column="5" source="compose:modifier-missing-check" />
-        <error line="98" column="5" source="compose:vm-forwarding-check" />
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/TabsScreen.kt">
         <error line="97" column="5" source="compose:vm-forwarding-check" />

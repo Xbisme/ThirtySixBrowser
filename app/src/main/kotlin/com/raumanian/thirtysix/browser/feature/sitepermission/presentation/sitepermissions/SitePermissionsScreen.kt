@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:function-naming") // Composables are PascalCase by Compose convention.
 
-package com.raumanian.thirtysix.browser.presentation.settings.sitepermissions
+package com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement

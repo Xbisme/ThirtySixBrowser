@@ -1,13 +1,13 @@
-package com.raumanian.thirtysix.browser.presentation.settings.sitepermissions
+package com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
-import com.raumanian.thirtysix.browser.domain.usecase.ObserveSitePermissionsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.RemoveSitePermissionsUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.SetSitePermissionUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.ObserveSitePermissionsUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.RemoveSitePermissionsUseCase
+import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.SetSitePermissionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

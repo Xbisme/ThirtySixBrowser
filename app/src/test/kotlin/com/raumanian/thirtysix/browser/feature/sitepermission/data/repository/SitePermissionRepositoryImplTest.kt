@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.data.repository
+package com.raumanian.thirtysix.browser.feature.sitepermission.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase

@@ -1,4 +1,4 @@
-package com.raumanian.thirtysix.browser.domain.usecase
+package com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
