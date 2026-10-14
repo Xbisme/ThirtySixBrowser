@@ -166,9 +166,9 @@ Per task: for every file in the folder, delete ID citations, planning-doc and co
 **Independent test**: quickstart G6–G8, G10.
 
 - [X] T063 [US1] On the AVD from T005 (seeded baseline debug install), `adb install -r` the branch's debug APK; run quickstart G6 and record each store's result in the "Results" table.
-- [ ] T064 [US1] Run quickstart G7: unit and instrumented suites (16 KB AVD; CI API 29). Every baseline test present (compare the test-class list from T004's reports to now: same class and method names, under new packages).
-- [ ] T065 [US1] Run quickstart G8: release APK size vs baseline (±2 %), cold start 10 interleaved rounds against the baseline release (±5 %); Compose report counts unchanged (206 / 0).
-- [ ] T066 [US1] Run quickstart G10 smoke on the 16 KB AVD release build and on API 24 AVD debug build. Diff the merged release manifest against `specs/025-architecture-cleanup/baseline/AndroidManifest-release.xml`: no difference allowed (FR-003).
+- [X] T064 [US1] Run quickstart G7: unit and instrumented suites (16 KB AVD; CI API 29). Every baseline test present (compare the test-class list from T004's reports to now: same class and method names, under new packages).
+- [X] T065 [US1] Run quickstart G8: release APK size vs baseline (±2 %), cold start 10 interleaved rounds against the baseline release (±5 %); Compose report counts unchanged (206 / 0).
+- [X] T066 [US1] Run quickstart G10 smoke on the 16 KB AVD release build and on API 24 AVD debug build. Diff the merged release manifest against `specs/025-architecture-cleanup/baseline/AndroidManifest-release.xml`: no difference allowed (FR-003).
 
 ---
 
@@ -219,6 +219,8 @@ Phase 6: T056 ∥ T057
 |---|---|
 | Unit tests | 932 (0 failed) |
 | Instrumented tests (16 KB AVD `TA016_API36_16K`) | 189 (0 failed) |
+| G7 instrumented (`TA016_API36_16K`, cold-booted, animations off) | 189 | **190/190** in 2 min 19 s; same 189 method names as the baseline. Earlier runs: 181/190 when the app kept the per-app language `de` from the T063 install (English string lookups failed; 22/22 once uninstalled), and an abandoned run while the host Mac was at load ~90 from an unrelated render job | ✅ |
+| G10 smoke | — | 16 KB AVD, release: link from another app opens a new tab after onboarding · star · History · Downloads · Bookmarks · Settings → Dark and Tiếng Việt applied in place · protection off/on for the site · dashboard · incognito start page · Fire from the hub and from Tabs end on Home, history cleared, bookmark kept · 0 crashes. API 24 AVD, debug: link, star, History, Dark + Deutsch, Fire → Home, 0 crashes | ✅ |
 | Release APK bytes | 3,725,735 |
 | Cold start median (ms), release, first-run state (onboarding), 10 launches | 271 |
 | Comment share / files > 15 % / blocks > 5 lines | 21.9 % / 117 / 160 (`scripts/comment-stats.py`) |
@@ -395,4 +397,7 @@ Found by a script on `77982fe`+T039: `invoke` whose whole body is one call on a 
 | Comment share / files > 15 % / blocks > 5 lines | 21.9 % / 117 / 160 | **8.4 % / 0 / 0**; `Spec`/`FR-`/`SC-`/`T0xx`/`§` in `app/src`: 0 | ✅ |
 | detekt baseline / `KNOWN_VIOLATIONS` | 1,726 / 214 | deleted / `emptySet()` | ✅ |
 | Release APK bytes | 3,725,735 | 3,742,047 (+0.44 %) | ✅ ±2 % |
+| Compose report restartable / non-skippable | 206 / 0 | 208 / 0: `AppNavGraph` renamed `AppNavHost`; new `FireOverlayHost` (the cross-feature slot) and `PauseWithLifecycle` (split out of `BrowserWebView` for detekt), both skippable | ✅ |
+| Cold start, release, returning user, Galaxy A55 (median `am start -W TotalTime`, interleaved; `speed-profile` compiled after each install) | 240 ms (70 launches) | 234 ms (70 launches), **−2.5 %**. Batch 1 (10 rounds × 3): 246 → 267.5 ms (+8.7 %), the second launch of each round equal (236 vs 230.5); batch 2 (8 rounds × 5, longer settle after install): 233.5 → 224 ms (−4.1 %). The phone was charging and in use between batches | ✅ ±5 % |
+| Merged release manifest | `baseline/AndroidManifest-release.xml` | identical once comments are removed (144/144 lines); only comment text changed | ✅ |
 | G6 upgrade over the seeded baseline debug install (`TA016_API36_16K`) | tabs 20 · history 20 · downloads 20 · bookmarks 2 / folders 1 · fireproof 1 · site permission 1 · exception 1 · Dark · DuckDuckGo · text 125 % · retention 30 · app language `de` | identical: every database row equal (`.dump` diff only `android_metadata` locale, which SQLite rewrites on open), settings file equal except `app_launch_count` 2 → 3, app locale still `de`, 41 cached favicon/screenshot files kept; UI opens dark, German, 20 tabs; 5 cold starts, 0 crashes | ✅ |
