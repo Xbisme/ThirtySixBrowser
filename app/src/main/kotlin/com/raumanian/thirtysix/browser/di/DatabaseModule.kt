@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.raumanian.thirtysix.browser.data.local.dao.BookmarkDao
 import com.raumanian.thirtysix.browser.data.local.dao.BookmarkFolderDao
 import com.raumanian.thirtysix.browser.data.local.dao.DownloadRecordDao
+import com.raumanian.thirtysix.browser.data.local.dao.FireproofSiteDao
 import com.raumanian.thirtysix.browser.data.local.dao.HistoryDao
 import com.raumanian.thirtysix.browser.data.local.dao.SitePermissionDao
 import com.raumanian.thirtysix.browser.data.local.dao.SiteProtectionExceptionDao
@@ -13,6 +14,7 @@ import com.raumanian.thirtysix.browser.data.local.database.AppDatabase
 import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration1To2
 import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration2To3
 import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration3To4
+import com.raumanian.thirtysix.browser.data.local.database.migrations.Migration4To5
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,6 +39,7 @@ object DatabaseModule {
                 Migration1To2.MIGRATION_1_2,
                 Migration2To3.MIGRATION_2_3,
                 Migration3To4.MIGRATION_3_4,
+                Migration4To5.MIGRATION_4_5,
             )
             .build()
 
@@ -48,6 +51,9 @@ object DatabaseModule {
 
     @Provides
     fun provideDownloadRecordDao(db: AppDatabase): DownloadRecordDao = db.downloadRecordDao()
+
+    @Provides
+    fun provideFireproofSiteDao(db: AppDatabase): FireproofSiteDao = db.fireproofSiteDao()
 
     @Provides
     fun provideHistoryDao(db: AppDatabase): HistoryDao = db.historyDao()

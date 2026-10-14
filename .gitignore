@@ -17,3 +17,7 @@ __pycache__/
 
 # Claude Code agent worktrees (local only)
 /.claude/worktrees/
+
+# Spec 024 script generator (tools/privacy-scripts)
+node_modules/
+tools/privacy-scripts/build/

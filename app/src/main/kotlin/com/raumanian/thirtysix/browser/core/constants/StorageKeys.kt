@@ -59,4 +59,11 @@ object StorageKeys {
      * Clear browsing data does not touch it.
      */
     val TEXT_ZOOM_PERCENT = intPreferencesKey("text_zoom_percent")
+
+    /**
+     * Spec 024 FR-007 — `true` from just before a Fire run's first destructive step until its last
+     * (data-model "DataStore — one key", INV-1). `true` at start-up means a run was interrupted and
+     * must finish before any tab is shown. Absent → `false`, so older installs need no migration.
+     */
+    val FIRE_IN_PROGRESS = booleanPreferencesKey("fire_in_progress")
 }

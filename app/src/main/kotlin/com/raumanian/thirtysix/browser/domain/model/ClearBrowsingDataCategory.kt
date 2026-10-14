@@ -25,6 +25,12 @@ enum class ClearBrowsingDataCategory {
      * Opt-in like [SitePermissions]: never part of [DEFAULT_SELECTION].
      */
     SitesWithoutProtection,
+
+    /**
+     * Spec 024 FR-013 — the fireproof list. Opt-in like [SitePermissions]: never part of
+     * [DEFAULT_SELECTION]. Cookies and site data never consult it (INV-10).
+     */
+    FireproofSites,
     ;
 
     companion object {

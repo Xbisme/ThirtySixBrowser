@@ -61,6 +61,10 @@ interface HistoryDao {
     )
     suspend fun getLatestVisitPerUrl(): List<HistoryEntryEntity>
 
+    /** Spec 024 data-model step 1 — every distinct recorded address, for Fire's host collection. */
+    @Query("SELECT DISTINCT ${HistoryEntryEntity.COL_URL} FROM ${HistoryEntryEntity.TABLE_NAME}")
+    suspend fun getDistinctUrls(): List<String>
+
     /**
      * Spec 019 (data-model §4) — the newest [limit] visits for the Home page. Served by the
      * existing `visited_at` index, so it never scans the whole table the way [observeAll] does.

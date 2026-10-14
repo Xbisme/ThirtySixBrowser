@@ -19,4 +19,10 @@ object AssetPaths {
 
     /** Spec 023 FR-003 — licence text for the Public Suffix List. */
     const val LICENSE_MPL_2: String = "licenses/MPL-2.0.txt"
+
+    /** Spec 024 research R9 — the fingerprinting shield (own code); installed first. */
+    const val PRIVACY_FINGERPRINT_SCRIPT: String = "privacy/fingerprint.js"
+
+    /** Spec 024 research R7 — cookie-banner auto-decline, built from autoconsent (MPL-2.0). */
+    const val PRIVACY_CONSENT_SCRIPT: String = "privacy/consent.js"
 }

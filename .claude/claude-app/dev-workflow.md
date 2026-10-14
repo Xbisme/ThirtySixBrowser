@@ -122,6 +122,6 @@ Các Spec theo thứ tự implement:
 | 021 | `web-capabilities` | 020 | ✅ Done (PR #32, Phase 6) |
 | 022 | `page-tools` | 021 | ✅ Done (PR #35, Phase 6) |
 | 023 | `privacy-protection` | 022 | ✅ Done (PR #37, Phase 6) |
-| 024 | `privacy-tools` | 023 | ⬜ Phase 6 — tiếp theo |
+| 024 | `privacy-tools` | 023 | 🟢 Implemented (branch `024-privacy-tools`, chưa mở PR) |
 
-> Cập nhật 2026-10-11: Specs 001–019 đã merge vào `main` (019 `ui-redesign` qua PR #27, `54e090a`, 2026-10-10; đã chạy gate trên máy thật Galaxy A55 ngày 2026-10-11). Phase 6 "trình duyệt thật" (Constitution v1.5.0): Spec 020 đã merge (PR #30); Spec 021 `web-capabilities` đã merge (PR #32, `ef9ae68`). Spec 022 `page-tools` đã merge (PR #35, `d0908a1`). Constitution v1.6.0 tách 023 cũ thành 023 `privacy-protection` (tầng mạng) + 024 `privacy-tools` (Fire, dashboard, script). Tiếp theo: Spec 023. Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.
+> Cập nhật 2026-10-11: Specs 001–019 đã merge vào `main` (019 `ui-redesign` qua PR #27, `54e090a`, 2026-10-10; đã chạy gate trên máy thật Galaxy A55 ngày 2026-10-11). Phase 6 "trình duyệt thật" (Constitution v1.5.0): Spec 020 đã merge (PR #30); Spec 021 `web-capabilities` đã merge (PR #32, `ef9ae68`). Spec 022 `page-tools` đã merge (PR #35, `d0908a1`). Constitution v1.6.0 tách 023 cũ thành 023 `privacy-protection` (tầng mạng) + 024 `privacy-tools` (Fire, dashboard, script). Spec 023 đã merge (PR #37, `ec631d1`). Cập nhật 2026-10-13: Spec 024 đã implement trên branch `024-privacy-tools`, chờ gate trên máy thật và PR. Tiến độ chi tiết xem `sdd-roadmap.md` — bảng này chỉ là tóm tắt.

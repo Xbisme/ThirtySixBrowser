@@ -8,6 +8,7 @@ import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.domain.model.ClearBrowsingDataResult
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.domain.repository.IncognitoProtectionExceptions
 import com.raumanian.thirtysix.browser.domain.repository.ProtectionExceptionRepository
@@ -34,6 +35,8 @@ import kotlinx.coroutines.CancellationException
  *    in-memory one-time grants.
  *  - **Sites without protection** (Spec 023 FR-016a) → `ProtectionExceptionRepository.clearAll()`
  *    and the incognito choices held in memory.
+ *  - **Fireproof sites** (Spec 024 FR-013) → `FireproofSiteRepository.clearAll()`. Fireproofing
+ *    protects only against Fire: the cookie step above never consults it (INV-10).
  *
  * Every category, and every step inside a category, runs in its own failure boundary: an
  * earlier failure never stops later work (FR-033, FR-043), and a category is failed if any of
@@ -52,6 +55,7 @@ class ClearBrowsingDataUseCase @Inject constructor(
     private val oneTimeGrants: OneTimeGrantStore,
     private val protectionExceptions: ProtectionExceptionRepository,
     private val incognitoProtectionExceptions: IncognitoProtectionExceptions,
+    private val fireproofSites: FireproofSiteRepository,
 ) {
 
     /** @param categories non-empty — an empty set is a programming error (FR-026). */
@@ -106,6 +110,10 @@ class ClearBrowsingDataUseCase @Inject constructor(
             val stored = attempt { protectionExceptions.clearAll() } is Result.Success
             incognitoProtectionExceptions.clear()
             if (!stored) failed += ClearBrowsingDataCategory.SitesWithoutProtection
+        }
+        if (ClearBrowsingDataCategory.FireproofSites in categories) {
+            val stored = attempt { fireproofSites.clearAll() } is Result.Success
+            if (!stored) failed += ClearBrowsingDataCategory.FireproofSites
         }
         return failed
     }

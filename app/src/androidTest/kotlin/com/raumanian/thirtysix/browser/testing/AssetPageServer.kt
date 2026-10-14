@@ -74,7 +74,8 @@ class AssetPageServer : AutoCloseable {
                     fullRequests += path to headers
                     val body = runCatching { assets.open(name).use { input -> input.readBytes() } }.getOrNull()
                     val head = if (body != null) {
-                        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: ${body.size}\r\n"
+                        "HTTP/1.1 200 OK\r\nContent-Type: ${contentTypeOf(name)}\r\nContent-Length: ${body.size}\r\n" +
+                            extraHeadersFor(path)
                     } else {
                         "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n"
                     }
@@ -84,7 +85,21 @@ class AssetPageServer : AutoCloseable {
         }
     }
 
+    /** Spec 024 — a service worker must be served as JavaScript, or registration fails. */
+    private fun contentTypeOf(name: String): String =
+        if (name.endsWith(".js")) "application/javascript; charset=utf-8" else "text/html; charset=utf-8"
+
+    /** Spec 024 — `storage.html` (not `?check`) also sets the persistent HttpOnly cookie of quickstart G4. */
+    private fun extraHeadersFor(path: String): String =
+        if (path.substringBefore('?').endsWith(STORAGE_FIXTURE) && !path.contains("check")) {
+            "Set-Cookie: $PERSISTENT_COOKIE\r\nCache-Control: no-store\r\n"
+        } else {
+            "Cache-Control: no-store\r\n"
+        }
+
     private companion object {
         const val USER_AGENT_HEADER = "User-Agent:"
+        const val STORAGE_FIXTURE = "storage.html"
+        const val PERSISTENT_COOKIE = "fp_persist=1; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax"
     }
 }

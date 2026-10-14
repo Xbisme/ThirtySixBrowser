@@ -1,0 +1,13 @@
+package com.raumanian.thirtysix.browser.domain.usecase
+
+import com.raumanian.thirtysix.browser.domain.model.FireproofSite
+import com.raumanian.thirtysix.browser.domain.repository.FireproofSiteRepository
+import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+
+/** Spec 024 FR-012 — the fireproof sites, newest first. */
+class ObserveFireproofSitesUseCase @Inject constructor(
+    private val repository: FireproofSiteRepository,
+) {
+    operator fun invoke(): Flow<List<FireproofSite>> = repository.observeAll()
+}

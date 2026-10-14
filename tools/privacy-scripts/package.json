@@ -1,0 +1,10 @@
+{
+  "name": "thirtysix-privacy-scripts",
+  "private": true,
+  "description": "Spec 024 research R7 — builds app/src/main/assets/privacy/consent.js by hand. Never run from Gradle or CI.",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@duckduckgo/autoconsent": "16.51.0",
+    "esbuild": "0.28.2"
+  }
+}

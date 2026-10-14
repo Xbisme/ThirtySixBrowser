@@ -19,5 +19,8 @@ sealed class AppDestination(val route: String) {
     /** Spec 023 FR-015 — sites the person turned protection off for. */
     data object ProtectionExceptions : AppDestination("settings/protection_exceptions")
 
+    /** Spec 024 FR-012 — Settings → Privacy → Fireproof sites. */
+    data object FireproofSites : AppDestination("settings/fireproof_sites")
+
     data object Onboarding : AppDestination("onboarding")
 }

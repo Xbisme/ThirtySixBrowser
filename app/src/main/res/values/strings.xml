@@ -427,4 +427,28 @@
         <item quantity="one">%1$d tracker blocked on this page</item>
         <item quantity="other">%1$d trackers blocked on this page</item>
     </plurals>
+    <!-- Spec 024 privacy tools -->
+    <string name="fire_action">Fire</string>
+    <string name="fire_action_tabs_cd">Fire: close all tabs and clear browsing data</string>
+    <string name="fire_confirm_title">Close all tabs and clear data?</string>
+    <string name="fire_confirm_body">Closes every tab, including incognito tabs, and clears history, cookies and site data, cached files and site permissions.\n\nKept: bookmarks, downloads, settings and fireproof sites.</string>
+    <string name="fire_confirm_action">Clear</string>
+    <string name="fire_confirm_cancel">Cancel</string>
+    <string name="fire_done_announcement">Browsing data cleared</string>
+    <string name="dashboard_title">Privacy on this site</string>
+    <string name="dashboard_connection_secure">Connection is secure</string>
+    <string name="dashboard_no_trackers">No trackers blocked on this page</string>
+    <string name="dashboard_fireproof_title">Fireproof this site</string>
+    <string name="dashboard_fireproof_help">Keeps you signed in when you use Fire. Sign-in services on other sites need fireproofing too.</string>
+    <string name="settings_fireproof_sites">Fireproof sites</string>
+    <string name="settings_fireproof_sites_summary">Sites that keep their cookies and data when you use Fire</string>
+    <string name="fireproof_sites_empty">No fireproof sites. Turn on Fireproof this site from a page\'s privacy panel; it will be listed here.</string>
+    <string name="fireproof_sites_remove">Remove</string>
+    <string name="fireproof_sites_remove_cd">Remove %1$s from fireproof sites</string>
+    <string name="fireproof_sites_remove_all">Remove all</string>
+    <string name="fireproof_sites_remove_all_confirm_title">Remove every fireproof site?</string>
+    <string name="fireproof_sites_remove_all_confirm_body">Fire will clear these sites\' cookies and data the next time you use it.</string>
+    <string name="settings_clear_category_fireproof_sites">Fireproof sites</string>
+    <string name="settings_clear_category_fireproof_sites_description">Sites stop being kept when you use Fire</string>
+    <string name="settings_about_notice_autoconsent">Cookie-banner rules come from autoconsent by DuckDuckGo (https://github.com/duckduckgo/autoconsent), used under MPL 2.0.</string>
 </resources>

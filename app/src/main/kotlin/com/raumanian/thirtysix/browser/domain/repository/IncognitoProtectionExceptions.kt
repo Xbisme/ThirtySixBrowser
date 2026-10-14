@@ -12,4 +12,7 @@ interface IncognitoProtectionExceptions {
     fun contains(site: String): Boolean
 
     fun clear()
+
+    /** Spec 024 research R5 — the sites switched off in incognito, for the page-start scripts. */
+    fun snapshot(): Set<String>
 }
