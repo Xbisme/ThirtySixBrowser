@@ -230,6 +230,7 @@ private object LoadingIndicatorNoopFaviconCache : FaviconCache {
     override val version: StateFlow<Long> = state.asStateFlow()
     override suspend fun save(url: String, bitmap: Bitmap) = Unit
     override suspend fun clearAll() = Unit
+    override suspend fun retainOnly(hosts: Set<String>) = Unit
     override fun fileFor(url: String): File? = null
 }
 

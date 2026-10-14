@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +49,9 @@ import com.raumanian.thirtysix.browser.presentation.browser.components.FindInPag
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubCallbacks
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubPageToolsState
 import com.raumanian.thirtysix.browser.presentation.browser.components.HubSheet
+import com.raumanian.thirtysix.browser.presentation.browser.components.PrivacyToolsHosts
 import com.raumanian.thirtysix.browser.presentation.browser.components.QuickSetting
+import com.raumanian.thirtysix.browser.presentation.browser.fire.FireViewModel
 import com.raumanian.thirtysix.browser.presentation.browser.page.BrowserPageRequests
 import com.raumanian.thirtysix.browser.presentation.browser.page.FullscreenOverlay
 import com.raumanian.thirtysix.browser.presentation.browser.page.LongPressActions
@@ -136,6 +139,12 @@ fun BrowserScreen(
     val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
     // Spec 023 — the privacy protections: the WebView reports its page, the hub reads it.
     val protection: ProtectionViewModel = hiltViewModel()
+    // Spec 024 US1 — Fire: confirmed here, run by the process-wide coordinator.
+    val fire: FireViewModel = hiltViewModel()
+    val fireState by fire.state.collectAsStateWithLifecycle()
+    var fireConfirmOpen by rememberSaveable { mutableStateOf(false) }
+    // Spec 024 US3 — survives rotation (FR-018); a language change no longer recreates the activity.
+    var dashboardOpen by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(protection) {
         // FR-012 — after the per-site switch the page reloads with the new setting.
         protection.reloadEvents.collect { webViewActions.reload() }
@@ -319,8 +328,20 @@ fun BrowserScreen(
             // FR-011 — nothing about protection on Home or the incognito start page.
             protectionFlow = if (state.isHomeContent) null else protection.status,
             onProtectionSwitched = protection::onProtectionSwitched,
+            onFire = { fireConfirmOpen = true },
+            onDashboard = { dashboardOpen = true },
         )
     }
+    PrivacyToolsHosts(
+        fire = fire,
+        fireState = fireState,
+        fireConfirmOpen = fireConfirmOpen,
+        onFireConfirmClosed = { fireConfirmOpen = false },
+        dashboardOpen = dashboardOpen,
+        isHomeContent = state.isHomeContent,
+        onDashboardClosed = { dashboardOpen = false },
+        protection = protection,
+    )
     if (quickSettingsUsed) {
         QuickSettingsHost(
             request = quickSettingRequest,
@@ -386,6 +407,8 @@ private fun BrowserHub(
     onPageTool: (PageTool) -> Unit,
     protectionFlow: StateFlow<PageProtectionStatus>?,
     onProtectionSwitched: (Boolean) -> Unit,
+    onFire: () -> Unit,
+    onDashboard: () -> Unit,
 ) {
     HubSheet(
         canGoBack = state.canGoBack,
@@ -405,6 +428,8 @@ private fun BrowserHub(
             onQuickSetting = onQuickSetting,
             onPageTool = onPageTool,
             onProtectionSwitched = onProtectionSwitched,
+            onFire = onFire,
+            onDashboard = onDashboard,
         ),
         pageTools = pageTools,
         protectionFlow = protectionFlow,

@@ -15,4 +15,8 @@ class HttpsUpgradeFailureStore @Inject constructor() : HttpsUpgradeFailures {
     }
 
     override fun snapshot(): Set<String> = hosts
+
+    override fun clear() {
+        hosts.clear()
+    }
 }

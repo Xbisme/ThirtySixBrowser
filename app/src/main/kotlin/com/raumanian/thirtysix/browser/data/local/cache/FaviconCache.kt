@@ -72,6 +72,13 @@ interface FaviconCache {
      *    deletion — as the category's failure signal.
      */
     suspend fun clearAll()
+
+    /**
+     * Spec 024 FR-008 — delete every cached site icon except those of [hosts] (bookmarked hosts and
+     * hosts of fireproof sites). Same contract as [clearAll]: IO dispatcher, idempotent, a file that
+     * cannot be deleted is skipped, and [version] is bumped afterwards.
+     */
+    suspend fun retainOnly(hosts: Set<String>)
 }
 
 /**
@@ -116,6 +123,15 @@ class DiskFaviconCache @Inject constructor(
         cacheDir.listFiles()?.forEach { file ->
             // The file name derives from a visited host, so it is deliberately not logged (§I).
             if (!file.delete()) android.util.Log.w(LOG_TAG, "Failed to delete a cached favicon")
+        }
+        versionState.update { it + 1 }
+    }
+
+    override suspend fun retainOnly(hosts: Set<String>) = withContext(dispatchers.io) {
+        val keep = hosts.mapNotNullTo(HashSet()) { host -> keyFor(host)?.let { "$it.png" } }
+        cacheDir.listFiles()?.forEach { file ->
+            // As in clearAll: the name derives from a visited host and is never logged (§I).
+            if (file.name !in keep && !file.delete()) android.util.Log.w(LOG_TAG, "Failed to delete a cached favicon")
         }
         versionState.update { it + 1 }
     }

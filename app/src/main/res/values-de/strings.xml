@@ -388,4 +388,28 @@
         <item quantity="one">%1$d Tracker auf dieser Seite blockiert</item>
         <item quantity="other">%1$d Tracker auf dieser Seite blockiert</item>
     </plurals>
+    <!-- Spec 024 privacy tools -->
+    <string name="fire_action">Feuer</string>
+    <string name="fire_action_tabs_cd">Feuer: alle Tabs schließen und Browserdaten löschen</string>
+    <string name="fire_confirm_title">Alle Tabs schließen und Daten löschen?</string>
+    <string name="fire_confirm_body">Schließt alle Tabs, auch Inkognito-Tabs, und löscht Verlauf, Cookies und Websitedaten, zwischengespeicherte Dateien und Website-Berechtigungen.\n\nBehalten werden: Lesezeichen, Downloads, Einstellungen und feuerfeste Websites.</string>
+    <string name="fire_confirm_action">Löschen</string>
+    <string name="fire_confirm_cancel">Abbrechen</string>
+    <string name="fire_done_announcement">Browserdaten gelöscht</string>
+    <string name="dashboard_title">Datenschutz auf dieser Website</string>
+    <string name="dashboard_connection_secure">Verbindung ist sicher</string>
+    <string name="dashboard_no_trackers">Keine Tracker auf dieser Seite blockiert</string>
+    <string name="dashboard_fireproof_title">Website feuerfest machen</string>
+    <string name="dashboard_fireproof_help">Du bleibst angemeldet, wenn du Feuer verwendest. Anmeldedienste auf anderen Websites müssen ebenfalls feuerfest sein.</string>
+    <string name="settings_fireproof_sites">Feuerfeste Websites</string>
+    <string name="settings_fireproof_sites_summary">Websites, die ihre Cookies und Daten beim Feuer behalten</string>
+    <string name="fireproof_sites_empty">Keine feuerfesten Websites. Schalte „Website feuerfest machen“ im Datenschutzbereich einer Seite ein; sie erscheint dann hier.</string>
+    <string name="fireproof_sites_remove">Entfernen</string>
+    <string name="fireproof_sites_remove_cd">%1$s aus den feuerfesten Websites entfernen</string>
+    <string name="fireproof_sites_remove_all">Alle entfernen</string>
+    <string name="fireproof_sites_remove_all_confirm_title">Alle feuerfesten Websites entfernen?</string>
+    <string name="fireproof_sites_remove_all_confirm_body">Beim nächsten Feuer werden Cookies und Daten dieser Websites gelöscht.</string>
+    <string name="settings_clear_category_fireproof_sites">Feuerfeste Websites</string>
+    <string name="settings_clear_category_fireproof_sites_description">Websites werden beim Feuer nicht mehr behalten</string>
+    <string name="settings_about_notice_autoconsent">Die Regeln für Cookie-Banner stammen aus autoconsent von DuckDuckGo (https://github.com/duckduckgo/autoconsent), verwendet unter MPL 2.0.</string>
 </resources>

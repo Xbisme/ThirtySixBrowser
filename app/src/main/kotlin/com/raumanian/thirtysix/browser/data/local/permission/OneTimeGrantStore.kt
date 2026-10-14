@@ -26,6 +26,14 @@ class OneTimeGrantStore @Inject constructor() {
         grants.removeAll { it.tabId == tabId }
     }
 
+    /**
+     * Spec 024 FR-004a — Fire keeps only the grants whose origin [keep] accepts (fireproof sites).
+     * Called on the main thread, like every other method here.
+     */
+    fun retainOnly(keep: (origin: String) -> Boolean) {
+        grants.retainAll { keep(it.origin) }
+    }
+
     /** Clear browsing data with the Site permissions category (FR-010a). */
     fun clear() {
         grants.clear()

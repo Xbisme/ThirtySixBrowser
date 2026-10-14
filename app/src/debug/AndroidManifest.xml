@@ -64,5 +64,18 @@
                 <action android:name="com.raumanian.thirtysix.browser.debug.SEED_TABS" />
             </intent-filter>
         </receiver>
+
+        <!--
+            Spec 024 T034 — debug-only Fire step delay for quickstart G7 (interrupted Fire).
+            Same posture as the seeders above: debug source set only.
+        -->
+        <receiver
+            android:name="com.raumanian.thirtysix.browser.dev.FireStepDelayReceiver"
+            android:exported="true"
+            tools:ignore="MissingClass,ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.raumanian.thirtysix.browser.debug.FIRE_STEP_DELAY" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.repository
 
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.domain.privacy.urlHostOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -47,6 +48,14 @@ interface HistoryRepository {
      * single grouped query.
      */
     suspend fun getLatestVisitPerUrl(): List<HistoryEntry> = observeAll().first().distinctBy { it.url }
+
+    /**
+     * Spec 024 data-model step 1 — the distinct hosts of every recorded `http`/`https` address,
+     * read once, so Fire can find the sites whose data it must clear. The default derives it from
+     * [observeAll]; the Room implementation overrides it with a `SELECT DISTINCT` query.
+     */
+    suspend fun distinctHosts(): Set<String> =
+        observeAll().first().mapNotNullTo(HashSet()) { urlHostOrNull(it.url) }
 
     /**
      * Spec 014 FR-001 (title backfill) — correct the title of an already-recorded row.

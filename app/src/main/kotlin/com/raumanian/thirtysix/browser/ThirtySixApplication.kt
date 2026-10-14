@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser
 import android.app.Application
 import android.util.Log
 import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.domain.repository.PrivacyScriptBundles
 import com.raumanian.thirtysix.browser.domain.repository.ProtectionDataRepository
 import com.raumanian.thirtysix.browser.domain.usecase.PruneOldHistoryUseCase
 import dagger.hilt.android.HiltAndroidApp
@@ -34,6 +35,9 @@ class ThirtySixApplication : Application() {
     @Inject
     lateinit var protectionData: ProtectionDataRepository
 
+    @Inject
+    lateinit var privacyScripts: PrivacyScriptBundles
+
     private val applicationScope: CoroutineScope by lazy {
         CoroutineScope(SupervisorJob() + dispatchers.io)
     }
@@ -49,6 +53,8 @@ class ThirtySixApplication : Application() {
         // Spec 023 research R10: parse the bundled protection lists off the main thread now,
         // so the first page load rarely has to wait for them. Never awaited here.
         protectionData.preload()
+        // Spec 024 research R6: the page-start scripts, read once the same way.
+        privacyScripts.preload()
     }
 
     private companion object {

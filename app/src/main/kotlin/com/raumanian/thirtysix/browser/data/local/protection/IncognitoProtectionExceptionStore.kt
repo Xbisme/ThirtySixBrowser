@@ -23,4 +23,6 @@ class IncognitoProtectionExceptionStore @Inject constructor() : IncognitoProtect
     override fun clear() {
         sites.clear()
     }
+
+    override fun snapshot(): Set<String> = sites.toSet()
 }

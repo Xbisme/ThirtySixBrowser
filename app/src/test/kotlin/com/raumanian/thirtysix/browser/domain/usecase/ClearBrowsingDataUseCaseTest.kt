@@ -8,6 +8,7 @@ import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.testdoubles.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.testdoubles.FakeFaviconCache
+import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.testdoubles.FakeScreenshotCache
@@ -41,6 +42,7 @@ class ClearBrowsingDataUseCaseTest {
     private val grants = OneTimeGrantStore()
     private val protectionExceptions = FakeProtectionExceptionRepository()
     private val incognitoProtection = IncognitoProtectionExceptionStore()
+    private val fireproof = FakeFireproofSiteRepository()
     private val useCase = ClearBrowsingDataUseCase(
         history,
         web,
@@ -51,6 +53,7 @@ class ClearBrowsingDataUseCaseTest {
         grants,
         protectionExceptions,
         incognitoProtection,
+        fireproof,
     )
 
     @Test
@@ -67,6 +70,28 @@ class ClearBrowsingDataUseCaseTest {
         assertTrue(result.failed.isEmpty())
         assertTrue(protectionExceptions.currentSites().isEmpty())
         assertTrue(!incognitoProtection.contains("private.example"))
+        assertEquals("no other category ran", emptyList<String>(), log)
+    }
+
+    @Test
+    fun `fireproof sites are cleared only when their category is selected and never shield cookies`() = runTest {
+        fireproof.add("example.com")
+
+        val defaults = useCase(ClearBrowsingDataCategory.DEFAULT_SELECTION)
+        assertTrue(defaults.failed.isEmpty())
+        assertEquals(
+            "INV-10 — cookies cleared without consulting the list",
+            setOf("example.com"),
+            fireproof.currentSites(),
+        )
+        assertTrue(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
+        assertFalse(FakeWebDataCleaner.CALL_CLEAR_EXCEPT in log)
+        assertFalse(ClearBrowsingDataCategory.FireproofSites in ClearBrowsingDataCategory.DEFAULT_SELECTION)
+
+        log.clear()
+        val result = useCase(setOf(ClearBrowsingDataCategory.FireproofSites))
+        assertTrue(result.failed.isEmpty())
+        assertTrue(fireproof.currentSites().isEmpty())
         assertEquals("no other category ran", emptyList<String>(), log)
     }
 

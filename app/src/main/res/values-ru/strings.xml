@@ -398,4 +398,28 @@
         <item quantity="many">На этой странице заблокировано %1$d трекеров</item>
         <item quantity="other">На этой странице заблокировано %1$d трекера</item>
     </plurals>
+    <!-- Spec 024 privacy tools -->
+    <string name="fire_action">Огонь</string>
+    <string name="fire_action_tabs_cd">Огонь: закрыть все вкладки и удалить данные браузера</string>
+    <string name="fire_confirm_title">Закрыть все вкладки и удалить данные?</string>
+    <string name="fire_confirm_body">Закрывает все вкладки, включая вкладки инкогнито, и удаляет историю, файлы cookie и данные сайтов, кешированные файлы и разрешения сайтов.\n\nСохраняются: закладки, загрузки, настройки и огнеупорные сайты.</string>
+    <string name="fire_confirm_action">Удалить</string>
+    <string name="fire_confirm_cancel">Отмена</string>
+    <string name="fire_done_announcement">Данные браузера удалены</string>
+    <string name="dashboard_title">Конфиденциальность на этом сайте</string>
+    <string name="dashboard_connection_secure">Соединение защищено</string>
+    <string name="dashboard_no_trackers">На этой странице трекеры не заблокированы</string>
+    <string name="dashboard_fireproof_title">Сделать сайт огнеупорным</string>
+    <string name="dashboard_fireproof_help">Вы останетесь в аккаунте после «Огня». Сервисы входа на других сайтах тоже нужно сделать огнеупорными.</string>
+    <string name="settings_fireproof_sites">Огнеупорные сайты</string>
+    <string name="settings_fireproof_sites_summary">Сайты, которые сохраняют cookie и данные при «Огне»</string>
+    <string name="fireproof_sites_empty">Огнеупорных сайтов нет. Включите «Сделать сайт огнеупорным» на панели конфиденциальности страницы — сайт появится здесь.</string>
+    <string name="fireproof_sites_remove">Удалить</string>
+    <string name="fireproof_sites_remove_cd">Удалить %1$s из огнеупорных сайтов</string>
+    <string name="fireproof_sites_remove_all">Удалить все</string>
+    <string name="fireproof_sites_remove_all_confirm_title">Удалить все огнеупорные сайты?</string>
+    <string name="fireproof_sites_remove_all_confirm_body">При следующем «Огне» cookie и данные этих сайтов будут удалены.</string>
+    <string name="settings_clear_category_fireproof_sites">Огнеупорные сайты</string>
+    <string name="settings_clear_category_fireproof_sites_description">Сайты перестанут сохраняться при «Огне»</string>
+    <string name="settings_about_notice_autoconsent">Правила для баннеров cookie взяты из autoconsent от DuckDuckGo (https://github.com/duckduckgo/autoconsent) и используются по лицензии MPL 2.0.</string>
 </resources>

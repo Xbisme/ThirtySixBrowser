@@ -82,6 +82,13 @@ fun AboutSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT_NOTICE_PSL),
         )
+        // Spec 024 FR-023 — the bundled cookie-banner rules (MPL-2.0, research R7).
+        Text(
+            text = stringResource(R.string.settings_about_notice_autoconsent),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT_NOTICE_AUTOCONSENT),
+        )
     }
 }
 
@@ -89,3 +96,4 @@ const val TEST_TAG_SETTINGS_ABOUT_VERSION: String = "settings_about_version"
 const val TEST_TAG_SETTINGS_ABOUT_PRIVACY: String = "settings_about_privacy"
 const val TEST_TAG_SETTINGS_ABOUT_NOTICE_TRACKERS: String = "settings_about_notice_trackers"
 const val TEST_TAG_SETTINGS_ABOUT_NOTICE_PSL: String = "settings_about_notice_psl"
+const val TEST_TAG_SETTINGS_ABOUT_NOTICE_AUTOCONSENT: String = "settings_about_notice_autoconsent"

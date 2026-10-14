@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.domain.repository
 
 import com.raumanian.thirtysix.browser.domain.model.SiteDataClearOutcome
+import com.raumanian.thirtysix.browser.domain.model.SiteDataPath
 
 /**
  * Spec 016 — clears data held by the web engine (FR-028, FR-029, FR-042, FR-043).
@@ -43,4 +44,28 @@ interface WebDataCleaner {
      * @return `true` if the calls completed without throwing; `false` otherwise.
      */
     suspend fun clearWebCache(): Boolean
+
+    /**
+     * Spec 024 data-model step 1 — hosts of the origins the web engine reports as holding storage
+     * (`WebStorage.getOrigins`). Empty on any failure; never throws.
+     */
+    suspend fun storageOrigins(): Set<String>
+
+    /**
+     * Spec 024 FR-003, FR-010 — clears cookies and site data of every site except [keepSites]
+     * (registrable domains), using [candidateHosts] (data-model step 1) to find the sites that hold
+     * data and [isKept] to tell them apart (research R2, R3):
+     *  1. reads the kept sites' cookies, with their attributes where the engine can report them;
+     *  2. deletes each non-kept candidate's site data — per site where the engine supports it
+     *     ([SiteDataPath.PerSite]), otherwise by origin ([SiteDataPath.Fallback]);
+     *  3. removes every cookie, then writes the kept ones back.
+     *
+     * Callers MUST have emptied the incognito cookie set-aside first. Returns `null` only when the
+     * cookies could not be removed; never throws except for cancellation.
+     */
+    suspend fun clearExcept(
+        keepSites: Set<String>,
+        candidateHosts: Set<String>,
+        isKept: (host: String) -> Boolean,
+    ): SiteDataPath?
 }

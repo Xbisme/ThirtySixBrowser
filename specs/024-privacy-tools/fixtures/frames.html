@@ -1,0 +1,12 @@
+<!doctype html>
+<!-- Spec 024 fixture (FR-020, T062). Embeds fingerprint.html from the other host name
+     (localhost <-> 127.0.0.1) and puts the frame's result in this page's title. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>frames</title>
+<script>
+  window.addEventListener('message', function (event) {
+    if (event.data && event.data.fixture === 'fingerprint') document.title = 'frame:' + event.data.result;
+  });
+  var other = location.hostname === 'localhost' ? '127.0.0.1' : 'localhost';
+  document.write('<iframe src="' + location.protocol + '//' + other + ':' + location.port + location.pathname.replace('frames.html', 'fingerprint.html') + '" width="300" height="150"></iframe>');
+</script>

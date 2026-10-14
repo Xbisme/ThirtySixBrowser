@@ -125,6 +125,9 @@ object AppIcons {
 
     @DrawableRes val Warning = R.drawable.ic_warning
 
+    /** Spec 024 FR-001 — the Fire action in the hub and on the Tabs screen. */
+    @DrawableRes val Fire = R.drawable.ic_fire
+
     // Spec 022 — page tools in the hub and the find bar.
     @DrawableRes val FindInPage = R.drawable.ic_find_in_page
 

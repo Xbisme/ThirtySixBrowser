@@ -40,6 +40,7 @@ internal const val TEST_TAG_HUB_SETTINGS: String = "hub_settings"
 internal const val TEST_TAG_HUB_BACK: String = "hub_back"
 internal const val TEST_TAG_HUB_FORWARD: String = "hub_forward"
 internal const val TEST_TAG_HUB_DOWNLOADS_ACTIVE: String = "hub_downloads_active"
+internal const val TEST_TAG_HUB_FIRE: String = "hub_fire"
 
 private val TileGap = 10.dp
 
@@ -95,7 +96,7 @@ internal fun HubSheet(
             )
             HubProtectionSection(
                 status = protection,
-                onBanner = closeThen(callbacks.onPrivacy),
+                onBanner = closeThen(if (protection.isWebPage) callbacks.onDashboard else callbacks.onPrivacy),
                 onProtectionSwitched = { on -> closeThen { callbacks.onProtectionSwitched(on) }() },
             )
             RowBanner(
@@ -187,6 +188,15 @@ private fun HubPlaces(callbacks: HubCallbacks, closeThen: (() -> Unit) -> () -> 
             tone = QuickTileTone.Place,
             onClick = closeThen(callbacks.onBookmarks),
             modifier = Modifier.weight(1f),
+        )
+        // Spec 024 FR-001 — Fire sits with the places: it acts on everything they hold.
+        QuickTile(
+            label = stringResource(R.string.fire_action),
+            icon = AppIcons.Fire,
+            // Same tone as the places, so the row keeps one tile height (device check, 16 KB AVD).
+            tone = QuickTileTone.Place,
+            onClick = closeThen(callbacks.onFire),
+            modifier = Modifier.weight(1f).testTag(TEST_TAG_HUB_FIRE),
         )
     }
 }

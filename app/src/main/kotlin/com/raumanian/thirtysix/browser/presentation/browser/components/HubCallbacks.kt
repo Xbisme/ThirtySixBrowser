@@ -21,6 +21,13 @@ internal data class HubCallbacks(
     val onPageTool: (PageTool) -> Unit,
     /** Spec 023 FR-012 — the per-site protection switch; the sheet has already closed. */
     val onProtectionSwitched: (on: Boolean) -> Unit = {},
+    /** Spec 024 FR-001 — the Fire tile; the sheet has already closed, the caller confirms. */
+    val onFire: () -> Unit = {},
+    /**
+     * Spec 024 FR-015 — the blocked-tracker line on a web page opens the privacy dashboard. Home
+     * and the incognito start page keep [onPrivacy] (Settings), as before.
+     */
+    val onDashboard: () -> Unit = {},
 )
 
 /** Spec 019 — the hub's quick-setting tiles, each opening an existing Settings chooser. */

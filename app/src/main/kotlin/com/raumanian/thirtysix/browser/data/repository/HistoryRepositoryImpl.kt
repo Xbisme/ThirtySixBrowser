@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.data.local.dao.HistoryDao
 import com.raumanian.thirtysix.browser.data.local.entity.HistoryEntryEntity
 import com.raumanian.thirtysix.browser.data.mapper.HistoryEntryMapper
 import com.raumanian.thirtysix.browser.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.domain.privacy.urlHostOrNull
 import com.raumanian.thirtysix.browser.domain.repository.HistoryRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,6 +43,9 @@ class HistoryRepositoryImpl @Inject constructor(
 
     override suspend fun getLatestVisitPerUrl(): List<HistoryEntry> =
         withContext(dispatchers.io) { dao.getLatestVisitPerUrl().map(HistoryEntryMapper::toDomain) }
+
+    override suspend fun distinctHosts(): Set<String> =
+        withContext(dispatchers.io) { dao.getDistinctUrls().mapNotNullTo(HashSet(), ::urlHostOrNull) }
 
     override suspend fun updateTitle(id: Long, title: String): Int =
         withContext(dispatchers.io) { dao.updateTitle(id, title) }

@@ -133,6 +133,7 @@ class TabsViewModelChipModeTest {
         override val version: StateFlow<Long> = MutableStateFlow(0L)
         override suspend fun save(url: String, bitmap: Bitmap) = Unit
         override suspend fun clearAll() = Unit
+        override suspend fun retainOnly(hosts: Set<String>) = Unit
         override fun fileFor(url: String): File? = null
     }
 

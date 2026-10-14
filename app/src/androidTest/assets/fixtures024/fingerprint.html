@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- Spec 024 fixture (quickstart G12, T062). Reports in the title, as JSON:
+     c = canvas toDataURL hash, i = getImageData hash, a = audio hash,
+     b = typeof navigator.getBattery, d = enumerateDevices ids joined.
+     In a frame it also posts the result to its parent (page-level message, not to the app). -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>fingerprint</title>
+<canvas id="c" width="200" height="60"></canvas>
+<p id="out">…</p>
+<script>
+// ES2015 promise chains (no async/await) so the page also runs on WebView 53.
+(function () {
+  function hash(text) { var h = 0x811c9dc5; for (var i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(16); }
+  var canvas = document.getElementById('c');
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f60'; ctx.fillRect(0, 0, 200, 60);
+  ctx.fillStyle = '#069'; ctx.font = '16px sans-serif'; ctx.fillText('ThirtySix fingerprint', 4, 30);
+  ctx.fillStyle = 'rgba(102, 204, 0, 0.7)'; ctx.fillRect(100, 5, 80, 40);
+  var c = hash(canvas.toDataURL());
+  var i = hash(Array.prototype.join.call(ctx.getImageData(0, 0, 200, 60).data, ','));
+  function audio() {
+    try {
+      var Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      var ac = new Ctx(1, 44100, 44100);
+      var osc = ac.createOscillator(); osc.type = 'triangle'; osc.frequency.value = 10000;
+      var comp = ac.createDynamicsCompressor();
+      osc.connect(comp); comp.connect(ac.destination); osc.start(0);
+      return ac.startRendering().then(function (buffer) {
+        var data = buffer.getChannelData(0); var sum = 0;
+        for (var k = 4500; k < 5000; k++) sum += Math.abs(data[k]);
+        return sum.toString();
+      }, function () { return 'error'; });
+    } catch (e) { return Promise.resolve('error'); }
+  }
+  function devices() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return Promise.resolve('none');
+    return navigator.mediaDevices.enumerateDevices().then(function (list) {
+      return list.map(function (x) { return x.deviceId; }).join('|');
+    }, function () { return 'error'; });
+  }
+  Promise.all([audio(), devices()]).then(function (r) {
+    var result = JSON.stringify({ c: c, i: i, a: r[0], b: typeof navigator.getBattery, d: r[1], host: location.hostname });
+    document.title = result;
+    document.getElementById('out').textContent = result;
+    if (window.parent !== window) window.parent.postMessage({ fixture: 'fingerprint', result: result }, '*');
+  });
+})();
+</script>

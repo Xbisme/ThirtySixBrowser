@@ -114,8 +114,9 @@ fun ClearBrowsingDataDialog(
                             onToggle = onToggle,
                         )
                     }
-                    if (inProgress) ClearInProgressRow()
                 }
+                // Outside the scrolling list, so a short screen still shows that a clear is running.
+                if (inProgress) ClearInProgressRow()
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     PillButton(
                         label = stringResource(R.string.settings_clear_confirm),
@@ -205,6 +206,7 @@ private val ClearBrowsingDataCategory.labelRes: Int
         ClearBrowsingDataCategory.CachedImagesAndFiles -> R.string.settings_clear_category_cache
         ClearBrowsingDataCategory.SitePermissions -> R.string.settings_clear_category_site_permissions
         ClearBrowsingDataCategory.SitesWithoutProtection -> R.string.settings_clear_category_sites_without_protection
+        ClearBrowsingDataCategory.FireproofSites -> R.string.settings_clear_category_fireproof_sites
     }
 
 @get:StringRes
@@ -216,6 +218,7 @@ private val ClearBrowsingDataCategory.descriptionRes: Int
         ClearBrowsingDataCategory.SitePermissions -> R.string.settings_clear_category_site_permissions_description
         ClearBrowsingDataCategory.SitesWithoutProtection ->
             R.string.settings_clear_category_sites_without_protection_description
+        ClearBrowsingDataCategory.FireproofSites -> R.string.settings_clear_category_fireproof_sites_description
     }
 
 const val TEST_TAG_SETTINGS_CLEAR_DIALOG: String = "settings_clear_dialog"

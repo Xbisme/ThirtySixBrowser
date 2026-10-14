@@ -2,9 +2,17 @@ package com.raumanian.thirtysix.browser.presentation.browser.protection
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.domain.model.PageProtectionStatus
+import com.raumanian.thirtysix.browser.domain.repository.PrivacyScriptBundles
+import com.raumanian.thirtysix.browser.domain.repository.PrivacyScriptSession
+import com.raumanian.thirtysix.browser.domain.usecase.ObserveFireproofSitesUseCase
+import com.raumanian.thirtysix.browser.domain.usecase.SetSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SetSiteProtectionUseCase
+import com.raumanian.thirtysix.browser.presentation.browser.privacy.PrivacyScriptInputs
+import com.raumanian.thirtysix.browser.testdoubles.FakeFireproofSiteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -24,12 +32,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ProtectionViewModelTest {
     private val test = ProtectionTestEngine()
+    private val fireproof = FakeFireproofSiteRepository()
     private lateinit var viewModel: ProtectionViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
-        viewModel = ProtectionViewModel(test.engine, SetSiteProtectionUseCase(test.exceptions, test.incognito))
+        viewModel = ProtectionViewModel(
+            test.engine,
+            SetSiteProtectionUseCase(test.exceptions, test.incognito),
+            ObserveFireproofSitesUseCase(fireproof),
+            SetSiteFireproofUseCase(fireproof),
+            PrivacyScriptInputs(NoSession, NoBundles, test.exceptions, test.incognito),
+        )
     }
 
     @After
@@ -75,5 +90,15 @@ class ProtectionViewModelTest {
         assertTrue(test.exceptions.currentSites().isEmpty())
         viewModel.onProtectionSwitched(true)
         assertFalse(test.incognito.contains("shop.com"))
+    }
+
+    private object NoSession : PrivacyScriptSession {
+        override val secret: StateFlow<String> = MutableStateFlow("00")
+        override fun regenerate() = Unit
+    }
+
+    private object NoBundles : PrivacyScriptBundles {
+        override val loaded: StateFlow<List<String>?> = MutableStateFlow(emptyList())
+        override fun preload() = Unit
     }
 }
