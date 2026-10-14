@@ -131,6 +131,20 @@ class FireDataTest {
         composeRule.runOnUiThread { fire.acknowledge() }
     }
 
+    /**
+     * Every kind is gone on an engine with complete site-data removal. On older engines (the CI
+     * emulator's WebView 74) the fallback leaves Cache Storage and service workers (Spec 016 A17),
+     * so only the other kinds are checked there.
+     */
+    private fun assertCleared(host: String) {
+        val found = check(host)
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DELETE_BROWSING_DATA)) {
+            assertEquals(NOTHING, found)
+        } else {
+            assertTrue("$host kept data: $found", found.startsWith(FALLBACK_CLEARED))
+        }
+    }
+
     @Test
     fun withoutFireproofSitesEverySiteIsCleared() {
         store(LOCAL)
@@ -139,8 +153,8 @@ class FireDataTest {
 
         runFire()
 
-        assertEquals(NOTHING, check(LOCAL))
-        assertEquals(NOTHING, check(LOOPBACK))
+        assertCleared(LOCAL)
+        assertCleared(LOOPBACK)
         assertTrue(cookieInfo(LOCAL).none { it.startsWith(PERSISTENT) })
         assertTrue("history not cleared", runBlocking { history.distinctHosts() }.isEmpty())
         assertEquals("exactly one tab after Fire", 1, runBlocking { tabs.observeTabs().first() }.size)
@@ -190,6 +204,7 @@ class FireDataTest {
         const val STORAGE = "fixtures024/storage.html"
         const val CHECK = "check:"
         const val NOTHING = "check:js=0,ls=0,idb=0,cache=0,sw=0"
+        const val FALLBACK_CLEARED = "check:js=0,ls=0,idb=0,"
         const val EVERYTHING = "check:js=1,ls=1,idb=1,cache=1,sw=1"
         const val PERSISTENT = "fp_persist="
         const val INCOGNITO = "fp_incognito"

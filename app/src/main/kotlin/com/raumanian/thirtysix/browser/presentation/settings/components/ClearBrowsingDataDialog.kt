@@ -114,8 +114,9 @@ fun ClearBrowsingDataDialog(
                             onToggle = onToggle,
                         )
                     }
-                    if (inProgress) ClearInProgressRow()
                 }
+                // Outside the scrolling list, so a short screen still shows that a clear is running.
+                if (inProgress) ClearInProgressRow()
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     PillButton(
                         label = stringResource(R.string.settings_clear_confirm),
