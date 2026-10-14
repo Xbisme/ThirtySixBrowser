@@ -354,7 +354,7 @@ description: "Task list for Spec 024 — Privacy Tools"
 - [X] T069 Run **G14** on the A55 release build: 10 news sites × 5 loads, main vs branch; cold start interleaved for first run and returning user (SC-010, SC-011). If page load is over +5%, measure each script alone to find the cost, and report to the owner before changing the rule set.
 - [X] T070 Run **G16**: all 8 locales at 360dp (DE and RU first) for every new surface; `animator_duration_scale 0`. Screen-reader checks are DEFERRED to a person, as in Specs 016–023.
 - [X] T071 [P] Update the docs: `CLAUDE.md` (Recent Changes, Spec Roadmap row 024, Active Spec), `.claude/claude-app/sdd-roadmap.md`, `.claude/claude-app/project-context.md` and `.claude/claude-app/dev-workflow.md` (024 status, and the stale "Tiếp theo: Spec 023" note). ⚠️ Record that a v5 install cannot be downgraded to a v4 build.
-- [ ] T072 Open the PR `024-privacy-tools` → `main`. Its body carries:
+- [X] T072 Open the PR `024-privacy-tools` → `main`. Its body carries:
   - gates and numbers;
   - the R8 spec amendment;
   - limitations (R2 path-scoped cookies, R3 enumeration gaps, old-engine fallback);

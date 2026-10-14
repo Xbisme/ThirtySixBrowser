@@ -286,7 +286,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 | 021 | `web-capabilities` | ✅ Done 2026-10-11 ([PR #32](https://github.com/Xbisme/ThirtySixBrowser/pull/32) merged, `ef9ae68`, CI 6/6, 135/135 on API 29; 70/70; G1–G20 + SC-001 10/10 on a Galaxy A55) | File upload, fullscreen video, popups, JS dialogs + HTTP auth, per-site camera/mic/location prompts, long-press menu |
 | 022 | `page-tools` | ✅ Done 2026-10-11 ([PR #35](https://github.com/Xbisme/ThirtySixBrowser/pull/35) merged, `d0908a1`, CI 6/6; 68/68) | Find in page, share, desktop mode, text zoom, print/PDF, address-bar autocomplete |
 | 023 | `privacy-protection` | ✅ Done 2026-10-12 ([PR #37](https://github.com/Xbisme/ThirtySixBrowser/pull/37) merged, `ec631d1`, CI 6/6; 77/78 — proxy capture + screen reader open) | Tracker blocking (EasyPrivacy+EasyList subset, 11,012 hosts), HTTPS upgrade + fallback, param stripping, GPC; all on by default, off per site |
-| 024 | `privacy-tools` | 🟢 Implemented 2026-10-13 on branch `024-privacy-tools` (PR not yet opened; device gates G5/G11/G12/G14 need the A55) | Fire button + fireproof sites, per-site privacy dashboard, cookie-banner + fingerprint scripts (split from 023, Constitution v1.6.0) |
+| 024 | `privacy-tools` | 🟢 Implemented 2026-10-14 — [PR #39](https://github.com/Xbisme/ThirtySixBrowser/pull/39) open; 72/72 tasks, A55 gates run (G5 real sign-ins left to the owner) | Fire button + fireproof sites, per-site privacy dashboard, cookie-banner + fingerprint scripts (split from 023, Constitution v1.6.0) |
 
 > Full details: `.claude/claude-app/project-context.md` and `.claude/claude-app/sdd-roadmap.md`
 
@@ -681,7 +681,7 @@ So the two remaining blockers are both **people-and-hardware** problems, not cod
 
 ## Active Spec
 
-**Current**: 🟢 [Spec 024 — Privacy Tools](specs/024-privacy-tools/) — implemented on branch `024-privacy-tools`, not yet committed or opened as a PR. [tasks.md](specs/024-privacy-tools/tasks.md) holds the implementation notes; real-device gates (G5 sign-ins, G11 real banner sites, G12 drawing-heavy sites, G14 performance) wait for the Galaxy A55.
+**Current**: 🟢 [Spec 024 — Privacy Tools](specs/024-privacy-tools/) — [PR #39](https://github.com/Xbisme/ThirtySixBrowser/pull/39) open, 72/72. [tasks.md](specs/024-privacy-tools/tasks.md) holds the implementation notes and the Device Gate Results (A55: SC-007 17/20 refused, 0 accepted; page load +3.0%). Open: G5 real sign-ins (owner), proxy capture, screen reader; two findings for the owner (Spec 012 incognito cookie restore, blank `height:100%` pages).
 
 **Previous**: ✅ [Spec 023 — Privacy Protection](specs/023-privacy-protection/) — **merged into `main` via [PR #37](https://github.com/Xbisme/ThirtySixBrowser/pull/37) (2026-10-12, merge commit `ec631d1`, CI 6/6), 77/78** (T075's proxy capture and screen-reader checks open). [tasks.md](specs/023-privacy-protection/tasks.md) holds the gate table and implementation notes.
 
