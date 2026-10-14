@@ -22,12 +22,12 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Thir
 import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
 import com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect
 import com.raumanian.thirtysix.browser.domain.fire.FireCoordinator
-import com.raumanian.thirtysix.browser.domain.usecase.RecordAppLaunchUseCase
 import com.raumanian.thirtysix.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
-import com.raumanian.thirtysix.browser.presentation.entry.IncomingIntentReader
-import com.raumanian.thirtysix.browser.presentation.entry.IncomingRequestRelay
-import com.raumanian.thirtysix.browser.presentation.entry.LaunchCountPolicy
-import com.raumanian.thirtysix.browser.presentation.entry.PendingRequestState
+import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.RecordAppLaunchUseCase
+import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingIntentReader
+import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingRequestRelay
+import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.LaunchCountPolicy
+import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.PendingRequestState
 import com.raumanian.thirtysix.browser.presentation.navigation.AppDestination
 import com.raumanian.thirtysix.browser.presentation.navigation.AppNavGraph
 import dagger.hilt.android.AndroidEntryPoint
