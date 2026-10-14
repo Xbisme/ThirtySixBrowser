@@ -2,6 +2,11 @@ package com.raumanian.thirtysix.browser.domain.usecase
 
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveDownloadsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ResolveDownloadStatusUseCase
+import com.raumanian.thirtysix.browser.feature.downloads.fake.InMemoryDownloadsRepository
+import com.raumanian.thirtysix.browser.feature.downloads.fake.RecordingGateway
+import com.raumanian.thirtysix.browser.feature.downloads.fake.testRecord
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
