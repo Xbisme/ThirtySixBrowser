@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 
 /**
  * Spec 012 — hand-rolled in-memory fake of [IncognitoTabRepository] for unit
- * tests. Mirrors the production [com.raumanian.thirtysix.browser.data.repository.IncognitoTabRepositoryImpl]
+ * tests. Mirrors the production [com.raumanian.thirtysix.browser.feature.tabs.data.repository.IncognitoTabRepositoryImpl]
  * contract WITHOUT the cookie-snapshot side effects (callers that need
  * snapshot lifecycle assertions inject a [FakeCookieJarSnapshotManager] and
  * use the production impl).

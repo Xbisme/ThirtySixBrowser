@@ -51,6 +51,21 @@
         <error line="46" column="5" source="compose:modifier-missing-check" />
         <error line="98" column="5" source="compose:vm-forwarding-check" />
     </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/tabs/presentation/tabs/TabsScreen.kt">
+        <error line="97" column="5" source="compose:vm-forwarding-check" />
+        <error line="171" column="5" source="compose:lambda-param-in-effect" />
+        <error line="210" column="5" source="compose:parameter-naming" />
+        <error line="267" column="67" source="compose:parameter-naming" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/tabs/presentation/tabs/component/CloseAllIncognitoConfirmDialog.kt">
+        <error line="17" column="5" source="compose:modifier-missing-check" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/tabs/presentation/tabs/component/CloseAllTabsConfirmDialog.kt">
+        <error line="16" column="5" source="compose:modifier-missing-check" />
+    </file>
+    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/tabs/presentation/tabs/component/TabSwitcherCard.kt">
+        <error line="149" column="47" source="compose:modifier-without-default-check" />
+    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/browser/BrowserScreen.kt">
         <error line="120" column="9" source="compose:vm-injection-check" />
         <error line="127" column="5" source="compose:vm-forwarding-check" />
@@ -119,20 +134,5 @@
     </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/settings/protectionexceptions/ProtectionExceptionsScreen.kt">
         <error line="39" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/TabsScreen.kt">
-        <error line="97" column="5" source="compose:vm-forwarding-check" />
-        <error line="171" column="5" source="compose:lambda-param-in-effect" />
-        <error line="210" column="5" source="compose:parameter-naming" />
-        <error line="267" column="67" source="compose:parameter-naming" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/CloseAllIncognitoConfirmDialog.kt">
-        <error line="17" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/CloseAllTabsConfirmDialog.kt">
-        <error line="16" column="5" source="compose:modifier-missing-check" />
-    </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/presentation/tabs/components/TabSwitcherCard.kt">
-        <error line="149" column="47" source="compose:modifier-without-default-check" />
     </file>
 </baseline>

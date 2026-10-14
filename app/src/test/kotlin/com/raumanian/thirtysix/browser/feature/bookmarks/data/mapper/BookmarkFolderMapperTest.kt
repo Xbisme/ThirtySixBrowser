@@ -2,8 +2,8 @@ package com.raumanian.thirtysix.browser.feature.bookmarks.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkFolderEntity
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
-import com.raumanian.thirtysix.browser.data.mapper.toDomain
-import com.raumanian.thirtysix.browser.data.mapper.toEntity
+import com.raumanian.thirtysix.browser.feature.tabs.data.mapper.toDomain
+import com.raumanian.thirtysix.browser.feature.tabs.data.mapper.toEntity
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

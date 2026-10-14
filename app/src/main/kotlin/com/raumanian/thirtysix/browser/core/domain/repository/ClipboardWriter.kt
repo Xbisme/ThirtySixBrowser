@@ -9,7 +9,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
  * the plain JVM (no Robolectric). Mirrors the
  * [com.raumanian.thirtysix.browser.data.local.cache.FaviconCache] pattern from Spec 011:
  * interface + concrete implementation in one file, bound in
- * [com.raumanian.thirtysix.browser.di.ClipboardModule].
+ * [com.raumanian.thirtysix.browser.core.di.ClipboardModule].
  *
  * > Deviates from tasks.md T067, which called for injecting `@ApplicationContext Context`
  * > straight into the ViewModel. The seam is behaviourally identical and strictly more

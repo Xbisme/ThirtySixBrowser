@@ -7,7 +7,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.domain.usecase.CloseAllTabsUseCase
+import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllTabsUseCase
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.flow.MutableStateFlow

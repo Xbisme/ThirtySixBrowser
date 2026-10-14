@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.feature.downloads.data.mapper
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.DownloadRecordEntity
-import com.raumanian.thirtysix.browser.data.mapper.toDomain
-import com.raumanian.thirtysix.browser.data.mapper.toEntity
+import com.raumanian.thirtysix.browser.feature.tabs.data.mapper.toDomain
+import com.raumanian.thirtysix.browser.feature.tabs.data.mapper.toEntity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
