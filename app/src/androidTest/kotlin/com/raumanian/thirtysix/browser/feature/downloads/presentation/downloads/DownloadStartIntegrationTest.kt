@@ -8,9 +8,9 @@ import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.usecase.SanitizeDownloadFileNameUseCase
-import com.raumanian.thirtysix.browser.domain.usecase.StartDownloadResult
-import com.raumanian.thirtysix.browser.domain.usecase.StartDownloadUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SanitizeDownloadFileNameUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.StartDownloadResult
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.StartDownloadUseCase
 import com.raumanian.thirtysix.browser.feature.downloads.data.repository.DownloadsRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first

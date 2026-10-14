@@ -21,7 +21,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
 import com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect
-import com.raumanian.thirtysix.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.RecordAppLaunchUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingIntentReader
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingRequestRelay

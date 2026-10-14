@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
  *    [com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect]
  *    (FR-016 / FR-016a).
  *  - The address-bar incognito indicator
- *    ([com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState.isIncognito]).
+ *    ([com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserUiState.isIncognito]).
  *  - The cache-write gate inside `BrowserViewModel.onIconReceived` /
  *    `onScreenshotReady` (FR-009 / FR-010).
  *

@@ -4,7 +4,7 @@ package com.raumanian.thirtysix.browser.core.presentation.util
  * Spec 011 — one-shot transient event surface for the tab-management feature.
  *
  * Used by both [TabsUiState.errorEvent] (switcher's "new tab" card cap-reached)
- * AND [com.raumanian.thirtysix.browser.presentation.browser.BrowserUiState.tabsEvent]
+ * AND [com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserUiState.tabsEvent]
  * (BrowserScreen long-press on the 5th BottomAppBar button cap-reached). One
  * shared sealed type so both surfaces have a single semantic for the
  * cap-reached snackbar message.

@@ -10,18 +10,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.BookmarksScreen
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserScreen
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserSlots
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.DownloadsScreen
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.EntryEvent
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.EntryPointViewModel
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.HistoryScreen
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.OnboardingScreen
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.FireOverlayHost
 import com.raumanian.thirtysix.browser.feature.privacy.presentation.fire.rememberFireButton
 import com.raumanian.thirtysix.browser.feature.privacy.presentation.fireproof.FireproofSitesScreen
 import com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions.ProtectionExceptionsScreen
+import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.QuickSettingsHost
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SettingsScreen
 import com.raumanian.thirtysix.browser.feature.sitepermission.presentation.sitepermissions.SitePermissionsScreen
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.TabsScreen
-import com.raumanian.thirtysix.browser.presentation.browser.BrowserScreen
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
@@ -46,7 +49,17 @@ fun AppNavGraph(
         // 5th BottomAppBar button can navigate to AppDestination.Tabs (single
         // tap), and the switcher can pop back via TabsViewModel.popBackEvent.
         composable(AppDestination.Browser.route) {
-            BrowserScreen(navController = navController, incomingContent = entryPointViewModel.browserHooks)
+            BrowserScreen(
+                slots = BrowserSlots(
+                    fireButton = rememberFireButton(onConfirm = {}),
+                    fireOverlay = { FireOverlayHost() },
+                    quickSettings = { request, onRequestHandled, snackbar ->
+                        QuickSettingsHost(request = request, onRequestHandled = onRequestHandled, snackbarHostState = snackbar)
+                    },
+                    incomingContent = entryPointViewModel.browserHooks,
+                ),
+                navController = navController,
+            )
         }
         composable(AppDestination.Tabs.route) {
             TabsScreen(

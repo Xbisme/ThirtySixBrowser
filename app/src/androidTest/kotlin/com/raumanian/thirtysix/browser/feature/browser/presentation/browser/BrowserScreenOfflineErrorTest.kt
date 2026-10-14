@@ -1,0 +1,311 @@
+package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
+
+import android.content.Context
+import androidx.activity.compose.setContent
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.HiltTestActivity
+import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
+import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TEST_TAG_BROWSER_ERROR_STATE
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
+import dagger.hilt.components.SingletonComponent
+import java.io.File
+import java.io.OutputStream
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+/**
+ * Spec 007 US3 — error-state rendering smoke test.
+ *
+ * Mục đích: assert rằng khi `BrowserUiState.loadingState` chuyển sang
+ * [LoadingState.Failed], [BrowserScreen] swap từ [BrowserWebView] sang
+ * [components.BrowserErrorState] (ngừng render WebView).
+ *
+ * Lý do KHÔNG dùng real WebView load + invalid URL trigger:
+ * - Earlier `@UninstallModules` + `FakeUrlConfigModule` swap (CI run 2026-05-01)
+ *   timed out ngay cả với 15 s budget. Hai khả năng: (a) Hilt nested-module
+ *   replace không thực sự swap binding ở androidTest, (b) Chromium WebView trên
+ *   emulator API 29 không fire `onReceivedError(ERROR_HOST_LOOKUP)` đáng tin cậy
+ *   cho `.invalid` TLD. Cả hai đều mất nhiều thời gian debug và tạo flake mù.
+ * - Phần "WebViewClient → ErrorReason" mapping đã được cover deterministic ở
+ *   `BrowserViewModelTest` (Failed transitions) + `ErrorReasonTest`
+ *   (toUserMessageRes table) — JVM-only, không cần emulator network.
+ * - SC-003 production scenario (airplane mode → localized error UI ≤ 5 s) vẫn
+ *   được verify bằng Gate 7 step 4 (user manual on real device).
+ *
+ * Test này chỉ trả lời 1 câu hỏi đơn giản: rendering branch của BrowserScreen
+ * khi `Failed` đúng không. Trigger qua `viewModel::onLoadFailed` trực tiếp →
+ * không phụ thuộc network, deterministic, < 1 s ở real CI.
+ */
+@HiltAndroidTest
+// Spec 022 — the browser screen now reads settings (text size), so each test needs its own
+// DataStore file: a fresh Hilt component per test would otherwise open a second one on the same
+// file ("multiple DataStores active"), as Spec 020 found for MainActivity tests.
+@UninstallModules(SettingsDataStoreProviderModule::class)
+@RunWith(AndroidJUnit4::class)
+class BrowserScreenOfflineErrorTest {
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object PerTestSettingsDataStoreModule {
+        @Provides
+        @Singleton
+        fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                produceFile = { File(context.cacheDir, "spec022-settings-${System.nanoTime()}.preferences_pb") },
+            )
+    }
+
+    @get:Rule(order = 0)
+    val hiltRule: HiltAndroidRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeRule = createAndroidComposeRule<HiltTestActivity>()
+
+    private lateinit var viewModel: BrowserViewModel
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+        composeRule.activity.runOnUiThread {
+            // Construct VM and seed it to Failed BEFORE setContent. Reasoning:
+            // BrowserScreen branches `when (loadingState)` and only constructs
+            // BrowserWebView when state is NOT Failed. Seeding upfront means
+            // the WebView is never created → no real network load → no race
+            // between WebView's onPageFinished and the test's assertion (which
+            // would re-transition Failed → Loaded and hide the error UI).
+            // Spec 010 — error-rendering test never invokes the address-bar
+            // Query branch, so a no-op `BuildSearchUrlUseCase` is sufficient.
+            // Spec 011 — error-rendering test does not exercise tab logic;
+            // a no-op TabRepository fake suffices for the 4 new use-case
+            // dependencies.
+            val noopTabRepo = OfflineErrorNoopTabRepository
+            val noopIncognitoRepo = OfflineErrorNoopIncognitoTabRepository
+            val observeTabs = ObserveTabsUseCase(noopTabRepo)
+            val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
+            viewModel = BrowserViewModel(
+                defaultHomeUrl = SAMPLE_PAGE_URL,
+                buildSearchUrl = BuildSearchUrlUseCase(OfflineErrorNoopSearchEngineRepository),
+                observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
+                observeTabs = observeTabs,
+                observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
+                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
+                createTab = CreateTabUseCase(noopTabRepo, SAMPLE_PAGE_URL),
+                faviconCache = OfflineErrorNoopFaviconCache,
+                screenshotCache = OfflineErrorNoopScreenshotCache,
+                isUrlBookmarked = IsUrlBookmarkedUseCase(OfflineErrorNoopBookmarkRepository),
+                toggleBookmark = ToggleBookmarkUseCase(
+                    OfflineErrorNoopBookmarkRepository,
+                    AddBookmarkUseCase(OfflineErrorNoopBookmarkRepository),
+                ),
+                recordHistoryEntry = RecordHistoryEntryUseCase(
+                    OfflineErrorNoopHistoryRepository,
+                ),
+                updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(OfflineErrorNoopHistoryRepository),
+                startDownload = instrumentedNoOpStartDownloadUseCase(),
+            ).apply {
+                onLoadStarted(SAMPLE_PAGE_URL)
+                onLoadFailed(ErrorReason.NetworkUnavailable)
+            }
+            composeRule.activity.setContent {
+                BrowserScreen(
+                    slots = NoSlots,
+                    viewModel = viewModel,
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun errorState_rendersWhenInitialStateIsFailed() {
+        composeRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag(TEST_TAG_BROWSER_ERROR_STATE),
+            timeoutMillis = ERROR_STATE_TIMEOUT_MS,
+        )
+    }
+
+    private companion object {
+        // Pure recomposition with state preseeded — well within 5 s. The
+        // earlier 15 s budget targeted real DNS NXDOMAIN, no longer applicable.
+        const val ERROR_STATE_TIMEOUT_MS: Long = 5_000L
+    }
+}
+
+/**
+ * Spec 010 — file-private no-op [SearchEngineRepository] for the error-state
+ * rendering test. Query branch is never reached.
+ */
+private object OfflineErrorNoopSearchEngineRepository : SearchEngineRepository {
+    override suspend fun buildSearchUrl(query: String): String =
+        error("instrumented test should not reach the search-URL build path")
+}
+
+/**
+ * Spec 011 — file-private no-op [TabRepository] for the error-rendering test.
+ * Mirrors the OfflineErrorNoopSearchEngineRepository pattern.
+ */
+private object OfflineErrorNoopTabRepository : TabRepository {
+    // Spec 012 — hot StateFlow (NOT flowOf) so ObserveAllTabsUseCase.combine
+    // stays subscribed and Compose recomposer keeps receiving updates.
+    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
+    override fun observeTabs(): Flow<List<Tab>> = state
+    override suspend fun createTab(url: String): Result<Tab> =
+        error("error-rendering test should not reach createTab")
+    override suspend fun switchActiveTab(tabId: Long) = Unit
+    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
+    override suspend fun closeTab(tabId: Long) = Unit
+    override suspend fun closeAllTabs() = Unit
+    override suspend fun getTabCount(): Int = 0
+}
+
+/** Spec 012 — no-op [IncognitoTabRepository] for the error-rendering test. */
+private object OfflineErrorNoopIncognitoTabRepository : IncognitoTabRepository {
+    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
+        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
+    override fun observeTabs(): Flow<List<Tab>> = state
+    override suspend fun createTab(url: String): Result<Tab> =
+        error("error-rendering test should not reach incognito createTab")
+    override suspend fun switchActiveTab(tabId: Long) = Unit
+    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
+    override suspend fun closeTab(tabId: Long) = Unit
+    override suspend fun closeAll() = Unit
+    override suspend fun getCount(): Int = 0
+}
+
+/**
+ * Spec 011 favicon amendment — no-op [FaviconCache] for the error-rendering
+ * instrumented test. The test never triggers `onReceivedIcon` (loading
+ * state seeded to Failed before WebView is constructed).
+ */
+private object OfflineErrorNoopFaviconCache : FaviconCache {
+    private val state = MutableStateFlow(0L)
+    override val version: StateFlow<Long> = state.asStateFlow()
+    override suspend fun save(url: String, writeImage: (OutputStream) -> Unit) = Unit
+    override suspend fun clearAll() = Unit
+    override suspend fun retainOnly(hosts: Set<String>) = Unit
+    override fun fileFor(url: String): File? = null
+}
+
+private object OfflineErrorNoopScreenshotCache : ScreenshotCache {
+    private val state = MutableStateFlow(0L)
+    override val version: StateFlow<Long> = state.asStateFlow()
+    override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) = Unit
+    override fun fileFor(tabId: Long): File? = null
+    override suspend fun delete(tabId: Long) = Unit
+    override suspend fun clearAll() = Unit
+}
+
+private object OfflineErrorNoopBookmarkRepository :
+    BookmarkRepository {
+    override fun observeBookmarksByFolder(folderId: Long?) =
+        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
+    override fun observeBookmarksByUrl(url: String) =
+        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
+    override fun observeRecentBookmarks(limit: Int) =
+        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
+    override suspend fun getAllBookmarks() = emptyList<Bookmark>()
+
+    override fun searchBookmarks(query: String) =
+        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
+    override suspend fun getBookmark(id: Long) = null
+    override suspend fun countBookmarksByUrl(url: String) = 0
+    override suspend fun addBookmark(bookmark: Bookmark) =
+        Result.Success(0L)
+    override suspend fun updateBookmark(bookmark: Bookmark) =
+        Result.Success(Unit)
+    override suspend fun deleteBookmark(id: Long) =
+        Result.Success(Unit)
+    override suspend fun deleteMostRecentBookmarkByUrl(url: String) =
+        Result.Success(0)
+    override suspend fun moveBookmarkToFolder(bookmarkId: Long, newParentId: Long?) =
+        Result.Success(Unit)
+    override fun observeFoldersByParent(parentId: Long?) =
+        kotlinx.coroutines.flow.flowOf(emptyList<BookmarkFolder>())
+    override fun observeAllFolders() =
+        kotlinx.coroutines.flow.flowOf(emptyList<BookmarkFolder>())
+    override suspend fun getFolder(id: Long) = null
+    override suspend fun getAncestorChain(folderId: Long) = emptyList<BookmarkFolder>()
+    override suspend fun countDescendants(folderId: Long) =
+        BookmarkDescendantCount(0, 0)
+    override suspend fun createFolder(name: String, parentId: Long?) =
+        Result.Success(0L)
+    override suspend fun renameFolder(folderId: Long, newName: String) =
+        Result.Success(Unit)
+    override suspend fun moveFolder(folderId: Long, newParentId: Long?) =
+        Result.Success(Unit)
+    override suspend fun deleteFolderCascade(folderId: Long) =
+        Result.Success(
+            BookmarkDescendantCount(0, 0),
+        )
+}
+
+/**
+ * Spec 014 — no-op [HistoryRepository] for the error-rendering test. Recorder
+ * never fires (state seeded to Failed before any onLoadFinished can run).
+ */
+private object OfflineErrorNoopHistoryRepository :
+    HistoryRepository {
+    override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
+    override fun observeAll() =
+        kotlinx.coroutines.flow.flowOf(emptyList<HistoryEntry>())
+    override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
+    override suspend fun updateTitle(id: Long, title: String): Int = 0
+    override suspend fun deleteById(id: Long): Int = 0
+    override suspend fun clearAll(): Int = 0
+    override suspend fun count(): Int = 0
+}
+
+/** Spec 019 — a real page address for tests; the app's default is now the Home page. */
+private const val SAMPLE_PAGE_URL: String = "https://www.google.com/"
+
+private val NoSlots = BrowserSlots(
+    fireButton = FireButton(enabled = true, onClick = {}),
+    fireOverlay = {},
+    quickSettings = { _, _, _ -> },
+)

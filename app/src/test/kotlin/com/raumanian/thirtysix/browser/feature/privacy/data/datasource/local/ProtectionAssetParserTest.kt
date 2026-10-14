@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local
 
-import com.raumanian.thirtysix.browser.domain.protection.TrackerMatcher
+import com.raumanian.thirtysix.browser.feature.browser.domain.protection.TrackerMatcher
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
@@ -10,7 +11,6 @@ import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingTarget
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.OpenOutcome
 import kotlinx.coroutines.flow.Flow

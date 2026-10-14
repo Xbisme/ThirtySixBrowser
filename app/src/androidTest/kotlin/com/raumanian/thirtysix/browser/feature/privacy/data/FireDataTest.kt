@@ -20,9 +20,9 @@ import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.testing.AssetPageServer
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.WebViewProfiles
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.TestProtection
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.FireCoordinator
-import com.raumanian.thirtysix.browser.presentation.browser.WebViewProfiles
-import com.raumanian.thirtysix.browser.protection.TestProtection
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

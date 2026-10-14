@@ -1,9 +1,9 @@
 package com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.AddressBarSubmitResult
+import com.raumanian.thirtysix.browser.core.domain.model.classifyAddressBarInput
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlPatterns
-import com.raumanian.thirtysix.browser.domain.model.AddressBarSubmitResult
-import com.raumanian.thirtysix.browser.domain.model.classifyAddressBarInput
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingRequest
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingTarget
 import java.net.URI

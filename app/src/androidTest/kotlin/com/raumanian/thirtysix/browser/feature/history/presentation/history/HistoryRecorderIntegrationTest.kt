@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.domain.usecase.RecordHistoryEntryUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.history.data.repository.HistoryRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ClearAllHistoryUseCase
 import com.raumanian.thirtysix.browser.feature.history.domain.usecase.DeleteHistoryEntryUseCase

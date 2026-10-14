@@ -16,10 +16,10 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.usecase.IsSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
-import com.raumanian.thirtysix.browser.domain.usecase.IsSiteFireproofUseCase
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first

@@ -7,6 +7,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -17,7 +18,6 @@ import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingRequest
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.OpenIncomingRequestUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.ResolveIncomingRequestUseCase

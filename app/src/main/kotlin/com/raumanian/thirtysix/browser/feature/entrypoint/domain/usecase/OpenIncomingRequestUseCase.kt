@@ -2,11 +2,11 @@ package com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingTarget
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.OpenOutcome
 import javax.inject.Inject
