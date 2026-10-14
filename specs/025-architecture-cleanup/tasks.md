@@ -128,16 +128,16 @@ Each feature task moves the listed main files to `F/<f>/` with the template sub-
 
 Per task: for every file in the folder, delete ID citations, planning-doc and constitution citations, change history, banners, commented-out code and comments that restate code; shorten surviving reasons to 1–3 lines; turn `TODO` without ticket into a ticket or remove it. A reason longer than three lines that is still true goes into a new ADR in `docs/adr/` and the code keeps one line pointing to it by file name. Code is not changed. Then regenerate `config/detekt/baseline.xml` (only removals), drop the folder's `KNOWN_VIOLATIONS` entries, run G1, **commit** `docs(025): comments in <folder>`.
 
-- [ ] T044 [P] [US5] `C/` (main) and `UT/core/`, `IT/core/`
-- [ ] T045 [P] [US5] `F/settings/`, `F/onboarding/` and their tests
-- [ ] T046 [P] [US5] `F/sitepermission/`, `F/downloads/` and their tests
-- [ ] T047 [P] [US5] `F/history/`, `F/bookmarks/` and their tests
-- [ ] T048 [P] [US5] `F/tabs/`, `F/entrypoint/` and their tests
-- [ ] T049 [P] [US5] `F/privacy/` and its tests
-- [ ] T050 [P] [US5] `F/browser/presentation/browser/` and `…/home`, `…/incognito`, `…/suggestions` and their tests
-- [ ] T051 [P] [US5] `F/browser/presentation/page/`, `…/protection/`, `F/browser/domain/`, `F/browser/data/`, `F/browser/di/` and their tests
-- [ ] T052 [P] [US5] `M/navigation/`, `M/MainActivity.kt`, `M/ThirtySixApplication.kt`, `app/src/debug/**`, `app/build.gradle.kts`, `gradle/libs.versions.toml` (catalog comments: spec references → plain reasons), `app/proguard-rules.pro`, `app/src/main/AndroidManifest.xml`, `res/xml/*.xml` comments, `.github/workflows/ci.yml` comments
-- [ ] T053 [US5] Delete `config/detekt/baseline.xml` and the `baseline =` line; `KNOWN_VIOLATIONS` must be `emptySet()`; run quickstart G5 and record the numbers in the "Results" table. **Commit** `docs(025): comment policy met`.
+- [X] T044 [P] [US5] `C/` (main) and `UT/core/`, `IT/core/`
+- [X] T045 [P] [US5] `F/settings/`, `F/onboarding/` and their tests
+- [X] T046 [P] [US5] `F/sitepermission/`, `F/downloads/` and their tests
+- [X] T047 [P] [US5] `F/history/`, `F/bookmarks/` and their tests
+- [X] T048 [P] [US5] `F/tabs/`, `F/entrypoint/` and their tests
+- [X] T049 [P] [US5] `F/privacy/` and its tests
+- [X] T050 [P] [US5] `F/browser/presentation/browser/` and `…/home`, `…/incognito`, `…/suggestions` and their tests
+- [X] T051 [P] [US5] `F/browser/presentation/page/`, `…/protection/`, `F/browser/domain/`, `F/browser/data/`, `F/browser/di/` and their tests
+- [X] T052 [P] [US5] `M/navigation/`, `M/MainActivity.kt`, `M/ThirtySixApplication.kt`, `app/src/debug/**`, `app/build.gradle.kts`, `gradle/libs.versions.toml` (catalog comments: spec references → plain reasons), `app/proguard-rules.pro`, `app/src/main/AndroidManifest.xml`, `res/xml/*.xml` comments, `.github/workflows/ci.yml` comments
+- [X] T053 [US5] Delete `config/detekt/baseline.xml` and the `baseline =` line; `KNOWN_VIOLATIONS` must be `emptySet()`; run quickstart G5 and record the numbers in the "Results" table. **Commit** `docs(025): comment policy met`.
 
 ---
 
@@ -147,15 +147,15 @@ Per task: for every file in the folder, delete ID citations, planning-doc and co
 
 **Independent test**: quickstart G9.
 
-- [ ] T054 [US4] Create `docs/archive/changelog-001-024.md` with `CLAUDE.md`'s sections from "Known Runtime Considerations" to the end, verbatim, first line `> Archive — not a rule. The rules are in .specify/memory/constitution.md.`; `git mv .claude/claude-app/{dev-workflow,meeting-note,project-context,sdd-roadmap}.md docs/archive/` and add the same first line to each.
-- [ ] T055 [US4] Build the "facts to keep" table in this file: every bullet under "Facts to keep", "⚠️" notes and "Known carry-forward debt" in the old `CLAUDE.md` and `.specify/memory/constitution.md` 1.6.0, each with its destination: constitution clause, ADR number, check/test name, `AGENTS.md` line, or "obsolete" with reason. No row may be left without a destination.
-- [ ] T056 [P] [US4] Write ADRs `docs/adr/0000-template.md` (from template) and `0001`–`0004` adapted from `/Users/xbism3/Documents/Template/android/docs/adr/` (0001 records `*RepositoryImpl`, shared contracts and the database in `core/` per research R2–R3, and the template gap; 0004 cites this app's own before/after numbers from the Results table).
-- [ ] T057 [P] [US4] Write ADRs `0005`–`0012` listed in contracts/governance-set.md, each from the matching facts in T055 (context, decision, consequences; ≤ 1 page each), plus any ADR created during Phase 5.
-- [ ] T058 [US4] Replace `.specify/memory/constitution.md` with the template's `/Users/xbism3/Documents/Template/android/.specify/memory/constitution.md`, `[PROJECT_NAME]` = ThirtySix Browser, Product Constraints filled from contracts/governance-set.md, `[FLAVORS_POLICY]` = "no product flavors", `[CRITICAL_FLOWS]` from governance-set.md, `[COVERAGE_TARGET]` = "every use case, repository, mapper and view model has a test", budgets from the Baseline table, Version **2.0.0**, Ratified 2026-04-30, Last Amended = commit date. Principle II's implementation-naming sentence names `*RepositoryImpl`. Under 250 lines; every MUST followed by **Enforced by** or **Review**; no Sync Impact Report comment left.
-- [ ] T059 [US4] Create `docs/constitution-history.md`: one line per version 1.0.0 → 1.6.0 (from the old file's amendment notes, dates from git log) and 2.0.0 "Adopted the cleanarch Android template; phase order retired (ADR 0005)".
-- [ ] T060 [US4] Create `AGENTS.md` from the template's, adapted: commands with the `JAVA_HOME` prefix, `connectedDebugAndroidTest` with the force-stop note, the 16 KB script path, package map for `com.raumanian.thirtysix.browser` with the ten features, writing/comment/test rules; Spec 026 pending work in one line. Under 100 lines. Replace `CLAUDE.md` with the single line `@AGENTS.md`.
-- [ ] T061 [US4] Update the user's agent memory notes in `/Users/xbism3/.claude/projects/-Users-xbism3-Documents-SelfProject-ThirdtySixBrowser/memory/` whose text points to `CLAUDE.md` sections or old package paths, and its `MEMORY.md` index lines, so none refers to removed content.
-- [ ] T062 [US4] Run quickstart G9. **Commit** `docs(025): constitution 2.0.0, AGENTS.md, ADRs, archive`.
+- [X] T054 [US4] Create `docs/archive/changelog-001-024.md` with `CLAUDE.md`'s sections from "Known Runtime Considerations" to the end, verbatim, first line `> Archive — not a rule. The rules are in .specify/memory/constitution.md.`; `git mv .claude/claude-app/{dev-workflow,meeting-note,project-context,sdd-roadmap}.md docs/archive/` and add the same first line to each.
+- [X] T055 [US4] Build the "facts to keep" table in this file: every bullet under "Facts to keep", "⚠️" notes and "Known carry-forward debt" in the old `CLAUDE.md` and `.specify/memory/constitution.md` 1.6.0, each with its destination: constitution clause, ADR number, check/test name, `AGENTS.md` line, or "obsolete" with reason. No row may be left without a destination.
+- [X] T056 [P] [US4] Write ADRs `docs/adr/0000-template.md` (from template) and `0001`–`0004` adapted from `/Users/xbism3/Documents/Template/android/docs/adr/` (0001 records `*RepositoryImpl`, shared contracts and the database in `core/` per research R2–R3, and the template gap; 0004 cites this app's own before/after numbers from the Results table).
+- [X] T057 [P] [US4] Write ADRs `0005`–`0012` listed in contracts/governance-set.md, each from the matching facts in T055 (context, decision, consequences; ≤ 1 page each), plus any ADR created during Phase 5.
+- [X] T058 [US4] Replace `.specify/memory/constitution.md` with the template's `/Users/xbism3/Documents/Template/android/.specify/memory/constitution.md`, `[PROJECT_NAME]` = ThirtySix Browser, Product Constraints filled from contracts/governance-set.md, `[FLAVORS_POLICY]` = "no product flavors", `[CRITICAL_FLOWS]` from governance-set.md, `[COVERAGE_TARGET]` = "every use case, repository, mapper and view model has a test", budgets from the Baseline table, Version **2.0.0**, Ratified 2026-04-30, Last Amended = commit date. Principle II's implementation-naming sentence names `*RepositoryImpl`. Under 250 lines; every MUST followed by **Enforced by** or **Review**; no Sync Impact Report comment left.
+- [X] T059 [US4] Create `docs/constitution-history.md`: one line per version 1.0.0 → 1.6.0 (from the old file's amendment notes, dates from git log) and 2.0.0 "Adopted the cleanarch Android template; phase order retired (ADR 0005)".
+- [X] T060 [US4] Create `AGENTS.md` from the template's, adapted: commands with the `JAVA_HOME` prefix, `connectedDebugAndroidTest` with the force-stop note, the 16 KB script path, package map for `com.raumanian.thirtysix.browser` with the ten features, writing/comment/test rules; Spec 026 pending work in one line. Under 100 lines. Replace `CLAUDE.md` with the single line `@AGENTS.md`.
+- [X] T061 [US4] Update the user's agent memory notes in `/Users/xbism3/.claude/projects/-Users-xbism3-Documents-SelfProject-ThirdtySixBrowser/memory/` whose text points to `CLAUDE.md` sections or old package paths, and its `MEMORY.md` index lines, so none refers to removed content.
+- [X] T062 [US4] Run quickstart G9. **Commit** `docs(025): constitution 2.0.0, AGENTS.md, ADRs, archive`.
 
 ---
 
@@ -165,7 +165,7 @@ Per task: for every file in the folder, delete ID citations, planning-doc and co
 
 **Independent test**: quickstart G6–G8, G10.
 
-- [ ] T063 [US1] On the AVD from T005 (seeded baseline debug install), `adb install -r` the branch's debug APK; run quickstart G6 and record each store's result in the "Results" table.
+- [X] T063 [US1] On the AVD from T005 (seeded baseline debug install), `adb install -r` the branch's debug APK; run quickstart G6 and record each store's result in the "Results" table.
 - [ ] T064 [US1] Run quickstart G7: unit and instrumented suites (16 KB AVD; CI API 29). Every baseline test present (compare the test-class list from T004's reports to now: same class and method names, under new packages).
 - [ ] T065 [US1] Run quickstart G8: release APK size vs baseline (±2 %), cold start 10 interleaved rounds against the baseline release (±5 %); Compose report counts unchanged (206 / 0).
 - [ ] T066 [US1] Run quickstart G10 smoke on the 16 KB AVD release build and on API 24 AVD debug build. Diff the merged release manifest against `specs/025-architecture-cleanup/baseline/AndroidManifest-release.xml`: no difference allowed (FR-003).
@@ -229,9 +229,9 @@ Phase 6: T056 ∥ T057
 
 | Allowlist | Entries at T014 | After Phase 4 | After Phase 5 |
 |---|---|---|---|
-| `KNOWN_VIOLATIONS` | 214 files (layering 10, placement 15, colors 2, dispatcher 1, comments ≈ 190) | | 0 |
-| detekt baseline | 1,726 (ForbiddenComment 1,682 · MaxLineLength 28 · OutdatedDocumentation 12 · UnusedPrivateProperty 3 · LoopWithTooManyJumpStatements 1 — the last four newly seen because detekt now scans androidTest and debug) | | deleted |
-| ktlint baseline | 77 (compose-rules 69: vm-forwarding 18, parameter-naming 16, modifier-missing 16, vm-injection 6, modifier-without-default 5, lambda-param-in-effect 5, multiple-emitters 3; standard 8) | | deleted |
+| `KNOWN_VIOLATIONS` | 214 files (layering 10, placement 15, colors 2, dispatcher 1, comments ≈ 190) | 197 (comments, plus `UrlExtensions.kt`: domain imported `androidx.core.net`) | **0** (`emptySet()`) |
+| detekt baseline | 1,726 (ForbiddenComment 1,682 · MaxLineLength 28 · OutdatedDocumentation 12 · UnusedPrivateProperty 3 · LoopWithTooManyJumpStatements 1 — the last four newly seen because detekt now scans androidTest and debug) | 1,711 | **deleted** (the 45 non-comment findings fixed: long lines wrapped, partial `@property` KDoc moved onto the properties, two unused test properties removed, `TabSeeder` loop without two jumps, `AppNavHost` and one test `setUp` split) |
+| ktlint baseline | 77 (compose-rules 69: vm-forwarding 18, parameter-naming 16, modifier-missing 16, vm-injection 6, modifier-without-default 5, lambda-param-in-effect 5, multiple-emitters 3; standard 8) | 24 (the Spec 026 `vm-*` findings + 1 `multiple-emitters`) | 24 — see Open questions |
 
 ## Rule proof (T015)
 
@@ -343,6 +343,34 @@ Found by a script on `77982fe`+T039: `invoke` whose whole body is one call on a 
 
 | Fact (old source) | Destination |
 |---|---|
+| Dated "Recent Changes" entries, gate results, PR numbers, measurements (old `CLAUDE.md`) | `docs/archive/changelog-001-024.md` (history) |
+| `.claude/claude-app/{dev-workflow,meeting-note,project-context,sdd-roadmap}.md` | `docs/archive/` (history) |
+| Feature-first layout, ten features, shared code in `core/`, database in `core/data` | constitution I–II, ADR 0001, `ArchitectureTest`/`PlacementTest` |
+| `hilt-compiler` (not `hilt-android-compiler`) with KSP; modules per feature | ADR 0002, constitution III |
+| Comment rules; IDs out of source | constitution VI, ADR 0004, detekt `ForbiddenComment`, `CommentPolicyTest` |
+| Phase order (§X) and roadmap-first rule | retired, ADR 0005 |
+| Home is `thirtysix:home`, never loaded | ADR 0006 |
+| Incognito WebView profile, "in use" profile wiped then deleted next process, snapshot fallback on old engines | ADR 0007, `IncognitoIsolationTest` |
+| Fire order, in-progress marker, fireproof cookie snapshot/restore | ADR 0008, `FireDataTest`, `RunFireUseCaseTest` |
+| Language applied in place; `screenLayout` in `configChanges`; chooser closes after the language lands | ADR 0009 |
+| AVD snapshot cache bugs (key, failed write, passing write) | ADR 0010 |
+| `singleTask`, intent hand-over rules, one-slot relays, one `EntryPointViewModel`, pop-to-browser instead of `launchSingleTop`, start route read before `setContent`, default-browser re-read on resume | ADR 0011 |
+| `loadProtected`, HTTPS fallback traps, blocked-count reset point, GPC app-wide only with features, protection assets and licences | ADR 0012 |
+| Page request queue per tab + generation; pop-up WebView registered before its tab and given a client at once; `mediaPlaybackRequiresUserGesture = false` | ADR 0013 |
+| Never install a pre-023/pre-024 build over a newer one; additive migrations | ADR 0014, constitution VII, `AGENTS.md` |
+| Load progress in its own flow read in `drawBehind`; swipe offsets in `graphicsLayer`; desktop mode read by tab id; `painterResource` cannot load the animated brand mark | ADR 0015, constitution IV |
+| Page scripts only via `ProtectionHooks`, local-only prelude, autoconsent `optOut` + `heuristicMode: 'off'`, rebuild script | ADR 0016, constitution Product Constraints |
+| AVD is not Pixel 5-class; release builds cannot be seeded; A55 is a personal phone; interleaved cold-start rounds; `adb emu network capture` useless | ADR 0017, `AGENTS.md` Devices |
+| Per-test DataStore for tests that launch `MainActivity`; force-stop before `connectedDebugAndroidTest` | `AGENTS.md` Tests/Commands, ADR 0002 |
+| A tag inside a clickable `ListRow` needs `useUnmergedTree = true` in tests | kept as a comment at `ListRow` (code-level reason) |
+| `ConfirmDialog`/`ChoiceDialog` take no per-button test tags | obsolete as a rule (test style), visible in the code |
+| Suggestion snapshot: one `GROUP BY` query + bookmarks, filtered in memory, never SQL `LIKE` | kept as a 1–3 line comment at the suggestion source use case |
+| `AddressBar` ignores late echoes of its own text | kept as a 1–3 line comment at `AddressBar`, covered by `AddressBarTest` |
+| `OneTimeGrantStore` placement | superseded: it is in `core/domain/util` (ADR 0001) |
+| `javascript:` links get no long-press menu; theguardian.com shows 0 trackers before consent | obsolete as rules (observations); in the archive |
+| Reasons removed from code comments in Phase 5 (collected per folder, 101 notes) | ADRs 0018–0025 (downloads record-after-enqueue, clear-browsing-data order, history recording and retention, WebView lifecycle, repository-reads-repository exceptions, debug tools, backup exclusion, theme and dynamic color) and bullets added to 0006–0016; 8 trivial notes dropped |
+| Spec 026 hand-off (forwarding use cases, screens without `onAction`) | this file, `AGENTS.md` Open work |
+| Open device gates (TalkBack passes, SC-005/SC-006 on hardware, first-run cold start +30 %, G5 sign-ins) | `docs/archive/changelog-001-024.md`; open items for the owner, not rules |
 
 ## Checkpoint results
 
@@ -363,3 +391,8 @@ Found by a script on `77982fe`+T039: `invoke` whose whole body is one call on a 
 
 | Measure | Baseline | After | Within budget |
 |---|---|---|---|
+| Unit tests | 932 | **959**, 0 failed (+27: architecture checks, host-extraction cases) | ✅ |
+| Comment share / files > 15 % / blocks > 5 lines | 21.9 % / 117 / 160 | **8.4 % / 0 / 0**; `Spec`/`FR-`/`SC-`/`T0xx`/`§` in `app/src`: 0 | ✅ |
+| detekt baseline / `KNOWN_VIOLATIONS` | 1,726 / 214 | deleted / `emptySet()` | ✅ |
+| Release APK bytes | 3,725,735 | 3,742,047 (+0.44 %) | ✅ ±2 % |
+| G6 upgrade over the seeded baseline debug install (`TA016_API36_16K`) | tabs 20 · history 20 · downloads 20 · bookmarks 2 / folders 1 · fireproof 1 · site permission 1 · exception 1 · Dark · DuckDuckGo · text 125 % · retention 30 · app language `de` | identical: every database row equal (`.dump` diff only `android_metadata` locale, which SQLite rewrites on open), settings file equal except `app_launch_count` 2 → 3, app locale still `de`, 41 cached favicon/screenshot files kept; UI opens dark, German, 20 tabs; 5 cold starts, 0 crashes | ✅ |

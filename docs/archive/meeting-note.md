@@ -1,3 +1,5 @@
+> Archive — not a rule. The rules are in `.specify/memory/constitution.md`; the reasons in `docs/adr/`.
+
 # ThirtySixBrowser — Meeting Note & Roadmap
 
 **Created**: 2026-04-30

@@ -1,3 +1,5 @@
+> Archive — not a rule. The rules are in `.specify/memory/constitution.md`; the reasons in `docs/adr/`.
+
 # ThirtySixBrowser — Lộ Trình Spec (SDD Roadmap)
 
 > Cập nhật lần cuối: 2026-10-14 (Spec 024 merged qua PR #39 — 🎉 Phase 6 hoàn tất; PR #40 sửa trang `height: 100%` bị trắng)

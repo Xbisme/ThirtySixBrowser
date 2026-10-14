@@ -1,3 +1,5 @@
+> Archive — not a rule. The rules are in `.specify/memory/constitution.md`; the reasons in `docs/adr/`.
+
 # Dev Workflow — Quy Trình Làm Việc
 
 > Quy trình giữa user (Xbism3), Claude (Speckit/Planning), và Copilot Pro (Implementation).
