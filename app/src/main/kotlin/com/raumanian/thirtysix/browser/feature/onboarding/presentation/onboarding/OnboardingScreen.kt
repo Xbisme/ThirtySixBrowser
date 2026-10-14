@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun OnboardingScreen(
     onFinish: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,7 +80,7 @@ fun OnboardingScreen(
 
     val colors = ThirtySixTheme.colors
     // Spec 019 FR-052 — the flow sits on the hero mesh in both themes.
-    Box(modifier = Modifier.fillMaxSize().background(colors.heroDeep)) {
+    Box(modifier = modifier.fillMaxSize().background(colors.heroDeep)) {
         MeshArt(
             base = colors.heroDeep,
             glowA = colors.heroViolet,
@@ -234,8 +236,9 @@ private fun PageDots(current: Int) {
 
 @Composable
 private fun LaunchedLeaveEffect(viewModel: OnboardingViewModel, onLeave: () -> Unit) {
+    val currentOnLeave by rememberUpdatedState(onLeave)
     androidx.compose.runtime.LaunchedEffect(viewModel) {
-        viewModel.leaveFlow.collectLatest { onLeave() }
+        viewModel.leaveFlow.collectLatest { currentOnLeave() }
     }
 }
 

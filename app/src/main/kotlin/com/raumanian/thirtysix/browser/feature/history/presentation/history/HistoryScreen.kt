@@ -43,6 +43,7 @@ import com.raumanian.thirtysix.browser.feature.history.presentation.history.comp
  */
 @Composable
 fun HistoryScreen(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: HistoryViewModel = hiltViewModel(),
     onShowBrowser: () -> Unit = {},
@@ -64,6 +65,7 @@ fun HistoryScreen(
     HistorySnackbarEffect(viewModel = viewModel, snackbarHostState = snackbarHostState)
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             HistoryTopBar(
                 searchQuery = state.searchQuery,

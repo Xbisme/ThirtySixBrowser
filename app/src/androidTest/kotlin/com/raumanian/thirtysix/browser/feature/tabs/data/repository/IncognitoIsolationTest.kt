@@ -109,7 +109,7 @@ class IncognitoIsolationTest {
             started = true
             page = Page(url, incognito)
             composeRule.setContent {
-                page?.let { shown -> key(shown.serial) { protection.Content(shown.url, shown.incognito) } }
+                page?.let { shown -> key(shown.serial) { protection.Content(shown.url, incognito = shown.incognito) } }
             }
         } else {
             composeRule.runOnUiThread { page = Page(url, incognito) }

@@ -12,7 +12,7 @@ import com.raumanian.thirtysix.browser.core.presentation.util.QuickSetting
 class BrowserSlots(
     val fireButton: FireButton,
     val fireOverlay: @Composable () -> Unit,
-    val quickSettings: @Composable (request: QuickSetting?, onRequestHandled: () -> Unit, snackbar: SnackbarHostState) -> Unit,
+    val quickSettings: @Composable (request: QuickSetting?, onConsumeRequest: () -> Unit, snackbar: SnackbarHostState) -> Unit,
     val incomingContent: IncomingContentHooks = IncomingContentHooks(),
     val destinations: BrowserDestinations = BrowserDestinations(),
 )

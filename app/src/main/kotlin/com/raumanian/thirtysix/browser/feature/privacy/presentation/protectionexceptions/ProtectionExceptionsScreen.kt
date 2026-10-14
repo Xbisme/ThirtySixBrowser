@@ -37,6 +37,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
  */
 @Composable
 fun ProtectionExceptionsScreen(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: ProtectionExceptionsViewModel = hiltViewModel(),
 ) {
@@ -45,7 +46,7 @@ fun ProtectionExceptionsScreen(
     BackHandler(onBack = navigateBack)
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             SettingsTopBar(

@@ -31,7 +31,12 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
  * Dismissing answers Cancel.
  */
 @Composable
-fun SiteJsDialog(request: PageRequest.JsDialog, onSuppress: () -> Unit, done: () -> Unit) {
+fun SiteJsDialog(
+    request: PageRequest.JsDialog,
+    onSuppress: () -> Unit,
+    modifier: Modifier = Modifier,
+    done: () -> Unit,
+) {
     var text by remember(request) { mutableStateOf(request.defaultText.orEmpty()) }
     var suppress by remember(request) { mutableStateOf(false) }
     val answer: (Boolean) -> Unit = { ok ->
@@ -42,6 +47,7 @@ fun SiteJsDialog(request: PageRequest.JsDialog, onSuppress: () -> Unit, done: ()
     val ok = SiteDialogAction(stringResource(R.string.site_dialog_ok), PillStyle.Filled, { answer(true) })
     val cancel = SiteDialogAction(stringResource(R.string.site_dialog_cancel), PillStyle.Text, { answer(false) })
     SiteDialogFrame(
+        modifier = modifier,
         title = stringResource(R.string.site_dialog_from, siteName(request.origin)),
         body = request.message.takeIf { it.isNotEmpty() },
         actions = if (request.kind == JsDialogKind.Alert) listOf(ok) else listOf(ok, cancel),

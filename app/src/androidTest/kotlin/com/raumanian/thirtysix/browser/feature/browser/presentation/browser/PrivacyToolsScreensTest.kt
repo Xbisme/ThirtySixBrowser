@@ -116,7 +116,7 @@ class PrivacyToolsScreensTest {
         composeRule.setContent {
             ThirtySixTheme {
                 val current = state.collectAsState().value
-                FireOverlay(state = current, onFinished = { calls += "finished" })
+                FireOverlay(state = current, onFinish = { calls += "finished" })
             }
         }
         composeRule.onNodeWithTag(TEST_TAG_FIRE_OVERLAY).assertExists()
@@ -146,8 +146,8 @@ class PrivacyToolsScreensTest {
                 PrivacyDashboardSheet(
                     dashboardFlow = dashboard,
                     onDismiss = {},
-                    onProtectionSwitched = { calls += "protection:$it" },
-                    onFireproofSwitched = { calls += "fireproof:$it" },
+                    onProtectionSwitch = { calls += "protection:$it" },
+                    onFireproofSwitch = { calls += "fireproof:$it" },
                 )
             }
         }
@@ -168,8 +168,8 @@ class PrivacyToolsScreensTest {
                         PageDashboardState("news.test", true, true, emptyList(), 0, fireproof = null),
                     ),
                     onDismiss = {},
-                    onProtectionSwitched = {},
-                    onFireproofSwitched = {},
+                    onProtectionSwitch = {},
+                    onFireproofSwitch = {},
                 )
             }
         }

@@ -13,20 +13,20 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.prot
 internal fun PrivacyToolsHosts(
     dashboardOpen: Boolean,
     isHomeContent: Boolean,
-    onDashboardClosed: () -> Unit,
+    onDashboardClose: () -> Unit,
     protection: ProtectionViewModel,
 ) {
     // FR-015 — no dashboard on Home or the incognito start page.
     if (dashboardOpen && !isHomeContent) {
         PrivacyDashboardSheet(
             dashboardFlow = protection.dashboard,
-            onDismiss = onDashboardClosed,
-            onProtectionSwitched = { on ->
+            onDismiss = onDashboardClose,
+            onProtectionSwitch = { on ->
                 // FR-017 — exactly the hub switch: close, then reload with the new setting.
-                onDashboardClosed()
+                onDashboardClose()
                 protection.onProtectionSwitched(on)
             },
-            onFireproofSwitched = protection::onFireproofSwitched,
+            onFireproofSwitch = protection::onFireproofSwitched,
         )
     }
 }

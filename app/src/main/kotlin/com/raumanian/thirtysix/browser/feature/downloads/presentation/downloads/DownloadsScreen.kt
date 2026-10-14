@@ -38,6 +38,7 @@ private const val DOWNLOAD_ROW_CONTENT_TYPE = "download_row"
  */
 @Composable
 fun DownloadsScreen(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: DownloadsViewModel = hiltViewModel(),
 ) {
@@ -47,7 +48,7 @@ fun DownloadsScreen(
     DownloadsSnackbarEffect(viewModel = viewModel, snackbarHostState = snackbarHostState)
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = { DownloadsTopBar(onBackClick = { navController.popBackStack() }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },

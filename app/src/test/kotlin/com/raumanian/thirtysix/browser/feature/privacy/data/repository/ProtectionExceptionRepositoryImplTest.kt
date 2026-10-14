@@ -4,7 +4,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -20,15 +23,19 @@ class ProtectionExceptionRepositoryImplTest {
 
     private lateinit var db: AppDatabase
     private lateinit var repository: ProtectionExceptionRepositoryImpl
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
 
     @Before
     fun setUp() {
         db = inMemoryAppDatabase()
-        repository = ProtectionExceptionRepositoryImpl(db.siteProtectionExceptionDao(), TestDispatchers)
+        repository = ProtectionExceptionRepositoryImpl(db.siteProtectionExceptionDao(), TestDispatchers, scope)
     }
 
     @After
-    fun tearDown() = db.close()
+    fun tearDown() {
+        scope.cancel()
+        db.close()
+    }
 
     @Test
     fun `added sites are listed newest first and visible in the snapshot at once`() = runTest {

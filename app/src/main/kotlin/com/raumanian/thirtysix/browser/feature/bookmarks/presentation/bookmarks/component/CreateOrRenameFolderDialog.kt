@@ -21,11 +21,13 @@ fun CreateOrRenameFolderDialog(
     initialName: String,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var name by remember { mutableStateOf(initialName) }
     val error = name.trim().isEmpty()
     BookmarkInputDialog(
         title = title,
+        modifier = modifier,
         confirmEnabled = !error,
         onConfirm = { if (!error) onConfirm(name.trim()) },
         onDismiss = onDismiss,

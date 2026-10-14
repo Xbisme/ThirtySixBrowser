@@ -16,6 +16,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 fun CloseAllTabsConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     ConfirmDialog(
         title = stringResource(R.string.tabs_switcher_close_all),
@@ -24,7 +25,7 @@ fun CloseAllTabsConfirmDialog(
         cancelLabel = stringResource(android.R.string.cancel),
         onConfirm = onConfirm,
         onDismiss = onDismiss,
-        modifier = Modifier.testTag(TEST_TAG_CLOSE_ALL_DIALOG),
+        modifier = modifier.testTag(TEST_TAG_CLOSE_ALL_DIALOG),
     )
 }
 

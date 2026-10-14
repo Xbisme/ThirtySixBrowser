@@ -13,7 +13,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -51,7 +53,8 @@ private const val FADE_FRACTION = 3
  * read only inside `graphicsLayer` (Constitution §V).
  */
 @Composable
-internal fun FireOverlay(state: FireState, onFinished: () -> Unit) {
+internal fun FireOverlay(state: FireState, onFinish: () -> Unit) {
+    val currentOnFinish by rememberUpdatedState(onFinish)
     if (state == FireState.Idle) return
     Dialog(
         onDismissRequest = {},
@@ -75,7 +78,7 @@ internal fun FireOverlay(state: FireState, onFinished: () -> Unit) {
             val remaining = BrowserLimits.FIRE_OVERLAY_MIN_MS - (SystemClock.uptimeMillis() - shownAt)
             if (remaining > 0) delay(remaining)
             surface.animateTo(0f, tween(BrowserLimits.FIRE_OVERLAY_MS / FADE_FRACTION))
-            onFinished()
+            currentOnFinish()
         }
         val done = stringResource(R.string.fire_done_announcement)
         Box(

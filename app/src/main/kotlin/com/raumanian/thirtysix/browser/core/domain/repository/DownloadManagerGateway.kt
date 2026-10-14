@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.core.domain.repository
 
-import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 
 /**
@@ -29,7 +29,7 @@ interface DownloadManagerGateway {
      *   absent, or refusing. A null return MUST produce a localized message and MUST NOT
      *   create a record (FR-008a, FR-008b).
      */
-    suspend fun enqueue(request: DownloadRequest): Long?
+    suspend fun enqueue(request: DownloadOrder): Long?
 
     /**
      * Read the live state of one transfer.

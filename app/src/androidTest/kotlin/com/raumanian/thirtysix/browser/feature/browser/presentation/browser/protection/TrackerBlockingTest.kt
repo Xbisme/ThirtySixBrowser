@@ -31,7 +31,7 @@ class TrackerBlockingTest {
 
     private fun load(incognito: Boolean = false) {
         val url = server.url("trackers.html?port=${server.port}", TestProtection.PAGE_HOST)
-        composeRule.setContent { protection.Content(url, incognito) }
+        composeRule.setContent { protection.Content(url, incognito = incognito) }
         composeRule.waitUntil(TestProtection.TIMEOUT_MS) {
             server.paths().count { it.startsWith("/ok-") } == FIRST_PARTY &&
                 monitorBlocked().size == TestProtection.TRACKER_HOSTS.size + 1

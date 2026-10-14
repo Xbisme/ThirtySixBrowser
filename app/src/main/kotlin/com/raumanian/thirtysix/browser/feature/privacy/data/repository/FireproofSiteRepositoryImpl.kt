@@ -4,12 +4,12 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.FireproofSiteD
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.FireproofSiteEntity
 import com.raumanian.thirtysix.browser.core.domain.model.FireproofSite
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
+import com.raumanian.thirtysix.browser.core.domain.util.ApplicationScope
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.privacy.data.mapper.toDomain
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -24,13 +24,14 @@ import kotlinx.coroutines.withContext
 class FireproofSiteRepositoryImpl @Inject constructor(
     private val dao: FireproofSiteDao,
     private val dispatchers: DispatcherProvider,
+    @ApplicationScope appScope: CoroutineScope,
 ) : FireproofSiteRepository {
 
     @Volatile
     private var sites: Set<String> = emptySet()
 
     init {
-        CoroutineScope(SupervisorJob() + dispatchers.io).launch {
+        appScope.launch(dispatchers.io) {
             dao.observeAll().collect { rows -> sites = rows.mapTo(HashSet()) { it.site } }
         }
     }

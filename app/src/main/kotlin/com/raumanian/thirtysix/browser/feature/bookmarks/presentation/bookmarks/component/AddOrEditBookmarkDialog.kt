@@ -56,6 +56,7 @@ fun AddOrEditBookmarkDialog(
     allFolders: List<BookmarkFolder>,
     onConfirm: (title: String, url: String, parentId: Long?) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var bookmarkTitle by remember { mutableStateOf(initialBookmarkTitle) }
     var url by remember { mutableStateOf(initialUrl) }
@@ -74,6 +75,7 @@ fun AddOrEditBookmarkDialog(
     val folderFieldText = folderLabel ?: rootLabel
 
     BookmarkInputDialog(
+        modifier = modifier,
         title = title,
         confirmEnabled = canSubmit,
         onConfirm = {

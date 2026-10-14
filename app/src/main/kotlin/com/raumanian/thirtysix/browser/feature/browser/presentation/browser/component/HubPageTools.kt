@@ -80,7 +80,12 @@ internal fun HubPageTools(state: HubPageToolsState, onPageTool: (PageTool) -> Un
 }
 
 @Composable
-private fun PageToolTile(tool: PageTool, state: HubPageToolsState, onPageTool: (PageTool) -> Unit, modifier: Modifier) {
+private fun PageToolTile(
+    tool: PageTool,
+    state: HubPageToolsState,
+    onPageTool: (PageTool) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val onClick = { onPageTool(tool) }
     when (tool) {
         PageTool.Find -> QuickTile(

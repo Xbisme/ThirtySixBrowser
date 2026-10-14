@@ -146,7 +146,7 @@ fun TabSwitcherCard(
  * `graphicsLayer { }` (draw phase), so a drag never recomposes the card (research R11).
  */
 @Composable
-private fun SwipeToClose(onClose: () -> Unit, modifier: Modifier, content: @Composable () -> Unit) {
+private fun SwipeToClose(onClose: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     var offset by remember { mutableFloatStateOf(0f) }
     var widthPx by remember { mutableIntStateOf(0) }
     Box(

@@ -37,6 +37,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
  */
 @Composable
 fun FireproofSitesScreen(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: FireproofSitesViewModel = hiltViewModel(),
 ) {
@@ -45,7 +46,7 @@ fun FireproofSitesScreen(
     BackHandler(onBack = navigateBack)
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             SettingsTopBar(

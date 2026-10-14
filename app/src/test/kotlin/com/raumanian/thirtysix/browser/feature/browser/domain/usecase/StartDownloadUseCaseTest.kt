@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
@@ -145,9 +145,9 @@ class StartDownloadUseCaseTest {
 
     private class FakeGateway(private val handle: Long?) : DownloadManagerGateway {
         val callLog = mutableListOf<String>()
-        var lastRequest: DownloadRequest? = null
+        var lastRequest: DownloadOrder? = null
 
-        override suspend fun enqueue(request: DownloadRequest): Long? {
+        override suspend fun enqueue(request: DownloadOrder): Long? {
             callLog += "enqueue"
             lastRequest = request
             return handle

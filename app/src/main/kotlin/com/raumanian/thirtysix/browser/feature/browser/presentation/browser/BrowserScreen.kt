@@ -221,7 +221,7 @@ fun BrowserScreen(
                 BrowserTopBar(
                     state = state,
                     addressBarCallbacks = addressBarCallbacks,
-                    onStarTapped = viewModel::onStarTapped,
+                    onStarTap = viewModel::onStarTapped,
                     onReloadOrStop = {
                         if (state.loadingState is LoadingState.Loading) {
                             webViewActions.stopLoading()
@@ -317,7 +317,7 @@ fun BrowserScreen(
             onPageTool = pageToolHandler,
             // FR-011 — nothing about protection on Home or the incognito start page.
             protectionFlow = if (state.isHomeContent) null else protection.status,
-            onProtectionSwitched = protection::onProtectionSwitched,
+            onProtectionSwitch = protection::onProtectionSwitched,
             onFire = slots.fireButton.onClick,
             onDashboard = { dashboardOpen = true },
         )
@@ -325,7 +325,7 @@ fun BrowserScreen(
     PrivacyToolsHosts(
         dashboardOpen = dashboardOpen,
         isHomeContent = state.isHomeContent,
-        onDashboardClosed = { dashboardOpen = false },
+        onDashboardClose = { dashboardOpen = false },
         protection = protection,
     )
     slots.fireOverlay()
@@ -335,8 +335,8 @@ fun BrowserScreen(
     // Spec 021 US4 — long-press downloads pass the same storage-permission gate as page downloads.
     val context = LocalContext.current
     val longPressDownload = rememberDownloadRequestHandler(
-        onGranted = viewModel::onDownloadRequested,
-        onDenied = viewModel::onStoragePermissionDenied,
+        onGrant = viewModel::onDownloadRequested,
+        onDeny = viewModel::onStoragePermissionDenied,
     )
     val longPressActions: LongPressActions = hiltViewModel()
     val currentIncognito by rememberUpdatedState(state.isIncognito)
@@ -389,7 +389,7 @@ private fun BrowserHub(
     pageTools: HubPageToolsState,
     onPageTool: (PageTool) -> Unit,
     protectionFlow: StateFlow<PageProtectionStatus>?,
-    onProtectionSwitched: (Boolean) -> Unit,
+    onProtectionSwitch: (Boolean) -> Unit,
     onFire: () -> Unit,
     onDashboard: () -> Unit,
 ) {
@@ -410,7 +410,7 @@ private fun BrowserHub(
             onBookmarks = slots.destinations.openBookmarks,
             onQuickSetting = onQuickSetting,
             onPageTool = onPageTool,
-            onProtectionSwitched = onProtectionSwitched,
+            onProtectionSwitched = onProtectionSwitch,
             onFire = onFire,
             onDashboard = onDashboard,
         ),
@@ -578,8 +578,8 @@ private fun BrowserContent(
     // Spec 015 FR-010 – FR-012 — downloads pass through the storage-permission gate before
     // reaching the ViewModel. On API 29+ the gate is a straight pass-through.
     val onDownloadRequested = rememberDownloadRequestHandler(
-        onGranted = viewModel::onDownloadRequested,
-        onDenied = viewModel::onStoragePermissionDenied,
+        onGrant = viewModel::onDownloadRequested,
+        onDeny = viewModel::onStoragePermissionDenied,
     )
     val context = LocalContext.current
     val incognitoProfile = remember(context) { context.incognitoWebProfile() }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -49,7 +50,7 @@ private const val HTTPS_PREFIX = "https://"
 internal fun BrowserTopBar(
     state: BrowserUiState,
     addressBarCallbacks: AddressBarCallbacks,
-    onStarTapped: () -> Unit,
+    onStarTap: () -> Unit,
     onReloadOrStop: () -> Unit,
     modifier: Modifier = Modifier,
     progress: () -> Float = { 0f },
@@ -89,7 +90,7 @@ internal fun BrowserTopBar(
                 TopBarActions(
                     state = state,
                     isLoading = isLoading,
-                    onStarTapped = onStarTapped,
+                    onStarTap = onStarTap,
                     onReloadOrStop = onReloadOrStop,
                 )
             }
@@ -99,10 +100,10 @@ internal fun BrowserTopBar(
 
 /** The bookmark toggle (when the page can be bookmarked) and Reload/Stop (FR-023). */
 @Composable
-private fun TopBarActions(
+private fun RowScope.TopBarActions(
     state: BrowserUiState,
     isLoading: Boolean,
-    onStarTapped: () -> Unit,
+    onStarTap: () -> Unit,
     onReloadOrStop: () -> Unit,
 ) {
     val content = LocalContentColor.current
@@ -116,7 +117,7 @@ private fun TopBarActions(
                     R.string.bookmark_action_star_add_cd
                 },
             ),
-            onClick = onStarTapped,
+            onClick = onStarTap,
             style = RoundIconStyle.Bare,
             tint = if (state.isBookmarked) MaterialTheme.colorScheme.primary else content,
             modifier = Modifier.testTag(TEST_TAG_BROWSER_STAR_ICON),

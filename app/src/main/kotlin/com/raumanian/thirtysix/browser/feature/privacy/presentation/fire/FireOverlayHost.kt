@@ -9,5 +9,5 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun FireOverlayHost(fire: FireViewModel = hiltViewModel()) {
     val fireState by fire.state.collectAsStateWithLifecycle()
-    FireOverlay(state = fireState, onFinished = fire::acknowledge)
+    FireOverlay(state = fireState, onFinish = fire::acknowledge)
 }

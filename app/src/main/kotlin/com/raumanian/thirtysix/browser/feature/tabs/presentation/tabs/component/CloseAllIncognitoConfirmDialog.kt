@@ -18,6 +18,7 @@ fun CloseAllIncognitoConfirmDialog(
     count: Int,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     ConfirmDialog(
         title = stringResource(R.string.tabs_action_close_all_incognito),
@@ -27,7 +28,7 @@ fun CloseAllIncognitoConfirmDialog(
         onConfirm = onConfirm,
         onDismiss = onDismiss,
         glyph = AppIcons.IncognitoFilled,
-        modifier = Modifier.testTag(TEST_TAG_CLOSE_ALL_INCOGNITO_DIALOG),
+        modifier = modifier.testTag(TEST_TAG_CLOSE_ALL_INCOGNITO_DIALOG),
     )
 }
 

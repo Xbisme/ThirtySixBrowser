@@ -51,8 +51,8 @@ private const val CONTENT_TYPE_SWITCH = "switch"
 internal fun PrivacyDashboardSheet(
     dashboardFlow: StateFlow<PageDashboardState?>,
     onDismiss: () -> Unit,
-    onProtectionSwitched: (Boolean) -> Unit,
-    onFireproofSwitched: (Boolean) -> Unit,
+    onProtectionSwitch: (Boolean) -> Unit,
+    onFireproofSwitch: (Boolean) -> Unit,
 ) {
     val dashboard by dashboardFlow.collectAsStateWithLifecycle()
     val state = dashboard ?: return
@@ -86,7 +86,7 @@ internal fun PrivacyDashboardSheet(
                         stringResource(R.string.hub_protection_site_off, state.site)
                     },
                     checked = state.protectionOn,
-                    onChange = onProtectionSwitched,
+                    onChange = onProtectionSwitch,
                     icon = AppIcons.Shield,
                     tag = TEST_TAG_DASHBOARD_PROTECTION_SWITCH,
                 )
@@ -97,7 +97,7 @@ internal fun PrivacyDashboardSheet(
                         title = stringResource(R.string.dashboard_fireproof_title),
                         body = stringResource(R.string.dashboard_fireproof_help),
                         checked = fireproof,
-                        onChange = onFireproofSwitched,
+                        onChange = onFireproofSwitch,
                         icon = AppIcons.Fire,
                         tag = TEST_TAG_DASHBOARD_FIREPROOF_SWITCH,
                     )
@@ -107,6 +107,8 @@ internal fun PrivacyDashboardSheet(
     }
 }
 
+// Title and site are one lazy-list item; they stay siblings so the layout is unchanged.
+@Suppress("ktlint:compose:multiple-emitters-check")
 @Composable
 private fun DashboardTitle(state: PageDashboardState) {
     Text(

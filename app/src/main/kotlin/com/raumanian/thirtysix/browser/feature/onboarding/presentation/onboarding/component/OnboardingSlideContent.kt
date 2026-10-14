@@ -213,7 +213,7 @@ private fun ThemePreviewCard(
 }
 
 @Composable
-private fun PreviewHalf(surface: Color, accent: Color, modifier: Modifier) {
+private fun PreviewHalf(surface: Color, accent: Color, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize().background(surface).padding(Spacing.sm)) {
         Box(
             modifier = Modifier

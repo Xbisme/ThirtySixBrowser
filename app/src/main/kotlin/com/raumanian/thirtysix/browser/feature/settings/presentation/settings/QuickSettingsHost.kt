@@ -6,6 +6,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.core.presentation.util.QuickSetting
@@ -22,10 +23,11 @@ import com.raumanian.thirtysix.browser.core.presentation.util.QuickSetting
 @Composable
 internal fun QuickSettingsHost(
     request: QuickSetting?,
-    onRequestHandled: () -> Unit,
+    onConsumeRequest: () -> Unit,
     snackbarHostState: SnackbarHostState,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
+    val currentOnConsumeRequest by rememberUpdatedState(onConsumeRequest)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(request) {
         when (request) {
@@ -39,7 +41,7 @@ internal fun QuickSettingsHost(
             QuickSetting.TextSize -> viewModel.onTextSizeRowClick()
             null -> return@LaunchedEffect
         }
-        onRequestHandled()
+        currentOnConsumeRequest()
     }
     SettingsDialogHost(state = state, viewModel = viewModel)
     SettingsSnackbarEffect(viewModel = viewModel, snackbarHostState = snackbarHostState)

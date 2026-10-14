@@ -35,8 +35,8 @@ import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
  */
 @Composable
 internal fun rememberDownloadRequestHandler(
-    onGranted: (url: String, userAgent: String, contentDisposition: String?, mimeType: String?) -> Unit,
-    onDenied: (permanently: Boolean) -> Unit,
+    onGrant: (url: String, userAgent: String, contentDisposition: String?, mimeType: String?) -> Unit,
+    onDeny: (permanently: Boolean) -> Unit,
 ): (String, String, String?, String?) -> Unit {
     val context = LocalContext.current
 
@@ -56,11 +56,11 @@ internal fun rememberDownloadRequestHandler(
         pending.value = null
         when {
             granted && request != null ->
-                onGranted(request.url, request.userAgent, request.contentDisposition, request.mimeType)
+                onGrant(request.url, request.userAgent, request.contentDisposition, request.mimeType)
             // A denial with the rationale flag now false means the platform will not show
             // the dialog again, so the message must point at system settings instead of
             // re-prompting into a void (FR-012).
-            else -> onDenied(!context.shouldShowStorageRationale())
+            else -> onDeny(!context.shouldShowStorageRationale())
         }
     }
 
@@ -73,16 +73,16 @@ internal fun rememberDownloadRequestHandler(
             onDismiss = {
                 showRationale.value = false
                 pending.value = null
-                onDenied(false)
+                onDeny(false)
             },
         )
     }
 
-    return remember(onGranted, onDenied) {
+    return remember(onGrant, onDeny) {
         { url, userAgent, contentDisposition, mimeType ->
             when {
                 !isLegacyStoragePermissionRequired() || context.hasLegacyStoragePermission() ->
-                    onGranted(url, userAgent, contentDisposition, mimeType)
+                    onGrant(url, userAgent, contentDisposition, mimeType)
 
                 context.shouldShowStorageRationale() -> {
                     pending.value = PendingDownload(url, userAgent, contentDisposition, mimeType)

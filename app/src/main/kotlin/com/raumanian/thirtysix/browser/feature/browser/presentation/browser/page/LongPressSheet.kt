@@ -29,8 +29,13 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressMen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LongPressSheet(menu: LongPressMenu, onAction: (LongPressAction) -> Unit, onDismiss: () -> Unit) {
-    SheetFrame(onDismiss = onDismiss, modifier = Modifier.testTag(TEST_TAG_LONG_PRESS_SHEET)) {
+fun LongPressSheet(
+    menu: LongPressMenu,
+    onAction: (LongPressAction) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SheetFrame(onDismiss = onDismiss, modifier = modifier.testTag(TEST_TAG_LONG_PRESS_SHEET)) {
         Column(modifier = Modifier.padding(bottom = Spacing.md)) {
             Text(
                 text = menu.header,

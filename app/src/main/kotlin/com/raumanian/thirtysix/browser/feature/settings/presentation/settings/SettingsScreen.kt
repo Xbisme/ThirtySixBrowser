@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -67,6 +68,7 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun SettingsScreen(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: SettingsViewModel = hiltViewModel(),
     destinations: SettingsDestinations = SettingsDestinations(),
@@ -95,7 +97,7 @@ fun SettingsScreen(
     )
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = { SettingsTopBar(onBackClick = navigateBack) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -305,19 +307,20 @@ private fun LazyListScope.aboutSection(state: SettingsUiState) {
 private fun LanguageChooserHost(
     selected: AppLanguage,
     onSelect: (AppLanguage) -> Unit,
-    onApplied: () -> Unit,
+    onApply: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val currentOnApply by rememberUpdatedState(onApply)
     val locales = LocalConfiguration.current.locales
     val localesWhenOpened = remember { locales }
     var picked by remember { mutableStateOf(false) }
     LaunchedEffect(locales, picked) {
-        if (picked && locales != localesWhenOpened) onApplied()
+        if (picked && locales != localesWhenOpened) currentOnApply()
     }
     LaunchedEffect(picked) {
         if (picked) {
             delay(BrowserLimits.LANGUAGE_APPLY_TIMEOUT_MS)
-            onApplied()
+            currentOnApply()
         }
     }
     AppLanguageChooserDialog(
@@ -347,7 +350,7 @@ internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewM
         SettingsDialog.LanguageChooser -> LanguageChooserHost(
             selected = state.appLanguage,
             onSelect = viewModel::onLanguageSelected,
-            onApplied = viewModel::onLanguageApplied,
+            onApply = viewModel::onLanguageApplied,
             onDismiss = viewModel::dismissDialog,
         )
         is SettingsDialog.ClearBrowsingData -> ClearBrowsingDataDialog(

@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.feature.downloads.fake
 
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadListItem
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
@@ -56,7 +56,7 @@ internal open class RecordingGateway(
     /** Marks a file present, by recorded URI or by name — the probe accepts either. */
     fun addFile(uri: String) = existingFiles.add(uri)
 
-    override suspend fun enqueue(request: DownloadRequest): Long? = null
+    override suspend fun enqueue(request: DownloadOrder): Long? = null
     override suspend fun queryStatuses(transferHandles: List<Long>): Map<Long, DownloadStatus> =
         statuses.filterKeys { it in transferHandles }
 

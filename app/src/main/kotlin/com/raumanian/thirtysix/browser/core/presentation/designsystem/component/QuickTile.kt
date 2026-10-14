@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -103,7 +104,7 @@ fun QuickTile(
 
 /** The label, wrapping to two lines (FR-055), and the optional value line under it. */
 @Composable
-private fun QuickTileLabels(label: String, value: String?) {
+private fun ColumnScope.QuickTileLabels(label: String, value: String?) {
     Text(
         text = label,
         style = MaterialTheme.typography.labelMedium.copy(hyphens = Hyphens.Auto),

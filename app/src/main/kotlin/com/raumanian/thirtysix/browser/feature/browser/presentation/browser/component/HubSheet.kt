@@ -98,7 +98,7 @@ internal fun HubSheet(
             HubProtectionSection(
                 status = protection,
                 onBanner = closeThen(if (protection.isWebPage) callbacks.onDashboard else callbacks.onPrivacy),
-                onProtectionSwitched = { on -> closeThen { callbacks.onProtectionSwitched(on) }() },
+                onProtectionSwitch = { on -> closeThen { callbacks.onProtectionSwitched(on) }() },
             )
             RowBanner(
                 title = stringResource(R.string.hub_incognito_banner_title),

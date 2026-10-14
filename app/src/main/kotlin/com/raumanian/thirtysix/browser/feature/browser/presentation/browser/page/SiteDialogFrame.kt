@@ -41,6 +41,7 @@ fun SiteDialogFrame(
     actions: List<SiteDialogAction>,
     onDismiss: () -> Unit,
     @DrawableRes glyph: Int,
+    modifier: Modifier = Modifier,
     body: String? = null,
     dismissOnOutside: Boolean = true,
     content: (@Composable () -> Unit)? = null,
@@ -52,7 +53,7 @@ fun SiteDialogFrame(
         Surface(
             shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.surfaceContainerLow,
-            modifier = Modifier
+            modifier = modifier
                 .widthIn(max = Dimens.dialogMaxWidth)
                 .semantics { paneTitle = title },
         ) {

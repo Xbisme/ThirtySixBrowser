@@ -37,7 +37,7 @@ internal const val TEST_TAG_HUB_NOT_SECURE: String = "hub_not_secure"
 internal fun HubProtectionSection(
     status: PageProtectionStatus,
     onBanner: () -> Unit,
-    onProtectionSwitched: (Boolean) -> Unit,
+    onProtectionSwitch: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (!status.isWebPage) {
@@ -69,7 +69,7 @@ internal fun HubProtectionSection(
             trailing = { Switch(checked = status.protectionOn, onCheckedChange = null) },
             modifier = Modifier
                 .testTag(TEST_TAG_HUB_PROTECTION_SWITCH)
-                .toggleable(value = status.protectionOn, role = Role.Switch, onValueChange = onProtectionSwitched),
+                .toggleable(value = status.protectionOn, role = Role.Switch, onValueChange = onProtectionSwitch),
         )
         if (!status.connectionSecure) {
             ListRow(

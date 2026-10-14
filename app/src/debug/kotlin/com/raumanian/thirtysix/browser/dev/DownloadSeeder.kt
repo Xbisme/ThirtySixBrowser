@@ -6,11 +6,11 @@ import android.content.Intent
 import android.util.Log
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
@@ -57,6 +57,9 @@ class DownloadSeeder : BroadcastReceiver() {
     @Inject
     lateinit var repository: DownloadsRepository
 
+    @Inject
+    lateinit var dispatchers: DispatcherProvider
+
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             ACTION_SEED -> seed(
@@ -72,7 +75,7 @@ class DownloadSeeder : BroadcastReceiver() {
     private fun seed(count: Int, days: Int) {
         // goAsync() is deliberately not used: seeding takes far longer than a receiver's
         // allowed window, and this is a debug tool where a detached scope is acceptable.
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dispatchers.io).launch {
             Log.i(TAG, "seeding $count download records across $days day(s)")
             val now = System.currentTimeMillis()
             val span = TimeUnit.DAYS.toMillis(days.toLong()).coerceAtLeast(1L)
@@ -103,7 +106,7 @@ class DownloadSeeder : BroadcastReceiver() {
     }
 
     private fun clear() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dispatchers.io).launch {
             val before = repository.count()
             // Deleted one at a time because the repository deliberately has no clear-all:
             // the feature does not offer one either (bulk clearing is Spec 016's business),

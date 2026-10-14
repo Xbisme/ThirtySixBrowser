@@ -28,7 +28,10 @@ import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
  * `FLAG_SECURE`, which covers this overlay too (FR-017).
  */
 @Composable
-fun FullscreenOverlay(controller: FullscreenController) {
+fun FullscreenOverlay(
+    controller: FullscreenController,
+    modifier: Modifier = Modifier,
+) {
     val view by controller.view.collectAsStateWithLifecycle()
     val fullscreenView = view ?: return
     val activity = LocalContext.current.findActivity()
@@ -57,7 +60,7 @@ fun FullscreenOverlay(controller: FullscreenController) {
             }
         },
         onRelease = { it.removeAllViews() },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.scrim),
     )

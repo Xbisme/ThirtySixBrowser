@@ -148,7 +148,7 @@ private fun SettingsRowLayout(
     tone: SettingsIconTone,
     title: String,
     summary: String?,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     trailing: @Composable RowScope.() -> Unit,
 ) {
     Row(

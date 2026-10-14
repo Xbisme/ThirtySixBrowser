@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
@@ -24,7 +24,7 @@ internal fun instrumentedNoOpStartDownloadUseCase(): StartDownloadUseCase = Star
 )
 
 private object InstrumentedInertGateway : DownloadManagerGateway {
-    override suspend fun enqueue(request: DownloadRequest): Long? = null
+    override suspend fun enqueue(request: DownloadOrder): Long? = null
     override suspend fun queryStatuses(transferHandles: List<Long>) = emptyMap<Long, DownloadStatus>()
     override suspend fun cancel(transferHandle: Long) = false
     override suspend fun contentUriFor(transferHandle: Long): String? = null

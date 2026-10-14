@@ -12,13 +12,13 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
 import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -53,6 +53,9 @@ class TabSeeder : BroadcastReceiver() {
     lateinit var tabRepository: TabRepository
 
     @Inject
+    lateinit var dispatchers: DispatcherProvider
+
+    @Inject
     lateinit var screenshotCache: ScreenshotCache
 
     @Inject
@@ -60,7 +63,7 @@ class TabSeeder : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dispatchers.io).launch {
             try {
                 if (intent.action == ACTION_SEED_TABS) {
                     seed(requested = intent.getIntExtra(EXTRA_COUNT, BrowserLimits.MAX_TABS))

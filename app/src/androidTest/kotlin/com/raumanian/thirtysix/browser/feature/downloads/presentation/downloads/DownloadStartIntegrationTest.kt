@@ -4,7 +4,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
-import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
@@ -108,7 +108,7 @@ class DownloadStartIntegrationTest {
     }
 
     private class FakeGateway(private val handle: Long?) : DownloadManagerGateway {
-        override suspend fun enqueue(request: DownloadRequest): Long? = handle
+        override suspend fun enqueue(request: DownloadOrder): Long? = handle
         override suspend fun queryStatuses(transferHandles: List<Long>) = emptyMap<Long, DownloadStatus>()
         override suspend fun cancel(transferHandle: Long) = false
         override suspend fun contentUriFor(transferHandle: Long): String? = null

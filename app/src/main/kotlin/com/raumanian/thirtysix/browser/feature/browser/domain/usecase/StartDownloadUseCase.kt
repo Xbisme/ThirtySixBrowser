@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import javax.inject.Inject
@@ -53,7 +53,7 @@ class StartDownloadUseCase @Inject constructor(
         val fileName = sanitizeFileName(contentDisposition, url)
         val resolvedMimeType = mimeType.orEmpty()
 
-        val request = DownloadRequest(
+        val request = DownloadOrder(
             sourceUrl = url,
             fileName = fileName,
             mimeType = resolvedMimeType,

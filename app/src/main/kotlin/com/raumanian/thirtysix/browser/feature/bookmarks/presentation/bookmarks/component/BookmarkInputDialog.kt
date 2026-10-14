@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.PillButton
@@ -20,16 +21,19 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spac
  * system's pill buttons (filled OK, text Cancel). The shared `ConfirmDialog`/`ChoiceDialog`
  * have no slot for input fields, so this stays AlertDialog-based.
  */
+@Suppress("LongParameterList") // A dialog frame: title, confirm state, two actions, modifier and content.
 @Composable
 internal fun BookmarkInputDialog(
     title: String,
     confirmEnabled: Boolean,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         titleContentColor = MaterialTheme.colorScheme.onSurface,

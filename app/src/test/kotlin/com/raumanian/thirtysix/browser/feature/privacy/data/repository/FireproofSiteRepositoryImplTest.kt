@@ -8,7 +8,10 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDat
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -26,15 +29,19 @@ class FireproofSiteRepositoryImplTest {
 
     private lateinit var db: AppDatabase
     private lateinit var repository: FireproofSiteRepositoryImpl
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
 
     @Before
     fun setUp() {
         db = inMemoryAppDatabase()
-        repository = FireproofSiteRepositoryImpl(db.fireproofSiteDao(), TestDispatchers)
+        repository = FireproofSiteRepositoryImpl(db.fireproofSiteDao(), TestDispatchers, scope)
     }
 
     @After
-    fun tearDown() = db.close()
+    fun tearDown() {
+        scope.cancel()
+        db.close()
+    }
 
     @Test
     fun `added sites are listed newest first and visible in the snapshot at once`() = runTest {
@@ -70,7 +77,7 @@ class FireproofSiteRepositoryImplTest {
 
     @Test
     fun `a failed write is reported as an error and leaves the snapshot unchanged`() = runTest {
-        val failing = FireproofSiteRepositoryImpl(FailingDao, TestDispatchers)
+        val failing = FireproofSiteRepositoryImpl(FailingDao, TestDispatchers, scope)
 
         val result = failing.add("a.example")
 

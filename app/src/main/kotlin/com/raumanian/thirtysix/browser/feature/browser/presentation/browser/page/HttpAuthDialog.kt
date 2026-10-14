@@ -26,7 +26,11 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
  * it. Dismissing cancels.
  */
 @Composable
-fun HttpAuthDialog(request: PageRequest.HttpAuth, done: () -> Unit) {
+fun HttpAuthDialog(
+    request: PageRequest.HttpAuth,
+    modifier: Modifier = Modifier,
+    done: () -> Unit,
+) {
     var username by remember(request) { mutableStateOf("") }
     var password by remember(request) { mutableStateOf("") }
     val cancel = {
@@ -34,6 +38,7 @@ fun HttpAuthDialog(request: PageRequest.HttpAuth, done: () -> Unit) {
         done()
     }
     SiteDialogFrame(
+        modifier = modifier,
         title = stringResource(R.string.http_auth_title, request.host),
         body = request.realm,
         actions = listOf(

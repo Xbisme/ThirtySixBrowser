@@ -100,7 +100,7 @@ fun TabsScreen(
                 state = state,
                 navController = navController,
                 fire = fireButton,
-                onModeSelected = viewModel::onModeSelected,
+                onModeSelect = viewModel::onModeSelected,
                 onCloseAll = if (state.mode == TabsMode.Incognito) {
                     viewModel::onCloseAllIncognitoRequested
                 } else {
@@ -134,6 +134,7 @@ private fun TabsErrorEventEffect(
     snackbarHostState: SnackbarHostState,
     consumeErrorEvent: () -> Unit,
 ) {
+    val currentConsumeErrorEvent by rememberUpdatedState(consumeErrorEvent)
     val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
     val maxIncognitoMessage = stringResource(
         R.string.tabs_error_max_incognito_tabs_reached,
@@ -143,11 +144,11 @@ private fun TabsErrorEventEffect(
         when (errorEvent) {
             is TabsErrorEvent.MaxTabsReached -> {
                 snackbarHostState.showSnackbar(maxTabsMessage)
-                consumeErrorEvent()
+                currentConsumeErrorEvent()
             }
             is TabsErrorEvent.MaxIncognitoTabsReached -> {
                 snackbarHostState.showSnackbar(maxIncognitoMessage)
-                consumeErrorEvent()
+                currentConsumeErrorEvent()
             }
             null -> Unit
         }
@@ -177,7 +178,7 @@ private fun TabsHeader(
     state: TabsUiState,
     navController: NavHostController,
     fire: FireButton,
-    onModeSelected: (TabsMode) -> Unit,
+    onModeSelect: (TabsMode) -> Unit,
     onCloseAll: () -> Unit,
 ) {
     val incognito = state.mode == TabsMode.Incognito
@@ -227,13 +228,13 @@ private fun TabsHeader(
                 .padding(horizontal = Spacing.sm)
                 .semantics { heading() },
         )
-        ModeChips(incognito = incognito, showIncognito = state.incognitoTabCount > 0, onModeSelected = onModeSelected)
+        ModeChips(incognito = incognito, showIncognito = state.incognitoTabCount > 0, onModeSelect = onModeSelect)
     }
 }
 
 /** Open / Incognito chips; the Incognito chip appears only while incognito tabs exist (Q3). */
 @Composable
-private fun ModeChips(incognito: Boolean, showIncognito: Boolean, onModeSelected: (TabsMode) -> Unit) {
+private fun ModeChips(incognito: Boolean, showIncognito: Boolean, onModeSelect: (TabsMode) -> Unit) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         modifier = Modifier.padding(horizontal = Spacing.sm),
@@ -241,7 +242,7 @@ private fun ModeChips(incognito: Boolean, showIncognito: Boolean, onModeSelected
         ThirtySixChip(
             label = stringResource(R.string.tabs_chip_open),
             selected = !incognito,
-            onClick = { onModeSelected(TabsMode.Open) },
+            onClick = { onModeSelect(TabsMode.Open) },
             leadingIcon = AppIcons.Tab,
             modifier = Modifier.testTag(TEST_TAG_TABS_CHIP_OPEN),
         )
@@ -249,7 +250,7 @@ private fun ModeChips(incognito: Boolean, showIncognito: Boolean, onModeSelected
             ThirtySixChip(
                 label = stringResource(R.string.tabs_chip_incognito),
                 selected = incognito,
-                onClick = { onModeSelected(TabsMode.Incognito) },
+                onClick = { onModeSelect(TabsMode.Incognito) },
                 leadingIcon = AppIcons.Incognito,
                 modifier = Modifier.testTag(TEST_TAG_TABS_CHIP_INCOGNITO),
             )

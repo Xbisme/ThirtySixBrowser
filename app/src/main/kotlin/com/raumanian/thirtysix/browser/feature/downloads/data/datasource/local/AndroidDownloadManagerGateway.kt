@@ -5,7 +5,7 @@ import android.content.Context
 import android.os.Environment
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
-import com.raumanian.thirtysix.browser.core.domain.model.DownloadRequest
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,7 +23,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
     private val downloadManager: DownloadManager?
         get() = runCatching { context.getSystemService<DownloadManager>() }.getOrNull()
 
-    override suspend fun enqueue(request: DownloadRequest): Long? = runCatching {
+    override suspend fun enqueue(request: DownloadOrder): Long? = runCatching {
         val manager = downloadManager ?: return null
         val platformRequest = DownloadManager.Request(request.sourceUrl.toUri()).apply {
             setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, request.fileName)

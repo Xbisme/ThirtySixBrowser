@@ -97,7 +97,11 @@ internal class TestProtection(
     )
 
     @Composable
-    fun Content(url: String, incognito: Boolean = false) {
+    fun Content(
+        url: String,
+        modifier: Modifier = Modifier,
+        incognito: Boolean = false,
+    ) {
         BrowserWebView(
             incognitoProfile = IncognitoProfiles,
             state = remember { BrowserUiState(currentUrl = url, loadingState = LoadingState.Idle, isIncognito = incognito) },
@@ -117,7 +121,7 @@ internal class TestProtection(
                 onIconReceived = { _, _ -> },
                 onScreenshotReady = {},
             ),
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             protection = hooks,
         )
     }

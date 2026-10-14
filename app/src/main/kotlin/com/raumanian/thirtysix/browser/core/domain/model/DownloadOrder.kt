@@ -15,7 +15,7 @@ package com.raumanian.thirtysix.browser.core.domain.model
  *   the same identity as the request that triggered it.
  * @property referer the page the download was initiated from, or null.
  */
-data class DownloadRequest(
+data class DownloadOrder(
     val sourceUrl: String,
     val fileName: String,
     val mimeType: String,

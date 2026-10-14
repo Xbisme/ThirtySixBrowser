@@ -116,7 +116,7 @@ fun BookmarksTopBar(
         )
         BookmarksSearchWell(
             query = state.searchQuery,
-            onFocused = { if (!state.isSearchActive) onSearchOpen() },
+            onFocus = { if (!state.isSearchActive) onSearchOpen() },
             onQueryChange = onSearchQueryChange,
             modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.sm),
         )
@@ -127,7 +127,7 @@ fun BookmarksTopBar(
 @Composable
 private fun BookmarksSearchWell(
     query: String,
-    onFocused: () -> Unit,
+    onFocus: () -> Unit,
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -142,7 +142,7 @@ private fun BookmarksSearchWell(
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         modifier = modifier
             .fillMaxWidth()
-            .onFocusChanged { if (it.isFocused) onFocused() },
+            .onFocusChanged { if (it.isFocused) onFocus() },
         decorationBox = { innerTextField ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,

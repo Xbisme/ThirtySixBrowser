@@ -45,7 +45,7 @@ class ProtectionScreensTest {
     private fun hub(status: PageProtectionStatus, switched: MutableList<Boolean> = mutableListOf()) {
         composeRule.setContent {
             ThirtySixTheme {
-                HubProtectionSection(status = status, onBanner = {}, onProtectionSwitched = { switched += it })
+                HubProtectionSection(status = status, onBanner = {}, onProtectionSwitch = { switched += it })
             }
         }
     }

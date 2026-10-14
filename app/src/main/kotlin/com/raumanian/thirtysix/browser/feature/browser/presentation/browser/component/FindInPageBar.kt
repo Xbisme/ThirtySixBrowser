@@ -129,7 +129,7 @@ internal fun FindInPageBar(
 
 /** The search well: icon, text field, and the "current/total" count. */
 @Composable
-private fun FindField(state: FindInPageState, onQueryChange: (String) -> Unit, modifier: Modifier) {
+private fun FindField(state: FindInPageState, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
     val shape = ThirtySixTheme.shapes.full
     val content = LocalContentColor.current

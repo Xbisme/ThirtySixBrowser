@@ -8,11 +8,11 @@ import android.util.Log
 import androidx.room.withTransaction
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
@@ -63,13 +63,16 @@ class HistorySeeder : BroadcastReceiver() {
     @Inject
     lateinit var historyRepository: HistoryRepository
 
+    @Inject
+    lateinit var dispatchers: DispatcherProvider
+
     /** Used only to group each batch of repository writes into one transaction. */
     @Inject
     lateinit var database: AppDatabase
 
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
-        val scope = CoroutineScope(Dispatchers.IO)
+        val scope = CoroutineScope(dispatchers.io)
         scope.launch {
             try {
                 when (intent.action) {

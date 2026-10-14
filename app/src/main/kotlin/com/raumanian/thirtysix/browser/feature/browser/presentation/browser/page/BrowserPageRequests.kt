@@ -67,7 +67,7 @@ private fun rememberPageRequestRenderers(
                 }
                 is PageRequest.JsDialog -> {
                     val suppress = { session.dialogs.suppress(request.tabId, request.generation) }
-                    SiteJsDialog(request, onSuppress = suppress, done)
+                    SiteJsDialog(request, onSuppress = suppress, done = done)
                     true
                 }
                 is PageRequest.LeavePage -> {
@@ -75,7 +75,7 @@ private fun rememberPageRequestRenderers(
                     true
                 }
                 is PageRequest.HttpAuth -> {
-                    HttpAuthDialog(request, done)
+                    HttpAuthDialog(request, done = done)
                     true
                 }
                 is PageRequest.LongPress -> longPress?.let {

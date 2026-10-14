@@ -62,8 +62,8 @@ fun AppNavHost(
                 BrowserSlots(
                     fireButton = rememberFireButton(onConfirm = {}),
                     fireOverlay = { FireOverlayHost() },
-                    quickSettings = { request, onRequestHandled, snackbar ->
-                        QuickSettingsHost(request = request, onRequestHandled = onRequestHandled, snackbarHostState = snackbar)
+                    quickSettings = { request, onConsumeRequest, snackbar ->
+                        QuickSettingsHost(request = request, onConsumeRequest = onConsumeRequest, snackbarHostState = snackbar)
                     },
                     incomingContent = entryPointViewModel.browserHooks,
                     destinations = BrowserDestinations(

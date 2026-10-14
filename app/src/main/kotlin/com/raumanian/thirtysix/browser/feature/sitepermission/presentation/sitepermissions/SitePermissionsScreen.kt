@@ -44,6 +44,7 @@ import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
  */
 @Composable
 fun SitePermissionsScreen(
+    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: SitePermissionsViewModel = hiltViewModel(),
 ) {
@@ -52,7 +53,7 @@ fun SitePermissionsScreen(
     BackHandler(onBack = navigateBack)
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             SettingsTopBar(
