@@ -115,8 +115,8 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 
 ## Phase 7: Delivery
 
-- [ ] T016 Push, then open the PR with the steps, Baseline vs Results and the attribution footer. Merge with CI 6/6 once the owner agrees.
-- [ ] T017 Memory note after the merge.
+- [X] T016 Push, then open the PR with the steps, Baseline vs Results and the attribution footer. Merge with CI 6/6 once the owner agrees.
+- [X] T017 Memory note after the merge.
 
 ## Dependencies
 
