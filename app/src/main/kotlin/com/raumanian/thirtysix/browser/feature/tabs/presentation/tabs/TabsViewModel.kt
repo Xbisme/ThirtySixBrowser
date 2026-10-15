@@ -120,14 +120,9 @@ class TabsViewModel @Inject constructor(
 
     private fun onTabClick(tabId: Long) {
         viewModelScope.launch {
-            if (tabId < 0L) {
-                // The tab repository only knows normal tabs, so tapping an incognito
-                // tab just closes the switcher without bumping its lastActiveAt.
-                showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
-            } else {
-                tabs.switchActiveTab(tabId)
-                showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
-            }
+            // Incognito tabs have negative ids and live only in memory.
+            if (tabId < 0L) incognitoTabs.switchActiveTab(tabId) else tabs.switchActiveTab(tabId)
+            showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
         }
     }
 
