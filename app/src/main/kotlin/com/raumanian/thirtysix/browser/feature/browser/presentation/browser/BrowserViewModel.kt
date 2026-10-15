@@ -23,8 +23,6 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.CurrentPage
 import com.raumanian.thirtysix.browser.feature.browser.domain.repository.CurrentPageRepository
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.StartDownloadResult
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.StartDownloadUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkResult
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
@@ -66,7 +64,6 @@ class BrowserViewModel @Inject constructor(
     private val toggleBookmark: ToggleBookmarkUseCase,
     private val recordHistoryEntry: RecordHistoryEntryUseCase,
     private val updateHistoryEntryTitle: UpdateHistoryEntryTitleUseCase,
-    private val startDownload: StartDownloadUseCase,
     private val pageStore: CurrentPageRepository,
 ) : ViewModel() {
 
@@ -155,7 +152,6 @@ class BrowserViewModel @Inject constructor(
             is BrowserAction.Page -> onPage(action)
             is BrowserAction.AddressBar -> onAddressBar(action)
             is BrowserAction.Home -> onHome(action)
-            is BrowserAction.Download -> onDownload(action)
             BrowserAction.StarTapped -> onStarTapped()
             BrowserAction.ToggleDesktopMode -> onDesktopModeToggled()
             BrowserAction.BackWithoutHistory -> onBackWithoutHistory()
@@ -197,14 +193,6 @@ class BrowserViewModel @Inject constructor(
         }
     }
 
-    private fun onDownload(action: BrowserAction.Download) {
-        when (action) {
-            is BrowserAction.Download.Requested ->
-                onDownloadRequested(action.url, action.userAgent, action.contentDisposition, action.mimeType)
-            is BrowserAction.Download.StoragePermissionDenied -> onStoragePermissionDenied(action.permanently)
-        }
-    }
-
     private fun onStarTapped() {
         val page = pageStore.page.value
         val url = page.url
@@ -219,32 +207,6 @@ class BrowserViewModel @Inject constructor(
                 eventChannel.trySend(BrowserEvent.Bookmark(event))
             }
         }
-    }
-
-    // Incognito downloads are recorded like any other; the tab's incognito state is not consulted.
-    private fun onDownloadRequested(
-        url: String,
-        userAgent: String,
-        contentDisposition: String?,
-        mimeType: String?,
-    ) {
-        viewModelScope.launch {
-            val event = when (val result = startDownload(url, contentDisposition, mimeType, userAgent)) {
-                is StartDownloadResult.Started -> DownloadSnackbarEvent.Started(result.fileName)
-                StartDownloadResult.ServiceUnavailable -> DownloadSnackbarEvent.ServiceUnavailable
-            }
-            eventChannel.trySend(BrowserEvent.Download(event))
-        }
-    }
-
-    // Called from the permission launcher, the only place that knows the person's answer.
-    private fun onStoragePermissionDenied(permanently: Boolean) {
-        val event = if (permanently) {
-            DownloadSnackbarEvent.StoragePermissionPermanentlyDenied
-        } else {
-            DownloadSnackbarEvent.StoragePermissionDenied
-        }
-        eventChannel.trySend(BrowserEvent.Download(event))
     }
 
     /** Flips the active tab's page mode; nothing without an active tab. The screen reloads the WebView. */

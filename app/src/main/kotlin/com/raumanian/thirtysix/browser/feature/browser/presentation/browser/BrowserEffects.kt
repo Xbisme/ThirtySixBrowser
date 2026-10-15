@@ -27,11 +27,6 @@ internal fun BrowserEventEffects(
     val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
     val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
     val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
-    val downloadStartedTemplate = stringResource(R.string.downloads_started_snackbar)
-    val downloadServiceUnavailableMessage = stringResource(R.string.downloads_service_unavailable)
-    val storagePermissionDeniedMessage = stringResource(R.string.downloads_storage_permission_denied)
-    val storagePermissionSettingsMessage =
-        stringResource(R.string.downloads_storage_permission_denied_permanently)
 
     EventEffect(events) { event ->
         val message = when (event) {
@@ -50,12 +45,6 @@ internal fun BrowserEventEffects(
                 BookmarkSnackbarEvent.Added -> bookmarkAddedMessage
                 BookmarkSnackbarEvent.Removed -> bookmarkRemovedMessage
             }
-            is BrowserEvent.Download -> when (val download = event.event) {
-                is DownloadSnackbarEvent.Started -> downloadStartedTemplate.format(download.fileName)
-                DownloadSnackbarEvent.ServiceUnavailable -> downloadServiceUnavailableMessage
-                DownloadSnackbarEvent.StoragePermissionDenied -> storagePermissionDeniedMessage
-                DownloadSnackbarEvent.StoragePermissionPermanentlyDenied -> storagePermissionSettingsMessage
-            }
         }
         if (message != null) scope.launch { snackbarHostState.showSnackbar(message) }
     }
@@ -69,5 +58,24 @@ internal fun HubEventEffect(events: Flow<HubEvent>, snackbarHostState: SnackbarH
         when (event) {
             HubEvent.MaxIncognitoTabsReached -> snackbarHostState.showSnackbar(maxIncognitoMessage)
         }
+    }
+}
+
+/** Download messages; shown apart from the collector so a showing one never holds up the next. */
+@Composable
+internal fun DownloadRequestEventEffect(events: Flow<DownloadSnackbarEvent>, snackbarHostState: SnackbarHostState) {
+    val scope = rememberCoroutineScope()
+    val startedTemplate = stringResource(R.string.downloads_started_snackbar)
+    val serviceUnavailable = stringResource(R.string.downloads_service_unavailable)
+    val permissionDenied = stringResource(R.string.downloads_storage_permission_denied)
+    val permissionDeniedPermanently = stringResource(R.string.downloads_storage_permission_denied_permanently)
+    EventEffect(events) { event ->
+        val message = when (event) {
+            is DownloadSnackbarEvent.Started -> startedTemplate.format(event.fileName)
+            DownloadSnackbarEvent.ServiceUnavailable -> serviceUnavailable
+            DownloadSnackbarEvent.StoragePermissionDenied -> permissionDenied
+            DownloadSnackbarEvent.StoragePermissionPermanentlyDenied -> permissionDeniedPermanently
+        }
+        scope.launch { snackbarHostState.showSnackbar(message) }
     }
 }

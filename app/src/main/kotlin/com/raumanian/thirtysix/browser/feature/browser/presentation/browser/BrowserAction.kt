@@ -48,17 +48,6 @@ sealed interface BrowserAction {
         data object NavigateFrom : Home
     }
 
-    sealed interface Download : BrowserAction {
-        data class Requested(
-            val url: String,
-            val userAgent: String,
-            val contentDisposition: String?,
-            val mimeType: String?,
-        ) : Download
-
-        data class StoragePermissionDenied(val permanently: Boolean) : Download
-    }
-
     data object StarTapped : BrowserAction
 
     data object ToggleDesktopMode : BrowserAction

@@ -135,7 +135,6 @@ class BrowserViewModelStarToggleTest {
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(
                 FakeHistoryRepository(),
             ),
-            startDownload = noOpStartDownloadUseCase(),
             pageStore = CurrentPageRepositoryImpl(url),
         )
     }

@@ -83,6 +83,7 @@ fun BrowserRoute(
     modifier: Modifier = Modifier,
     viewModel: BrowserViewModel = hiltViewModel(),
     findInPage: FindInPageViewModel = hiltViewModel(),
+    downloadRequests: DownloadRequestViewModel = hiltViewModel(),
     hubViewModel: HubViewModel = hiltViewModel(),
     suggestions: AddressSuggestionsViewModel = hiltViewModel(),
     pageTextSize: PageTextSizeViewModel = hiltViewModel(),
@@ -109,6 +110,7 @@ fun BrowserRoute(
         snackbarHostState = snackbarHostState,
     )
     HubEventEffect(events = hubViewModel.events, snackbarHostState = snackbarHostState)
+    DownloadRequestEventEffect(events = downloadRequests.events, snackbarHostState = snackbarHostState)
     // After the per-site switch the page reloads with the new setting.
     EventEffect(protection.events) { webViewActions.reload() }
 
@@ -133,6 +135,7 @@ fun BrowserRoute(
         actions = BrowserScreenActions(
             onAction = viewModel::onAction,
             onFindAction = findInPage::onAction,
+            onDownloadAction = downloadRequests::onAction,
             onHubAction = hubViewModel::onAction,
             onSuggestionsAction = suggestions::onAction,
             onProtectionAction = protection::onAction,
@@ -392,9 +395,11 @@ internal fun BrowserScreen(
     val context = LocalContext.current
     val longPressDownload = rememberDownloadRequestHandler(
         onGrant = { url, userAgent, disposition, mimeType ->
-            onAction(BrowserAction.Download.Requested(url, userAgent, disposition, mimeType))
+            actions.onDownloadAction(DownloadRequestAction.Requested(url, userAgent, disposition, mimeType))
         },
-        onDeny = { permanently -> onAction(BrowserAction.Download.StoragePermissionDenied(permanently)) },
+        onDeny = { permanently ->
+            actions.onDownloadAction(DownloadRequestAction.StoragePermissionDenied(permanently))
+        },
     )
     val currentIncognito by rememberUpdatedState(state.isIncognito)
     val longPress = remember(sources.longPressActions, snackbarHostState, longPressDownload) {
@@ -546,9 +551,11 @@ private fun BrowserContent(
     // On API 29+ the storage-permission gate passes straight through.
     val onDownloadRequested = rememberDownloadRequestHandler(
         onGrant = { url, userAgent, disposition, mimeType ->
-            actions.onAction(BrowserAction.Download.Requested(url, userAgent, disposition, mimeType))
+            actions.onDownloadAction(DownloadRequestAction.Requested(url, userAgent, disposition, mimeType))
         },
-        onDeny = { permanently -> actions.onAction(BrowserAction.Download.StoragePermissionDenied(permanently)) },
+        onDeny = { permanently ->
+            actions.onDownloadAction(DownloadRequestAction.StoragePermissionDenied(permanently))
+        },
     )
     val context = LocalContext.current
     val incognitoProfile = remember(context) { context.incognitoWebProfile() }

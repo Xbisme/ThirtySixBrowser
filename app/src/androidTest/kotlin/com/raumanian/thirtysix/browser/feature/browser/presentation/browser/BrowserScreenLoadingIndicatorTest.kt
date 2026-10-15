@@ -115,7 +115,6 @@ class BrowserScreenLoadingIndicatorTest {
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(
                     LoadingIndicatorNoopHistoryRepository,
                 ),
-                startDownload = instrumentedNoOpStartDownloadUseCase(),
                 pageStore = CurrentPageRepositoryImpl(SAMPLE_PAGE_URL),
             ).apply {
                 // Seeded before setContent so `BrowserWebView` skips its initial `loadUrl`.

@@ -12,6 +12,4 @@ sealed interface BrowserEvent {
     data class TabLimit(val error: TabsErrorEvent) : BrowserEvent
 
     data class Bookmark(val event: BookmarkSnackbarEvent) : BrowserEvent
-
-    data class Download(val event: DownloadSnackbarEvent) : BrowserEvent
 }

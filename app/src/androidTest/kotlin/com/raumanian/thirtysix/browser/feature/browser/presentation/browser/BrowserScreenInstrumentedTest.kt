@@ -119,7 +119,6 @@ class BrowserScreenInstrumentedTest {
                     InstrumentedNoopHistoryRepository,
                 ),
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(InstrumentedNoopHistoryRepository),
-                startDownload = instrumentedNoOpStartDownloadUseCase(),
                 pageStore = CurrentPageRepositoryImpl(TEST_PAGE_URL),
             )
             composeRule.activity.setContent {

@@ -109,7 +109,6 @@ class BrowserViewModelIncognitoCacheGateTest {
             recordHistoryEntry = RecordHistoryEntryUseCase(
                 FakeHistoryRepository(),
             ),
-            startDownload = noOpStartDownloadUseCase(),
             pageStore = CurrentPageRepositoryImpl("https://normal.example.com"),
         )
     }

@@ -113,7 +113,6 @@ class BrowserScreenOfflineErrorTest {
                     OfflineErrorNoopHistoryRepository,
                 ),
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(OfflineErrorNoopHistoryRepository),
-                startDownload = instrumentedNoOpStartDownloadUseCase(),
                 pageStore = CurrentPageRepositoryImpl(SAMPLE_PAGE_URL),
             ).apply {
                 onAction(BrowserAction.Page.LoadStarted(SAMPLE_PAGE_URL))

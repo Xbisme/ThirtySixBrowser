@@ -89,7 +89,6 @@ class BrowserViewModelTest {
             toggleBookmark = toggleBookmark,
             recordHistoryEntry = RecordHistoryEntryUseCase(historyRepository),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(historyRepository),
-            startDownload = noOpStartDownloadUseCase(),
             pageStore = CurrentPageRepositoryImpl(url),
         )
     }

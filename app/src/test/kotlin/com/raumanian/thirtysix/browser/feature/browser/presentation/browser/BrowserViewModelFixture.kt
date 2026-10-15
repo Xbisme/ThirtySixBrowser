@@ -45,7 +45,6 @@ internal class BrowserViewModelFixture(
             toggleBookmark = ToggleBookmarkUseCase(bookmarks, AddBookmarkUseCase(bookmarks)),
             recordHistoryEntry = RecordHistoryEntryUseCase(history),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(history),
-            startDownload = noOpStartDownloadUseCase(),
             pageStore = pageStore,
         )
     }

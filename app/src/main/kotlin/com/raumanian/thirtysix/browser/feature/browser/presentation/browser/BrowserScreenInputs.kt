@@ -30,6 +30,7 @@ class BrowserScreenSources(
 class BrowserScreenActions(
     val onAction: (BrowserAction) -> Unit,
     val onFindAction: (FindInPageAction) -> Unit,
+    val onDownloadAction: (DownloadRequestAction) -> Unit,
     val onHubAction: (HubAction) -> Unit,
     val onSuggestionsAction: (AddressSuggestionsAction) -> Unit,
     val onProtectionAction: (ProtectionAction) -> Unit,
