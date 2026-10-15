@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.Dp
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.BrowserErrorState
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomePage
+import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeSearchBar
+import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeSearchHooks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.incognito.IncognitoPage
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionList
 
@@ -133,7 +135,15 @@ private fun HomeOverlay(
     suggestions: @Composable () -> Unit,
 ) {
     if (isIncognito) {
-        IncognitoPage(bottomPadding = bottomPadding)
+        // No address suggestions here: they come from normal browsing.
+        IncognitoPage(bottomPadding = bottomPadding) {
+            HomeSearchBar(
+                engine = null,
+                onSubmit = callbacks.onSearchSubmit,
+                focusRequester = searchFocus,
+                hooks = HomeSearchHooks(),
+            )
+        }
     } else {
         HomePage(
             callbacks = callbacks,

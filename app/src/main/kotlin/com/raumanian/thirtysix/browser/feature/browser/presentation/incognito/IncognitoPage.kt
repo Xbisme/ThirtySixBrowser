@@ -48,10 +48,10 @@ private const val FOOTNOTE_ALPHA = 0.75f
 
 /**
  * What an empty incognito tab shows instead of Home. Every statement must match what incognito
- * actually does; nothing personal from normal tabs is shown.
+ * actually does; nothing personal from normal tabs is shown. [search] is the field that opens a page.
  */
 @Composable
-fun IncognitoPage(bottomPadding: Dp, modifier: Modifier = Modifier) {
+fun IncognitoPage(bottomPadding: Dp, modifier: Modifier = Modifier, search: @Composable () -> Unit = {}) {
     val colors = ThirtySixTheme.colors
     Column(
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
@@ -77,6 +77,7 @@ fun IncognitoPage(bottomPadding: Dp, modifier: Modifier = Modifier) {
                 color = colors.onIncognito,
             )
         }
+        search()
         Column(
             verticalArrangement = Arrangement.spacedBy(PointGap),
             modifier = Modifier

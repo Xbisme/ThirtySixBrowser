@@ -177,10 +177,10 @@ data class HomeSearchHooks(
     val suggestions: @Composable () -> Unit = {},
 )
 
-/** Submits exactly as the address bar does. */
+/** Submits exactly as the address bar does. Without an [engine] the engine's initial is left out. */
 @Composable
-private fun HomeSearchBar(
-    engine: SearchEngine,
+internal fun HomeSearchBar(
+    engine: SearchEngine?,
     onSubmit: (String) -> Unit,
     focusRequester: FocusRequester,
     hooks: HomeSearchHooks,
@@ -215,15 +215,17 @@ private fun HomeSearchBar(
                     .background(scheme.surfaceContainerLow, shape)
                     .padding(horizontal = Spacing.md),
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(EngineDisc).background(scheme.surfaceContainer, shape),
-                ) {
-                    Text(
-                        text = engine.name.take(1),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = scheme.primary,
-                    )
+                if (engine != null) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(EngineDisc).background(scheme.surfaceContainer, shape),
+                    ) {
+                        Text(
+                            text = engine.name.take(1),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = scheme.primary,
+                        )
+                    }
                 }
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     if (text.isEmpty()) {

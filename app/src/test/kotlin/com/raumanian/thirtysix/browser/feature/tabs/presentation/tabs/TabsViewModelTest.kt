@@ -125,6 +125,39 @@ class TabsViewModelTest {
         }
     }
 
+    private fun incognitoTab(id: Long, lastActiveAt: Long) = Tab(
+        id = id,
+        url = "https://example.com/$id",
+        title = "",
+        position = 0,
+        createdAt = 0L,
+        lastActiveAt = lastActiveAt,
+        isIncognito = true,
+    )
+
+    @Test
+    fun `onTabClick on an incognito tab makes it the active tab`() = runTest(testDispatcher) {
+        val incognito = com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository()
+        incognito.emit(
+            listOf(
+                incognitoTab(id = -1L, lastActiveAt = 200L),
+                incognitoTab(id = -2L, lastActiveAt = 100L),
+            ),
+        )
+        val vm = newViewModel(incognitoRepository = incognito)
+
+        vm.events.test {
+            vm.onAction(TabsAction.TabClick(-2L))
+            advanceUntilIdle()
+
+            assertEquals(TabsEvent.ShowBrowser, awaitItem())
+            val switched = incognito.observeTabs().first().single { it.id == -2L }
+            assertTrue(switched.lastActiveAt > 200L)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test
     fun `onNewTabClick under cap creates a tab and emits popBackEvent`() = runTest(testDispatcher) {
         turbineScope {

@@ -63,6 +63,8 @@ internal fun BrowserScreen(
     val findCallbacks = rememberFindCallbacks(actions.onFindAction, sources.findInPage, hosts.webViewActions)
     // Composed after every other back handler, so Back closes the find bar first.
     BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
+    // The holder also closes the bar on a new page or a tab switch; the highlights go with it.
+    LaunchedEffect(findOpen) { if (!findOpen) hosts.webViewActions.clearMatches() }
     IncomingContentEffects(
         hooks = hosts.slots.incomingContent,
         webViewActions = hosts.webViewActions,
