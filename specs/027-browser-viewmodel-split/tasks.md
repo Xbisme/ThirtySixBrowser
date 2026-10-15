@@ -90,7 +90,7 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 
 ## Phase 4: User Story 3, no dead shared code (P3)
 
-- [ ] T011 [US3] Delete `core/presentation/util/BaseViewModel.kt` and `T/../core/presentation/util/BaseViewModelTest.kt`. G1. **Commit** `refactor(027): remove unused BaseViewModel`.
+- [X] T011 [US3] Delete `core/presentation/util/BaseViewModel.kt` and `T/../core/presentation/util/BaseViewModelTest.kt`. G1. **Commit** `refactor(027): remove unused BaseViewModel`.
 
 ## Phase 5: Governance
 
