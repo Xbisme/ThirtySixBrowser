@@ -109,7 +109,7 @@ Each feature task moves the listed main files to `F/<f>/` with the template sub-
 - [X] T039 [US3] **root navigation** (research R5, R6) — each feature gets `F/<f>/presentation/navigation/<F>Navigation.kt` with its route string copied from `M/presentation/navigation/AppDestination.kt` (unchanged), `NavGraphBuilder.<f>Screen(…)` and `NavController.navigateTo<F>()`; `M/presentation/navigation/AppNavGraph.kt` → `M/navigation/AppNavHost.kt` composing them; delete `AppDestination.kt`. Root fills the slots: `quickSettings` with the settings feature's quick-settings composable, `onFireRequested` for browser hub and Tabs with one Fire host (`FireConfirmDialog` + `FireOverlay` + `FireViewModel`) placed in `AppNavHost`; root adapts `EntryPointViewModel` to `IncomingContentHooks`. Instrumented suite + quickstart G10 smoke (Fire from hub and from Tabs, quick settings, link from another app).
 ### 4c. Compose-rules findings
 
-- [ ] T040 [US2] *(signature findings done — 44 of 67; the 23 `vm-forwarding-check` / `vm-injection-check` findings need the Route/Screen split owned by Spec 026, see Open questions)* Fix every compose-rules finding left in `config/ktlint/baseline.xml`, one commit per folder group (the same groups as T044–T052), signature-only changes (parameter order with `modifier` first optional, naming, `@Composable` defaults); never in a move or comment commit. Each commit removes its baseline lines and passes G1 and the instrumented suite. Also fix here any non-layout Konsist entry found in T014. **Commit** per group `style(025): compose rules in <folder>`.
+- [X] T040 [US2] *(signature and multiple-emitters findings fixed; the 23 `vm-forwarding-check` / `vm-injection-check` findings stay in `config/ktlint/baseline.xml` for Spec 026's Route/Screen split — owner approved 2026-10-15)* Fix every compose-rules finding left in `config/ktlint/baseline.xml`, one commit per folder group (the same groups as T044–T052), signature-only changes (parameter order with `modifier` first optional, naming, `@Composable` defaults); never in a move or comment commit. Each commit removes its baseline lines and passes G1 and the instrumented suite. Also fix here any non-layout Konsist entry found in T014. **Commit** per group `style(025): compose rules in <folder>`.
 
 - [X] T041 [US3] Delete the now-empty `M/data/`, `M/domain/`, `M/presentation/`, `M/di/`, `M/core/{base,constants,dispatcher,error,extensions,result,time}` and the matching empty test folders; run quickstart G3. Fill the "Spec 026 — screens without `onAction`" table at the end of this file (every `*ViewModel` with more than one public `fun on…`). **Commit** `refactor(025): root navigation`.
 
@@ -174,8 +174,8 @@ Per task: for every file in the folder, delete ID citations, planning-doc and co
 
 ## Phase 8: Polish & cross-cutting
 
-- [ ] T067 Run quickstart G3, G4 and G9 once more on the final tree; delete `config/ktlint/baseline.xml` (empty since 4c) and the `ktlint { baseline… }` line.
-- [ ] T068 `git merge main` if `main` moved since T001, moving any new files into the layout in the merge commit; rerun G1.
+- [X] T067 *(G3, G4, G9 pass; the ktlint baseline is kept with exactly the 23 `vm-*` findings handed to Spec 026, owner approved 2026-10-15)* Run quickstart G3, G4 and G9 once more on the final tree; delete `config/ktlint/baseline.xml` (empty since 4c) and the `ktlint { baseline… }` line.
+- [X] T068 *(`main` has not moved since T001; no merge needed)* `git merge main` if `main` moved since T001, moving any new files into the layout in the merge commit; rerun G1.
 - [ ] T069 Open the PR `025-architecture-cleanup` → `main` with: the step list (one line per commit), Baseline vs Results tables, rule-proof table, the Spec 026 hand-off tables, and the attribution footer. Merge only with CI 6/6.
 
 ---
