@@ -1,10 +1,7 @@
 package com.raumanian.thirtysix.browser.core.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
-import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
-import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllTabsUseCase
@@ -18,7 +15,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -30,11 +26,8 @@ class TabUseCasesTest {
 
     private lateinit var fake: FakeTabRepository
     private lateinit var fakeIncognito: FakeIncognitoTabRepository
-    private lateinit var observeTabs: ObserveTabsUseCase
     private lateinit var observeAllTabs: ObserveAllTabsUseCase
     private lateinit var observeActiveTab: ObserveActiveTabUseCase
-    private lateinit var createTab: CreateTabUseCase
-    private lateinit var switchActiveTab: SwitchActiveTabUseCase
     private lateinit var closeTab: CloseTabUseCase
     private lateinit var closeAllTabs: CloseAllTabsUseCase
     private lateinit var updateTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase
@@ -44,11 +37,8 @@ class TabUseCasesTest {
         fake = FakeTabRepository(homeUrl = HOME_URL)
         fakeIncognito = FakeIncognitoTabRepository()
         val screenshotCache = NoopScreenshotCache
-        observeTabs = ObserveTabsUseCase(fake)
         observeAllTabs = ObserveAllTabsUseCase(fake, fakeIncognito)
         observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
-        createTab = CreateTabUseCase(fake, HOME_URL)
-        switchActiveTab = SwitchActiveTabUseCase(fake)
         closeTab = CloseTabUseCase(fake, screenshotCache)
         closeAllTabs = CloseAllTabsUseCase(fake, screenshotCache)
         updateTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(fake, fakeIncognito)
@@ -83,53 +73,6 @@ class TabUseCasesTest {
     }
 
     @Test
-    fun `createTab delegates and propagates Success`() = runTest {
-        fake.reset()
-
-        val result = createTab("https://new.com")
-
-        assertTrue(result is Result.Success)
-        assertEquals("https://new.com", (result as Result.Success).data.url)
-    }
-
-    @Test
-    fun `createTab propagates MaxTabsReachedException at cap`() = runTest {
-        // Pre-fill the fake to MAX_TABS via direct emission.
-        val tabs = (1..BrowserLimits.MAX_TABS).map { i ->
-            Tab(
-                id = i.toLong(),
-                url = "https://t$i.com",
-                title = "",
-                position = i - 1,
-                createdAt = 0L,
-                lastActiveAt = i.toLong(),
-            )
-        }
-        fake.emit(tabs)
-
-        val result = createTab("https://overflow.com")
-
-        assertTrue(result is Result.Error)
-        assertTrue((result as Result.Error).throwable is MaxTabsReachedException)
-    }
-
-    @Test
-    fun `switchActiveTab updates lastActiveAt to make target the active tab`() = runTest {
-        fake.emit(
-            listOf(
-                Tab(id = 1L, url = "https://a.com", title = "", position = 0, createdAt = 0L, lastActiveAt = 100L),
-                Tab(id = 2L, url = "https://b.com", title = "", position = 1, createdAt = 0L, lastActiveAt = 50L),
-            ),
-        )
-        // Tab 1 is active before the switch.
-        assertEquals(1L, observeActiveTab().first()!!.id)
-
-        switchActiveTab(2L)
-
-        assertEquals(2L, observeActiveTab().first()!!.id)
-    }
-
-    @Test
     fun `closeTab on last surviving tab triggers fresh home tab seed`() = runTest {
         fake.reset()
         fake.emit(
@@ -140,7 +83,7 @@ class TabUseCasesTest {
 
         closeTab(7L)
 
-        val tabs = observeTabs().first()
+        val tabs = fake.observeTabs().first()
         assertEquals(1, tabs.size)
         assertEquals(HOME_URL, tabs.single().url)
     }
@@ -157,7 +100,7 @@ class TabUseCasesTest {
 
         closeAllTabs()
 
-        val tabs = observeTabs().first()
+        val tabs = fake.observeTabs().first()
         assertEquals(1, tabs.size)
         assertEquals(HOME_URL, tabs.single().url)
     }
@@ -172,7 +115,7 @@ class TabUseCasesTest {
 
         updateTabUrlAndTitle(5L, "https://after.com", "After")
 
-        val updated = observeTabs().first().find { it.id == 5L }
+        val updated = fake.observeTabs().first().find { it.id == 5L }
         assertNotNull(updated)
         assertEquals("https://after.com", updated!!.url)
         assertEquals("After", updated.title)
@@ -188,7 +131,7 @@ class TabUseCasesTest {
 
         updateTabUrlAndTitle(MISSING_ID, "https://after.com", "After")
 
-        val tabs = observeTabs().first()
+        val tabs = fake.observeTabs().first()
         assertEquals(1, tabs.size)
         // Original row unchanged; no synthetic row appeared.
         assertEquals("https://only.com", tabs.single().url)

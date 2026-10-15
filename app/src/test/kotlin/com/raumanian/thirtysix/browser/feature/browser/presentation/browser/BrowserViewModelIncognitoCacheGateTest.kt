@@ -7,12 +7,9 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
@@ -96,12 +93,11 @@ class BrowserViewModelIncognitoCacheGateTest {
         val addBookmark = AddBookmarkUseCase(bookmarkRepo)
         return BrowserViewModel(
             defaultHomeUrl = "https://normal.example.com",
-            buildSearchUrl = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),
+            searchEngine = GoogleByteIdenticalRepository,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-            observeTabs = ObserveTabsUseCase(tabRepository),
+            tabs = tabRepository,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
-            createTab = CreateTabUseCase(tabRepository, "https://normal.example.com"),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
             isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo),
@@ -127,7 +123,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         assertEquals("incognito flag should propagate to UiState", true, vm.uiState.value.isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onIconReceived("https://incognito.example.com", bmp)
+        vm.onAction(BrowserAction.Page.IconReceived("https://incognito.example.com", bmp))
         advanceUntilIdle()
 
         assertEquals(
@@ -148,7 +144,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         assertEquals(true, vm.uiState.value.isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onScreenshotReady(bmp)
+        vm.onAction(BrowserAction.Page.ScreenshotReady(bmp))
         advanceUntilIdle()
 
         assertEquals(
@@ -169,7 +165,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         assertEquals(false, vm.uiState.value.isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onIconReceived("https://example.com", bmp)
+        vm.onAction(BrowserAction.Page.IconReceived("https://example.com", bmp))
         advanceUntilIdle()
 
         assertEquals(

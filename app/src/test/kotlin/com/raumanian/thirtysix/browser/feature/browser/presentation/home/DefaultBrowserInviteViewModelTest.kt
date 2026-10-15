@@ -4,7 +4,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.InviteState
-import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
@@ -13,8 +12,6 @@ import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.DismissDefaultBrowserInviteUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ObserveDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -74,12 +71,11 @@ class DefaultBrowserInviteViewModelTest {
         repository: FakeInviteRepository,
         incognito: FakeIncognitoTabRepository = FakeIncognitoTabRepository(),
     ) = DefaultBrowserInviteViewModel(
-        observeInvite = ObserveDefaultBrowserInviteUseCase(repository),
+        invites = repository,
         observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(
             ObserveAllTabsUseCase(oldNormalTab(), incognito),
         ),
-        isDefaultBrowser = IsDefaultBrowserUseCase(controller),
-        dismissInvite = DismissDefaultBrowserInviteUseCase(repository),
+        defaultBrowser = controller,
         syncInvite = SyncDefaultBrowserInviteUseCase(controller, repository),
         dispatchers = Dispatchers1(dispatcher),
     )
@@ -113,7 +109,7 @@ class DefaultBrowserInviteViewModelTest {
         val vm = viewModel(repo)
         assertTrue(shown(vm))
 
-        vm.onDismiss()
+        vm.onAction(DefaultBrowserInviteAction.Dismiss)
 
         assertTrue(repo.state.value.dismissed)
         assertFalse(vm.showInvite.value)
@@ -126,12 +122,12 @@ class DefaultBrowserInviteViewModelTest {
         assertTrue(shown(vm))
 
         isDefault = true
-        vm.onResume()
+        vm.onAction(DefaultBrowserInviteAction.Resumed)
         assertFalse(vm.showInvite.value)
         assertTrue(repo.state.value.dismissed)
 
         isDefault = false
-        vm.onResume()
+        vm.onAction(DefaultBrowserInviteAction.Resumed)
         assertFalse("no comeback once retired", vm.showInvite.value)
     }
 
@@ -141,7 +137,7 @@ class DefaultBrowserInviteViewModelTest {
         val vm = viewModel(repo)
         assertTrue(shown(vm))
 
-        vm.onResume() // e.g. the person declined the system confirmation
+        vm.onAction(DefaultBrowserInviteAction.Resumed) // e.g. the person declined the system confirmation
 
         assertTrue(vm.showInvite.value)
         assertFalse(repo.state.value.dismissed)

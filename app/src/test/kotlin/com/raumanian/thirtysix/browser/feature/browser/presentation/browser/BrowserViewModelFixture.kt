@@ -2,12 +2,9 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
@@ -31,12 +28,11 @@ internal class BrowserViewModelFixture(
         val observeAllTabs = ObserveAllTabsUseCase(tabs, incognitoTabs)
         return BrowserViewModel(
             defaultHomeUrl = url,
-            buildSearchUrl = BuildSearchUrlUseCase(EchoSearchEngine),
+            searchEngine = EchoSearchEngine,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-            observeTabs = ObserveTabsUseCase(tabs),
+            tabs = tabs,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabs, incognitoTabs),
-            createTab = CreateTabUseCase(tabs, url),
             faviconCache = FakeFaviconCache(),
             screenshotCache = FakeScreenshotCache(),
             isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarks),

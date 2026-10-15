@@ -3,7 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.pro
 import android.webkit.WebView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SetSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SetSiteProtectionUseCase
@@ -12,9 +12,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 class ProtectionViewModel @Inject constructor(
     private val engine: ProtectionEngine,
     private val setSiteProtection: SetSiteProtectionUseCase,
-    observeFireproofSites: ObserveFireproofSitesUseCase,
+    fireproofSites: FireproofSiteRepository,
     private val setSiteFireproof: SetSiteFireproofUseCase,
     scriptInputs: PrivacyScriptInputs,
 ) : ViewModel() {
@@ -59,7 +59,7 @@ class ProtectionViewModel @Inject constructor(
             if (shown == null) {
                 flowOf(null)
             } else {
-                combine(shown.status, shown.blockedHostsFlow, observeFireproofSites()) { status, hosts, fireproof ->
+                combine(shown.status, shown.blockedHostsFlow, fireproofSites.observeAll()) { status, hosts, fireproof ->
                     PageDashboardState.of(
                         status = status,
                         blockedHosts = hosts,
@@ -75,28 +75,35 @@ class ProtectionViewModel @Inject constructor(
     private fun registrableDomain(host: String): String =
         engine.matchers.matchersOrNull()?.suffixes?.registrableDomain(host) ?: host
 
+    fun onAction(action: ProtectionAction) {
+        when (action) {
+            is ProtectionAction.ProtectionSwitched -> onProtectionSwitched(action.on)
+            is ProtectionAction.FireproofSwitched -> onFireproofSwitched(action.fireproof)
+        }
+    }
+
     /** Normal tabs only: incognito never offers the fireproof switch. */
-    fun onFireproofSwitched(fireproof: Boolean) {
+    private fun onFireproofSwitched(fireproof: Boolean) {
         val current = monitor.value?.takeUnless { it.isIncognito } ?: return
         current.currentSite?.let { site -> viewModelScope.launch { setSiteFireproof(site, fireproof) } }
     }
 
-    private val _reloadEvents = MutableSharedFlow<Unit>(
+    private val reloadEvents = MutableSharedFlow<ProtectionEvent>(
         replay = 0,
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    val reloadEvents: SharedFlow<Unit> = _reloadEvents.asSharedFlow()
+    val events: Flow<ProtectionEvent> = reloadEvents.asSharedFlow()
 
-    fun onProtectionSwitched(on: Boolean) {
+    private fun onProtectionSwitched(on: Boolean) {
         val current = monitor.value ?: return
         val site = current.currentSite ?: return
         viewModelScope.launch {
             setSiteProtection(site, on = on, isIncognito = current.isIncognito)
             // The reload must already run the scripts' new rule for this site.
             hooks.reinstallScripts()
-            _reloadEvents.tryEmit(Unit)
+            reloadEvents.tryEmit(ProtectionEvent.Reload)
         }
     }
 

@@ -29,12 +29,9 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
@@ -102,16 +99,14 @@ class BrowserScreenInstrumentedTest {
             // rotation test can re-attach the same view model after the activity is recreated.
             val noopTabRepo = InstrumentedNoopTabRepository
             val noopIncognitoRepo = InstrumentedNoopIncognitoTabRepository
-            val observeTabs = ObserveTabsUseCase(noopTabRepo)
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = TEST_PAGE_URL,
-                buildSearchUrl = BuildSearchUrlUseCase(InstrumentedNoopSearchEngineRepository),
+                searchEngine = InstrumentedNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-                observeTabs = observeTabs,
+                tabs = noopTabRepo,
                 observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
                 updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
-                createTab = CreateTabUseCase(noopTabRepo, TEST_PAGE_URL),
                 faviconCache = InstrumentedNoopFaviconCache,
                 screenshotCache = InstrumentedNoopScreenshotCache,
                 isUrlBookmarked = IsUrlBookmarkedUseCase(InstrumentedNoopBookmarkRepository),
@@ -126,7 +121,7 @@ class BrowserScreenInstrumentedTest {
                 startDownload = instrumentedNoOpStartDownloadUseCase(),
             )
             composeRule.activity.setContent {
-                BrowserScreen(
+                BrowserRoute(
                     slots = NoSlots,
                     viewModel = viewModel,
                 )
@@ -151,7 +146,7 @@ class BrowserScreenInstrumentedTest {
 
         composeRule.activity.runOnUiThread {
             composeRule.activity.setContent {
-                BrowserScreen(
+                BrowserRoute(
                     slots = NoSlots,
                     viewModel = viewModel,
                 )

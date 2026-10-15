@@ -192,19 +192,19 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### browser
 
-- [ ] T033 [P] [US2] `F/browser/presentation/home/`:
+- [X] T033 [P] [US2] `F/browser/presentation/home/`:
   - Add `HomeAction` (`Resumed`, `TabShortcut(tabId)`) and `DefaultBrowserInviteAction` (`Resumed`, `Dismiss`), with `onAction` on both holders.
   - `HomeViewModel` injects `SettingsRepository` and `TabRepository.switchActiveTab`.
   - `DefaultBrowserInviteViewModel` injects `DefaultBrowserInviteRepository` (`observeInviteState`, `markInviteDismissed`) and `DefaultBrowserController`; remove `F/browser/domain/usecase/{DismissDefaultBrowserInviteUseCase,ObserveDefaultBrowserInviteUseCase}.kt`.
   - `HomePage.kt` stays the host, sending `Resumed` from `LifecycleResumeEffect` and drawing `HomeContent`.
   - Update `HomeViewModelTest` and `DefaultBrowserInviteViewModelTest`. Remove their cases from `DefaultBrowserUseCasesTest`; delete the file if it is left empty, otherwise keep `SyncDefaultBrowserInvite`.
-- [ ] T034 [P] [US2] Hub, suggestions and protection:
+- [X] T034 [P] [US2] Hub, suggestions and protection:
   - **Hub**: add `HubAction.NewIncognitoTab` to `HubViewModel`; `HubEvent` stays Drop and is exposed as `events`. Inject `IncognitoTabRepository.createTab`.
   - **Suggestions**: add `AddressSuggestionsAction` (`TextChanged(text, currentPageUrl)`, `FocusChanged(focused)`) to `AddressSuggestionsViewModel`; `onEditingStarted` and `onEditingEnded` become private. Update `AddressSuggestionsViewModelTest` and `A/…/suggestions/AddressBarSuggestionsFlowTest.kt` to send `FocusChanged`.
   - **Protection**: add `ProtectionAction` (`ProtectionSwitched(on)`, `FireproofSwitched(on)`) to `ProtectionViewModel`. Add `ProtectionEvent.Reload`, replacing `reloadEvents`; it is Drop with unchanged settings. Inject `FireproofSiteRepository.observeAll()`. `hooks` stays.
   - `PageTextSizeViewModel` injects `SettingsRepository.observeSettings()` and keeps no action.
   - Update `ProtectionViewModelTest`.
-- [ ] T035 [US2] `F/browser/presentation/browser/BrowserViewModel.kt`:
+- [X] T035 [US2] `F/browser/presentation/browser/BrowserViewModel.kt`:
   - Add `BrowserAction` with nested groups:
     - `Page.*`: the 12 WebView callbacks with their parameters.
     - `AddressBar.*`: `TextChange`, `FocusChange`, `Submit`, `Clear`.
@@ -222,7 +222,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - `isDesktopMode(tabId)` becomes `val desktopMode: DesktopModeLookup` (`fun interface`, in `F/browser/presentation/browser/DesktopModeLookup.kt`).
   - Inject `SearchEngineRepository`, `TabRepository` (`observeTabs`, `createTab`) in place of BuildSearchUrl, ObserveTabs, CreateTab.
   - `loadProgress`, `activeTab`, `tabCount` and `findInPage` stay separate flows (ADR 0015).
-- [ ] T036 [US2] Split `F/browser/presentation/browser/BrowserScreen.kt` into `BrowserRoute(slots, viewModel, hubViewModel)` and `BrowserScreen(...)`:
+- [X] T036 [US2] Split `F/browser/presentation/browser/BrowserScreen.kt` into `BrowserRoute(slots, viewModel, hubViewModel)` and `BrowserScreen(...)`:
   - **Route**: obtains Browser, Hub, AddressSuggestions, PageTextSize and Protection holders, plus the WebView bridges `PopupTabs` and `LongPressActions` (moved up from `BrowserScreen.kt:102,323`) and `SitePermissionGate` (moved up from the default parameters at `page/BrowserPageRequests.kt:21,42`, which then take it as a required parameter). It collects state once and runs one `EventEffect` per holder:
     - `LoadUrl` → hide keyboard, clear focus, `webViewActions.loadUrl(url)`, in that order.
     - `SetDesktopMode` → `webViewActions.setDesktopMode`.
@@ -233,13 +233,13 @@ The two stories land together per feature because the holder's constructor (US3)
   - Per-frame reads stay in `drawBehind`/`graphicsLayer`.
   - `BrowserNavigation.kt` calls the route.
   - Delete the 10 `BrowserScreen.kt` baseline lines; `config/ktlint/baseline.xml` is now empty.
-- [ ] T037 [US3] Delete the core use cases that now have no caller:
+- [X] T037 [US3] Delete the core use cases that now have no caller:
   - `C/domain/usecase/{BuildSearchUrlUseCase,CreateTabUseCase,CreateIncognitoTabUseCase,CloseIncognitoTabUseCase,SwitchActiveTabUseCase,ObserveTabsUseCase,ObserveUserSettingsUseCase,GetAppLanguageUseCase,IsDefaultBrowserUseCase,SetSearchEngineUseCase,SetThemeModeUseCase,ObserveFireproofSitesUseCase}.kt`
   - `F/browser/presentation/browser/page/PopupTabs.kt` first injects `TabRepository`/`IncognitoTabRepository` in place of CreateTab, CreateIncognitoTab and CloseIncognitoTab. Its public shape is unchanged (research R2).
   - Delete `T/core/domain/usecase/BuildSearchUrlUseCaseTest.kt`, and the remaining pass-through cases in `SettingsUseCasesTest`, `AppLanguageUseCasesTest` (keep `SetAppLanguage`), `TabUseCasesTest` and `FireproofUseCasesTest` (keep the non-forwarding fireproof use cases).
   - `find M -name '*UseCase.kt' | wc -l` must print 49.
-- [ ] T038 [US2] Update the 6 `T/feature/browser/presentation/browser/BrowserViewModel*Test.kt` and `BrowserViewModelFixture` to send `BrowserAction`s. Snackbar assertions read `events`; the submit tests assert `BrowserEvent.LoadUrl(url)` where they asserted the lambda call. Make `A/…/browser/{BrowserScreenInstrumentedTest,BrowserScreenOfflineErrorTest,BrowserScreenLoadingIndicatorTest}.kt` call `BrowserRoute(slots = NoSlots, viewModel = viewModel)`.
-- [ ] T039 [US2] Run G1, the full instrumented suite on `TA016_API36_16K` and the Compose report (0 non-skippable). **Commit** `refactor(026): browser actions and events`.
+- [X] T038 [US2] Update the 6 `T/feature/browser/presentation/browser/BrowserViewModel*Test.kt` and `BrowserViewModelFixture` to send `BrowserAction`s. Snackbar assertions read `events`; the submit tests assert `BrowserEvent.LoadUrl(url)` where they asserted the lambda call. Make `A/…/browser/{BrowserScreenInstrumentedTest,BrowserScreenOfflineErrorTest,BrowserScreenLoadingIndicatorTest}.kt` call `BrowserRoute(slots = NoSlots, viewModel = viewModel)`.
+- [X] T039 *(G1 and Compose report done: 217 restartable / 0 non-skippable; full instrumented suite deferred: AVD not available, androidTest compiles)* [US2] Run G1, the full instrumented suite on `TA016_API36_16K` and the Compose report (0 non-skippable). **Commit** `refactor(026): browser actions and events`.
 
 **Checkpoint**: every covered holder takes `onAction`; `config/ktlint/baseline.xml` has no entries; 49 use cases.
 
@@ -397,4 +397,14 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | `FolderUseCasesTest.MoveBookmark updates parent folder` | repository behaviour | moved to `BookmarkRepositoryImplTest.moveBookmarkToFolder updates the parent folder` |
 | `BookmarksViewModelTest.consumeOpenUrl clears the signal` | the open signal is not repeated | rewritten as `an opened url is delivered once` |
 | `SettingsRepositoryCurrentSettingsTest.use case returns what the repository returns` | pass-through | deleted (the repository cases in the same file stay) |
+| `DefaultBrowserUseCasesTest.observe, dismiss and record go to the repository` | pass-through | deleted |
+| `DefaultBrowserUseCasesTest.is-default reads the controller` | pass-through | deleted |
+| `SettingsUseCasesTest` (observe, set theme, set search engine) | pass-through | deleted with the file |
+| `BuildSearchUrlUseCaseTest` | pass-through | deleted |
+| `AppLanguageUseCasesTest.get returns what the platform holds` | pass-through | deleted (the `SetAppLanguage` cases stay) |
+| `TabUseCasesTest.createTab delegates and propagates Success` / `…at cap` | repository behaviour | covered by `TabRepositoryImplTest.createTab under cap…` / `…at cap…` |
+| `TabUseCasesTest.switchActiveTab updates lastActiveAt…` | repository behaviour | moved to `TabRepositoryImplTest.switchActiveTab makes the target the active tab` |
+| `BrowserViewModelStarToggleTest.consumeBookmarkSnackbarEvent clears the event idempotently` | the message is not repeated | rewritten as `a bookmark message is delivered once` |
+| `BrowserViewModelTest.consumeTabsEvent clears the tabsEvent field` | no tab-limit message without cause | rewritten as `no tab-limit message is sent without a long press` |
+| `BrowserViewModelTest` submit / Home submit / back-without-history / desktop-mode return values | the Boolean said whether a load or change happened | now assert the `LoadUrl` / `SetDesktopMode` events, or that state is unchanged |
 | `OnboardingViewModelTest`: back reports true / false | the return value told the screen to leave | rewritten as state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 does not move) |

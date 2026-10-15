@@ -51,8 +51,8 @@ class AddressSuggestionsViewModelTest {
     fun `typing shows matches, bookmarks first`() = runTest {
         seed()
         val vm = newViewModel()
-        vm.onEditingStarted()
-        vm.onTextChanged("kot", currentPageUrl = "https://example.com/")
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
+        vm.onAction(AddressSuggestionsAction.TextChanged("kot", currentPageUrl = "https://example.com/"))
         advanceUntilIdle()
         val shown = vm.uiState.value.suggestions
         assertEquals(listOf("https://kotlinlang.org/docs", "https://news.example/kotlin"), shown.map { it.url })
@@ -63,15 +63,15 @@ class AddressSuggestionsViewModelTest {
     fun `the snapshot is loaded once per editing session`() = runTest {
         seed()
         val vm = newViewModel()
-        vm.onEditingStarted()
-        vm.onTextChanged("k", null)
-        vm.onTextChanged("ko", null)
-        vm.onEditingStarted()
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
+        vm.onAction(AddressSuggestionsAction.TextChanged("k", null))
+        vm.onAction(AddressSuggestionsAction.TextChanged("ko", null))
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
         advanceUntilIdle()
         assertEquals(1, bookmarks.reads)
 
-        vm.onEditingEnded()
-        vm.onEditingStarted()
+        vm.onAction(AddressSuggestionsAction.FocusChanged(false))
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
         advanceUntilIdle()
         assertEquals(2, bookmarks.reads)
     }
@@ -80,11 +80,13 @@ class AddressSuggestionsViewModelTest {
     fun `the page's own address unchanged, or empty text, suggests nothing`() = runTest {
         seed()
         val vm = newViewModel()
-        vm.onEditingStarted()
-        vm.onTextChanged("https://example.com/", currentPageUrl = "https://example.com/")
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
+        vm.onAction(
+            AddressSuggestionsAction.TextChanged("https://example.com/", currentPageUrl = "https://example.com/"),
+        )
         advanceUntilIdle()
         assertTrue(vm.uiState.value.suggestions.isEmpty())
-        vm.onTextChanged("", currentPageUrl = "https://example.com/")
+        vm.onAction(AddressSuggestionsAction.TextChanged("", currentPageUrl = "https://example.com/"))
         advanceUntilIdle()
         assertTrue(vm.uiState.value.suggestions.isEmpty())
     }
@@ -93,11 +95,11 @@ class AddressSuggestionsViewModelTest {
     fun `ending the session clears the suggestions`() = runTest {
         seed()
         val vm = newViewModel()
-        vm.onEditingStarted()
-        vm.onTextChanged("kot", null)
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
+        vm.onAction(AddressSuggestionsAction.TextChanged("kot", null))
         advanceUntilIdle()
         assertEquals(2, vm.uiState.value.suggestions.size)
-        vm.onEditingEnded()
+        vm.onAction(AddressSuggestionsAction.FocusChanged(false))
         advanceUntilIdle()
         assertTrue(vm.uiState.value.suggestions.isEmpty())
     }
@@ -106,9 +108,9 @@ class AddressSuggestionsViewModelTest {
     fun `only the latest text counts`() = runTest {
         seed()
         val vm = newViewModel()
-        vm.onEditingStarted()
-        vm.onTextChanged("kot", null)
-        vm.onTextChanged("example.com", null)
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
+        vm.onAction(AddressSuggestionsAction.TextChanged("kot", null))
+        vm.onAction(AddressSuggestionsAction.TextChanged("example.com", null))
         advanceUntilIdle()
         assertEquals(listOf("https://example.com/"), vm.uiState.value.suggestions.map { it.url })
     }
@@ -118,9 +120,11 @@ class AddressSuggestionsViewModelTest {
         seed()
         val historyBefore = history.recorded
         val vm = newViewModel()
-        vm.onEditingStarted()
-        "kotlin docs".indices.forEach { vm.onTextChanged("kotlin docs".take(it + 1), null) }
-        vm.onEditingEnded()
+        vm.onAction(AddressSuggestionsAction.FocusChanged(true))
+        "kotlin docs".indices.forEach { end ->
+            vm.onAction(AddressSuggestionsAction.TextChanged("kotlin docs".take(end + 1), null))
+        }
+        vm.onAction(AddressSuggestionsAction.FocusChanged(false))
         advanceUntilIdle()
         assertEquals(historyBefore, history.recorded)
         assertEquals(1, bookmarks.getAllBookmarks().size)

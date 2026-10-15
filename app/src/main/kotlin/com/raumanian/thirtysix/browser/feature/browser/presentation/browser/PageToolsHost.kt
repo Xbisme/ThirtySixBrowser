@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
@@ -12,21 +13,22 @@ import androidx.compose.ui.unit.dp
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.FindInPageCallbacks
+import kotlinx.coroutines.flow.StateFlow
 /** What each hub page tool does; the hub has already closed when this runs. */
 @Composable
 internal fun rememberPageToolHandler(
-    viewModel: BrowserViewModel,
+    onAction: (BrowserAction) -> Unit,
     chrome: ChromeScrollState,
     actions: PageToolActions,
 ): (PageTool) -> Unit {
     val current = rememberUpdatedState(actions)
-    return remember(viewModel, chrome) {
+    return remember(onAction, chrome) {
         { tool ->
             when (tool) {
                 PageTool.Find -> {
                     // The find bar replaces a showing top bar, not one slid away.
                     chrome.show()
-                    viewModel.onFindOpened()
+                    onAction(BrowserAction.Find.Opened)
                 }
                 PageTool.Share -> current.value.share()
                 PageTool.DesktopSite -> current.value.toggleDesktopSite()
@@ -39,12 +41,13 @@ internal fun rememberPageToolHandler(
 
 /** Incognito is not consulted: sharing is the person's explicit action, and nothing about it is recorded. */
 @Composable
-internal fun rememberShareAction(viewModel: BrowserViewModel): () -> Unit {
+internal fun rememberShareAction(currentUrl: () -> String, title: () -> String?): () -> Unit {
     val context = LocalContext.current
     val chooserTitle = stringResource(R.string.share_page_title)
-    return remember(viewModel, context, chooserTitle) {
+    val page by rememberUpdatedState(currentUrl to title)
+    return remember(context, chooserTitle) {
         {
-            val content = ShareContent.of(viewModel.uiState.value.currentUrl, viewModel.activeTab.value?.title)
+            val content = ShareContent.of(page.first(), page.second())
             val send = Intent(Intent.ACTION_SEND)
                 .setType(AppConstants.MIME_TEXT_PLAIN)
                 .putExtra(Intent.EXTRA_TEXT, content.text)
@@ -64,21 +67,22 @@ internal fun rememberShareAction(viewModel: BrowserViewModel): () -> Unit {
  */
 @Composable
 internal fun rememberFindCallbacks(
-    viewModel: BrowserViewModel,
+    onAction: (BrowserAction) -> Unit,
+    findInPage: StateFlow<FindInPageState>,
     webViewActions: WebViewActionsHandle,
 ): FindInPageCallbacks =
-    remember(viewModel, webViewActions) {
+    remember(onAction, findInPage, webViewActions) {
         FindInPageCallbacks(
             onQueryChange = { text ->
-                viewModel.onFindQueryChanged(text)
-                val query = viewModel.findInPage.value.query
+                onAction(BrowserAction.Find.QueryChanged(text))
+                val query = findInPage.value.query
                 if (query.isEmpty()) webViewActions.clearMatches() else webViewActions.findAll(query)
             },
             onPrevious = { webViewActions.findNext(false) },
             onNext = { webViewActions.findNext(true) },
             onClose = {
                 webViewActions.clearMatches()
-                viewModel.onFindClosed()
+                onAction(BrowserAction.Find.Closed)
             },
         )
     }

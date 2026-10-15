@@ -5,12 +5,9 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
@@ -33,8 +30,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -58,7 +53,8 @@ class BrowserViewModelStarToggleTest {
             val initial = awaitItem()
             assertEquals(false, initial.isBookmarked)
 
-            vm.onStarTapped()
+            val events = eventsOf(vm)
+            vm.onAction(BrowserAction.StarTapped)
             advanceUntilIdle()
 
             // Drain emissions until isBookmarked = true (the snackbar event
@@ -68,7 +64,7 @@ class BrowserViewModelStarToggleTest {
                 val state = awaitItem()
                 if (state.isBookmarked) {
                     saw = true
-                    assertEquals(BookmarkSnackbarEvent.Added, state.bookmarkSnackbarEvent)
+                    assertEquals(listOf(BrowserEvent.Bookmark(BookmarkSnackbarEvent.Added)), events)
                 }
             }
             cancelAndIgnoreRemainingEvents()
@@ -82,34 +78,31 @@ class BrowserViewModelStarToggleTest {
         val vm = newViewModel(bookmarkRepo = bookmarkRepo, url = "https://example.com")
         advanceUntilIdle()
 
-        vm.onStarTapped()
+        val events = eventsOf(vm)
+        vm.onAction(BrowserAction.StarTapped)
         advanceUntilIdle()
-        vm.consumeBookmarkSnackbarEvent()
         assertEquals(1, bookmarkRepo.countBookmarksByUrl("https://example.com"))
 
-        vm.onStarTapped()
+        vm.onAction(BrowserAction.StarTapped)
         advanceUntilIdle()
 
         assertEquals(0, bookmarkRepo.countBookmarksByUrl("https://example.com"))
-        assertEquals(BookmarkSnackbarEvent.Removed, vm.uiState.value.bookmarkSnackbarEvent)
+        assertEquals(BrowserEvent.Bookmark(BookmarkSnackbarEvent.Removed), events.last())
         assertEquals(false, vm.uiState.value.isBookmarked)
     }
 
     @Test
-    fun `consumeBookmarkSnackbarEvent clears the event idempotently`() = runTest {
+    fun `a bookmark message is delivered once`() = runTest {
         val vm = newViewModel(url = "https://example.com")
         advanceUntilIdle()
 
-        vm.onStarTapped()
+        vm.onAction(BrowserAction.StarTapped)
         advanceUntilIdle()
-        assertTrue(vm.uiState.value.bookmarkSnackbarEvent != null)
 
-        vm.consumeBookmarkSnackbarEvent()
-        assertNull(vm.uiState.value.bookmarkSnackbarEvent)
-
-        // Second call is a no-op.
-        vm.consumeBookmarkSnackbarEvent()
-        assertNull(vm.uiState.value.bookmarkSnackbarEvent)
+        vm.events.test {
+            assertEquals(BrowserEvent.Bookmark(BookmarkSnackbarEvent.Added), awaitItem())
+            expectNoEvents()
+        }
     }
 
     private fun newViewModel(
@@ -118,7 +111,6 @@ class BrowserViewModelStarToggleTest {
     ): BrowserViewModel {
         val tabRepository = FakeTabRepository(homeUrl = url)
         val incognitoRepo = FakeIncognitoTabRepository()
-        val observeTabs = ObserveTabsUseCase(tabRepository)
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
         val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
@@ -127,12 +119,11 @@ class BrowserViewModelStarToggleTest {
         val isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo)
         return BrowserViewModel(
             defaultHomeUrl = url,
-            buildSearchUrl = BuildSearchUrlUseCase(GoogleByteIdenticalRepository),
+            searchEngine = GoogleByteIdenticalRepository,
             observeActiveTab = observeActiveTab,
-            observeTabs = observeTabs,
+            tabs = tabRepository,
             observeActiveTabIsIncognito = observeActiveTabIsIncognito,
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
-            createTab = CreateTabUseCase(tabRepository, url),
             faviconCache = NoopFaviconCache,
             screenshotCache = NoopScreenshotCache,
             isUrlBookmarked = isUrlBookmarked,

@@ -51,7 +51,14 @@ class AddressSuggestionsViewModel @Inject constructor(
             initialValue = AddressSuggestionsUiState(),
         )
 
-    fun onEditingStarted() {
+    fun onAction(action: AddressSuggestionsAction) {
+        when (action) {
+            is AddressSuggestionsAction.TextChanged -> onTextChanged(action.text, action.currentPageUrl)
+            is AddressSuggestionsAction.FocusChanged -> if (action.focused) onEditingStarted() else onEditingEnded()
+        }
+    }
+
+    private fun onEditingStarted() {
         if (snapshot.value != null || loadJob?.isActive == true) return
         loadJob = viewModelScope.launch {
             snapshot.value = withContext(dispatchers.default) { loadSource() }
@@ -59,13 +66,11 @@ class AddressSuggestionsViewModel @Inject constructor(
     }
 
     /** A field still showing the page's own address unchanged suggests nothing. */
-    fun onTextChanged(text: String, currentPageUrl: String?) {
+    private fun onTextChanged(text: String, currentPageUrl: String?) {
         input.value = Input(text, currentPageUrl)
     }
 
-    fun onFocusChanged(focused: Boolean) = if (focused) onEditingStarted() else onEditingEnded()
-
-    fun onEditingEnded() {
+    private fun onEditingEnded() {
         loadJob?.cancel()
         loadJob = null
         snapshot.value = null

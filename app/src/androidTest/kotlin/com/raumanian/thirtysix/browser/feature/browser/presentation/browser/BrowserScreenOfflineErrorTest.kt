@@ -24,12 +24,9 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
@@ -96,16 +93,14 @@ class BrowserScreenOfflineErrorTest {
             // state back to Loaded before the assertion.
             val noopTabRepo = OfflineErrorNoopTabRepository
             val noopIncognitoRepo = OfflineErrorNoopIncognitoTabRepository
-            val observeTabs = ObserveTabsUseCase(noopTabRepo)
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = SAMPLE_PAGE_URL,
-                buildSearchUrl = BuildSearchUrlUseCase(OfflineErrorNoopSearchEngineRepository),
+                searchEngine = OfflineErrorNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-                observeTabs = observeTabs,
+                tabs = noopTabRepo,
                 observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
                 updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
-                createTab = CreateTabUseCase(noopTabRepo, SAMPLE_PAGE_URL),
                 faviconCache = OfflineErrorNoopFaviconCache,
                 screenshotCache = OfflineErrorNoopScreenshotCache,
                 isUrlBookmarked = IsUrlBookmarkedUseCase(OfflineErrorNoopBookmarkRepository),
@@ -119,11 +114,11 @@ class BrowserScreenOfflineErrorTest {
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(OfflineErrorNoopHistoryRepository),
                 startDownload = instrumentedNoOpStartDownloadUseCase(),
             ).apply {
-                onLoadStarted(SAMPLE_PAGE_URL)
-                onLoadFailed(ErrorReason.NetworkUnavailable)
+                onAction(BrowserAction.Page.LoadStarted(SAMPLE_PAGE_URL))
+                onAction(BrowserAction.Page.LoadFailed(ErrorReason.NetworkUnavailable))
             }
             composeRule.activity.setContent {
-                BrowserScreen(
+                BrowserRoute(
                     slots = NoSlots,
                     viewModel = viewModel,
                 )

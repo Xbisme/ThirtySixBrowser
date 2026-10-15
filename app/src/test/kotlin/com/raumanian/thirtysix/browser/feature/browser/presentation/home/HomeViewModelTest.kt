@@ -5,8 +5,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
@@ -58,11 +56,11 @@ class HomeViewModelTest {
     private fun viewModel(clock: Clock, tabs: FakeTabRepository, history: FakeHistoryRepository) = HomeViewModel(
         observeActiveTab = ObserveActiveTabUseCase(ObserveAllTabsUseCase(tabs, FakeIncognitoTabRepository())),
         observeHomeContent = ObserveHomeContentUseCase(tabs, FakeBookmarkRepository(), history),
-        observeUserSettings = ObserveUserSettingsUseCase(FakeSettingsRepository()),
+        settings = FakeSettingsRepository(),
         screenshotCache = FakeScreenshotCache(),
         faviconCache = FakeFaviconCache(),
         clock = clock,
-        switchActiveTab = SwitchActiveTabUseCase(tabs),
+        tabs = tabs,
         dispatchers = TestDispatchers(testDispatcher),
     )
 
@@ -98,7 +96,7 @@ class HomeViewModelTest {
             assertEquals(GreetingPeriod.Morning, expectMostRecentItem().greeting)
 
             clock.instant = at(HOUR_EVENING)
-            vm.onResume()
+            vm.onAction(HomeAction.Resumed)
             advanceUntilIdle()
             assertEquals(GreetingPeriod.Evening, expectMostRecentItem().greeting)
             cancelAndIgnoreRemainingEvents()

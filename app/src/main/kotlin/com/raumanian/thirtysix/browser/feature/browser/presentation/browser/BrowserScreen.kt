@@ -32,13 +32,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.presentation.util.EventEffect
 import com.raumanian.thirtysix.browser.core.presentation.util.QuickSetting
-import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.BrowserBottomBar
@@ -57,13 +56,16 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PopupEffects
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PopupTabs
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.SitePermissionGate
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.rememberPageSession
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.ProtectionAction
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.ProtectionHooks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.ProtectionViewModel
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomePage
 import com.raumanian.thirtysix.browser.feature.browser.presentation.incognito.IncognitoPage
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionList
+import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionsAction
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionsViewModel
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.BrowserAddressSuggestions
 import kotlinx.coroutines.flow.StateFlow
@@ -71,24 +73,95 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
- * The browser: the WebView fills the screen and the bars float over it. Scroll offsets and load
- * progress are read only inside `graphicsLayer`/draw lambdas, so scrolling and loading recompose nothing.
+ * Obtains the browser's state holders and WebView bridges, collects their state once and turns
+ * their one-off events into WebView calls and snackbars.
  */
 @Composable
-@Suppress("LongMethod") // Top-level host: wires bars, overlays, hub, effects and snackbars.
-fun BrowserScreen(
+@Suppress("LongParameterList")
+fun BrowserRoute(
     slots: BrowserSlots,
     modifier: Modifier = Modifier,
     viewModel: BrowserViewModel = hiltViewModel(),
     hubViewModel: HubViewModel = hiltViewModel(),
+    suggestions: AddressSuggestionsViewModel = hiltViewModel(),
+    pageTextSize: PageTextSizeViewModel = hiltViewModel(),
+    protection: ProtectionViewModel = hiltViewModel(),
+    popupTabs: PopupTabs = hiltViewModel(),
+    longPressActions: LongPressActions = hiltViewModel(),
+    permissionGate: SitePermissionGate = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
     // Held as State, not delegated: reading `.value` here would recompose on every tick.
     val progress: State<Float> = viewModel.loadProgress.collectAsStateWithLifecycle()
+    // The app-wide text size changes rarely; the WebView and the hub read it.
+    val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    BrowserEventEffects(
+        events = viewModel.events,
+        webViewActions = webViewActions,
+        snackbarHostState = snackbarHostState,
+    )
+    HubEventEffect(events = hubViewModel.events, snackbarHostState = snackbarHostState)
+    // After the per-site switch the page reloads with the new setting.
+    EventEffect(protection.events) { webViewActions.reload() }
+
+    BrowserScreen(
+        state = state,
+        tabCount = tabCount,
+        activeTab = activeTab,
+        progress = { progress.value },
+        textZoomPercent = textZoomPercent,
+        sources = BrowserScreenSources(
+            findInPage = viewModel.findInPage,
+            suggestions = suggestions.uiState,
+            hasActiveDownloads = hubViewModel.hasActiveDownloads,
+            protectionStatus = protection.status,
+            protectionDashboard = protection.dashboard,
+            protectionHooks = protection.hooks,
+            desktopMode = viewModel.desktopMode,
+            popups = popupTabs,
+            longPressActions = longPressActions,
+            permissionGate = permissionGate,
+        ),
+        actions = BrowserScreenActions(
+            onAction = viewModel::onAction,
+            onHubAction = hubViewModel::onAction,
+            onSuggestionsAction = suggestions::onAction,
+            onProtectionAction = protection::onAction,
+        ),
+        webViewActions = webViewActions,
+        snackbarHostState = snackbarHostState,
+        slots = slots,
+        modifier = modifier,
+    )
+}
+
+/**
+ * The browser: the WebView fills the screen and the bars float over it. Scroll offsets and load
+ * progress are read only inside `graphicsLayer`/draw lambdas, so scrolling and loading recompose nothing.
+ */
+@Composable
+@Suppress("LongMethod", "LongParameterList") // Top-level host: wires bars, overlays, hub and effects.
+internal fun BrowserScreen(
+    state: BrowserUiState,
+    tabCount: Int,
+    activeTab: Tab?,
+    progress: () -> Float,
+    textZoomPercent: Int,
+    sources: BrowserScreenSources,
+    actions: BrowserScreenActions,
+    webViewActions: WebViewActionsHandle,
+    snackbarHostState: SnackbarHostState,
+    slots: BrowserSlots,
+    modifier: Modifier = Modifier,
+) {
+    val onAction = actions.onAction
+    val currentState by rememberUpdatedState(state)
+    val currentTab by rememberUpdatedState(activeTab)
     val addressFocus = remember { FocusRequester() }
     val homeSearchFocus = remember { FocusRequester() }
     var topBarHeightPx by remember { mutableIntStateOf(0) }
@@ -99,40 +172,33 @@ fun BrowserScreen(
     var quickSettingsUsed by remember { mutableStateOf(false) }
 
     // Requests the page makes of the browser: permissions, files, dialogs.
-    val popupTabs: PopupTabs = hiltViewModel()
     val pageSession = rememberPageSession(
         activeTabId = activeTab?.id,
         isIncognito = state.isIncognito,
-        popups = popupTabs,
+        permissionGate = sources.permissionGate,
+        popups = sources.popups,
     )
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
-    HomeBackHandlers(state = state, viewModel = viewModel)
+    HomeBackHandlers(state = state, onAction = onAction)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = slots.incomingContent)
     // Only whether the find bar is open is read here; the bar collects its own text and count.
-    val findOpen by remember(viewModel) {
-        viewModel.findInPage.map { it.isOpen }.distinctUntilChanged()
+    val findOpen by remember(sources.findInPage) {
+        sources.findInPage.map { it.isOpen }.distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = false)
-    val findCallbacks = rememberFindCallbacks(viewModel, webViewActions)
-    val suggestions: AddressSuggestionsViewModel = hiltViewModel()
-    // The app-wide text size changes rarely; the WebView and the hub read it.
-    val pageTextSize: PageTextSizeViewModel = hiltViewModel()
-    val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
-    val protection: ProtectionViewModel = hiltViewModel()
+    val findCallbacks = rememberFindCallbacks(onAction, sources.findInPage, webViewActions)
     var dashboardOpen by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(protection) {
-        // After the per-site switch the page reloads with the new setting.
-        protection.reloadEvents.collect { webViewActions.reload() }
-    }
-    val addressBarCallbacks = rememberAddressBarCallbacks(viewModel, webViewActions, suggestions)
+    val addressBarCallbacks = rememberAddressBarCallbacks(
+        onAction = onAction,
+        onSuggestionsAction = actions.onSuggestionsAction,
+        currentUrl = { currentState.currentUrl },
+    )
     // Composed after every other back handler, so Back closes the find bar first.
     BackHandler(enabled = findOpen, onBack = findCallbacks.onClose)
-    BrowserSnackbarEffects(state = state, viewModel = viewModel, snackbarHostState = snackbarHostState)
     IncomingContentEffects(
         hooks = slots.incomingContent,
         webViewActions = webViewActions,
         snackbarHostState = snackbarHostState,
     )
-    HubEventEffect(hubViewModel = hubViewModel, snackbarHostState = snackbarHostState)
 
     LaunchedEffect(activeTab?.id) {
         // Tab switch: a fresh load on the re-keyed WebView.
@@ -151,14 +217,15 @@ fun BrowserScreen(
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         BrowserContent(
             state = state,
-            viewModel = viewModel,
+            onAction = onAction,
             webViewActions = webViewActions,
             activeTabId = activeTab?.id ?: 0L,
             onScrollDelta = rememberScrollDeltaHandler(chrome) { findOpenNow },
             pageRequests = pageSession,
-            takePopup = { activeTab?.url?.let(popupTabs::take) },
+            takePopup = { activeTab?.url?.let(sources.popups::take) },
             textZoomPercent = textZoomPercent,
-            protection = protection.hooks,
+            protection = sources.protectionHooks,
+            desktopMode = sources.desktopMode,
             modifier = Modifier
                 .fillMaxSize()
                 // While finding, the bars stay put, so the page is shortened by the find bar's height:
@@ -173,14 +240,13 @@ fun BrowserScreen(
             )
         }
         if (state.isHomeContent) {
-            val homeCallbacks =
-                rememberHomeCallbacks(viewModel, hubViewModel, webViewActions, slots, suggestions)
+            val homeCallbacks = rememberHomeCallbacks(actions, webViewActions, slots)
             HomeOverlay(
                 isIncognito = state.isIncognito,
                 callbacks = homeCallbacks,
                 suggestions = {
                     AddressSuggestionList(
-                        stateFlow = suggestions.uiState,
+                        stateFlow = sources.suggestions,
                         onPick = { suggestion -> homeCallbacks.onSearchSubmit(suggestion.url) },
                     )
                 },
@@ -193,7 +259,7 @@ fun BrowserScreen(
             showTopBar = !state.isHomeContent,
             findBar = {
                 FindInPageBar(
-                    stateFlow = viewModel.findInPage,
+                    stateFlow = sources.findInPage,
                     isIncognito = state.isIncognito,
                     callbacks = findCallbacks,
                     modifier = Modifier
@@ -205,16 +271,16 @@ fun BrowserScreen(
                 BrowserTopBar(
                     state = state,
                     addressBarCallbacks = addressBarCallbacks,
-                    onStarTap = viewModel::onStarTapped,
+                    onStarTap = { onAction(BrowserAction.StarTapped) },
                     onReloadOrStop = {
                         if (state.loadingState is LoadingState.Loading) {
                             webViewActions.stopLoading()
-                            viewModel.onLoadStopped()
+                            onAction(BrowserAction.Page.LoadStopped)
                         } else {
                             webViewActions.reload()
                         }
                     },
-                    progress = { progress.value },
+                    progress = progress,
                     focusRequester = addressFocus,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
@@ -227,7 +293,7 @@ fun BrowserScreen(
         BrowserAddressSuggestions(
             visible = state.isAddressBarFocused,
             topBarHeight = topInset,
-            stateFlow = suggestions.uiState,
+            stateFlow = sources.suggestions,
             onPick = { suggestion -> addressBarCallbacks.onSuggestion(suggestion.url) },
         )
         UnlessFinding(findOpen) {
@@ -236,14 +302,14 @@ fun BrowserScreen(
                 isIncognito = state.isIncognito,
                 isHomeActive = state.isHomeContent,
                 callbacks = BrowserBottomBarCallbacks(
-                    onHome = viewModel::onHomePressed,
+                    onHome = { onAction(BrowserAction.Home.Pressed) },
                     onSearch = {
                         chrome.show()
                         if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
                     },
-                    onNewTab = viewModel::onLongPressNewTab,
+                    onNewTab = { onAction(BrowserAction.LongPressNewTab) },
                     onTabs = slots.destinations.openTabs,
-                    onTabsLongPress = viewModel::onLongPressNewTab,
+                    onTabsLongPress = { onAction(BrowserAction.LongPressNewTab) },
                     onMenu = { hubOpen = true },
                 ),
                 modifier = Modifier
@@ -261,15 +327,17 @@ fun BrowserScreen(
     }
 
     val pageToolHandler = rememberPageToolHandler(
-        viewModel = viewModel,
+        onAction = onAction,
         chrome = chrome,
         actions = PageToolActions(
-            share = rememberShareAction(viewModel),
-            toggleDesktopSite = { viewModel.onDesktopModeToggled()?.let(webViewActions.setDesktopMode) },
+            share = rememberShareAction(
+                currentUrl = { currentState.currentUrl },
+                title = { currentTab?.title },
+            ),
+            toggleDesktopSite = { onAction(BrowserAction.ToggleDesktopMode) },
             // Offered only once the page has loaded.
             print = {
-                val title = viewModel.activeTab.value?.title
-                webViewActions.print(PrintJobName.of(title, viewModel.uiState.value.currentUrl))
+                webViewActions.print(PrintJobName.of(currentTab?.title, currentState.currentUrl))
             },
             openTextSize = {
                 quickSettingsUsed = true
@@ -283,7 +351,8 @@ fun BrowserScreen(
         }
         BrowserHub(
             state = state,
-            hubViewModel = hubViewModel,
+            hasActiveDownloads = sources.hasActiveDownloads,
+            onHubAction = actions.onHubAction,
             webViewActions = webViewActions,
             slots = slots,
             onDismiss = { hubOpen = false },
@@ -298,8 +367,8 @@ fun BrowserScreen(
             ),
             onPageTool = pageToolHandler,
             // Nothing about protection on Home or the incognito start page.
-            protectionFlow = if (state.isHomeContent) null else protection.status,
-            onProtectionSwitch = protection::onProtectionSwitched,
+            protectionFlow = if (state.isHomeContent) null else sources.protectionStatus,
+            onProtectionSwitch = { on -> actions.onProtectionAction(ProtectionAction.ProtectionSwitched(on)) },
             onFire = slots.fireButton.onClick,
             onDashboard = { dashboardOpen = true },
         )
@@ -308,7 +377,8 @@ fun BrowserScreen(
         dashboardOpen = dashboardOpen,
         isHomeContent = state.isHomeContent,
         onDashboardClose = { dashboardOpen = false },
-        protection = protection,
+        dashboardFlow = sources.protectionDashboard,
+        onProtectionAction = actions.onProtectionAction,
     )
     slots.fireOverlay()
     if (quickSettingsUsed) {
@@ -317,21 +387,22 @@ fun BrowserScreen(
     // Long-press downloads pass the same storage-permission gate as page downloads.
     val context = LocalContext.current
     val longPressDownload = rememberDownloadRequestHandler(
-        onGrant = viewModel::onDownloadRequested,
-        onDeny = viewModel::onStoragePermissionDenied,
+        onGrant = { url, userAgent, disposition, mimeType ->
+            onAction(BrowserAction.Download.Requested(url, userAgent, disposition, mimeType))
+        },
+        onDeny = { permanently -> onAction(BrowserAction.Download.StoragePermissionDenied(permanently)) },
     )
-    val longPressActions: LongPressActions = hiltViewModel()
     val currentIncognito by rememberUpdatedState(state.isIncognito)
-    val longPress = remember(longPressActions, snackbarHostState, longPressDownload) {
+    val longPress = remember(sources.longPressActions, snackbarHostState, longPressDownload) {
         LongPressHooks(
-            actions = longPressActions,
+            actions = sources.longPressActions,
             snackbarHostState = snackbarHostState,
             isIncognito = { currentIncognito },
             onDownload = { url -> longPressDownload(url, WebSettings.getDefaultUserAgent(context), null, null) },
         )
     }
-    BrowserPageRequests(session = pageSession, longPress = longPress)
-    PopupEffects(popups = popupTabs, snackbarHostState = snackbarHostState)
+    BrowserPageRequests(session = pageSession, permissionGate = sources.permissionGate, longPress = longPress)
+    PopupEffects(popups = sources.popups, snackbarHostState = snackbarHostState)
 }
 
 /** The Home page in a normal tab, the incognito page in an incognito one; the WebView stays alive underneath. */
@@ -359,7 +430,8 @@ private fun HomeOverlay(
 @Suppress("LongParameterList")
 private fun BrowserHub(
     state: BrowserUiState,
-    hubViewModel: HubViewModel,
+    hasActiveDownloads: StateFlow<Boolean>,
+    onHubAction: (HubAction) -> Unit,
     webViewActions: WebViewActionsHandle,
     slots: BrowserSlots,
     onDismiss: () -> Unit,
@@ -375,14 +447,14 @@ private fun BrowserHub(
         canGoBack = state.canGoBack,
         canGoForward = state.canGoForward,
         onDismiss = onDismiss,
-        hasActiveDownloadsFlow = hubViewModel.hasActiveDownloads,
+        hasActiveDownloadsFlow = hasActiveDownloads,
         callbacks = HubCallbacks(
             onSettings = slots.destinations.openSettings,
             onBack = { webViewActions.goBack() },
             onForward = { webViewActions.goForward() },
             onDownloadsInProgress = slots.destinations.openDownloads,
             onPrivacy = slots.destinations.openSettings,
-            onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
+            onNewIncognitoTab = { onHubAction(HubAction.NewIncognitoTab) },
             onDownloads = slots.destinations.openDownloads,
             onHistory = slots.destinations.openHistory,
             onBookmarks = slots.destinations.openBookmarks,
@@ -420,110 +492,35 @@ private fun BrowserBackHandlers(
  * with no history left, returns to Home. Composed after [BrowserBackHandlers] to take precedence.
  */
 @Composable
-private fun HomeBackHandlers(state: BrowserUiState, viewModel: BrowserViewModel) {
-    BackHandler(enabled = state.homeOverlay) { viewModel.onHomeOverlayDismissed() }
+private fun HomeBackHandlers(state: BrowserUiState, onAction: (BrowserAction) -> Unit) {
+    BackHandler(enabled = state.homeOverlay) { onAction(BrowserAction.Home.OverlayDismissed) }
     BackHandler(
         enabled = !state.canGoBack && state.cameFromHome && !state.isIncognito && !state.isHomeContent,
-    ) { viewModel.onBackWithoutHistory() }
+    ) { onAction(BrowserAction.BackWithoutHistory) }
 }
 
 @Composable
 private fun rememberHomeCallbacks(
-    viewModel: BrowserViewModel,
-    hubViewModel: HubViewModel,
+    actions: BrowserScreenActions,
     webViewActions: WebViewActionsHandle,
     slots: BrowserSlots,
-    suggestions: AddressSuggestionsViewModel,
-): HomeCallbacks {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
-    return remember(
-        viewModel,
-        hubViewModel,
-        webViewActions,
-        slots,
-        keyboardController,
-        focusManager,
-        suggestions,
-    ) {
-        HomeCallbacks(
-            onSearchSubmit = { input ->
-                viewModel.onHomeSubmit(input) { url ->
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                    webViewActions.loadUrl(url)
-                }
-            },
-            onOpenUrl = { url ->
-                viewModel.onNavigateFromHome()
-                webViewActions.loadUrl(url)
-            },
-            onSeeAllHistory = slots.destinations.openHistory,
-            onNewIncognitoTab = hubViewModel::onNewIncognitoTab,
-            // Home's field starts empty, so there is no page address to compare with.
-            onSearchTextChange = { text -> suggestions.onTextChanged(text, currentPageUrl = null) },
-            onSearchFocusChange = { focused -> suggestions.onFocusChanged(focused) },
-        )
-    }
-}
-
-@Composable
-private fun BrowserSnackbarEffects(
-    state: BrowserUiState,
-    viewModel: BrowserViewModel,
-    snackbarHostState: SnackbarHostState,
-) {
-    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
-    val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
-    val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
-    val downloadStartedTemplate = stringResource(R.string.downloads_started_snackbar)
-    val downloadServiceUnavailableMessage = stringResource(R.string.downloads_service_unavailable)
-    val storagePermissionDeniedMessage = stringResource(R.string.downloads_storage_permission_denied)
-    val storagePermissionSettingsMessage = stringResource(R.string.downloads_storage_permission_denied_permanently)
-
-    LaunchedEffect(state.tabsEvent) {
-        if (state.tabsEvent is TabsErrorEvent.MaxTabsReached) {
-            snackbarHostState.showSnackbar(maxTabsMessage)
-            viewModel.consumeTabsEvent()
-        }
-    }
-    LaunchedEffect(state.bookmarkSnackbarEvent) {
-        val message = when (state.bookmarkSnackbarEvent) {
-            BookmarkSnackbarEvent.Added -> bookmarkAddedMessage
-            BookmarkSnackbarEvent.Removed -> bookmarkRemovedMessage
-            null -> null
-        }
-        if (message != null) {
-            snackbarHostState.showSnackbar(message)
-            viewModel.consumeBookmarkSnackbarEvent()
-        }
-    }
-    LaunchedEffect(state.downloadSnackbarEvent) {
-        val message = when (val event = state.downloadSnackbarEvent) {
-            is DownloadSnackbarEvent.Started -> downloadStartedTemplate.format(event.fileName)
-            DownloadSnackbarEvent.ServiceUnavailable -> downloadServiceUnavailableMessage
-            DownloadSnackbarEvent.StoragePermissionDenied -> storagePermissionDeniedMessage
-            DownloadSnackbarEvent.StoragePermissionPermanentlyDenied -> storagePermissionSettingsMessage
-            null -> null
-        }
-        if (message != null) {
-            snackbarHostState.showSnackbar(message)
-            viewModel.consumeDownloadSnackbarEvent()
-        }
-    }
-}
-
-/** Snackbars for hub actions that finish after the sheet has closed. */
-@Composable
-private fun HubEventEffect(hubViewModel: HubViewModel, snackbarHostState: SnackbarHostState) {
-    val maxIncognitoMessage = stringResource(R.string.tabs_error_max_incognito_tabs_reached)
-    LaunchedEffect(hubViewModel) {
-        hubViewModel.events.collect { event ->
-            when (event) {
-                HubEvent.MaxIncognitoTabsReached -> snackbarHostState.showSnackbar(maxIncognitoMessage)
-            }
-        }
-    }
+): HomeCallbacks = remember(actions, webViewActions, slots) {
+    HomeCallbacks(
+        onSearchSubmit = { input -> actions.onAction(BrowserAction.Home.Submit(input)) },
+        onOpenUrl = { url ->
+            actions.onAction(BrowserAction.Home.NavigateFrom)
+            webViewActions.loadUrl(url)
+        },
+        onSeeAllHistory = slots.destinations.openHistory,
+        onNewIncognitoTab = { actions.onHubAction(HubAction.NewIncognitoTab) },
+        // Home's field starts empty, so there is no page address to compare with.
+        onSearchTextChange = { text ->
+            actions.onSuggestionsAction(AddressSuggestionsAction.TextChanged(text, currentPageUrl = null))
+        },
+        onSearchFocusChange = { focused ->
+            actions.onSuggestionsAction(AddressSuggestionsAction.FocusChanged(focused))
+        },
+    )
 }
 
 /** The always-mounted WebView, keyed by the active tab so a switch disposes the previous one. */
@@ -531,7 +528,7 @@ private fun HubEventEffect(hubViewModel: HubViewModel, snackbarHostState: Snackb
 @Suppress("LongParameterList")
 private fun BrowserContent(
     state: BrowserUiState,
-    viewModel: BrowserViewModel,
+    onAction: (BrowserAction) -> Unit,
     webViewActions: WebViewActionsHandle,
     activeTabId: Long,
     onScrollDelta: (Float) -> Unit,
@@ -539,12 +536,15 @@ private fun BrowserContent(
     takePopup: () -> WebView?,
     textZoomPercent: Int,
     protection: ProtectionHooks,
+    desktopMode: DesktopModeLookup,
     modifier: Modifier = Modifier,
 ) {
     // On API 29+ the storage-permission gate passes straight through.
     val onDownloadRequested = rememberDownloadRequestHandler(
-        onGrant = viewModel::onDownloadRequested,
-        onDeny = viewModel::onStoragePermissionDenied,
+        onGrant = { url, userAgent, disposition, mimeType ->
+            onAction(BrowserAction.Download.Requested(url, userAgent, disposition, mimeType))
+        },
+        onDeny = { permanently -> onAction(BrowserAction.Download.StoragePermissionDenied(permanently)) },
     )
     val context = LocalContext.current
     val incognitoProfile = remember(context) { context.incognitoWebProfile() }
@@ -556,66 +556,58 @@ private fun BrowserContent(
                 state = state,
                 actions = webViewActions,
                 callbacks = BrowserWebViewCallbacks(
-                    onLoadStarted = viewModel::onLoadStarted,
-                    onProgressChanged = viewModel::onProgressChanged,
-                    onLoadFinished = viewModel::onLoadFinished,
-                    onLoadFailed = viewModel::onLoadFailed,
+                    onLoadStarted = { onAction(BrowserAction.Page.LoadStarted(it)) },
+                    onProgressChanged = { onAction(BrowserAction.Page.ProgressChanged(it)) },
+                    onLoadFinished = { onAction(BrowserAction.Page.LoadFinished(it)) },
+                    onLoadFailed = { onAction(BrowserAction.Page.LoadFailed(it)) },
                     onDownloadRequested = onDownloadRequested,
                     pageRequests = pageRequests,
-                    onFindResult = viewModel::onFindResult,
+                    onFindResult = { ordinal, total -> onAction(BrowserAction.Page.FindResult(ordinal, total)) },
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
-                    onUrlChange = viewModel::onUrlChanged,
-                    onCanGoBackChange = viewModel::onCanGoBackChanged,
-                    onCanGoForwardChange = viewModel::onCanGoForwardChanged,
-                    onTitleChange = viewModel::onTitleReceived,
-                    onIconReceived = viewModel::onIconReceived,
-                    onScreenshotReady = viewModel::onScreenshotReady,
+                    onUrlChange = { onAction(BrowserAction.Page.UrlChanged(it)) },
+                    onCanGoBackChange = { onAction(BrowserAction.Page.CanGoBackChanged(it)) },
+                    onCanGoForwardChange = { onAction(BrowserAction.Page.CanGoForwardChanged(it)) },
+                    onTitleChange = { onAction(BrowserAction.Page.TitleReceived(it)) },
+                    onIconReceived = { url, icon -> onAction(BrowserAction.Page.IconReceived(url, icon)) },
+                    onScreenshotReady = { onAction(BrowserAction.Page.ScreenshotReady(it)) },
                     onScrollDelta = onScrollDelta,
                 ),
                 incognitoProfile = incognitoProfile,
                 modifier = Modifier.fillMaxSize(),
                 adopted = adopted,
                 textZoomPercent = textZoomPercent,
-                desktopMode = remember { viewModel.isDesktopMode(activeTabId) },
+                desktopMode = remember { desktopMode.isDesktop(activeTabId) },
                 protection = protection,
             )
         }
     }
 }
 
-/** On a non-empty submit: dismiss the keyboard, clear focus, then load, in that order. */
+/** A submit reaches the view model, whose load event dismisses the keyboard and clears focus first. */
 @Composable
 private fun rememberAddressBarCallbacks(
-    viewModel: BrowserViewModel,
-    webViewActions: WebViewActionsHandle,
-    suggestions: AddressSuggestionsViewModel,
+    onAction: (BrowserAction) -> Unit,
+    onSuggestionsAction: (AddressSuggestionsAction) -> Unit,
+    currentUrl: () -> String,
 ): AddressBarCallbacks {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
-    return remember(viewModel, webViewActions, keyboardController, focusManager, suggestions) {
-        val submit = {
-            viewModel.onAddressBarSubmit { url ->
-                keyboardController?.hide()
-                focusManager.clearFocus()
-                webViewActions.loadUrl(url)
-            }
-            Unit
-        }
+    val pageUrl by rememberUpdatedState(currentUrl)
+    return remember(onAction, onSuggestionsAction) {
+        val submit = { onAction(BrowserAction.AddressBar.Submit) }
         AddressBarCallbacks(
             onTextChange = { text ->
-                viewModel.onAddressBarTextChange(text)
-                suggestions.onTextChanged(text, currentPageUrl = viewModel.uiState.value.currentUrl)
+                onAction(BrowserAction.AddressBar.TextChange(text))
+                onSuggestionsAction(AddressSuggestionsAction.TextChanged(text, currentPageUrl = pageUrl()))
             },
             onFocusChange = { focused ->
-                viewModel.onAddressBarFocusChange(focused)
-                suggestions.onFocusChanged(focused)
+                onAction(BrowserAction.AddressBar.FocusChange(focused))
+                onSuggestionsAction(AddressSuggestionsAction.FocusChanged(focused))
             },
             onSubmit = submit,
-            onClear = viewModel::onAddressBarClear,
+            onClear = { onAction(BrowserAction.AddressBar.Clear) },
             // A chosen suggestion is submitted exactly like a typed address.
             onSuggestion = { url ->
-                viewModel.onAddressBarTextChange(url)
+                onAction(BrowserAction.AddressBar.TextChange(url))
                 submit()
             },
         )
