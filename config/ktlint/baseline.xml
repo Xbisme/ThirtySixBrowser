@@ -16,9 +16,6 @@
         <error line="284" column="9" source="compose:vm-forwarding-check" />
         <error line="323" column="9" source="compose:vm-injection-check" />
     </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/downloads/presentation/downloads/DownloadsScreen.kt">
-        <error line="42" column="5" source="compose:vm-forwarding-check" />
-    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/history/presentation/history/HistoryScreen.kt">
         <error line="54" column="5" source="compose:vm-forwarding-check" />
         <error line="71" column="9" source="compose:vm-forwarding-check" />

@@ -7,7 +7,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ExternalFileOpener
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveDownloadsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ResolveDownloadStatusUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.feature.downloads.domain.usecase.CancelDownloadUseCase
@@ -45,7 +44,7 @@ internal fun instrumentedViewModel(
     val repository = InstrumentedDownloadsRepository(records)
     val gateway = InstrumentedGateway(statuses, existingFiles)
     return DownloadsViewModel(
-        observeDownloads = ObserveDownloadsUseCase(repository),
+        downloads = repository,
         resolveStatus = ResolveDownloadStatusUseCase(gateway, repository),
         openDownloadedFile = OpenDownloadedFileUseCase(gateway, InstrumentedNoopOpener),
         removeDownloadRecord = RemoveDownloadRecordUseCase(repository),

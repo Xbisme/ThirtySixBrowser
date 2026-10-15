@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadListItem
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveDownloadsUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ResolveDownloadStatusUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
@@ -23,7 +23,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -44,7 +43,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
 class DownloadsViewModel @Inject constructor(
-    observeDownloads: ObserveDownloadsUseCase,
+    downloads: DownloadsRepository,
     private val resolveStatus: ResolveDownloadStatusUseCase,
     private val openDownloadedFile: OpenDownloadedFileUseCase,
     private val removeDownloadRecord: RemoveDownloadRecordUseCase,
@@ -62,10 +61,10 @@ class DownloadsViewModel @Inject constructor(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    val events: SharedFlow<DownloadsEvent> = _events.asSharedFlow()
+    val events: Flow<DownloadsEvent> = _events.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val itemsFlow: Flow<List<DownloadListItem>> = observeDownloads()
+    private val itemsFlow: Flow<List<DownloadListItem>> = downloads.observeAll()
         .flatMapLatest { records -> pollStatuses(records) }
         .flowOn(dispatchers.default)
 
@@ -96,24 +95,38 @@ class DownloadsViewModel @Inject constructor(
         }
     }
 
-    fun onItemLongPressed(item: DownloadListItem) {
+    fun onAction(action: DownloadsAction) {
+        when (action) {
+            is DownloadsAction.ItemClicked -> onItemClicked(action.item)
+            is DownloadsAction.ItemLongPressed -> onItemLongPressed(action.item)
+            DownloadsAction.ActionSheetDismissed -> onActionSheetDismissed()
+            is DownloadsAction.CopyLinkClicked -> onCopyLinkClicked(action.item)
+            is DownloadsAction.RemoveFromListClicked -> onRemoveFromListClicked(action.item)
+            is DownloadsAction.DeleteFileRequested -> onDeleteFileRequested(action.record)
+            is DownloadsAction.DeleteFileConfirmed -> onDeleteFileConfirmed(action.record)
+            DownloadsAction.DeleteConfirmationDismissed -> onDeleteConfirmationDismissed()
+            is DownloadsAction.CancelClicked -> onCancelClicked(action.item)
+        }
+    }
+
+    private fun onItemLongPressed(item: DownloadListItem) {
         interaction.update { it.copy(actionSheetTarget = item.record.id) }
     }
 
     /** Dismissing performs nothing. */
-    fun onActionSheetDismissed() {
+    private fun onActionSheetDismissed() {
         interaction.update { it.copy(actionSheetTarget = null) }
     }
 
-    fun onDeleteFileRequested(record: DownloadRecord) {
+    private fun onDeleteFileRequested(record: DownloadRecord) {
         interaction.update { it.copy(actionSheetTarget = null, deleteConfirmation = record) }
     }
 
-    fun onDeleteConfirmationDismissed() {
+    private fun onDeleteConfirmationDismissed() {
         interaction.update { it.copy(deleteConfirmation = null) }
     }
 
-    fun onItemClicked(item: DownloadListItem) {
+    private fun onItemClicked(item: DownloadListItem) {
         viewModelScope.launch {
             val event = when (openDownloadedFile(item)) {
                 OpenDownloadResult.Opened -> null
@@ -125,14 +138,14 @@ class DownloadsViewModel @Inject constructor(
         }
     }
 
-    fun onCopyLinkClicked(item: DownloadListItem) {
+    private fun onCopyLinkClicked(item: DownloadListItem) {
         interaction.update { it.copy(actionSheetTarget = null) }
         val copied = clipboardWriter.copyUrl(item.record.sourceUrl, AppConstants.CLIPBOARD_DOWNLOAD_LINK_LABEL)
         emitEvent(if (copied) DownloadsEvent.LinkCopied else DownloadsEvent.OperationFailed)
     }
 
     /** Removes the row and leaves the file; withheld while in flight. */
-    fun onRemoveFromListClicked(item: DownloadListItem) {
+    private fun onRemoveFromListClicked(item: DownloadListItem) {
         interaction.update { it.copy(actionSheetTarget = null) }
         viewModelScope.launch {
             val removed = removeDownloadRecord(item)
@@ -141,7 +154,7 @@ class DownloadsViewModel @Inject constructor(
     }
 
     /** Runs only after the confirmation dialog. */
-    fun onDeleteFileConfirmed(record: DownloadRecord) {
+    private fun onDeleteFileConfirmed(record: DownloadRecord) {
         interaction.update { it.copy(deleteConfirmation = null) }
         viewModelScope.launch {
             val deleted = deleteDownloadedFile(record)
@@ -149,7 +162,7 @@ class DownloadsViewModel @Inject constructor(
         }
     }
 
-    fun onCancelClicked(item: DownloadListItem) {
+    private fun onCancelClicked(item: DownloadListItem) {
         viewModelScope.launch {
             val cancelled = cancelDownload(item)
             // A transfer that finished in the meantime is left alone and reports nothing.
@@ -157,7 +170,7 @@ class DownloadsViewModel @Inject constructor(
         }
     }
 
-    internal fun emitEvent(event: DownloadsEvent) {
+    private fun emitEvent(event: DownloadsEvent) {
         _events.tryEmit(event)
     }
 

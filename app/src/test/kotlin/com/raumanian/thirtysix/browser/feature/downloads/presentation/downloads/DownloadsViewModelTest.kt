@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveDownloadsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ResolveDownloadStatusUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
@@ -46,7 +45,7 @@ class DownloadsViewModelTest {
     ): DownloadsViewModel {
         val resolve = ResolveDownloadStatusUseCase(gateway, repository)
         return DownloadsViewModel(
-            observeDownloads = ObserveDownloadsUseCase(repository),
+            downloads = repository,
             resolveStatus = resolve,
             openDownloadedFile = OpenDownloadedFileUseCase(gateway, opener),
             removeDownloadRecord = RemoveDownloadRecordUseCase(repository),
@@ -147,11 +146,11 @@ class DownloadsViewModelTest {
         vm.uiState.test {
             awaitItem()
             advanceUntilIdle()
-            vm.onItemLongPressed(testItem(record = record))
+            vm.onAction(DownloadsAction.ItemLongPressed(testItem(record = record)))
             advanceUntilIdle()
             assertEquals(1L, expectMostRecentItem().pendingActionSheetTarget?.record?.id)
 
-            vm.onActionSheetDismissed()
+            vm.onAction(DownloadsAction.ActionSheetDismissed)
             advanceUntilIdle()
             assertNull(expectMostRecentItem().pendingActionSheetTarget)
             assertEquals("dismissing must not delete anything", 1, repository.current.size)
@@ -166,11 +165,11 @@ class DownloadsViewModelTest {
         val gateway = RecordingGateway().apply { setStatus(10L, DownloadStatus.Complete()) }
         val vm = viewModel(repository, gateway)
 
-        vm.onDeleteFileRequested(record)
+        vm.onAction(DownloadsAction.DeleteFileRequested(record))
         advanceUntilIdle()
         assertEquals("nothing may be deleted before confirmation", 1, repository.current.size)
 
-        vm.onDeleteFileConfirmed(record)
+        vm.onAction(DownloadsAction.DeleteFileConfirmed(record))
         advanceUntilIdle()
         assertTrue(repository.current.isEmpty())
     }
@@ -186,7 +185,7 @@ class DownloadsViewModelTest {
         )
 
         vm.events.test {
-            vm.onCopyLinkClicked(testItem(record = record))
+            vm.onAction(DownloadsAction.CopyLinkClicked(testItem(record = record)))
             advanceUntilIdle()
             assertEquals(DownloadsEvent.LinkCopied, awaitItem())
             assertEquals(record.sourceUrl, clipboard.copied.single())
@@ -202,8 +201,10 @@ class DownloadsViewModelTest {
             val vm = viewModel(repository, RecordingGateway())
 
             vm.events.test {
-                vm.onRemoveFromListClicked(
-                    testItem(status = DownloadStatus.Running(1L, 10L), record = record),
+                vm.onAction(
+                    DownloadsAction.RemoveFromListClicked(
+                        testItem(status = DownloadStatus.Running(1L, 10L), record = record),
+                    ),
                 )
                 advanceUntilIdle()
                 assertEquals(DownloadsEvent.OperationFailed, awaitItem())
@@ -219,7 +220,8 @@ class DownloadsViewModelTest {
         val vm = viewModel(InMemoryDownloadsRepository(listOf(record)), gateway)
 
         vm.events.test {
-            vm.onCancelClicked(testItem(status = DownloadStatus.Running(9L, 10L), record = record))
+            val item = testItem(status = DownloadStatus.Running(9L, 10L), record = record)
+            vm.onAction(DownloadsAction.CancelClicked(item))
             advanceUntilIdle()
             expectNoEvents()
             cancelAndIgnoreRemainingEvents()
@@ -232,7 +234,8 @@ class DownloadsViewModelTest {
         val vm = viewModel(InMemoryDownloadsRepository(listOf(record)), RecordingGateway())
 
         vm.events.test {
-            vm.onItemClicked(testItem(status = DownloadStatus.Running(1L, 10L), record = record))
+            val item = testItem(status = DownloadStatus.Running(1L, 10L), record = record)
+            vm.onAction(DownloadsAction.ItemClicked(item))
             advanceUntilIdle()
             assertEquals(DownloadsEvent.DownloadNotComplete, awaitItem())
             cancelAndIgnoreRemainingEvents()

@@ -111,11 +111,11 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### downloads
 
-- [ ] T013 [US3] Remove `C/domain/usecase/ObserveDownloadsUseCase.kt`.
+- [X] T013 [US3] Remove `C/domain/usecase/ObserveDownloadsUseCase.kt`.
   - `F/downloads/presentation/downloads/DownloadsViewModel.kt` and `F/browser/domain/usecase/ObserveHasActiveDownloadsUseCase.kt` inject `DownloadsRepository.observeAll()`.
   - Update `T/…/ObserveHasActiveDownloadsUseCaseTest.kt`, `DownloadsViewModelTest.kt` and `A/feature/downloads/presentation/downloads/DownloadsScreenTestDoubles.kt`.
-- [ ] T014 [US2] Add `DownloadsAction` with 9 cases, one per `on…` function, carrying the same parameters. `DownloadsEvent` keeps its cases and is exposed as `events: Flow<DownloadsEvent>`; it is Drop, with `MutableSharedFlow(replay = 0, extraBufferCapacity = 1, onBufferOverflow = DROP_OLDEST)` unchanged. `emitEvent` becomes `private`. Split `DownloadsScreen.kt` into `DownloadsRoute` and `DownloadsScreen(state, onAction, onBack)`. The route's `EventEffect` shows the same snackbars; the `FileMissing` "Remove" action calls `onAction(RemoveFromListClicked(item))`. `DownloadsNavigation.kt` calls the route.
-- [ ] T015 [US2] Update `DownloadsViewModelTest`, and make `A/…/downloads/{DownloadsScreenBrowseTest,DownloadsScreenCancelTest,DownloadsScreenActionSheetTest}.kt` call `DownloadsRoute(viewModel = vm)`. Delete the `DownloadsScreen.kt:42` baseline line. Gate and **commit** `refactor(026): downloads actions and events`.
+- [X] T014 [US2] Add `DownloadsAction` with 9 cases, one per `on…` function, carrying the same parameters. `DownloadsEvent` keeps its cases and is exposed as `events: Flow<DownloadsEvent>`; it is Drop, with `MutableSharedFlow(replay = 0, extraBufferCapacity = 1, onBufferOverflow = DROP_OLDEST)` unchanged. `emitEvent` becomes `private`. Split `DownloadsScreen.kt` into `DownloadsRoute` and `DownloadsScreen(state, onAction, onBack)`. The route's `EventEffect` shows the same snackbars; the `FileMissing` "Remove" action calls `onAction(RemoveFromListClicked(item))`. `DownloadsNavigation.kt` calls the route.
+- [X] T015 *(instrumented run deferred: AVD not available; androidTest compiles)* [US2] Update `DownloadsViewModelTest`, and make `A/…/downloads/{DownloadsScreenBrowseTest,DownloadsScreenCancelTest,DownloadsScreenActionSheetTest}.kt` call `DownloadsRoute(viewModel = vm)`. Delete the `DownloadsScreen.kt:42` baseline line. Gate and **commit** `refactor(026): downloads actions and events`.
 
 ### history
 

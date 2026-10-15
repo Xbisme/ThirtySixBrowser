@@ -50,9 +50,9 @@ class DownloadsScreenActionSheetTest {
             statuses = mapOf(completeRecord.transferHandle to status),
             existingFiles = if (filePresent) setOf(completeRecord.localUri!!) else emptySet(),
         )
-        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.setContent { ThirtySixTheme { DownloadsRoute(viewModel = vm) } }
         composeRule.waitForIdle()
-        vm.onItemLongPressed(vm.uiState.value.items.single())
+        vm.onAction(DownloadsAction.ItemLongPressed(vm.uiState.value.items.single()))
         composeRule.waitForIdle()
     }
 
@@ -104,10 +104,10 @@ class DownloadsScreenActionSheetTest {
             statuses = mapOf(completeRecord.transferHandle to DownloadStatus.Complete()),
             existingFiles = setOf(completeRecord.localUri!!),
         )
-        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.setContent { ThirtySixTheme { DownloadsRoute(viewModel = vm) } }
         composeRule.waitForIdle()
 
-        vm.onItemLongPressed(vm.uiState.value.items.single())
+        vm.onAction(DownloadsAction.ItemLongPressed(vm.uiState.value.items.single()))
         composeRule.waitForIdle()
         composeRule.onNodeWithTag(TEST_TAG_ACTION_DELETE_FILE).performClick()
         composeRule.waitForIdle()
