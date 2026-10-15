@@ -100,14 +100,14 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### privacy
 
-- [ ] T010 [US3] Remove `F/privacy/domain/usecase/ObserveProtectionExceptionsUseCase.kt`. `ProtectionExceptionsViewModel` injects `ProtectionExceptionRepository.observeAll()`. In `T/feature/browser/domain/usecase/SiteProtectionUseCasesTest.kt`, read state back through the fake repository instead (it is pass-through only). `FireproofSitesViewModel` injects `FireproofSiteRepository.observeAll()` in place of `ObserveFireproofSitesUseCase`, but the use case file stays until T037 because `ProtectionViewModel` still uses it.
-- [ ] T011 [US2] Add the actions:
+- [X] T010 [US3] Remove `F/privacy/domain/usecase/ObserveProtectionExceptionsUseCase.kt`. `ProtectionExceptionsViewModel` injects `ProtectionExceptionRepository.observeAll()`. In `T/feature/browser/domain/usecase/SiteProtectionUseCasesTest.kt`, read state back through the fake repository instead (it is pass-through only). `FireproofSitesViewModel` injects `FireproofSiteRepository.observeAll()` in place of `ObserveFireproofSitesUseCase`, but the use case file stays until T037 because `ProtectionViewModel` still uses it.
+- [X] T011 [US2] Add the actions:
   - `ProtectionExceptionsAction`: `TurnOn(site)`, `TurnAllOnClick`, `TurnAllOnConfirmed`, `TurnAllOnDismissed`.
   - `FireproofSitesAction`: `Remove(site)`, `RemoveAllClick`, `RemoveAllConfirmed`, `RemoveAllDismissed`.
   - `FireAction`: `Fire`, `Acknowledge`.
 
   Add `onAction` to each holder. Split the screens into `ProtectionExceptionsRoute`/`Screen` and `FireproofSitesRoute`/`Screen`, and point `PrivacyNavigation.kt` at the routes. `RememberFireButton.kt` sends `FireAction.Fire` and `FireOverlayHost.kt` sends `FireAction.Acknowledge`; both stay hosts that obtain `FireViewModel`.
-- [ ] T012 [US2] Update `T/feature/privacy/presentation/protectionexceptions/ProtectionExceptionsViewModelTest.kt`, to drive `onAction` (`FireproofSitesViewModel` and `FireViewModel` have no unit test; their screens are covered by the instrumented tests below and `FireCoordinatorImplTest`). Update `A/feature/privacy/presentation/fireproof/FireproofSitesScreenTest.kt` and `A/feature/browser/presentation/browser/protection/ProtectionScreensTest.kt` to call the routes. Gate (instrumented tests included) and **commit** `refactor(026): privacy actions and events`.
+- [X] T012 *(instrumented run deferred: AVD not available; androidTest compiles)* [US2] Update `T/feature/privacy/presentation/protectionexceptions/ProtectionExceptionsViewModelTest.kt`, to drive `onAction` (`FireproofSitesViewModel` and `FireViewModel` have no unit test; their screens are covered by the instrumented tests below and `FireCoordinatorImplTest`). Update `A/feature/privacy/presentation/fireproof/FireproofSitesScreenTest.kt` and `A/feature/browser/presentation/browser/protection/ProtectionScreensTest.kt` to call the routes. Gate (instrumented tests included) and **commit** `refactor(026): privacy actions and events`.
 
 ### downloads
 

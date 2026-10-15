@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.privacy.presentation.protectione
 
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -25,7 +24,7 @@ class ProtectionExceptionsViewModelTest {
     @Before
     fun setUp() {
         viewModel = ProtectionExceptionsViewModel(
-            ObserveProtectionExceptionsUseCase(repository),
+            repository,
             RemoveProtectionExceptionsUseCase(repository),
         )
     }
@@ -42,7 +41,7 @@ class ProtectionExceptionsViewModelTest {
         repository.add("new.com")
         assertEquals(listOf("new.com", "old.com"), viewModel.uiState.value.sites)
 
-        viewModel.onTurnOn("old.com")
+        viewModel.onAction(ProtectionExceptionsAction.TurnOn("old.com"))
 
         assertEquals(listOf("new.com"), viewModel.uiState.value.sites)
     }
@@ -52,14 +51,14 @@ class ProtectionExceptionsViewModelTest {
         repository.add("a.com")
         repository.add("b.com")
 
-        viewModel.onTurnAllOnClick()
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnClick)
         assertTrue(viewModel.uiState.value.isConfirmingTurnAllOn)
-        viewModel.onTurnAllOnDismissed()
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnDismissed)
         assertFalse(viewModel.uiState.value.isConfirmingTurnAllOn)
         assertEquals(2, viewModel.uiState.value.sites.size)
 
-        viewModel.onTurnAllOnClick()
-        viewModel.onTurnAllOnConfirmed()
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnClick)
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnConfirmed)
         assertTrue(viewModel.uiState.value.sites.isEmpty())
     }
 }

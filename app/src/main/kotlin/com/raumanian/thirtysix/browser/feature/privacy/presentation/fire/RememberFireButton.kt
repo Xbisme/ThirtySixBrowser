@@ -26,7 +26,7 @@ fun rememberFireButton(
             onConfirm = {
                 confirmOpen = false
                 onConfirm()
-                fire.fire()
+                fire.onAction(FireAction.Fire)
             },
             onDismiss = { confirmOpen = false },
         )

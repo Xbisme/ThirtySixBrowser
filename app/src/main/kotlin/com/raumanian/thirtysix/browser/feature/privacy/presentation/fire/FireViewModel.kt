@@ -17,7 +17,10 @@ class FireViewModel @Inject constructor(
 ) : ViewModel() {
     val state: StateFlow<FireState> = coordinator.state
 
-    fun fire() = coordinator.fire()
-
-    fun acknowledge() = coordinator.acknowledge()
+    fun onAction(action: FireAction) {
+        when (action) {
+            FireAction.Fire -> coordinator.fire()
+            FireAction.Acknowledge -> coordinator.acknowledge()
+        }
+    }
 }

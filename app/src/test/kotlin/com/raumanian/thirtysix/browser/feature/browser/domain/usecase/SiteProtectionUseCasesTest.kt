@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -18,7 +17,6 @@ class SiteProtectionUseCasesTest {
     private val isProtected = IsSiteProtectedUseCase(repository, incognito)
     private val setProtection = SetSiteProtectionUseCase(repository, incognito)
     private val remove = RemoveProtectionExceptionsUseCase(repository)
-    private val observe = ObserveProtectionExceptionsUseCase(repository)
 
     @Test
     fun `every site is protected by default`() {
@@ -32,7 +30,7 @@ class SiteProtectionUseCasesTest {
 
         assertFalse(isProtected("shop.example", isIncognito = false))
         assertTrue("incognito ignores the saved list", isProtected("shop.example", isIncognito = true))
-        assertEquals(listOf("shop.example"), observe().first().map { it.site })
+        assertEquals(listOf("shop.example"), repository.observeAll().first().map { it.site })
 
         setProtection("shop.example", on = true, isIncognito = false)
         assertTrue(isProtected("shop.example", isIncognito = false))
@@ -44,7 +42,7 @@ class SiteProtectionUseCasesTest {
 
         assertFalse(isProtected("shop.example", isIncognito = true))
         assertTrue(isProtected("shop.example", isIncognito = false))
-        assertTrue(observe().first().isEmpty())
+        assertTrue(repository.observeAll().first().isEmpty())
 
         setProtection("shop.example", on = true, isIncognito = true)
         assertTrue(isProtected("shop.example", isIncognito = true))
@@ -56,9 +54,9 @@ class SiteProtectionUseCasesTest {
         setProtection("b.example", on = false, isIncognito = false)
 
         remove("a.example")
-        assertEquals(listOf("b.example"), observe().first().map { it.site })
+        assertEquals(listOf("b.example"), repository.observeAll().first().map { it.site })
 
         remove(null)
-        assertTrue(observe().first().isEmpty())
+        assertTrue(repository.observeAll().first().isEmpty())
     }
 }
