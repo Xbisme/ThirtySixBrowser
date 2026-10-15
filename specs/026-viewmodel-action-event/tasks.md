@@ -371,7 +371,7 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | Use cases | 82 → 49 | ✅ |
 | `fun consume…` in main | 0 | ✅ |
 | Holders without `onAction` | `PageTextSizeViewModel`, `EntryPointViewModel` (no input) | ✅ |
-| Unit tests | 940 passed, 0 failed (959 at baseline − 24 removed pass-through or moved use-case tests + 5 repository assertions moved + 2 Konsist checks − … see disposition) | ✅ |
+| Unit tests | 940 passed, 0 failed: 959 at baseline − 27 use-case tests removed + 6 repository assertions moved + 2 Konsist checks (see the disposition table) | ✅ |
 | Release APK bytes | 3,758,431 (baseline 3,742,047, +0.44 %) | ✅ |
 | 16 KB alignment | all native libs aligned | ✅ |
 | Compose restartable / non-skippable | 217 / 0 (baseline 208 / 0; new routes and effects) | ✅ |
