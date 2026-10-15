@@ -105,7 +105,7 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 ## Phase 6: User Story 1, nothing changes for the person (P1, verification)
 
 - [X] T013 [US1] G2 shape results in "Results".
-- [ ] T014 [US1] G3 on `TA016_API36_16K`:
+- [X] T014 [US1] G3 on `TA016_API36_16K`:
   - instrumented suite
   - upgrade over the seeded `90cd024` debug build
   - 20+ interleaved cold starts
@@ -157,3 +157,11 @@ MVP is T002–T005: the store plus the first extracted holder proves the pattern
 | detekt, ktlint, lintDebug | clean | yes |
 | Compose restartable / non-skippable | 225 / 0 (was 217 / 0) | yes |
 | Release APK | 3,758,431 B, unchanged (`classes.dex` +4,399 B compressed, absorbed by the 4 KB signing-block padding) | yes |
+| Instrumented, `TA016_API36_16K` | 189 passed, 0 failed (1 skipped: the template `ExampleInstrumentedTest`) | yes |
+| Upgrade over `90cd024` debug | 4 tabs, 1 bookmark, settings (no onboarding) and every history row kept; the star still shows saved | yes |
+| Cold start, release, 2 × 12 interleaved after `install -r` | median 159 → 187 ms and 173 → 200 ms, noisy (dexopt after each install, load ≈ 3) | see next row |
+| Cold start, release, speed-compiled, 3 blocks of 6 each | base median 196.5 ms, branch 187.5 ms | yes, no slowdown |
+| Behaviour walk, 16 KB AVD (debug) | Home submit and Back to Home; Home over a page and Back; address query → Google; star across rotation; desktop site on/off; find closes after a link load and after a tab switch; PDF download request reaches DownloadManager; one history row per navigation through redirects (`iana.org`, `http://google.com`) | yes |
+| API 24 smoke (debug, upgraded in place) | Home submit, star toggle and snackbar, find 1/2, Back closes keyboard, then find, then returns to Home; no crash or ANR | yes |
+
+Seen on both `90cd024` and this branch, not caused by this work: find highlights stay on the next page after a link load closes the find bar; the incognito start page has no search field, so the bottom bar's Search does nothing there; a scripted tap on an incognito tab card in Tabs returned to the normal tab. Incognito writes were not checked by hand; the instrumented `IncognitoStressInstrumentedTest` and the unit `PageViewModelIncognitoCacheGateTest` cover them. One ANR during the walk came from the AVD swapping (1.1 GB swap, load 6.6, main thread in `WebViewCompat.getProfile`); after a reboot it did not recur.
