@@ -104,14 +104,14 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 
 ## Phase 6: User Story 1, nothing changes for the person (P1, verification)
 
-- [ ] T013 [US1] G2 shape results in "Results".
+- [X] T013 [US1] G2 shape results in "Results".
 - [ ] T014 [US1] G3 on `TA016_API36_16K`:
   - instrumented suite
   - upgrade over the seeded `90cd024` debug build
   - 20+ interleaved cold starts
   - behaviour walk: Home and address submit, star across rotation, desktop site, find bar closing after a new load and after a tab switch, download request, Back to Home, history rows after a redirect, nothing written in incognito
   - a smoke on `TA016_API24`
-- [ ] T015 [US1] Full G1, the Compose report and the release APK size vs T001.
+- [X] T015 [US1] Full G1, the Compose report and the release APK size vs T001.
 
 ## Phase 7: Delivery
 
@@ -148,3 +148,12 @@ MVP is T002–T005: the store plus the first extracted holder proves the pattern
 
 | Measure | Value | Pass |
 |---|---|---|
+| Largest file in `P` (except WebView, chrome client) | `BrowserScreen.kt` 201 lines (was 615) | yes (≤ 300) |
+| Size suppressions in `feature/browser` | 21 (was 26) | **no** (target ≤ 19): `PageViewModel` keeps one, since each of its functions handles one WebView callback; reaching 19 would need a new collaborator just to pass the threshold |
+| Holder deps / actions | Page 9 / 11, AddressBar 3 / 9, PageActions 5 / 3, FindInPage 1 / 4, DownloadRequest 1 / 2 | yes (≤ 10 / ≤ 12) |
+| `BaseViewModel` in `app/src` | none | yes |
+| `PageViewModel.kt` | 267 lines (was 514 as `BrowserViewModel.kt`) | — |
+| Unit tests | 942, 0 failed (946 before the 4 `BaseViewModel` tests were deleted) | yes |
+| detekt, ktlint, lintDebug | clean | yes |
+| Compose restartable / non-skippable | 225 / 0 (was 217 / 0) | yes |
+| Release APK | 3,758,431 B, unchanged (`classes.dex` +4,399 B compressed, absorbed by the 4 KB signing-block padding) | yes |
