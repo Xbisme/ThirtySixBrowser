@@ -119,16 +119,16 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### history
 
-- [ ] T016 [US3] Remove `F/history/domain/usecase/{ObserveHistoryEntriesUseCase,DeleteHistoryEntryUseCase,ClearAllHistoryUseCase}.kt`. `HistoryViewModel` injects `HistoryRepository` (`observeAll()`, `deleteById(id)`, `clearAll()`) and `TabRepository.createTab(url)` in place of `CreateTabUseCase`; that use case stays until T037.
+- [X] T016 [US3] Remove `F/history/domain/usecase/{ObserveHistoryEntriesUseCase,DeleteHistoryEntryUseCase,ClearAllHistoryUseCase}.kt`. `HistoryViewModel` injects `HistoryRepository` (`observeAll()`, `deleteById(id)`, `clearAll()`) and `TabRepository.createTab(url)` in place of `CreateTabUseCase`; that use case stays until T037.
   - Delete `T/feature/history/domain/usecase/ObserveHistoryEntriesUseCaseTest.kt` (pass-through).
   - For `ClearAllHistoryUseCaseTest` (removed count, 0 when empty) and `DeleteHistoryEntryUseCaseTest` (1 or 0; other visits kept), check the `HistoryRepositoryImpl`/`HistoryDao` tests and move any assertion not already covered, then delete both files.
   - Update `A/…/history/HistoryScreenTestDoubles.kt` and `HistoryRecorderIntegrationTest`.
-- [ ] T017 [US2] Add `HistoryAction` with 11 cases, one per `on…` function. `consumeOpenUrl` goes. Add `HistoryEvent`:
+- [X] T017 [US2] Add `HistoryAction` with 11 cases, one per `on…` function. `consumeOpenUrl` goes. Add `HistoryEvent`:
   - `OpenUrl(url)`: **Keep**, `Channel(BUFFERED)`, replacing `HistoryUiState.openUrl`.
   - `Snackbar(HistoryErrorEvent)`: **Drop**, the existing `MutableSharedFlow(replay = 0, extraBufferCapacity = 1, DROP_OLDEST)`.
 
   Expose `events = merge(...)`. `faviconCache` stays a property. Split `HistoryScreen.kt` into `HistoryRoute` (its `EventEffect` calls `onShowBrowser()` for `OpenUrl` and shows the snackbar for `Snackbar`) and `HistoryScreen(state, onAction, faviconCache, onBack)`. `HistoryContent` takes `onAction`. `HistoryNavigation.kt` calls the route.
-- [ ] T018 [US2] Update `HistoryViewModelTest` so `openUrl` assertions read `HistoryEvent.OpenUrl` from `events`. Make `A/…/history/{HistoryScreenBrowseTest,HistoryScreenSearchTest,HistoryScreenLongPressTest}.kt` call `HistoryRoute(viewModel = …)`. Delete the two `HistoryScreen.kt` baseline lines. Gate and **commit** `refactor(026): history actions and events`.
+- [X] T018 *(instrumented run deferred: AVD not available; androidTest compiles)* [US2] Update `HistoryViewModelTest` so `openUrl` assertions read `HistoryEvent.OpenUrl` from `events`. Make `A/…/history/{HistoryScreenBrowseTest,HistoryScreenSearchTest,HistoryScreenLongPressTest}.kt` call `HistoryRoute(viewModel = …)`. Delete the two `HistoryScreen.kt` baseline lines. Gate and **commit** `refactor(026): history actions and events`.
 
 ### onboarding
 
@@ -376,3 +376,10 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 
 | Removed test / case | Asserted | Disposition |
 |---|---|---|
+| `ObserveHistoryEntriesUseCaseTest` (1) | pass-through | deleted |
+| `ClearAllHistoryUseCaseTest`: count + empties | repository behaviour | covered by `HistoryRepositoryImplTest.clearAll removes every row…` |
+| `ClearAllHistoryUseCaseTest`: empty → 0 | repository behaviour | moved to `HistoryRepositoryImplTest.clearAll on an empty history returns 0` |
+| `DeleteHistoryEntryUseCaseTest`: returns 1, removes | repository behaviour | covered by `HistoryRepositoryImplTest.deleteById removes only the targeted row…` |
+| `DeleteHistoryEntryUseCaseTest`: unknown id → 0 | DAO behaviour | covered by `HistoryDaoSpec014Test.deleteById returns 0 when the row does not exist` |
+| `DeleteHistoryEntryUseCaseTest`: other visits to the same URL stay | repository behaviour | moved to `HistoryRepositoryImplTest.deleting one visit leaves other visits to the same URL intact` |
+| `HistoryViewModelTest.consumeOpenUrl clears the navigation signal` | the open signal is not repeated | rewritten as `an opened url is delivered once` (the consume function no longer exists) |

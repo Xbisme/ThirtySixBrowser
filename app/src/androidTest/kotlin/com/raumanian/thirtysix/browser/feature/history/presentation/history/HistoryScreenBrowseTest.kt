@@ -44,7 +44,7 @@ class HistoryScreenBrowseTest {
     fun seededHistory_rendersDayHeadersAndEveryRow() {
         val repository = InstrumentedFakeHistoryRepository(seeded)
         composeRule.setContent {
-            ThirtySixTheme { HistoryScreen(viewModel = buildHistoryViewModel(repository)) }
+            ThirtySixTheme { HistoryRoute(viewModel = buildHistoryViewModel(repository)) }
         }
 
         composeRule.onNodeWithText(TODAY_HEADER).assertIsDisplayed()
@@ -60,7 +60,7 @@ class HistoryScreenBrowseTest {
         val tabRepository = InstrumentedFakeTabRepository(listOf(activeTab))
         composeRule.setContent {
             ThirtySixTheme {
-                HistoryScreen(viewModel = buildHistoryViewModel(repository, tabRepository))
+                HistoryRoute(viewModel = buildHistoryViewModel(repository, tabRepository))
             }
         }
 

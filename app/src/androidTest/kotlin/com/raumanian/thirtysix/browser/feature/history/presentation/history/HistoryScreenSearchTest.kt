@@ -102,7 +102,7 @@ class HistoryScreenSearchTest {
 
     private fun setScreen(repository: InstrumentedFakeHistoryRepository) {
         composeRule.setContent {
-            ThirtySixTheme { HistoryScreen(viewModel = buildHistoryViewModel(repository)) }
+            ThirtySixTheme { HistoryRoute(viewModel = buildHistoryViewModel(repository)) }
         }
     }
 

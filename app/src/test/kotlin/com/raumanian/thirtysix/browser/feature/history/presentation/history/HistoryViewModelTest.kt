@@ -1,10 +1,10 @@
 package com.raumanian.thirtysix.browser.feature.history.presentation.history
 
+import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -16,9 +16,6 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.feature.history.domain.model.HistoryDayBucket
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ClearAllHistoryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.DeleteHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ObserveHistoryEntriesUseCase
 import java.io.File
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
@@ -28,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -96,27 +94,27 @@ class HistoryViewModelTest {
         advanceUntilIdle()
 
         val entry = vm.uiState.first { it.entries.isNotEmpty() }.entries.single()
-        vm.onEntryTap(entry)
+        vm.onAction(HistoryAction.EntryTap(entry))
         advanceUntilIdle()
 
-        assertEquals("https://example.com", vm.uiState.first { it.openUrl != null }.openUrl)
+        assertEquals("https://example.com", vm.events.filterIsInstance<HistoryEvent.OpenUrl>().first().url)
         val activeTab = tabRepo.observeTabs().first().maxByOrNull { it.lastActiveAt }
         assertEquals("https://example.com", activeTab?.url)
     }
 
     @Test
-    fun `consumeOpenUrl clears the navigation signal`() = runTest {
+    fun `an opened url is delivered once`() = runTest {
         val repo = FakeHistoryRepository()
         repo.recordVisit("https://example.com", "Example", now)
         val vm = newViewModel(repo)
         advanceUntilIdle()
-        vm.onEntryTap(vm.uiState.first { it.entries.isNotEmpty() }.entries.single())
+        vm.onAction(HistoryAction.EntryTap(vm.uiState.first { it.entries.isNotEmpty() }.entries.single()))
         advanceUntilIdle()
 
-        vm.consumeOpenUrl()
-        advanceUntilIdle()
-
-        assertNull(vm.uiState.first { it.openUrl == null }.openUrl)
+        vm.events.test {
+            assertEquals(HistoryEvent.OpenUrl("https://example.com"), awaitItem())
+            expectNoEvents()
+        }
     }
 
     @Test
@@ -133,7 +131,7 @@ class HistoryViewModelTest {
         val vm = seededViewModel()
         advanceUntilIdle()
 
-        vm.onSearchQueryChange("e")
+        vm.onAction(HistoryAction.SearchQueryChange("e"))
         advanceUntilIdle()
 
         val state = vm.uiState.first { it.searchQuery == "e" }
@@ -146,7 +144,7 @@ class HistoryViewModelTest {
         val vm = seededViewModel()
         advanceUntilIdle()
 
-        vm.onSearchQueryChange("KO")
+        vm.onAction(HistoryAction.SearchQueryChange("KO"))
         advanceUntilIdle()
 
         val matched = vm.uiState.first { it.searchQuery == "KO" }
@@ -161,7 +159,7 @@ class HistoryViewModelTest {
         val vm = seededViewModel()
         advanceUntilIdle()
 
-        vm.onSearchQueryChange("xyznomatchhere")
+        vm.onAction(HistoryAction.SearchQueryChange("xyznomatchhere"))
         advanceUntilIdle()
 
         val state = vm.uiState.first { it.searchQuery == "xyznomatchhere" }
@@ -178,7 +176,7 @@ class HistoryViewModelTest {
         advanceUntilIdle()
 
         for (query in listOf("%_", "'s", "%_o")) {
-            vm.onSearchQueryChange(query)
+            vm.onAction(HistoryAction.SearchQueryChange(query))
             advanceUntilIdle()
             val matched = vm.uiState.first { it.searchQuery == query }
                 .groupedEntries
@@ -196,7 +194,7 @@ class HistoryViewModelTest {
         val vm = seededViewModel()
         advanceUntilIdle()
 
-        vm.onSearchQueryChange("z".repeat(BrowserLimits.MAX_HISTORY_QUERY_LENGTH + 50))
+        vm.onAction(HistoryAction.SearchQueryChange("z".repeat(BrowserLimits.MAX_HISTORY_QUERY_LENGTH + 50)))
         advanceUntilIdle()
 
         assertEquals(
@@ -209,10 +207,10 @@ class HistoryViewModelTest {
     fun `clearing the query restores the full grouped list`() = runTest {
         val vm = seededViewModel()
         advanceUntilIdle()
-        vm.onSearchQueryChange("kotlin")
+        vm.onAction(HistoryAction.SearchQueryChange("kotlin"))
         advanceUntilIdle()
 
-        vm.onSearchQueryClear()
+        vm.onAction(HistoryAction.SearchQueryClear)
         advanceUntilIdle()
 
         val state = vm.uiState.first { it.searchQuery.isEmpty() }
@@ -225,7 +223,7 @@ class HistoryViewModelTest {
         repo.recordVisit("https://kotlinlang.org", "Kotlin docs", now)
         val vm = newViewModel(repo)
         advanceUntilIdle()
-        vm.onSearchQueryChange("kotlin")
+        vm.onAction(HistoryAction.SearchQueryChange("kotlin"))
         advanceUntilIdle()
 
         repo.recordVisit("https://play.kotlinlang.org", "Kotlin playground", now + 1_000L)
@@ -245,10 +243,10 @@ class HistoryViewModelTest {
         advanceUntilIdle()
         val entry = vm.uiState.first { it.entries.isNotEmpty() }.entries.single()
 
-        vm.onLongPressEntry(entry)
+        vm.onAction(HistoryAction.LongPressEntry(entry))
         assertEquals(entry, vm.uiState.value.pendingActionSheetTarget)
 
-        vm.onActionSheetDismiss()
+        vm.onAction(HistoryAction.ActionSheetDismiss)
         assertNull(vm.uiState.value.pendingActionSheetTarget)
     }
 
@@ -263,7 +261,7 @@ class HistoryViewModelTest {
         advanceUntilIdle()
         val entry = vm.uiState.first { it.entries.isNotEmpty() }.entries.single()
 
-        vm.onOpenInNewTab(entry)
+        vm.onAction(HistoryAction.OpenInNewTab(entry))
         advanceUntilIdle()
 
         val normalTabs = tabRepo.observeTabs().first()
@@ -272,7 +270,7 @@ class HistoryViewModelTest {
             normalTabs.any { it.url == "https://example.com" },
         )
         assertNull(vm.uiState.value.pendingActionSheetTarget)
-        assertEquals("https://example.com", vm.uiState.first { it.openUrl != null }.openUrl)
+        assertEquals("https://example.com", vm.events.filterIsInstance<HistoryEvent.OpenUrl>().first().url)
     }
 
     @Test
@@ -287,13 +285,14 @@ class HistoryViewModelTest {
             val entry = vm.uiState.first { it.entries.isNotEmpty() }.entries.single()
 
             val events = mutableListOf<HistoryErrorEvent>()
-            val job = collectEvents(vm, events)
-            vm.onOpenInNewTab(entry)
+            val opened = mutableListOf<String>()
+            val job = collectEvents(vm, events, opened)
+            vm.onAction(HistoryAction.OpenInNewTab(entry))
             advanceUntilIdle()
             job.cancel()
 
             assertEquals(listOf(HistoryErrorEvent.TabCapReached), events)
-            assertNull(vm.uiState.value.openUrl)
+            assertTrue(opened.isEmpty())
         }
 
     @Test
@@ -307,7 +306,7 @@ class HistoryViewModelTest {
 
         val events = mutableListOf<HistoryErrorEvent>()
         val job = collectEvents(vm, events)
-        vm.onDeleteEntry(target)
+        vm.onAction(HistoryAction.DeleteEntry(target))
         advanceUntilIdle()
         job.cancel()
 
@@ -323,7 +322,7 @@ class HistoryViewModelTest {
 
         val events = mutableListOf<HistoryErrorEvent>()
         val job = collectEvents(vm, events)
-        vm.onDeleteEntry(HistoryEntry(1L, "https://example.com", "Example", now))
+        vm.onAction(HistoryAction.DeleteEntry(HistoryEntry(1L, "https://example.com", "Example", now)))
         advanceUntilIdle()
         job.cancel()
 
@@ -341,7 +340,7 @@ class HistoryViewModelTest {
 
         val events = mutableListOf<HistoryErrorEvent>()
         val job = collectEvents(vm, events)
-        vm.onCopyUrl(entry)
+        vm.onAction(HistoryAction.CopyUrl(entry))
         advanceUntilIdle()
         job.cancel()
 
@@ -360,7 +359,7 @@ class HistoryViewModelTest {
 
         val events = mutableListOf<HistoryErrorEvent>()
         val job = collectEvents(vm, events)
-        vm.onCopyUrl(entry)
+        vm.onAction(HistoryAction.CopyUrl(entry))
         advanceUntilIdle()
         job.cancel()
 
@@ -374,10 +373,10 @@ class HistoryViewModelTest {
         val vm = newViewModel(repo)
         advanceUntilIdle()
 
-        vm.onClearAllRequested()
+        vm.onAction(HistoryAction.ClearAllRequested)
         assertTrue(vm.uiState.value.isClearAllDialogVisible)
 
-        vm.onClearAllCancelled()
+        vm.onAction(HistoryAction.ClearAllCancelled)
         assertFalse(vm.uiState.value.isClearAllDialogVisible)
         assertEquals(1, repo.recorded.size)
     }
@@ -389,9 +388,9 @@ class HistoryViewModelTest {
         repo.recordVisit("https://b.example.com", "B", now)
         val vm = newViewModel(repo)
         advanceUntilIdle()
-        vm.onClearAllRequested()
+        vm.onAction(HistoryAction.ClearAllRequested)
 
-        vm.onClearAllConfirmed()
+        vm.onAction(HistoryAction.ClearAllConfirmed)
         advanceUntilIdle()
 
         val state = vm.uiState.first { it.entries.isEmpty() }
@@ -404,11 +403,11 @@ class HistoryViewModelTest {
     fun `clear-all failure emits DeletionFailed and still closes the dialog`() = runTest {
         val vm = newViewModel(ThrowingHistoryRepository())
         advanceUntilIdle()
-        vm.onClearAllRequested()
+        vm.onAction(HistoryAction.ClearAllRequested)
 
         val events = mutableListOf<HistoryErrorEvent>()
         val job = collectEvents(vm, events)
-        vm.onClearAllConfirmed()
+        vm.onAction(HistoryAction.ClearAllConfirmed)
         advanceUntilIdle()
         job.cancel()
 
@@ -438,8 +437,16 @@ class HistoryViewModelTest {
     private fun TestScope.collectEvents(
         vm: HistoryViewModel,
         sink: MutableList<HistoryErrorEvent>,
+        opened: MutableList<String> = mutableListOf(),
     ): Job {
-        val job = launch { vm.historySnackbarEvent.collect { sink += it } }
+        val job = launch {
+            vm.events.collect { event ->
+                when (event) {
+                    is HistoryEvent.Snackbar -> sink += event.event
+                    is HistoryEvent.OpenUrl -> opened += event.url
+                }
+            }
+        }
         advanceUntilIdle()
         return job
     }
@@ -460,13 +467,11 @@ class HistoryViewModelTest {
     ): HistoryViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepo, incognitoRepo)
         return HistoryViewModel(
-            observeHistoryEntries = ObserveHistoryEntriesUseCase(historyRepository),
+            history = historyRepository,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepo, incognitoRepo),
-            createTab = CreateTabUseCase(tabRepo, HOME_URL),
-            deleteHistoryEntry = DeleteHistoryEntryUseCase(historyRepository),
-            clearAllHistory = ClearAllHistoryUseCase(historyRepository),
+            tabs = tabRepo,
             clipboardWriter = clipboardWriter,
             dispatchers = TestDispatchers(testDispatcher),
             faviconCache = NoopFaviconCache,

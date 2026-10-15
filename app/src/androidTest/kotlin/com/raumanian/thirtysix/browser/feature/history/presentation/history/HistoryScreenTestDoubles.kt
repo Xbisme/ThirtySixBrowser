@@ -7,16 +7,12 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ClearAllHistoryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.DeleteHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ObserveHistoryEntriesUseCase
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.CoroutineDispatcher
@@ -160,16 +156,14 @@ internal fun buildHistoryViewModel(
 ): HistoryViewModel {
     val observeAllTabs = ObserveAllTabsUseCase(tabRepository, InstrumentedNoopIncognitoRepository)
     return HistoryViewModel(
-        observeHistoryEntries = ObserveHistoryEntriesUseCase(historyRepository),
+        history = historyRepository,
         observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
         observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
         updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(
             tabRepository,
             InstrumentedNoopIncognitoRepository,
         ),
-        createTab = CreateTabUseCase(tabRepository, INSTRUMENTED_HOME_URL),
-        deleteHistoryEntry = DeleteHistoryEntryUseCase(historyRepository),
-        clearAllHistory = ClearAllHistoryUseCase(historyRepository),
+        tabs = tabRepository,
         clipboardWriter = clipboardWriter,
         dispatchers = InstrumentedImmediateDispatchers,
         faviconCache = InstrumentedNoopFaviconCacheForHistory,

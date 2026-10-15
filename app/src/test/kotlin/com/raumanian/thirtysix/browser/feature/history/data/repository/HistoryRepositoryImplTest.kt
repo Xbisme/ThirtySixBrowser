@@ -6,6 +6,7 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -101,6 +102,21 @@ class HistoryRepositoryImplTest {
             assertEquals(emptyList<Any>(), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `clearAll on an empty history returns 0`() = runTest {
+        assertEquals(0, repo.clearAll())
+    }
+
+    @Test
+    fun `deleting one visit leaves other visits to the same URL intact`() = runTest {
+        val first = repo.recordVisit("https://example.com", "Example", 1000L)
+        repo.recordVisit("https://example.com", "Example", 2000L)
+
+        repo.deleteById(first)
+
+        assertEquals(listOf(2000L), repo.observeAll().first().map { it.visitedAt })
     }
 
     @Test
