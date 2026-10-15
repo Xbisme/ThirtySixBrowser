@@ -2,14 +2,12 @@ package com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs
 
 import androidx.compose.runtime.Immutable
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
-import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 /** Tab switcher state; [tabs] is ordered by `lastActiveAt` descending, then `id`. */
 @Immutable
 data class TabsUiState(
     val tabs: List<Tab> = emptyList(),
     val activeTabId: Long? = null,
     val isCloseAllDialogVisible: Boolean = false,
-    val errorEvent: TabsErrorEvent? = null,
     /** The Incognito chip and close-all-incognito are hidden while this is 0. */
     val incognitoTabCount: Int = 0,
     val isCloseAllIncognitoDialogVisible: Boolean = false,

@@ -6,7 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
-import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.TabsScreen
+import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.TabsRoute
 
 const val TABS_ROUTE: String = "tabs"
 
@@ -16,7 +16,7 @@ fun NavGraphBuilder.tabsScreen(
     onShowBrowser: () -> Unit,
 ) {
     composable(TABS_ROUTE) {
-        TabsScreen(navController = navController, fireButton = fireButton(), onShowBrowser = onShowBrowser)
+        TabsRoute(navController = navController, fireButton = fireButton(), onShowBrowser = onShowBrowser)
     }
 }
 

@@ -23,10 +23,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,20 +45,21 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
+import com.raumanian.thirtysix.browser.core.presentation.util.EventEffect
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.CloseAllIncognitoConfirmDialog
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.CloseAllTabsConfirmDialog
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.TabCreateCard
 import com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs.component.TabSwitcherCard
-import java.io.File
+import kotlinx.coroutines.launch
 
 /**
  * Tab switcher: a plural-aware title, Open / Incognito mode chips, one close-all action for the
  * mode on screen, and an adaptive grid of image cards ending with the mode's create card.
  */
 @Composable
-fun TabsScreen(
+fun TabsRoute(
     navController: NavHostController,
     fireButton: FireButton,
     modifier: Modifier = Modifier,
@@ -68,22 +68,56 @@ fun TabsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    val showBrowser by rememberUpdatedState(onShowBrowser)
-    LaunchedEffect(viewModel) {
-        viewModel.popBackEvent.collect { showBrowser() }
-    }
-
-    TabsErrorEventEffect(
-        errorEvent = state.errorEvent,
-        snackbarHostState = snackbarHostState,
-        consumeErrorEvent = viewModel::consumeErrorEvent,
+    val scope = rememberCoroutineScope()
+    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
+    val maxIncognitoMessage = stringResource(
+        R.string.tabs_error_max_incognito_tabs_reached,
+        BrowserLimits.MAX_INCOGNITO_TABS,
     )
-    TabsConfirmDialogs(state = state, viewModel = viewModel)
+    EventEffect(viewModel.events) { event ->
+        when (event) {
+            TabsEvent.ShowBrowser -> onShowBrowser()
+            // Shown apart from the collector so a showing message never holds up navigation.
+            is TabsEvent.Error -> scope.launch {
+                snackbarHostState.showSnackbar(
+                    when (event.error) {
+                        TabsErrorEvent.MaxTabsReached -> maxTabsMessage
+                        TabsErrorEvent.MaxIncognitoTabsReached -> maxIncognitoMessage
+                    },
+                )
+            }
+        }
+    }
 
     // Favicon / screenshot saves bump these counters so cards re-read their files.
     val faviconVersion by viewModel.faviconVersion.collectAsStateWithLifecycle()
     val screenshotVersion by viewModel.screenshotVersion.collectAsStateWithLifecycle()
+
+    TabsScreen(
+        state = state,
+        images = viewModel.images,
+        imageVersions = faviconVersion to screenshotVersion,
+        fireButton = fireButton,
+        snackbarHostState = snackbarHostState,
+        onAction = viewModel::onAction,
+        onBack = { navController.popBackStack() },
+        modifier = modifier,
+    )
+}
+
+@Suppress("LongParameterList")
+@Composable
+fun TabsScreen(
+    state: TabsUiState,
+    images: TabImages,
+    imageVersions: Pair<Long, Long>,
+    fireButton: FireButton,
+    snackbarHostState: SnackbarHostState,
+    onAction: (TabsAction) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TabsConfirmDialogs(state = state, onAction = onAction)
 
     Scaffold(
         modifier = modifier
@@ -93,13 +127,13 @@ fun TabsScreen(
         topBar = {
             TabsHeader(
                 state = state,
-                navController = navController,
+                onBack = onBack,
                 fire = fireButton,
-                onModeSelect = viewModel::onModeSelected,
+                onModeSelect = { onAction(TabsAction.ModeSelected(it)) },
                 onCloseAll = if (state.mode == TabsMode.Incognito) {
-                    viewModel::onCloseAllIncognitoRequested
+                    { onAction(TabsAction.CloseAllIncognitoRequested) }
                 } else {
-                    viewModel::onCloseAllRequested
+                    { onAction(TabsAction.CloseAllRequested) }
                 },
             )
         },
@@ -108,61 +142,32 @@ fun TabsScreen(
         TabsGrid(
             state = state,
             padding = padding,
-            faviconVersion = faviconVersion,
-            screenshotVersion = screenshotVersion,
-            faviconFor = viewModel::faviconFor,
-            screenshotFor = viewModel::screenshotFor,
-            onTabClick = viewModel::onTabClick,
-            onTabClose = viewModel::onCloseTab,
+            imageVersions = imageVersions,
+            images = images,
+            onTabClick = { onAction(TabsAction.TabClick(it)) },
+            onTabClose = { onAction(TabsAction.CloseTab(it)) },
             onCreate = if (state.mode == TabsMode.Incognito) {
-                viewModel::onNewIncognitoTabClick
+                { onAction(TabsAction.NewIncognitoTabClick) }
             } else {
-                viewModel::onNewTabClick
+                { onAction(TabsAction.NewTabClick) }
             },
         )
     }
 }
 
 @Composable
-private fun TabsErrorEventEffect(
-    errorEvent: TabsErrorEvent?,
-    snackbarHostState: SnackbarHostState,
-    consumeErrorEvent: () -> Unit,
-) {
-    val currentConsumeErrorEvent by rememberUpdatedState(consumeErrorEvent)
-    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
-    val maxIncognitoMessage = stringResource(
-        R.string.tabs_error_max_incognito_tabs_reached,
-        BrowserLimits.MAX_INCOGNITO_TABS,
-    )
-    LaunchedEffect(errorEvent) {
-        when (errorEvent) {
-            is TabsErrorEvent.MaxTabsReached -> {
-                snackbarHostState.showSnackbar(maxTabsMessage)
-                currentConsumeErrorEvent()
-            }
-            is TabsErrorEvent.MaxIncognitoTabsReached -> {
-                snackbarHostState.showSnackbar(maxIncognitoMessage)
-                currentConsumeErrorEvent()
-            }
-            null -> Unit
-        }
-    }
-}
-
-@Composable
-private fun TabsConfirmDialogs(state: TabsUiState, viewModel: TabsViewModel) {
+private fun TabsConfirmDialogs(state: TabsUiState, onAction: (TabsAction) -> Unit) {
     if (state.isCloseAllDialogVisible) {
         CloseAllTabsConfirmDialog(
-            onConfirm = viewModel::onCloseAllConfirmed,
-            onDismiss = viewModel::onCloseAllDismissed,
+            onConfirm = { onAction(TabsAction.CloseAllConfirmed) },
+            onDismiss = { onAction(TabsAction.CloseAllDismissed) },
         )
     }
     if (state.isCloseAllIncognitoDialogVisible) {
         CloseAllIncognitoConfirmDialog(
             count = state.incognitoTabCount,
-            onConfirm = viewModel::onCloseAllIncognitoConfirmed,
-            onDismiss = viewModel::onCloseAllIncognitoDismissed,
+            onConfirm = { onAction(TabsAction.CloseAllIncognitoConfirmed) },
+            onDismiss = { onAction(TabsAction.CloseAllIncognitoDismissed) },
         )
     }
 }
@@ -171,7 +176,7 @@ private fun TabsConfirmDialogs(state: TabsUiState, viewModel: TabsViewModel) {
 @Composable
 private fun TabsHeader(
     state: TabsUiState,
-    navController: NavHostController,
+    onBack: () -> Unit,
     fire: FireButton,
     onModeSelect: (TabsMode) -> Unit,
     onCloseAll: () -> Unit,
@@ -189,7 +194,7 @@ private fun TabsHeader(
             RoundIconButton(
                 icon = AppIcons.ArrowBack,
                 contentDescription = stringResource(R.string.browser_action_back),
-                onClick = { navController.popBackStack() },
+                onClick = onBack,
                 style = RoundIconStyle.Bare,
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -258,10 +263,8 @@ private fun ModeChips(incognito: Boolean, showIncognito: Boolean, onModeSelect: 
 private fun TabsGrid(
     state: TabsUiState,
     padding: PaddingValues,
-    faviconVersion: Long,
-    screenshotVersion: Long,
-    faviconFor: (String) -> File?,
-    screenshotFor: (Long) -> File?,
+    imageVersions: Pair<Long, Long>,
+    images: TabImages,
     onTabClick: (Long) -> Unit,
     onTabClose: (Long) -> Unit,
     onCreate: () -> Unit,
@@ -286,8 +289,8 @@ private fun TabsGrid(
         items(items = state.visibleTabs, key = { tab -> tab.id }, contentType = { CONTENT_TYPE_TAB }) { tab ->
             // Incognito cards never read the caches; the version pair re-reads files
             // after a save without recomposing anything else.
-            val files = remember(tab.id, tab.url, tab.isIncognito, faviconVersion, screenshotVersion) {
-                if (tab.isIncognito) null to null else faviconFor(tab.url) to screenshotFor(tab.id)
+            val files = remember(tab.id, tab.url, tab.isIncognito, imageVersions) {
+                if (tab.isIncognito) null to null else images.favicon(tab.url) to images.screenshot(tab.id)
             }
             TabSwitcherCard(
                 tab = tab,

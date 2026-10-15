@@ -156,10 +156,10 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### tabs
 
-- [ ] T025 [US3] Remove `F/tabs/domain/usecase/CloseAllIncognitoTabsUseCase.kt`. `TabsViewModel` stops using `CreateTab`, `CreateIncognitoTab`, `SwitchActiveTab` and `CloseIncognitoTab`; their core files are deleted in T037, once `PopupTabs`, `HubViewModel` and `HomeViewModel` are switched too.
+- [X] T025 [US3] Remove `F/tabs/domain/usecase/CloseAllIncognitoTabsUseCase.kt`. `TabsViewModel` stops using `CreateTab`, `CreateIncognitoTab`, `SwitchActiveTab` and `CloseIncognitoTab`; their core files are deleted in T037, once `PopupTabs`, `HubViewModel` and `HomeViewModel` are switched too.
   - `TabsViewModel` injects `TabRepository` (`createTab(homeUrl)`: pass its injected `homeUrl` explicitly where `createTab()` was called with no argument; `switchActiveTab`) and `IncognitoTabRepository` (`createTab`, `closeTab`, `closeAll`). `CloseTab`, `CloseAllTabs` and `ObserveAllTabs` stay; they are not forwards.
   - From `T/core/domain/usecase/TabUseCasesTest.kt`, move the cap (`MaxTabsReachedException`) and switch-active cases to the `TabRepositoryImpl` test if they are not covered there, and delete the pass-through cases.
-- [ ] T026 [US2] Add `TabsAction` with 11 cases: `TabClick(tabId)`, `CloseTab(tabId)`, `NewTabClick`, `NewIncognitoTabClick`, `CloseAllRequested`, `CloseAllDismissed`, `CloseAllConfirmed`, `CloseAllIncognitoRequested`, `CloseAllIncognitoDismissed`, `CloseAllIncognitoConfirmed`, `ModeSelected(mode)`. `consumeErrorEvent` goes.
+- [X] T026 [US2] Add `TabsAction` with 11 cases: `TabClick(tabId)`, `CloseTab(tabId)`, `NewTabClick`, `NewIncognitoTabClick`, `CloseAllRequested`, `CloseAllDismissed`, `CloseAllConfirmed`, `CloseAllIncognitoRequested`, `CloseAllIncognitoDismissed`, `CloseAllIncognitoConfirmed`, `ModeSelected(mode)`. `consumeErrorEvent` goes.
   - Add `TabsEvent`:
     - `ShowBrowser`: **Drop**, the existing `MutableSharedFlow(replay = 0, extraBufferCapacity = 1)` with default SUSPEND overflow.
     - `Error(TabsErrorEvent)`: **Keep**, `Channel(BUFFERED)`, replacing `TabsUiState.errorEvent`.
@@ -167,7 +167,7 @@ The two stories land together per feature because the holder's constructor (US3)
     Expose `events = merge(...)`.
   - `faviconFor`/`screenshotFor` become `val images: TabImages`, a `fun interface`-style lookup in `F/tabs/presentation/tabs/TabImages.kt` with `favicon(url): File?` and `screenshot(tabId): File?`.
   - Split `TabsScreen.kt` into `TabsRoute` (collects `uiState`, `faviconVersion`, `screenshotVersion`; `EventEffect` → `showBrowser()` / snackbar) and `TabsScreen(state, onAction, images, versions, fireButton)`. `TabsConfirmDialogs` takes `onAction`. `TabsNavigation.kt` calls the route.
-- [ ] T027 [US2] Update `TabsViewModelTest` and `TabsViewModelChipModeTest`: `errorEvent` assertions read `TabsEvent.Error`, and `popBackEvent` assertions read `TabsEvent.ShowBrowser`. Delete the `TabsScreen.kt:82` baseline line. Run the tabs instrumented tests (`CloseAllIncognitoFlowTest`, `TabSwipeTest`, `TabPersistenceProcessDeathTest`, `IncognitoStressInstrumentedTest`). Gate and **commit** `refactor(026): tabs actions and events`.
+- [X] T027 *(tabs instrumented run deferred: AVD not available; androidTest compiles; `TabUseCasesTest` cases move in T037 with their use cases)* [US2] Update `TabsViewModelTest` and `TabsViewModelChipModeTest`: `errorEvent` assertions read `TabsEvent.Error`, and `popBackEvent` assertions read `TabsEvent.ShowBrowser`. Delete the `TabsScreen.kt:82` baseline line. Run the tabs instrumented tests (`CloseAllIncognitoFlowTest`, `TabSwipeTest`, `TabPersistenceProcessDeathTest`, `IncognitoStressInstrumentedTest`). Gate and **commit** `refactor(026): tabs actions and events`.
 
 ### bookmarks
 
@@ -385,4 +385,6 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | `HistoryViewModelTest.consumeOpenUrl clears the navigation signal` | the open signal is not repeated | rewritten as `an opened url is delivered once` (the consume function no longer exists) |
 | `SettingsUseCasesTest.setOnboardingCompletedUseCase_delegates` | pass-through | deleted |
 | `SettingsUseCasesTest.setDynamicColorEnabledUseCase_delegates` | pass-through | deleted |
+| `TabsViewModelTest.consumeErrorEvent clears the errorEvent field` | the error is not repeated | rewritten as `an error is delivered once` |
+| `TabsViewModelTest`: no error on a successful create | `errorEvent` stays null | now asserts the only event is `ShowBrowser` |
 | `OnboardingViewModelTest`: back reports true / false | the return value told the screen to leave | rewritten as state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 does not move) |

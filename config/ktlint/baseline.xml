@@ -16,7 +16,4 @@
         <error line="284" column="9" source="compose:vm-forwarding-check" />
         <error line="323" column="9" source="compose:vm-injection-check" />
     </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/tabs/presentation/tabs/TabsScreen.kt">
-        <error line="82" column="5" source="compose:vm-forwarding-check" />
-    </file>
 </baseline>
