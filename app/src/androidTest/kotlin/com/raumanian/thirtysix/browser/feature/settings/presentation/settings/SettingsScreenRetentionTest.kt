@@ -35,7 +35,7 @@ class SettingsScreenRetentionTest {
 
     private fun render(repository: InstrumentedFakeSettingsRepository = InstrumentedFakeSettingsRepository()) {
         composeRule.setContent {
-            ThirtySixTheme { SettingsScreen(viewModel = settingsViewModel(settingsRepository = repository)) }
+            ThirtySixTheme { SettingsRoute(viewModel = settingsViewModel(settingsRepository = repository)) }
         }
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LIST)
             .performScrollToNode(hasTestTag(TEST_TAG_SETTINGS_RETENTION_ROW))

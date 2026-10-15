@@ -142,8 +142,8 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### settings
 
-- [ ] T022 [US3] Remove `F/settings/domain/usecase/{SetDynamicColorEnabledUseCase,SetTextSizeUseCase}.kt`. `SettingsViewModel` injects `SettingsRepository` and `DefaultBrowserController` in place of the 7 use cases listed in data-model.md. Delete from `T/core/domain/usecase/{SettingsUseCasesTest,AppLanguageUseCasesTest}.kt` and `T/feature/browser/domain/usecase/DefaultBrowserUseCasesTest.kt` the cases for removed use cases only (pass-through); keep the `SetAppLanguage` and `SyncDefaultBrowserInvite` cases. Update `T/…/settings/SettingsViewModelTestFactory.kt` and `A/…/settings/SettingsScreenTestDoubles.kt`.
-- [ ] T023 [US2] Add `SettingsAction` with 21 cases:
+- [X] T022 [US3] Remove `F/settings/domain/usecase/{SetDynamicColorEnabledUseCase,SetTextSizeUseCase}.kt`. `SettingsViewModel` injects `SettingsRepository` and `DefaultBrowserController` in place of the 7 use cases listed in data-model.md. Delete from `T/core/domain/usecase/{SettingsUseCasesTest,AppLanguageUseCasesTest}.kt` and `T/feature/browser/domain/usecase/DefaultBrowserUseCasesTest.kt` the cases for removed use cases only (pass-through); keep the `SetAppLanguage` and `SyncDefaultBrowserInvite` cases. Update `T/…/settings/SettingsViewModelTestFactory.kt` and `A/…/settings/SettingsScreenTestDoubles.kt`.
+- [X] T023 [US2] Add `SettingsAction` with 21 cases:
   - `Started`, `Resumed` (was `refreshDefaultBrowser`), `DismissDialog`
   - `ThemeRowClick`, `ThemeSelected`, `TextSizeRowClick`, `TextSizeSelected`, `SearchEngineRowClick`, `SearchEngineSelected`
   - `LanguageRowClick`, `LanguageSelected`, `LanguageApplied`
@@ -152,7 +152,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - `DynamicColorToggled`
 
   Expose `SettingsEvent` as `events`; it is Drop with unchanged settings. Split `SettingsScreen.kt` into `SettingsRoute` (`LifecycleStartEffect` → `Started`, `LifecycleResumeEffect` → `Resumed`) and `SettingsScreen(state, onAction, destinations)`. The section builders, `SettingsDialogHost(state, onAction)` and `SettingsSnackbarEffect(events, snackbarHostState)` take no holder. `QuickSettingsHost.kt` keeps obtaining `SettingsViewModel`, sends `…RowClick` actions from its `LaunchedEffect(request)`, and passes `state` + `onAction` to `SettingsDialogHost`. `SettingsNavigation.kt` calls the route.
-- [ ] T024 [US2] Update `SettingsViewModelTest` and `SettingsViewModelDefaultBrowserTest`. Make the 8 `A/…/settings/SettingsScreen*Test.kt` / `SettingsDefaultBrowserRowTest.kt` call `SettingsRoute(viewModel = settingsViewModel(...))`. Delete the four `SettingsScreen.kt`/`QuickSettingsHost.kt` baseline lines. Gate (instrumented tests included; quick settings from the hub by hand) and **commit** `refactor(026): settings actions and events`.
+- [X] T024 *(instrumented run and hub quick settings by hand deferred: AVD not available; androidTest compiles; full G1 green)* [US2] Update `SettingsViewModelTest` and `SettingsViewModelDefaultBrowserTest`. Make the 8 `A/…/settings/SettingsScreen*Test.kt` / `SettingsDefaultBrowserRowTest.kt` call `SettingsRoute(viewModel = settingsViewModel(...))`. Delete the four `SettingsScreen.kt`/`QuickSettingsHost.kt` baseline lines. Gate (instrumented tests included; quick settings from the hub by hand) and **commit** `refactor(026): settings actions and events`.
 
 ### tabs
 
@@ -384,4 +384,5 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | `DeleteHistoryEntryUseCaseTest`: other visits to the same URL stay | repository behaviour | moved to `HistoryRepositoryImplTest.deleting one visit leaves other visits to the same URL intact` |
 | `HistoryViewModelTest.consumeOpenUrl clears the navigation signal` | the open signal is not repeated | rewritten as `an opened url is delivered once` (the consume function no longer exists) |
 | `SettingsUseCasesTest.setOnboardingCompletedUseCase_delegates` | pass-through | deleted |
+| `SettingsUseCasesTest.setDynamicColorEnabledUseCase_delegates` | pass-through | deleted |
 | `OnboardingViewModelTest`: back reports true / false | the return value told the screen to leave | rewritten as state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 does not move) |

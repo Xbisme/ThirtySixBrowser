@@ -17,6 +17,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageController
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
@@ -24,12 +25,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
-import com.raumanian.thirtysix.browser.core.domain.usecase.GetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedFakeHistoryRepository
@@ -38,8 +34,6 @@ import com.raumanian.thirtysix.browser.feature.history.presentation.history.Inst
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ClearBrowsingDataUseCase
-import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetDynamicColorEnabledUseCase
-import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetTextSizeUseCase
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
@@ -175,10 +169,6 @@ internal fun settingsViewModel(
     appLanguageController: AppLanguageController = InstrumentedFakeAppLanguageController(),
     historyRepository: HistoryRepository = InstrumentedFakeHistoryRepository(),
     webDataCleaner: WebDataCleaner = InstrumentedFakeWebDataCleaner(),
-    setThemeMode: SetThemeModeUseCase = SetThemeModeUseCase(settingsRepository),
-    setDynamicColorEnabled: SetDynamicColorEnabledUseCase = SetDynamicColorEnabledUseCase(settingsRepository),
-    setSearchEngine: SetSearchEngineUseCase = SetSearchEngineUseCase(settingsRepository),
-    getAppLanguage: GetAppLanguageUseCase = GetAppLanguageUseCase(appLanguageController),
     setAppLanguage: SetAppLanguageUseCase =
         SetAppLanguageUseCase(appLanguageController, InstrumentedImmediateDispatchers),
     clearBrowsingData: ClearBrowsingDataUseCase = ClearBrowsingDataUseCase(
@@ -197,21 +187,16 @@ internal fun settingsViewModel(
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
     supportsDynamicColor: Boolean = true,
     appVersionName: String = INSTRUMENTED_APP_VERSION_NAME,
-    isDefaultBrowser: IsDefaultBrowserUseCase = IsDefaultBrowserUseCase { false },
-    setTextSize: SetTextSizeUseCase = SetTextSizeUseCase(settingsRepository),
+    defaultBrowser: DefaultBrowserController = DefaultBrowserController { false },
 ): SettingsViewModel = SettingsViewModel(
-    observeUserSettings = ObserveUserSettingsUseCase(settingsRepository),
-    setThemeMode = setThemeMode,
-    setDynamicColorEnabled = setDynamicColorEnabled,
-    setSearchEngine = setSearchEngine,
-    getAppLanguage = getAppLanguage,
+    settings = settingsRepository,
+    languages = appLanguageController,
     setAppLanguage = setAppLanguage,
     clearBrowsingData = clearBrowsingData,
     changeHistoryRetention = changeHistoryRetention,
+    defaultBrowser = defaultBrowser,
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
-    isDefaultBrowser = isDefaultBrowser,
-    setTextSize = setTextSize,
 )
 
 internal const val INSTRUMENTED_APP_VERSION_NAME: String = "9.9.9-instrumented"

@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 
-import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -18,22 +18,22 @@ class SettingsViewModelDefaultBrowserTest {
 
     @Test
     fun `the initial state is read from the system`() {
-        val vm = settingsViewModel(isDefaultBrowser = IsDefaultBrowserUseCase { true })
+        val vm = settingsViewModel(defaultBrowser = DefaultBrowserController { true })
         assertTrue(vm.uiState.value.isDefaultBrowser)
     }
 
     @Test
     fun `a refresh picks up a change made outside the app`() {
         var isDefault = false
-        val vm = settingsViewModel(isDefaultBrowser = IsDefaultBrowserUseCase { isDefault })
+        val vm = settingsViewModel(defaultBrowser = DefaultBrowserController { isDefault })
         assertFalse(vm.uiState.value.isDefaultBrowser)
 
         isDefault = true
-        vm.refreshDefaultBrowser()
+        vm.onAction(SettingsAction.Resumed)
         assertTrue(vm.uiState.value.isDefaultBrowser)
 
         isDefault = false
-        vm.refreshDefaultBrowser()
+        vm.onAction(SettingsAction.Resumed)
         assertFalse(vm.uiState.value.isDefaultBrowser)
     }
 }

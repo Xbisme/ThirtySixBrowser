@@ -34,7 +34,7 @@ class SettingsScreenClearDataTest {
 
     private fun render(webDataCleaner: WebDataCleaner = InstrumentedFakeWebDataCleaner()) {
         composeRule.setContent {
-            ThirtySixTheme { SettingsScreen(viewModel = settingsViewModel(webDataCleaner = webDataCleaner)) }
+            ThirtySixTheme { SettingsRoute(viewModel = settingsViewModel(webDataCleaner = webDataCleaner)) }
         }
     }
 

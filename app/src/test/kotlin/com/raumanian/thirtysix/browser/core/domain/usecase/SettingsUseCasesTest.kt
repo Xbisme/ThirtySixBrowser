@@ -6,7 +6,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetDynamicColorEnabledUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
@@ -42,14 +41,6 @@ class SettingsUseCasesTest {
         val result = useCase(SearchEngine.Google)
         assertTrue(result is Result.Success)
         assertEquals(SearchEngine.Google, fake.lastSearchEngine)
-    }
-
-    @Test
-    fun setDynamicColorEnabledUseCase_delegates() = runBlocking {
-        val useCase = SetDynamicColorEnabledUseCase(fake)
-        val result = useCase(false)
-        assertTrue(result is Result.Success)
-        assertEquals(false, fake.lastDynamicColorEnabled)
     }
 }
 

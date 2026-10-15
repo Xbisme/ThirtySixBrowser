@@ -88,9 +88,9 @@ class SettingsViewModelTest {
     fun `dismissDialog closes an open dialog`() = runTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
-        viewModel.onThemeRowClick()
+        viewModel.onAction(SettingsAction.ThemeRowClick)
 
-        viewModel.dismissDialog()
+        viewModel.onAction(SettingsAction.DismissDialog)
 
         assertNull(viewModel.uiState.value.dialog)
     }
@@ -102,7 +102,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
 
-        viewModel.onThemeRowClick()
+        viewModel.onAction(SettingsAction.ThemeRowClick)
 
         assertEquals(SettingsDialog.ThemeChooser, viewModel.uiState.value.dialog)
     }
@@ -112,9 +112,9 @@ class SettingsViewModelTest {
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
-        viewModel.onThemeRowClick()
+        viewModel.onAction(SettingsAction.ThemeRowClick)
 
-        viewModel.onThemeSelected(ThemeMode.Dark)
+        viewModel.onAction(SettingsAction.ThemeSelected(ThemeMode.Dark))
         advanceUntilIdle()
 
         assertEquals(listOf(FakeSettingsRepository.CALL_SET_THEME_MODE), repository.writes)
@@ -127,9 +127,9 @@ class SettingsViewModelTest {
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
-        viewModel.onThemeRowClick()
+        viewModel.onAction(SettingsAction.ThemeRowClick)
 
-        viewModel.onThemeSelected(UserSettings.DEFAULT.themeMode)
+        viewModel.onAction(SettingsAction.ThemeSelected(UserSettings.DEFAULT.themeMode))
         advanceUntilIdle()
 
         assertTrue(repository.writes.isEmpty())
@@ -143,7 +143,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
-        viewModel.onThemeSelected(ThemeMode.Dark)
+        viewModel.onAction(SettingsAction.ThemeSelected(ThemeMode.Dark))
         advanceUntilIdle()
 
         assertEquals(listOf(SettingsEvent.SettingNotSaved), events)
@@ -157,7 +157,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
 
-        viewModel.onSearchEngineRowClick()
+        viewModel.onAction(SettingsAction.SearchEngineRowClick)
 
         assertEquals(SettingsDialog.SearchEngineChooser, viewModel.uiState.value.dialog)
     }
@@ -167,9 +167,9 @@ class SettingsViewModelTest {
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
-        viewModel.onSearchEngineRowClick()
+        viewModel.onAction(SettingsAction.SearchEngineRowClick)
 
-        viewModel.onSearchEngineSelected(SearchEngine.DuckDuckGo)
+        viewModel.onAction(SettingsAction.SearchEngineSelected(SearchEngine.DuckDuckGo))
         advanceUntilIdle()
 
         assertEquals(listOf(FakeSettingsRepository.CALL_SET_SEARCH_ENGINE), repository.writes)
@@ -182,9 +182,9 @@ class SettingsViewModelTest {
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
-        viewModel.onSearchEngineRowClick()
+        viewModel.onAction(SettingsAction.SearchEngineRowClick)
 
-        viewModel.onSearchEngineSelected(UserSettings.DEFAULT.searchEngine)
+        viewModel.onAction(SettingsAction.SearchEngineSelected(UserSettings.DEFAULT.searchEngine))
         advanceUntilIdle()
 
         assertTrue(repository.writes.isEmpty())
@@ -198,7 +198,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
-        viewModel.onSearchEngineSelected(SearchEngine.Bing)
+        viewModel.onAction(SettingsAction.SearchEngineSelected(SearchEngine.Bing))
         advanceUntilIdle()
 
         assertEquals(listOf(SettingsEvent.SettingNotSaved), events)
@@ -224,7 +224,7 @@ class SettingsViewModelTest {
 
         // E.g. changed in Android 13+ system settings while the app was away.
         controller.currentLanguage = AppLanguage.Japanese
-        viewModel.onScreenStarted()
+        viewModel.onAction(SettingsAction.Started)
 
         assertEquals(AppLanguage.Japanese, viewModel.uiState.value.appLanguage)
     }
@@ -234,7 +234,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
 
-        viewModel.onLanguageRowClick()
+        viewModel.onAction(SettingsAction.LanguageRowClick)
 
         assertEquals(SettingsDialog.LanguageChooser, viewModel.uiState.value.dialog)
     }
@@ -244,9 +244,9 @@ class SettingsViewModelTest {
         val controller = FakeAppLanguageController(currentLanguage = AppLanguage.German)
         val viewModel = settingsViewModel(appLanguageController = controller)
         advanceUntilIdle()
-        viewModel.onLanguageRowClick()
+        viewModel.onAction(SettingsAction.LanguageRowClick)
 
-        viewModel.onLanguageSelected(AppLanguage.German)
+        viewModel.onAction(SettingsAction.LanguageSelected(AppLanguage.German))
         advanceUntilIdle()
 
         assertTrue(controller.applied.isEmpty())
@@ -258,16 +258,16 @@ class SettingsViewModelTest {
         val controller = FakeAppLanguageController(currentLanguage = AppLanguage.FollowSystem)
         val viewModel = settingsViewModel(appLanguageController = controller)
         advanceUntilIdle()
-        viewModel.onLanguageRowClick()
+        viewModel.onAction(SettingsAction.LanguageRowClick)
 
-        viewModel.onLanguageSelected(AppLanguage.French)
+        viewModel.onAction(SettingsAction.LanguageSelected(AppLanguage.French))
         advanceUntilIdle()
 
         assertEquals(listOf(AppLanguage.French), controller.applied)
         assertEquals(AppLanguage.French, viewModel.uiState.value.appLanguage)
         // The chooser stays until the screen reports the language has landed.
         assertEquals(SettingsDialog.LanguageChooser, viewModel.uiState.value.dialog)
-        viewModel.onLanguageApplied()
+        viewModel.onAction(SettingsAction.LanguageApplied)
         assertNull(viewModel.uiState.value.dialog)
     }
 
@@ -278,7 +278,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
-        viewModel.onLanguageSelected(AppLanguage.Russian)
+        viewModel.onAction(SettingsAction.LanguageSelected(AppLanguage.Russian))
         advanceUntilIdle()
 
         assertEquals(listOf(SettingsEvent.LanguageNotApplied), events)
@@ -292,7 +292,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
 
-        viewModel.onClearBrowsingDataRowClick()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
 
         assertEquals(
             SettingsDialog.ClearBrowsingData(
@@ -307,15 +307,15 @@ class SettingsViewModelTest {
     fun `toggling a category removes it and adds it back`() = runTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
-        viewModel.onClearBrowsingDataRowClick()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
 
-        viewModel.onClearCategoryToggled(ClearBrowsingDataCategory.History)
+        viewModel.onAction(SettingsAction.ClearCategoryToggled(ClearBrowsingDataCategory.History))
         assertEquals(
             setOf(ClearBrowsingDataCategory.CookiesAndSiteData, ClearBrowsingDataCategory.CachedImagesAndFiles),
             clearDialog(viewModel).selection,
         )
 
-        viewModel.onClearCategoryToggled(ClearBrowsingDataCategory.History)
+        viewModel.onAction(SettingsAction.ClearCategoryToggled(ClearBrowsingDataCategory.History))
         assertEquals(ClearBrowsingDataCategory.DEFAULT_SELECTION, clearDialog(viewModel).selection)
     }
 
@@ -327,10 +327,12 @@ class SettingsViewModelTest {
             webDataCleaner = FakeWebDataCleaner(log),
         )
         advanceUntilIdle()
-        viewModel.onClearBrowsingDataRowClick()
-        ClearBrowsingDataCategory.DEFAULT_SELECTION.forEach(viewModel::onClearCategoryToggled)
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
+        ClearBrowsingDataCategory.DEFAULT_SELECTION.forEach { category ->
+            viewModel.onAction(SettingsAction.ClearCategoryToggled(category))
+        }
 
-        viewModel.onClearBrowsingDataConfirmed()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataConfirmed)
         advanceUntilIdle()
 
         assertTrue(log.isEmpty())
@@ -343,13 +345,13 @@ class SettingsViewModelTest {
         val web = FakeWebDataCleaner(log).apply { siteDataGate = CompletableDeferred() }
         val viewModel = settingsViewModel(historyRepository = FakeHistoryRepository(log), webDataCleaner = web)
         advanceUntilIdle()
-        viewModel.onClearBrowsingDataRowClick()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
 
-        viewModel.onClearBrowsingDataConfirmed()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataConfirmed)
         advanceUntilIdle()
-        viewModel.onClearBrowsingDataConfirmed()
-        viewModel.onClearBrowsingDataDismissed()
-        viewModel.onClearCategoryToggled(ClearBrowsingDataCategory.History)
+        viewModel.onAction(SettingsAction.ClearBrowsingDataConfirmed)
+        viewModel.onAction(SettingsAction.ClearBrowsingDataDismissed)
+        viewModel.onAction(SettingsAction.ClearCategoryToggled(ClearBrowsingDataCategory.History))
         advanceUntilIdle()
 
         assertTrue(clearDialog(viewModel).inProgress)
@@ -366,9 +368,9 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
         val events = collectEvents(viewModel)
-        viewModel.onClearBrowsingDataRowClick()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
 
-        viewModel.onClearBrowsingDataConfirmed()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataConfirmed)
         advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.dialog)
@@ -382,9 +384,9 @@ class SettingsViewModelTest {
         )
         advanceUntilIdle()
         val events = collectEvents(viewModel)
-        viewModel.onClearBrowsingDataRowClick()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
 
-        viewModel.onClearBrowsingDataConfirmed()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataConfirmed)
         advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.dialog)
@@ -395,9 +397,9 @@ class SettingsViewModelTest {
     fun `dismissing an idle clear dialog closes it`() = runTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
-        viewModel.onClearBrowsingDataRowClick()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
 
-        viewModel.onClearBrowsingDataDismissed()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataDismissed)
 
         assertNull(viewModel.uiState.value.dialog)
     }
@@ -409,7 +411,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel()
         advanceUntilIdle()
 
-        viewModel.onRetentionRowClick()
+        viewModel.onAction(SettingsAction.RetentionRowClick)
 
         assertEquals(SettingsDialog.RetentionChooser, viewModel.uiState.value.dialog)
     }
@@ -419,9 +421,9 @@ class SettingsViewModelTest {
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
-        viewModel.onRetentionRowClick()
+        viewModel.onAction(SettingsAction.RetentionRowClick)
 
-        viewModel.onRetentionSelected(HistoryRetention.Days30)
+        viewModel.onAction(SettingsAction.RetentionSelected(HistoryRetention.Days30))
         advanceUntilIdle()
 
         assertEquals(SettingsDialog.ConfirmShortenRetention(HistoryRetention.Days30), viewModel.uiState.value.dialog)
@@ -433,9 +435,9 @@ class SettingsViewModelTest {
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
-        viewModel.onRetentionRowClick()
+        viewModel.onAction(SettingsAction.RetentionRowClick)
 
-        viewModel.onRetentionSelected(HistoryRetention.Days180)
+        viewModel.onAction(SettingsAction.RetentionSelected(HistoryRetention.Days180))
         advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.dialog)
@@ -448,9 +450,9 @@ class SettingsViewModelTest {
         val repository = FakeSettingsRepository()
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
-        viewModel.onRetentionRowClick()
+        viewModel.onAction(SettingsAction.RetentionRowClick)
 
-        viewModel.onRetentionSelected(UserSettings.DEFAULT.historyRetention)
+        viewModel.onAction(SettingsAction.RetentionSelected(UserSettings.DEFAULT.historyRetention))
         advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.dialog)
@@ -463,9 +465,9 @@ class SettingsViewModelTest {
         history.recordVisit("https://old.example.com/", "Old", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(60))
         val viewModel = settingsViewModel(historyRepository = history)
         advanceUntilIdle()
-        viewModel.onRetentionSelected(HistoryRetention.Days30)
+        viewModel.onAction(SettingsAction.RetentionSelected(HistoryRetention.Days30))
 
-        viewModel.onShortenRetentionConfirmed()
+        viewModel.onAction(SettingsAction.ShortenRetentionConfirmed)
         advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.dialog)
@@ -480,9 +482,9 @@ class SettingsViewModelTest {
         history.recordVisit("https://old.example.com/", "Old", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(60))
         val viewModel = settingsViewModel(settingsRepository = repository, historyRepository = history)
         advanceUntilIdle()
-        viewModel.onRetentionSelected(HistoryRetention.Days7)
+        viewModel.onAction(SettingsAction.RetentionSelected(HistoryRetention.Days7))
 
-        viewModel.onShortenRetentionCancelled()
+        viewModel.onAction(SettingsAction.ShortenRetentionCancelled)
         advanceUntilIdle()
 
         assertNull(viewModel.uiState.value.dialog)
@@ -498,7 +500,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
-        viewModel.onRetentionSelected(HistoryRetention.Days180)
+        viewModel.onAction(SettingsAction.RetentionSelected(HistoryRetention.Days180))
         advanceUntilIdle()
 
         assertEquals(listOf(SettingsEvent.SettingNotSaved), events)
@@ -512,7 +514,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
-        viewModel.onRetentionSelected(HistoryRetention.Days180)
+        viewModel.onAction(SettingsAction.RetentionSelected(HistoryRetention.Days180))
         advanceUntilIdle()
 
         assertEquals(listOf(SettingsEvent.RetentionPruneDeferred), events)
@@ -528,7 +530,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
 
-        viewModel.onDynamicColorToggled(true)
+        viewModel.onAction(SettingsAction.DynamicColorToggled(true))
         advanceUntilIdle()
 
         assertEquals(listOf(FakeSettingsRepository.CALL_SET_DYNAMIC_COLOR), repository.writes)
@@ -541,7 +543,7 @@ class SettingsViewModelTest {
         val viewModel = settingsViewModel(settingsRepository = repository)
         advanceUntilIdle()
 
-        viewModel.onDynamicColorToggled(UserSettings.DEFAULT.isDynamicColorEnabled)
+        viewModel.onAction(SettingsAction.DynamicColorToggled(UserSettings.DEFAULT.isDynamicColorEnabled))
         advanceUntilIdle()
 
         assertTrue(repository.writes.isEmpty())
@@ -554,7 +556,7 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         val events = collectEvents(viewModel)
 
-        viewModel.onDynamicColorToggled(true)
+        viewModel.onAction(SettingsAction.DynamicColorToggled(true))
         advanceUntilIdle()
 
         assertEquals(listOf(SettingsEvent.SettingNotSaved), events)

@@ -30,7 +30,7 @@ class SettingsScreenThemeTest {
 
     private fun render(repository: InstrumentedFakeSettingsRepository) {
         composeRule.setContent {
-            ThirtySixTheme { SettingsScreen(viewModel = settingsViewModel(settingsRepository = repository)) }
+            ThirtySixTheme { SettingsRoute(viewModel = settingsViewModel(settingsRepository = repository)) }
         }
     }
 

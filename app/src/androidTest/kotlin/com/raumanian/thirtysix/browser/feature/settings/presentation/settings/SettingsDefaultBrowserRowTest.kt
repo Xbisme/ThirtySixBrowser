@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +25,7 @@ class SettingsDefaultBrowserRowTest {
     private fun render(isDefault: Boolean) {
         composeRule.setContent {
             ThirtySixTheme {
-                SettingsScreen(viewModel = settingsViewModel(isDefaultBrowser = IsDefaultBrowserUseCase { isDefault }))
+                SettingsRoute(viewModel = settingsViewModel(defaultBrowser = DefaultBrowserController { isDefault }))
             }
         }
     }

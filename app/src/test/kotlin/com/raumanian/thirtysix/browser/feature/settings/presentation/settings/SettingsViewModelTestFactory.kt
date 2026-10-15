@@ -1,11 +1,7 @@
 package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 
-import com.raumanian.thirtysix.browser.core.domain.usecase.GetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
@@ -20,8 +16,6 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ClearBrowsingDataUseCase
-import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetDynamicColorEnabledUseCase
-import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetTextSizeUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -32,10 +26,6 @@ internal fun settingsViewModel(
     appLanguageController: FakeAppLanguageController = FakeAppLanguageController(),
     historyRepository: FakeHistoryRepository = FakeHistoryRepository(),
     webDataCleaner: FakeWebDataCleaner = FakeWebDataCleaner(),
-    setThemeMode: SetThemeModeUseCase = SetThemeModeUseCase(settingsRepository),
-    setDynamicColorEnabled: SetDynamicColorEnabledUseCase = SetDynamicColorEnabledUseCase(settingsRepository),
-    setSearchEngine: SetSearchEngineUseCase = SetSearchEngineUseCase(settingsRepository),
-    getAppLanguage: GetAppLanguageUseCase = GetAppLanguageUseCase(appLanguageController),
     setAppLanguage: SetAppLanguageUseCase = SetAppLanguageUseCase(appLanguageController, MainDispatchers),
     clearBrowsingData: ClearBrowsingDataUseCase = ClearBrowsingDataUseCase(
         historyRepository = historyRepository,
@@ -53,21 +43,16 @@ internal fun settingsViewModel(
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
     supportsDynamicColor: Boolean = true,
     appVersionName: String = TEST_APP_VERSION_NAME,
-    isDefaultBrowser: IsDefaultBrowserUseCase = IsDefaultBrowserUseCase { false },
-    setTextSize: SetTextSizeUseCase = SetTextSizeUseCase(settingsRepository),
+    defaultBrowser: DefaultBrowserController = DefaultBrowserController { false },
 ): SettingsViewModel = SettingsViewModel(
-    observeUserSettings = ObserveUserSettingsUseCase(settingsRepository),
-    setThemeMode = setThemeMode,
-    setDynamicColorEnabled = setDynamicColorEnabled,
-    setSearchEngine = setSearchEngine,
-    getAppLanguage = getAppLanguage,
+    settings = settingsRepository,
+    languages = appLanguageController,
     setAppLanguage = setAppLanguage,
     clearBrowsingData = clearBrowsingData,
     changeHistoryRetention = changeHistoryRetention,
+    defaultBrowser = defaultBrowser,
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
-    isDefaultBrowser = isDefaultBrowser,
-    setTextSize = setTextSize,
 )
 
 internal const val TEST_APP_VERSION_NAME: String = "9.9.9-test"
