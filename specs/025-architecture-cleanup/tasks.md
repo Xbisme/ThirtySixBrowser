@@ -176,7 +176,7 @@ Per task: for every file in the folder, delete ID citations, planning-doc and co
 
 - [X] T067 *(G3, G4, G9 pass; the ktlint baseline is kept with exactly the 23 `vm-*` findings handed to Spec 026, owner approved 2026-10-15)* Run quickstart G3, G4 and G9 once more on the final tree; delete `config/ktlint/baseline.xml` (empty since 4c) and the `ktlint { baseline… }` line.
 - [X] T068 *(`main` has not moved since T001; no merge needed)* `git merge main` if `main` moved since T001, moving any new files into the layout in the merge commit; rerun G1.
-- [ ] T069 Open the PR `025-architecture-cleanup` → `main` with: the step list (one line per commit), Baseline vs Results tables, rule-proof table, the Spec 026 hand-off tables, and the attribution footer. Merge only with CI 6/6.
+- [X] T069 *(PR #43)* Open the PR `025-architecture-cleanup` → `main` with: the step list (one line per commit), Baseline vs Results tables, rule-proof table, the Spec 026 hand-off tables, and the attribution footer. Merge only with CI 6/6.
 
 ---
 
