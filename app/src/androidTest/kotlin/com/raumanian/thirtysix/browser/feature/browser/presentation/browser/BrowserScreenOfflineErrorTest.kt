@@ -23,7 +23,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabReposi
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -31,9 +30,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAnd
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TEST_TAG_BROWSER_ERROR_STATE
 import dagger.Module
@@ -96,7 +93,6 @@ class BrowserScreenOfflineErrorTest {
             val noopIncognitoRepo = OfflineErrorNoopIncognitoTabRepository
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                defaultHomeUrl = SAMPLE_PAGE_URL,
                 searchEngine = OfflineErrorNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 tabs = noopTabRepo,
@@ -104,11 +100,6 @@ class BrowserScreenOfflineErrorTest {
                 updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
                 faviconCache = OfflineErrorNoopFaviconCache,
                 screenshotCache = OfflineErrorNoopScreenshotCache,
-                isUrlBookmarked = IsUrlBookmarkedUseCase(OfflineErrorNoopBookmarkRepository),
-                toggleBookmark = ToggleBookmarkUseCase(
-                    OfflineErrorNoopBookmarkRepository,
-                    AddBookmarkUseCase(OfflineErrorNoopBookmarkRepository),
-                ),
                 recordHistoryEntry = RecordHistoryEntryUseCase(
                     OfflineErrorNoopHistoryRepository,
                 ),

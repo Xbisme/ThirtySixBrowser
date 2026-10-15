@@ -6,21 +6,17 @@ import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
-import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
@@ -89,11 +85,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         screenshotCache: ScreenshotCache,
     ): BrowserViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
-        // Star use cases over a self-contained fake.
-        val bookmarkRepo = FakeBookmarkRepository()
-        val addBookmark = AddBookmarkUseCase(bookmarkRepo)
         return BrowserViewModel(
-            defaultHomeUrl = "https://normal.example.com",
             searchEngine = GoogleByteIdenticalRepository,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepository,
@@ -101,8 +93,6 @@ class BrowserViewModelIncognitoCacheGateTest {
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
-            isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo),
-            toggleBookmark = ToggleBookmarkUseCase(bookmarkRepo, addBookmark),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(
                 FakeHistoryRepository(),
             ),

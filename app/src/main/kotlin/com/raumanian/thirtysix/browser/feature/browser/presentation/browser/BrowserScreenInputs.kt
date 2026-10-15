@@ -31,6 +31,12 @@ class BrowserScreenActions(
     val onAction: (BrowserAction) -> Unit,
     val onFindAction: (FindInPageAction) -> Unit,
     val onDownloadAction: (DownloadRequestAction) -> Unit,
+    val onPageActionsAction: (PageActionsAction) -> Unit,
+    val tools: BrowserToolActions,
+)
+
+/** The holders of the screen's tools: the hub, address suggestions and site protection. */
+class BrowserToolActions(
     val onHubAction: (HubAction) -> Unit,
     val onSuggestionsAction: (AddressSuggestionsAction) -> Unit,
     val onProtectionAction: (ProtectionAction) -> Unit,

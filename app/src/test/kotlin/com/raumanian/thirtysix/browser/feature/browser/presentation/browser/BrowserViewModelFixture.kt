@@ -25,15 +25,22 @@ internal class BrowserViewModelFixture(
 ) {
     /** One store for every holder this fixture builds, as the browser screen shares one. */
     val pageStore = CurrentPageRepositoryImpl(url)
+    val bookmarks = FakeBookmarkRepository()
 
     fun buildFind(): FindInPageViewModel = FindInPageViewModel(pageStore)
 
+    fun buildPageActions(): PageActionsViewModel = PageActionsViewModel(
+        defaultHomeUrl = url,
+        pageStore = pageStore,
+        tabs = tabs,
+        isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarks),
+        toggleBookmark = ToggleBookmarkUseCase(bookmarks, AddBookmarkUseCase(bookmarks)),
+    )
+
     fun build(): BrowserViewModel {
-        val bookmarks = FakeBookmarkRepository()
         val history = FakeHistoryRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabs, incognitoTabs)
         return BrowserViewModel(
-            defaultHomeUrl = url,
             searchEngine = EchoSearchEngine,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabs,
@@ -41,8 +48,6 @@ internal class BrowserViewModelFixture(
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabs, incognitoTabs),
             faviconCache = FakeFaviconCache(),
             screenshotCache = FakeScreenshotCache(),
-            isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarks),
-            toggleBookmark = ToggleBookmarkUseCase(bookmarks, AddBookmarkUseCase(bookmarks)),
             recordHistoryEntry = RecordHistoryEntryUseCase(history),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(history),
             pageStore = pageStore,

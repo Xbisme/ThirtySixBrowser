@@ -1,27 +1,20 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import app.cash.turbine.test
-import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
-import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
-import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
@@ -60,8 +53,6 @@ class BrowserViewModelTest {
         tabRepository: FakeTabRepository = FakeTabRepository(homeUrl = url),
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
-        bookmarkRepository: FakeBookmarkRepository =
-            FakeBookmarkRepository(),
         historyRepository: FakeHistoryRepository = FakeHistoryRepository(),
     ): BrowserViewModel {
         // Tab use cases and caches share one self-contained fake by default.
@@ -69,15 +60,7 @@ class BrowserViewModelTest {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
         val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
-        // Star-icon use cases; a self-contained fake by default.
-        val isUrlBookmarked =
-            IsUrlBookmarkedUseCase(bookmarkRepository)
-        val addBookmark =
-            AddBookmarkUseCase(bookmarkRepository)
-        val toggleBookmark =
-            ToggleBookmarkUseCase(bookmarkRepository, addBookmark)
         return BrowserViewModel(
-            defaultHomeUrl = url,
             searchEngine = searchEngine,
             observeActiveTab = observeActiveTab,
             tabs = tabRepository,
@@ -85,8 +68,6 @@ class BrowserViewModelTest {
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
-            isUrlBookmarked = isUrlBookmarked,
-            toggleBookmark = toggleBookmark,
             recordHistoryEntry = RecordHistoryEntryUseCase(historyRepository),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(historyRepository),
             pageStore = CurrentPageRepositoryImpl(url),
@@ -562,50 +543,6 @@ class BrowserViewModelTest {
         val vm = newViewModel(url = seededUrl)
         advanceUntilIdle()
         assertEquals(seededUrl, vm.screenState().currentUrl)
-    }
-
-    @Test
-    fun `onLongPressNewTab under cap creates a tab without setting tabsEvent`() = runTest(testDispatcher) {
-        val vm = newViewModel()
-        advanceUntilIdle()
-        val events = eventsOf(vm)
-        vm.onAction(BrowserAction.LongPressNewTab)
-        advanceUntilIdle()
-        // No cap-reached error because we're far below MAX_TABS.
-        assertTrue(events.none { it is BrowserEvent.TabLimit })
-    }
-
-    @Test
-    fun `onLongPressNewTab at cap sets tabsEvent to MaxTabsReached`() = runTest(testDispatcher) {
-        // Pre-fill the FakeTabRepository to MAX_TABS.
-        val repository = FakeTabRepository(homeUrl = "https://example.com")
-        val seed = (1..BrowserLimits.MAX_TABS).map { i ->
-            Tab(
-                id = i.toLong(),
-                url = "https://t$i.com",
-                title = "",
-                position = i - 1,
-                createdAt = 0L,
-                lastActiveAt = i.toLong(),
-            )
-        }
-        repository.emit(seed)
-        val vm = newViewModel(url = "https://example.com", tabRepository = repository)
-        advanceUntilIdle()
-
-        val events = eventsOf(vm)
-        vm.onAction(BrowserAction.LongPressNewTab)
-        advanceUntilIdle()
-
-        assertEquals(listOf(BrowserEvent.TabLimit(TabsErrorEvent.MaxTabsReached)), events)
-    }
-
-    @Test
-    fun `no tab-limit message is sent without a long press`() = runTest(testDispatcher) {
-        val vm = newViewModel()
-        val events = eventsOf(vm)
-        advanceUntilIdle()
-        assertTrue(events.none { it is BrowserEvent.TabLimit })
     }
 
     // ---------- History recording ----------

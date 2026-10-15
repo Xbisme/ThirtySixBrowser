@@ -23,7 +23,7 @@ data class BrowserUiState(
         get() = currentUrl == UrlConstants.HOME_PAGE_URL || homeOverlay
 }
 
-fun browserUiState(page: CurrentPage, own: PageUiState): BrowserUiState = BrowserUiState(
+fun browserUiState(page: CurrentPage, own: PageUiState, actions: PageActionsUiState): BrowserUiState = BrowserUiState(
     currentUrl = page.url,
     loadingState = own.loadingState,
     canGoBack = own.canGoBack,
@@ -31,8 +31,8 @@ fun browserUiState(page: CurrentPage, own: PageUiState): BrowserUiState = Browse
     addressBarText = own.addressBarText,
     isAddressBarFocused = own.isAddressBarFocused,
     isIncognito = page.isIncognito,
-    isBookmarked = own.isBookmarked,
+    isBookmarked = actions.isBookmarked,
     homeOverlay = own.homeOverlay,
     cameFromHome = own.cameFromHome,
-    isDesktopMode = own.isDesktopMode,
+    isDesktopMode = actions.isDesktopMode,
 )

@@ -69,7 +69,7 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 - [X] T006 *(no download test existed on the browser holder; two new ones added)* [US2] **Download requests**: `P/DownloadRequestViewModel.kt`, `P/DownloadRequestAction.kt` (`Requested`, `StoragePermissionDenied`) and `P/DownloadRequestEvent.kt` (`Download(DownloadSnackbarEvent)`, Keep).
   - Page downloads and long-press downloads both send to it.
   - Move the download tests.
-- [ ] T007 [US2] **Page actions**: `P/PageActionsViewModel.kt`, `P/PageActionsAction.kt` (`StarTapped`, `ToggleDesktopMode`, `LongPressNewTab`), `P/PageActionsEvent.kt` (`Bookmark`, `TabLimit`, `SetDesktopMode`, Keep) and `P/PageActionsUiState.kt` (`isBookmarked`, `isDesktopMode`).
+- [X] T007 [US2] **Page actions**: `P/PageActionsViewModel.kt`, `P/PageActionsAction.kt` (`StarTapped`, `ToggleDesktopMode`, `LongPressNewTab`), `P/PageActionsEvent.kt` (`Bookmark`, `TabLimit`, `SetDesktopMode`, Keep) and `P/PageActionsUiState.kt` (`isBookmarked`, `isDesktopMode`).
   - `isBookmarked` is derived from `page.url`, and the toggle reads `page.url` and `page.title`.
   - Desktop mode uses `page.activeTab` and keeps the `desktopMode` lookup.
   - Tests: StarToggle, DesktopMode and the long-press cases.

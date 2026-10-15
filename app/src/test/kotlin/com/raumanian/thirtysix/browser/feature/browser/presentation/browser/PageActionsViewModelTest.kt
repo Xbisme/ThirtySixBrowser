@@ -1,25 +1,20 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import app.cash.turbine.test
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
+import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
-import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
-import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
 import java.net.URLEncoder
@@ -31,12 +26,13 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
 /** Star-icon paths of [BrowserViewModel]; the star reflects whether any bookmark has the URL. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class BrowserViewModelStarToggleTest {
+class PageActionsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -54,8 +50,8 @@ class BrowserViewModelStarToggleTest {
             val initial = awaitItem()
             assertEquals(false, initial.isBookmarked)
 
-            val events = eventsOf(vm)
-            vm.onAction(BrowserAction.StarTapped)
+            val events = eventsOf(vm.events)
+            vm.onAction(PageActionsAction.StarTapped)
             advanceUntilIdle()
 
             // Drain emissions until isBookmarked = true (the snackbar event
@@ -65,7 +61,7 @@ class BrowserViewModelStarToggleTest {
                 val state = awaitItem()
                 if (state.isBookmarked) {
                     saw = true
-                    assertEquals(listOf(BrowserEvent.Bookmark(BookmarkSnackbarEvent.Added)), events)
+                    assertEquals(listOf(PageActionsEvent.Bookmark(BookmarkSnackbarEvent.Added)), events)
                 }
             }
             cancelAndIgnoreRemainingEvents()
@@ -79,17 +75,17 @@ class BrowserViewModelStarToggleTest {
         val vm = newViewModel(bookmarkRepo = bookmarkRepo, url = "https://example.com")
         advanceUntilIdle()
 
-        val events = eventsOf(vm)
-        vm.onAction(BrowserAction.StarTapped)
+        val events = eventsOf(vm.events)
+        vm.onAction(PageActionsAction.StarTapped)
         advanceUntilIdle()
         assertEquals(1, bookmarkRepo.countBookmarksByUrl("https://example.com"))
 
-        vm.onAction(BrowserAction.StarTapped)
+        vm.onAction(PageActionsAction.StarTapped)
         advanceUntilIdle()
 
         assertEquals(0, bookmarkRepo.countBookmarksByUrl("https://example.com"))
-        assertEquals(BrowserEvent.Bookmark(BookmarkSnackbarEvent.Removed), events.last())
-        assertEquals(false, vm.screenState().isBookmarked)
+        assertEquals(PageActionsEvent.Bookmark(BookmarkSnackbarEvent.Removed), events.last())
+        assertEquals(false, vm.uiState.value.isBookmarked)
     }
 
     @Test
@@ -97,47 +93,70 @@ class BrowserViewModelStarToggleTest {
         val vm = newViewModel(url = "https://example.com")
         advanceUntilIdle()
 
-        vm.onAction(BrowserAction.StarTapped)
+        vm.onAction(PageActionsAction.StarTapped)
         advanceUntilIdle()
 
         vm.events.test {
-            assertEquals(BrowserEvent.Bookmark(BookmarkSnackbarEvent.Added), awaitItem())
+            assertEquals(PageActionsEvent.Bookmark(BookmarkSnackbarEvent.Added), awaitItem())
             expectNoEvents()
         }
+    }
+
+    @Test
+    fun `onLongPressNewTab under cap creates a tab without setting tabsEvent`() = runTest(testDispatcher) {
+        val vm = newViewModel()
+        advanceUntilIdle()
+        val events = eventsOf(vm.events)
+        vm.onAction(PageActionsAction.LongPressNewTab)
+        advanceUntilIdle()
+        // No cap-reached error because we're far below MAX_TABS.
+        assertTrue(events.none { it is PageActionsEvent.TabLimit })
+    }
+
+    @Test
+    fun `onLongPressNewTab at cap sets tabsEvent to MaxTabsReached`() = runTest(testDispatcher) {
+        // Pre-fill the FakeTabRepository to MAX_TABS.
+        val repository = FakeTabRepository(homeUrl = "https://example.com")
+        val seed = (1..BrowserLimits.MAX_TABS).map { i ->
+            Tab(
+                id = i.toLong(),
+                url = "https://t$i.com",
+                title = "",
+                position = i - 1,
+                createdAt = 0L,
+                lastActiveAt = i.toLong(),
+            )
+        }
+        repository.emit(seed)
+        val vm = newViewModel(url = "https://example.com", tabRepository = repository)
+        advanceUntilIdle()
+
+        val events = eventsOf(vm.events)
+        vm.onAction(PageActionsAction.LongPressNewTab)
+        advanceUntilIdle()
+
+        assertEquals(listOf(PageActionsEvent.TabLimit(TabsErrorEvent.MaxTabsReached)), events)
+    }
+
+    @Test
+    fun `no tab-limit message is sent without a long press`() = runTest(testDispatcher) {
+        val vm = newViewModel()
+        val events = eventsOf(vm.events)
+        advanceUntilIdle()
+        assertTrue(events.none { it is PageActionsEvent.TabLimit })
     }
 
     private fun newViewModel(
         url: String = SAMPLE_PAGE_URL,
         bookmarkRepo: FakeBookmarkRepository = FakeBookmarkRepository(),
-    ): BrowserViewModel {
-        val tabRepository = FakeTabRepository(homeUrl = url)
-        val incognitoRepo = FakeIncognitoTabRepository()
-        val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
-        val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
-        val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
-        val addBookmark = AddBookmarkUseCase(bookmarkRepo)
-        val toggleBookmark = ToggleBookmarkUseCase(bookmarkRepo, addBookmark)
-        val isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo)
-        return BrowserViewModel(
-            defaultHomeUrl = url,
-            searchEngine = GoogleByteIdenticalRepository,
-            observeActiveTab = observeActiveTab,
-            tabs = tabRepository,
-            observeActiveTabIsIncognito = observeActiveTabIsIncognito,
-            updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
-            faviconCache = NoopFaviconCache,
-            screenshotCache = NoopScreenshotCache,
-            isUrlBookmarked = isUrlBookmarked,
-            toggleBookmark = toggleBookmark,
-            recordHistoryEntry = RecordHistoryEntryUseCase(
-                FakeHistoryRepository(),
-            ),
-            updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(
-                FakeHistoryRepository(),
-            ),
-            pageStore = CurrentPageRepositoryImpl(url),
-        )
-    }
+        tabRepository: FakeTabRepository = FakeTabRepository(homeUrl = url),
+    ): PageActionsViewModel = PageActionsViewModel(
+        defaultHomeUrl = url,
+        pageStore = CurrentPageRepositoryImpl(url),
+        tabs = tabRepository,
+        isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo),
+        toggleBookmark = ToggleBookmarkUseCase(bookmarkRepo, AddBookmarkUseCase(bookmarkRepo)),
+    )
 
     private object NoopFaviconCache : FaviconCache {
         private val state = MutableStateFlow(0L)

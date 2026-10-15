@@ -14,34 +14,41 @@ import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-/** One-off browser events: loads and page-mode changes act at once; messages never hold them up. */
+/** A requested load: hide the keyboard, clear focus, then load, in that order. */
 @Composable
-internal fun BrowserEventEffects(
-    events: Flow<BrowserEvent>,
-    webViewActions: WebViewActionsHandle,
-    snackbarHostState: SnackbarHostState,
-) {
+internal fun BrowserEventEffects(events: Flow<BrowserEvent>, webViewActions: WebViewActionsHandle) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
-    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
-    val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
-    val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
-
     EventEffect(events) { event ->
-        val message = when (event) {
+        when (event) {
             is BrowserEvent.LoadUrl -> {
                 keyboardController?.hide()
                 focusManager.clearFocus()
                 webViewActions.loadUrl(event.url)
-                null
             }
-            is BrowserEvent.SetDesktopMode -> {
+        }
+    }
+}
+
+/** A page-mode change acts at once; star and tab-limit messages never hold it up. */
+@Composable
+internal fun PageActionsEventEffect(
+    events: Flow<PageActionsEvent>,
+    webViewActions: WebViewActionsHandle,
+    snackbarHostState: SnackbarHostState,
+) {
+    val scope = rememberCoroutineScope()
+    val maxTabsMessage = stringResource(R.string.browser_max_tabs_reached)
+    val bookmarkAddedMessage = stringResource(R.string.bookmark_added_snackbar)
+    val bookmarkRemovedMessage = stringResource(R.string.bookmark_removed_snackbar)
+    EventEffect(events) { event ->
+        val message = when (event) {
+            is PageActionsEvent.SetDesktopMode -> {
                 webViewActions.setDesktopMode(event.enabled)
                 null
             }
-            is BrowserEvent.TabLimit -> maxTabsMessage.takeIf { event.error is TabsErrorEvent.MaxTabsReached }
-            is BrowserEvent.Bookmark -> when (event.event) {
+            is PageActionsEvent.TabLimit -> maxTabsMessage.takeIf { event.error is TabsErrorEvent.MaxTabsReached }
+            is PageActionsEvent.Bookmark -> when (event.event) {
                 BookmarkSnackbarEvent.Added -> bookmarkAddedMessage
                 BookmarkSnackbarEvent.Removed -> bookmarkRemovedMessage
             }

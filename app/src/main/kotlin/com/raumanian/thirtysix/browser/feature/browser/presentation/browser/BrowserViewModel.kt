@@ -7,37 +7,27 @@ import com.raumanian.thirtysix.browser.core.domain.model.AddressBarSubmitResult
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.model.classifyAddressBarInput
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
-import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
-import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
 import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.CurrentPage
 import com.raumanian.thirtysix.browser.feature.browser.domain.repository.CurrentPageRepository
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkResult
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import javax.inject.Named
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -52,7 +42,6 @@ import kotlinx.coroutines.launch
 @Suppress("TooManyFunctions", "LongParameterList")
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class BrowserViewModel @Inject constructor(
-    @param:Named("default_home_url") private val defaultHomeUrl: String,
     private val searchEngine: SearchEngineRepository,
     observeActiveTab: ObserveActiveTabUseCase,
     private val tabs: TabRepository,
@@ -60,8 +49,6 @@ class BrowserViewModel @Inject constructor(
     private val updateActiveTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase,
     private val faviconCache: FaviconCache,
     private val screenshotCache: ScreenshotCache,
-    private val isUrlBookmarked: IsUrlBookmarkedUseCase,
-    private val toggleBookmark: ToggleBookmarkUseCase,
     private val recordHistoryEntry: RecordHistoryEntryUseCase,
     private val updateHistoryEntryTitle: UpdateHistoryEntryTitleUseCase,
     private val pageStore: CurrentPageRepository,
@@ -104,12 +91,6 @@ class BrowserViewModel @Inject constructor(
             initialValue = INITIAL_TAB_COUNT,
         )
 
-    // In memory only: new tabs and every tab after a process restart start in mobile mode. Tab ids
-    // are never reused, so a closed tab's entry is inert.
-    private val desktopModeTabs = MutableStateFlow<Set<Long>>(emptySet())
-
-    val desktopMode: DesktopModeLookup = DesktopModeLookup { tabId -> tabId in desktopModeTabs.value }
-
     // The navigation that started but is not yet in history: armed by [onLoadStarted], consumed
     // once by [onLoadFinished], cleared by [onLoadFailed] so an error page is never recorded.
     private var pendingHistoryUrl: String? = null
@@ -128,22 +109,8 @@ class BrowserViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        combine(pageStore.page.map { it.activeTab?.id }, desktopModeTabs) { id, desktop -> id != null && id in desktop }
-            .distinctUntilChanged()
-            .onEach { desktop -> _uiState.update { it.copy(isDesktopMode = desktop) } }
-            .launchIn(viewModelScope)
-
         observeActiveTabIsIncognito()
             .onEach { incognito -> pageStore.setIncognito(incognito) }
-            .launchIn(viewModelScope)
-
-        pageStore.page
-            .map { it.url }
-            .distinctUntilChanged()
-            .flatMapLatest { url -> isUrlBookmarked(url) }
-            .onEach { bookmarked ->
-                _uiState.update { state -> state.copy(isBookmarked = bookmarked) }
-            }
             .launchIn(viewModelScope)
     }
 
@@ -152,10 +119,7 @@ class BrowserViewModel @Inject constructor(
             is BrowserAction.Page -> onPage(action)
             is BrowserAction.AddressBar -> onAddressBar(action)
             is BrowserAction.Home -> onHome(action)
-            BrowserAction.StarTapped -> onStarTapped()
-            BrowserAction.ToggleDesktopMode -> onDesktopModeToggled()
             BrowserAction.BackWithoutHistory -> onBackWithoutHistory()
-            BrowserAction.LongPressNewTab -> onLongPressNewTab()
         }
     }
 
@@ -191,29 +155,6 @@ class BrowserViewModel @Inject constructor(
             is BrowserAction.Home.Submit -> onHomeSubmit(action.input)
             BrowserAction.Home.NavigateFrom -> onNavigateFromHome()
         }
-    }
-
-    private fun onStarTapped() {
-        val page = pageStore.page.value
-        val url = page.url
-        val title = page.title
-        viewModelScope.launch {
-            val result = toggleBookmark(url = url, fallbackTitle = title)
-            if (result is Result.Success) {
-                val event = when (result.data) {
-                    ToggleBookmarkResult.Added -> BookmarkSnackbarEvent.Added
-                    ToggleBookmarkResult.Removed -> BookmarkSnackbarEvent.Removed
-                }
-                eventChannel.trySend(BrowserEvent.Bookmark(event))
-            }
-        }
-    }
-
-    /** Flips the active tab's page mode; nothing without an active tab. The screen reloads the WebView. */
-    private fun onDesktopModeToggled() {
-        val tabId = pageStore.page.value.activeTab?.id ?: return
-        desktopModeTabs.update { desktop -> if (tabId in desktop) desktop - tabId else desktop + tabId }
-        eventChannel.trySend(BrowserEvent.SetDesktopMode(tabId in desktopModeTabs.value))
     }
 
     // [onUrlChanged] owns the address; `url` is kept for symmetry with [onLoadFinished].
@@ -357,16 +298,6 @@ class BrowserViewModel @Inject constructor(
                 title = title,
                 isIncognito = incognito,
             )
-        }
-    }
-
-    /** Opens a new Home tab, or reports that the tab limit is reached. */
-    private fun onLongPressNewTab() {
-        viewModelScope.launch {
-            val result = tabs.createTab(defaultHomeUrl)
-            if (result is Result.Error && result.throwable is MaxTabsReachedException) {
-                eventChannel.trySend(BrowserEvent.TabLimit(TabsErrorEvent.MaxTabsReached))
-            }
         }
     }
 

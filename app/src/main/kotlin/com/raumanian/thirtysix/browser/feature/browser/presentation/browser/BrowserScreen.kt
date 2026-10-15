@@ -84,6 +84,7 @@ fun BrowserRoute(
     viewModel: BrowserViewModel = hiltViewModel(),
     findInPage: FindInPageViewModel = hiltViewModel(),
     downloadRequests: DownloadRequestViewModel = hiltViewModel(),
+    pageActions: PageActionsViewModel = hiltViewModel(),
     hubViewModel: HubViewModel = hiltViewModel(),
     suggestions: AddressSuggestionsViewModel = hiltViewModel(),
     pageTextSize: PageTextSizeViewModel = hiltViewModel(),
@@ -94,7 +95,8 @@ fun BrowserRoute(
 ) {
     val pageState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPage by viewModel.currentPage.collectAsStateWithLifecycle()
-    val state = browserUiState(currentPage, pageState)
+    val actionsState by pageActions.uiState.collectAsStateWithLifecycle()
+    val state = browserUiState(currentPage, pageState, actionsState)
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
     // Held as State, not delegated: reading `.value` here would recompose on every tick.
@@ -104,13 +106,14 @@ fun BrowserRoute(
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    BrowserEventEffects(
-        events = viewModel.events,
+    BrowserEventEffects(events = viewModel.events, webViewActions = webViewActions)
+    HubEventEffect(events = hubViewModel.events, snackbarHostState = snackbarHostState)
+    DownloadRequestEventEffect(events = downloadRequests.events, snackbarHostState = snackbarHostState)
+    PageActionsEventEffect(
+        events = pageActions.events,
         webViewActions = webViewActions,
         snackbarHostState = snackbarHostState,
     )
-    HubEventEffect(events = hubViewModel.events, snackbarHostState = snackbarHostState)
-    DownloadRequestEventEffect(events = downloadRequests.events, snackbarHostState = snackbarHostState)
     // After the per-site switch the page reloads with the new setting.
     EventEffect(protection.events) { webViewActions.reload() }
 
@@ -127,7 +130,7 @@ fun BrowserRoute(
             protectionStatus = protection.status,
             protectionDashboard = protection.dashboard,
             protectionHooks = protection.hooks,
-            desktopMode = viewModel.desktopMode,
+            desktopMode = pageActions.desktopMode,
             popups = popupTabs,
             longPressActions = longPressActions,
             permissionGate = permissionGate,
@@ -136,9 +139,12 @@ fun BrowserRoute(
             onAction = viewModel::onAction,
             onFindAction = findInPage::onAction,
             onDownloadAction = downloadRequests::onAction,
-            onHubAction = hubViewModel::onAction,
-            onSuggestionsAction = suggestions::onAction,
-            onProtectionAction = protection::onAction,
+            onPageActionsAction = pageActions::onAction,
+            tools = BrowserToolActions(
+                onHubAction = hubViewModel::onAction,
+                onSuggestionsAction = suggestions::onAction,
+                onProtectionAction = protection::onAction,
+            ),
         ),
         webViewActions = webViewActions,
         snackbarHostState = snackbarHostState,
@@ -196,7 +202,7 @@ internal fun BrowserScreen(
     var dashboardOpen by rememberSaveable { mutableStateOf(false) }
     val addressBarCallbacks = rememberAddressBarCallbacks(
         onAction = onAction,
-        onSuggestionsAction = actions.onSuggestionsAction,
+        onSuggestionsAction = actions.tools.onSuggestionsAction,
         currentUrl = { currentState.currentUrl },
     )
     // Composed after every other back handler, so Back closes the find bar first.
@@ -278,7 +284,7 @@ internal fun BrowserScreen(
                 BrowserTopBar(
                     state = state,
                     addressBarCallbacks = addressBarCallbacks,
-                    onStarTap = { onAction(BrowserAction.StarTapped) },
+                    onStarTap = { actions.onPageActionsAction(PageActionsAction.StarTapped) },
                     onReloadOrStop = {
                         if (state.loadingState is LoadingState.Loading) {
                             webViewActions.stopLoading()
@@ -314,9 +320,9 @@ internal fun BrowserScreen(
                         chrome.show()
                         if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
                     },
-                    onNewTab = { onAction(BrowserAction.LongPressNewTab) },
+                    onNewTab = { actions.onPageActionsAction(PageActionsAction.LongPressNewTab) },
                     onTabs = slots.destinations.openTabs,
-                    onTabsLongPress = { onAction(BrowserAction.LongPressNewTab) },
+                    onTabsLongPress = { actions.onPageActionsAction(PageActionsAction.LongPressNewTab) },
                     onMenu = { hubOpen = true },
                 ),
                 modifier = Modifier
@@ -341,7 +347,7 @@ internal fun BrowserScreen(
                 currentUrl = { currentState.currentUrl },
                 title = { currentTab?.title },
             ),
-            toggleDesktopSite = { onAction(BrowserAction.ToggleDesktopMode) },
+            toggleDesktopSite = { actions.onPageActionsAction(PageActionsAction.ToggleDesktopMode) },
             // Offered only once the page has loaded.
             print = {
                 webViewActions.print(PrintJobName.of(currentTab?.title, currentState.currentUrl))
@@ -359,7 +365,7 @@ internal fun BrowserScreen(
         BrowserHub(
             state = state,
             hasActiveDownloads = sources.hasActiveDownloads,
-            onHubAction = actions.onHubAction,
+            onHubAction = actions.tools.onHubAction,
             webViewActions = webViewActions,
             slots = slots,
             onDismiss = { hubOpen = false },
@@ -375,7 +381,7 @@ internal fun BrowserScreen(
             onPageTool = pageToolHandler,
             // Nothing about protection on Home or the incognito start page.
             protectionFlow = if (state.isHomeContent) null else sources.protectionStatus,
-            onProtectionSwitch = { on -> actions.onProtectionAction(ProtectionAction.ProtectionSwitched(on)) },
+            onProtectionSwitch = { on -> actions.tools.onProtectionAction(ProtectionAction.ProtectionSwitched(on)) },
             onFire = slots.fireButton.onClick,
             onDashboard = { dashboardOpen = true },
         )
@@ -385,7 +391,7 @@ internal fun BrowserScreen(
         isHomeContent = state.isHomeContent,
         onDashboardClose = { dashboardOpen = false },
         dashboardFlow = sources.protectionDashboard,
-        onProtectionAction = actions.onProtectionAction,
+        onProtectionAction = actions.tools.onProtectionAction,
     )
     slots.fireOverlay()
     if (quickSettingsUsed) {
@@ -521,13 +527,13 @@ private fun rememberHomeCallbacks(
             webViewActions.loadUrl(url)
         },
         onSeeAllHistory = slots.destinations.openHistory,
-        onNewIncognitoTab = { actions.onHubAction(HubAction.NewIncognitoTab) },
+        onNewIncognitoTab = { actions.tools.onHubAction(HubAction.NewIncognitoTab) },
         // Home's field starts empty, so there is no page address to compare with.
         onSearchTextChange = { text ->
-            actions.onSuggestionsAction(AddressSuggestionsAction.TextChanged(text, currentPageUrl = null))
+            actions.tools.onSuggestionsAction(AddressSuggestionsAction.TextChanged(text, currentPageUrl = null))
         },
         onSearchFocusChange = { focused ->
-            actions.onSuggestionsAction(AddressSuggestionsAction.FocusChanged(focused))
+            actions.tools.onSuggestionsAction(AddressSuggestionsAction.FocusChanged(focused))
         },
     )
 }

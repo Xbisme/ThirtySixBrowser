@@ -7,10 +7,8 @@ data class PageUiState(
     val canGoForward: Boolean = false,
     val addressBarText: String = "",
     val isAddressBarFocused: Boolean = false,
-    val isBookmarked: Boolean = false,
     /** Home was pressed on a loaded page and covers it; Back clears it. */
     val homeOverlay: Boolean = false,
     /** This tab left the Home page; Back without page history returns there. */
     val cameFromHome: Boolean = false,
-    val isDesktopMode: Boolean = false,
 )

@@ -23,7 +23,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabReposi
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -31,9 +30,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAnd
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TEST_TAG_PAGE_LOAD_PROGRESS
 import dagger.Module
@@ -95,7 +92,6 @@ class BrowserScreenLoadingIndicatorTest {
             val noopIncognitoRepo = LoadingIndicatorNoopIncognitoTabRepository
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                defaultHomeUrl = SAMPLE_PAGE_URL,
                 searchEngine = LoadingIndicatorNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 tabs = noopTabRepo,
@@ -106,11 +102,6 @@ class BrowserScreenLoadingIndicatorTest {
                 ),
                 faviconCache = LoadingIndicatorNoopFaviconCache,
                 screenshotCache = LoadingIndicatorNoopScreenshotCache,
-                isUrlBookmarked = IsUrlBookmarkedUseCase(LoadingIndicatorNoopBookmarkRepository),
-                toggleBookmark = ToggleBookmarkUseCase(
-                    LoadingIndicatorNoopBookmarkRepository,
-                    AddBookmarkUseCase(LoadingIndicatorNoopBookmarkRepository),
-                ),
                 recordHistoryEntry = RecordHistoryEntryUseCase(LoadingIndicatorNoopHistoryRepository),
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(
                     LoadingIndicatorNoopHistoryRepository,

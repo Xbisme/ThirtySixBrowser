@@ -3,20 +3,16 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
-import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
@@ -155,9 +151,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
         val tabRepo = FakeTabRepository(homeUrl = HOME_URL)
         val incognitoRepo = FakeIncognitoTabRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabRepo, incognitoRepo)
-        val bookmarkRepo = FakeBookmarkRepository()
         return BrowserViewModel(
-            defaultHomeUrl = HOME_URL,
             searchEngine = NoopSearchEngineRepository,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepo,
@@ -165,8 +159,6 @@ class BrowserViewModelHistoryRecordSequenceTest {
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepo, incognitoRepo),
             faviconCache = NoopFaviconCache,
             screenshotCache = NoopScreenshotCache,
-            isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo),
-            toggleBookmark = ToggleBookmarkUseCase(bookmarkRepo, AddBookmarkUseCase(bookmarkRepo)),
             recordHistoryEntry = RecordHistoryEntryUseCase(history),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(history),
             pageStore = CurrentPageRepositoryImpl(HOME_URL),

@@ -28,7 +28,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabReposi
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -36,9 +35,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAnd
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import dagger.Module
 import dagger.Provides
@@ -102,7 +99,6 @@ class BrowserScreenInstrumentedTest {
             val noopIncognitoRepo = InstrumentedNoopIncognitoTabRepository
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                defaultHomeUrl = TEST_PAGE_URL,
                 searchEngine = InstrumentedNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 tabs = noopTabRepo,
@@ -110,11 +106,6 @@ class BrowserScreenInstrumentedTest {
                 updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
                 faviconCache = InstrumentedNoopFaviconCache,
                 screenshotCache = InstrumentedNoopScreenshotCache,
-                isUrlBookmarked = IsUrlBookmarkedUseCase(InstrumentedNoopBookmarkRepository),
-                toggleBookmark = ToggleBookmarkUseCase(
-                    InstrumentedNoopBookmarkRepository,
-                    AddBookmarkUseCase(InstrumentedNoopBookmarkRepository),
-                ),
                 recordHistoryEntry = RecordHistoryEntryUseCase(
                     InstrumentedNoopHistoryRepository,
                 ),

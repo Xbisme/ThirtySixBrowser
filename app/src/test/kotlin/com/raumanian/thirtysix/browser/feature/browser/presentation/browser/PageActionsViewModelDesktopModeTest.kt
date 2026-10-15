@@ -17,7 +17,7 @@ import org.junit.Test
 
 /** Desktop mode belongs to one tab and lives in memory only. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class BrowserViewModelDesktopModeTest {
+class PageActionsViewModelDesktopModeTest {
 
     private val dispatcher = StandardTestDispatcher()
     private val tabs = FakeTabRepository(initialTabs = listOf(tab(1L), tab(2L)))
@@ -25,9 +25,14 @@ class BrowserViewModelDesktopModeTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule(dispatcher)
 
-    private fun TestScope.newViewModel(): BrowserViewModel {
-        val vm = BrowserViewModelFixture(tabs = tabs).build()
-        backgroundScope.launch { vm.activeTab.collect { } }
+    private lateinit var page: BrowserViewModel
+
+    // The page holder writes the active tab into the shared store, as on the browser screen.
+    private fun TestScope.newViewModel(): PageActionsViewModel {
+        val fixture = BrowserViewModelFixture(tabs = tabs)
+        page = fixture.build()
+        val vm = fixture.buildPageActions()
+        backgroundScope.launch { page.activeTab.collect { } }
         backgroundScope.launch { vm.uiState.collect { } }
         advanceUntilIdle()
         return vm
@@ -36,65 +41,65 @@ class BrowserViewModelDesktopModeTest {
     @Test
     fun `toggling affects only the active tab`() = runTest {
         val vm = newViewModel()
-        assertEquals(2L, vm.activeTab.value?.id)
-        val events = eventsOf(vm)
+        assertEquals(2L, page.activeTab.value?.id)
+        val events = eventsOf(vm.events)
 
-        vm.onAction(BrowserAction.ToggleDesktopMode)
-        assertEquals(listOf(BrowserEvent.SetDesktopMode(true)), events)
+        vm.onAction(PageActionsAction.ToggleDesktopMode)
+        assertEquals(listOf(PageActionsEvent.SetDesktopMode(true)), events)
         advanceUntilIdle()
 
         assertTrue(vm.desktopMode.isDesktop(2L))
         assertFalse(vm.desktopMode.isDesktop(1L))
-        assertTrue(vm.screenState().isDesktopMode)
+        assertTrue(vm.uiState.value.isDesktopMode)
     }
 
     @Test
     fun `toggling twice returns to mobile`() = runTest {
         val vm = newViewModel()
-        val events = eventsOf(vm)
-        vm.onAction(BrowserAction.ToggleDesktopMode)
-        vm.onAction(BrowserAction.ToggleDesktopMode)
-        assertEquals(BrowserEvent.SetDesktopMode(false), events.last())
+        val events = eventsOf(vm.events)
+        vm.onAction(PageActionsAction.ToggleDesktopMode)
+        vm.onAction(PageActionsAction.ToggleDesktopMode)
+        assertEquals(PageActionsEvent.SetDesktopMode(false), events.last())
         advanceUntilIdle()
         assertFalse(vm.desktopMode.isDesktop(2L))
-        assertFalse(vm.screenState().isDesktopMode)
+        assertFalse(vm.uiState.value.isDesktopMode)
     }
 
     @Test
     fun `switching tab shows that tab's own mode, and a new tab is mobile`() = runTest {
         val vm = newViewModel()
-        vm.onAction(BrowserAction.ToggleDesktopMode)
+        vm.onAction(PageActionsAction.ToggleDesktopMode)
         // Explicit activity times: the fake's own clock can tie within one millisecond.
         tabs.emit(listOf(tab(1L, lastActiveAt = 10L), tab(2L, lastActiveAt = 3L)))
         advanceUntilIdle()
-        assertEquals(1L, vm.activeTab.value?.id)
-        assertFalse(vm.screenState().isDesktopMode)
+        assertEquals(1L, page.activeTab.value?.id)
+        assertFalse(vm.uiState.value.isDesktopMode)
 
         tabs.emit(listOf(tab(1L, lastActiveAt = 10L), tab(2L, lastActiveAt = 20L)))
         advanceUntilIdle()
-        assertTrue(vm.screenState().isDesktopMode)
+        assertTrue(vm.uiState.value.isDesktopMode)
 
         tabs.emit(listOf(tab(1L, lastActiveAt = 10L), tab(2L, lastActiveAt = 20L), tab(3L, lastActiveAt = 30L)))
         advanceUntilIdle()
-        assertEquals(3L, vm.activeTab.value?.id)
+        assertEquals(3L, page.activeTab.value?.id)
         assertFalse(vm.desktopMode.isDesktop(3L))
-        assertFalse(vm.screenState().isDesktopMode)
+        assertFalse(vm.uiState.value.isDesktopMode)
     }
 
     @Test
     fun `a fresh view model, as after a process restart, has every tab in mobile mode`() = runTest {
-        newViewModel().onAction(BrowserAction.ToggleDesktopMode)
+        newViewModel().onAction(PageActionsAction.ToggleDesktopMode)
         val restarted = newViewModel()
         assertFalse(restarted.desktopMode.isDesktop(1L))
         assertFalse(restarted.desktopMode.isDesktop(2L))
-        assertFalse(restarted.screenState().isDesktopMode)
+        assertFalse(restarted.uiState.value.isDesktopMode)
     }
 
     @Test
     fun `with no active tab, toggling does nothing`() = runTest {
-        val vm = BrowserViewModelFixture(tabs = tabs).build()
-        val events = eventsOf(vm)
-        vm.onAction(BrowserAction.ToggleDesktopMode)
+        val vm = BrowserViewModelFixture(tabs = tabs).buildPageActions()
+        val events = eventsOf(vm.events)
+        vm.onAction(PageActionsAction.ToggleDesktopMode)
         assertTrue(events.isEmpty())
     }
 

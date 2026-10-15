@@ -48,11 +48,5 @@ sealed interface BrowserAction {
         data object NavigateFrom : Home
     }
 
-    data object StarTapped : BrowserAction
-
-    data object ToggleDesktopMode : BrowserAction
-
     data object BackWithoutHistory : BrowserAction
-
-    data object LongPressNewTab : BrowserAction
 }
