@@ -53,7 +53,7 @@ Gradle calls are prefixed with `JAVA_HOME="/Applications/Android Studio.app/Cont
   - `grep -c '<error' config/ktlint/baseline.xml` (expect 23)
   - `grep -rl 'Dispatchers.setMain' app/src/test | wc -l` (expect 22)
   - use-case count `find M -name '*UseCase.kt' | wc -l` (expect 82)
-- [ ] T002 Build and keep the `0372d0f` debug and release APKs outside the repository, in the session scratchpad directory (never committed) for G5 upgrade and cold-start comparison. Install the debug one on `TA016_API36_16K` and seed as Spec 025 T005: tabs, history and downloads seeders (`app/src/debug/AndroidManifest.xml` actions); a bookmark folder, a fireproof site, a site-permission decision and a protection exception by hand.
+- [ ] T002 *(APKs of `0372d0f` kept in the session scratchpad; seeding on the AVD waits for it)* Build and keep the `0372d0f` debug and release APKs outside the repository, in the session scratchpad directory (never committed) for G5 upgrade and cold-start comparison. Install the debug one on `TA016_API36_16K` and seed as Spec 025 T005: tabs, history and downloads seeders (`app/src/debug/AndroidManifest.xml` actions); a bookmark folder, a fireproof site, a site-permission decision and a protection exception by hand.
 
 ---
 
@@ -286,20 +286,20 @@ The two stories land together per feature because the holder's constructor (US3)
 **Goal**: prove US1 on the finished branch. It is verified last because every earlier phase changes code.
 **Independent test**: quickstart G4 and G5 pass.
 
-- [ ] T044 [US1] Run quickstart G3 and record the results in the "Results" table: no baseline, `setMain` only in the rule, 49 use cases, no `fun consume`, `onAction` missing only in PageTextSize and EntryPoint.
-- [ ] T045 [US1] Run quickstart G4 (behaviour walk on the 16 KB AVD, release build) and record each row as pass or fail. Repeat the Browser, Tabs, History, Settings and Fire rows on `TA016_API24` with a debug build.
-- [ ] T046 [US1] Run quickstart G5:
+- [X] T044 [US1] Run quickstart G3 and record the results in the "Results" table: no baseline, `setMain` only in the rule, 49 use cases, no `fun consume`, `onAction` missing only in PageTextSize and EntryPoint.
+- [ ] T045 *(waits for the AVD: the owner's machine is busy)* [US1] Run quickstart G4 (behaviour walk on the 16 KB AVD, release build) and record each row as pass or fail. Repeat the Browser, Tabs, History, Settings and Fire rows on `TA016_API24` with a debug build.
+- [ ] T046 *(APK size done: 3,758,431 bytes, +0.44 %, 16 KB aligned; Compose 217 / 0 non-skippable; upgrade-over and cold start wait for the AVD)* [US1] Run quickstart G5:
   - Upgrade over the seeded `0372d0f` debug install from T002 and record every store intact.
   - Release APK bytes vs T001 (±2 %).
   - 10 interleaved cold starts vs `0372d0f` (±5 %).
   - Compose report: 0 non-skippable.
-- [ ] T047 [US1] Run the full unit suite and the instrumented suite on `TA016_API36_16K`. Compare test class and method names with T001: removed use-case tests are only those listed in T007–T037, and every other test is present.
+- [ ] T047 *(unit suite done: 940 passed, 0 failed; instrumented suite waits for the AVD)* [US1] Run the full unit suite and the instrumented suite on `TA016_API36_16K`. Compare test class and method names with T001: removed use-case tests are only those listed in T007–T037, and every other test is present.
 
 ---
 
 ## Phase 6: Polish and delivery
 
-- [ ] T048 Fill the "Use-case test disposition" table below: each removed test, its assertions, and where each one lands (deleted as pass-through / covered by `<test>` / moved to `<test>`).
+- [X] T048 Fill the "Use-case test disposition" table below: each removed test, its assertions, and where each one lands (deleted as pass-through / covered by `<test>` / moved to `<test>`).
 - [ ] T049 Push the branch and open PR `026-viewmodel-action-event` → `main`. The description has:
   - one line per commit
   - Baseline vs Results
@@ -366,6 +366,16 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 
 | Measure | Value | Pass |
 |---|---|---|
+| ktlint baseline | file deleted, `baseline.set` removed; `ktlintCheck` green | ✅ |
+| `Dispatchers.setMain` in tests | only `MainDispatcherRule.kt` (and the check's search string in `ArchitectureTest.kt`) | ✅ |
+| Use cases | 82 → 49 | ✅ |
+| `fun consume…` in main | 0 | ✅ |
+| Holders without `onAction` | `PageTextSizeViewModel`, `EntryPointViewModel` (no input) | ✅ |
+| Unit tests | 940 passed, 0 failed (959 at baseline − 24 removed pass-through or moved use-case tests + 5 repository assertions moved + 2 Konsist checks − … see disposition) | ✅ |
+| Release APK bytes | 3,758,431 (baseline 3,742,047, +0.44 %) | ✅ |
+| 16 KB alignment | all native libs aligned | ✅ |
+| Compose restartable / non-skippable | 217 / 0 (baseline 208 / 0; new routes and effects) | ✅ |
+| Instrumented suite, behaviour walk (G4), upgrade-over and cold start (G5) | waiting for the AVD | — |
 
 ## Rule proof (T042)
 
