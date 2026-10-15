@@ -28,7 +28,7 @@ class AddressBarViewModelTest {
     val mainDispatcherRule = MainDispatcherRule(testDispatcher)
 
     private fun newAddressBar(searchEngine: SearchEngineRepository? = null): AddressBarViewModel {
-        val fixture = BrowserViewModelFixture(url = SAMPLE_PAGE_URL)
+        val fixture = BrowserHoldersFixture(url = SAMPLE_PAGE_URL)
         return if (searchEngine == null) fixture.buildAddressBar() else fixture.buildAddressBar(searchEngine)
     }
 
@@ -200,12 +200,12 @@ class AddressBarViewModelTest {
 
     @Test
     fun `onUrlChanged updates currentUrl and does not affect address-bar text or focus`() = runTest {
-        val fixture = BrowserViewModelFixture(url = "https://example.com")
+        val fixture = BrowserHoldersFixture(url = "https://example.com")
         val page = fixture.build()
         val addressBar = fixture.buildAddressBar()
         addressBar.onAction(AddressBarAction.TextChange("typing-in-progress"))
         addressBar.onAction(AddressBarAction.FocusChange(true))
-        page.onAction(BrowserAction.Page.UrlChanged("https://example.com/about"))
+        page.onAction(PageAction.UrlChanged("https://example.com/about"))
         val state = page.screenState(addressBar)
         assertEquals("https://example.com/about", state.currentUrl)
         assertEquals("typing-in-progress", state.addressBarText)
@@ -215,12 +215,12 @@ class AddressBarViewModelTest {
     /** The screen's load mirrors the real WebView, whose `onPageStarted` reports the URL at once. */
     @Test
     fun `submit triggers immediate currentUrl update via onUrlChanged`() = runTest {
-        val fixture = BrowserViewModelFixture(url = "https://before.example.com")
+        val fixture = BrowserHoldersFixture(url = "https://before.example.com")
         val page = fixture.build()
         val addressBar = fixture.buildAddressBar()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             addressBar.events.collect { event ->
-                if (event is AddressBarEvent.LoadUrl) page.onAction(BrowserAction.Page.UrlChanged(event.url))
+                if (event is AddressBarEvent.LoadUrl) page.onAction(PageAction.UrlChanged(event.url))
             }
         }
 
@@ -234,7 +234,7 @@ class AddressBarViewModelTest {
 
     @Test
     fun `Home pressed on a page overlays Home and Back returns to the page`() = runTest {
-        val fixture = BrowserViewModelFixture(url = "https://page.test/")
+        val fixture = BrowserHoldersFixture(url = "https://page.test/")
         val page = fixture.build()
         val addressBar = fixture.buildAddressBar()
         advanceUntilIdle()
@@ -247,7 +247,7 @@ class AddressBarViewModelTest {
 
     @Test
     fun `Home submit loads the same URL as the address bar and marks cameFromHome`() = runTest {
-        val vm = BrowserViewModelFixture(url = UrlConstants.HOME_PAGE_URL).buildAddressBar()
+        val vm = BrowserHoldersFixture(url = UrlConstants.HOME_PAGE_URL).buildAddressBar()
         val events = eventsOf(vm.events)
         vm.onAction(AddressBarAction.HomeSubmit("kotlinlang.org"))
         val fromHome = events.loads().single()
@@ -259,7 +259,7 @@ class AddressBarViewModelTest {
 
     @Test
     fun `blank Home submit does nothing`() = runTest {
-        val vm = BrowserViewModelFixture(url = UrlConstants.HOME_PAGE_URL).buildAddressBar()
+        val vm = BrowserHoldersFixture(url = UrlConstants.HOME_PAGE_URL).buildAddressBar()
         val events = eventsOf(vm.events)
         vm.onAction(AddressBarAction.HomeSubmit("   "))
         assertTrue(events.loads().isEmpty())
@@ -268,7 +268,7 @@ class AddressBarViewModelTest {
 
     @Test
     fun `Back without history returns to Home only when the page came from Home`() = runTest {
-        val fixture = BrowserViewModelFixture(url = UrlConstants.HOME_PAGE_URL)
+        val fixture = BrowserHoldersFixture(url = UrlConstants.HOME_PAGE_URL)
         val page = fixture.build()
         val addressBar = fixture.buildAddressBar()
         advanceUntilIdle()
@@ -277,7 +277,7 @@ class AddressBarViewModelTest {
         assertEquals(before, page.screenState(addressBar))
 
         addressBar.onAction(AddressBarAction.NavigateFromHome)
-        page.onAction(BrowserAction.Page.UrlChanged("https://page.test/"))
+        page.onAction(PageAction.UrlChanged("https://page.test/"))
         assertFalse(page.screenState(addressBar).isHomeContent)
         addressBar.onAction(AddressBarAction.BackWithoutHistory)
         assertTrue(page.screenState(addressBar).isHomeContent)

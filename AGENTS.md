@@ -13,7 +13,7 @@ and check for `BUILD SUCCESSFUL`.
 |---|---|
 | Build | `./gradlew assembleDebug` |
 | Unit tests, including architecture rules | `./gradlew testDebugUnitTest` |
-| One test class | `./gradlew testDebugUnitTest --tests '*BrowserViewModelTest'` |
+| One test class | `./gradlew testDebugUnitTest --tests '*PageViewModelTest'` |
 | Static checks | `./gradlew detekt ktlintCheck lintDebug` |
 | Instrumented tests | `adb shell am force-stop com.raumanian.thirtysix.browser.debug && ANDROID_SERIAL=<emulator> ./gradlew connectedDebugAndroidTest` |
 | Compose compiler report | `./gradlew assembleRelease -PcomposeReports` |

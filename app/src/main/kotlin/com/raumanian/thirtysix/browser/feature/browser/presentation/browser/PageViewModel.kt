@@ -29,12 +29,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Turns WebView callbacks into [BrowserUiState] and writes the live page through to the active tab. */
-// Many thin state mutators over one source of truth; splitting the view model would split that state.
+/** Turns WebView callbacks into the page's state and writes the live page through to the active tab and history. */
+// One handler per WebView callback, plus the tab, history and cache writes they lead to.
 @HiltViewModel
 @Suppress("TooManyFunctions", "LongParameterList")
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class BrowserViewModel @Inject constructor(
+class PageViewModel @Inject constructor(
     observeActiveTab: ObserveActiveTabUseCase,
     private val tabs: TabRepository,
     observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
@@ -57,7 +57,7 @@ class BrowserViewModel @Inject constructor(
 
     /**
      * Page-load progress in `[0f, 1f]`, kept out of [uiState] so a progress tick never emits a new
-     * [BrowserUiState]; the UI reads it only in the progress line's draw phase.
+     * page state; the UI reads it only in the progress line's draw phase.
      */
     val loadProgress: StateFlow<Float> = _loadProgress.asStateFlow()
 
@@ -102,25 +102,19 @@ class BrowserViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun onAction(action: BrowserAction) {
+    fun onAction(action: PageAction) {
         when (action) {
-            is BrowserAction.Page -> onPage(action)
-        }
-    }
-
-    private fun onPage(action: BrowserAction.Page) {
-        when (action) {
-            is BrowserAction.Page.LoadStarted -> onLoadStarted(action.url)
-            is BrowserAction.Page.ProgressChanged -> onProgressChanged(action.newProgress)
-            is BrowserAction.Page.LoadFinished -> onLoadFinished(action.url)
-            is BrowserAction.Page.LoadFailed -> onLoadFailed(action.reason)
-            BrowserAction.Page.LoadStopped -> onLoadStopped()
-            is BrowserAction.Page.UrlChanged -> onUrlChanged(action.url)
-            is BrowserAction.Page.TitleReceived -> onTitleReceived(action.title)
-            is BrowserAction.Page.IconReceived -> onIconReceived(action.url, action.icon)
-            is BrowserAction.Page.ScreenshotReady -> onScreenshotReady(action.bitmap)
-            is BrowserAction.Page.CanGoBackChanged -> _uiState.update { it.copy(canGoBack = action.canGoBack) }
-            is BrowserAction.Page.CanGoForwardChanged -> _uiState.update { it.copy(canGoForward = action.canGoForward) }
+            is PageAction.LoadStarted -> onLoadStarted(action.url)
+            is PageAction.ProgressChanged -> onProgressChanged(action.newProgress)
+            is PageAction.LoadFinished -> onLoadFinished(action.url)
+            is PageAction.LoadFailed -> onLoadFailed(action.reason)
+            PageAction.LoadStopped -> onLoadStopped()
+            is PageAction.UrlChanged -> onUrlChanged(action.url)
+            is PageAction.TitleReceived -> onTitleReceived(action.title)
+            is PageAction.IconReceived -> onIconReceived(action.url, action.icon)
+            is PageAction.ScreenshotReady -> onScreenshotReady(action.bitmap)
+            is PageAction.CanGoBackChanged -> _uiState.update { it.copy(canGoBack = action.canGoBack) }
+            is PageAction.CanGoForwardChanged -> _uiState.update { it.copy(canGoForward = action.canGoForward) }
         }
     }
 

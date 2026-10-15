@@ -26,14 +26,14 @@ class FindInPageViewModelTest {
 
     @Test
     fun `opening starts empty with no count`() = runTest {
-        val vm = BrowserViewModelFixture().buildFind()
+        val vm = BrowserHoldersFixture().buildFind()
         vm.onAction(FindInPageAction.Opened)
         assertEquals(FindInPageState(isOpen = true), vm.state.value)
     }
 
     @Test
     fun `the query is cut at the find text limit`() = runTest {
-        val vm = BrowserViewModelFixture().buildFind()
+        val vm = BrowserHoldersFixture().buildFind()
         vm.onAction(FindInPageAction.Opened)
         vm.onAction(FindInPageAction.QueryChanged("x".repeat(BrowserLimits.MAX_FIND_QUERY_LENGTH + 50)))
         assertEquals(BrowserLimits.MAX_FIND_QUERY_LENGTH, vm.state.value.query.length)
@@ -41,7 +41,7 @@ class FindInPageViewModelTest {
 
     @Test
     fun `a result shows the one-based current match and the total`() = runTest {
-        val vm = BrowserViewModelFixture().buildFind()
+        val vm = BrowserHoldersFixture().buildFind()
         vm.onAction(FindInPageAction.Opened)
         vm.onAction(FindInPageAction.QueryChanged("lorem"))
         vm.onAction(FindInPageAction.Result(activeOrdinal = 0, total = 12))
@@ -53,7 +53,7 @@ class FindInPageViewModelTest {
 
     @Test
     fun `no matches reads zero of zero`() = runTest {
-        val vm = BrowserViewModelFixture().buildFind()
+        val vm = BrowserHoldersFixture().buildFind()
         vm.onAction(FindInPageAction.Opened)
         vm.onAction(FindInPageAction.QueryChanged("zzz"))
         vm.onAction(FindInPageAction.Result(activeOrdinal = 0, total = 0))
@@ -63,7 +63,7 @@ class FindInPageViewModelTest {
 
     @Test
     fun `a changed query resets the count until its result arrives`() = runTest {
-        val vm = BrowserViewModelFixture().buildFind()
+        val vm = BrowserHoldersFixture().buildFind()
         vm.onAction(FindInPageAction.Opened)
         vm.onAction(FindInPageAction.QueryChanged("lorem"))
         vm.onAction(FindInPageAction.Result(activeOrdinal = 3, total = 12))
@@ -74,7 +74,7 @@ class FindInPageViewModelTest {
 
     @Test
     fun `results arriving after close or for an empty query are ignored`() = runTest {
-        val vm = BrowserViewModelFixture().buildFind()
+        val vm = BrowserHoldersFixture().buildFind()
         vm.onAction(FindInPageAction.Opened)
         vm.onAction(FindInPageAction.Result(activeOrdinal = 0, total = 5))
         assertEquals(0, vm.state.value.total)
@@ -86,7 +86,7 @@ class FindInPageViewModelTest {
 
     @Test
     fun `the current match never exceeds the total`() = runTest {
-        val vm = BrowserViewModelFixture().buildFind()
+        val vm = BrowserHoldersFixture().buildFind()
         vm.onAction(FindInPageAction.Opened)
         vm.onAction(FindInPageAction.QueryChanged("lorem"))
         vm.onAction(FindInPageAction.Result(activeOrdinal = 40, total = 3))
@@ -96,20 +96,20 @@ class FindInPageViewModelTest {
 
     @Test
     fun `a navigation closes the find bar`() = runTest {
-        val fixture = BrowserViewModelFixture()
+        val fixture = BrowserHoldersFixture()
         val page = fixture.build()
         val vm = fixture.buildFind()
         advanceUntilIdle()
         vm.onAction(FindInPageAction.Opened)
         vm.onAction(FindInPageAction.QueryChanged("lorem"))
-        page.onAction(BrowserAction.Page.LoadStarted("https://example.com/next"))
+        page.onAction(PageAction.LoadStarted("https://example.com/next"))
         advanceUntilIdle()
         assertFalse(vm.state.value.isOpen)
     }
 
     @Test
     fun `switching tab closes the find bar`() = runTest {
-        val fixture = BrowserViewModelFixture(
+        val fixture = BrowserHoldersFixture(
             tabs = FakeTabRepository(
                 initialTabs = listOf(
                     tab(id = 1L, url = "https://example.com/"),

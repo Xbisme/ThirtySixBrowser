@@ -9,7 +9,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 internal fun List<AddressBarEvent>.loads(): List<String> = filterIsInstance<AddressBarEvent.LoadUrl>().map { it.url }
 
 /** The screen's snapshot, assembled as `BrowserRoute` does; holders not passed contribute their defaults. */
-internal fun BrowserViewModel.screenState(addressBar: AddressBarViewModel? = null): BrowserUiState = browserUiState(
+internal fun PageViewModel.screenState(addressBar: AddressBarViewModel? = null): BrowserUiState = browserUiState(
     currentPage.value,
     uiState.value,
     addressBar?.uiState?.value ?: AddressBarUiState(),

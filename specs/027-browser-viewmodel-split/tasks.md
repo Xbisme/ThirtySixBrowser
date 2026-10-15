@@ -76,11 +76,11 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 - [X] T008 [US2] **Address bar and Home**: `P/AddressBarViewModel.kt`, `P/AddressBarAction.kt` (`TextChange`, `FocusChange`, `Submit`, `Clear`, `HomePressed`, `HomeOverlayDismissed`, `HomeSubmit`, `NavigateFromHome`, `BackWithoutHistory`), `P/AddressBarEvent.kt` (`LoadUrl`, Keep) and `P/AddressBarUiState.kt` (`text`, `isFocused`, `homeOverlay`, `cameFromHome`, `isHomeContent`).
   - Back-without-history writes the Home URL, clears the title and persists the tab as today.
   - Tests: submit, query, Home and Back cases, including the cross-concern "submit then `UrlChanged`" case, which drives this holder and the page holder over one store.
-- [ ] T009 [US2] **Page**: rename what is left of `BrowserViewModel` to `P/PageViewModel.kt` with `P/PageAction.kt` (11 cases) and `P/PageUiState.kt`.
+- [X] T009 [US2] **Page**: rename what is left of `BrowserViewModel` to `P/PageViewModel.kt` with `P/PageAction.kt` (11 cases) and `P/PageUiState.kt`.
   - Delete `BrowserViewModel.kt`, `BrowserAction.kt` and `BrowserEvent.kt`.
   - The remaining tests become `PageViewModelTest`, `PageViewModelHistoryRecordSequenceTest` and `PageViewModelIncognitoCacheGateTest`.
   - `A/presentation/browser/BrowserScreen*Test.kt` pass `pageViewModel = …`.
-  - Check SC-004 for every holder.
+  - Check SC-004 for every holder. *(Page 9 deps / 11 actions, AddressBar 3 / 9, PageActions 5 / 3, FindInPage 1 / 4, DownloadRequest 1 / 2. The browser screen tests build the store-sharing holders through `A/fixture/BrowserScreenHolders.kt`, which replaces their three copies of the no-op repositories.)*
 - [ ] T010 [US2] Split `P/BrowserScreen.kt` into `BrowserRoute.kt`, `BrowserScreen.kt`, `BrowserContent.kt`, `BrowserHubHost.kt`, `BrowserBackHandlers.kt` and `BrowserCallbacks.kt`, moving each composable as is.
   - Remove the size suppressions on these files, on `BrowserScreenInputs.kt` and on the holders (grouping inputs where a list is still too long).
   - Run G2.

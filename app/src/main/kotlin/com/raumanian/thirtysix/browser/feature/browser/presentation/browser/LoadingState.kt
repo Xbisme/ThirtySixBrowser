@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 /**
  * The WebView's current load. [Loading] carries no progress fraction: that lives in
- * `BrowserViewModel.loadProgress`, so progress ticks do not recompose the browser chrome.
+ * `PageViewModel.loadProgress`, so progress ticks do not recompose the browser chrome.
  */
 sealed class LoadingState {
     data object Idle : LoadingState()

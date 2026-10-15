@@ -21,7 +21,7 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHist
 import java.net.URLEncoder
 
 /** Builds the browser holders over fakes and one shared page store, so a new dependency is added in one place. */
-internal class BrowserViewModelFixture(
+internal class BrowserHoldersFixture(
     val url: String = "https://example.com/",
     val tabs: FakeTabRepository = FakeTabRepository(homeUrl = url),
     val incognitoTabs: FakeIncognitoTabRepository = FakeIncognitoTabRepository(),
@@ -47,10 +47,10 @@ internal class BrowserViewModelFixture(
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabs, incognitoTabs),
         )
 
-    fun build(): BrowserViewModel {
+    fun build(): PageViewModel {
         val history = FakeHistoryRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabs, incognitoTabs)
-        return BrowserViewModel(
+        return PageViewModel(
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabs,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),

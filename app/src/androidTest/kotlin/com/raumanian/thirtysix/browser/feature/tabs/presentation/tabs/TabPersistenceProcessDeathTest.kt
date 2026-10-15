@@ -45,7 +45,7 @@ class TabPersistenceProcessDeathTest {
         assertEquals(EXPECTED_TAB_COUNT, before.size)
         val activeBefore = before.first().id // sorted DESC by lastActiveAt → first is active
 
-        // Re-runs BrowserViewModel.init { observeActiveTab() } in a fresh ViewModel.
+        // Re-runs PageViewModel.init { observeActiveTab() } in a fresh ViewModel.
         ActivityScenario.launch(HiltTestActivity::class.java).use { scenario ->
             scenario.recreate()
 

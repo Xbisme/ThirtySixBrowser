@@ -25,11 +25,11 @@ class PageActionsViewModelDesktopModeTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule(dispatcher)
 
-    private lateinit var page: BrowserViewModel
+    private lateinit var page: PageViewModel
 
     // The page holder writes the active tab into the shared store, as on the browser screen.
     private fun TestScope.newViewModel(): PageActionsViewModel {
-        val fixture = BrowserViewModelFixture(tabs = tabs)
+        val fixture = BrowserHoldersFixture(tabs = tabs)
         page = fixture.build()
         val vm = fixture.buildPageActions()
         backgroundScope.launch { page.activeTab.collect { } }
@@ -97,7 +97,7 @@ class PageActionsViewModelDesktopModeTest {
 
     @Test
     fun `with no active tab, toggling does nothing`() = runTest {
-        val vm = BrowserViewModelFixture(tabs = tabs).buildPageActions()
+        val vm = BrowserHoldersFixture(tabs = tabs).buildPageActions()
         val events = eventsOf(vm.events)
         vm.onAction(PageActionsAction.ToggleDesktopMode)
         assertTrue(events.isEmpty())

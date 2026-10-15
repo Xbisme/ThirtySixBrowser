@@ -10,7 +10,7 @@ in a composable body recomposes the whole screen per frame.
 
 ## Decision
 
-- Load progress has its own flow (`BrowserViewModel.loadProgress`), held as `State` and read only in
+- Load progress has its own flow (`PageViewModel.loadProgress`), held as `State` and read only in
   `ProgressLine`'s `drawBehind`; `uiState` changes only on load-state transitions.
 - Swipe and drag offsets are plain float state read in `graphicsLayer`, settled with the suspend
   `animate()`; an `Animatable` updated by per-delta `snapTo` read stale values in `onDragStopped`.

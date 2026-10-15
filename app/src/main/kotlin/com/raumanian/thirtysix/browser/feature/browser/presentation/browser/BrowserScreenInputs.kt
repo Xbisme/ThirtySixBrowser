@@ -28,7 +28,7 @@ class BrowserScreenSources(
 
 /** Where the browser screen sends input: one entry point per state holder. */
 class BrowserScreenActions(
-    val onAction: (BrowserAction) -> Unit,
+    val onPageAction: (PageAction) -> Unit,
     val onAddressBarAction: (AddressBarAction) -> Unit,
     val onFindAction: (FindInPageAction) -> Unit,
     val onDownloadAction: (DownloadRequestAction) -> Unit,

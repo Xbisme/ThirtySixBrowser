@@ -20,7 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-/** Star-icon paths of [BrowserViewModel]; the star reflects whether any bookmark has the URL. */
+/** Star-icon paths of [PageViewModel]; the star reflects whether any bookmark has the URL. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class PageActionsViewModelTest {
 

@@ -32,7 +32,7 @@ import org.junit.Test
  * state is already Loaded with the new URL, so recording cannot be inferred from that state.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class BrowserViewModelHistoryRecordSequenceTest {
+class PageViewModelHistoryRecordSequenceTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -40,13 +40,13 @@ class BrowserViewModelHistoryRecordSequenceTest {
     val mainDispatcherRule = MainDispatcherRule(testDispatcher)
 
     /** One full navigation as the platform actually sequences it. */
-    private fun BrowserViewModel.navigate(url: String) {
-        onAction(BrowserAction.Page.UrlChanged(url)) // doUpdateVisitedHistory
-        onAction(BrowserAction.Page.UrlChanged(url)) // onPageStarted fires it again
-        onAction(BrowserAction.Page.LoadStarted(url))
-        onAction(BrowserAction.Page.ProgressChanged(PROGRESS_MID))
-        onAction(BrowserAction.Page.ProgressChanged(PROGRESS_DONE))
-        onAction(BrowserAction.Page.LoadFinished(url))
+    private fun PageViewModel.navigate(url: String) {
+        onAction(PageAction.UrlChanged(url)) // doUpdateVisitedHistory
+        onAction(PageAction.UrlChanged(url)) // onPageStarted fires it again
+        onAction(PageAction.LoadStarted(url))
+        onAction(PageAction.ProgressChanged(PROGRESS_MID))
+        onAction(PageAction.ProgressChanged(PROGRESS_DONE))
+        onAction(PageAction.LoadFinished(url))
     }
 
     @Test
@@ -74,8 +74,8 @@ class BrowserViewModelHistoryRecordSequenceTest {
         advanceUntilIdle()
 
         vm.navigate(FIRST_URL)
-        vm.onAction(BrowserAction.Page.LoadFinished(FIRST_URL)) // platform re-fire, same navigation
-        vm.onAction(BrowserAction.Page.LoadFinished(FIRST_URL))
+        vm.onAction(PageAction.LoadFinished(FIRST_URL)) // platform re-fire, same navigation
+        vm.onAction(PageAction.LoadFinished(FIRST_URL))
         advanceUntilIdle()
 
         assertEquals(1, history.recorded.size)
@@ -101,10 +101,10 @@ class BrowserViewModelHistoryRecordSequenceTest {
         val vm = newViewModel(history)
         advanceUntilIdle()
 
-        vm.onAction(BrowserAction.Page.UrlChanged(SECOND_URL))
-        vm.onAction(BrowserAction.Page.LoadStarted(SECOND_URL))
-        vm.onAction(BrowserAction.Page.LoadFailed(ErrorReason.DnsFailure))
-        vm.onAction(BrowserAction.Page.LoadFinished(SECOND_URL)) // WebView still finishes the error page
+        vm.onAction(PageAction.UrlChanged(SECOND_URL))
+        vm.onAction(PageAction.LoadStarted(SECOND_URL))
+        vm.onAction(PageAction.LoadFailed(ErrorReason.DnsFailure))
+        vm.onAction(PageAction.LoadFinished(SECOND_URL)) // WebView still finishes the error page
         advanceUntilIdle()
 
         assertEquals(0, history.recorded.size)
@@ -117,7 +117,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
         advanceUntilIdle()
 
         vm.navigate(FIRST_URL)
-        vm.onAction(BrowserAction.Page.TitleReceived("First Page"))
+        vm.onAction(PageAction.TitleReceived("First Page"))
         advanceUntilIdle()
 
         // Second navigation whose own title never arrives before page-finish.
@@ -140,17 +140,17 @@ class BrowserViewModelHistoryRecordSequenceTest {
 
         vm.navigate(FIRST_URL)
         advanceUntilIdle()
-        vm.onAction(BrowserAction.Page.TitleReceived("First Page")) // arrives late, as on a real device
+        vm.onAction(PageAction.TitleReceived("First Page")) // arrives late, as on a real device
         advanceUntilIdle()
 
         assertEquals("First Page", history.recorded.single { it.url == FIRST_URL }.title)
     }
 
-    private fun newViewModel(history: FakeHistoryRepository): BrowserViewModel {
+    private fun newViewModel(history: FakeHistoryRepository): PageViewModel {
         val tabRepo = FakeTabRepository(homeUrl = HOME_URL)
         val incognitoRepo = FakeIncognitoTabRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabRepo, incognitoRepo)
-        return BrowserViewModel(
+        return PageViewModel(
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepo,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),

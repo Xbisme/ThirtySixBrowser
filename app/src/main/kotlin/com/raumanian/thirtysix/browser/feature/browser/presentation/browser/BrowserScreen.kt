@@ -81,7 +81,7 @@ import kotlinx.coroutines.flow.map
 fun BrowserRoute(
     slots: BrowserSlots,
     modifier: Modifier = Modifier,
-    viewModel: BrowserViewModel = hiltViewModel(),
+    pageViewModel: PageViewModel = hiltViewModel(),
     addressBar: AddressBarViewModel = hiltViewModel(),
     findInPage: FindInPageViewModel = hiltViewModel(),
     downloadRequests: DownloadRequestViewModel = hiltViewModel(),
@@ -94,15 +94,15 @@ fun BrowserRoute(
     longPressActions: LongPressActions = hiltViewModel(),
     permissionGate: SitePermissionGate = hiltViewModel(),
 ) {
-    val pageState by viewModel.uiState.collectAsStateWithLifecycle()
-    val currentPage by viewModel.currentPage.collectAsStateWithLifecycle()
+    val pageState by pageViewModel.uiState.collectAsStateWithLifecycle()
+    val currentPage by pageViewModel.currentPage.collectAsStateWithLifecycle()
     val addressBarState by addressBar.uiState.collectAsStateWithLifecycle()
     val actionsState by pageActions.uiState.collectAsStateWithLifecycle()
     val state = browserUiState(currentPage, pageState, addressBarState, actionsState)
-    val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
-    val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
+    val tabCount by pageViewModel.tabCount.collectAsStateWithLifecycle()
+    val activeTab by pageViewModel.activeTab.collectAsStateWithLifecycle()
     // Held as State, not delegated: reading `.value` here would recompose on every tick.
-    val progress: State<Float> = viewModel.loadProgress.collectAsStateWithLifecycle()
+    val progress: State<Float> = pageViewModel.loadProgress.collectAsStateWithLifecycle()
     // The app-wide text size changes rarely; the WebView and the hub read it.
     val textZoomPercent by pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
     val webViewActions = remember { WebViewActionsHandle() }
@@ -138,7 +138,7 @@ fun BrowserRoute(
             permissionGate = permissionGate,
         ),
         actions = BrowserScreenActions(
-            onAction = viewModel::onAction,
+            onPageAction = pageViewModel::onAction,
             onAddressBarAction = addressBar::onAction,
             onFindAction = findInPage::onAction,
             onDownloadAction = downloadRequests::onAction,
@@ -175,7 +175,7 @@ internal fun BrowserScreen(
     slots: BrowserSlots,
     modifier: Modifier = Modifier,
 ) {
-    val onAction = actions.onAction
+    val onPageAction = actions.onPageAction
     val currentState by rememberUpdatedState(state)
     val currentTab by rememberUpdatedState(activeTab)
     val addressFocus = remember { FocusRequester() }
@@ -291,7 +291,7 @@ internal fun BrowserScreen(
                     onReloadOrStop = {
                         if (state.loadingState is LoadingState.Loading) {
                             webViewActions.stopLoading()
-                            onAction(BrowserAction.Page.LoadStopped)
+                            onPageAction(PageAction.LoadStopped)
                         } else {
                             webViewActions.reload()
                         }
@@ -576,21 +576,21 @@ private fun BrowserContent(
                 state = state,
                 actions = webViewActions,
                 callbacks = BrowserWebViewCallbacks(
-                    onLoadStarted = { actions.onAction(BrowserAction.Page.LoadStarted(it)) },
-                    onProgressChanged = { actions.onAction(BrowserAction.Page.ProgressChanged(it)) },
-                    onLoadFinished = { actions.onAction(BrowserAction.Page.LoadFinished(it)) },
-                    onLoadFailed = { actions.onAction(BrowserAction.Page.LoadFailed(it)) },
+                    onLoadStarted = { actions.onPageAction(PageAction.LoadStarted(it)) },
+                    onProgressChanged = { actions.onPageAction(PageAction.ProgressChanged(it)) },
+                    onLoadFinished = { actions.onPageAction(PageAction.LoadFinished(it)) },
+                    onLoadFailed = { actions.onPageAction(PageAction.LoadFailed(it)) },
                     onDownloadRequested = onDownloadRequested,
                     pageRequests = pageRequests,
                     onFindResult = { ordinal, total -> actions.onFindAction(FindInPageAction.Result(ordinal, total)) },
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
-                    onUrlChange = { actions.onAction(BrowserAction.Page.UrlChanged(it)) },
-                    onCanGoBackChange = { actions.onAction(BrowserAction.Page.CanGoBackChanged(it)) },
-                    onCanGoForwardChange = { actions.onAction(BrowserAction.Page.CanGoForwardChanged(it)) },
-                    onTitleChange = { actions.onAction(BrowserAction.Page.TitleReceived(it)) },
-                    onIconReceived = { url, icon -> actions.onAction(BrowserAction.Page.IconReceived(url, icon)) },
-                    onScreenshotReady = { actions.onAction(BrowserAction.Page.ScreenshotReady(it)) },
+                    onUrlChange = { actions.onPageAction(PageAction.UrlChanged(it)) },
+                    onCanGoBackChange = { actions.onPageAction(PageAction.CanGoBackChanged(it)) },
+                    onCanGoForwardChange = { actions.onPageAction(PageAction.CanGoForwardChanged(it)) },
+                    onTitleChange = { actions.onPageAction(PageAction.TitleReceived(it)) },
+                    onIconReceived = { url, icon -> actions.onPageAction(PageAction.IconReceived(url, icon)) },
+                    onScreenshotReady = { actions.onPageAction(PageAction.ScreenshotReady(it)) },
                     onScrollDelta = onScrollDelta,
                 ),
                 incognitoProfile = incognitoProfile,

@@ -32,11 +32,11 @@ import org.junit.runner.RunWith
 
 /**
  * Incognito tabs write neither favicons nor screenshots to disk; normal tabs still do. Robolectric
- * is needed for real `Bitmap`s, so these live apart from the pure-JVM [BrowserViewModelTest].
+ * is needed for real `Bitmap`s, so these live apart from the pure-JVM [PageViewModelTest].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class BrowserViewModelIncognitoCacheGateTest {
+class PageViewModelIncognitoCacheGateTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -47,7 +47,7 @@ class BrowserViewModelIncognitoCacheGateTest {
     private fun newIncognitoActiveViewModel(
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
-    ): BrowserViewModel {
+    ): PageViewModel {
         val tabRepository = FakeTabRepository(homeUrl = "https://normal.example.com")
         val incognitoRepo = FakeIncognitoTabRepository()
         incognitoRepo.emit(
@@ -69,7 +69,7 @@ class BrowserViewModelIncognitoCacheGateTest {
     private fun newNormalActiveViewModel(
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
-    ): BrowserViewModel {
+    ): PageViewModel {
         val tabRepository = FakeTabRepository(homeUrl = "https://normal.example.com")
         val incognitoRepo = FakeIncognitoTabRepository()
         return buildVm(tabRepository, incognitoRepo, faviconCache, screenshotCache)
@@ -80,9 +80,9 @@ class BrowserViewModelIncognitoCacheGateTest {
         incognitoRepo: FakeIncognitoTabRepository,
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
-    ): BrowserViewModel {
+    ): PageViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
-        return BrowserViewModel(
+        return PageViewModel(
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepository,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
@@ -110,7 +110,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         assertEquals("incognito flag should propagate to UiState", true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(BrowserAction.Page.IconReceived("https://incognito.example.com", bmp))
+        vm.onAction(PageAction.IconReceived("https://incognito.example.com", bmp))
         advanceUntilIdle()
 
         assertEquals(
@@ -131,7 +131,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         assertEquals(true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(BrowserAction.Page.ScreenshotReady(bmp))
+        vm.onAction(PageAction.ScreenshotReady(bmp))
         advanceUntilIdle()
 
         assertEquals(
@@ -152,7 +152,7 @@ class BrowserViewModelIncognitoCacheGateTest {
         assertEquals(false, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(BrowserAction.Page.IconReceived("https://example.com", bmp))
+        vm.onAction(PageAction.IconReceived("https://example.com", bmp))
         advanceUntilIdle()
 
         assertEquals(

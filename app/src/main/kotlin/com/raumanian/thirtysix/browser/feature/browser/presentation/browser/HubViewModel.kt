@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Apart from [BrowserViewModel] on purpose: only the open hub subscribes to [hasActiveDownloads],
+ * Apart from [PageViewModel] on purpose: only the open hub subscribes to [hasActiveDownloads],
  * so the platform download service is polled only while the hub is on screen.
  */
 @HiltViewModel
