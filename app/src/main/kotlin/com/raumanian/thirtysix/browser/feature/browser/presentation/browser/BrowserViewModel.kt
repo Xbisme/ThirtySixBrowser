@@ -9,11 +9,10 @@ import com.raumanian.thirtysix.browser.core.domain.model.classifyAddressBarInput
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
@@ -31,6 +30,8 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -52,12 +54,11 @@ import kotlinx.coroutines.launch
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class BrowserViewModel @Inject constructor(
     @param:Named("default_home_url") private val defaultHomeUrl: String,
-    private val buildSearchUrl: BuildSearchUrlUseCase,
+    private val searchEngine: SearchEngineRepository,
     observeActiveTab: ObserveActiveTabUseCase,
-    observeTabs: ObserveTabsUseCase,
+    private val tabs: TabRepository,
     observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
     private val updateActiveTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase,
-    private val createTab: CreateTabUseCase,
     private val faviconCache: FaviconCache,
     private val screenshotCache: ScreenshotCache,
     private val isUrlBookmarked: IsUrlBookmarkedUseCase,
@@ -75,6 +76,10 @@ class BrowserViewModel @Inject constructor(
     )
 
     val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
+
+    // Kept until the screen collects them, as the consumed-once state fields they replace were.
+    private val eventChannel = Channel<BrowserEvent>(Channel.BUFFERED)
+    val events: Flow<BrowserEvent> = eventChannel.receiveAsFlow()
 
     private val _loadProgress = MutableStateFlow(0f)
 
@@ -94,7 +99,7 @@ class BrowserViewModel @Inject constructor(
     val activeTab: StateFlow<Tab?> = activeTabFlow
 
     // Starts at 1: there is always at least one tab once the flow emits, so the badge never flashes empty.
-    val tabCount: StateFlow<Int> = observeTabs()
+    val tabCount: StateFlow<Int> = tabs.observeTabs()
         .map { it.size }
         .stateIn(
             scope = viewModelScope,
@@ -107,6 +112,8 @@ class BrowserViewModel @Inject constructor(
     // In memory only: new tabs and every tab after a process restart start in mobile mode. Tab ids
     // are never reused, so a closed tab's entry is inert.
     private val desktopModeTabs = MutableStateFlow<Set<Long>>(emptySet())
+
+    val desktopMode: DesktopModeLookup = DesktopModeLookup { tabId -> tabId in desktopModeTabs.value }
 
     private val _findInPage = MutableStateFlow(FindInPageState())
 
@@ -163,7 +170,72 @@ class BrowserViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun onStarTapped() {
+    fun onAction(action: BrowserAction) {
+        when (action) {
+            is BrowserAction.Page -> onPage(action)
+            is BrowserAction.AddressBar -> onAddressBar(action)
+            is BrowserAction.Home -> onHome(action)
+            is BrowserAction.Find -> onFind(action)
+            is BrowserAction.Download -> onDownload(action)
+            BrowserAction.StarTapped -> onStarTapped()
+            BrowserAction.ToggleDesktopMode -> onDesktopModeToggled()
+            BrowserAction.BackWithoutHistory -> onBackWithoutHistory()
+            BrowserAction.LongPressNewTab -> onLongPressNewTab()
+        }
+    }
+
+    private fun onPage(action: BrowserAction.Page) {
+        when (action) {
+            is BrowserAction.Page.LoadStarted -> onLoadStarted(action.url)
+            is BrowserAction.Page.ProgressChanged -> onProgressChanged(action.newProgress)
+            is BrowserAction.Page.LoadFinished -> onLoadFinished(action.url)
+            is BrowserAction.Page.LoadFailed -> onLoadFailed(action.reason)
+            BrowserAction.Page.LoadStopped -> onLoadStopped()
+            is BrowserAction.Page.UrlChanged -> onUrlChanged(action.url)
+            is BrowserAction.Page.TitleReceived -> onTitleReceived(action.title)
+            is BrowserAction.Page.IconReceived -> onIconReceived(action.url, action.icon)
+            is BrowserAction.Page.ScreenshotReady -> onScreenshotReady(action.bitmap)
+            is BrowserAction.Page.CanGoBackChanged -> _uiState.update { it.copy(canGoBack = action.canGoBack) }
+            is BrowserAction.Page.CanGoForwardChanged -> _uiState.update { it.copy(canGoForward = action.canGoForward) }
+            is BrowserAction.Page.FindResult -> onFindResult(action.activeOrdinal, action.total)
+        }
+    }
+
+    private fun onAddressBar(action: BrowserAction.AddressBar) {
+        when (action) {
+            is BrowserAction.AddressBar.TextChange -> _uiState.update { it.copy(addressBarText = action.text) }
+            is BrowserAction.AddressBar.FocusChange -> _uiState.update { it.copy(isAddressBarFocused = action.focused) }
+            BrowserAction.AddressBar.Submit -> submit(_uiState.value.addressBarText)
+            BrowserAction.AddressBar.Clear -> _uiState.update { it.copy(addressBarText = "") }
+        }
+    }
+
+    private fun onHome(action: BrowserAction.Home) {
+        when (action) {
+            BrowserAction.Home.Pressed -> onHomePressed()
+            BrowserAction.Home.OverlayDismissed -> _uiState.update { it.copy(homeOverlay = false) }
+            is BrowserAction.Home.Submit -> onHomeSubmit(action.input)
+            BrowserAction.Home.NavigateFrom -> onNavigateFromHome()
+        }
+    }
+
+    private fun onFind(action: BrowserAction.Find) {
+        when (action) {
+            BrowserAction.Find.Opened -> onFindOpened()
+            is BrowserAction.Find.QueryChanged -> onFindQueryChanged(action.query)
+            BrowserAction.Find.Closed -> onFindClosed()
+        }
+    }
+
+    private fun onDownload(action: BrowserAction.Download) {
+        when (action) {
+            is BrowserAction.Download.Requested ->
+                onDownloadRequested(action.url, action.userAgent, action.contentDisposition, action.mimeType)
+            is BrowserAction.Download.StoragePermissionDenied -> onStoragePermissionDenied(action.permanently)
+        }
+    }
+
+    private fun onStarTapped() {
         val state = _uiState.value
         val url = state.currentUrl
         val title = currentTitleCache.value
@@ -174,17 +246,13 @@ class BrowserViewModel @Inject constructor(
                     ToggleBookmarkResult.Added -> BookmarkSnackbarEvent.Added
                     ToggleBookmarkResult.Removed -> BookmarkSnackbarEvent.Removed
                 }
-                _uiState.update { current -> current.copy(bookmarkSnackbarEvent = event) }
+                eventChannel.trySend(BrowserEvent.Bookmark(event))
             }
         }
     }
 
-    fun consumeBookmarkSnackbarEvent() {
-        _uiState.update { it.copy(bookmarkSnackbarEvent = null) }
-    }
-
     // Incognito downloads are recorded like any other; the tab's incognito state is not consulted.
-    fun onDownloadRequested(
+    private fun onDownloadRequested(
         url: String,
         userAgent: String,
         contentDisposition: String?,
@@ -195,42 +263,32 @@ class BrowserViewModel @Inject constructor(
                 is StartDownloadResult.Started -> DownloadSnackbarEvent.Started(result.fileName)
                 StartDownloadResult.ServiceUnavailable -> DownloadSnackbarEvent.ServiceUnavailable
             }
-            _uiState.update { current -> current.copy(downloadSnackbarEvent = event) }
+            eventChannel.trySend(BrowserEvent.Download(event))
         }
     }
 
     // Called from the permission launcher, the only place that knows the person's answer.
-    fun onStoragePermissionDenied(permanently: Boolean) {
-        _uiState.update { current ->
-            current.copy(
-                downloadSnackbarEvent = if (permanently) {
-                    DownloadSnackbarEvent.StoragePermissionPermanentlyDenied
-                } else {
-                    DownloadSnackbarEvent.StoragePermissionDenied
-                },
-            )
+    private fun onStoragePermissionDenied(permanently: Boolean) {
+        val event = if (permanently) {
+            DownloadSnackbarEvent.StoragePermissionPermanentlyDenied
+        } else {
+            DownloadSnackbarEvent.StoragePermissionDenied
         }
+        eventChannel.trySend(BrowserEvent.Download(event))
     }
 
-    fun consumeDownloadSnackbarEvent() {
-        _uiState.update { it.copy(downloadSnackbarEvent = null) }
+    /** Flips the active tab's page mode; nothing without an active tab. The screen reloads the WebView. */
+    private fun onDesktopModeToggled() {
+        val tabId = activeTabFlow.value?.id ?: return
+        desktopModeTabs.update { desktop -> if (tabId in desktop) desktop - tabId else desktop + tabId }
+        eventChannel.trySend(BrowserEvent.SetDesktopMode(tabId in desktopModeTabs.value))
     }
 
-    // Read synchronously when a tab's WebView is built, so it starts in the right mode.
-    fun isDesktopMode(tabId: Long): Boolean = tabId in desktopModeTabs.value
-
-    /** Flips the active tab's page mode; `null` without an active tab. The caller reloads the WebView. */
-    fun onDesktopModeToggled(): Boolean? {
-        val tabId = activeTabFlow.value?.id ?: return null
-        desktopModeTabs.update { tabs -> if (tabId in tabs) tabs - tabId else tabs + tabId }
-        return tabId in desktopModeTabs.value
-    }
-
-    fun onFindOpened() {
+    private fun onFindOpened() {
         _findInPage.value = FindInPageState(isOpen = true)
     }
 
-    fun onFindQueryChanged(query: String) {
+    private fun onFindQueryChanged(query: String) {
         _findInPage.update { state ->
             if (!state.isOpen) {
                 state
@@ -241,7 +299,7 @@ class BrowserViewModel @Inject constructor(
     }
 
     // A late result after the bar closed, or while it is empty, must not reopen or relabel it.
-    fun onFindResult(activeOrdinal: Int, total: Int) {
+    private fun onFindResult(activeOrdinal: Int, total: Int) {
         _findInPage.update { state ->
             when {
                 !state.isOpen || state.query.isEmpty() -> state
@@ -251,13 +309,13 @@ class BrowserViewModel @Inject constructor(
         }
     }
 
-    fun onFindClosed() {
+    private fun onFindClosed() {
         _findInPage.value = FindInPageState()
     }
 
     // [onUrlChanged] owns the address; `url` is kept for symmetry with [onLoadFinished].
     @Suppress("UNUSED_PARAMETER")
-    fun onLoadStarted(url: String) {
+    private fun onLoadStarted(url: String) {
         pendingHistoryUrl = url
         // Drop the previous page's title so it can never attach to the new URL; [onTitleReceived] patches it in.
         currentTitleCache.value = ""
@@ -270,7 +328,7 @@ class BrowserViewModel @Inject constructor(
     }
 
     // Progress goes to [loadProgress]; [uiState] changes only when the loading state itself changes.
-    fun onProgressChanged(newProgress: Int) {
+    private fun onProgressChanged(newProgress: Int) {
         val clamped = newProgress.coerceIn(0, MAX_PROGRESS)
         if (clamped >= MAX_PROGRESS) {
             _loadProgress.value = 0f
@@ -293,7 +351,7 @@ class BrowserViewModel @Inject constructor(
         }
     }
 
-    fun onLoadFinished(url: String) {
+    private fun onLoadFinished(url: String) {
         val previous = _uiState.value
         // One write per started navigation: a platform re-fire of onPageFinished finds the token consumed.
         val shouldRecord = pendingHistoryUrl != null
@@ -319,23 +377,15 @@ class BrowserViewModel @Inject constructor(
         }
     }
 
-    fun onLoadFailed(reason: ErrorReason) {
+    private fun onLoadFailed(reason: ErrorReason) {
         // The platform still delivers onPageFinished for the error page, which must not reach history.
         pendingHistoryUrl = null
         _loadProgress.value = 0f
         _uiState.update { it.copy(loadingState = LoadingState.Failed(reason)) }
     }
 
-    fun onCanGoBackChanged(canGoBack: Boolean) {
-        _uiState.update { it.copy(canGoBack = canGoBack) }
-    }
-
-    fun onCanGoForwardChanged(canGoForward: Boolean) {
-        _uiState.update { it.copy(canGoForward = canGoForward) }
-    }
-
     // The page settles wherever it had reached; the loading indicator hides at once.
-    fun onLoadStopped() {
+    private fun onLoadStopped() {
         _loadProgress.value = 0f
         _uiState.update { current ->
             if (current.loadingState is LoadingState.Loading) {
@@ -346,82 +396,54 @@ class BrowserViewModel @Inject constructor(
         }
     }
 
-    fun onAddressBarTextChange(newText: String) {
-        _uiState.update { it.copy(addressBarText = newText) }
-    }
-
-    fun onAddressBarFocusChange(focused: Boolean) {
-        _uiState.update { it.copy(isAddressBarFocused = focused) }
-    }
-
-    /**
-     * Returns `true` when something was submitted, so the caller can release focus and keyboard at
-     * once; a search URL is then built and loaded asynchronously.
-     */
-    fun onAddressBarSubmit(loadUrl: (String) -> Unit): Boolean = submit(_uiState.value.addressBarText, loadUrl)
-
     /** Shows the Home page over a loaded page; does nothing on Home. */
-    fun onHomePressed() {
+    private fun onHomePressed() {
         _uiState.update { if (it.currentUrl == UrlConstants.HOME_PAGE_URL) it else it.copy(homeOverlay = true) }
     }
 
-    fun onHomeOverlayDismissed() {
-        _uiState.update { it.copy(homeOverlay = false) }
-    }
-
     /** Submits like the address bar, then remembers that this navigation started on Home. */
-    fun onHomeSubmit(input: String, loadUrl: (String) -> Unit): Boolean {
-        val handled = submit(input, loadUrl)
-        if (handled) onNavigateFromHome()
-        return handled
+    private fun onHomeSubmit(input: String) {
+        if (submit(input)) onNavigateFromHome()
     }
 
-    fun onNavigateFromHome() {
+    private fun onNavigateFromHome() {
         _uiState.update { it.copy(homeOverlay = false, cameFromHome = true) }
     }
 
-    /**
-     * Back with no WebView history: returns the tab to Home when the page was opened from Home in a
-     * normal tab; otherwise `false`, and the system handles Back.
-     */
-    fun onBackWithoutHistory(): Boolean {
+    /** Back with no WebView history: returns the tab to Home when the page was opened from Home in a normal tab. */
+    private fun onBackWithoutHistory() {
         val state = _uiState.value
-        if (!state.cameFromHome || state.isIncognito) return false
+        if (!state.cameFromHome || state.isIncognito) return
         currentTitleCache.value = ""
         _uiState.update {
             it.copy(currentUrl = UrlConstants.HOME_PAGE_URL, cameFromHome = false, homeOverlay = false)
         }
         persistActiveTabState(UrlConstants.HOME_PAGE_URL)
-        return true
     }
 
-    private fun submit(raw: String, loadUrl: (String) -> Unit): Boolean =
+    // True when something was submitted; a search URL is then built and loaded asynchronously.
+    private fun submit(raw: String): Boolean =
         when (val classified = classifyAddressBarInput(raw)) {
             AddressBarSubmitResult.Empty -> false
             is AddressBarSubmitResult.Url -> {
-                loadUrl(classified.target)
+                eventChannel.trySend(BrowserEvent.LoadUrl(classified.target))
                 true
             }
             is AddressBarSubmitResult.Query -> {
                 viewModelScope.launch {
-                    val searchUrl = buildSearchUrl(classified.text)
-                    loadUrl(searchUrl)
+                    eventChannel.trySend(BrowserEvent.LoadUrl(searchEngine.buildSearchUrl(classified.text)))
                 }
                 true
             }
         }
 
-    fun onAddressBarClear() {
-        _uiState.update { it.copy(addressBarText = "") }
-    }
-
     // Fired from onPageStarted and doUpdateVisitedHistory, so every hop of a redirect chain shows.
-    fun onUrlChanged(url: String) {
+    private fun onUrlChanged(url: String) {
         _uiState.update { it.copy(currentUrl = url) }
         persistActiveTabState(url)
     }
 
-    fun onTitleReceived(title: String) {
+    private fun onTitleReceived(title: String) {
         currentTitleCache.value = title
         // The title usually arrives after the load finished; patch it onto the row just written.
         if (lastRecordedHistoryUrl == _uiState.value.currentUrl) {
@@ -441,20 +463,16 @@ class BrowserViewModel @Inject constructor(
     }
 
     /** Opens a new Home tab, or reports that the tab limit is reached. */
-    fun onLongPressNewTab() {
+    private fun onLongPressNewTab() {
         viewModelScope.launch {
-            val result = createTab(defaultHomeUrl)
+            val result = tabs.createTab(defaultHomeUrl)
             if (result is Result.Error && result.throwable is MaxTabsReachedException) {
-                _uiState.update { it.copy(tabsEvent = TabsErrorEvent.MaxTabsReached) }
+                eventChannel.trySend(BrowserEvent.TabLimit(TabsErrorEvent.MaxTabsReached))
             }
         }
     }
 
-    fun consumeTabsEvent() {
-        _uiState.update { it.copy(tabsEvent = null) }
-    }
-
-    fun onIconReceived(url: String, icon: Bitmap) {
+    private fun onIconReceived(url: String, icon: Bitmap) {
         // Incognito never writes favicons: the cache is keyed by host and would leak browsing into normal tabs.
         if (_uiState.value.isIncognito) return
         viewModelScope.launch {
@@ -463,7 +481,7 @@ class BrowserViewModel @Inject constructor(
     }
 
     /** Stores the tab preview by tab id; dropped when there is no active tab yet. */
-    fun onScreenshotReady(bitmap: Bitmap) {
+    private fun onScreenshotReady(bitmap: Bitmap) {
         // Incognito never writes previews to disk, where they could be recovered after the tab closed.
         if (_uiState.value.isIncognito) return
         val tabId = activeTabFlow.value?.id ?: return

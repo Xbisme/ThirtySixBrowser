@@ -32,7 +32,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /** Settings → Privacy → Fireproof sites. "Remove all" asks first. */
 @Composable
-fun FireproofSitesScreen(
+fun FireproofSitesRoute(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: FireproofSitesViewModel = hiltViewModel(),
@@ -40,13 +40,27 @@ fun FireproofSitesScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigateBack: () -> Unit = { navController.popBackStack() }
     BackHandler(onBack = navigateBack)
+    FireproofSitesScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        onBack = navigateBack,
+        modifier = modifier,
+    )
+}
 
+@Composable
+fun FireproofSitesScreen(
+    state: FireproofSitesUiState,
+    onAction: (FireproofSitesAction) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             SettingsTopBar(
-                onBackClick = navigateBack,
+                onBackClick = onBack,
                 title = stringResource(R.string.settings_fireproof_sites),
                 action = if (state.sites.isEmpty()) {
                     null
@@ -54,7 +68,7 @@ fun FireproofSitesScreen(
                     {
                         PillButton(
                             label = stringResource(R.string.fireproof_sites_remove_all),
-                            onClick = viewModel::onRemoveAllClick,
+                            onClick = { onAction(FireproofSitesAction.RemoveAllClick) },
                             style = PillStyle.Danger,
                             modifier = Modifier.testTag(TEST_TAG_FIREPROOF_SITES_REMOVE_ALL),
                         )
@@ -80,7 +94,7 @@ fun FireproofSitesScreen(
                 }
             }
             items(state.sites, key = { it }, contentType = { CONTENT_TYPE_ROW }) { site ->
-                FireproofRow(site = site, onRemove = { viewModel.onRemove(site) })
+                FireproofRow(site = site, onRemove = { onAction(FireproofSitesAction.Remove(site)) })
             }
         }
     }
@@ -91,8 +105,8 @@ fun FireproofSitesScreen(
             body = stringResource(R.string.fireproof_sites_remove_all_confirm_body),
             confirmLabel = stringResource(R.string.fireproof_sites_remove_all),
             cancelLabel = stringResource(R.string.settings_action_cancel),
-            onConfirm = viewModel::onRemoveAllConfirmed,
-            onDismiss = viewModel::onRemoveAllDismissed,
+            onConfirm = { onAction(FireproofSitesAction.RemoveAllConfirmed) },
+            onDismiss = { onAction(FireproofSitesAction.RemoveAllDismissed) },
         )
     }
 }

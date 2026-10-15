@@ -4,13 +4,11 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
@@ -21,19 +19,15 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBook
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -46,20 +40,17 @@ class BrowserViewModelHistoryRecordSequenceTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    @Before
-    fun setUp() = Dispatchers.setMain(testDispatcher)
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(testDispatcher)
 
     /** One full navigation as the platform actually sequences it. */
     private fun BrowserViewModel.navigate(url: String) {
-        onUrlChanged(url) // doUpdateVisitedHistory
-        onUrlChanged(url) // onPageStarted fires it again
-        onLoadStarted(url)
-        onProgressChanged(PROGRESS_MID)
-        onProgressChanged(PROGRESS_DONE)
-        onLoadFinished(url)
+        onAction(BrowserAction.Page.UrlChanged(url)) // doUpdateVisitedHistory
+        onAction(BrowserAction.Page.UrlChanged(url)) // onPageStarted fires it again
+        onAction(BrowserAction.Page.LoadStarted(url))
+        onAction(BrowserAction.Page.ProgressChanged(PROGRESS_MID))
+        onAction(BrowserAction.Page.ProgressChanged(PROGRESS_DONE))
+        onAction(BrowserAction.Page.LoadFinished(url))
     }
 
     @Test
@@ -87,8 +78,8 @@ class BrowserViewModelHistoryRecordSequenceTest {
         advanceUntilIdle()
 
         vm.navigate(FIRST_URL)
-        vm.onLoadFinished(FIRST_URL) // platform re-fire, same navigation
-        vm.onLoadFinished(FIRST_URL)
+        vm.onAction(BrowserAction.Page.LoadFinished(FIRST_URL)) // platform re-fire, same navigation
+        vm.onAction(BrowserAction.Page.LoadFinished(FIRST_URL))
         advanceUntilIdle()
 
         assertEquals(1, history.recorded.size)
@@ -114,10 +105,10 @@ class BrowserViewModelHistoryRecordSequenceTest {
         val vm = newViewModel(history)
         advanceUntilIdle()
 
-        vm.onUrlChanged(SECOND_URL)
-        vm.onLoadStarted(SECOND_URL)
-        vm.onLoadFailed(ErrorReason.DnsFailure)
-        vm.onLoadFinished(SECOND_URL) // WebView still finishes the error page
+        vm.onAction(BrowserAction.Page.UrlChanged(SECOND_URL))
+        vm.onAction(BrowserAction.Page.LoadStarted(SECOND_URL))
+        vm.onAction(BrowserAction.Page.LoadFailed(ErrorReason.DnsFailure))
+        vm.onAction(BrowserAction.Page.LoadFinished(SECOND_URL)) // WebView still finishes the error page
         advanceUntilIdle()
 
         assertEquals(0, history.recorded.size)
@@ -130,7 +121,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
         advanceUntilIdle()
 
         vm.navigate(FIRST_URL)
-        vm.onTitleReceived("First Page")
+        vm.onAction(BrowserAction.Page.TitleReceived("First Page"))
         advanceUntilIdle()
 
         // Second navigation whose own title never arrives before page-finish.
@@ -153,7 +144,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
 
         vm.navigate(FIRST_URL)
         advanceUntilIdle()
-        vm.onTitleReceived("First Page") // arrives late, as on a real device
+        vm.onAction(BrowserAction.Page.TitleReceived("First Page")) // arrives late, as on a real device
         advanceUntilIdle()
 
         assertEquals("First Page", history.recorded.single { it.url == FIRST_URL }.title)
@@ -166,12 +157,11 @@ class BrowserViewModelHistoryRecordSequenceTest {
         val bookmarkRepo = FakeBookmarkRepository()
         return BrowserViewModel(
             defaultHomeUrl = HOME_URL,
-            buildSearchUrl = BuildSearchUrlUseCase(NoopSearchEngineRepository),
+            searchEngine = NoopSearchEngineRepository,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-            observeTabs = ObserveTabsUseCase(tabRepo),
+            tabs = tabRepo,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepo, incognitoRepo),
-            createTab = CreateTabUseCase(tabRepo, HOME_URL),
             faviconCache = NoopFaviconCache,
             screenshotCache = NoopScreenshotCache,
             isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo),

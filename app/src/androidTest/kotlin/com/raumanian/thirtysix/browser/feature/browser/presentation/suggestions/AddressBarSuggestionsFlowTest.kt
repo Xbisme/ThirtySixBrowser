@@ -83,11 +83,11 @@ class AddressBarSuggestionsFlowTest {
             val callbacks = AddressBarCallbacks(
                 onTextChange = { text ->
                     ui = ui.copy(addressBarText = text)
-                    viewModel.onTextChanged(text, ui.currentUrl)
+                    viewModel.onAction(AddressSuggestionsAction.TextChanged(text, ui.currentUrl))
                 },
                 onFocusChange = { focused ->
                     ui = ui.copy(isAddressBarFocused = focused)
-                    viewModel.onFocusChanged(focused)
+                    viewModel.onAction(AddressSuggestionsAction.FocusChanged(focused))
                 },
                 onSubmit = {
                     submitted += ui.addressBarText

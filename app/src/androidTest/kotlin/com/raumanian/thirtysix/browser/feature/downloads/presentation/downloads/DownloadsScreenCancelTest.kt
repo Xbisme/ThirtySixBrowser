@@ -29,7 +29,7 @@ class DownloadsScreenCancelTest {
             records = listOf(record),
             statuses = mapOf(record.transferHandle to status),
         )
-        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.setContent { ThirtySixTheme { DownloadsRoute(viewModel = vm) } }
         composeRule.waitForIdle()
         return vm
     }
@@ -75,7 +75,7 @@ class DownloadsScreenCancelTest {
             statuses = records.map { it.transferHandle }.zip(statuses).toMap(),
             existingFiles = records.mapNotNull { it.localUri }.toSet(),
         )
-        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.setContent { ThirtySixTheme { DownloadsRoute(viewModel = vm) } }
         composeRule.waitForIdle()
 
         assertEquals("every terminal row must be on screen", statuses.size, vm.uiState.value.items.size)

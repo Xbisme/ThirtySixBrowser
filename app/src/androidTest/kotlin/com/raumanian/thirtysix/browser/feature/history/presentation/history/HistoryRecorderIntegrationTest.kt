@@ -7,9 +7,6 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.history.data.repository.HistoryRepositoryImpl
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ClearAllHistoryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.DeleteHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ObserveHistoryEntriesUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -61,7 +58,7 @@ class HistoryRecorderIntegrationTest {
             isIncognito = false,
         )
 
-        val entries = ObserveHistoryEntriesUseCase(repository)().first()
+        val entries = repository.observeAll().first()
         assertEquals(1, entries.size)
         assertEquals("https://example.com/", entries.single().url)
         assertEquals("Example Domain", entries.single().title)
@@ -75,7 +72,7 @@ class HistoryRecorderIntegrationTest {
 
         useCase(url = "https://secret.example.com/", title = "Secret", isIncognito = true)
 
-        val entries = ObserveHistoryEntriesUseCase(repository)().first()
+        val entries = repository.observeAll().first()
         assertEquals(1, entries.size)
         assertEquals("https://example.com/", entries.single().url)
     }
@@ -86,7 +83,7 @@ class HistoryRecorderIntegrationTest {
         useCase(url = "https://example.com/", title = "Example Domain", isIncognito = false)
         useCase(url = "https://example.com/", title = "Example Domain", isIncognito = false)
 
-        val entries = ObserveHistoryEntriesUseCase(repository)().first()
+        val entries = repository.observeAll().first()
         assertEquals(2, entries.size)
         assertEquals(2, entries.map { it.id }.distinct().size)
     }
@@ -96,11 +93,11 @@ class HistoryRecorderIntegrationTest {
         val useCase = RecordHistoryEntryUseCase(repository)
         useCase(url = "https://example.com/", title = "Example Domain", isIncognito = false)
         useCase(url = "https://example.com/", title = "Example Domain", isIncognito = false)
-        val target = ObserveHistoryEntriesUseCase(repository)().first().first()
+        val target = repository.observeAll().first().first()
 
-        assertEquals(1, DeleteHistoryEntryUseCase(repository)(target.id))
+        assertEquals(1, repository.deleteById(target.id))
 
-        val remaining = ObserveHistoryEntriesUseCase(repository)().first()
+        val remaining = repository.observeAll().first()
         assertEquals(1, remaining.size)
         assertTrue(remaining.single().id != target.id)
     }
@@ -110,9 +107,9 @@ class HistoryRecorderIntegrationTest {
         val useCase = RecordHistoryEntryUseCase(repository)
         repeat(3) { useCase("https://example.com/$it", "Page $it", isIncognito = false) }
 
-        assertEquals(3, ClearAllHistoryUseCase(repository)())
+        assertEquals(3, repository.clearAll())
 
-        assertTrue(ObserveHistoryEntriesUseCase(repository)().first().isEmpty())
+        assertTrue(repository.observeAll().first().isEmpty())
     }
 
     private companion object {

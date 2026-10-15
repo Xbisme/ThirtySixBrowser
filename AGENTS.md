@@ -48,6 +48,8 @@ reaches the wrong way. Fix the code, not the test. `KNOWN_VIOLATIONS` only shrin
 ## Writing code
 
 - ViewModel → UseCase → Repository → DataSource. ViewModels expose `StateFlow<UiState>` only.
+- Screens are `XRoute` + `XScreen(state, onAction)`; input is `onAction(XAction)`, one-off effects
+  are `XEvent`. A use case that would only forward one call is not written: call the contract.
 - One feature opens another only through callbacks filled in by `AppNavHost`.
 - Inject `DispatcherProvider`; only `di/` names `Dispatchers.IO`. Long-lived work uses `@ApplicationScope`.
 - Text from `stringResource` in all 8 locales, colors and type from `MaterialTheme`, no magic numbers.
@@ -72,7 +74,8 @@ detekt and `CommentPolicyTest` enforce this.
 ## Tests
 
 Mirror `main/`. Fakes of core contracts are in `core/testing/fake/`; a feature's own fakes and
-sample data in its `fake/` and `fixture/`. Instrumented tests that launch `MainActivity` replace
+sample data in its `fake/` and `fixture/`. State-holder tests set the main dispatcher
+with `MainDispatcherRule`. Instrumented tests that launch `MainActivity` replace
 `SettingsDataStoreProviderModule` with a per-test DataStore.
 
 ## Devices
@@ -81,8 +84,3 @@ sample data in its `fake/` and `fixture/`. Instrumented tests that launch `MainA
 - The Galaxy A55 is the owner's phone: never run instrumented tests on it, and check
   `dumpsys window | grep mCurrentFocus` before scripted input (`docs/adr/0017`).
 - Never install an older build over a newer one: Room has no downgrade migration.
-
-## Open work
-
-Spec 026 moves every screen to `onAction(XAction)` / `XEvent` with a Route/Screen split and
-removes use cases that only forward one call (lists in `specs/025-architecture-cleanup/tasks.md`).

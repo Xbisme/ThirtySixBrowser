@@ -32,7 +32,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 /** Settings → Privacy → Sites without protection. "Turn all back on" asks first. */
 @Composable
-fun ProtectionExceptionsScreen(
+fun ProtectionExceptionsRoute(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: ProtectionExceptionsViewModel = hiltViewModel(),
@@ -40,13 +40,27 @@ fun ProtectionExceptionsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigateBack: () -> Unit = { navController.popBackStack() }
     BackHandler(onBack = navigateBack)
+    ProtectionExceptionsScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        onBack = navigateBack,
+        modifier = modifier,
+    )
+}
 
+@Composable
+fun ProtectionExceptionsScreen(
+    state: ProtectionExceptionsUiState,
+    onAction: (ProtectionExceptionsAction) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             SettingsTopBar(
-                onBackClick = navigateBack,
+                onBackClick = onBack,
                 title = stringResource(R.string.settings_protection_exceptions),
                 action = if (state.sites.isEmpty()) {
                     null
@@ -54,7 +68,7 @@ fun ProtectionExceptionsScreen(
                     {
                         PillButton(
                             label = stringResource(R.string.protection_exceptions_turn_all_on),
-                            onClick = viewModel::onTurnAllOnClick,
+                            onClick = { onAction(ProtectionExceptionsAction.TurnAllOnClick) },
                             style = PillStyle.Danger,
                             modifier = Modifier.testTag(TEST_TAG_PROTECTION_EXCEPTIONS_TURN_ALL_ON),
                         )
@@ -80,7 +94,7 @@ fun ProtectionExceptionsScreen(
                 }
             }
             items(state.sites, key = { it }, contentType = { CONTENT_TYPE_ROW }) { site ->
-                ExceptionRow(site = site, onTurnOn = { viewModel.onTurnOn(site) })
+                ExceptionRow(site = site, onTurnOn = { onAction(ProtectionExceptionsAction.TurnOn(site)) })
             }
         }
     }
@@ -91,8 +105,8 @@ fun ProtectionExceptionsScreen(
             body = stringResource(R.string.protection_exceptions_turn_all_on_confirm_body),
             confirmLabel = stringResource(R.string.protection_exceptions_turn_on),
             cancelLabel = stringResource(R.string.settings_action_cancel),
-            onConfirm = viewModel::onTurnAllOnConfirmed,
-            onDismiss = viewModel::onTurnAllOnDismissed,
+            onConfirm = { onAction(ProtectionExceptionsAction.TurnAllOnConfirmed) },
+            onDismiss = { onAction(ProtectionExceptionsAction.TurnAllOnDismissed) },
         )
     }
 }

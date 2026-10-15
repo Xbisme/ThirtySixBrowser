@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -42,16 +41,16 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppI
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
+import com.raumanian.thirtysix.browser.core.presentation.util.EventEffect
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.LanguageSlide
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.SearchEngineSlide
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.ThemeSlide
 import com.raumanian.thirtysix.browser.feature.onboarding.presentation.onboarding.component.WelcomeSlide
-import kotlinx.coroutines.flow.collectLatest
 
 /** Shown instead of the browser while the first-run flag is unset; `MainActivity` decides before the graph is built. */
 @Composable
-fun OnboardingScreen(
+fun OnboardingRoute(
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel(),
@@ -60,13 +59,22 @@ fun OnboardingScreen(
     val context = LocalContext.current
 
     // onFinish must pop the onboarding route inclusively, or Back from the browser returns here.
-    LaunchedLeaveEffect(viewModel) { onFinish() }
+    EventEffect(viewModel.events) { onFinish() }
 
     // On the first slide Back leaves the app without writing the first-run flag, so the flow returns next launch.
     BackHandler {
-        if (!viewModel.onBack()) context.findActivity()?.finish()
+        if (state.isFirstSlide) context.findActivity()?.finish() else viewModel.onAction(OnboardingAction.Back)
     }
 
+    OnboardingScreen(state = state, onAction = viewModel::onAction, modifier = modifier)
+}
+
+@Composable
+fun OnboardingScreen(
+    state: OnboardingUiState,
+    onAction: (OnboardingAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val colors = ThirtySixTheme.colors
     Box(modifier = modifier.fillMaxSize().background(colors.heroDeep)) {
         MeshArt(
@@ -80,13 +88,17 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing),
         ) {
-            OnboardingTopBar(state = state, onBack = { viewModel.onBack() }, onSkip = viewModel::onSkip)
+            OnboardingTopBar(
+                state = state,
+                onBack = { onAction(OnboardingAction.Back) },
+                onSkip = { onAction(OnboardingAction.Skip) },
+            )
             SlideBody(
                 state = state,
-                viewModel = viewModel,
+                onAction = onAction,
                 modifier = Modifier.weight(1f),
             )
-            OnboardingControls(state = state, onForward = viewModel::onForward)
+            OnboardingControls(state = state, onForward = { onAction(OnboardingAction.Forward) })
         }
     }
 }
@@ -94,24 +106,24 @@ fun OnboardingScreen(
 @Composable
 private fun SlideBody(
     state: OnboardingUiState,
-    viewModel: OnboardingViewModel,
+    onAction: (OnboardingAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (state.currentSlide) {
         OnboardingSlides.WELCOME -> WelcomeSlide(modifier = modifier)
         OnboardingSlides.LANGUAGE -> LanguageSlide(
             selected = state.language,
-            onSelect = viewModel::onLanguageSelected,
+            onSelect = { onAction(OnboardingAction.LanguageSelected(it)) },
             modifier = modifier,
         )
         OnboardingSlides.THEME -> ThemeSlide(
             selected = state.themeMode,
-            onSelect = viewModel::onThemeSelected,
+            onSelect = { onAction(OnboardingAction.ThemeSelected(it)) },
             modifier = modifier,
         )
         else -> SearchEngineSlide(
             selected = state.searchEngine,
-            onSelect = viewModel::onSearchEngineSelected,
+            onSelect = { onAction(OnboardingAction.SearchEngineSelected(it)) },
             modifier = modifier,
         )
     }
@@ -207,14 +219,6 @@ private fun PageDots(current: Int) {
                     ),
             )
         }
-    }
-}
-
-@Composable
-private fun LaunchedLeaveEffect(viewModel: OnboardingViewModel, onLeave: () -> Unit) {
-    val currentOnLeave by rememberUpdatedState(onLeave)
-    androidx.compose.runtime.LaunchedEffect(viewModel) {
-        viewModel.leaveFlow.collectLatest { currentOnLeave() }
     }
 }
 

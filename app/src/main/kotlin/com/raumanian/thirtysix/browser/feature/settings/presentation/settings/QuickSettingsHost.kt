@@ -25,18 +25,18 @@ internal fun QuickSettingsHost(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(request) {
         when (request) {
-            QuickSetting.Theme -> viewModel.onThemeRowClick()
+            QuickSetting.Theme -> viewModel.onAction(SettingsAction.ThemeRowClick)
             QuickSetting.Language -> {
-                viewModel.onScreenStarted()
-                viewModel.onLanguageRowClick()
+                viewModel.onAction(SettingsAction.Started)
+                viewModel.onAction(SettingsAction.LanguageRowClick)
             }
-            QuickSetting.SearchEngine -> viewModel.onSearchEngineRowClick()
-            QuickSetting.ClearData -> viewModel.onClearBrowsingDataRowClick()
-            QuickSetting.TextSize -> viewModel.onTextSizeRowClick()
+            QuickSetting.SearchEngine -> viewModel.onAction(SettingsAction.SearchEngineRowClick)
+            QuickSetting.ClearData -> viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
+            QuickSetting.TextSize -> viewModel.onAction(SettingsAction.TextSizeRowClick)
             null -> return@LaunchedEffect
         }
         currentOnConsumeRequest()
     }
-    SettingsDialogHost(state = state, viewModel = viewModel)
-    SettingsSnackbarEffect(viewModel = viewModel, snackbarHostState = snackbarHostState)
+    SettingsDialogHost(state = state, onAction = viewModel::onAction)
+    SettingsSnackbarEffect(events = viewModel.events, snackbarHostState = snackbarHostState)
 }

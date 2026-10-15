@@ -12,7 +12,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -22,29 +21,51 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.presentation.util.EventEffect
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component.DeleteDownloadedFileConfirmDialog
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component.DownloadActionSheet
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component.DownloadActionSheetCallbacks
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component.DownloadRow
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component.DownloadsTopBar
 import com.raumanian.thirtysix.browser.feature.downloads.presentation.downloads.component.EmptyDownloadsState
+import kotlinx.coroutines.flow.Flow
+
 private const val DOWNLOAD_ROW_CONTENT_TYPE = "download_row"
 
 @Composable
-fun DownloadsScreen(
+fun DownloadsRoute(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: DownloadsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    DownloadsSnackbarEffect(
+        events = viewModel.events,
+        snackbarHostState = snackbarHostState,
+        onAction = viewModel::onAction,
+    )
+    DownloadsScreen(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onAction = viewModel::onAction,
+        onBack = { navController.popBackStack() },
+        modifier = modifier,
+    )
+}
 
-    DownloadsSnackbarEffect(viewModel = viewModel, snackbarHostState = snackbarHostState)
-
+@Composable
+fun DownloadsScreen(
+    state: DownloadsUiState,
+    snackbarHostState: SnackbarHostState,
+    onAction: (DownloadsAction) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
-        topBar = { DownloadsTopBar(onBackClick = { navController.popBackStack() }) },
+        topBar = { DownloadsTopBar(onBackClick = onBack) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         if (state.isEmpty) {
@@ -63,9 +84,9 @@ fun DownloadsScreen(
                 ) { item ->
                     DownloadRow(
                         item = item,
-                        onClick = { viewModel.onItemClicked(item) },
-                        onLongClick = { viewModel.onItemLongPressed(item) },
-                        onCancelClick = { viewModel.onCancelClicked(item) },
+                        onClick = { onAction(DownloadsAction.ItemClicked(item)) },
+                        onLongClick = { onAction(DownloadsAction.ItemLongPressed(item)) },
+                        onCancelClick = { onAction(DownloadsAction.CancelClicked(item)) },
                     )
                 }
             }
@@ -76,11 +97,11 @@ fun DownloadsScreen(
         DownloadActionSheet(
             item = target,
             callbacks = DownloadActionSheetCallbacks(
-                onOpen = { viewModel.onItemClicked(target) },
-                onCopyLink = { viewModel.onCopyLinkClicked(target) },
-                onRemoveFromList = { viewModel.onRemoveFromListClicked(target) },
-                onDeleteFile = { viewModel.onDeleteFileRequested(target.record) },
-                onDismiss = viewModel::onActionSheetDismissed,
+                onOpen = { onAction(DownloadsAction.ItemClicked(target)) },
+                onCopyLink = { onAction(DownloadsAction.CopyLinkClicked(target)) },
+                onRemoveFromList = { onAction(DownloadsAction.RemoveFromListClicked(target)) },
+                onDeleteFile = { onAction(DownloadsAction.DeleteFileRequested(target.record)) },
+                onDismiss = { onAction(DownloadsAction.ActionSheetDismissed) },
             ),
         )
     }
@@ -88,16 +109,17 @@ fun DownloadsScreen(
     state.pendingDeleteConfirmation?.let { record ->
         DeleteDownloadedFileConfirmDialog(
             record = record,
-            onConfirm = { viewModel.onDeleteFileConfirmed(record) },
-            onDismiss = viewModel::onDeleteConfirmationDismissed,
+            onConfirm = { onAction(DownloadsAction.DeleteFileConfirmed(record)) },
+            onDismiss = { onAction(DownloadsAction.DeleteConfirmationDismissed) },
         )
     }
 }
 
 @Composable
 private fun DownloadsSnackbarEffect(
-    viewModel: DownloadsViewModel,
+    events: Flow<DownloadsEvent>,
     snackbarHostState: SnackbarHostState,
+    onAction: (DownloadsAction) -> Unit,
 ) {
     val linkCopied = stringResource(R.string.downloads_link_copied)
     val noAppCanOpen = stringResource(R.string.downloads_no_app_can_open)
@@ -109,27 +131,25 @@ private fun DownloadsSnackbarEffect(
     val failed = stringResource(R.string.downloads_operation_failed)
     val removeLabel = stringResource(R.string.downloads_action_remove)
 
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            val message = when (event) {
-                DownloadsEvent.LinkCopied -> linkCopied
-                DownloadsEvent.NoAppCanOpenFile -> noAppCanOpen
-                is DownloadsEvent.FileMissing -> fileMissing
-                DownloadsEvent.DownloadNotComplete -> notComplete
-                DownloadsEvent.FileDeleted -> fileDeleted
-                DownloadsEvent.RecordRemoved -> recordRemoved
-                DownloadsEvent.DownloadCancelled -> cancelled
-                DownloadsEvent.OperationFailed -> failed
-            }
-            // The stale row must be removable from the same message that says the file is gone.
-            val stale = event as? DownloadsEvent.FileMissing
-            val result = snackbarHostState.showSnackbar(
-                message = message,
-                actionLabel = stale?.let { removeLabel },
-            )
-            if (stale != null && result == SnackbarResult.ActionPerformed) {
-                viewModel.onRemoveFromListClicked(stale.item)
-            }
+    EventEffect(events) { event ->
+        val message = when (event) {
+            DownloadsEvent.LinkCopied -> linkCopied
+            DownloadsEvent.NoAppCanOpenFile -> noAppCanOpen
+            is DownloadsEvent.FileMissing -> fileMissing
+            DownloadsEvent.DownloadNotComplete -> notComplete
+            DownloadsEvent.FileDeleted -> fileDeleted
+            DownloadsEvent.RecordRemoved -> recordRemoved
+            DownloadsEvent.DownloadCancelled -> cancelled
+            DownloadsEvent.OperationFailed -> failed
+        }
+        // The stale row must be removable from the same message that says the file is gone.
+        val stale = event as? DownloadsEvent.FileMissing
+        val result = snackbarHostState.showSnackbar(
+            message = message,
+            actionLabel = stale?.let { removeLabel },
+        )
+        if (stale != null && result == SnackbarResult.ActionPerformed) {
+            onAction(DownloadsAction.RemoveFromListClicked(stale.item))
         }
     }
 }

@@ -3,7 +3,9 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component
 
 import androidx.compose.runtime.Composable
-import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.ProtectionViewModel
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.PageDashboardState
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.ProtectionAction
+import kotlinx.coroutines.flow.StateFlow
 /** The privacy dashboard and the Fire confirmation and overlay, hosted over the browser. */
 @Composable
 @Suppress("LongParameterList")
@@ -11,19 +13,20 @@ internal fun PrivacyToolsHosts(
     dashboardOpen: Boolean,
     isHomeContent: Boolean,
     onDashboardClose: () -> Unit,
-    protection: ProtectionViewModel,
+    dashboardFlow: StateFlow<PageDashboardState?>,
+    onProtectionAction: (ProtectionAction) -> Unit,
 ) {
     // No dashboard on Home or the incognito start page.
     if (dashboardOpen && !isHomeContent) {
         PrivacyDashboardSheet(
-            dashboardFlow = protection.dashboard,
+            dashboardFlow = dashboardFlow,
             onDismiss = onDashboardClose,
             onProtectionSwitch = { on ->
                 // Exactly like the hub switch: close, then reload with the new setting.
                 onDashboardClose()
-                protection.onProtectionSwitched(on)
+                onProtectionAction(ProtectionAction.ProtectionSwitched(on))
             },
-            onFireproofSwitch = protection::onFireproofSwitched,
+            onFireproofSwitch = { fireproof -> onProtectionAction(ProtectionAction.FireproofSwitched(fireproof)) },
         )
     }
 }

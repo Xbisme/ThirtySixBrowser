@@ -35,7 +35,7 @@ class DownloadsScreenBrowseTest {
             existingFiles = records.mapNotNull { it.localUri }.toSet(),
         )
 
-        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.setContent { ThirtySixTheme { DownloadsRoute(viewModel = vm) } }
         composeRule.waitForIdle()
 
         assertEquals(3, composeRule.onAllNodesWithTag(TEST_TAG_DOWNLOAD_ROW).fetchSemanticsNodes().size)
@@ -56,7 +56,7 @@ class DownloadsScreenBrowseTest {
             existingFiles = setOf(done.localUri!!),
         )
 
-        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.setContent { ThirtySixTheme { DownloadsRoute(viewModel = vm) } }
         composeRule.waitForIdle()
 
         assertEquals(
@@ -73,7 +73,7 @@ class DownloadsScreenBrowseTest {
     fun noRecords_showsTheEmptyState() {
         val vm = instrumentedViewModel(records = emptyList(), statuses = emptyMap())
 
-        composeRule.setContent { ThirtySixTheme { DownloadsScreen(viewModel = vm) } }
+        composeRule.setContent { ThirtySixTheme { DownloadsRoute(viewModel = vm) } }
         composeRule.waitForIdle()
 
         composeRule.onNodeWithTag(TEST_TAG_DOWNLOADS_EMPTY).assertIsDisplayed()

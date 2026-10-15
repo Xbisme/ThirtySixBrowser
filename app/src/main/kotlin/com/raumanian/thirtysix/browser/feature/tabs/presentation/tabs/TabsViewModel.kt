@@ -4,23 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.usecase.CloseIncognitoTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
-import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllIncognitoTabsUseCase
 import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllTabsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,44 +40,42 @@ import kotlinx.coroutines.launch
 @Suppress("LongParameterList", "TooManyFunctions")
 class TabsViewModel @Inject constructor(
     observeAllTabs: ObserveAllTabsUseCase,
-    private val createTab: CreateTabUseCase,
-    private val createIncognitoTab: CreateIncognitoTabUseCase,
-    private val switchActiveTab: SwitchActiveTabUseCase,
+    private val tabs: TabRepository,
+    private val incognitoTabs: IncognitoTabRepository,
     private val closeTab: CloseTabUseCase,
-    private val closeIncognitoTab: CloseIncognitoTabUseCase,
     private val closeAllTabs: CloseAllTabsUseCase,
-    private val closeAllIncognitoTabs: CloseAllIncognitoTabsUseCase,
     @param:Named("default_home_url") private val homeUrl: String,
-    private val faviconCache: FaviconCache,
-    private val screenshotCache: ScreenshotCache,
+    faviconCache: FaviconCache,
+    screenshotCache: ScreenshotCache,
 ) : ViewModel() {
 
-    /** Bumps when a favicon is written, so cards re-read [faviconFor]. */
-    val faviconVersion: kotlinx.coroutines.flow.StateFlow<Long> get() = faviconCache.version
+    val images: TabImages = CachedTabImages(faviconCache, screenshotCache)
 
-    fun faviconFor(url: String): File? = faviconCache.fileFor(url)
+    /** Bumps when a favicon is written, so cards read [images] again. */
+    val faviconVersion: StateFlow<Long> = faviconCache.version
 
-    /** Bumps when a screenshot is written or deleted, so cards re-read [screenshotFor]. */
-    val screenshotVersion: kotlinx.coroutines.flow.StateFlow<Long>
-        get() = screenshotCache.version
-
-    fun screenshotFor(tabId: Long): File? = screenshotCache.fileFor(tabId)
+    /** Bumps when a screenshot is written or deleted, so cards read [images] again. */
+    val screenshotVersion: StateFlow<Long> = screenshotCache.version
 
     private data class LocalState(
         val isCloseAllDialogVisible: Boolean = false,
         val isCloseAllIncognitoDialogVisible: Boolean = false,
-        val errorEvent: TabsErrorEvent? = null,
         /** The chip the user picked; `null` until they pick one (then the active tab decides). */
         val modeOverride: TabsMode? = null,
     )
 
     private val localState: MutableStateFlow<LocalState> = MutableStateFlow(LocalState())
 
-    private val _popBackEvent: MutableSharedFlow<Unit> =
+    private val showBrowserEvents: MutableSharedFlow<TabsEvent> =
         MutableSharedFlow(replay = 0, extraBufferCapacity = 1)
 
-    /** One-shot signal that the Composable should pop the switcher route. */
-    val popBackEvent = _popBackEvent.asSharedFlow()
+    // Kept until the screen collects it, as the consumed-once state field it replaces was.
+    private val errors = Channel<TabsErrorEvent>(Channel.BUFFERED)
+
+    val events: Flow<TabsEvent> = merge(
+        showBrowserEvents.asSharedFlow(),
+        errors.receiveAsFlow().map { TabsEvent.Error(it) },
+    )
 
     val uiState: StateFlow<TabsUiState> = combine(
         observeAllTabs().map { tabs ->
@@ -93,7 +91,6 @@ class TabsViewModel @Inject constructor(
             activeTabId = activeId,
             isCloseAllDialogVisible = local.isCloseAllDialogVisible,
             isCloseAllIncognitoDialogVisible = local.isCloseAllIncognitoDialogVisible,
-            errorEvent = local.errorEvent,
             incognitoTabCount = incognitoCount,
             mode = mode,
             visibleTabs = tabs.filter { it.isIncognito == (mode == TabsMode.Incognito) },
@@ -104,91 +101,91 @@ class TabsViewModel @Inject constructor(
         initialValue = TabsUiState.EMPTY,
     )
 
-    fun onTabClick(tabId: Long) {
+    fun onAction(action: TabsAction) {
+        when (action) {
+            is TabsAction.TabClick -> onTabClick(action.tabId)
+            is TabsAction.CloseTab -> onCloseTab(action.tabId)
+            TabsAction.NewTabClick -> onNewTabClick()
+            TabsAction.NewIncognitoTabClick -> onNewIncognitoTabClick()
+            TabsAction.CloseAllRequested -> showCloseAll(visible = true)
+            TabsAction.CloseAllDismissed -> showCloseAll(visible = false)
+            TabsAction.CloseAllConfirmed -> onCloseAllConfirmed()
+            TabsAction.CloseAllIncognitoRequested -> showCloseAllIncognito(visible = true)
+            TabsAction.CloseAllIncognitoDismissed -> showCloseAllIncognito(visible = false)
+            TabsAction.CloseAllIncognitoConfirmed -> onCloseAllIncognitoConfirmed()
+            // Create and close-all then act on this kind of tab only.
+            is TabsAction.ModeSelected -> localState.update { it.copy(modeOverride = action.mode) }
+        }
+    }
+
+    private fun onTabClick(tabId: Long) {
         viewModelScope.launch {
             if (tabId < 0L) {
-                // SwitchActiveTabUseCase only knows normal tabs, so tapping an incognito
+                // The tab repository only knows normal tabs, so tapping an incognito
                 // tab just closes the switcher without bumping its lastActiveAt.
-                _popBackEvent.tryEmit(Unit)
+                showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
             } else {
-                switchActiveTab(tabId)
-                _popBackEvent.tryEmit(Unit)
+                tabs.switchActiveTab(tabId)
+                showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
             }
         }
     }
 
-    fun onCloseTab(tabId: Long) {
+    private fun onCloseTab(tabId: Long) {
         viewModelScope.launch {
             if (tabId < 0L) {
-                closeIncognitoTab(tabId)
+                incognitoTabs.closeTab(tabId)
             } else {
                 closeTab(tabId)
             }
         }
     }
 
-    fun onNewTabClick() {
+    private fun onNewTabClick() {
         viewModelScope.launch {
-            val result = createTab()
+            val result = tabs.createTab(homeUrl)
             if (result is Result.Error && result.throwable is MaxTabsReachedException) {
-                localState.update { it.copy(errorEvent = TabsErrorEvent.MaxTabsReached) }
+                errors.trySend(TabsErrorEvent.MaxTabsReached)
             } else if (result is Result.Success) {
-                _popBackEvent.tryEmit(Unit)
+                showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
             }
         }
     }
 
-    fun onNewIncognitoTabClick() {
+    private fun onNewIncognitoTabClick() {
         viewModelScope.launch {
-            val result = createIncognitoTab(homeUrl)
+            val result = incognitoTabs.createTab(homeUrl)
             when {
                 result is Result.Error && result.throwable is MaxIncognitoTabsReachedException -> {
-                    localState.update { it.copy(errorEvent = TabsErrorEvent.MaxIncognitoTabsReached) }
+                    errors.trySend(TabsErrorEvent.MaxIncognitoTabsReached)
                 }
-                result is Result.Success -> _popBackEvent.tryEmit(Unit)
+                result is Result.Success -> showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
                 else -> Unit
             }
         }
     }
 
-    fun onCloseAllRequested() {
-        localState.update { it.copy(isCloseAllDialogVisible = true) }
+    private fun showCloseAll(visible: Boolean) {
+        localState.update { it.copy(isCloseAllDialogVisible = visible) }
     }
 
-    fun onCloseAllDismissed() {
-        localState.update { it.copy(isCloseAllDialogVisible = false) }
+    private fun showCloseAllIncognito(visible: Boolean) {
+        localState.update { it.copy(isCloseAllIncognitoDialogVisible = visible) }
     }
 
-    fun onCloseAllConfirmed() {
+    private fun onCloseAllConfirmed() {
         viewModelScope.launch {
             closeAllTabs()
             localState.update { it.copy(isCloseAllDialogVisible = false) }
-            _popBackEvent.tryEmit(Unit)
+            showBrowserEvents.tryEmit(TabsEvent.ShowBrowser)
         }
     }
 
-    fun onCloseAllIncognitoRequested() {
-        localState.update { it.copy(isCloseAllIncognitoDialogVisible = true) }
-    }
-
-    fun onCloseAllIncognitoDismissed() {
-        localState.update { it.copy(isCloseAllIncognitoDialogVisible = false) }
-    }
-
-    fun onCloseAllIncognitoConfirmed() {
+    private fun onCloseAllIncognitoConfirmed() {
         viewModelScope.launch {
-            closeAllIncognitoTabs()
+            incognitoTabs.closeAll()
             localState.update { it.copy(isCloseAllIncognitoDialogVisible = false) }
         }
-    }
-
-    /** A chip was tapped; create and close-all act on this kind of tab only. */
-    fun onModeSelected(mode: TabsMode) {
-        localState.update { it.copy(modeOverride = mode) }
-    }
-
-    fun consumeErrorEvent() {
-        localState.update { it.copy(errorEvent = null) }
     }
 
     private companion object {

@@ -29,7 +29,7 @@ class SettingsScreenAboutTest {
     fun about_showsTheInjectedVersionAndThePrivacyStatement() {
         composeRule.setContent {
             ThirtySixTheme {
-                SettingsScreen(viewModel = settingsViewModel(appVersionName = INSTRUMENTED_APP_VERSION_NAME))
+                SettingsRoute(viewModel = settingsViewModel(appVersionName = INSTRUMENTED_APP_VERSION_NAME))
             }
         }
 

@@ -17,9 +17,8 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.model.PageProtecti
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.HubProtectionSection
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TEST_TAG_HUB_NOT_SECURE
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TEST_TAG_HUB_PROTECTION_SWITCH
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
-import com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions.ProtectionExceptionsScreen
+import com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions.ProtectionExceptionsRoute
 import com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions.ProtectionExceptionsViewModel
 import com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions.TEST_TAG_PROTECTION_EXCEPTIONS_EMPTY
 import com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions.TEST_TAG_PROTECTION_EXCEPTIONS_TURN_ALL_ON
@@ -89,10 +88,10 @@ class ProtectionScreensTest {
             repository.add("b.com")
         }
         val viewModel = ProtectionExceptionsViewModel(
-            ObserveProtectionExceptionsUseCase(repository),
+            repository,
             RemoveProtectionExceptionsUseCase(repository),
         )
-        composeRule.setContent { ThirtySixTheme { ProtectionExceptionsScreen(viewModel = viewModel) } }
+        composeRule.setContent { ThirtySixTheme { ProtectionExceptionsRoute(viewModel = viewModel) } }
 
         composeRule.onNodeWithText("a.com").assertExists()
         composeRule.onNodeWithTag(TEST_TAG_PROTECTION_EXCEPTIONS_TURN_ALL_ON).performClick()

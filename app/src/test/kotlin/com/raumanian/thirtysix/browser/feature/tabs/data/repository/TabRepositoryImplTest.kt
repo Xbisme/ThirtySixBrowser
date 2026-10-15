@@ -11,6 +11,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -98,6 +99,17 @@ class TabRepositoryImplTest {
         assertTrue((result as Result.Error).throwable is MaxTabsReachedException)
         // Count must remain at the cap (no row inserted).
         assertEquals(BrowserLimits.MAX_TABS, tabDao.count())
+    }
+
+    @Test
+    fun `switchActiveTab makes the target the active tab`() = runTest {
+        val first = tabDao.insert(entity(url = "https://a.com", lastActiveAt = 100L))
+        val second = tabDao.insert(entity(url = "https://b.com", lastActiveAt = 50L))
+        assertEquals(first, repository.observeTabs().first().first().id)
+
+        repository.switchActiveTab(second)
+
+        assertEquals(second, repository.observeTabs().first().first().id)
     }
 
     @Test

@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.GreetingPeriod
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ObserveHomeContentUseCase
@@ -36,11 +36,11 @@ import kotlinx.coroutines.launch
 class HomeViewModel @Inject constructor(
     observeActiveTab: ObserveActiveTabUseCase,
     observeHomeContent: ObserveHomeContentUseCase,
-    observeUserSettings: ObserveUserSettingsUseCase,
+    settings: SettingsRepository,
     private val screenshotCache: ScreenshotCache,
     private val faviconCache: FaviconCache,
     private val clock: Clock,
-    private val switchActiveTab: SwitchActiveTabUseCase,
+    private val tabs: TabRepository,
     dispatchers: DispatcherProvider,
 ) : ViewModel() {
 
@@ -48,7 +48,7 @@ class HomeViewModel @Inject constructor(
 
     val uiState: StateFlow<HomeUiState> = combine(
         observeActiveTab().map { it?.id }.distinctUntilChanged().flatMapLatest { observeHomeContent(it) },
-        observeUserSettings().map { it.searchEngine }.distinctUntilChanged(),
+        settings.observeSettings().map { it.searchEngine }.distinctUntilChanged(),
         greeting,
         screenshotCache.version,
         faviconCache.version,
@@ -73,13 +73,12 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeUiState(greeting = greeting.value),
         )
 
-    fun onResume() {
-        greeting.value = currentGreeting()
-    }
-
-    /** Activates that tab; nothing is loaded. */
-    fun onTabShortcut(tabId: Long) {
-        viewModelScope.launch { switchActiveTab(tabId) }
+    fun onAction(action: HomeAction) {
+        when (action) {
+            HomeAction.Resumed -> greeting.value = currentGreeting()
+            // Activates that tab; nothing is loaded.
+            is HomeAction.TabShortcut -> viewModelScope.launch { tabs.switchActiveTab(action.tabId) }
+        }
     }
 
     private fun currentGreeting(): GreetingPeriod = GreetingPeriod.of(LocalTime.now(clock))

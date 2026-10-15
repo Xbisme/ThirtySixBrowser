@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
@@ -31,7 +30,7 @@ class OpenIncomingRequestUseCaseTest {
     }
 
     private fun useCase(tabs: TabRepository) = OpenIncomingRequestUseCase(
-        buildSearchUrl = BuildSearchUrlUseCase(TestSearchEngine),
+        searchEngine = TestSearchEngine,
         tabs = tabs,
         observeActiveTab = ObserveActiveTabUseCase(ObserveAllTabsUseCase(tabs, incognito)),
         clock = clock,

@@ -13,15 +13,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -31,8 +27,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
-import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsActionRow
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsIconTone
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SettingsInfoRow
@@ -46,20 +40,12 @@ import com.raumanian.thirtysix.browser.core.presentation.util.rememberDefaultBro
 import com.raumanian.thirtysix.browser.core.presentation.util.searchEngineLabel
 import com.raumanian.thirtysix.browser.core.presentation.util.themeModeLabel
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.AboutSection
-import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.AppLanguageChooserDialog
-import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.ClearBrowsingDataDialog
-import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.ConfirmShortenRetentionDialog
-import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.HistoryRetentionChooserDialog
-import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.SearchEngineChooserDialog
-import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.TextSizeChooserDialog
-import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.ThemeModeChooserDialog
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.historyRetentionLabel
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.component.textSizeLabel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsScreen(
+fun SettingsRoute(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: SettingsViewModel = hiltViewModel(),
@@ -71,26 +57,48 @@ fun SettingsScreen(
 
     // The language may have changed in system settings while the screen was hidden.
     LifecycleStartEffect(viewModel) {
-        viewModel.onScreenStarted()
+        viewModel.onAction(SettingsAction.Started)
         onStopOrDispose { }
     }
     // On resume, not start: the system's default-browser confirmation is translucent.
     LifecycleResumeEffect(viewModel) {
-        viewModel.refreshDefaultBrowser()
+        viewModel.onAction(SettingsAction.Resumed)
         onPauseOrDispose { }
     }
     BackHandler(onBack = navigateBack)
-    SettingsSnackbarEffect(viewModel = viewModel, snackbarHostState = snackbarHostState)
+    SettingsSnackbarEffect(events = viewModel.events, snackbarHostState = snackbarHostState)
     val scope = rememberCoroutineScope()
     val unavailableMessage = stringResource(R.string.entry_default_browser_unavailable)
     val requestDefaultBrowser = rememberDefaultBrowserRequest(
         onUnavailable = { scope.launch { snackbarHostState.showSnackbar(unavailableMessage) } },
     )
 
+    SettingsScreen(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onAction = viewModel::onAction,
+        onBack = navigateBack,
+        onMakeDefault = requestDefaultBrowser,
+        destinations = destinations,
+        modifier = modifier,
+    )
+}
+
+@Suppress("LongParameterList")
+@Composable
+fun SettingsScreen(
+    state: SettingsUiState,
+    snackbarHostState: SnackbarHostState,
+    onAction: (SettingsAction) -> Unit,
+    onBack: () -> Unit,
+    onMakeDefault: () -> Unit,
+    destinations: SettingsDestinations,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
-        topBar = { SettingsTopBar(onBackClick = navigateBack) },
+        topBar = { SettingsTopBar(onBackClick = onBack) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         LazyColumn(
@@ -99,12 +107,12 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .testTag(TEST_TAG_SETTINGS_LIST),
         ) {
-            generalSection(state = state, onMakeDefault = requestDefaultBrowser)
-            appearanceSection(state = state, viewModel = viewModel)
-            languageAndSearchSection(state = state, viewModel = viewModel)
+            generalSection(state = state, onMakeDefault = onMakeDefault)
+            appearanceSection(state = state, onAction = onAction)
+            languageAndSearchSection(state = state, onAction = onAction)
             privacySection(
                 state = state,
-                viewModel = viewModel,
+                onAction = onAction,
                 onSitePermissions = destinations.onSitePermissions,
                 onProtectionExceptions = destinations.onProtectionExceptions,
                 onFireproofSites = destinations.onFireproofSites,
@@ -113,7 +121,7 @@ fun SettingsScreen(
         }
     }
 
-    SettingsDialogHost(state = state, viewModel = viewModel)
+    SettingsDialogHost(state = state, onAction = onAction)
 }
 
 private fun LazyListScope.sectionHeader(key: String, @StringRes titleRes: Int, showDivider: Boolean = true) {
@@ -149,7 +157,7 @@ private fun LazyListScope.generalSection(state: SettingsUiState, onMakeDefault: 
     }
 }
 
-private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: SettingsViewModel) {
+private fun LazyListScope.appearanceSection(state: SettingsUiState, onAction: (SettingsAction) -> Unit) {
     sectionHeader(key = KEY_SECTION_APPEARANCE, titleRes = R.string.settings_section_appearance)
     item(key = KEY_ROW_THEME, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
@@ -157,7 +165,7 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
             value = themeModeLabel(state.themeMode),
             icon = AppIcons.ContrastFilled,
             tone = SettingsIconTone.Sky,
-            onClick = viewModel::onThemeRowClick,
+            onClick = { onAction(SettingsAction.ThemeRowClick) },
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_THEME_ROW),
         )
     }
@@ -167,7 +175,7 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
             value = textSizeLabel(state.textSize),
             icon = AppIcons.TextSize,
             tone = SettingsIconTone.Sky,
-            onClick = viewModel::onTextSizeRowClick,
+            onClick = { onAction(SettingsAction.TextSizeRowClick) },
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_TEXT_SIZE_ROW),
         )
     }
@@ -180,14 +188,14 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, viewModel: S
                 checked = state.isDynamicColorEnabled,
                 icon = AppIcons.PaletteFilled,
                 tone = SettingsIconTone.Primary,
-                onCheckedChange = viewModel::onDynamicColorToggled,
+                onCheckedChange = { onAction(SettingsAction.DynamicColorToggled(it)) },
                 modifier = Modifier.testTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW),
             )
         }
     }
 }
 
-private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, viewModel: SettingsViewModel) {
+private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, onAction: (SettingsAction) -> Unit) {
     sectionHeader(key = KEY_SECTION_LANGUAGE_AND_SEARCH, titleRes = R.string.settings_section_language_and_search)
     item(key = KEY_ROW_LANGUAGE, contentType = CONTENT_TYPE_ROW) {
         SettingsValueRow(
@@ -195,7 +203,7 @@ private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, viewM
             value = appLanguageLabel(state.appLanguage),
             icon = AppIcons.TranslateFilled,
             tone = SettingsIconTone.Sun,
-            onClick = viewModel::onLanguageRowClick,
+            onClick = { onAction(SettingsAction.LanguageRowClick) },
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_LANGUAGE_ROW),
         )
     }
@@ -205,7 +213,7 @@ private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, viewM
             value = searchEngineLabel(state.searchEngine),
             icon = AppIcons.SearchEngineFilled,
             tone = SettingsIconTone.Mint,
-            onClick = viewModel::onSearchEngineRowClick,
+            onClick = { onAction(SettingsAction.SearchEngineRowClick) },
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW),
         )
     }
@@ -213,7 +221,7 @@ private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, viewM
 
 private fun LazyListScope.privacySection(
     state: SettingsUiState,
-    viewModel: SettingsViewModel,
+    onAction: (SettingsAction) -> Unit,
     onSitePermissions: () -> Unit,
     onProtectionExceptions: () -> Unit,
     onFireproofSites: () -> Unit,
@@ -225,7 +233,7 @@ private fun LazyListScope.privacySection(
             value = historyRetentionLabel(state.historyRetention),
             icon = AppIcons.ScheduleFilled,
             tone = SettingsIconTone.Primary,
-            onClick = viewModel::onRetentionRowClick,
+            onClick = { onAction(SettingsAction.RetentionRowClick) },
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_RETENTION_ROW),
         )
     }
@@ -264,7 +272,7 @@ private fun LazyListScope.privacySection(
             title = stringResource(R.string.settings_clear_browsing_data_title),
             icon = AppIcons.MopFilled,
             tone = SettingsIconTone.Peach,
-            onClick = viewModel::onClearBrowsingDataRowClick,
+            onClick = { onAction(SettingsAction.ClearBrowsingDataRowClick) },
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_CLEAR_ROW),
         )
     }
@@ -277,110 +285,6 @@ private fun LazyListScope.aboutSection(state: SettingsUiState) {
             appVersionName = state.appVersionName,
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_ABOUT),
         )
-    }
-}
-
-/**
- * Keeps the language chooser open until the new configuration arrives, then closes it in that
- * frame, so the person sees one change. Reading the configuration in composition is deliberate.
- */
-@Composable
-private fun LanguageChooserHost(
-    selected: AppLanguage,
-    onSelect: (AppLanguage) -> Unit,
-    onApply: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val currentOnApply by rememberUpdatedState(onApply)
-    val locales = LocalConfiguration.current.locales
-    val localesWhenOpened = remember { locales }
-    var picked by remember { mutableStateOf(false) }
-    LaunchedEffect(locales, picked) {
-        if (picked && locales != localesWhenOpened) currentOnApply()
-    }
-    LaunchedEffect(picked) {
-        if (picked) {
-            delay(BrowserLimits.LANGUAGE_APPLY_TIMEOUT_MS)
-            currentOnApply()
-        }
-    }
-    AppLanguageChooserDialog(
-        selected = selected,
-        onSelect = { language ->
-            picked = true
-            onSelect(language)
-        },
-        onDismiss = onDismiss,
-    )
-}
-
-@Composable
-internal fun SettingsDialogHost(state: SettingsUiState, viewModel: SettingsViewModel) {
-    when (val dialog = state.dialog) {
-        SettingsDialog.ThemeChooser -> ThemeModeChooserDialog(
-            selected = state.themeMode,
-            onSelect = viewModel::onThemeSelected,
-            onDismiss = viewModel::dismissDialog,
-        )
-        SettingsDialog.SearchEngineChooser -> SearchEngineChooserDialog(
-            selected = state.searchEngine,
-            onSelect = viewModel::onSearchEngineSelected,
-            onDismiss = viewModel::dismissDialog,
-        )
-        SettingsDialog.LanguageChooser -> LanguageChooserHost(
-            selected = state.appLanguage,
-            onSelect = viewModel::onLanguageSelected,
-            onApply = viewModel::onLanguageApplied,
-            onDismiss = viewModel::dismissDialog,
-        )
-        is SettingsDialog.ClearBrowsingData -> ClearBrowsingDataDialog(
-            selection = dialog.selection,
-            inProgress = dialog.inProgress,
-            onToggle = viewModel::onClearCategoryToggled,
-            onConfirm = viewModel::onClearBrowsingDataConfirmed,
-            onDismiss = viewModel::onClearBrowsingDataDismissed,
-        )
-        SettingsDialog.RetentionChooser -> HistoryRetentionChooserDialog(
-            selected = state.historyRetention,
-            onSelect = viewModel::onRetentionSelected,
-            onDismiss = viewModel::dismissDialog,
-        )
-        SettingsDialog.TextSizeChooser -> TextSizeChooserDialog(
-            selected = state.textSize,
-            onSelect = viewModel::onTextSizeSelected,
-            onDismiss = viewModel::dismissDialog,
-        )
-        is SettingsDialog.ConfirmShortenRetention -> ConfirmShortenRetentionDialog(
-            target = dialog.target,
-            onConfirm = viewModel::onShortenRetentionConfirmed,
-            onCancel = viewModel::onShortenRetentionCancelled,
-        )
-        null -> Unit
-    }
-}
-
-@Composable
-internal fun SettingsSnackbarEffect(
-    viewModel: SettingsViewModel,
-    snackbarHostState: SnackbarHostState,
-) {
-    val notSaved = stringResource(R.string.settings_error_not_saved)
-    val languageNotApplied = stringResource(R.string.settings_error_language_not_applied)
-    val cleared = stringResource(R.string.settings_clear_done)
-    val partiallyCleared = stringResource(R.string.settings_clear_partial_failure)
-    val pruneDeferred = stringResource(R.string.settings_retention_prune_deferred)
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            val message = when (event) {
-                SettingsEvent.SettingNotSaved -> notSaved
-                SettingsEvent.LanguageNotApplied -> languageNotApplied
-                SettingsEvent.BrowsingDataCleared -> cleared
-                SettingsEvent.BrowsingDataPartiallyCleared -> partiallyCleared
-                SettingsEvent.RetentionPruneDeferred -> pruneDeferred
-            }
-            snackbarHostState.showSnackbar(message)
-        }
     }
 }
 

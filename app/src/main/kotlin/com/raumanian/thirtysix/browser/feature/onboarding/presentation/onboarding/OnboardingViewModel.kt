@@ -4,20 +4,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
-import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
-import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.core.domain.usecase.GetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.AppLanguageController
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
-import com.raumanian.thirtysix.browser.feature.onboarding.domain.usecase.SetOnboardingCompletedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,20 +22,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Every choice is saved at once through the same use cases Settings uses, so both screens agree.
+ * Every choice is saved at once through the same settings store Settings uses, so both screens agree.
  * The slide position lives in [SavedStateHandle]: applying a language clears the ViewModel store.
  * The first-run flag is written only by finishing or skipping, so backing out asks again next launch.
  */
 @HiltViewModel
-@Suppress("LongParameterList") // one injected use case per thing the flow can do
 class OnboardingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    observeUserSettings: ObserveUserSettingsUseCase,
-    private val getAppLanguage: GetAppLanguageUseCase,
-    private val setThemeMode: SetThemeModeUseCase,
-    private val setSearchEngine: SetSearchEngineUseCase,
+    private val settings: SettingsRepository,
+    private val languages: AppLanguageController,
     private val setAppLanguage: SetAppLanguageUseCase,
-    private val setOnboardingCompleted: SetOnboardingCompletedUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -48,16 +39,16 @@ class OnboardingViewModel @Inject constructor(
     )
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
-    private val _leaveFlow = MutableSharedFlow<Unit>(
+    private val leaveEvents = MutableSharedFlow<OnboardingEvent>(
         replay = 0,
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
-    val leaveFlow: SharedFlow<Unit> = _leaveFlow.asSharedFlow()
+    val events: Flow<OnboardingEvent> = leaveEvents.asSharedFlow()
 
     init {
         // Read back from the stored settings, so the slides always show what is actually saved.
-        observeUserSettings()
+        settings.observeSettings()
             .onEach { settings ->
                 _uiState.update {
                     it.copy(themeMode = settings.themeMode, searchEngine = settings.searchEngine)
@@ -68,8 +59,21 @@ class OnboardingViewModel @Inject constructor(
         refreshAppLanguage()
     }
 
+    fun onAction(action: OnboardingAction) {
+        when (action) {
+            OnboardingAction.Forward -> onForward()
+            OnboardingAction.Back -> onBack()
+            OnboardingAction.Skip -> completeAndLeave()
+            is OnboardingAction.ThemeSelected -> viewModelScope.launch { settings.setThemeMode(action.mode) }
+            is OnboardingAction.SearchEngineSelected -> viewModelScope.launch {
+                settings.setSearchEngine(action.engine)
+            }
+            is OnboardingAction.LanguageSelected -> onLanguageSelected(action.language)
+        }
+    }
+
     /** On the last slide this completes the flow. */
-    fun onForward() {
+    private fun onForward() {
         val state = _uiState.value
         if (state.isLastSlide) {
             completeAndLeave()
@@ -78,27 +82,14 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    /** @return `false` on the first slide: the caller should leave the app, leaving the first-run flag unwritten. */
-    fun onBack(): Boolean {
+    // On the first slide the screen leaves the app instead, leaving the first-run flag unwritten.
+    private fun onBack() {
         val state = _uiState.value
-        if (state.isFirstSlide) return false
-        moveTo(state.currentSlide - 1)
-        return true
-    }
-
-    // Skip records that the person was asked; it changes no setting.
-    fun onSkip() = completeAndLeave()
-
-    fun onThemeSelected(mode: ThemeMode) {
-        viewModelScope.launch { setThemeMode(mode) }
-    }
-
-    fun onSearchEngineSelected(engine: SearchEngine) {
-        viewModelScope.launch { setSearchEngine(engine) }
+        if (!state.isFirstSlide) moveTo(state.currentSlide - 1)
     }
 
     // The use case skips the platform when the language is already held; refresh either way.
-    fun onLanguageSelected(language: AppLanguage) {
+    private fun onLanguageSelected(language: AppLanguage) {
         viewModelScope.launch {
             setAppLanguage(language)
             refreshAppLanguage()
@@ -111,16 +102,17 @@ class OnboardingViewModel @Inject constructor(
         _uiState.update { it.copy(currentSlide = clamped) }
     }
 
+    // Skip records that the person was asked; it changes no setting.
     private fun completeAndLeave() {
         viewModelScope.launch {
-            setOnboardingCompleted(true)
-            _leaveFlow.tryEmit(Unit)
+            settings.setOnboardingCompleted(true)
+            leaveEvents.tryEmit(OnboardingEvent.Leave)
         }
     }
 
     private fun refreshAppLanguage() {
         viewModelScope.launch {
-            _uiState.update { it.copy(language = getAppLanguage()) }
+            _uiState.update { it.copy(language = languages.current()) }
         }
     }
 

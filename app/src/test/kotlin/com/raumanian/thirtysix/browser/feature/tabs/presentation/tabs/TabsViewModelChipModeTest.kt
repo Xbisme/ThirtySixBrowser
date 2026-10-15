@@ -3,19 +3,14 @@ package com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.usecase.CloseIncognitoTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllIncognitoTabsUseCase
 import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllTabsUseCase
 import java.io.File
 import java.io.OutputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,13 +19,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /** The Open / Incognito chip modes of the tab switcher. */
@@ -41,21 +33,15 @@ class TabsViewModelChipModeTest {
     private val normal = FakeTabRepository(homeUrl = HOME_URL)
     private val incognito = FakeIncognitoTabRepository()
 
-    @Before
-    fun setUp() = Dispatchers.setMain(dispatcher)
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(dispatcher)
 
     private fun viewModel() = TabsViewModel(
         observeAllTabs = ObserveAllTabsUseCase(normal, incognito),
-        createTab = CreateTabUseCase(normal, HOME_URL),
-        createIncognitoTab = CreateIncognitoTabUseCase(incognito),
-        switchActiveTab = SwitchActiveTabUseCase(normal),
+        tabs = normal,
+        incognitoTabs = incognito,
         closeTab = CloseTabUseCase(normal, NoopScreenshots),
-        closeIncognitoTab = CloseIncognitoTabUseCase(incognito),
         closeAllTabs = CloseAllTabsUseCase(normal, NoopScreenshots),
-        closeAllIncognitoTabs = CloseAllIncognitoTabsUseCase(incognito),
         homeUrl = HOME_URL,
         faviconCache = NoopFavicons,
         screenshotCache = NoopScreenshots,
@@ -92,7 +78,7 @@ class TabsViewModelChipModeTest {
         normal.emit(listOf(tab(1, active = 10)))
         val vm = started(viewModel())
 
-        vm.onModeSelected(TabsMode.Incognito)
+        vm.onAction(TabsAction.ModeSelected(TabsMode.Incognito))
         advanceUntilIdle()
 
         assertEquals(0, vm.uiState.value.incognitoTabCount)
@@ -108,7 +94,7 @@ class TabsViewModelChipModeTest {
         assertEquals(TabsMode.Open, vm.uiState.value.mode)
         assertEquals(listOf(1L, 2L), vm.uiState.value.visibleTabs.map { it.id }.sorted())
 
-        vm.onModeSelected(TabsMode.Incognito)
+        vm.onAction(TabsAction.ModeSelected(TabsMode.Incognito))
         advanceUntilIdle()
 
         assertEquals(listOf(-1L), vm.uiState.value.visibleTabs.map { it.id })
@@ -119,9 +105,9 @@ class TabsViewModelChipModeTest {
         normal.emit(listOf(tab(1, active = 30)))
         incognito.emit(listOf(tab(-1, active = 20, isIncognito = true), tab(-2, active = 10, isIncognito = true)))
         val vm = started(viewModel())
-        vm.onModeSelected(TabsMode.Incognito)
+        vm.onAction(TabsAction.ModeSelected(TabsMode.Incognito))
 
-        vm.onCloseAllIncognitoConfirmed()
+        vm.onAction(TabsAction.CloseAllIncognitoConfirmed)
         advanceUntilIdle()
 
         assertTrue(incognito.snapshot().isEmpty())

@@ -1,6 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveDownloadsUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ResolveDownloadStatusUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import javax.inject.Inject
@@ -16,12 +16,12 @@ import kotlinx.coroutines.flow.flow
  * platform is polled only while something is in flight, and only while the hub collects this.
  */
 class ObserveHasActiveDownloadsUseCase @Inject constructor(
-    private val observeDownloads: ObserveDownloadsUseCase,
+    private val downloads: DownloadsRepository,
     private val resolveStatus: ResolveDownloadStatusUseCase,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(pollIntervalMs: Long = BrowserLimits.DOWNLOAD_STATUS_POLL_INTERVAL_MS): Flow<Boolean> =
-        observeDownloads()
+        downloads.observeAll()
             .flatMapLatest { records ->
                 flow {
                     while (true) {

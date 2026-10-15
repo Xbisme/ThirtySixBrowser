@@ -2,16 +2,16 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsReachedException
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ObserveHasActiveDownloadsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HubViewModel @Inject constructor(
     observeHasActiveDownloads: ObserveHasActiveDownloadsUseCase,
-    private val createIncognitoTab: CreateIncognitoTabUseCase,
+    private val incognitoTabs: IncognitoTabRepository,
     @param:Named("default_home_url") private val homeUrl: String,
 ) : ViewModel() {
 
@@ -37,12 +37,17 @@ class HubViewModel @Inject constructor(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
-    val events: SharedFlow<HubEvent> = _events.asSharedFlow()
+    val events: Flow<HubEvent> = _events.asSharedFlow()
 
-    /** "Browse without a trace": opens a new incognito tab, within the incognito tab limit. */
-    fun onNewIncognitoTab() {
+    fun onAction(action: HubAction) {
+        when (action) {
+            HubAction.NewIncognitoTab -> onNewIncognitoTab()
+        }
+    }
+
+    private fun onNewIncognitoTab() {
         viewModelScope.launch {
-            val result = createIncognitoTab(homeUrl)
+            val result = incognitoTabs.createTab(homeUrl)
             if (result is Result.Error && result.throwable is MaxIncognitoTabsReachedException) {
                 _events.tryEmit(HubEvent.MaxIncognitoTabsReached)
             }

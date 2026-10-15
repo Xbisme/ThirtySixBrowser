@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveDownloadsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ResolveDownloadStatusUseCase
 import com.raumanian.thirtysix.browser.feature.downloads.fake.InMemoryDownloadsRepository
 import com.raumanian.thirtysix.browser.feature.downloads.fake.RecordingGateway
@@ -16,7 +15,7 @@ class ObserveHasActiveDownloadsUseCaseTest {
 
     private fun useCase(gateway: RecordingGateway, repository: InMemoryDownloadsRepository) =
         ObserveHasActiveDownloadsUseCase(
-            observeDownloads = ObserveDownloadsUseCase(repository),
+            downloads = repository,
             resolveStatus = ResolveDownloadStatusUseCase(gateway, repository),
         )
 

@@ -24,12 +24,9 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
@@ -98,15 +95,14 @@ class BrowserScreenLoadingIndicatorTest {
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
                 defaultHomeUrl = SAMPLE_PAGE_URL,
-                buildSearchUrl = BuildSearchUrlUseCase(LoadingIndicatorNoopSearchEngineRepository),
+                searchEngine = LoadingIndicatorNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-                observeTabs = ObserveTabsUseCase(noopTabRepo),
+                tabs = noopTabRepo,
                 observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
                 updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(
                     noopTabRepo,
                     noopIncognitoRepo,
                 ),
-                createTab = CreateTabUseCase(noopTabRepo, SAMPLE_PAGE_URL),
                 faviconCache = LoadingIndicatorNoopFaviconCache,
                 screenshotCache = LoadingIndicatorNoopScreenshotCache,
                 isUrlBookmarked = IsUrlBookmarkedUseCase(LoadingIndicatorNoopBookmarkRepository),
@@ -121,11 +117,11 @@ class BrowserScreenLoadingIndicatorTest {
                 startDownload = instrumentedNoOpStartDownloadUseCase(),
             ).apply {
                 // Seeded before setContent so `BrowserWebView` skips its initial `loadUrl`.
-                onLoadStarted(SAMPLE_PAGE_URL)
-                onLoadFailed(ErrorReason.NetworkUnavailable)
+                onAction(BrowserAction.Page.LoadStarted(SAMPLE_PAGE_URL))
+                onAction(BrowserAction.Page.LoadFailed(ErrorReason.NetworkUnavailable))
             }
             composeRule.activity.setContent {
-                BrowserScreen(
+                BrowserRoute(
                     slots = NoSlots,
                     viewModel = viewModel,
                 )
@@ -137,8 +133,8 @@ class BrowserScreenLoadingIndicatorTest {
     @Test
     fun loadingIndicator_appearsWhileLoadingAndHidesWhenLoaded() {
         composeRule.activity.runOnUiThread {
-            viewModel.onLoadStarted(SAMPLE_PAGE_URL)
-            viewModel.onProgressChanged(PROGRESS_MIDWAY)
+            viewModel.onAction(BrowserAction.Page.LoadStarted(SAMPLE_PAGE_URL))
+            viewModel.onAction(BrowserAction.Page.ProgressChanged(PROGRESS_MIDWAY))
         }
         composeRule.waitUntilExactlyOneExists(
             matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),
@@ -146,8 +142,8 @@ class BrowserScreenLoadingIndicatorTest {
         )
 
         composeRule.activity.runOnUiThread {
-            viewModel.onProgressChanged(PROGRESS_COMPLETE)
-            viewModel.onLoadFinished(SAMPLE_PAGE_URL)
+            viewModel.onAction(BrowserAction.Page.ProgressChanged(PROGRESS_COMPLETE))
+            viewModel.onAction(BrowserAction.Page.LoadFinished(SAMPLE_PAGE_URL))
         }
         composeRule.waitUntilDoesNotExist(
             matcher = hasTestTag(TEST_TAG_PAGE_LOAD_PROGRESS),

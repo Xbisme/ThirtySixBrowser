@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsSiteFireproofUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveFireproofSitesUseCase
 import kotlinx.coroutines.flow.first
@@ -68,7 +67,7 @@ class FireproofUseCasesTest {
         assertEquals(setOf("b.example", "c.example"), repository.currentSites())
 
         RemoveFireproofSitesUseCase(repository)("b.example")
-        assertEquals(listOf("c.example"), ObserveFireproofSitesUseCase(repository)().first().map { it.site })
+        assertEquals(listOf("c.example"), repository.observeAll().first().map { it.site })
 
         RemoveFireproofSitesUseCase(repository)(null)
         assertTrue(repository.currentSites().isEmpty())

@@ -21,7 +21,7 @@ class SettingsScreenDynamicColorTest {
     @Test(timeout = SETTINGS_TEST_TIMEOUT_MS)
     fun dynamicColorRow_isAbsentWhereDynamicColorIsUnsupported() {
         composeRule.setContent {
-            ThirtySixTheme { SettingsScreen(viewModel = settingsViewModel(supportsDynamicColor = false)) }
+            ThirtySixTheme { SettingsRoute(viewModel = settingsViewModel(supportsDynamicColor = false)) }
         }
 
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).assertDoesNotExist()
@@ -32,7 +32,7 @@ class SettingsScreenDynamicColorTest {
         val repository = InstrumentedFakeSettingsRepository()
         composeRule.setContent {
             ThirtySixTheme {
-                SettingsScreen(
+                SettingsRoute(
                     viewModel = settingsViewModel(settingsRepository = repository, supportsDynamicColor = true),
                 )
             }

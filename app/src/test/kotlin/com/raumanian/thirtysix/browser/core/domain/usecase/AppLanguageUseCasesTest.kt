@@ -12,16 +12,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** [GetAppLanguageUseCase] and [SetAppLanguageUseCase]. */
+/** [SetAppLanguageUseCase]. */
 
 class AppLanguageUseCasesTest {
-
-    @Test
-    fun `get returns what the platform holds`() {
-        val controller = FakeAppLanguageController(currentLanguage = AppLanguage.Korean)
-
-        assertEquals(AppLanguage.Korean, GetAppLanguageUseCase(controller)())
-    }
 
     @Test
     fun `setting the language already held makes no platform call`() = runTest {

@@ -8,7 +8,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 /**
  * The browser screen's page session: created once, told about every tab switch, and disposed with
@@ -18,7 +17,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 fun rememberPageSession(
     activeTabId: Long?,
     isIncognito: Boolean,
-    permissionGate: SitePermissionGate = hiltViewModel(),
+    permissionGate: SitePermissionGate,
     popups: PopupTabs? = null,
 ): PageSession {
     val scope = rememberCoroutineScope()
@@ -39,7 +38,7 @@ fun rememberPageSession(
 @Composable
 fun BrowserPageRequests(
     session: PageSession,
-    permissionGate: SitePermissionGate = hiltViewModel(),
+    permissionGate: SitePermissionGate,
     longPress: LongPressHooks? = null,
 ) {
     longPress?.let { LongPressEffects(it) }

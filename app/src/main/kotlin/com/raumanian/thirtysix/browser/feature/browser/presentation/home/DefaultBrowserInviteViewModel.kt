@@ -2,12 +2,11 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserController
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.DismissDefaultBrowserInviteUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ObserveDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -25,18 +24,17 @@ import kotlinx.coroutines.launch
  */
 @HiltViewModel
 class DefaultBrowserInviteViewModel @Inject constructor(
-    observeInvite: ObserveDefaultBrowserInviteUseCase,
+    private val invites: DefaultBrowserInviteRepository,
     observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
-    private val isDefaultBrowser: IsDefaultBrowserUseCase,
-    private val dismissInvite: DismissDefaultBrowserInviteUseCase,
+    private val defaultBrowser: DefaultBrowserController,
     private val syncInvite: SyncDefaultBrowserInviteUseCase,
     dispatchers: DispatcherProvider,
 ) : ViewModel() {
 
-    private val isDefault = MutableStateFlow(isDefaultBrowser())
+    private val isDefault = MutableStateFlow(defaultBrowser.isDefaultBrowser())
 
     val showInvite: StateFlow<Boolean> = combine(
-        observeInvite(),
+        invites.observeInviteState(),
         isDefault,
         observeActiveTabIsIncognito(),
     ) { invite, default, incognito ->
@@ -48,15 +46,18 @@ class DefaultBrowserInviteViewModel @Inject constructor(
         .flowOn(dispatchers.default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), initialValue = false)
 
-    /** The person may have just changed the default browser; re-read and record it. */
-    fun onResume() {
-        val nowDefault = isDefaultBrowser()
-        isDefault.value = nowDefault
-        if (nowDefault) viewModelScope.launch { syncInvite() }
+    fun onAction(action: DefaultBrowserInviteAction) {
+        when (action) {
+            DefaultBrowserInviteAction.Resumed -> onResume()
+            DefaultBrowserInviteAction.Dismiss -> viewModelScope.launch { invites.markInviteDismissed() }
+        }
     }
 
-    fun onDismiss() {
-        viewModelScope.launch { dismissInvite() }
+    /** The person may have just changed the default browser; re-read and record it. */
+    private fun onResume() {
+        val nowDefault = defaultBrowser.isDefaultBrowser()
+        isDefault.value = nowDefault
+        if (nowDefault) viewModelScope.launch { syncInvite() }
     }
 
     private companion object {

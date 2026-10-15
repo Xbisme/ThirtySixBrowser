@@ -199,6 +199,33 @@ class BookmarkRepositoryImplTest {
         assertEquals(3, count.folders)
     }
 
+    @Test
+    fun `countDescendants on an empty folder is zero`() = runTest {
+        val a = (repo.createFolder("A", null) as Result.Success).data
+
+        val count = repo.countDescendants(a)
+        assertEquals(0, count.bookmarks)
+        assertEquals(0, count.folders)
+    }
+
+    @Test
+    fun `deleteBookmark removes an existing bookmark`() = runTest {
+        val id = (repo.addBookmark(bookmark(url = "https://x.com", title = "X")) as Result.Success).data
+
+        assertTrue(repo.deleteBookmark(id) is Result.Success)
+        assertNull(repo.getBookmark(id))
+    }
+
+    @Test
+    fun `moveBookmarkToFolder updates the parent folder`() = runTest {
+        val folderId = (repo.createFolder("F", null) as Result.Success).data
+        val id = (repo.addBookmark(bookmark(url = "https://b.com", title = "B")) as Result.Success).data
+
+        repo.moveBookmarkToFolder(id, folderId)
+
+        assertEquals(folderId, repo.getBookmark(id)!!.parentFolderId)
+    }
+
     private fun bookmark(
         id: Long = 0L,
         url: String,

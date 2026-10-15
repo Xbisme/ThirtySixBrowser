@@ -1,19 +1,16 @@
 package com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions
 
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -21,17 +18,16 @@ class ProtectionExceptionsViewModelTest {
     private val repository = FakeProtectionExceptionRepository()
     private lateinit var viewModel: ProtectionExceptionsViewModel
 
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
+
     @Before
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
         viewModel = ProtectionExceptionsViewModel(
-            ObserveProtectionExceptionsUseCase(repository),
+            repository,
             RemoveProtectionExceptionsUseCase(repository),
         )
     }
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
 
     @Test
     fun `an empty list is loaded and shown as empty`() {
@@ -45,7 +41,7 @@ class ProtectionExceptionsViewModelTest {
         repository.add("new.com")
         assertEquals(listOf("new.com", "old.com"), viewModel.uiState.value.sites)
 
-        viewModel.onTurnOn("old.com")
+        viewModel.onAction(ProtectionExceptionsAction.TurnOn("old.com"))
 
         assertEquals(listOf("new.com"), viewModel.uiState.value.sites)
     }
@@ -55,14 +51,14 @@ class ProtectionExceptionsViewModelTest {
         repository.add("a.com")
         repository.add("b.com")
 
-        viewModel.onTurnAllOnClick()
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnClick)
         assertTrue(viewModel.uiState.value.isConfirmingTurnAllOn)
-        viewModel.onTurnAllOnDismissed()
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnDismissed)
         assertFalse(viewModel.uiState.value.isConfirmingTurnAllOn)
         assertEquals(2, viewModel.uiState.value.sites.size)
 
-        viewModel.onTurnAllOnClick()
-        viewModel.onTurnAllOnConfirmed()
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnClick)
+        viewModel.onAction(ProtectionExceptionsAction.TurnAllOnConfirmed)
         assertTrue(viewModel.uiState.value.sites.isEmpty())
     }
 }

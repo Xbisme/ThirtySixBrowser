@@ -24,7 +24,7 @@ class SettingsScreenLanguageTest {
 
     private fun render(controller: InstrumentedFakeAppLanguageController) {
         composeRule.setContent {
-            ThirtySixTheme { SettingsScreen(viewModel = settingsViewModel(appLanguageController = controller)) }
+            ThirtySixTheme { SettingsRoute(viewModel = settingsViewModel(appLanguageController = controller)) }
         }
     }
 

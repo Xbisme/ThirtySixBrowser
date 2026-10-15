@@ -7,14 +7,12 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
@@ -23,22 +21,18 @@ import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.OpenInc
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.ResolveIncomingRequestUseCase
 import java.io.File
 import java.io.OutputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -54,25 +48,18 @@ class EntryPointViewModelTest {
         override suspend fun buildSearchUrl(query: String): String = "https://search.test/?q=$query"
     }
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private fun viewModel(
         settings: FakeSettingsRepository = onboarded(),
         tabs: FakeTabRepository = FakeTabRepository(initialTabs = listOf(tab(1, 1L))),
     ) = EntryPointViewModel(
         relay = relay,
-        observeUserSettings = ObserveUserSettingsUseCase(settings),
+        settings = settings,
         resolve = ResolveIncomingRequestUseCase(),
         open = OpenIncomingRequestUseCase(
-            buildSearchUrl = BuildSearchUrlUseCase(TestSearchEngine),
+            searchEngine = TestSearchEngine,
             tabs = tabs,
             observeActiveTab = ObserveActiveTabUseCase(ObserveAllTabsUseCase(tabs, incognito)),
             clock = MonotonicClock { 0L },
@@ -80,7 +67,7 @@ class EntryPointViewModelTest {
         externalTabs = externalTabs,
         activeTabNavigation = navigation,
         messages = messages,
-        observeTabs = ObserveTabsUseCase(tabs),
+        tabs = tabs,
         closeTab = CloseTabUseCase(tabs, NoopScreenshots),
     )
 

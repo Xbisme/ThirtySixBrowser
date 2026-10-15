@@ -1,20 +1,19 @@
 package com.raumanian.thirtysix.browser.feature.tabs.presentation.tabs
 
 import app.cash.turbine.test
+import app.cash.turbine.testIn
+import app.cash.turbine.turbineScope
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllIncognitoTabsUseCase
 import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllTabsUseCase
 import java.io.File
 import java.io.OutputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,15 +21,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -38,15 +34,8 @@ class TabsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(testDispatcher)
 
     private fun newViewModel(
         repository: FakeTabRepository = FakeTabRepository(homeUrl = HOME_URL),
@@ -61,19 +50,10 @@ class TabsViewModelTest {
         )
         return TabsViewModel(
             observeAllTabs = observeAllTabs,
-            createTab = CreateTabUseCase(repository, HOME_URL),
-            createIncognitoTab = com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase(
-                incognitoRepository,
-            ),
-            switchActiveTab = SwitchActiveTabUseCase(repository),
+            tabs = repository,
+            incognitoTabs = incognitoRepository,
             closeTab = CloseTabUseCase(repository, screenshotCache),
-            closeIncognitoTab = com.raumanian.thirtysix.browser.core.domain.usecase.CloseIncognitoTabUseCase(
-                incognitoRepository,
-            ),
             closeAllTabs = CloseAllTabsUseCase(repository, screenshotCache),
-            closeAllIncognitoTabs = CloseAllIncognitoTabsUseCase(
-                incognitoRepository,
-            ),
             homeUrl = HOME_URL,
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
@@ -127,12 +107,12 @@ class TabsViewModelTest {
         )
         val vm = newViewModel(repository)
 
-        vm.popBackEvent.test {
-            vm.onTabClick(2L)
+        vm.events.test {
+            vm.onAction(TabsAction.TabClick(2L))
             advanceUntilIdle()
 
-            // popBackEvent fires once after the switch completes.
-            awaitItem()
+            // ShowBrowser fires once after the switch completes.
+            assertEquals(TabsEvent.ShowBrowser, awaitItem())
 
             // After the switch, repository's max(lastActiveAt) is on tab 2.
             // Read directly from the repository rather than vm.uiState — the
@@ -147,25 +127,29 @@ class TabsViewModelTest {
 
     @Test
     fun `onNewTabClick under cap creates a tab and emits popBackEvent`() = runTest(testDispatcher) {
-        val repository = FakeTabRepository(homeUrl = HOME_URL)
-        val vm = newViewModel(repository)
-        // Drain initial state.
-        vm.uiState.test {
-            var current = awaitItem()
-            while (current.tabs.isEmpty()) current = awaitItem()
-            val initialCount = current.tabs.size
+        turbineScope {
+            val repository = FakeTabRepository(homeUrl = HOME_URL)
+            val vm = newViewModel(repository)
+            val events = vm.events.testIn(backgroundScope)
+            // Drain initial state.
+            vm.uiState.test {
+                var current = awaitItem()
+                while (current.tabs.isEmpty()) current = awaitItem()
+                val initialCount = current.tabs.size
 
-            vm.onNewTabClick()
-            advanceUntilIdle()
+                vm.onAction(TabsAction.NewTabClick)
+                advanceUntilIdle()
 
-            // Drain to the new state with one more tab.
-            var afterCreate = awaitItem()
-            while (afterCreate.tabs.size <= initialCount) afterCreate = awaitItem()
-            assertEquals(initialCount + 1, afterCreate.tabs.size)
-            // No error event on success.
-            assertNull(afterCreate.errorEvent)
+                // Drain to the new state with one more tab.
+                var afterCreate = awaitItem()
+                while (afterCreate.tabs.size <= initialCount) afterCreate = awaitItem()
+                assertEquals(initialCount + 1, afterCreate.tabs.size)
 
-            cancelAndIgnoreRemainingEvents()
+                cancelAndIgnoreRemainingEvents()
+            }
+            // No error event on success: the only event is the pop back to the browser.
+            assertEquals(TabsEvent.ShowBrowser, events.awaitItem())
+            events.cancel()
         }
     }
 
@@ -185,20 +169,13 @@ class TabsViewModelTest {
         }
         repository.emit(tabs)
         val vm = newViewModel(repository)
-        vm.uiState.test {
-            // Drain initial.
-            var current = awaitItem()
-            while (current.tabs.size != BrowserLimits.MAX_TABS) current = awaitItem()
-
-            vm.onNewTabClick()
+        vm.events.test {
+            vm.onAction(TabsAction.NewTabClick)
             advanceUntilIdle()
 
-            // Drain until errorEvent surfaces.
-            var afterFailure = awaitItem()
-            while (afterFailure.errorEvent !is TabsErrorEvent.MaxTabsReached) afterFailure = awaitItem()
-            assertEquals(TabsErrorEvent.MaxTabsReached, afterFailure.errorEvent)
+            assertEquals(TabsEvent.Error(TabsErrorEvent.MaxTabsReached), awaitItem())
             // Tab count unchanged.
-            assertEquals(BrowserLimits.MAX_TABS, afterFailure.tabs.size)
+            assertEquals(BrowserLimits.MAX_TABS, repository.observeTabs().first().size)
 
             cancelAndIgnoreRemainingEvents()
         }
@@ -219,7 +196,7 @@ class TabsViewModelTest {
         val vm = newViewModel(repository)
         advanceUntilIdle()
 
-        vm.onCloseTab(2L)
+        vm.onAction(TabsAction.CloseTab(2L))
         advanceUntilIdle()
 
         val remaining = repository.observeTabs().first()
@@ -238,7 +215,7 @@ class TabsViewModelTest {
         val vm = newViewModel(repository)
         advanceUntilIdle()
 
-        vm.onCloseTab(7L)
+        vm.onAction(TabsAction.CloseTab(7L))
         advanceUntilIdle()
 
         val tabs = repository.observeTabs().first()
@@ -257,7 +234,7 @@ class TabsViewModelTest {
             while (current.tabs.isEmpty()) current = awaitItem()
             assertTrue(current.isCloseAllDialogVisible.not())
 
-            vm.onCloseAllRequested()
+            vm.onAction(TabsAction.CloseAllRequested)
             // Next emission carries dialog = true.
             var afterToggle = awaitItem()
             while (!afterToggle.isCloseAllDialogVisible) afterToggle = awaitItem()
@@ -271,7 +248,7 @@ class TabsViewModelTest {
     fun `onCloseAllDismissed clears the dialog visibility flag`() = runTest(testDispatcher) {
         val vm = newViewModel()
         advanceUntilIdle()
-        vm.onCloseAllRequested()
+        vm.onAction(TabsAction.CloseAllRequested)
         advanceUntilIdle()
         vm.uiState.test {
             // The combined Flow may emit while we're attaching; advance to a
@@ -279,7 +256,7 @@ class TabsViewModelTest {
             var withDialog = awaitItem()
             while (!withDialog.isCloseAllDialogVisible) withDialog = awaitItem()
 
-            vm.onCloseAllDismissed()
+            vm.onAction(TabsAction.CloseAllDismissed)
             var dismissed = awaitItem()
             while (dismissed.isCloseAllDialogVisible) dismissed = awaitItem()
             assertTrue(dismissed.isCloseAllDialogVisible.not())
@@ -301,7 +278,7 @@ class TabsViewModelTest {
         val vm = newViewModel(repository)
         advanceUntilIdle()
 
-        vm.onCloseAllConfirmed()
+        vm.onAction(TabsAction.CloseAllConfirmed)
         advanceUntilIdle()
 
         val tabs = repository.observeTabs().first()
@@ -344,7 +321,7 @@ class TabsViewModelTest {
         assertEquals(HOME_URL, before.single().url)
         assertEquals(1, incognitoRepo.observeTabs().first().size)
 
-        vm.onCloseTab(-1L)
+        vm.onAction(TabsAction.CloseTab(-1L))
         advanceUntilIdle()
 
         // After close: incognito gone, the auto-seeded normal home tab is the
@@ -357,7 +334,7 @@ class TabsViewModelTest {
     }
 
     @Test
-    fun `consumeErrorEvent clears the errorEvent field`() = runTest(testDispatcher) {
+    fun `an error is delivered once`() = runTest(testDispatcher) {
         val repository = FakeTabRepository(homeUrl = HOME_URL)
         // Pre-fill to cap so the first onNewTabClick triggers MaxTabsReached.
         val tabs = (1..BrowserLimits.MAX_TABS).map { i ->
@@ -372,24 +349,12 @@ class TabsViewModelTest {
         }
         repository.emit(tabs)
         val vm = newViewModel(repository)
-        vm.uiState.test {
-            // Drain to the cap state.
-            var current = awaitItem()
-            while (current.tabs.size != BrowserLimits.MAX_TABS) current = awaitItem()
+        vm.onAction(TabsAction.NewTabClick)
+        advanceUntilIdle()
 
-            vm.onNewTabClick()
-            advanceUntilIdle()
-
-            var withError = awaitItem()
-            while (withError.errorEvent !is TabsErrorEvent.MaxTabsReached) withError = awaitItem()
-            assertEquals(TabsErrorEvent.MaxTabsReached, withError.errorEvent)
-
-            vm.consumeErrorEvent()
-            var cleared = awaitItem()
-            while (cleared.errorEvent != null) cleared = awaitItem()
-            assertNull(cleared.errorEvent)
-
-            cancelAndIgnoreRemainingEvents()
+        vm.events.test {
+            assertEquals(TabsEvent.Error(TabsErrorEvent.MaxTabsReached), awaitItem())
+            expectNoEvents()
         }
     }
 

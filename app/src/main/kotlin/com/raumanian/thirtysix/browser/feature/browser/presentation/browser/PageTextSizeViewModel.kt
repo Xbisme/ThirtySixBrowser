@@ -2,7 +2,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.stateIn
 
 /** The app-wide text size, in its own view model so [BrowserViewModel] needs no settings dependency. */
 @HiltViewModel
-class PageTextSizeViewModel @Inject constructor(observeUserSettings: ObserveUserSettingsUseCase) : ViewModel() {
-    val textZoomPercent: StateFlow<Int> = observeUserSettings()
+class PageTextSizeViewModel @Inject constructor(settings: SettingsRepository) : ViewModel() {
+    val textZoomPercent: StateFlow<Int> = settings.observeSettings()
         .map { it.textSize.percent }
         .distinctUntilChanged()
         .stateIn(

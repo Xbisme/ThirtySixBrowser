@@ -4,10 +4,9 @@ import android.webkit.WebView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
-import com.raumanian.thirtysix.browser.core.domain.usecase.CloseIncognitoTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
@@ -42,10 +41,9 @@ sealed interface PopupEvent {
 class PopupTabs @Inject constructor(
     observeAllTabs: ObserveAllTabsUseCase,
     private val decidePopup: DecidePopupUseCase,
-    private val createTab: CreateTabUseCase,
-    private val createIncognitoTab: CreateIncognitoTabUseCase,
+    private val tabRepository: TabRepository,
+    private val incognitoTabs: IncognitoTabRepository,
     private val closeTab: CloseTabUseCase,
-    private val closeIncognitoTab: CloseIncognitoTabUseCase,
     private val switchToTab: SwitchToTabUseCase,
     private val registry: PopupWebViewRegistry,
 ) : ViewModel() {
@@ -70,7 +68,11 @@ class PopupTabs @Inject constructor(
     fun adopt(popup: WebView, opener: PageContext) {
         val placeholder = registry.hold(popup, opener.tabId)
         viewModelScope.launch {
-            val created = if (opener.isIncognito) createIncognitoTab(placeholder) else createTab(placeholder)
+            val created = if (opener.isIncognito) {
+                incognitoTabs.createTab(placeholder)
+            } else {
+                tabRepository.createTab(placeholder)
+            }
             when (created) {
                 is Result.Success -> {
                     registry.onTabCreated(popup, created.data.id)
@@ -92,7 +94,7 @@ class PopupTabs @Inject constructor(
     /** Open from the blocked notice: once, as a new active tab. */
     fun openBlocked(url: String, incognito: Boolean) {
         viewModelScope.launch {
-            val created = if (incognito) createIncognitoTab(url) else createTab(url)
+            val created = if (incognito) incognitoTabs.createTab(url) else tabRepository.createTab(url)
             if (created is Result.Error) _events.tryEmit(PopupEvent.TabLimitReached)
         }
     }
@@ -111,7 +113,7 @@ class PopupTabs @Inject constructor(
         registry.forget(window)
         viewModelScope.launch {
             if (tabs.value.any { it.id == openerTabId }) switchToTab(openerTabId)
-            if (tabId < 0L) closeIncognitoTab(tabId) else closeTab(tabId)
+            if (tabId < 0L) incognitoTabs.closeTab(tabId) else closeTab(tabId)
         }
     }
 

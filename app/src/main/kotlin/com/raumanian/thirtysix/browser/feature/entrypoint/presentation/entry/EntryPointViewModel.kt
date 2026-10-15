@@ -3,9 +3,9 @@ package com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.R
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.presentation.util.IncomingContentHooks
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.IncomingTarget
 import com.raumanian.thirtysix.browser.feature.entrypoint.domain.model.OpenOutcome
@@ -38,13 +38,13 @@ sealed interface EntryEvent {
 @Suppress("LongParameterList") // Hand-off pieces + the two use cases + tab store access; mirrors TabsViewModel.
 class EntryPointViewModel @Inject constructor(
     private val relay: IncomingRequestRelay,
-    observeUserSettings: ObserveUserSettingsUseCase,
+    settings: SettingsRepository,
     private val resolve: ResolveIncomingRequestUseCase,
     private val open: OpenIncomingRequestUseCase,
     private val externalTabs: ExternalTabRegistry,
     private val activeTabNavigation: ActiveTabNavigationRelay,
     private val messages: EntryMessageRelay,
-    observeTabs: ObserveTabsUseCase,
+    tabs: TabRepository,
     private val closeTab: CloseTabUseCase,
 ) : ViewModel() {
 
@@ -63,7 +63,7 @@ class EntryPointViewModel @Inject constructor(
     )
 
     init {
-        val onboardingDone = observeUserSettings().map { it.isOnboardingCompleted }.distinctUntilChanged()
+        val onboardingDone = settings.observeSettings().map { it.isOnboardingCompleted }.distinctUntilChanged()
         combine(relay.pending, onboardingDone) { request, done -> done && request != null }
             .filter { ready -> ready }
             .onEach { handlePending() }
@@ -72,7 +72,7 @@ class EntryPointViewModel @Inject constructor(
         // However a tab closed, its id leaves the registry so a later tab cannot inherit "return to sender".
         // Only ids that disappear are dropped: the store may emit before a just-created tab is listed.
         var previousIds: Set<Long> = emptySet()
-        observeTabs()
+        tabs.observeTabs()
             .map { tabs -> tabs.mapTo(mutableSetOf()) { it.id } }
             .onEach { currentIds ->
                 externalTabs.removeAll(previousIds - currentIds)

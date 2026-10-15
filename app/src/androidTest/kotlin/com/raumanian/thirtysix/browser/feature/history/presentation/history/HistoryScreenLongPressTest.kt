@@ -97,7 +97,7 @@ class HistoryScreenLongPressTest {
     ) {
         composeRule.setContent {
             ThirtySixTheme {
-                HistoryScreen(
+                HistoryRoute(
                     viewModel = buildHistoryViewModel(repository, tabRepository, clipboardWriter),
                 )
             }

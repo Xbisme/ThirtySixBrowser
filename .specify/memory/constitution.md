@@ -60,8 +60,10 @@ Implementations are named `<Interface>Impl`, recorded in `docs/adr/0001`.
   Long-lived collectors run in the injected `@ApplicationScope` scope.
 - DI is Hilt. Annotation processing runs on KSP; kapt is forbidden.
 
-**Enforced by**: `PlacementTest`, `ArchitectureTest.dispatchers are injected` (Konsist).
-**Review**: Action/Event shape (screens written before 2.0.0 move to it in Spec 026), KSP.
+**Enforced by**: `PlacementTest`, `ArchitectureTest.dispatchers are injected`,
+`ArchitectureTest.view models take input only through onAction` (Konsist); compose-rules
+`vm-forwarding-check` and `vm-injection-check` with no baseline.
+**Review**: Action/Event shape inside a holder (sealed types in the screen folder), KSP.
 
 ### IV. Compose render discipline
 
@@ -152,7 +154,8 @@ restate the code.
   from another app, normal and incognito tabs, the bookmark star, history recording, Fire,
   tracker blocking and incognito isolation.
 
-**Enforced by**: `./gradlew testDebugUnitTest` and `connectedDebugAndroidTest` in CI.
+**Enforced by**: `./gradlew testDebugUnitTest` and `connectedDebugAndroidTest` in CI;
+`ArchitectureTest.main dispatcher is set only by the rule` (Konsist).
 Coverage target: every use case, repository, mapper and ViewModel has a test.
 
 ## Product Constraints
@@ -215,4 +218,4 @@ A spec is done only when all of these pass:
 - Versioning: MAJOR when a principle is removed or redefined, MINOR when a principle or
   a check is added, PATCH for wording.
 
-**Version**: 2.0.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-14
+**Version**: 2.1.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-15

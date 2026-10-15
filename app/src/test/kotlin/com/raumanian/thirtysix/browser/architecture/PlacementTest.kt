@@ -58,8 +58,9 @@ class PlacementTest {
     fun `view models never reach past the domain`() {
         scope.classes().withNameEndingWith("ViewModel").assertTrue { viewModel ->
             viewModel.primaryConstructor?.parameters.orEmpty().none { parameter ->
+                val isDomainContract = parameter.type.hasInterfaceDeclaration { it.resideInPackage("..domain..") }
                 DATA_SUFFIXES.any { parameter.type.name.endsWith(it) } ||
-                    parameter.type.name.startsWith("Default") ||
+                    (parameter.type.name.startsWith("Default") && !isDomainContract) ||
                     parameter.type.name.endsWith("Impl")
             }
         }

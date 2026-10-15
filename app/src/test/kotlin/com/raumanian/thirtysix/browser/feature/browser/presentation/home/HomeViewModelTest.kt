@@ -5,9 +5,8 @@ import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
@@ -22,16 +21,12 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /** HomeViewModel state, greeting and dispatcher. */
@@ -40,11 +35,8 @@ class HomeViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    @Before
-    fun setUp() = Dispatchers.setMain(testDispatcher)
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(testDispatcher)
 
     private class MutableClock(var instant: Instant) : Clock() {
         override fun getZone() = ZoneOffset.UTC
@@ -64,11 +56,11 @@ class HomeViewModelTest {
     private fun viewModel(clock: Clock, tabs: FakeTabRepository, history: FakeHistoryRepository) = HomeViewModel(
         observeActiveTab = ObserveActiveTabUseCase(ObserveAllTabsUseCase(tabs, FakeIncognitoTabRepository())),
         observeHomeContent = ObserveHomeContentUseCase(tabs, FakeBookmarkRepository(), history),
-        observeUserSettings = ObserveUserSettingsUseCase(FakeSettingsRepository()),
+        settings = FakeSettingsRepository(),
         screenshotCache = FakeScreenshotCache(),
         faviconCache = FakeFaviconCache(),
         clock = clock,
-        switchActiveTab = SwitchActiveTabUseCase(tabs),
+        tabs = tabs,
         dispatchers = TestDispatchers(testDispatcher),
     )
 
@@ -104,7 +96,7 @@ class HomeViewModelTest {
             assertEquals(GreetingPeriod.Morning, expectMostRecentItem().greeting)
 
             clock.instant = at(HOUR_EVENING)
-            vm.onResume()
+            vm.onAction(HomeAction.Resumed)
             advanceUntilIdle()
             assertEquals(GreetingPeriod.Evening, expectMostRecentItem().greeting)
             cancelAndIgnoreRemainingEvents()

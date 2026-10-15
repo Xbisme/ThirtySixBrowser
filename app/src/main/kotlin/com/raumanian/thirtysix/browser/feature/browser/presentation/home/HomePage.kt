@@ -81,8 +81,8 @@ fun HomePage(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val showInvite by inviteViewModel.showInvite.collectAsStateWithLifecycle()
     LifecycleResumeEffect(viewModel, inviteViewModel) {
-        viewModel.onResume()
-        inviteViewModel.onResume()
+        viewModel.onAction(HomeAction.Resumed)
+        inviteViewModel.onAction(DefaultBrowserInviteAction.Resumed)
         onPauseOrDispose { }
     }
     val unavailableMessage = stringResource(R.string.entry_default_browser_unavailable)
@@ -96,7 +96,7 @@ fun HomePage(
         onShortcut = { shortcut ->
             val tabId = shortcut.tabId
             if (shortcut.kind == ShortcutKind.Tab && tabId != null) {
-                viewModel.onTabShortcut(tabId)
+                viewModel.onAction(HomeAction.TabShortcut(tabId))
             } else {
                 callbacks.onOpenUrl(shortcut.url)
             }
@@ -106,7 +106,12 @@ fun HomePage(
         modifier = modifier,
         searchSuggestions = searchSuggestions,
         inviteCard = if (showInvite) {
-            { DefaultBrowserInviteCard(onAction = requestDefaultBrowser, onDismiss = inviteViewModel::onDismiss) }
+            {
+                DefaultBrowserInviteCard(
+                    onAction = requestDefaultBrowser,
+                    onDismiss = { inviteViewModel.onAction(DefaultBrowserInviteAction.Dismiss) },
+                )
+            }
         } else {
             null
         },

@@ -5,8 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
-import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -15,38 +16,35 @@ import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.history.domain.model.HistoryDayBucket
 import com.raumanian.thirtysix.browser.feature.history.domain.model.historyDayBucketOf
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ClearAllHistoryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.DeleteHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.history.domain.usecase.ObserveHistoryEntriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 @Suppress("TooManyFunctions", "LongParameterList")
 class HistoryViewModel @Inject constructor(
-    observeHistoryEntries: ObserveHistoryEntriesUseCase,
+    private val history: HistoryRepository,
     observeActiveTab: ObserveActiveTabUseCase,
     observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
     private val updateActiveTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase,
-    private val createTab: CreateTabUseCase,
-    private val deleteHistoryEntry: DeleteHistoryEntryUseCase,
-    private val clearAllHistory: ClearAllHistoryUseCase,
+    private val tabs: TabRepository,
     private val clipboardWriter: ClipboardWriter,
     dispatchers: DispatcherProvider,
     val faviconCache: FaviconCache,
@@ -57,12 +55,19 @@ class HistoryViewModel @Inject constructor(
 
     // `replay = 0` so a re-subscribing Composable never re-shows a stale message; `DROP_OLDEST`
     // with one slot so a burst of actions surfaces the latest outcome without suspending.
-    private val _historySnackbarEvent: MutableSharedFlow<HistoryErrorEvent> = MutableSharedFlow(
+    private val snackbarEvents: MutableSharedFlow<HistoryErrorEvent> = MutableSharedFlow(
         replay = 0,
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
-    val historySnackbarEvent: SharedFlow<HistoryErrorEvent> = _historySnackbarEvent.asSharedFlow()
+
+    // Kept until the screen collects it, as the consumed-once state field it replaces was.
+    private val openUrls = Channel<String>(Channel.BUFFERED)
+
+    val events: Flow<HistoryEvent> = merge(
+        openUrls.receiveAsFlow().map { HistoryEvent.OpenUrl(it) },
+        snackbarEvents.map { HistoryEvent.Snackbar(it) },
+    )
 
     private val searchQueryFlow: MutableStateFlow<String> = MutableStateFlow("")
 
@@ -72,7 +77,7 @@ class HistoryViewModel @Inject constructor(
 
     init {
         // Re-derives on every repository emission and keystroke, so new matches appear under an active query.
-        combine(observeHistoryEntries(), searchQueryFlow) { entries, query -> entries to query }
+        combine(history.observeAll(), searchQueryFlow) { entries, query -> entries to query }
             .map { (entries, query) -> Derived(entries, groupByDay(filterEntries(entries, query))) }
             // The O(n) filter and bucketing would block the UI thread on every keystroke at 10 000 rows;
             // `flowOn` moves only the upstream, so the state write in `onEach` stays on main.
@@ -93,7 +98,23 @@ class HistoryViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun onEntryTap(entry: HistoryEntry) {
+    fun onAction(action: HistoryAction) {
+        when (action) {
+            is HistoryAction.EntryTap -> onEntryTap(action.entry)
+            is HistoryAction.LongPressEntry -> onLongPressEntry(action.entry)
+            HistoryAction.ActionSheetDismiss -> onActionSheetDismiss()
+            is HistoryAction.OpenInNewTab -> onOpenInNewTab(action.entry)
+            is HistoryAction.DeleteEntry -> onDeleteEntry(action.entry)
+            is HistoryAction.CopyUrl -> onCopyUrl(action.entry)
+            is HistoryAction.SearchQueryChange -> onSearchQueryChange(action.query)
+            HistoryAction.SearchQueryClear -> onSearchQueryChange("")
+            HistoryAction.ClearAllRequested -> onClearAllRequested()
+            HistoryAction.ClearAllCancelled -> onClearAllCancelled()
+            HistoryAction.ClearAllConfirmed -> onClearAllConfirmed()
+        }
+    }
+
+    private fun onEntryTap(entry: HistoryEntry) {
         viewModelScope.launch {
             if (activeTabId > 0L) {
                 updateActiveTabUrlAndTitle(
@@ -103,31 +124,23 @@ class HistoryViewModel @Inject constructor(
                     isIncognito = lastKnownIsIncognito,
                 )
             }
-            _uiState.update { state -> state.copy(openUrl = entry.url) }
+            openUrls.trySend(entry.url)
         }
-    }
-
-    fun consumeOpenUrl() {
-        _uiState.update { state -> state.copy(openUrl = null) }
     }
 
     // Mirrored synchronously so the field stays responsive; truncated so the per-keystroke scan
     // never sees a huge query.
-    fun onSearchQueryChange(query: String) {
+    private fun onSearchQueryChange(query: String) {
         val bounded = query.take(BrowserLimits.MAX_HISTORY_QUERY_LENGTH)
         _uiState.update { state -> state.copy(searchQuery = bounded) }
         searchQueryFlow.value = bounded
     }
 
-    fun onSearchQueryClear() {
-        onSearchQueryChange("")
-    }
-
-    fun onLongPressEntry(entry: HistoryEntry) {
+    private fun onLongPressEntry(entry: HistoryEntry) {
         _uiState.update { state -> state.copy(pendingActionSheetTarget = entry) }
     }
 
-    fun onActionSheetDismiss() {
+    private fun onActionSheetDismiss() {
         _uiState.update { state -> state.copy(pendingActionSheetTarget = null) }
     }
 
@@ -135,54 +148,53 @@ class HistoryViewModel @Inject constructor(
      * Always opens a normal tab, even from an incognito one. On a cap failure the existing tab-cap
      * message is shown and the screen stays open.
      */
-    fun onOpenInNewTab(entry: HistoryEntry) {
+    private fun onOpenInNewTab(entry: HistoryEntry) {
         viewModelScope.launch {
             _uiState.update { state -> state.copy(pendingActionSheetTarget = null) }
-            val outcome = runCatching { createTab(entry.url) }
+            val outcome = runCatching { tabs.createTab(entry.url) }
             val capReached = outcome.getOrNull().let { result ->
                 result is Result.Error && result.throwable is MaxTabsReachedException
             }
             when {
                 outcome.isFailure || capReached ->
-                    _historySnackbarEvent.tryEmit(HistoryErrorEvent.TabCapReached)
-                else ->
-                    _uiState.update { state -> state.copy(openUrl = entry.url) }
+                    snackbarEvents.tryEmit(HistoryErrorEvent.TabCapReached)
+                else -> openUrls.trySend(entry.url)
             }
         }
     }
 
     /** Removes exactly the targeted row; other visits to the same URL stay. */
-    fun onDeleteEntry(entry: HistoryEntry) {
+    private fun onDeleteEntry(entry: HistoryEntry) {
         viewModelScope.launch {
             _uiState.update { state -> state.copy(pendingActionSheetTarget = null) }
-            runCatching { deleteHistoryEntry(entry.id) }
+            runCatching { history.deleteById(entry.id) }
                 .onFailure { cause ->
-                    _historySnackbarEvent.tryEmit(HistoryErrorEvent.DeletionFailed(cause))
+                    snackbarEvents.tryEmit(HistoryErrorEvent.DeletionFailed(cause))
                 }
         }
     }
 
-    fun onCopyUrl(entry: HistoryEntry) {
+    private fun onCopyUrl(entry: HistoryEntry) {
         _uiState.update { state -> state.copy(pendingActionSheetTarget = null) }
         if (clipboardWriter.copyUrl(entry.url)) {
-            _historySnackbarEvent.tryEmit(HistoryErrorEvent.ClipboardCopied)
+            snackbarEvents.tryEmit(HistoryErrorEvent.ClipboardCopied)
         }
     }
 
-    fun onClearAllRequested() {
+    private fun onClearAllRequested() {
         _uiState.update { state -> state.copy(isClearAllDialogVisible = true) }
     }
 
-    fun onClearAllCancelled() {
+    private fun onClearAllCancelled() {
         _uiState.update { state -> state.copy(isClearAllDialogVisible = false) }
     }
 
-    fun onClearAllConfirmed() {
+    private fun onClearAllConfirmed() {
         viewModelScope.launch {
             try {
-                runCatching { clearAllHistory() }
+                runCatching { history.clearAll() }
                     .onFailure { cause ->
-                        _historySnackbarEvent.tryEmit(HistoryErrorEvent.DeletionFailed(cause))
+                        snackbarEvents.tryEmit(HistoryErrorEvent.DeletionFailed(cause))
                     }
             } finally {
                 _uiState.update { state -> state.copy(isClearAllDialogVisible = false) }
