@@ -17,12 +17,17 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookm
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
-/** Builds a [BrowserViewModel] over fakes, so a new constructor dependency is added in one place. */
+/** Builds the browser holders over fakes and one shared page store, so a new dependency is added in one place. */
 internal class BrowserViewModelFixture(
     val url: String = "https://example.com/",
     val tabs: FakeTabRepository = FakeTabRepository(homeUrl = url),
     val incognitoTabs: FakeIncognitoTabRepository = FakeIncognitoTabRepository(),
 ) {
+    /** One store for every holder this fixture builds, as the browser screen shares one. */
+    val pageStore = CurrentPageRepositoryImpl(url)
+
+    fun buildFind(): FindInPageViewModel = FindInPageViewModel(pageStore)
+
     fun build(): BrowserViewModel {
         val bookmarks = FakeBookmarkRepository()
         val history = FakeHistoryRepository()
@@ -41,7 +46,7 @@ internal class BrowserViewModelFixture(
             recordHistoryEntry = RecordHistoryEntryUseCase(history),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(history),
             startDownload = noOpStartDownloadUseCase(),
-            pageStore = CurrentPageRepositoryImpl(url),
+            pageStore = pageStore,
         )
     }
 

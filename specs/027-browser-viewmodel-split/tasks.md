@@ -62,7 +62,7 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 
 **Goal**: each concern in its own holder (FR-003, FR-004). **Independent test**: G2 shape checks, and each concern's tests build only its collaborators.
 
-- [ ] T005 [US2] **Find in page**: `P/FindInPageViewModel.kt` and `P/FindInPageAction.kt` (`Opened`, `QueryChanged`, `Closed`, `Result`; `Page.FindResult` moves here).
+- [X] T005 [US2] **Find in page**: `P/FindInPageViewModel.kt` and `P/FindInPageAction.kt` (`Opened`, `QueryChanged`, `Closed`, `Result`; `Page.FindResult` moves here).
   - It closes when `page.generation` changes.
   - `rememberFindCallbacks` and the find bar use it, and the WebView's `onFindResult` sends `FindInPageAction.Result`.
   - Tests: `BrowserViewModelFindTest` → `T/presentation/browser/FindInPageViewModelTest.kt`, plus "closes on a new load" and "closes on a tab switch" (moved from the browser tests).

@@ -14,7 +14,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
@@ -114,11 +113,6 @@ class BrowserViewModel @Inject constructor(
 
     val desktopMode: DesktopModeLookup = DesktopModeLookup { tabId -> tabId in desktopModeTabs.value }
 
-    private val _findInPage = MutableStateFlow(FindInPageState())
-
-    // Kept out of [uiState]: a result per keystroke recomposes only the find bar.
-    val findInPage: StateFlow<FindInPageState> = _findInPage.asStateFlow()
-
     // The navigation that started but is not yet in history: armed by [onLoadStarted], consumed
     // once by [onLoadFinished], cleared by [onLoadFailed] so an error page is never recorded.
     private var pendingHistoryUrl: String? = null
@@ -135,13 +129,6 @@ class BrowserViewModel @Inject constructor(
                 pageStore.setActiveTab(tab)
                 tab?.let { active -> pageStore.setUrl(active.url) }
             }
-            .launchIn(viewModelScope)
-
-        // The find bar belongs to the page it searched.
-        pageStore.page
-            .map { it.generation }
-            .distinctUntilChanged()
-            .onEach { onFindClosed() }
             .launchIn(viewModelScope)
 
         combine(pageStore.page.map { it.activeTab?.id }, desktopModeTabs) { id, desktop -> id != null && id in desktop }
@@ -168,7 +155,6 @@ class BrowserViewModel @Inject constructor(
             is BrowserAction.Page -> onPage(action)
             is BrowserAction.AddressBar -> onAddressBar(action)
             is BrowserAction.Home -> onHome(action)
-            is BrowserAction.Find -> onFind(action)
             is BrowserAction.Download -> onDownload(action)
             BrowserAction.StarTapped -> onStarTapped()
             BrowserAction.ToggleDesktopMode -> onDesktopModeToggled()
@@ -190,7 +176,6 @@ class BrowserViewModel @Inject constructor(
             is BrowserAction.Page.ScreenshotReady -> onScreenshotReady(action.bitmap)
             is BrowserAction.Page.CanGoBackChanged -> _uiState.update { it.copy(canGoBack = action.canGoBack) }
             is BrowserAction.Page.CanGoForwardChanged -> _uiState.update { it.copy(canGoForward = action.canGoForward) }
-            is BrowserAction.Page.FindResult -> onFindResult(action.activeOrdinal, action.total)
         }
     }
 
@@ -209,14 +194,6 @@ class BrowserViewModel @Inject constructor(
             BrowserAction.Home.OverlayDismissed -> _uiState.update { it.copy(homeOverlay = false) }
             is BrowserAction.Home.Submit -> onHomeSubmit(action.input)
             BrowserAction.Home.NavigateFrom -> onNavigateFromHome()
-        }
-    }
-
-    private fun onFind(action: BrowserAction.Find) {
-        when (action) {
-            BrowserAction.Find.Opened -> onFindOpened()
-            is BrowserAction.Find.QueryChanged -> onFindQueryChanged(action.query)
-            BrowserAction.Find.Closed -> onFindClosed()
         }
     }
 
@@ -277,43 +254,13 @@ class BrowserViewModel @Inject constructor(
         eventChannel.trySend(BrowserEvent.SetDesktopMode(tabId in desktopModeTabs.value))
     }
 
-    private fun onFindOpened() {
-        _findInPage.value = FindInPageState(isOpen = true)
-    }
-
-    private fun onFindQueryChanged(query: String) {
-        _findInPage.update { state ->
-            if (!state.isOpen) {
-                state
-            } else {
-                state.copy(query = query.take(BrowserLimits.MAX_FIND_QUERY_LENGTH), current = 0, total = 0)
-            }
-        }
-    }
-
-    // A late result after the bar closed, or while it is empty, must not reopen or relabel it.
-    private fun onFindResult(activeOrdinal: Int, total: Int) {
-        _findInPage.update { state ->
-            when {
-                !state.isOpen || state.query.isEmpty() -> state
-                total <= 0 -> state.copy(current = 0, total = 0)
-                else -> state.copy(current = (activeOrdinal + 1).coerceIn(1, total), total = total)
-            }
-        }
-    }
-
-    private fun onFindClosed() {
-        _findInPage.value = FindInPageState()
-    }
-
     // [onUrlChanged] owns the address; `url` is kept for symmetry with [onLoadFinished].
     @Suppress("UNUSED_PARAMETER")
     private fun onLoadStarted(url: String) {
         pendingHistoryUrl = url
-        // Drops the previous page's title so it can never attach to the new URL, and closes the find
-        // bar, whose highlights went with the old page; [onTitleReceived] patches the title in.
+        // Drops the previous page's title so it can never attach to the new URL ([onTitleReceived]
+        // patches it in) and closes the find bar, whose highlights went with the old page.
         pageStore.startNewPage()
-        onFindClosed()
         _loadProgress.value = 0f
         _uiState.update {
             it.copy(loadingState = LoadingState.Loading)

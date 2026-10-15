@@ -26,8 +26,6 @@ sealed interface BrowserAction {
         data class CanGoBackChanged(val canGoBack: Boolean) : Page
 
         data class CanGoForwardChanged(val canGoForward: Boolean) : Page
-
-        data class FindResult(val activeOrdinal: Int, val total: Int) : Page
     }
 
     sealed interface AddressBar : BrowserAction {
@@ -48,14 +46,6 @@ sealed interface BrowserAction {
         data class Submit(val input: String) : Home
 
         data object NavigateFrom : Home
-    }
-
-    sealed interface Find : BrowserAction {
-        data object Opened : Find
-
-        data class QueryChanged(val query: String) : Find
-
-        data object Closed : Find
     }
 
     sealed interface Download : BrowserAction {

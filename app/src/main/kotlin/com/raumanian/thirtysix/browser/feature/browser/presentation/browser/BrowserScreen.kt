@@ -82,6 +82,7 @@ fun BrowserRoute(
     slots: BrowserSlots,
     modifier: Modifier = Modifier,
     viewModel: BrowserViewModel = hiltViewModel(),
+    findInPage: FindInPageViewModel = hiltViewModel(),
     hubViewModel: HubViewModel = hiltViewModel(),
     suggestions: AddressSuggestionsViewModel = hiltViewModel(),
     pageTextSize: PageTextSizeViewModel = hiltViewModel(),
@@ -118,7 +119,7 @@ fun BrowserRoute(
         progress = { progress.value },
         textZoomPercent = textZoomPercent,
         sources = BrowserScreenSources(
-            findInPage = viewModel.findInPage,
+            findInPage = findInPage.state,
             suggestions = suggestions.uiState,
             hasActiveDownloads = hubViewModel.hasActiveDownloads,
             protectionStatus = protection.status,
@@ -131,6 +132,7 @@ fun BrowserRoute(
         ),
         actions = BrowserScreenActions(
             onAction = viewModel::onAction,
+            onFindAction = findInPage::onAction,
             onHubAction = hubViewModel::onAction,
             onSuggestionsAction = suggestions::onAction,
             onProtectionAction = protection::onAction,
@@ -187,7 +189,7 @@ internal fun BrowserScreen(
     val findOpen by remember(sources.findInPage) {
         sources.findInPage.map { it.isOpen }.distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = false)
-    val findCallbacks = rememberFindCallbacks(onAction, sources.findInPage, webViewActions)
+    val findCallbacks = rememberFindCallbacks(actions.onFindAction, sources.findInPage, webViewActions)
     var dashboardOpen by rememberSaveable { mutableStateOf(false) }
     val addressBarCallbacks = rememberAddressBarCallbacks(
         onAction = onAction,
@@ -219,7 +221,7 @@ internal fun BrowserScreen(
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         BrowserContent(
             state = state,
-            onAction = onAction,
+            actions = actions,
             webViewActions = webViewActions,
             activeTabId = activeTab?.id ?: 0L,
             onScrollDelta = rememberScrollDeltaHandler(chrome) { findOpenNow },
@@ -329,7 +331,7 @@ internal fun BrowserScreen(
     }
 
     val pageToolHandler = rememberPageToolHandler(
-        onAction = onAction,
+        onFindAction = actions.onFindAction,
         chrome = chrome,
         actions = PageToolActions(
             share = rememberShareAction(
@@ -530,7 +532,7 @@ private fun rememberHomeCallbacks(
 @Suppress("LongParameterList")
 private fun BrowserContent(
     state: BrowserUiState,
-    onAction: (BrowserAction) -> Unit,
+    actions: BrowserScreenActions,
     webViewActions: WebViewActionsHandle,
     activeTabId: Long,
     onScrollDelta: (Float) -> Unit,
@@ -544,9 +546,9 @@ private fun BrowserContent(
     // On API 29+ the storage-permission gate passes straight through.
     val onDownloadRequested = rememberDownloadRequestHandler(
         onGrant = { url, userAgent, disposition, mimeType ->
-            onAction(BrowserAction.Download.Requested(url, userAgent, disposition, mimeType))
+            actions.onAction(BrowserAction.Download.Requested(url, userAgent, disposition, mimeType))
         },
-        onDeny = { permanently -> onAction(BrowserAction.Download.StoragePermissionDenied(permanently)) },
+        onDeny = { permanently -> actions.onAction(BrowserAction.Download.StoragePermissionDenied(permanently)) },
     )
     val context = LocalContext.current
     val incognitoProfile = remember(context) { context.incognitoWebProfile() }
@@ -558,21 +560,21 @@ private fun BrowserContent(
                 state = state,
                 actions = webViewActions,
                 callbacks = BrowserWebViewCallbacks(
-                    onLoadStarted = { onAction(BrowserAction.Page.LoadStarted(it)) },
-                    onProgressChanged = { onAction(BrowserAction.Page.ProgressChanged(it)) },
-                    onLoadFinished = { onAction(BrowserAction.Page.LoadFinished(it)) },
-                    onLoadFailed = { onAction(BrowserAction.Page.LoadFailed(it)) },
+                    onLoadStarted = { actions.onAction(BrowserAction.Page.LoadStarted(it)) },
+                    onProgressChanged = { actions.onAction(BrowserAction.Page.ProgressChanged(it)) },
+                    onLoadFinished = { actions.onAction(BrowserAction.Page.LoadFinished(it)) },
+                    onLoadFailed = { actions.onAction(BrowserAction.Page.LoadFailed(it)) },
                     onDownloadRequested = onDownloadRequested,
                     pageRequests = pageRequests,
-                    onFindResult = { ordinal, total -> onAction(BrowserAction.Page.FindResult(ordinal, total)) },
+                    onFindResult = { ordinal, total -> actions.onFindAction(FindInPageAction.Result(ordinal, total)) },
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
-                    onUrlChange = { onAction(BrowserAction.Page.UrlChanged(it)) },
-                    onCanGoBackChange = { onAction(BrowserAction.Page.CanGoBackChanged(it)) },
-                    onCanGoForwardChange = { onAction(BrowserAction.Page.CanGoForwardChanged(it)) },
-                    onTitleChange = { onAction(BrowserAction.Page.TitleReceived(it)) },
-                    onIconReceived = { url, icon -> onAction(BrowserAction.Page.IconReceived(url, icon)) },
-                    onScreenshotReady = { onAction(BrowserAction.Page.ScreenshotReady(it)) },
+                    onUrlChange = { actions.onAction(BrowserAction.Page.UrlChanged(it)) },
+                    onCanGoBackChange = { actions.onAction(BrowserAction.Page.CanGoBackChanged(it)) },
+                    onCanGoForwardChange = { actions.onAction(BrowserAction.Page.CanGoForwardChanged(it)) },
+                    onTitleChange = { actions.onAction(BrowserAction.Page.TitleReceived(it)) },
+                    onIconReceived = { url, icon -> actions.onAction(BrowserAction.Page.IconReceived(url, icon)) },
+                    onScreenshotReady = { actions.onAction(BrowserAction.Page.ScreenshotReady(it)) },
                     onScrollDelta = onScrollDelta,
                 ),
                 incognitoProfile = incognitoProfile,
