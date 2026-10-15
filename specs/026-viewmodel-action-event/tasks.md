@@ -250,15 +250,15 @@ The two stories land together per feature because the holder's constructor (US3)
 **Goal**: the action rule breaks the build, and the constitution says so.
 **Independent test**: quickstart G2 steps 1–2 fail with the file named; G3 passes.
 
-- [ ] T040 [US4] Add `` `view models take input only through onAction` `` to `T/architecture/ArchitectureTest.kt`:
+- [X] T040 [US4] Add `` `view models take input only through onAction` `` to `T/architecture/ArchitectureTest.kt`:
   - Scope: Konsist `productionScope()` classes whose name ends with `ViewModel` and whose package contains `.presentation`.
   - Assertion: every `public` or `internal` function is named `onAction`.
   - `additionalMessage = "send input through onAction(XAction)"`.
 
   Properties are not checked. `PopupTabs`, `SitePermissionGate` and `LongPressActions` fall outside the name match (research R2).
-- [ ] T041 [US4] Delete `config/ktlint/baseline.xml` and the `baseline.set(file("$rootDir/config/ktlint/baseline.xml"))` line in `app/build.gradle.kts` (`ktlint { … }` block, around lines 135–139). Run `./gradlew ktlintCheck`; it should pass with no baseline.
-- [ ] T042 [US4] Run quickstart G2 steps 1 and 2 (and step 3 again) on a scratch change. Record each failure message in the "Rule proof" table below, then revert.
-- [ ] T043 [US4] Governance, in one commit:
+- [X] T041 [US4] Delete `config/ktlint/baseline.xml` and the `baseline.set(file("$rootDir/config/ktlint/baseline.xml"))` line in `app/build.gradle.kts` (`ktlint { … }` block, around lines 135–139). Run `./gradlew ktlintCheck`; it should pass with no baseline.
+- [X] T042 [US4] Run quickstart G2 steps 1 and 2 (and step 3 again) on a scratch change. Record each failure message in the "Rule proof" table below, then revert.
+- [X] T043 *(done, except the ADR 0001 consequence line: the ADR template says an accepted ADR is never edited, so ADR 0026 states that it extends ADR 0001 instead; principle VIII also names the main-dispatcher check)* [US4] Governance, in one commit:
   - **`.specify/memory/constitution.md`**:
     - In principle III, change **Enforced by** to `PlacementTest`, `ArchitectureTest.dispatchers are injected`, `ArchitectureTest.view models take input only through onAction` (Konsist), compose-rules `vm-forwarding-check` / `vm-injection-check`.
     - Change **Review** to `KSP.`, removing the Spec 026 note.
@@ -371,6 +371,10 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 
 | Rule | Scratch violation | Failed with file named |
 |---|---|---|
+| view models take input only through onAction | `fun onRefreshClicked() = Unit` added to `SitePermissionsViewModel` | ✅ `SitePermissionsViewModel` ("send input through onAction(XAction)") |
+| compose-rules vm-forwarding (no baseline) | `SitePermissionsRoute` passes `viewModel` to a private child composable | ✅ `SitePermissionsScreen.kt:50` (`Forwarding a ViewModel…`) |
+| main dispatcher is set only by the rule | `"Dispatchers.setMain"` text added to `FakeTabRepository.kt` | ✅ `FakeTabRepository.kt` ("use MainDispatcherRule") |
+| view models never reach past the domain (narrowed `Default*` rule) | `ProofViewModel(store: DefaultProofStore)` with the store in a `data` package | ✅ `ProofViewModel` (the rule still fires outside `domain`) |
 
 ## Use-case test disposition (T048)
 

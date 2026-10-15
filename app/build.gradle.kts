@@ -135,7 +135,6 @@ detekt {
 ktlint {
     android.set(true)
     ignoreFailures.set(false)
-    baseline.set(file("$rootDir/config/ktlint/baseline.xml"))
 }
 
 kotlin {

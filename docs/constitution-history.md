@@ -4,6 +4,7 @@ One line per amendment, newest first. Detail lives in the commit and, for decisi
 
 | Version | Date | Change |
 |---|---|---|
+| 2.1.0 | 2026-10-15 | Action/event shape moved from Review to Enforced: Konsist onAction and main-dispatcher checks, compose-rules without a baseline (ADR 0026) |
 | 2.0.0 | 2026-10-14 | Adopted the cleanarch Android template: eight principles, each MUST with its check; feature-first layout; comment policy; phase order retired (ADR 0005). The full 1.6.0 text is in git history |
 | 1.6.0 | 2026-10-11 | Phase 6 gains 024 privacy-tools, split from 023 privacy-protection |
 | 1.5.1 | 2026-10-11 | Camera, microphone, location and audio-settings permission rows for Spec 021 |

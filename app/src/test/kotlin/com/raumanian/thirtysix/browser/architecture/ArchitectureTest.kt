@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.architecture
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.architecture.KoArchitectureCreator.assertArchitecture
 import com.lemonappdev.konsist.api.architecture.Layer
+import com.lemonappdev.konsist.api.ext.list.withNameEndingWith
 import com.lemonappdev.konsist.api.verify.assertTrue
 import org.junit.Test
 
@@ -56,6 +57,18 @@ class ArchitectureTest {
             .filterNot { it.packagee?.name.orEmpty().contains(".di") }
             .assertTrue(additionalMessage = "inject a DispatcherProvider; only di/ names a dispatcher") { file ->
                 NAMED_DISPATCHERS.none { file.text.contains(it) }
+            }
+    }
+
+    @Test
+    fun `view models take input only through onAction`() {
+        productionScope().classes()
+            .withNameEndingWith("ViewModel")
+            .filter { it.resideInPackage("..presentation..") }
+            .assertTrue(additionalMessage = "send input through onAction(XAction)") { viewModel ->
+                viewModel.functions(includeNested = false, includeLocal = false)
+                    .filter { it.hasPublicOrDefaultModifier || it.hasInternalModifier }
+                    .all { it.name == "onAction" }
             }
     }
 
