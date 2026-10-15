@@ -132,13 +132,13 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### onboarding
 
-- [ ] T019 [US3] Remove `F/onboarding/domain/usecase/SetOnboardingCompletedUseCase.kt`. `OnboardingViewModel` injects `SettingsRepository` (`observeSettings()`, `setThemeMode`, `setSearchEngine`, `setOnboardingCompleted`) and `AppLanguageController.current()` in place of `ObserveUserSettings`, `GetAppLanguage`, `SetThemeMode` and `SetSearchEngine`; those core use cases stay until their last caller goes. Drop the onboarding case from `T/core/domain/usecase/SettingsUseCasesTest.kt`.
-- [ ] T020 [US2] Add `OnboardingAction`: `Forward`, `Back`, `Skip`, `ThemeSelected(mode)`, `SearchEngineSelected(engine)`, `LanguageSelected(language)`. `Back` returns nothing. Add `OnboardingEvent.Leave`, replacing `leaveFlow`; it is Drop, with the same `MutableSharedFlow(replay = 0, extraBufferCapacity = 1, DROP_OLDEST)`. Split `OnboardingScreen.kt` into `OnboardingRoute` and `OnboardingScreen(state, onAction)`.
+- [X] T019 [US3] Remove `F/onboarding/domain/usecase/SetOnboardingCompletedUseCase.kt`. `OnboardingViewModel` injects `SettingsRepository` (`observeSettings()`, `setThemeMode`, `setSearchEngine`, `setOnboardingCompleted`) and `AppLanguageController.current()` in place of `ObserveUserSettings`, `GetAppLanguage`, `SetThemeMode` and `SetSearchEngine`; those core use cases stay until their last caller goes. Drop the onboarding case from `T/core/domain/usecase/SettingsUseCasesTest.kt`.
+- [X] T020 [US2] Add `OnboardingAction`: `Forward`, `Back`, `Skip`, `ThemeSelected(mode)`, `SearchEngineSelected(engine)`, `LanguageSelected(language)`. `Back` returns nothing. Add `OnboardingEvent.Leave`, replacing `leaveFlow`; it is Drop, with the same `MutableSharedFlow(replay = 0, extraBufferCapacity = 1, DROP_OLDEST)`. Split `OnboardingScreen.kt` into `OnboardingRoute` and `OnboardingScreen(state, onAction)`.
   - The route's `BackHandler` does `if (state.isFirstSlide) activity.finish() else onAction(Back)`. This is the same outcome as today's `onBack(): Boolean` (research R3), and the existing comment on why slide 1 leaves without writing the flag stays.
   - The top-bar Back sends `Back`.
   - `SlideBody` takes `onAction`; `LaunchedLeaveEffect` is replaced by `EventEffect`.
   - `OnboardingNavigation.kt` calls the route.
-- [ ] T021 [US2] Update `OnboardingViewModelTest`. The `onBack()` return-value assertions become state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 leaves state unchanged). Delete the two `OnboardingScreen.kt` baseline lines. Gate and **commit** `refactor(026): onboarding actions and events`.
+- [X] T021 [US2] Update `OnboardingViewModelTest`. The `onBack()` return-value assertions become state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 leaves state unchanged). Delete the two `OnboardingScreen.kt` baseline lines. Gate and **commit** `refactor(026): onboarding actions and events`.
 
 ### settings
 
@@ -383,3 +383,5 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | `DeleteHistoryEntryUseCaseTest`: unknown id → 0 | DAO behaviour | covered by `HistoryDaoSpec014Test.deleteById returns 0 when the row does not exist` |
 | `DeleteHistoryEntryUseCaseTest`: other visits to the same URL stay | repository behaviour | moved to `HistoryRepositoryImplTest.deleting one visit leaves other visits to the same URL intact` |
 | `HistoryViewModelTest.consumeOpenUrl clears the navigation signal` | the open signal is not repeated | rewritten as `an opened url is delivered once` (the consume function no longer exists) |
+| `SettingsUseCasesTest.setOnboardingCompletedUseCase_delegates` | pass-through | deleted |
+| `OnboardingViewModelTest`: back reports true / false | the return value told the screen to leave | rewritten as state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 does not move) |

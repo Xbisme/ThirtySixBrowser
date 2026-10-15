@@ -16,10 +16,6 @@
         <error line="284" column="9" source="compose:vm-forwarding-check" />
         <error line="323" column="9" source="compose:vm-injection-check" />
     </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/onboarding/presentation/onboarding/OnboardingScreen.kt">
-        <error line="63" column="5" source="compose:vm-forwarding-check" />
-        <error line="84" column="13" source="compose:vm-forwarding-check" />
-    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/settings/presentation/settings/QuickSettingsHost.kt">
         <error line="40" column="5" source="compose:vm-forwarding-check" />
         <error line="41" column="5" source="compose:vm-forwarding-check" />

@@ -4,16 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.core.domain.usecase.GetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
-import com.raumanian.thirtysix.browser.feature.onboarding.domain.usecase.SetOnboardingCompletedUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,12 +42,9 @@ class OnboardingViewModelTest {
         savedState: SavedStateHandle = SavedStateHandle(),
     ) = OnboardingViewModel(
         savedStateHandle = savedState,
-        observeUserSettings = ObserveUserSettingsUseCase(settings),
-        getAppLanguage = GetAppLanguageUseCase(language),
-        setThemeMode = SetThemeModeUseCase(settings),
-        setSearchEngine = SetSearchEngineUseCase(settings),
+        settings = settings,
+        languages = language,
         setAppLanguage = SetAppLanguageUseCase(language, TestDispatchers),
-        setOnboardingCompleted = SetOnboardingCompletedUseCase(settings),
     )
 
     // ──────── Navigation ────────
@@ -66,29 +58,32 @@ class OnboardingViewModelTest {
     fun `forward advances one slide at a time`() = runTest {
         val vm = viewModel()
 
-        vm.onForward()
+        vm.onAction(OnboardingAction.Forward)
         assertEquals(OnboardingSlides.LANGUAGE, vm.uiState.value.currentSlide)
-        vm.onForward()
+        vm.onAction(OnboardingAction.Forward)
         assertEquals(OnboardingSlides.THEME, vm.uiState.value.currentSlide)
-        vm.onForward()
+        vm.onAction(OnboardingAction.Forward)
         assertEquals(OnboardingSlides.SEARCH_ENGINE, vm.uiState.value.currentSlide)
         assertTrue(vm.uiState.value.isLastSlide)
     }
 
     @Test
-    fun `back moves to the previous slide and reports true`() = runTest {
+    fun `back moves to the previous slide`() = runTest {
         val vm = viewModel()
-        vm.onForward()
+        vm.onAction(OnboardingAction.Forward)
+        assertFalse(vm.uiState.value.isFirstSlide)
 
-        assertTrue(vm.onBack())
+        vm.onAction(OnboardingAction.Back)
         assertEquals(OnboardingSlides.FIRST, vm.uiState.value.currentSlide)
     }
 
     @Test
-    fun `back on the first slide reports false and does not move`() = runTest {
+    fun `back on the first slide does not move`() = runTest {
         val vm = viewModel()
 
-        assertFalse("caller must be told to leave the app", vm.onBack())
+        // The screen leaves the app when the state says it is on the first slide.
+        assertTrue(vm.uiState.value.isFirstSlide)
+        vm.onAction(OnboardingAction.Back)
         assertEquals(OnboardingSlides.FIRST, vm.uiState.value.currentSlide)
     }
 
@@ -99,7 +94,7 @@ class OnboardingViewModelTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
 
-        vm.onBack()
+        vm.onAction(OnboardingAction.Back)
         advanceUntilIdle()
 
         // Leaving this way is not consent to never being asked again.
@@ -111,9 +106,9 @@ class OnboardingViewModelTest {
     fun `forward on the last slide completes the flow`() = runTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
-        repeat(OnboardingSlides.LAST) { vm.onForward() }
+        repeat(OnboardingSlides.LAST) { vm.onAction(OnboardingAction.Forward) }
 
-        vm.onForward()
+        vm.onAction(OnboardingAction.Forward)
         advanceUntilIdle()
 
         assertTrue(settings.current.isOnboardingCompleted)
@@ -124,7 +119,7 @@ class OnboardingViewModelTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
 
-        vm.onSkip()
+        vm.onAction(OnboardingAction.Skip)
         advanceUntilIdle()
 
         assertTrue(settings.current.isOnboardingCompleted)
@@ -135,7 +130,7 @@ class OnboardingViewModelTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
 
-        vm.onSkip()
+        vm.onAction(OnboardingAction.Skip)
         advanceUntilIdle()
 
         // Skip records that the person was asked; the defaults stay unwritten.
@@ -152,9 +147,9 @@ class OnboardingViewModelTest {
         for (slide in OnboardingSlides.FIRST..OnboardingSlides.LAST) {
             val settings = FakeSettingsRepository()
             val vm = viewModel(settings = settings)
-            repeat(slide) { vm.onForward() }
+            repeat(slide) { vm.onAction(OnboardingAction.Forward) }
 
-            vm.onSkip()
+            vm.onAction(OnboardingAction.Skip)
             advanceUntilIdle()
 
             assertTrue("skip failed from slide $slide", settings.current.isOnboardingCompleted)
@@ -168,9 +163,9 @@ class OnboardingViewModelTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
 
-        vm.onForward()
-        vm.onForward()
-        vm.onBack()
+        vm.onAction(OnboardingAction.Forward)
+        vm.onAction(OnboardingAction.Forward)
+        vm.onAction(OnboardingAction.Back)
         advanceUntilIdle()
 
         // The slide index is session state, not a setting.
@@ -184,7 +179,7 @@ class OnboardingViewModelTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
 
-        vm.onThemeSelected(ThemeMode.Dark)
+        vm.onAction(OnboardingAction.ThemeSelected(ThemeMode.Dark))
         advanceUntilIdle()
 
         assertEquals(ThemeMode.Dark, settings.current.themeMode)
@@ -195,7 +190,7 @@ class OnboardingViewModelTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
 
-        vm.onSearchEngineSelected(SearchEngine.DuckDuckGo)
+        vm.onAction(OnboardingAction.SearchEngineSelected(SearchEngine.DuckDuckGo))
         advanceUntilIdle()
 
         assertEquals(SearchEngine.DuckDuckGo, settings.current.searchEngine)
@@ -206,7 +201,7 @@ class OnboardingViewModelTest {
         val settings = FakeSettingsRepository()
         val vm = viewModel(settings = settings)
 
-        vm.onThemeSelected(ThemeMode.Dark)
+        vm.onAction(OnboardingAction.ThemeSelected(ThemeMode.Dark))
         advanceUntilIdle()
 
         // The state shows what is stored, not a locally held copy.
@@ -220,7 +215,7 @@ class OnboardingViewModelTest {
         val language = FakeAppLanguageController()
         val vm = viewModel(language = language)
 
-        vm.onLanguageSelected(AppLanguage.Vietnamese)
+        vm.onAction(OnboardingAction.LanguageSelected(AppLanguage.Vietnamese))
         advanceUntilIdle()
 
         assertEquals(AppLanguage.Vietnamese, language.current())
@@ -230,11 +225,11 @@ class OnboardingViewModelTest {
     fun `choosing the language already in effect does not reapply it`() = runTest {
         val language = FakeAppLanguageController()
         val vm = viewModel(language = language)
-        vm.onLanguageSelected(AppLanguage.Vietnamese)
+        vm.onAction(OnboardingAction.LanguageSelected(AppLanguage.Vietnamese))
         advanceUntilIdle()
         val appliedBefore = language.applied.size
 
-        vm.onLanguageSelected(AppLanguage.Vietnamese)
+        vm.onAction(OnboardingAction.LanguageSelected(AppLanguage.Vietnamese))
         advanceUntilIdle()
 
         // A no-op must not cost an activity recreation and its black flash.
@@ -258,7 +253,7 @@ class OnboardingViewModelTest {
         val savedState = SavedStateHandle()
         val vm = viewModel(savedState = savedState)
 
-        vm.onForward()
+        vm.onAction(OnboardingAction.Forward)
 
         assertEquals(OnboardingSlides.LANGUAGE, savedState.get<Int>("onboarding_current_slide"))
     }

@@ -6,7 +6,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.feature.onboarding.domain.usecase.SetOnboardingCompletedUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.SetDynamicColorEnabledUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -51,14 +50,6 @@ class SettingsUseCasesTest {
         val result = useCase(false)
         assertTrue(result is Result.Success)
         assertEquals(false, fake.lastDynamicColorEnabled)
-    }
-
-    @Test
-    fun setOnboardingCompletedUseCase_delegates() = runBlocking {
-        val useCase = SetOnboardingCompletedUseCase(fake)
-        val result = useCase(true)
-        assertTrue(result is Result.Success)
-        assertEquals(true, fake.lastOnboardingCompleted)
     }
 }
 
