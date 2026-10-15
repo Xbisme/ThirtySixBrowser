@@ -10,7 +10,7 @@ whole table: about 300 B per row, so 100,000 rows is about 30 MB against a ~96 M
 
 ## Decision
 
-- A visit is recorded with an explicit per-navigation token in `PageViewModel` (armed in
+- A visit is recorded with an explicit per-navigation token in `BrowserViewModel` (armed in
   `onLoadStarted`, consumed once in `onLoadFinished`, cleared in `onLoadFailed`), not inferred from
   UI state: by `onPageFinished` the state already shows the new URL as loaded.
 - `onReceivedTitle` usually arrives after `onPageFinished`, so the row is written with the title

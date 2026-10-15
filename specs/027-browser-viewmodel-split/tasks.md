@@ -94,7 +94,7 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
 
 ## Phase 5: Governance
 
-- [ ] T012 `docs/adr/0027-browser-state-split-over-a-page-store.md` (template format) covering:
+- [X] T012 `docs/adr/0027-browser-state-split-over-a-page-store.md` (template format) covering:
   - the store and its scope
   - the five holders
   - the writers table
