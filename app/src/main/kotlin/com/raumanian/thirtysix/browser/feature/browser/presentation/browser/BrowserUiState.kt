@@ -1,10 +1,9 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
-/**
- * Immutable UI snapshot for the Browser screen. There is no `DEFAULT`: the initial state depends
- * on the injected home URL.
- */
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.CurrentPage
+
+/** The browser screen's snapshot, assembled at the route; see [browserUiState]. */
 data class BrowserUiState(
     val currentUrl: String,
     val loadingState: LoadingState,
@@ -15,9 +14,7 @@ data class BrowserUiState(
     /** The active tab is incognito: drives the indicator, the disk-cache gates and the WebView lockdown. */
     val isIncognito: Boolean = false,
     val isBookmarked: Boolean = false,
-    /** Home was pressed on a loaded page and covers it; Back clears it. */
     val homeOverlay: Boolean = false,
-    /** This tab left the Home page; Back without page history returns there. */
     val cameFromHome: Boolean = false,
     val isDesktopMode: Boolean = false,
 ) {
@@ -25,3 +22,17 @@ data class BrowserUiState(
     val isHomeContent: Boolean
         get() = currentUrl == UrlConstants.HOME_PAGE_URL || homeOverlay
 }
+
+fun browserUiState(page: CurrentPage, own: PageUiState): BrowserUiState = BrowserUiState(
+    currentUrl = page.url,
+    loadingState = own.loadingState,
+    canGoBack = own.canGoBack,
+    canGoForward = own.canGoForward,
+    addressBarText = own.addressBarText,
+    isAddressBarFocused = own.isAddressBarFocused,
+    isIncognito = page.isIncognito,
+    isBookmarked = own.isBookmarked,
+    homeOverlay = own.homeOverlay,
+    cameFromHome = own.cameFromHome,
+    isDesktopMode = own.isDesktopMode,
+)

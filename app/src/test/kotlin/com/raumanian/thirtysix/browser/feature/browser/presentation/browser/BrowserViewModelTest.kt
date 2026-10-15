@@ -18,6 +18,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
@@ -89,6 +90,7 @@ class BrowserViewModelTest {
             recordHistoryEntry = RecordHistoryEntryUseCase(historyRepository),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(historyRepository),
             startDownload = noOpStartDownloadUseCase(),
+            pageStore = CurrentPageRepositoryImpl(url),
         )
     }
 
@@ -125,7 +127,7 @@ class BrowserViewModelTest {
         val vm = newViewModel("https://example.com")
         vm.uiState.test {
             val first = awaitItem()
-            assertEquals("https://example.com", first.currentUrl)
+            assertEquals("https://example.com", vm.currentPage.value.url)
             assertEquals(LoadingState.Idle, first.loadingState)
             cancelAndIgnoreRemainingEvents()
         }
@@ -141,7 +143,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.Page.ProgressChanged(MID_PROGRESS))
         vm.onAction(BrowserAction.Page.ProgressChanged(MAX_PROGRESS))
 
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals("https://example.com", state.currentUrl)
         assertEquals(LoadingState.Loaded, state.loadingState)
     }
@@ -153,7 +155,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.Page.ProgressChanged(MID_PROGRESS)) // never reaches 100
         vm.onAction(BrowserAction.Page.LoadFinished("https://example.com"))
 
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals(LoadingState.Loaded, state.loadingState)
     }
 
@@ -162,9 +164,9 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.LoadStarted("https://example.com"))
         vm.onAction(BrowserAction.Page.LoadFinished("https://example.com"))
-        val firstLoaded = vm.uiState.value
+        val firstLoaded = vm.screenState()
         vm.onAction(BrowserAction.Page.LoadFinished("https://example.com")) // second call
-        val secondLoaded = vm.uiState.value
+        val secondLoaded = vm.screenState()
 
         assertEquals(firstLoaded, secondLoaded)
         assertEquals(LoadingState.Loaded, secondLoaded.loadingState)
@@ -175,7 +177,7 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.LoadStarted("https://example.com"))
         vm.onAction(BrowserAction.Page.ProgressChanged(OVER_PROGRESS)) // defensive: 150
-        assertEquals(LoadingState.Loaded, vm.uiState.value.loadingState)
+        assertEquals(LoadingState.Loaded, vm.screenState().loadingState)
     }
 
     @Test
@@ -183,7 +185,7 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.LoadStarted("https://example.com"))
         vm.onAction(BrowserAction.Page.ProgressChanged(NEGATIVE_PROGRESS)) // defensive: -5
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertTrue(state.loadingState is LoadingState.Loading)
         assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
@@ -193,7 +195,7 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.LoadStarted("https://example.com"))
         vm.onAction(BrowserAction.Page.LoadFailed(ErrorReason.NetworkUnavailable))
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertTrue(state.loadingState is LoadingState.Failed)
         assertEquals(ErrorReason.NetworkUnavailable, (state.loadingState as LoadingState.Failed).reason)
     }
@@ -205,7 +207,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.Page.LoadFinished("https://example.com"))
         vm.onAction(BrowserAction.Page.LoadStarted("https://other.example.com")) // simulating a reload
         vm.onAction(BrowserAction.Page.LoadFailed(ErrorReason.SslError))
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertTrue(state.loadingState is LoadingState.Failed)
         assertEquals(ErrorReason.SslError, (state.loadingState as LoadingState.Failed).reason)
     }
@@ -217,7 +219,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.Page.LoadFailed(ErrorReason.DnsFailure))
         // Now retry
         vm.onAction(BrowserAction.Page.LoadStarted("https://example.com"))
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertTrue(state.loadingState is LoadingState.Loading)
         assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
@@ -241,7 +243,7 @@ class BrowserViewModelTest {
     @Test
     fun `initial canGoBack and canGoForward are false`() = runTest {
         val vm = newViewModel()
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals(false, state.canGoBack)
         assertEquals(false, state.canGoForward)
     }
@@ -250,8 +252,8 @@ class BrowserViewModelTest {
     fun `onCanGoBackChanged true propagates to state`() = runTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.CanGoBackChanged(true))
-        assertEquals(true, vm.uiState.value.canGoBack)
-        assertEquals(false, vm.uiState.value.canGoForward) // independent
+        assertEquals(true, vm.screenState().canGoBack)
+        assertEquals(false, vm.screenState().canGoForward) // independent
     }
 
     @Test
@@ -259,15 +261,15 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.CanGoBackChanged(true))
         vm.onAction(BrowserAction.Page.CanGoBackChanged(false))
-        assertEquals(false, vm.uiState.value.canGoBack)
+        assertEquals(false, vm.screenState().canGoBack)
     }
 
     @Test
     fun `onCanGoForwardChanged true propagates to state`() = runTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.CanGoForwardChanged(true))
-        assertEquals(true, vm.uiState.value.canGoForward)
-        assertEquals(false, vm.uiState.value.canGoBack) // independent
+        assertEquals(true, vm.screenState().canGoForward)
+        assertEquals(false, vm.screenState().canGoBack) // independent
     }
 
     @Test
@@ -275,12 +277,12 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.CanGoBackChanged(true))
         vm.onAction(BrowserAction.Page.CanGoForwardChanged(true))
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals(true, state.canGoBack)
         assertEquals(true, state.canGoForward)
 
         vm.onAction(BrowserAction.Page.CanGoBackChanged(false))
-        val after = vm.uiState.value
+        val after = vm.screenState()
         assertEquals(false, after.canGoBack)
         assertEquals(true, after.canGoForward) // forward retains its value
     }
@@ -292,10 +294,10 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.Page.LoadStarted("https://example.com"))
         vm.onAction(BrowserAction.Page.ProgressChanged(MID_PROGRESS)) // partial load
-        assertTrue(vm.uiState.value.loadingState is LoadingState.Loading)
+        assertTrue(vm.screenState().loadingState is LoadingState.Loading)
 
         vm.onAction(BrowserAction.Page.LoadStopped)
-        assertEquals(LoadingState.Loaded, vm.uiState.value.loadingState)
+        assertEquals(LoadingState.Loaded, vm.screenState().loadingState)
     }
 
     @Test
@@ -303,20 +305,20 @@ class BrowserViewModelTest {
         val vm = newViewModel()
         // From Idle
         vm.onAction(BrowserAction.Page.LoadStopped)
-        assertEquals(LoadingState.Idle, vm.uiState.value.loadingState)
+        assertEquals(LoadingState.Idle, vm.screenState().loadingState)
 
         // From Loaded
         vm.onAction(BrowserAction.Page.LoadStarted("https://example.com"))
         vm.onAction(BrowserAction.Page.LoadFinished("https://example.com"))
-        val loaded = vm.uiState.value
+        val loaded = vm.screenState()
         vm.onAction(BrowserAction.Page.LoadStopped)
-        assertEquals(loaded, vm.uiState.value)
+        assertEquals(loaded, vm.screenState())
 
         // From Failed
         vm.onAction(BrowserAction.Page.LoadFailed(ErrorReason.NetworkUnavailable))
-        val failed = vm.uiState.value
+        val failed = vm.screenState()
         vm.onAction(BrowserAction.Page.LoadStopped)
-        assertEquals(failed, vm.uiState.value)
+        assertEquals(failed, vm.screenState())
     }
 
     // ---------- Address bar defaults ----------
@@ -324,7 +326,7 @@ class BrowserViewModelTest {
     @Test
     fun `initial address-bar text is empty and not focused`() = runTest {
         val vm = newViewModel()
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals("", state.addressBarText)
         assertEquals(false, state.isAddressBarFocused)
     }
@@ -335,16 +337,16 @@ class BrowserViewModelTest {
     fun `onAddressBarTextChange updates state`() = runTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.AddressBar.TextChange("foo"))
-        assertEquals("foo", vm.uiState.value.addressBarText)
+        assertEquals("foo", vm.screenState().addressBarText)
     }
 
     @Test
     fun `onAddressBarFocusChange toggles flag`() = runTest {
         val vm = newViewModel()
         vm.onAction(BrowserAction.AddressBar.FocusChange(true))
-        assertEquals(true, vm.uiState.value.isAddressBarFocused)
+        assertEquals(true, vm.screenState().isAddressBarFocused)
         vm.onAction(BrowserAction.AddressBar.FocusChange(false))
-        assertEquals(false, vm.uiState.value.isAddressBarFocused)
+        assertEquals(false, vm.screenState().isAddressBarFocused)
     }
 
     @Test
@@ -501,7 +503,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.AddressBar.TextChange("typing-in-progress"))
         vm.onAction(BrowserAction.AddressBar.FocusChange(true))
         vm.onAction(BrowserAction.Page.UrlChanged("https://example.com/about"))
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals("https://example.com/about", state.currentUrl)
         assertEquals("typing-in-progress", state.addressBarText)
         assertEquals(true, state.isAddressBarFocused)
@@ -512,7 +514,7 @@ class BrowserViewModelTest {
     fun `onLoadStarted does not mutate currentUrl on load start`() = runTest {
         val vm = newViewModel("https://initial.example.com")
         vm.onAction(BrowserAction.Page.LoadStarted("https://other.example.com"))
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals("https://initial.example.com", state.currentUrl)
         assertTrue(state.loadingState is LoadingState.Loading)
     }
@@ -534,7 +536,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.AddressBar.TextChange("example.com"))
         vm.onAction(BrowserAction.AddressBar.Submit)
 
-        assertEquals("https://example.com", vm.uiState.value.currentUrl)
+        assertEquals("https://example.com", vm.screenState().currentUrl)
     }
 
     // ---------- onAddressBarClear ----------
@@ -545,7 +547,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.AddressBar.TextChange("partial input"))
         vm.onAction(BrowserAction.AddressBar.FocusChange(true))
         vm.onAction(BrowserAction.AddressBar.Clear)
-        val state = vm.uiState.value
+        val state = vm.screenState()
         assertEquals("", state.addressBarText)
         assertEquals(true, state.isAddressBarFocused)
     }
@@ -560,7 +562,7 @@ class BrowserViewModelTest {
         val seededUrl = "https://www.google.com/"
         val vm = newViewModel(url = seededUrl)
         advanceUntilIdle()
-        assertEquals(seededUrl, vm.uiState.value.currentUrl)
+        assertEquals(seededUrl, vm.screenState().currentUrl)
     }
 
     @Test
@@ -719,7 +721,7 @@ class BrowserViewModelTest {
     fun `a tab at the Home address shows Home content`() = runTest {
         val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
         advanceUntilIdle()
-        assertTrue(vm.uiState.value.isHomeContent)
+        assertTrue(vm.screenState().isHomeContent)
     }
 
     @Test
@@ -727,10 +729,10 @@ class BrowserViewModelTest {
         val vm = newViewModel("https://page.test/")
         advanceUntilIdle()
         vm.onAction(BrowserAction.Home.Pressed)
-        assertTrue(vm.uiState.value.isHomeContent)
-        assertEquals("https://page.test/", vm.uiState.value.currentUrl)
+        assertTrue(vm.screenState().isHomeContent)
+        assertEquals("https://page.test/", vm.screenState().currentUrl)
         vm.onAction(BrowserAction.Home.OverlayDismissed)
-        assertFalse(vm.uiState.value.isHomeContent)
+        assertFalse(vm.screenState().isHomeContent)
     }
 
     @Test
@@ -743,7 +745,7 @@ class BrowserViewModelTest {
         vm.onAction(BrowserAction.AddressBar.TextChange("kotlinlang.org"))
         vm.onAction(BrowserAction.AddressBar.Submit)
         assertEquals(listOf(fromHome, fromHome), events.loads())
-        assertTrue(vm.uiState.value.cameFromHome)
+        assertTrue(vm.screenState().cameFromHome)
     }
 
     @Test
@@ -753,23 +755,23 @@ class BrowserViewModelTest {
         val events = eventsOf(vm)
         vm.onAction(BrowserAction.Home.Submit("   "))
         assertTrue(events.loads().isEmpty())
-        assertFalse(vm.uiState.value.cameFromHome)
+        assertFalse(vm.screenState().cameFromHome)
     }
 
     @Test
     fun `Back without history returns to Home only when the page came from Home`() = runTest {
         val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
         advanceUntilIdle()
-        val before = vm.uiState.value
+        val before = vm.screenState()
         vm.onAction(BrowserAction.BackWithoutHistory)
-        assertEquals(before, vm.uiState.value)
+        assertEquals(before, vm.screenState())
 
         vm.onAction(BrowserAction.Home.NavigateFrom)
         vm.onAction(BrowserAction.Page.UrlChanged("https://page.test/"))
-        assertFalse(vm.uiState.value.isHomeContent)
+        assertFalse(vm.screenState().isHomeContent)
         vm.onAction(BrowserAction.BackWithoutHistory)
-        assertTrue(vm.uiState.value.isHomeContent)
-        assertFalse(vm.uiState.value.cameFromHome)
+        assertTrue(vm.screenState().isHomeContent)
+        assertFalse(vm.screenState().cameFromHome)
     }
 
     private companion object {

@@ -90,7 +90,9 @@ fun BrowserRoute(
     longPressActions: LongPressActions = hiltViewModel(),
     permissionGate: SitePermissionGate = hiltViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val pageState by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentPage by viewModel.currentPage.collectAsStateWithLifecycle()
+    val state = browserUiState(currentPage, pageState)
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
     // Held as State, not delegated: reading `.value` here would recompose on every tick.

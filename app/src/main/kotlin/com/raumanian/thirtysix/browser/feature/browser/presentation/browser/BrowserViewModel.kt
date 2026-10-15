@@ -20,6 +20,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
 import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.CurrentPage
+import com.raumanian.thirtysix.browser.feature.browser.domain.repository.CurrentPageRepository
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.StartDownloadResult
@@ -66,16 +68,15 @@ class BrowserViewModel @Inject constructor(
     private val recordHistoryEntry: RecordHistoryEntryUseCase,
     private val updateHistoryEntryTitle: UpdateHistoryEntryTitleUseCase,
     private val startDownload: StartDownloadUseCase,
+    private val pageStore: CurrentPageRepository,
 ) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<BrowserUiState> = MutableStateFlow(
-        BrowserUiState(
-            currentUrl = defaultHomeUrl,
-            loadingState = LoadingState.Idle,
-        ),
-    )
+    private val _uiState: MutableStateFlow<PageUiState> = MutableStateFlow(PageUiState())
 
-    val uiState: StateFlow<BrowserUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<PageUiState> = _uiState.asStateFlow()
+
+    /** The page state this holder shares with the other browser holders. */
+    val currentPage: StateFlow<CurrentPage> = pageStore.page
 
     // Kept until the screen collects them, as the consumed-once state fields they replace were.
     private val eventChannel = Channel<BrowserEvent>(Channel.BUFFERED)
@@ -107,8 +108,6 @@ class BrowserViewModel @Inject constructor(
             initialValue = INITIAL_TAB_COUNT,
         )
 
-    private val currentTitleCache: MutableStateFlow<String> = MutableStateFlow("")
-
     // In memory only: new tabs and every tab after a process restart start in mobile mode. Tab ids
     // are never reused, so a closed tab's entry is inert.
     private val desktopModeTabs = MutableStateFlow<Set<Long>>(emptySet())
@@ -130,38 +129,32 @@ class BrowserViewModel @Inject constructor(
     private var lastRecordedHistoryUrl: String? = null
 
     init {
+        // A new tab starts without the previous tab's title; the store drops it on a switch.
         activeTabFlow
             .onEach { tab ->
-                tab?.let { active ->
-                    _uiState.update { state -> state.copy(currentUrl = active.url) }
-                }
+                pageStore.setActiveTab(tab)
+                tab?.let { active -> pageStore.setUrl(active.url) }
             }
             .launchIn(viewModelScope)
 
-        // A new tab starts without the previous tab's title.
-        activeTabFlow
-            .map { it?.id }
+        // The find bar belongs to the page it searched.
+        pageStore.page
+            .map { it.generation }
             .distinctUntilChanged()
-            .onEach {
-                currentTitleCache.value = ""
-                // The find bar belongs to the page it searched.
-                onFindClosed()
-            }
+            .onEach { onFindClosed() }
             .launchIn(viewModelScope)
 
-        combine(activeTabFlow.map { it?.id }, desktopModeTabs) { id, desktop -> id != null && id in desktop }
+        combine(pageStore.page.map { it.activeTab?.id }, desktopModeTabs) { id, desktop -> id != null && id in desktop }
             .distinctUntilChanged()
             .onEach { desktop -> _uiState.update { it.copy(isDesktopMode = desktop) } }
             .launchIn(viewModelScope)
 
         observeActiveTabIsIncognito()
-            .onEach { incognito ->
-                _uiState.update { state -> state.copy(isIncognito = incognito) }
-            }
+            .onEach { incognito -> pageStore.setIncognito(incognito) }
             .launchIn(viewModelScope)
 
-        _uiState
-            .map { it.currentUrl }
+        pageStore.page
+            .map { it.url }
             .distinctUntilChanged()
             .flatMapLatest { url -> isUrlBookmarked(url) }
             .onEach { bookmarked ->
@@ -236,9 +229,9 @@ class BrowserViewModel @Inject constructor(
     }
 
     private fun onStarTapped() {
-        val state = _uiState.value
-        val url = state.currentUrl
-        val title = currentTitleCache.value
+        val page = pageStore.page.value
+        val url = page.url
+        val title = page.title
         viewModelScope.launch {
             val result = toggleBookmark(url = url, fallbackTitle = title)
             if (result is Result.Success) {
@@ -279,7 +272,7 @@ class BrowserViewModel @Inject constructor(
 
     /** Flips the active tab's page mode; nothing without an active tab. The screen reloads the WebView. */
     private fun onDesktopModeToggled() {
-        val tabId = activeTabFlow.value?.id ?: return
+        val tabId = pageStore.page.value.activeTab?.id ?: return
         desktopModeTabs.update { desktop -> if (tabId in desktop) desktop - tabId else desktop + tabId }
         eventChannel.trySend(BrowserEvent.SetDesktopMode(tabId in desktopModeTabs.value))
     }
@@ -317,9 +310,9 @@ class BrowserViewModel @Inject constructor(
     @Suppress("UNUSED_PARAMETER")
     private fun onLoadStarted(url: String) {
         pendingHistoryUrl = url
-        // Drop the previous page's title so it can never attach to the new URL; [onTitleReceived] patches it in.
-        currentTitleCache.value = ""
-        // A new page closes the find bar; its highlights went with the old page.
+        // Drops the previous page's title so it can never attach to the new URL, and closes the find
+        // bar, whose highlights went with the old page; [onTitleReceived] patches the title in.
+        pageStore.startNewPage()
         onFindClosed()
         _loadProgress.value = 0f
         _uiState.update {
@@ -352,23 +345,20 @@ class BrowserViewModel @Inject constructor(
     }
 
     private fun onLoadFinished(url: String) {
-        val previous = _uiState.value
+        val previousIncognito = pageStore.page.value.isIncognito
         // One write per started navigation: a platform re-fire of onPageFinished finds the token consumed.
         val shouldRecord = pendingHistoryUrl != null
         pendingHistoryUrl = null
         _loadProgress.value = 0f
-        _uiState.update { current ->
-            if (current.loadingState is LoadingState.Loaded && current.currentUrl == url) {
-                current
-            } else {
-                current.copy(currentUrl = url, loadingState = LoadingState.Loaded)
-            }
+        if (_uiState.value.loadingState !is LoadingState.Loaded || pageStore.page.value.url != url) {
+            pageStore.setUrl(url)
+            _uiState.update { it.copy(loadingState = LoadingState.Loaded) }
         }
         persistActiveTabState(url)
         // The use case skips incognito and then returns 0.
         if (shouldRecord) {
-            val title = currentTitleCache.value
-            val incognito = previous.isIncognito
+            val title = pageStore.page.value.title
+            val incognito = previousIncognito
             viewModelScope.launch {
                 val rowId = recordHistoryEntry(url = url, title = title, isIncognito = incognito)
                 lastRecordedHistoryId = rowId
@@ -398,7 +388,7 @@ class BrowserViewModel @Inject constructor(
 
     /** Shows the Home page over a loaded page; does nothing on Home. */
     private fun onHomePressed() {
-        _uiState.update { if (it.currentUrl == UrlConstants.HOME_PAGE_URL) it else it.copy(homeOverlay = true) }
+        if (pageStore.page.value.url != UrlConstants.HOME_PAGE_URL) _uiState.update { it.copy(homeOverlay = true) }
     }
 
     /** Submits like the address bar, then remembers that this navigation started on Home. */
@@ -412,12 +402,10 @@ class BrowserViewModel @Inject constructor(
 
     /** Back with no WebView history: returns the tab to Home when the page was opened from Home in a normal tab. */
     private fun onBackWithoutHistory() {
-        val state = _uiState.value
-        if (!state.cameFromHome || state.isIncognito) return
-        currentTitleCache.value = ""
-        _uiState.update {
-            it.copy(currentUrl = UrlConstants.HOME_PAGE_URL, cameFromHome = false, homeOverlay = false)
-        }
+        if (!_uiState.value.cameFromHome || pageStore.page.value.isIncognito) return
+        pageStore.setTitle("")
+        pageStore.setUrl(UrlConstants.HOME_PAGE_URL)
+        _uiState.update { it.copy(cameFromHome = false, homeOverlay = false) }
         persistActiveTabState(UrlConstants.HOME_PAGE_URL)
     }
 
@@ -439,23 +427,24 @@ class BrowserViewModel @Inject constructor(
 
     // Fired from onPageStarted and doUpdateVisitedHistory, so every hop of a redirect chain shows.
     private fun onUrlChanged(url: String) {
-        _uiState.update { it.copy(currentUrl = url) }
+        pageStore.setUrl(url)
         persistActiveTabState(url)
     }
 
     private fun onTitleReceived(title: String) {
-        currentTitleCache.value = title
+        pageStore.setTitle(title)
+        val page = pageStore.page.value
         // The title usually arrives after the load finished; patch it onto the row just written.
-        if (lastRecordedHistoryUrl == _uiState.value.currentUrl) {
+        if (lastRecordedHistoryUrl == page.url) {
             val rowId = lastRecordedHistoryId
             viewModelScope.launch { updateHistoryEntryTitle(rowId, title) }
         }
-        val activeId = activeTabFlow.value?.id ?: return
-        val incognito = _uiState.value.isIncognito
+        val activeId = page.activeTab?.id ?: return
+        val incognito = page.isIncognito
         viewModelScope.launch {
             updateActiveTabUrlAndTitle(
                 tabId = activeId,
-                url = _uiState.value.currentUrl,
+                url = pageStore.page.value.url,
                 title = title,
                 isIncognito = incognito,
             )
@@ -474,7 +463,7 @@ class BrowserViewModel @Inject constructor(
 
     private fun onIconReceived(url: String, icon: Bitmap) {
         // Incognito never writes favicons: the cache is keyed by host and would leak browsing into normal tabs.
-        if (_uiState.value.isIncognito) return
+        if (pageStore.page.value.isIncognito) return
         viewModelScope.launch {
             faviconCache.save(url, icon.pngWriter())
         }
@@ -483,21 +472,23 @@ class BrowserViewModel @Inject constructor(
     /** Stores the tab preview by tab id; dropped when there is no active tab yet. */
     private fun onScreenshotReady(bitmap: Bitmap) {
         // Incognito never writes previews to disk, where they could be recovered after the tab closed.
-        if (_uiState.value.isIncognito) return
-        val tabId = activeTabFlow.value?.id ?: return
+        val page = pageStore.page.value
+        if (page.isIncognito) return
+        val tabId = page.activeTab?.id ?: return
         viewModelScope.launch {
             screenshotCache.save(tabId, bitmap.webpWriter())
         }
     }
 
     private fun persistActiveTabState(url: String) {
-        val activeId = activeTabFlow.value?.id ?: return
-        val incognito = _uiState.value.isIncognito
+        val page = pageStore.page.value
+        val activeId = page.activeTab?.id ?: return
+        val incognito = page.isIncognito
         viewModelScope.launch {
             updateActiveTabUrlAndTitle(
                 tabId = activeId,
                 url = url,
-                title = currentTitleCache.value,
+                title = page.title,
                 isIncognito = incognito,
             )
         }

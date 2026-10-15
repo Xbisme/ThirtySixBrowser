@@ -17,6 +17,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
@@ -109,6 +110,7 @@ class BrowserViewModelIncognitoCacheGateTest {
                 FakeHistoryRepository(),
             ),
             startDownload = noOpStartDownloadUseCase(),
+            pageStore = CurrentPageRepositoryImpl("https://normal.example.com"),
         )
     }
 
@@ -120,7 +122,7 @@ class BrowserViewModelIncognitoCacheGateTest {
             screenshotCache = NoopScreenshotCache,
         )
         advanceUntilIdle()
-        assertEquals("incognito flag should propagate to UiState", true, vm.uiState.value.isIncognito)
+        assertEquals("incognito flag should propagate to UiState", true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         vm.onAction(BrowserAction.Page.IconReceived("https://incognito.example.com", bmp))
@@ -141,7 +143,7 @@ class BrowserViewModelIncognitoCacheGateTest {
             screenshotCache = recordingScreenshot,
         )
         advanceUntilIdle()
-        assertEquals(true, vm.uiState.value.isIncognito)
+        assertEquals(true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         vm.onAction(BrowserAction.Page.ScreenshotReady(bmp))
@@ -162,7 +164,7 @@ class BrowserViewModelIncognitoCacheGateTest {
             screenshotCache = NoopScreenshotCache,
         )
         advanceUntilIdle()
-        assertEquals(false, vm.uiState.value.isIncognito)
+        assertEquals(false, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         vm.onAction(BrowserAction.Page.IconReceived("https://example.com", bmp))

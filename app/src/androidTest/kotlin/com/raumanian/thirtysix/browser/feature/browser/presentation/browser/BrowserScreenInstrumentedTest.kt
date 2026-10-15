@@ -35,6 +35,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
+import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
@@ -119,6 +120,7 @@ class BrowserScreenInstrumentedTest {
                 ),
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(InstrumentedNoopHistoryRepository),
                 startDownload = instrumentedNoOpStartDownloadUseCase(),
+                pageStore = CurrentPageRepositoryImpl(TEST_PAGE_URL),
             )
             composeRule.activity.setContent {
                 BrowserRoute(

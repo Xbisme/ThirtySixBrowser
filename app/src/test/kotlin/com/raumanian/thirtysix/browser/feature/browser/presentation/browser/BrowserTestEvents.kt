@@ -14,3 +14,6 @@ internal fun TestScope.eventsOf(vm: BrowserViewModel): List<BrowserEvent> {
 }
 
 internal fun List<BrowserEvent>.loads(): List<String> = filterIsInstance<BrowserEvent.LoadUrl>().map { it.url }
+
+/** The screen's snapshot, assembled as `BrowserRoute` does. */
+internal fun BrowserViewModel.screenState(): BrowserUiState = browserUiState(currentPage.value, uiState.value)

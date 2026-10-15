@@ -30,6 +30,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
+import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
@@ -113,6 +114,7 @@ class BrowserScreenOfflineErrorTest {
                 ),
                 updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(OfflineErrorNoopHistoryRepository),
                 startDownload = instrumentedNoOpStartDownloadUseCase(),
+                pageStore = CurrentPageRepositoryImpl(SAMPLE_PAGE_URL),
             ).apply {
                 onAction(BrowserAction.Page.LoadStarted(SAMPLE_PAGE_URL))
                 onAction(BrowserAction.Page.LoadFailed(ErrorReason.NetworkUnavailable))

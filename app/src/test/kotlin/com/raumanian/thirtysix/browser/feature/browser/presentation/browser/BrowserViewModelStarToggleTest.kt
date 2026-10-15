@@ -15,6 +15,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
@@ -88,7 +89,7 @@ class BrowserViewModelStarToggleTest {
 
         assertEquals(0, bookmarkRepo.countBookmarksByUrl("https://example.com"))
         assertEquals(BrowserEvent.Bookmark(BookmarkSnackbarEvent.Removed), events.last())
-        assertEquals(false, vm.uiState.value.isBookmarked)
+        assertEquals(false, vm.screenState().isBookmarked)
     }
 
     @Test
@@ -135,6 +136,7 @@ class BrowserViewModelStarToggleTest {
                 FakeHistoryRepository(),
             ),
             startDownload = noOpStartDownloadUseCase(),
+            pageStore = CurrentPageRepositoryImpl(url),
         )
     }
 

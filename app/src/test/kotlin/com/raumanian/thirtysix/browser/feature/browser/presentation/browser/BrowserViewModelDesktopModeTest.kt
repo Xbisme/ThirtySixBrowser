@@ -45,7 +45,7 @@ class BrowserViewModelDesktopModeTest {
 
         assertTrue(vm.desktopMode.isDesktop(2L))
         assertFalse(vm.desktopMode.isDesktop(1L))
-        assertTrue(vm.uiState.value.isDesktopMode)
+        assertTrue(vm.screenState().isDesktopMode)
     }
 
     @Test
@@ -57,7 +57,7 @@ class BrowserViewModelDesktopModeTest {
         assertEquals(BrowserEvent.SetDesktopMode(false), events.last())
         advanceUntilIdle()
         assertFalse(vm.desktopMode.isDesktop(2L))
-        assertFalse(vm.uiState.value.isDesktopMode)
+        assertFalse(vm.screenState().isDesktopMode)
     }
 
     @Test
@@ -68,17 +68,17 @@ class BrowserViewModelDesktopModeTest {
         tabs.emit(listOf(tab(1L, lastActiveAt = 10L), tab(2L, lastActiveAt = 3L)))
         advanceUntilIdle()
         assertEquals(1L, vm.activeTab.value?.id)
-        assertFalse(vm.uiState.value.isDesktopMode)
+        assertFalse(vm.screenState().isDesktopMode)
 
         tabs.emit(listOf(tab(1L, lastActiveAt = 10L), tab(2L, lastActiveAt = 20L)))
         advanceUntilIdle()
-        assertTrue(vm.uiState.value.isDesktopMode)
+        assertTrue(vm.screenState().isDesktopMode)
 
         tabs.emit(listOf(tab(1L, lastActiveAt = 10L), tab(2L, lastActiveAt = 20L), tab(3L, lastActiveAt = 30L)))
         advanceUntilIdle()
         assertEquals(3L, vm.activeTab.value?.id)
         assertFalse(vm.desktopMode.isDesktop(3L))
-        assertFalse(vm.uiState.value.isDesktopMode)
+        assertFalse(vm.screenState().isDesktopMode)
     }
 
     @Test
@@ -87,7 +87,7 @@ class BrowserViewModelDesktopModeTest {
         val restarted = newViewModel()
         assertFalse(restarted.desktopMode.isDesktop(1L))
         assertFalse(restarted.desktopMode.isDesktop(2L))
-        assertFalse(restarted.uiState.value.isDesktopMode)
+        assertFalse(restarted.screenState().isDesktopMode)
     }
 
     @Test

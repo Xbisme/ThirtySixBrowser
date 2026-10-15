@@ -13,6 +13,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
@@ -169,6 +170,7 @@ class BrowserViewModelHistoryRecordSequenceTest {
             recordHistoryEntry = RecordHistoryEntryUseCase(history),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(history),
             startDownload = noOpStartDownloadUseCase(),
+            pageStore = CurrentPageRepositoryImpl(HOME_URL),
         )
     }
 
