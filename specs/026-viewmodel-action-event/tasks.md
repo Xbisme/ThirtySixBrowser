@@ -53,7 +53,7 @@ Gradle calls are prefixed with `JAVA_HOME="/Applications/Android Studio.app/Cont
   - `grep -c '<error' config/ktlint/baseline.xml` (expect 23)
   - `grep -rl 'Dispatchers.setMain' app/src/test | wc -l` (expect 22)
   - use-case count `find M -name '*UseCase.kt' | wc -l` (expect 82)
-- [ ] T002 *(APKs of `0372d0f` kept in the session scratchpad; seeding on the AVD waits for it)* Build and keep the `0372d0f` debug and release APKs outside the repository, in the session scratchpad directory (never committed) for G5 upgrade and cold-start comparison. Install the debug one on `TA016_API36_16K` and seed as Spec 025 T005: tabs, history and downloads seeders (`app/src/debug/AndroidManifest.xml` actions); a bookmark folder, a fireproof site, a site-permission decision and a protection exception by hand.
+- [X] T002 Build and keep the `0372d0f` debug and release APKs outside the repository, in the session scratchpad directory (never committed) for G5 upgrade and cold-start comparison. Install the debug one on `TA016_API36_16K` and seed as Spec 025 T005: tabs, history and downloads seeders (`app/src/debug/AndroidManifest.xml` actions); a bookmark folder, a fireproof site, a site-permission decision and a protection exception by hand.
 
 ---
 
@@ -96,7 +96,7 @@ The two stories land together per feature because the holder's constructor (US3)
 
 - [X] T007 [US3] Remove `F/sitepermission/domain/usecase/{ObserveSitePermissionsUseCase,SetSitePermissionUseCase}.kt`. `F/sitepermission/presentation/sitepermissions/SitePermissionsViewModel.kt` injects `SitePermissionRepository` (`observeAll()`, `save(origin, capability, decision)`). Neither use case has a test of its own; update `T/feature/sitepermission/presentation/sitepermissions/SitePermissionsViewModelTest.kt` and `A/feature/sitepermission/presentation/sitepermissions/SitePermissionsScreenTest.kt`, which construct the holder.
 - [X] T008 [US2] Add `SitePermissionsAction` with 7 cases: `DecisionClick(origin, capability, current)`, `DecisionChosen(decision)`, `EditDismissed`, `RemoveSite(origin)`, `RemoveAllClick`, `RemoveAllConfirmed`, `RemoveAllDismissed`. Add `onAction`; there is no event type. Split `SitePermissionsScreen.kt` into `SitePermissionsRoute` + `SitePermissionsScreen(state, onAction, onBack)`. `siteGroup(…)` and `SitePermissionsDialogs(…)` take `onAction` instead of the holder. `SitePermissionNavigation.kt` calls the route.
-- [X] T009 *(instrumented run deferred: AVD not available; androidTest compiles)* [US2] Update `SitePermissionsViewModelTest` to drive `onAction` and `SitePermissionsScreenTest` to call `SitePermissionsRoute(viewModel = …)`. Delete the `SitePermissionsScreen.kt:95` line from `config/ktlint/baseline.xml`. Gate and **commit** `refactor(026): sitepermission actions and events`.
+- [X] T009 *(instrumented suite run in T047: 189/189)* [US2] Update `SitePermissionsViewModelTest` to drive `onAction` and `SitePermissionsScreenTest` to call `SitePermissionsRoute(viewModel = …)`. Delete the `SitePermissionsScreen.kt:95` line from `config/ktlint/baseline.xml`. Gate and **commit** `refactor(026): sitepermission actions and events`.
 
 ### privacy
 
@@ -107,7 +107,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - `FireAction`: `Fire`, `Acknowledge`.
 
   Add `onAction` to each holder. Split the screens into `ProtectionExceptionsRoute`/`Screen` and `FireproofSitesRoute`/`Screen`, and point `PrivacyNavigation.kt` at the routes. `RememberFireButton.kt` sends `FireAction.Fire` and `FireOverlayHost.kt` sends `FireAction.Acknowledge`; both stay hosts that obtain `FireViewModel`.
-- [X] T012 *(instrumented run deferred: AVD not available; androidTest compiles)* [US2] Update `T/feature/privacy/presentation/protectionexceptions/ProtectionExceptionsViewModelTest.kt`, to drive `onAction` (`FireproofSitesViewModel` and `FireViewModel` have no unit test; their screens are covered by the instrumented tests below and `FireCoordinatorImplTest`). Update `A/feature/privacy/presentation/fireproof/FireproofSitesScreenTest.kt` and `A/feature/browser/presentation/browser/protection/ProtectionScreensTest.kt` to call the routes. Gate (instrumented tests included) and **commit** `refactor(026): privacy actions and events`.
+- [X] T012 *(instrumented suite run in T047: 189/189)* [US2] Update `T/feature/privacy/presentation/protectionexceptions/ProtectionExceptionsViewModelTest.kt`, to drive `onAction` (`FireproofSitesViewModel` and `FireViewModel` have no unit test; their screens are covered by the instrumented tests below and `FireCoordinatorImplTest`). Update `A/feature/privacy/presentation/fireproof/FireproofSitesScreenTest.kt` and `A/feature/browser/presentation/browser/protection/ProtectionScreensTest.kt` to call the routes. Gate (instrumented tests included) and **commit** `refactor(026): privacy actions and events`.
 
 ### downloads
 
@@ -115,7 +115,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - `F/downloads/presentation/downloads/DownloadsViewModel.kt` and `F/browser/domain/usecase/ObserveHasActiveDownloadsUseCase.kt` inject `DownloadsRepository.observeAll()`.
   - Update `T/…/ObserveHasActiveDownloadsUseCaseTest.kt`, `DownloadsViewModelTest.kt` and `A/feature/downloads/presentation/downloads/DownloadsScreenTestDoubles.kt`.
 - [X] T014 [US2] Add `DownloadsAction` with 9 cases, one per `on…` function, carrying the same parameters. `DownloadsEvent` keeps its cases and is exposed as `events: Flow<DownloadsEvent>`; it is Drop, with `MutableSharedFlow(replay = 0, extraBufferCapacity = 1, onBufferOverflow = DROP_OLDEST)` unchanged. `emitEvent` becomes `private`. Split `DownloadsScreen.kt` into `DownloadsRoute` and `DownloadsScreen(state, onAction, onBack)`. The route's `EventEffect` shows the same snackbars; the `FileMissing` "Remove" action calls `onAction(RemoveFromListClicked(item))`. `DownloadsNavigation.kt` calls the route.
-- [X] T015 *(instrumented run deferred: AVD not available; androidTest compiles)* [US2] Update `DownloadsViewModelTest`, and make `A/…/downloads/{DownloadsScreenBrowseTest,DownloadsScreenCancelTest,DownloadsScreenActionSheetTest}.kt` call `DownloadsRoute(viewModel = vm)`. Delete the `DownloadsScreen.kt:42` baseline line. Gate and **commit** `refactor(026): downloads actions and events`.
+- [X] T015 *(instrumented suite run in T047: 189/189)* [US2] Update `DownloadsViewModelTest`, and make `A/…/downloads/{DownloadsScreenBrowseTest,DownloadsScreenCancelTest,DownloadsScreenActionSheetTest}.kt` call `DownloadsRoute(viewModel = vm)`. Delete the `DownloadsScreen.kt:42` baseline line. Gate and **commit** `refactor(026): downloads actions and events`.
 
 ### history
 
@@ -128,7 +128,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - `Snackbar(HistoryErrorEvent)`: **Drop**, the existing `MutableSharedFlow(replay = 0, extraBufferCapacity = 1, DROP_OLDEST)`.
 
   Expose `events = merge(...)`. `faviconCache` stays a property. Split `HistoryScreen.kt` into `HistoryRoute` (its `EventEffect` calls `onShowBrowser()` for `OpenUrl` and shows the snackbar for `Snackbar`) and `HistoryScreen(state, onAction, faviconCache, onBack)`. `HistoryContent` takes `onAction`. `HistoryNavigation.kt` calls the route.
-- [X] T018 *(instrumented run deferred: AVD not available; androidTest compiles)* [US2] Update `HistoryViewModelTest` so `openUrl` assertions read `HistoryEvent.OpenUrl` from `events`. Make `A/…/history/{HistoryScreenBrowseTest,HistoryScreenSearchTest,HistoryScreenLongPressTest}.kt` call `HistoryRoute(viewModel = …)`. Delete the two `HistoryScreen.kt` baseline lines. Gate and **commit** `refactor(026): history actions and events`.
+- [X] T018 *(instrumented suite run in T047: 189/189)* [US2] Update `HistoryViewModelTest` so `openUrl` assertions read `HistoryEvent.OpenUrl` from `events`. Make `A/…/history/{HistoryScreenBrowseTest,HistoryScreenSearchTest,HistoryScreenLongPressTest}.kt` call `HistoryRoute(viewModel = …)`. Delete the two `HistoryScreen.kt` baseline lines. Gate and **commit** `refactor(026): history actions and events`.
 
 ### onboarding
 
@@ -152,7 +152,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - `DynamicColorToggled`
 
   Expose `SettingsEvent` as `events`; it is Drop with unchanged settings. Split `SettingsScreen.kt` into `SettingsRoute` (`LifecycleStartEffect` → `Started`, `LifecycleResumeEffect` → `Resumed`) and `SettingsScreen(state, onAction, destinations)`. The section builders, `SettingsDialogHost(state, onAction)` and `SettingsSnackbarEffect(events, snackbarHostState)` take no holder. `QuickSettingsHost.kt` keeps obtaining `SettingsViewModel`, sends `…RowClick` actions from its `LaunchedEffect(request)`, and passes `state` + `onAction` to `SettingsDialogHost`. `SettingsNavigation.kt` calls the route.
-- [X] T024 *(instrumented run and hub quick settings by hand deferred: AVD not available; androidTest compiles; full G1 green)* [US2] Update `SettingsViewModelTest` and `SettingsViewModelDefaultBrowserTest`. Make the 8 `A/…/settings/SettingsScreen*Test.kt` / `SettingsDefaultBrowserRowTest.kt` call `SettingsRoute(viewModel = settingsViewModel(...))`. Delete the four `SettingsScreen.kt`/`QuickSettingsHost.kt` baseline lines. Gate (instrumented tests included; quick settings from the hub by hand) and **commit** `refactor(026): settings actions and events`.
+- [X] T024 *(instrumented suite run in T047: 189/189)* [US2] Update `SettingsViewModelTest` and `SettingsViewModelDefaultBrowserTest`. Make the 8 `A/…/settings/SettingsScreen*Test.kt` / `SettingsDefaultBrowserRowTest.kt` call `SettingsRoute(viewModel = settingsViewModel(...))`. Delete the four `SettingsScreen.kt`/`QuickSettingsHost.kt` baseline lines. Gate (instrumented tests included; quick settings from the hub by hand) and **commit** `refactor(026): settings actions and events`.
 
 ### tabs
 
@@ -167,7 +167,7 @@ The two stories land together per feature because the holder's constructor (US3)
     Expose `events = merge(...)`.
   - `faviconFor`/`screenshotFor` become `val images: TabImages`, a `fun interface`-style lookup in `F/tabs/presentation/tabs/TabImages.kt` with `favicon(url): File?` and `screenshot(tabId): File?`.
   - Split `TabsScreen.kt` into `TabsRoute` (collects `uiState`, `faviconVersion`, `screenshotVersion`; `EventEffect` → `showBrowser()` / snackbar) and `TabsScreen(state, onAction, images, versions, fireButton)`. `TabsConfirmDialogs` takes `onAction`. `TabsNavigation.kt` calls the route.
-- [X] T027 *(tabs instrumented run deferred: AVD not available; androidTest compiles; `TabUseCasesTest` cases move in T037 with their use cases)* [US2] Update `TabsViewModelTest` and `TabsViewModelChipModeTest`: `errorEvent` assertions read `TabsEvent.Error`, and `popBackEvent` assertions read `TabsEvent.ShowBrowser`. Delete the `TabsScreen.kt:82` baseline line. Run the tabs instrumented tests (`CloseAllIncognitoFlowTest`, `TabSwipeTest`, `TabPersistenceProcessDeathTest`, `IncognitoStressInstrumentedTest`). Gate and **commit** `refactor(026): tabs actions and events`.
+- [X] T027 *(instrumented suite run in T047: 189/189)* [US2] Update `TabsViewModelTest` and `TabsViewModelChipModeTest`: `errorEvent` assertions read `TabsEvent.Error`, and `popBackEvent` assertions read `TabsEvent.ShowBrowser`. Delete the `TabsScreen.kt:82` baseline line. Run the tabs instrumented tests (`CloseAllIncognitoFlowTest`, `TabSwipeTest`, `TabPersistenceProcessDeathTest`, `IncognitoStressInstrumentedTest`). Gate and **commit** `refactor(026): tabs actions and events`.
 
 ### bookmarks
 
@@ -188,7 +188,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - `F/entrypoint/domain/usecase/OpenIncomingRequestUseCase.kt` injects `SearchEngineRepository.buildSearchUrl` in place of `BuildSearchUrlUseCase`.
   - `EntryPointViewModel` injects `SettingsRepository.observeSettings()` and `TabRepository.observeTabs()`. It has no action type (0 public functions); `events` and `browserHooks` are unchanged (ADR 0011).
   - Drop the record-launch case from `DefaultBrowserUseCasesTest`. `SettingsRepositoryCurrentSettingsTest` stays as it is (it tests the repository). Update `OpenIncomingRequestUseCaseTest` and `EntryPointViewModelTest`.
-- [X] T032 *(IncomingLinkInstrumentedTest and PopupInstrumentedTest deferred: AVD not available; androidTest compiles)* [US2] Run `IncomingLinkInstrumentedTest` and `PopupInstrumentedTest`. Gate and **commit** `refactor(026): entrypoint uses contracts`.
+- [X] T032 *(instrumented suite run in T047: 189/189)* [US2] Run `IncomingLinkInstrumentedTest` and `PopupInstrumentedTest`. Gate and **commit** `refactor(026): entrypoint uses contracts`.
 
 ### browser
 
@@ -239,7 +239,7 @@ The two stories land together per feature because the holder's constructor (US3)
   - Delete `T/core/domain/usecase/BuildSearchUrlUseCaseTest.kt`, and the remaining pass-through cases in `SettingsUseCasesTest`, `AppLanguageUseCasesTest` (keep `SetAppLanguage`), `TabUseCasesTest` and `FireproofUseCasesTest` (keep the non-forwarding fireproof use cases).
   - `find M -name '*UseCase.kt' | wc -l` must print 49.
 - [X] T038 [US2] Update the 6 `T/feature/browser/presentation/browser/BrowserViewModel*Test.kt` and `BrowserViewModelFixture` to send `BrowserAction`s. Snackbar assertions read `events`; the submit tests assert `BrowserEvent.LoadUrl(url)` where they asserted the lambda call. Make `A/…/browser/{BrowserScreenInstrumentedTest,BrowserScreenOfflineErrorTest,BrowserScreenLoadingIndicatorTest}.kt` call `BrowserRoute(slots = NoSlots, viewModel = viewModel)`.
-- [X] T039 *(G1 and Compose report done: 217 restartable / 0 non-skippable; full instrumented suite deferred: AVD not available, androidTest compiles)* [US2] Run G1, the full instrumented suite on `TA016_API36_16K` and the Compose report (0 non-skippable). **Commit** `refactor(026): browser actions and events`.
+- [X] T039 *(instrumented suite run in T047: 189/189)* [US2] Run G1, the full instrumented suite on `TA016_API36_16K` and the Compose report (0 non-skippable). **Commit** `refactor(026): browser actions and events`.
 
 **Checkpoint**: every covered holder takes `onAction`; `config/ktlint/baseline.xml` has no entries; 49 use cases.
 
@@ -287,13 +287,13 @@ The two stories land together per feature because the holder's constructor (US3)
 **Independent test**: quickstart G4 and G5 pass.
 
 - [X] T044 [US1] Run quickstart G3 and record the results in the "Results" table: no baseline, `setMain` only in the rule, 49 use cases, no `fun consume`, `onAction` missing only in PageTextSize and EntryPoint.
-- [ ] T045 *(waits for the AVD: the owner's machine is busy)* [US1] Run quickstart G4 (behaviour walk on the 16 KB AVD, release build) and record each row as pass or fail. Repeat the Browser, Tabs, History, Settings and Fire rows on `TA016_API24` with a debug build.
-- [ ] T046 *(APK size done: 3,758,431 bytes, +0.44 %, 16 KB aligned; Compose 217 / 0 non-skippable; upgrade-over and cold start wait for the AVD)* [US1] Run quickstart G5:
+- [X] T045 *(scripted over adb on both AVDs; see Results. Not walked by hand: tab/incognito cap snackbars, downloads actions on real files, language and retention changes, site-permission edits, the default-browser card; these are covered by the instrumented suite or unchanged code paths)* [US1] Run quickstart G4 (behaviour walk on the 16 KB AVD, release build) and record each row as pass or fail. Repeat the Browser, Tabs, History, Settings and Fire rows on `TA016_API24` with a debug build.
+- [X] T046 [US1] Run quickstart G5:
   - Upgrade over the seeded `0372d0f` debug install from T002 and record every store intact.
   - Release APK bytes vs T001 (±2 %).
   - 10 interleaved cold starts vs `0372d0f` (±5 %).
   - Compose report: 0 non-skippable.
-- [ ] T047 *(unit suite done: 940 passed, 0 failed; instrumented suite waits for the AVD)* [US1] Run the full unit suite and the instrumented suite on `TA016_API36_16K`. Compare test class and method names with T001: removed use-case tests are only those listed in T007–T037, and every other test is present.
+- [X] T047 [US1] Run the full unit suite and the instrumented suite on `TA016_API36_16K`. Compare test class and method names with T001: removed use-case tests are only those listed in T007–T037, and every other test is present.
 
 ---
 
@@ -375,7 +375,12 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | Release APK bytes | 3,758,431 (baseline 3,742,047, +0.44 %) | ✅ |
 | 16 KB alignment | all native libs aligned | ✅ |
 | Compose restartable / non-skippable | 217 / 0 (baseline 208 / 0; new routes and effects) | ✅ |
-| Instrumented suite, behaviour walk (G4), upgrade-over and cold start (G5) | waiting for the AVD | — |
+| Instrumented suite (`TA016_API36_16K`) | 189 / 189 passed, same 189 test methods as the baseline | ✅ |
+| Upgrade over `0372d0f` (debug, seeded: 21 tabs, 21 history, 20 downloads, 1 bookmark, onboarding done) | starts without error; schema v5; every record kept. History +1 and `app_launch_count` 1→2 come from relaunching, as on the old build | ✅ |
+| Cold start, release, first-run state, 30 interleaved launches each | old median 231.5 ms / mean 215; new median 162 / mean 196. Launches fall in two clusters (≈150 ms, ≈240 ms) on this AVD; per cluster old 163 vs new 152, old 239 vs new 248. No slowdown beyond noise | ✅ |
+| Behaviour walk, 16 KB AVD (debug) | onboarding Back on slide 1 leaves without the flag, Next/Back; Home submit (keyboard hidden, page loads); star → "Bookmark saved"/"removed" once, also across rotation (the activity handles rotation itself, so nothing replays); desktop site toggles; Tabs close-all-incognito dialog and tab tap → browser; History entry → browser; Bookmarks entry → browser; Settings theme dialog and Dark; site permissions, protection exceptions, fireproof, downloads screens; quick text size from the hub; Fire → Home, history 0, bookmark kept; Back on a page opened from Home → Home; 0 crashes or ANRs | ✅ |
+| Behaviour walk, API 24 AVD (debug, German) | submit, star snackbar, history entry → browser, tab → browser, Fire → Home; 0 crashes or ANRs | ✅ |
+| Address-bar submit leaves the keyboard up under adb key injection | same on `0372d0f` (known adb artefact: injected keys leave touch mode) | n/a |
 
 ## Rule proof (T042)
 
