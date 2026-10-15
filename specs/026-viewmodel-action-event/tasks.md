@@ -78,7 +78,7 @@ Gradle calls are prefixed with `JAVA_HOME="/Applications/Android Studio.app/Cont
   - `T/feature/sitepermission/presentation/sitepermissions/SitePermissionsViewModelTest.kt`
   - `T/feature/tabs/presentation/tabs/{TabsViewModelChipModeTest,TabsViewModelTest}.kt`
 - [X] T005 Add `` `main dispatcher is set only by the rule` `` to `T/architecture/ArchitectureTest.kt`: Konsist `scopeFromTest(moduleName = "app")`, every file except `MainDispatcherRule.kt` must not contain `Dispatchers.setMain`, `additionalMessage = "use MainDispatcherRule"`. Prove it as in quickstart G2 step 3 on a scratch change, then revert. Run G1. **Commit** `test(026): one main dispatcher rule`.
-- [ ] T006 Create `C/presentation/util/EventEffect.kt`: `@Composable fun <E> EventEffect(events: Flow<E>, onEvent: suspend (E) -> Unit)`. It wraps `val latest by rememberUpdatedState(onEvent)` and `LaunchedEffect(events) { events.collect { latest(it) } }`; collection is not lifecycle-gated (research R4). Run G1. **Commit** `feat(026): EventEffect`.
+- [X] T006 Create `C/presentation/util/EventEffect.kt`: `@Composable fun <E> EventEffect(events: Flow<E>, onEvent: suspend (E) -> Unit)`. It wraps `val latest by rememberUpdatedState(onEvent)` and `LaunchedEffect(events) { events.collect { latest(it) } }`; collection is not lifecycle-gated (research R4). Run G1. **Commit** `feat(026): EventEffect`.
 
 **Checkpoint**: unit suite green with the rule in place; `EventEffect` available.
 
