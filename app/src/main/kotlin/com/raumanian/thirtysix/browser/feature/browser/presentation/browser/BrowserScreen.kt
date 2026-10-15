@@ -82,6 +82,7 @@ fun BrowserRoute(
     slots: BrowserSlots,
     modifier: Modifier = Modifier,
     viewModel: BrowserViewModel = hiltViewModel(),
+    addressBar: AddressBarViewModel = hiltViewModel(),
     findInPage: FindInPageViewModel = hiltViewModel(),
     downloadRequests: DownloadRequestViewModel = hiltViewModel(),
     pageActions: PageActionsViewModel = hiltViewModel(),
@@ -95,8 +96,9 @@ fun BrowserRoute(
 ) {
     val pageState by viewModel.uiState.collectAsStateWithLifecycle()
     val currentPage by viewModel.currentPage.collectAsStateWithLifecycle()
+    val addressBarState by addressBar.uiState.collectAsStateWithLifecycle()
     val actionsState by pageActions.uiState.collectAsStateWithLifecycle()
-    val state = browserUiState(currentPage, pageState, actionsState)
+    val state = browserUiState(currentPage, pageState, addressBarState, actionsState)
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     val activeTab by viewModel.activeTab.collectAsStateWithLifecycle()
     // Held as State, not delegated: reading `.value` here would recompose on every tick.
@@ -106,7 +108,7 @@ fun BrowserRoute(
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    BrowserEventEffects(events = viewModel.events, webViewActions = webViewActions)
+    BrowserEventEffects(events = addressBar.events, webViewActions = webViewActions)
     HubEventEffect(events = hubViewModel.events, snackbarHostState = snackbarHostState)
     DownloadRequestEventEffect(events = downloadRequests.events, snackbarHostState = snackbarHostState)
     PageActionsEventEffect(
@@ -137,6 +139,7 @@ fun BrowserRoute(
         ),
         actions = BrowserScreenActions(
             onAction = viewModel::onAction,
+            onAddressBarAction = addressBar::onAction,
             onFindAction = findInPage::onAction,
             onDownloadAction = downloadRequests::onAction,
             onPageActionsAction = pageActions::onAction,
@@ -192,7 +195,7 @@ internal fun BrowserScreen(
         popups = sources.popups,
     )
     BrowserBackHandlers(state = state, webViewActions = webViewActions)
-    HomeBackHandlers(state = state, onAction = onAction)
+    HomeBackHandlers(state = state, onAction = actions.onAddressBarAction)
     ExternalTabBackHandler(state = state, activeTabId = activeTab?.id, hooks = slots.incomingContent)
     // Only whether the find bar is open is read here; the bar collects its own text and count.
     val findOpen by remember(sources.findInPage) {
@@ -201,7 +204,7 @@ internal fun BrowserScreen(
     val findCallbacks = rememberFindCallbacks(actions.onFindAction, sources.findInPage, webViewActions)
     var dashboardOpen by rememberSaveable { mutableStateOf(false) }
     val addressBarCallbacks = rememberAddressBarCallbacks(
-        onAction = onAction,
+        onAction = actions.onAddressBarAction,
         onSuggestionsAction = actions.tools.onSuggestionsAction,
         currentUrl = { currentState.currentUrl },
     )
@@ -315,7 +318,7 @@ internal fun BrowserScreen(
                 isIncognito = state.isIncognito,
                 isHomeActive = state.isHomeContent,
                 callbacks = BrowserBottomBarCallbacks(
-                    onHome = { onAction(BrowserAction.Home.Pressed) },
+                    onHome = { actions.onAddressBarAction(AddressBarAction.HomePressed) },
                     onSearch = {
                         chrome.show()
                         if (state.isHomeContent) homeSearchFocus.requestFocus() else addressFocus.requestFocus()
@@ -507,11 +510,11 @@ private fun BrowserBackHandlers(
  * with no history left, returns to Home. Composed after [BrowserBackHandlers] to take precedence.
  */
 @Composable
-private fun HomeBackHandlers(state: BrowserUiState, onAction: (BrowserAction) -> Unit) {
-    BackHandler(enabled = state.homeOverlay) { onAction(BrowserAction.Home.OverlayDismissed) }
+private fun HomeBackHandlers(state: BrowserUiState, onAction: (AddressBarAction) -> Unit) {
+    BackHandler(enabled = state.homeOverlay) { onAction(AddressBarAction.HomeOverlayDismissed) }
     BackHandler(
         enabled = !state.canGoBack && state.cameFromHome && !state.isIncognito && !state.isHomeContent,
-    ) { onAction(BrowserAction.BackWithoutHistory) }
+    ) { onAction(AddressBarAction.BackWithoutHistory) }
 }
 
 @Composable
@@ -521,9 +524,9 @@ private fun rememberHomeCallbacks(
     slots: BrowserSlots,
 ): HomeCallbacks = remember(actions, webViewActions, slots) {
     HomeCallbacks(
-        onSearchSubmit = { input -> actions.onAction(BrowserAction.Home.Submit(input)) },
+        onSearchSubmit = { input -> actions.onAddressBarAction(AddressBarAction.HomeSubmit(input)) },
         onOpenUrl = { url ->
-            actions.onAction(BrowserAction.Home.NavigateFrom)
+            actions.onAddressBarAction(AddressBarAction.NavigateFromHome)
             webViewActions.loadUrl(url)
         },
         onSeeAllHistory = slots.destinations.openHistory,
@@ -604,27 +607,27 @@ private fun BrowserContent(
 /** A submit reaches the view model, whose load event dismisses the keyboard and clears focus first. */
 @Composable
 private fun rememberAddressBarCallbacks(
-    onAction: (BrowserAction) -> Unit,
+    onAction: (AddressBarAction) -> Unit,
     onSuggestionsAction: (AddressSuggestionsAction) -> Unit,
     currentUrl: () -> String,
 ): AddressBarCallbacks {
     val pageUrl by rememberUpdatedState(currentUrl)
     return remember(onAction, onSuggestionsAction) {
-        val submit = { onAction(BrowserAction.AddressBar.Submit) }
+        val submit = { onAction(AddressBarAction.Submit) }
         AddressBarCallbacks(
             onTextChange = { text ->
-                onAction(BrowserAction.AddressBar.TextChange(text))
+                onAction(AddressBarAction.TextChange(text))
                 onSuggestionsAction(AddressSuggestionsAction.TextChanged(text, currentPageUrl = pageUrl()))
             },
             onFocusChange = { focused ->
-                onAction(BrowserAction.AddressBar.FocusChange(focused))
+                onAction(AddressBarAction.FocusChange(focused))
                 onSuggestionsAction(AddressSuggestionsAction.FocusChanged(focused))
             },
             onSubmit = submit,
-            onClear = { onAction(BrowserAction.AddressBar.Clear) },
+            onClear = { onAction(AddressBarAction.Clear) },
             // A chosen suggestion is submitted exactly like a typed address.
             onSuggestion = { url ->
-                onAction(BrowserAction.AddressBar.TextChange(url))
+                onAction(AddressBarAction.TextChange(url))
                 submit()
             },
         )

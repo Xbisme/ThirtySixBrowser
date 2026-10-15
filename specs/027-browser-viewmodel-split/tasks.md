@@ -73,7 +73,7 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
   - `isBookmarked` is derived from `page.url`, and the toggle reads `page.url` and `page.title`.
   - Desktop mode uses `page.activeTab` and keeps the `desktopMode` lookup.
   - Tests: StarToggle, DesktopMode and the long-press cases.
-- [ ] T008 [US2] **Address bar and Home**: `P/AddressBarViewModel.kt`, `P/AddressBarAction.kt` (`TextChange`, `FocusChange`, `Submit`, `Clear`, `HomePressed`, `HomeOverlayDismissed`, `HomeSubmit`, `NavigateFromHome`, `BackWithoutHistory`), `P/AddressBarEvent.kt` (`LoadUrl`, Keep) and `P/AddressBarUiState.kt` (`text`, `isFocused`, `homeOverlay`, `cameFromHome`, `isHomeContent`).
+- [X] T008 [US2] **Address bar and Home**: `P/AddressBarViewModel.kt`, `P/AddressBarAction.kt` (`TextChange`, `FocusChange`, `Submit`, `Clear`, `HomePressed`, `HomeOverlayDismissed`, `HomeSubmit`, `NavigateFromHome`, `BackWithoutHistory`), `P/AddressBarEvent.kt` (`LoadUrl`, Keep) and `P/AddressBarUiState.kt` (`text`, `isFocused`, `homeOverlay`, `cameFromHome`, `isHomeContent`).
   - Back-without-history writes the Home URL, clears the title and persists the tab as today.
   - Tests: submit, query, Home and Back cases, including the cross-concern "submit then `UrlChanged`" case, which drives this holder and the page holder over one store.
 - [ ] T009 [US2] **Page**: rename what is left of `BrowserViewModel` to `P/PageViewModel.kt` with `P/PageAction.kt` (11 cases) and `P/PageUiState.kt`.

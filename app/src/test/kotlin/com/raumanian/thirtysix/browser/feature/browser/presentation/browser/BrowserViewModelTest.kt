@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -18,26 +17,19 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHist
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
-import java.net.URLEncoder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * JVM tests for [BrowserViewModel]. Query submits run in `viewModelScope`, so those tests advance
- * the dispatcher; [GoogleByteIdenticalRepository] pins the exact Google encoding.
- */
+/** JVM tests for [BrowserViewModel]: loading, navigation state, history and progress. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowserViewModelTest {
 
@@ -49,7 +41,6 @@ class BrowserViewModelTest {
     @Suppress("LongParameterList")
     private fun newViewModel(
         url: String = SAMPLE_PAGE_URL,
-        searchEngine: SearchEngineRepository = GoogleByteIdenticalRepository,
         tabRepository: FakeTabRepository = FakeTabRepository(homeUrl = url),
         faviconCache: FaviconCache = NoopFaviconCache,
         screenshotCache: ScreenshotCache = NoopScreenshotCache,
@@ -61,7 +52,6 @@ class BrowserViewModelTest {
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
         val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
         return BrowserViewModel(
-            searchEngine = searchEngine,
             observeActiveTab = observeActiveTab,
             tabs = tabRepository,
             observeActiveTabIsIncognito = observeActiveTabIsIncognito,
@@ -92,14 +82,6 @@ class BrowserViewModelTest {
         override fun fileFor(tabId: Long): File? = null
         override suspend fun delete(tabId: Long) = Unit
         override suspend fun clearAll() = Unit
-    }
-
-    /** Reproduces `URLEncoder.encode(query, "UTF-8")` into the Google template, byte for byte. */
-    private object GoogleByteIdenticalRepository : SearchEngineRepository {
-        override suspend fun buildSearchUrl(query: String): String {
-            val encoded = URLEncoder.encode(query, Charsets.UTF_8.name())
-            return String.format(UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE, encoded)
-        }
     }
 
     @Test
@@ -301,193 +283,7 @@ class BrowserViewModelTest {
         assertEquals(failed, vm.screenState())
     }
 
-    // ---------- Address bar defaults ----------
-
-    @Test
-    fun `initial address-bar text is empty and not focused`() = runTest {
-        val vm = newViewModel()
-        val state = vm.screenState()
-        assertEquals("", state.addressBarText)
-        assertEquals(false, state.isAddressBarFocused)
-    }
-
-    // ---------- Address bar text, focus and submit ----------
-
-    @Test
-    fun `onAddressBarTextChange updates state`() = runTest {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("foo"))
-        assertEquals("foo", vm.screenState().addressBarText)
-    }
-
-    @Test
-    fun `onAddressBarFocusChange toggles flag`() = runTest {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.FocusChange(true))
-        assertEquals(true, vm.screenState().isAddressBarFocused)
-        vm.onAction(BrowserAction.AddressBar.FocusChange(false))
-        assertEquals(false, vm.screenState().isAddressBarFocused)
-    }
-
-    @Test
-    fun `onAddressBarSubmit returns false on empty input and does not call loadUrl`() = runTest {
-        val vm = newViewModel()
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        assertTrue(calls.loads().isEmpty())
-    }
-
-    @Test
-    fun `onAddressBarSubmit returns false on whitespace-only input`() = runTest {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("   "))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        assertTrue(calls.loads().isEmpty())
-    }
-
-    @Test
-    fun `onAddressBarSubmit URL input prepends https and calls loadUrl`() = runTest {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("example.com"))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        assertEquals(listOf("https://example.com"), calls.loads())
-    }
-
-    @Test
-    fun `onAddressBarSubmit explicit http scheme is preserved`() = runTest {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("http://example.com"))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        assertEquals(listOf("http://example.com"), calls.loads())
-    }
-
-    /**
-     * Two consecutive submits forward both URLs in order: the WebView cancels the first load,
-     * so the view model must not coalesce or skip submissions.
-     */
-    @Test
-    fun `two consecutive submits forward both URLs to loadUrl in order`() = runTest {
-        val vm = newViewModel()
-        val calls = eventsOf(vm)
-
-        vm.onAction(BrowserAction.AddressBar.TextChange("first.com"))
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        vm.onAction(BrowserAction.AddressBar.TextChange("second.com"))
-        vm.onAction(BrowserAction.AddressBar.Submit)
-
-        assertEquals(listOf("https://first.com", "https://second.com"), calls.loads())
-    }
-
-    // ---------- Address bar query path ----------
-
-    @Test
-    fun `onAddressBarSubmit query input builds Google search URL`() = runTest(testDispatcher) {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("kotlin coroutines"))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        advanceUntilIdle()
-        // URLEncoder.encode renders space as `+` in form-urlencoded mode.
-        assertEquals(listOf("https://www.google.com/search?q=kotlin+coroutines"), calls.loads())
-    }
-
-    @Test
-    fun `onAddressBarSubmit query encodes special characters`() = runTest(testDispatcher) {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("c++ vs rust"))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        advanceUntilIdle()
-        // `+` becomes `%2B`; space becomes `+`.
-        assertEquals(listOf("https://www.google.com/search?q=c%2B%2B+vs+rust"), calls.loads())
-    }
-
-    @Test
-    fun `onAddressBarSubmit query encodes Unicode`() = runTest(testDispatcher) {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("안녕"))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        advanceUntilIdle()
-        // Korean "annyeong" UTF-8 percent-encoded.
-        assertEquals(listOf("https://www.google.com/search?q=%EC%95%88%EB%85%95"), calls.loads())
-    }
-
-    // ---------- Query path through BuildSearchUrlUseCase ----------
-
-    @Test
-    fun `query branch dispatches to BuildSearchUrlUseCase`() = runTest(testDispatcher) {
-        var receivedQuery: String? = null
-        val recordingRepo = object : SearchEngineRepository {
-            override suspend fun buildSearchUrl(query: String): String {
-                receivedQuery = query
-                return "https://example.test/search?q=$query"
-            }
-        }
-        val vm = newViewModel(searchEngine = recordingRepo)
-        vm.onAction(BrowserAction.AddressBar.TextChange("kotlin"))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        advanceUntilIdle()
-
-        assertEquals("kotlin", receivedQuery)
-        assertEquals(listOf("https://example.test/search?q=kotlin"), calls.loads())
-    }
-
-    @Test
-    fun `URL branch does not invoke BuildSearchUrlUseCase`() = runTest(testDispatcher) {
-        var useCaseCalled = false
-        val watcher = object : SearchEngineRepository {
-            override suspend fun buildSearchUrl(query: String): String {
-                useCaseCalled = true
-                return "should-not-be-used"
-            }
-        }
-        val vm = newViewModel(searchEngine = watcher)
-        vm.onAction(BrowserAction.AddressBar.TextChange("example.com"))
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        advanceUntilIdle()
-
-        assertEquals(false, useCaseCalled)
-        assertEquals(listOf("https://example.com"), calls.loads())
-    }
-
-    @Test
-    fun `empty submit returns false and never invokes BuildSearchUrlUseCase`() = runTest(testDispatcher) {
-        var useCaseCalled = false
-        val watcher = object : SearchEngineRepository {
-            override suspend fun buildSearchUrl(query: String): String {
-                useCaseCalled = true
-                return "irrelevant"
-            }
-        }
-        val vm = newViewModel(searchEngine = watcher)
-        // No onAddressBarTextChange call → addressBarText is empty.
-        val calls = eventsOf(vm)
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        advanceUntilIdle()
-
-        assertEquals(false, useCaseCalled)
-        assertTrue(calls.loads().isEmpty())
-    }
-
     // ---------- onUrlChanged and onLoadStarted ----------
-
-    @Test
-    fun `onUrlChanged updates currentUrl and does not affect addressBarText or focus`() = runTest {
-        val vm = newViewModel("https://example.com")
-        vm.onAction(BrowserAction.AddressBar.TextChange("typing-in-progress"))
-        vm.onAction(BrowserAction.AddressBar.FocusChange(true))
-        vm.onAction(BrowserAction.Page.UrlChanged("https://example.com/about"))
-        val state = vm.screenState()
-        assertEquals("https://example.com/about", state.currentUrl)
-        assertEquals("typing-in-progress", state.addressBarText)
-        assertEquals(true, state.isAddressBarFocused)
-    }
 
     /** `onLoadStarted` only flips the loading state; [onUrlChanged] owns `currentUrl`. */
     @Test
@@ -497,39 +293,6 @@ class BrowserViewModelTest {
         val state = vm.screenState()
         assertEquals("https://initial.example.com", state.currentUrl)
         assertTrue(state.loadingState is LoadingState.Loading)
-    }
-
-    /**
-     * After submit the WebView's `onPageStarted` fires synchronously; the stub `loadUrl` mirrors it,
-     * so `currentUrl` shows the target before any `onLoadFinished`.
-     */
-    @Test
-    fun `submit triggers immediate currentUrl update via onUrlChanged`() = runTest {
-        val vm = newViewModel("https://before.example.com")
-        // The screen's load mirrors the real WebView's onPageStarted → onUrlChanged chain.
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            vm.events.collect { event ->
-                if (event is BrowserEvent.LoadUrl) vm.onAction(BrowserAction.Page.UrlChanged(event.url))
-            }
-        }
-
-        vm.onAction(BrowserAction.AddressBar.TextChange("example.com"))
-        vm.onAction(BrowserAction.AddressBar.Submit)
-
-        assertEquals("https://example.com", vm.screenState().currentUrl)
-    }
-
-    // ---------- onAddressBarClear ----------
-
-    @Test
-    fun `onAddressBarClear empties text and preserves focus`() = runTest {
-        val vm = newViewModel()
-        vm.onAction(BrowserAction.AddressBar.TextChange("partial input"))
-        vm.onAction(BrowserAction.AddressBar.FocusChange(true))
-        vm.onAction(BrowserAction.AddressBar.Clear)
-        val state = vm.screenState()
-        assertEquals("", state.addressBarText)
-        assertEquals(true, state.isAddressBarFocused)
     }
 
     // ---------- Active-tab seeding and write-through ----------
@@ -658,56 +421,6 @@ class BrowserViewModelTest {
         val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
         advanceUntilIdle()
         assertTrue(vm.screenState().isHomeContent)
-    }
-
-    @Test
-    fun `Home pressed on a page overlays Home and Back returns to the page`() = runTest {
-        val vm = newViewModel("https://page.test/")
-        advanceUntilIdle()
-        vm.onAction(BrowserAction.Home.Pressed)
-        assertTrue(vm.screenState().isHomeContent)
-        assertEquals("https://page.test/", vm.screenState().currentUrl)
-        vm.onAction(BrowserAction.Home.OverlayDismissed)
-        assertFalse(vm.screenState().isHomeContent)
-    }
-
-    @Test
-    fun `Home submit loads the same URL as the address bar and marks cameFromHome`() = runTest {
-        val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
-        advanceUntilIdle()
-        val events = eventsOf(vm)
-        vm.onAction(BrowserAction.Home.Submit("kotlinlang.org"))
-        val fromHome = events.loads().single()
-        vm.onAction(BrowserAction.AddressBar.TextChange("kotlinlang.org"))
-        vm.onAction(BrowserAction.AddressBar.Submit)
-        assertEquals(listOf(fromHome, fromHome), events.loads())
-        assertTrue(vm.screenState().cameFromHome)
-    }
-
-    @Test
-    fun `blank Home submit does nothing`() = runTest {
-        val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
-        advanceUntilIdle()
-        val events = eventsOf(vm)
-        vm.onAction(BrowserAction.Home.Submit("   "))
-        assertTrue(events.loads().isEmpty())
-        assertFalse(vm.screenState().cameFromHome)
-    }
-
-    @Test
-    fun `Back without history returns to Home only when the page came from Home`() = runTest {
-        val vm = newViewModel(UrlConstants.HOME_PAGE_URL)
-        advanceUntilIdle()
-        val before = vm.screenState()
-        vm.onAction(BrowserAction.BackWithoutHistory)
-        assertEquals(before, vm.screenState())
-
-        vm.onAction(BrowserAction.Home.NavigateFrom)
-        vm.onAction(BrowserAction.Page.UrlChanged("https://page.test/"))
-        assertFalse(vm.screenState().isHomeContent)
-        vm.onAction(BrowserAction.BackWithoutHistory)
-        assertTrue(vm.screenState().isHomeContent)
-        assertFalse(vm.screenState().cameFromHome)
     }
 
     private companion object {

@@ -6,6 +6,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsInc
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
@@ -17,6 +18,8 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookm
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
+import java.net.URLEncoder
+
 /** Builds the browser holders over fakes and one shared page store, so a new dependency is added in one place. */
 internal class BrowserViewModelFixture(
     val url: String = "https://example.com/",
@@ -37,11 +40,17 @@ internal class BrowserViewModelFixture(
         toggleBookmark = ToggleBookmarkUseCase(bookmarks, AddBookmarkUseCase(bookmarks)),
     )
 
+    fun buildAddressBar(searchEngine: SearchEngineRepository = GoogleSearchEngine): AddressBarViewModel =
+        AddressBarViewModel(
+            pageStore = pageStore,
+            searchEngine = searchEngine,
+            updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabs, incognitoTabs),
+        )
+
     fun build(): BrowserViewModel {
         val history = FakeHistoryRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabs, incognitoTabs)
         return BrowserViewModel(
-            searchEngine = EchoSearchEngine,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabs,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
@@ -54,7 +63,11 @@ internal class BrowserViewModelFixture(
         )
     }
 
-    private object EchoSearchEngine : SearchEngineRepository {
-        override suspend fun buildSearchUrl(query: String): String = "https://search.example/?q=$query"
+    /** Reproduces `URLEncoder.encode(query, "UTF-8")` into the Google template, byte for byte. */
+    private object GoogleSearchEngine : SearchEngineRepository {
+        override suspend fun buildSearchUrl(query: String): String {
+            val encoded = URLEncoder.encode(query, Charsets.UTF_8.name())
+            return String.format(UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE, encoded)
+        }
     }
 }

@@ -21,7 +21,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
@@ -93,7 +92,6 @@ class BrowserScreenOfflineErrorTest {
             val noopIncognitoRepo = OfflineErrorNoopIncognitoTabRepository
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                searchEngine = OfflineErrorNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 tabs = noopTabRepo,
                 observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
@@ -131,12 +129,6 @@ class BrowserScreenOfflineErrorTest {
         // Pure recomposition with the state pre-seeded; no network involved.
         const val ERROR_STATE_TIMEOUT_MS: Long = 5_000L
     }
-}
-
-/** No-op [SearchEngineRepository]: the query branch is never reached. */
-private object OfflineErrorNoopSearchEngineRepository : SearchEngineRepository {
-    override suspend fun buildSearchUrl(query: String): String =
-        error("instrumented test should not reach the search-URL build path")
 }
 
 /** No-op [TabRepository] for the error-rendering test. */

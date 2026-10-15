@@ -26,7 +26,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
@@ -99,7 +98,6 @@ class BrowserScreenInstrumentedTest {
             val noopIncognitoRepo = InstrumentedNoopIncognitoTabRepository
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                searchEngine = InstrumentedNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 tabs = noopTabRepo,
                 observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
@@ -160,12 +158,6 @@ class BrowserScreenInstrumentedTest {
 
         // A CI emulator budget, not the production loading target.
     }
-}
-
-/** No-op [SearchEngineRepository]: the query branch is never reached here. */
-private object InstrumentedNoopSearchEngineRepository : SearchEngineRepository {
-    override suspend fun buildSearchUrl(query: String): String =
-        error("instrumented test should not reach the search-URL build path")
 }
 
 /** No-op [TabRepository]: no active tab, so the view model's collectors leave state alone. */

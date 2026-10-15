@@ -3,17 +3,13 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.raumanian.thirtysix.browser.core.domain.model.AddressBarSubmitResult
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
-import com.raumanian.thirtysix.browser.core.domain.model.classifyAddressBarInput
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
 import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.CurrentPage
@@ -22,8 +18,6 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHist
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,7 +35,6 @@ import kotlinx.coroutines.launch
 @Suppress("TooManyFunctions", "LongParameterList")
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class BrowserViewModel @Inject constructor(
-    private val searchEngine: SearchEngineRepository,
     observeActiveTab: ObserveActiveTabUseCase,
     private val tabs: TabRepository,
     observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
@@ -60,10 +52,6 @@ class BrowserViewModel @Inject constructor(
 
     /** The page state this holder shares with the other browser holders. */
     val currentPage: StateFlow<CurrentPage> = pageStore.page
-
-    // Kept until the screen collects them, as the consumed-once state fields they replace were.
-    private val eventChannel = Channel<BrowserEvent>(Channel.BUFFERED)
-    val events: Flow<BrowserEvent> = eventChannel.receiveAsFlow()
 
     private val _loadProgress = MutableStateFlow(0f)
 
@@ -117,9 +105,6 @@ class BrowserViewModel @Inject constructor(
     fun onAction(action: BrowserAction) {
         when (action) {
             is BrowserAction.Page -> onPage(action)
-            is BrowserAction.AddressBar -> onAddressBar(action)
-            is BrowserAction.Home -> onHome(action)
-            BrowserAction.BackWithoutHistory -> onBackWithoutHistory()
         }
     }
 
@@ -136,24 +121,6 @@ class BrowserViewModel @Inject constructor(
             is BrowserAction.Page.ScreenshotReady -> onScreenshotReady(action.bitmap)
             is BrowserAction.Page.CanGoBackChanged -> _uiState.update { it.copy(canGoBack = action.canGoBack) }
             is BrowserAction.Page.CanGoForwardChanged -> _uiState.update { it.copy(canGoForward = action.canGoForward) }
-        }
-    }
-
-    private fun onAddressBar(action: BrowserAction.AddressBar) {
-        when (action) {
-            is BrowserAction.AddressBar.TextChange -> _uiState.update { it.copy(addressBarText = action.text) }
-            is BrowserAction.AddressBar.FocusChange -> _uiState.update { it.copy(isAddressBarFocused = action.focused) }
-            BrowserAction.AddressBar.Submit -> submit(_uiState.value.addressBarText)
-            BrowserAction.AddressBar.Clear -> _uiState.update { it.copy(addressBarText = "") }
-        }
-    }
-
-    private fun onHome(action: BrowserAction.Home) {
-        when (action) {
-            BrowserAction.Home.Pressed -> onHomePressed()
-            BrowserAction.Home.OverlayDismissed -> _uiState.update { it.copy(homeOverlay = false) }
-            is BrowserAction.Home.Submit -> onHomeSubmit(action.input)
-            BrowserAction.Home.NavigateFrom -> onNavigateFromHome()
         }
     }
 
@@ -235,45 +202,6 @@ class BrowserViewModel @Inject constructor(
             }
         }
     }
-
-    /** Shows the Home page over a loaded page; does nothing on Home. */
-    private fun onHomePressed() {
-        if (pageStore.page.value.url != UrlConstants.HOME_PAGE_URL) _uiState.update { it.copy(homeOverlay = true) }
-    }
-
-    /** Submits like the address bar, then remembers that this navigation started on Home. */
-    private fun onHomeSubmit(input: String) {
-        if (submit(input)) onNavigateFromHome()
-    }
-
-    private fun onNavigateFromHome() {
-        _uiState.update { it.copy(homeOverlay = false, cameFromHome = true) }
-    }
-
-    /** Back with no WebView history: returns the tab to Home when the page was opened from Home in a normal tab. */
-    private fun onBackWithoutHistory() {
-        if (!_uiState.value.cameFromHome || pageStore.page.value.isIncognito) return
-        pageStore.setTitle("")
-        pageStore.setUrl(UrlConstants.HOME_PAGE_URL)
-        _uiState.update { it.copy(cameFromHome = false, homeOverlay = false) }
-        persistActiveTabState(UrlConstants.HOME_PAGE_URL)
-    }
-
-    // True when something was submitted; a search URL is then built and loaded asynchronously.
-    private fun submit(raw: String): Boolean =
-        when (val classified = classifyAddressBarInput(raw)) {
-            AddressBarSubmitResult.Empty -> false
-            is AddressBarSubmitResult.Url -> {
-                eventChannel.trySend(BrowserEvent.LoadUrl(classified.target))
-                true
-            }
-            is AddressBarSubmitResult.Query -> {
-                viewModelScope.launch {
-                    eventChannel.trySend(BrowserEvent.LoadUrl(searchEngine.buildSearchUrl(classified.text)))
-                }
-                true
-            }
-        }
 
     // Fired from onPageStarted and doUpdateVisitedHistory, so every hop of a redirect chain shows.
     private fun onUrlChanged(url: String) {

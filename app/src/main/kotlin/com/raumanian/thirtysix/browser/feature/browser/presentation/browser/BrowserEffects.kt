@@ -16,12 +16,12 @@ import kotlinx.coroutines.launch
 
 /** A requested load: hide the keyboard, clear focus, then load, in that order. */
 @Composable
-internal fun BrowserEventEffects(events: Flow<BrowserEvent>, webViewActions: WebViewActionsHandle) {
+internal fun BrowserEventEffects(events: Flow<AddressBarEvent>, webViewActions: WebViewActionsHandle) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     EventEffect(events) { event ->
         when (event) {
-            is BrowserEvent.LoadUrl -> {
+            is AddressBarEvent.LoadUrl -> {
                 keyboardController?.hide()
                 focusManager.clearFocus()
                 webViewActions.loadUrl(event.url)

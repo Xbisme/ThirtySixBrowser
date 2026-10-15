@@ -21,7 +21,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
@@ -92,7 +91,6 @@ class BrowserScreenLoadingIndicatorTest {
             val noopIncognitoRepo = LoadingIndicatorNoopIncognitoTabRepository
             val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
             viewModel = BrowserViewModel(
-                searchEngine = LoadingIndicatorNoopSearchEngineRepository,
                 observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
                 tabs = noopTabRepo,
                 observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
@@ -163,11 +161,6 @@ class BrowserScreenLoadingIndicatorTest {
         /** 100 maps to `LoadingState.Loaded`. */
         const val PROGRESS_COMPLETE: Int = 100
     }
-}
-
-private object LoadingIndicatorNoopSearchEngineRepository : SearchEngineRepository {
-    override suspend fun buildSearchUrl(query: String): String =
-        error("loading-indicator test should not reach the search-URL build path")
 }
 
 /** Hot StateFlow, not flowOf, so `ObserveAllTabsUseCase.combine` stays subscribed. */

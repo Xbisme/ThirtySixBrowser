@@ -5,12 +5,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
@@ -20,7 +18,6 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHist
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
-import java.net.URLEncoder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -86,7 +83,6 @@ class BrowserViewModelIncognitoCacheGateTest {
     ): BrowserViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         return BrowserViewModel(
-            searchEngine = GoogleByteIdenticalRepository,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepository,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
@@ -208,12 +204,5 @@ class BrowserViewModelIncognitoCacheGateTest {
         override fun fileFor(tabId: Long): File? = null
         override suspend fun delete(tabId: Long) = Unit
         override suspend fun clearAll() = Unit
-    }
-
-    private object GoogleByteIdenticalRepository : SearchEngineRepository {
-        override suspend fun buildSearchUrl(query: String): String {
-            val encoded = URLEncoder.encode(query, Charsets.UTF_8.name())
-            return String.format(UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE, encoded)
-        }
     }
 }

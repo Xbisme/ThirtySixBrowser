@@ -27,26 +27,4 @@ sealed interface BrowserAction {
 
         data class CanGoForwardChanged(val canGoForward: Boolean) : Page
     }
-
-    sealed interface AddressBar : BrowserAction {
-        data class TextChange(val text: String) : AddressBar
-
-        data class FocusChange(val focused: Boolean) : AddressBar
-
-        data object Submit : AddressBar
-
-        data object Clear : AddressBar
-    }
-
-    sealed interface Home : BrowserAction {
-        data object Pressed : Home
-
-        data object OverlayDismissed : Home
-
-        data class Submit(val input: String) : Home
-
-        data object NavigateFrom : Home
-    }
-
-    data object BackWithoutHistory : BrowserAction
 }

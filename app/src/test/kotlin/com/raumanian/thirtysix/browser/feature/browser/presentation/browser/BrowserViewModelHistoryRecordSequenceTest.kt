@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -152,7 +151,6 @@ class BrowserViewModelHistoryRecordSequenceTest {
         val incognitoRepo = FakeIncognitoTabRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabRepo, incognitoRepo)
         return BrowserViewModel(
-            searchEngine = NoopSearchEngineRepository,
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepo,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
@@ -163,11 +161,6 @@ class BrowserViewModelHistoryRecordSequenceTest {
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(history),
             pageStore = CurrentPageRepositoryImpl(HOME_URL),
         )
-    }
-
-    /** Search is irrelevant here; the VM only needs a non-null dependency. */
-    private object NoopSearchEngineRepository : SearchEngineRepository {
-        override suspend fun buildSearchUrl(query: String): String = query
     }
 
     private object NoopFaviconCache : FaviconCache {
