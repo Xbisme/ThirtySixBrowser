@@ -81,10 +81,12 @@ Then run G1 and **commit** `refactor(027): <concern> holder`.
   - The remaining tests become `PageViewModelTest`, `PageViewModelHistoryRecordSequenceTest` and `PageViewModelIncognitoCacheGateTest`.
   - `A/presentation/browser/BrowserScreen*Test.kt` pass `pageViewModel = …`.
   - Check SC-004 for every holder. *(Page 9 deps / 11 actions, AddressBar 3 / 9, PageActions 5 / 3, FindInPage 1 / 4, DownloadRequest 1 / 2. The browser screen tests build the store-sharing holders through `A/fixture/BrowserScreenHolders.kt`, which replaces their three copies of the no-op repositories.)*
-- [ ] T010 [US2] Split `P/BrowserScreen.kt` into `BrowserRoute.kt`, `BrowserScreen.kt`, `BrowserContent.kt`, `BrowserHubHost.kt`, `BrowserBackHandlers.kt` and `BrowserCallbacks.kt`, moving each composable as is.
+- [X] T010 [US2] Split `P/BrowserScreen.kt` into `BrowserRoute.kt`, `BrowserScreen.kt`, `BrowserContent.kt`, `BrowserHubHost.kt`, `BrowserBackHandlers.kt` and `BrowserCallbacks.kt`, moving each composable as is.
   - Remove the size suppressions on these files, on `BrowserScreenInputs.kt` and on the holders (grouping inputs where a list is still too long).
   - Run G2.
   - **Commit** `refactor(027): browser screen files`.
+
+  *Done:* the route takes three holder groups (`BrowserPageHolders`, `BrowserToolHolders`, `PageRequestHolders`), and the screen takes `state, sources, actions, hosts`. What the screen keeps for itself (focus, bar heights, the bars' scroll, open sheets) is in `P/BrowserScreenUi.kt`. Size suppressions in `F` went from 26 to 21. `PageViewModel` keeps its own, since each of its functions handles one WebView callback. Largest file: `BrowserScreen.kt` at 201 lines.
 
 ## Phase 4: User Story 3, no dead shared code (P3)
 

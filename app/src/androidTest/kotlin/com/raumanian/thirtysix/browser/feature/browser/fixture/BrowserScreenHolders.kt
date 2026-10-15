@@ -32,6 +32,7 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.Brow
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.FindInPageViewModel
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.PageActionsViewModel
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.PageViewModel
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.rememberBrowserPageHolders
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
@@ -81,10 +82,12 @@ class BrowserScreenHolders(startUrl: String) {
     fun Route() {
         BrowserRoute(
             slots = NoSlots,
-            pageViewModel = page,
-            addressBar = addressBar,
-            findInPage = findInPage,
-            pageActions = pageActions,
+            holders = rememberBrowserPageHolders(
+                page = page,
+                addressBar = addressBar,
+                findInPage = findInPage,
+                pageActions = pageActions,
+            ),
         )
     }
 }
