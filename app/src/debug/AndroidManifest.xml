@@ -2,17 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <!--
-        Spec 007 — register HiltTestActivity in the DEBUG variant only.
-        Lives in app/src/debug/ (not androidTest/) so the activity is bundled
-        into the debug APK's process (`com.raumanian.thirtysix.browser.debug`)
-        and instrumentation can launch it without the cross-process intent
-        mismatch that occurs when an Activity is declared inside the test APK.
-        See https://developer.android.com/training/dependency-injection/hilt-testing.
-    -->
-    <!--
-        Spec 015 gate G9 added usesCleartextTraffic here for local fixture servers. Spec 021
-        moved it to the main manifest (owner decision 2026-10-11: release builds open http://
-        sites too), so the debug variant no longer overrides it.
+        HiltTestActivity lives in the debug APK, not the test APK, so instrumentation can launch it
+        in the app process without a cross-process intent mismatch.
     -->
     <application>
         <activity
@@ -21,11 +12,8 @@
             tools:ignore="MissingClass" />
 
         <!--
-            Spec 014 T103a — debug-only bulk history seeder for the SC-005 / SC-006
-            benchmark (quickstart gate G8). Declared here so it ships in the debug APK
-            only; the release variant never compiles `app/src/debug/`. `exported="true"`
-            is required for `adb shell am broadcast` to reach it from the shell uid, and
-            is safe because the receiver exists solely in debug builds.
+            Debug-only seeders and hooks. Exported so `adb shell am broadcast` can reach them from
+            the shell uid; safe because the debug source set never ships in a release build.
         -->
         <receiver
             android:name="com.raumanian.thirtysix.browser.dev.HistorySeeder"
@@ -37,11 +25,6 @@
             </intent-filter>
         </receiver>
 
-        <!--
-            Spec 015 T107 — debug-only downloads seeder for the SC-006 benchmark
-            (quickstart gate G12). Same posture as HistorySeeder above: debug source set
-            only, so it cannot exist in a release build.
-        -->
         <receiver
             android:name="com.raumanian.thirtysix.browser.dev.DownloadSeeder"
             android:exported="true"
@@ -52,10 +35,6 @@
             </intent-filter>
         </receiver>
 
-        <!--
-            Spec 016 T078 — debug-only tab seeder for the clear-browsing-data gates
-            (quickstart G5 / G8). Same posture as the seeders above: debug source set only.
-        -->
         <receiver
             android:name="com.raumanian.thirtysix.browser.dev.TabSeeder"
             android:exported="true"
@@ -65,10 +44,6 @@
             </intent-filter>
         </receiver>
 
-        <!--
-            Spec 024 T034 — debug-only Fire step delay for quickstart G7 (interrupted Fire).
-            Same posture as the seeders above: debug source set only.
-        -->
         <receiver
             android:name="com.raumanian.thirtysix.browser.dev.FireStepDelayReceiver"
             android:exported="true"

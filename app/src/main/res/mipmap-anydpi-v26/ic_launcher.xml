@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Spec 017 — adaptive icon. <monochrome> now points at the dedicated monochrome mark;
+  adaptive icon. <monochrome> now points at the dedicated monochrome mark;
   it previously pointed at ic_launcher_foreground, the COLOUR layer, which the system
-  would have flattened into a featureless silhouette under themed icons (FR-006, R8).
+  would have flattened into a featureless silhouette under themed icons.
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/ic_launcher_background" />

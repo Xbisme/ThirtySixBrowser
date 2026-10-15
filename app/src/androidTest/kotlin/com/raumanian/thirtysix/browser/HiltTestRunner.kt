@@ -6,7 +6,7 @@ import androidx.test.runner.AndroidJUnitRunner
 import dagger.hilt.android.testing.HiltTestApplication
 
 /**
- * Spec 007 — instrumented-test runner that boots [HiltTestApplication] instead
+ * Instrumented-test runner that boots [HiltTestApplication] instead
  * of the production `@HiltAndroidApp` Application. Required for `@HiltAndroidTest`
  * + `@TestInstallIn` (TestUrlConfigModule) to work in `androidTest`.
  */

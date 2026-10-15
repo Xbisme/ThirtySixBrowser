@@ -7,48 +7,33 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Log
 import androidx.core.graphics.createBitmap
-import com.raumanian.thirtysix.browser.core.constants.AppConstants
-import com.raumanian.thirtysix.browser.core.constants.BrowserLimits
-import com.raumanian.thirtysix.browser.core.result.Result
-import com.raumanian.thirtysix.browser.data.local.cache.FaviconCache
-import com.raumanian.thirtysix.browser.data.local.cache.ScreenshotCache
-import com.raumanian.thirtysix.browser.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
+import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Spec 016 T078 — **debug-build-only** tab seeder for the clear-browsing-data gates
- * (quickstart G5 and G8, research R15).
- *
- * Tops the normal-tab count up to `min(count, BrowserLimits.MAX_TABS)`. It counts existing tabs
- * rather than creating `count` new ones, because the app always holds at least one tab and the
- * cap is 50 — creating 50 more would hit the cap. Each seeded tab gets a placeholder preview and
- * a site icon under its own host, so "Cached images and files" has real files to delete.
- *
- * Lives in `app/src/debug/`, like `HistorySeeder`, so the class does not exist in a release
- * build at all.
- *
- * Usage — with the debug build installed:
- * ```
- * # top up to 50 tabs
- * adb shell am broadcast -a com.raumanian.thirtysix.browser.debug.SEED_TABS \
- *   -n com.raumanian.thirtysix.browser.debug/com.raumanian.thirtysix.browser.dev.TabSeeder
- *
- * # top up to 10 tabs
- * adb shell am broadcast -a com.raumanian.thirtysix.browser.debug.SEED_TABS \
- *   -n com.raumanian.thirtysix.browser.debug/com.raumanian.thirtysix.browser.dev.TabSeeder --ei count 10
- *
- * adb logcat -s TabSeeder
- * ```
+ * Debug-only: tops normal tabs up to `--ei count N` (default the cap), each with a placeholder
+ * preview and site icon so "Cached images and files" has files to clear. It counts existing tabs
+ * because the app always holds at least one.
  */
 @AndroidEntryPoint
 class TabSeeder : BroadcastReceiver() {
 
     @Inject
     lateinit var tabRepository: TabRepository
+
+    @Inject
+    lateinit var dispatchers: DispatcherProvider
 
     @Inject
     lateinit var screenshotCache: ScreenshotCache
@@ -58,7 +43,7 @@ class TabSeeder : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dispatchers.io).launch {
             try {
                 if (intent.action == ACTION_SEED_TABS) {
                     seed(requested = intent.getIntExtra(EXTRA_COUNT, BrowserLimits.MAX_TABS))
@@ -75,26 +60,27 @@ class TabSeeder : BroadcastReceiver() {
         val goal = requested.coerceIn(1, BrowserLimits.MAX_TABS)
         var created = 0
         // Bounded by the cap, so a repository that stops counting new tabs cannot loop forever.
-        for (attempt in 0 until BrowserLimits.MAX_TABS) {
+        var stopped = false
+        repeat(BrowserLimits.MAX_TABS) {
             val total = tabRepository.getTabCount()
-            if (total >= goal) break
+            if (stopped || total >= goal) return@repeat
             val url = "https://seed-tab-$total.example.com/"
             when (val result = tabRepository.createTab(url)) {
                 is Result.Success -> {
                     screenshotCache.save(
                         tabId = result.data.id,
-                        bitmap = placeholder(
+                        writeImage = placeholder(
                             width = AppConstants.SCREENSHOT_TARGET_WIDTH_PX,
                             height = AppConstants.SCREENSHOT_TARGET_HEIGHT_PX,
                             index = total,
-                        ),
+                        ).webpWriter(),
                     )
-                    faviconCache.save(url, placeholder(ICON_SIZE_PX, ICON_SIZE_PX, total))
+                    faviconCache.save(url, placeholder(ICON_SIZE_PX, ICON_SIZE_PX, total).pngWriter())
                     created++
                 }
                 is Result.Error -> {
                     Log.w(TAG, "createTab failed after $created new tabs; stopping", result.throwable)
-                    break
+                    stopped = true
                 }
             }
         }

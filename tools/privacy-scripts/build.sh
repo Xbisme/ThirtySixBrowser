@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Spec 024 research R7 — builds app/src/main/assets/privacy/consent.js.
+# Builds app/src/main/assets/privacy/consent.js.
 # Run by hand only (see README.md). Never from Gradle or CI.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -11,7 +11,7 @@ npx esbuild entry.ts --bundle --minify --format=iife --target=chrome74 --legal-c
 OUT=../../app/src/main/assets/privacy/consent.js
 mkdir -p "$(dirname "$OUT")"
 {
-    printf '/*! ThirtySix cookie-banner auto-decline (Spec 024).\n'
+    printf '/*! ThirtySix cookie-banner auto-decline.\n'
     printf ' * Contains @duckduckgo/autoconsent %s, (c) DuckDuckGo, Inc., licensed under the\n' "$VERSION"
     printf ' * Mozilla Public License 2.0 (https://mozilla.org/MPL/2.0/).\n'
     printf ' * Source: https://github.com/duckduckgo/autoconsent/tree/v%s\n' "$VERSION"

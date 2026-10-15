@@ -168,16 +168,15 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       - run: chmod +x ./gradlew .specify/scripts/bash/verify-16kb-alignment.sh
 
-      - name: Assemble release (debug-signed fallback per Constitution §XI v1.2.0)
+      - name: Assemble release (debug-signed when no release key is configured)
         run: ./gradlew assembleRelease --build-cache --stacktrace
 
-      - name: Verify 16KB alignment (Constitution §IX, FR-016)
+      - name: Verify 16 KB alignment of native libraries
         run: .specify/scripts/bash/verify-16kb-alignment.sh app/build/outputs/apk/release/app-release.apk
 
   instrumented-test:
     name: Instrumented tests (emulator)
-    # Re-enabled at Spec 007 (webview-compose-wrapper). Workaround for emulator
-    # hang on shutdown lives in the "Force-kill emulator" step below.
+    # The emulator shutdown-hang workaround is in the "Force-kill emulator" step below.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -200,25 +199,10 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # No AVD cache, and every run cold-boots (`-no-snapshot` below). Do not bring a
-      # snapshot cache back without reading this.
-      #
-      # The job used to cache the AVD together with its quickboot snapshot. That cache
-      # zombie-booted the emulator four times — `Broken pipe (32)`, `No service published
-      # for: input`, `stop: Not implemented`, `Starting 0 tests` — and needed a manual
-      # `gh cache delete` each time:
-      #   - Spec 017 (PR #22): the key was unversioned, so a snapshot from an older runner
-      #     image was restored forever.
-      #   - Spec 018 (PR #26): `actions/cache` saved in a post-step even when the job failed,
-      #     so a broken snapshot was cached. Fixed by saving only on success.
-      #   - Spec 020 (PR #30) and Spec 021 (PR #32): the cache had been saved by a run that
-      #     PASSED, and the next run still zombie-booted from it. So a snapshot that boots
-      #     once is no guarantee it boots again; no keying or gating rule can fix that.
-      # The likely cause is that the snapshot is written while the emulator shuts down, the
-      # same phase where QEMU's `stop` is broken (see the Spec 008 note further down).
-      #
-      # A cold boot costs a minute or two per run. That is cheaper than a wedged job that
-      # needs someone to notice it, delete a cache and re-run.
+      # No AVD snapshot cache; every run cold-boots (`-no-snapshot` below). Cached snapshots
+      # zombie-booted the emulator (`Broken pipe (32)`, `Starting 0 tests`) even when a passing
+      # run had saved them, likely because the snapshot is written during the broken QEMU
+      # shutdown. A cold boot costs a minute or two; a wedged job costs a manual cache delete.
 
       - run: chmod +x ./gradlew
 
@@ -228,14 +212,9 @@ jobs:
         # hides which phase actually stalled.
         timeout-minutes: 16
         uses: reactivecircus/android-emulator-runner@v2
-        # Spec 008 — emulator-runner@v2's built-in "Terminate Emulator" phase
-        # hangs with emulator binary v36+ because QEMU's `stop` command emits
-        # "stop: Not implemented" and the action's wait-for-shutdown loop
-        # never sees the process exit. The fix that actually works: kill qemu
-        # at the END of `script` via `trap EXIT` (fires on both success and
-        # failure), so the action's terminate phase finds a dead process and
-        # exits immediately. ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=5 is kept
-        # as an additional safety bound.
+        # The action's "Terminate Emulator" phase hangs on emulator v36+: QEMU's `stop` replies
+        # "stop: Not implemented" and the process never exits. So `script` kills qemu itself at
+        # the end, on success or failure; the wait-before-kill bound is an extra safety net.
         env:
           ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: "5"
         with:
@@ -244,19 +223,9 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          # NOTE: must be a SINGLE LINE — emulator-runner@v2 invokes a fresh
-          # `/usr/bin/sh -c "<line>"` for each YAML script line, so multi-line
-          # variables (STATUS=$?) don't survive between lines.
-          #
-          # Process kill via `ps aux | awk` with the classic `[q]` / `[c]`
-          # bracket trick:
-          #   - bypasses pkill's 15-char comm truncation (crashpad_handler is
-          #     16 chars, longer than /proc/PID/comm allows)
-          #   - bypasses the self-match problem (`pkill -f qemu-system` matched
-          #     this very shell's cmdline because the literal string "qemu-system"
-          #     is in the script). The bracket trick stores the pattern in the
-          #     awk source as `[q]emu-system`, which doesn't contain the literal
-          #     substring "qemu-system" → safe.
+          # One line: the action runs each script line in a fresh `sh -c`, so STATUS would not
+          # survive. `ps | awk '/[q]emu/'` instead of pkill: pkill truncates names to 15 chars
+          # (crashpad_handler is 16), and `pkill -f` would match this shell's own command line.
           script: ./gradlew connectedDebugAndroidTest --build-cache --stacktrace; STATUS=$?; ps aux | awk '/[q]emu-system|[c]rashpad_handler/ { print $2 }' | xargs -r kill -9 2>/dev/null; sleep 2; exit $STATUS
 
       - name: Force-kill emulator (workaround for hang on shutdown)

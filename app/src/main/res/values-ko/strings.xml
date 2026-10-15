@@ -1,25 +1,25 @@
 <resources>
-    <!-- Spec 004 — Korean (ko) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <!-- Korean (ko) translation. Brand "ThirtySix" preserved in Latin -->
     <string name="app_name">ThirtySix 브라우저</string>
 
-    <!-- Spec 007 — Korean (ko) translations for Browser loading + error UI. -->
+    <!-- Korean (ko) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">페이지 로드 중</string>
     <string name="browser_error_title">페이지를 불러오지 못했습니다</string>
     <string name="browser_error_offline_hint">인터넷 연결을 확인한 다음 다시 시도해 주세요.</string>
     <string name="browser_error_generic">문제가 발생했습니다. 나중에 다시 시도해 주세요.</string>
 
-    <!-- Spec 008 — Korean (ko) translations for navigation bottom-bar a11y. -->
+    <!-- Korean (ko) translations for navigation bottom-bar a11y. -->
     <string name="browser_action_back">뒤로</string>
     <string name="browser_action_forward">앞으로</string>
     <string name="browser_action_reload">페이지 새로 고침</string>
     <string name="browser_action_stop">로드 중지</string>
     <string name="browser_action_home">홈</string>
 
-    <!-- Spec 009 — Korean (ko) translations for address-bar hint + clear button. -->
+    <!-- Korean (ko) translations for address-bar hint + clear button. -->
     <string name="browser_address_bar_hint">검색 또는 URL 입력</string>
     <string name="browser_address_bar_clear_cd">주소창 지우기</string>
 
-    <!-- Spec 011 — Korean (ko) translations for tabs management. -->
+    <!-- Korean (ko) translations for tabs management. -->
     <string name="tabs_switcher_new_tab">새 탭</string>
     <string name="tabs_switcher_close_all">모든 탭 닫기</string>
     <string name="tabs_switcher_close_all_confirm">모든 탭을 닫으시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
@@ -32,7 +32,7 @@
         <item quantity="other">탭 %1$d개</item>
     </plurals>
 
-    <!-- Spec 012 — Private / Incognito Mode. -->
+    <!-- Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">새 시크릿 탭</string>
     <string name="tabs_a11y_incognito_glyph">시크릿 탭</string>
     <string name="tabs_error_max_incognito_tabs_reached">시크릿 탭 최대 %d개에 도달했습니다</string>
@@ -41,13 +41,13 @@
     <string name="tabs_action_close_all_incognito">모든 시크릿 탭 닫기</string>
     <string name="tabs_close_all_incognito_confirm">시크릿 탭 %d개를 모두 닫으시겠습니까?</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <!-- Bookmarks CRUD. US1 star icon strings. -->
     <string name="bookmark_action_star_add_cd">이 페이지를 북마크에 추가</string>
     <string name="bookmark_action_star_remove_cd">이 페이지의 북마크 삭제</string>
     <string name="bookmark_added_snackbar">북마크 저장됨</string>
     <string name="bookmark_removed_snackbar">북마크 삭제됨</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <!-- Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">북마크</string>
     <string name="bookmarks_section_folders">폴더</string>
     <string name="bookmarks_section_pages">페이지</string>
@@ -56,7 +56,7 @@
     <string name="bookmarks_action_back_to_parent_cd">상위 폴더로</string>
     <string name="bookmarks_breadcrumb_root_label">루트</string>
 
-    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <!-- full bookmarks UI. -->
     <string name="bookmarks_action_new_folder_cd">새 폴더</string>
     <string name="bookmarks_dialog_create_folder_title">새 폴더</string>
     <string name="bookmarks_dialog_rename_folder_title">폴더 이름 변경</string>
@@ -85,7 +85,7 @@
     <string name="bookmarks_action_add_cd">북마크 추가</string>
     <string name="bookmarks_dialog_add_title">북마크 추가</string>
 
-    <!-- Spec 014 — History view (Korean). -->
+    <!-- History view (Korean). -->
     <string name="history_screen_title">기록</string>
     <string name="history_action_back">뒤로</string>
     <string name="history_day_today">오늘</string>
@@ -94,13 +94,13 @@
     <string name="history_empty_body">방문한 페이지가 여기에 표시됩니다.</string>
     <string name="history_row_content_description">%1$s, %2$s, %3$s에 방문</string>
 
-    <!-- Spec 014 US2 — search. -->
+    <!-- search. -->
     <string name="history_search_placeholder">방문 기록 검색</string>
     <string name="history_search_clear_content_description">검색어 지우기</string>
     <string name="history_no_matches_title">\"%1$s\"과(와) 일치하는 기록이 없습니다</string>
     <string name="history_no_matches_body">다른 단어로 검색하거나 철자를 확인해 보세요.</string>
 
-    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <!-- long-press per-entry actions. -->
     <string name="history_action_open_in_new_tab">새 탭에서 열기</string>
     <string name="history_action_delete_entry">항목 삭제</string>
     <string name="history_action_copy_url">URL 복사</string>
@@ -108,14 +108,14 @@
     <string name="history_snackbar_tab_cap_reached">탭을 최대 개수까지 열었습니다. 새 탭을 열려면 탭을 하나 닫으세요.</string>
     <string name="history_snackbar_deletion_failed">항목을 삭제하지 못했습니다. 다시 시도해 주세요.</string>
 
-    <!-- Spec 014 US4 — clear all. -->
+    <!-- clear all. -->
     <string name="history_action_clear_all">방문 기록 모두 삭제</string>
     <string name="history_clear_all_dialog_title">방문 기록을 모두 삭제할까요?</string>
     <string name="history_clear_all_dialog_body">방문 기록의 모든 페이지가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</string>
     <string name="history_clear_all_dialog_confirm">삭제</string>
     <string name="history_clear_all_dialog_cancel">취소</string>
 
-    <!-- Spec 015 — downloads (US1) -->
+    <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">%1$s 다운로드 중</string>
     <string name="downloads_service_unavailable">이 기기에서는 다운로드를 사용할 수 없습니다.</string>
     <string name="downloads_storage_permission_denied">다운로드를 저장하려면 저장소 접근 권한이 필요합니다.</string>
@@ -125,7 +125,7 @@
     <string name="downloads_storage_permission_rationale_confirm">계속</string>
     <string name="downloads_storage_permission_rationale_cancel">나중에</string>
 
-    <!-- Spec 015 — downloads (US2-US7) -->
+    <!-- downloads (US2-US7) -->
     <string name="downloads_screen_title">다운로드</string>
     <string name="downloads_action_back">뒤로</string>
     <string name="downloads_state_pending">대기 중</string>
@@ -159,7 +159,7 @@
     <string name="downloads_empty_body">다운로드한 파일이 여기에 표시됩니다.</string>
     <string name="downloads_operation_failed">문제가 발생했습니다. 다시 시도해 주세요.</string>
 
-    <!-- Spec 016 — Settings screen scaffold. -->
+    <!-- Settings screen scaffold. -->
     <string name="settings_screen_title">설정</string>
     <string name="settings_action_back">뒤로</string>
     <string name="settings_action_cancel">취소</string>
@@ -170,21 +170,21 @@
     <string name="settings_section_about">정보</string>
     <string name="settings_error_not_saved">설정을 저장하지 못했습니다. 다시 시도해 주세요.</string>
 
-    <!-- Spec 016 US1 — theme. -->
+    <!-- theme. -->
     <string name="settings_theme_title">테마</string>
     <string name="settings_theme_light">밝게</string>
     <string name="settings_theme_dark">어둡게</string>
     <string name="settings_theme_system">시스템 기본값</string>
 
-    <!-- Spec 016 US2 — search engine. -->
+    <!-- search engine. -->
     <string name="settings_search_engine_title">검색엔진</string>
 
-    <!-- Spec 016 US3 — app language. -->
+    <!-- app language. -->
     <string name="settings_language_title">앱 언어</string>
     <string name="settings_language_follow_system">시스템 설정 따르기</string>
     <string name="settings_error_language_not_applied">언어를 변경하지 못했습니다. 다시 시도해 주세요.</string>
 
-    <!-- Spec 016 US4 — clear browsing data. -->
+    <!-- clear browsing data. -->
     <string name="settings_clear_browsing_data_title">인터넷 사용 기록 삭제</string>
     <string name="settings_clear_dialog_title">인터넷 사용 기록을 삭제할까요?</string>
     <string name="settings_clear_category_history">방문 기록</string>
@@ -198,7 +198,7 @@
     <string name="settings_clear_done">인터넷 사용 기록이 삭제되었습니다</string>
     <string name="settings_clear_partial_failure">일부 데이터를 삭제하지 못했습니다. 다시 시도해 주세요.</string>
 
-    <!-- Spec 016 US5 — history retention. -->
+    <!-- history retention. -->
     <string name="settings_history_retention_title">방문 기록 보관 기간</string>
     <plurals name="settings_history_retention_days">
         <item quantity="other">%d일</item>
@@ -208,15 +208,14 @@
     <string name="settings_retention_shorten_confirm">삭제</string>
     <string name="settings_retention_prune_deferred">지금은 이전 방문 기록을 삭제하지 못했습니다. 다음에 앱을 시작할 때 삭제됩니다.</string>
 
-    <!-- Spec 016 US6 — dynamic color. -->
+    <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">동적 색상</string>
     <string name="settings_dynamic_color_summary">배경화면의 색상 사용</string>
 
-    <!-- Spec 016 US7 — About. -->
+    <!-- About. -->
     <string name="settings_about_version">버전 %1$s</string>
     <string name="settings_about_privacy_statement">이 앱은 개인정보를 수집하지 않으며 ThirtySix가 운영하는 서버에 아무것도 보내지 않습니다. 방문 기록, 북마크, 다운로드, 설정은 이 기기에만 저장됩니다.</string>
-    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
-         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <!-- onboarding: the privacy statement and option labels are reused from Settings. -->
     <string name="onboarding_welcome_title">ThirtySix에 오신 것을 환영합니다</string>
     <string name="onboarding_welcome_body">방해하지 않는 조용한 브라우저입니다.</string>
     <string name="onboarding_language_title">언어 선택</string>
@@ -230,7 +229,7 @@
     <string name="onboarding_action_skip">건너뛰기</string>
     <string name="onboarding_progress_a11y">%2$d단계 중 %1$d단계</string>
 
-    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <!-- bottom bar and hub -->
     <string name="nav_search">검색</string>
     <string name="nav_tabs">탭</string>
     <string name="nav_menu">메뉴</string>
@@ -245,7 +244,7 @@
         <item quantity="other">탭, %1$d개 열림</item>
     </plurals>
 
-    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <!-- Home page -->
     <string name="home_greeting_morning">좋은 아침이에요</string>
     <string name="home_greeting_afternoon">좋은 오후예요</string>
     <string name="home_greeting_evening">좋은 저녁이에요</string>
@@ -256,7 +255,7 @@
     <string name="home_shortcut_tag_saved">저장됨</string>
     <string name="home_shortcut_tag_recent">최근</string>
 
-    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <!-- incognito new-tab page -->
     <string name="incognito_page_title">시크릿 모드로 탐색 중입니다</string>
     <string name="incognito_page_subtitle">이 휴대전화를 사용하는 다른 사람은 여기서 한 일을 볼 수 없습니다.</string>
     <string name="incognito_page_section_title">시크릿 탭을 모두 닫으면</string>
@@ -265,11 +264,11 @@
     <string name="incognito_page_point_screenshots">시크릿 탭이 열려 있는 동안 스크린샷이 차단됩니다</string>
     <string name="incognito_page_footnote">다운로드한 파일과 저장한 북마크는 유지됩니다. 웹사이트와 네트워크는 여전히 방문 사실을 볼 수 있습니다.</string>
 
-    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <!-- tab switcher modes -->
     <string name="tabs_chip_open">열린 탭</string>
     <string name="tabs_chip_incognito">시크릿</string>
 
-    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <!-- default browser and entry points -->
     <string name="settings_section_general">일반</string>
     <string name="settings_default_browser_title">기본 브라우저</string>
     <string name="settings_default_browser_summary_not_default">ThirtySix가 기본 브라우저가 아닙니다. 탭하여 변경하세요.</string>
@@ -283,7 +282,7 @@
     <string name="entry_tab_limit_reused">탭 한도에 도달하여 현재 탭에서 열었습니다</string>
     <string name="entry_default_browser_unavailable">이 기기에서는 기본 앱을 변경할 수 없습니다</string>
 
-    <!-- Spec 021 — web capabilities (contracts C2) -->
+    <!-- web capabilities -->
     <string name="site_capability_camera">카메라</string>
     <string name="site_capability_microphone">마이크</string>
     <string name="site_capability_location">위치</string>
@@ -341,7 +340,7 @@
     <string name="settings_clear_category_site_permissions_description">사이트에서 카메라, 마이크, 위치를 다시 묻습니다</string>
     <string name="file_chooser_title">파일 선택</string>
 
-    <!-- Spec 022 — page tools -->
+    <!-- page tools -->
     <string name="hub_page_tools_title">페이지 도구</string>
     <string name="hub_tile_find_in_page">페이지에서 찾기</string>
     <string name="hub_tile_share">공유</string>
@@ -361,7 +360,7 @@
     <string name="suggestion_bookmark_cd">북마크: %1$s, %2$s</string>
     <string name="suggestion_history_cd">기록: %1$s, %2$s</string>
     <string name="share_page_title">페이지 공유</string>
-    <!-- Spec 023 privacy protection -->
+    <!-- privacy protection -->
     <string name="hub_protection_site_title">이 사이트 보호</string>
     <string name="hub_protection_site_on">추적기 차단, 추적 태그 제거, 보안 연결 우선</string>
     <string name="hub_protection_site_off">%1$s에서 꺼짐. 추적기가 로드될 수 있습니다.</string>
@@ -383,7 +382,7 @@
     <plurals name="hub_protection_trackers_blocked">
         <item quantity="other">이 페이지에서 추적기 %1$d개 차단됨</item>
     </plurals>
-    <!-- Spec 024 privacy tools -->
+    <!-- privacy tools -->
     <string name="fire_action">파이어</string>
     <string name="fire_action_tabs_cd">파이어: 모든 탭을 닫고 인터넷 사용 기록 삭제</string>
     <string name="fire_confirm_title">모든 탭을 닫고 데이터를 삭제할까요?</string>

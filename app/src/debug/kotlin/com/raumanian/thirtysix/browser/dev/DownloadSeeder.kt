@@ -4,58 +4,30 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.raumanian.thirtysix.browser.domain.model.DownloadRecord
-import com.raumanian.thirtysix.browser.domain.repository.DownloadsRepository
+import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
+import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
 /**
- * Spec 015 T107 — **debug-build-only** bulk downloads seeder for the SC-006 performance
- * gate (quickstart **G12**: 500 records, at least 5 of them in flight).
- *
- * Lives in `app/src/debug/` so it compiles into the debug APK only, exactly like Spec 014's
- * `HistorySeeder`. That is a stronger guarantee than a `BuildConfig.DEBUG` check: the class
- * does not exist in the release artifact at all, so there is nothing for R8 to strip and no
- * manifest entry survives.
- *
- * **What "in flight" means here.** This seeder writes *records*, not real transfers. A
- * seeded record carries a transfer handle the platform has never heard of, so
- * `ResolveDownloadStatusUseCase` resolves it through the FR-024a fallback — `Complete` when
- * `localUri` points at something readable, `Missing` otherwise. That exercises the fallback
- * path at scale, which is the expensive one, but it does **not** produce live progress bars.
- * For G12's "at least 5 actively transferring" requirement, start a few real downloads by
- * hand on top of the seeded rows.
- *
- * Usage — with the debug build installed:
- * ```
- * # seed the default 500 records spread over 30 days
- * adb shell am broadcast -a com.raumanian.thirtysix.browser.debug.SEED_DOWNLOADS \
- *   -n com.raumanian.thirtysix.browser.debug/com.raumanian.thirtysix.browser.dev.DownloadSeeder
- *
- * # custom volume / span
- * adb shell am broadcast -a com.raumanian.thirtysix.browser.debug.SEED_DOWNLOADS \
- *   -n com.raumanian.thirtysix.browser.debug/com.raumanian.thirtysix.browser.dev.DownloadSeeder \
- *   --ei count 2000 --ei days 90
- *
- * # wipe what was seeded
- * adb shell am broadcast -a com.raumanian.thirtysix.browser.debug.CLEAR_DOWNLOADS \
- *   -n com.raumanian.thirtysix.browser.debug/com.raumanian.thirtysix.browser.dev.DownloadSeeder
- *
- * # follow progress
- * adb logcat -s DownloadSeeder
- * ```
+ * Debug-only: writes download records (`--ei count`, `--ei days`), not real transfers. Their
+ * handles are unknown to the platform, so they resolve through the file-presence fallback and
+ * never show live progress; start real downloads by hand for those.
  */
 @AndroidEntryPoint
 class DownloadSeeder : BroadcastReceiver() {
 
     @Inject
     lateinit var repository: DownloadsRepository
+
+    @Inject
+    lateinit var dispatchers: DispatcherProvider
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
@@ -72,7 +44,7 @@ class DownloadSeeder : BroadcastReceiver() {
     private fun seed(count: Int, days: Int) {
         // goAsync() is deliberately not used: seeding takes far longer than a receiver's
         // allowed window, and this is a debug tool where a detached scope is acceptable.
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dispatchers.io).launch {
             Log.i(TAG, "seeding $count download records across $days day(s)")
             val now = System.currentTimeMillis()
             val span = TimeUnit.DAYS.toMillis(days.toLong()).coerceAtLeast(1L)
@@ -87,8 +59,7 @@ class DownloadSeeder : BroadcastReceiver() {
                         fileName = "seeded-$index.bin",
                         mimeType = MIME_TYPES[index % MIME_TYPES.size],
                         createdAt = createdAt,
-                        // A handle the platform will not recognise, so the row exercises the
-                        // FR-024a file-presence fallback rather than a real query result.
+                        // Unknown to the platform, so the file-presence fallback resolves it.
                         transferHandle = SEEDED_HANDLE_BASE + index,
                         localUri = null,
                     ),
@@ -103,11 +74,9 @@ class DownloadSeeder : BroadcastReceiver() {
     }
 
     private fun clear() {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dispatchers.io).launch {
             val before = repository.count()
-            // Deleted one at a time because the repository deliberately has no clear-all:
-            // the feature does not offer one either (bulk clearing is Spec 016's business),
-            // and a debug tool is not a reason to widen the production surface.
+            // One at a time: the repository has no clear-all, and a debug tool should not add one.
             val ids = repository.observeAll().first().map { it.id }
             val removed = ids.count { repository.deleteById(it) }
             Log.i(TAG, "cleared $removed of $before record(s)")
@@ -121,12 +90,11 @@ class DownloadSeeder : BroadcastReceiver() {
         const val EXTRA_COUNT = "count"
         const val EXTRA_DAYS = "days"
 
-        /** SC-006's envelope: 500 records is the realistic upper bound from A14. */
+        /** The realistic upper bound for one person's downloads list. */
         const val DEFAULT_COUNT = 500
         const val DEFAULT_DAYS = 30
         const val PROGRESS_EVERY = 50
 
-        /** Far above anything the platform would allocate, so seeded rows never collide. */
         const val SEEDED_HANDLE_BASE = 900_000_000L
 
         val MIME_TYPES = listOf(

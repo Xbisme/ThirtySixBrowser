@@ -1,37 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Spec 016 research R2 — MainActivity is an AppCompatActivity (needed for in-app language
+    <!-- MainActivity is an AppCompatActivity (needed for in-app language
          switching below Android 13), and AppCompat refuses to start without an AppCompat theme.
-         The two items are Spec 003's cold-start fix and are unchanged. -->
+         The two items are 's cold-start fix and are unchanged. -->
     <style name="Theme.ThirtySix" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/window_background_light</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <!-- Spec 017 — the launch-screen theme. MainActivity wears this only until
-         installSplashScreen() hands control back (see below); the app then runs on
-         Theme.ThirtySix above.
-
-         ⚠️ The parent is DELIBERATELY NOT AppCompat, contrary to what the surrounding
-         Spec 016 comment might suggest. Theme.SplashScreen descends from
-         android:Theme.DeviceDefault by the library's own design; forcing an AppCompat
-         parent here fights it and discards the per-API-level windowSplashScreen* wiring
-         the library sets up (specs/017-splash-screen/research.md R3).
-
-         What keeps AppCompat working is postSplashScreenTheme, NOT the parent:
-         installSplashScreen() resolves that attribute and calls Activity.setTheme() with
-         it before AppCompatActivity builds its delegate. Remove it, or call
-         installSplashScreen() after super.onCreate(), and the activity stays on this
-         DeviceDefault-based theme and AppCompat throws at launch (INV-7, INV-11). -->
+    <!-- Launch-screen theme. The parent must not be AppCompat: Theme.SplashScreen builds on
+         DeviceDefault. AppCompat works because installSplashScreen(), called before
+         super.onCreate(), applies postSplashScreenTheme; without that the app crashes at launch. -->
     <style name="Theme.ThirtySix.Splash" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.ThirtySix</item>
         <item name="windowSplashScreenBackground">@color/window_background_light</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_brand_mark</item>
-        <!-- Metadata only — this does NOT control how long the splash screen is shown.
-             The library reads it back via SplashScreenView.getIconAnimationDuration(); the
-             screen itself ends at the first drawable frame because we deliberately never
-             call setKeepOnScreenCondition (FR-008, research.md R4). Must be > 0 for an
-             animated icon. -->
+        <!-- Metadata only: it does not lengthen the splash screen, which ends at the first
+             drawable frame. Must be > 0 for an animated icon. -->
         <item name="windowSplashScreenAnimationDuration">@integer/splash_icon_animation_duration</item>
     </style>
 </resources>

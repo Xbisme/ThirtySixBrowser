@@ -1,4 +1,4 @@
-# ThirtySix Browser tracking query parameters (Spec 023, research R8).
+# ThirtySix Browser tracking query parameters.
 # Own list of parameter names that exist only to track; one per line.
 # A trailing * marks a prefix. Generic names (ref, source, cid) are deliberately absent.
 utm_*

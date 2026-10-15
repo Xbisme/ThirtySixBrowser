@@ -21,3 +21,4 @@ __pycache__/
 # Spec 024 script generator (tools/privacy-scripts)
 node_modules/
 tools/privacy-scripts/build/
+.kotlin/

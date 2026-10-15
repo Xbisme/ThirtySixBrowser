@@ -1,0 +1,257 @@
+package com.raumanian.thirtysix.browser.core.data.datasource.local.datastore
+
+import androidx.datastore.preferences.core.edit
+import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
+import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
+import com.raumanian.thirtysix.browser.core.domain.model.TextSize
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
+import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.feature.settings.data.mapper.SettingsMapper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+/**
+ * [SettingsDataStore] on plain JVM. A "process restart" cancels the producing scope and opens a
+ * second DataStore over the same file.
+ */
+class SettingsDataStoreTest {
+
+    @get:Rule val tempFolder = TemporaryFolder()
+
+    private val mapper = SettingsMapper()
+
+    // First-launch defaults
+
+    @Test
+    fun defaultRead_returnsDocumentedDefaults() = runBlocking {
+        val ds = SettingsDataStore(createTestSettingsDataStore(tempFolder.newFolder()))
+        val snapshot = mapper.toDomain(ds.data.first())
+
+        assertEquals(AppDefaults.THEME_MODE, snapshot.themeMode)
+        assertEquals(AppDefaults.DYNAMIC_COLOR_ENABLED, snapshot.isDynamicColorEnabled)
+        assertEquals(AppDefaults.SEARCH_ENGINE, snapshot.searchEngine)
+        assertEquals(AppDefaults.HISTORY_RETENTION, snapshot.historyRetention)
+        assertEquals(AppDefaults.IS_ONBOARDING_COMPLETED, snapshot.isOnboardingCompleted)
+    }
+
+    // Theme
+
+    @Test
+    fun writeThemeMode_then_freshReadReturnsThemeMode() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "session.preferences_pb"
+
+        val firstScope = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, firstScope))
+        val writeResult = first.setThemeMode(ThemeMode.Dark)
+        assertTrue("write should succeed", writeResult is Result.Success)
+        firstScope.coroutineContext.job.cancelAndJoin()
+
+        val secondScope = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, secondScope))
+        val snapshot = mapper.toDomain(second.data.first())
+        assertEquals(ThemeMode.Dark, snapshot.themeMode)
+        secondScope.coroutineContext.job.cancelAndJoin()
+    }
+
+    // Search engine
+
+    @Test
+    fun writeSearchEngine_then_freshReadReturnsSearchEngine() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "engine.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertTrue(first.setSearchEngine(SearchEngine.Google) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        val snapshot = mapper.toDomain(second.data.first())
+        assertEquals(SearchEngine.Google, snapshot.searchEngine)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    @Test
+    fun corruptedSearchEngineDisk_fallsBackToDefault() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "corrupt.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val raw1 = createTestSettingsDataStore(folder, fileName, s1)
+        // An engine a newer build wrote before a downgrade must read back as the default.
+        raw1.edit { it[StorageKeys.SEARCH_ENGINE] = "yandex" }
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        val snapshot = mapper.toDomain(second.data.first())
+        assertEquals(SearchEngine.Google, snapshot.searchEngine)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    // Onboarding flag
+
+    @Test
+    fun writeOnboardingCompleted_then_freshReadReturnsTrue() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "ob.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertTrue(first.setOnboardingCompleted(true) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        val snapshot = mapper.toDomain(second.data.first())
+        assertEquals(true, snapshot.isOnboardingCompleted)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    // Dynamic color and history retention
+
+    @Test
+    fun writeDynamicColorEnabled_then_freshReadReturnsIt() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "dynamic.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertTrue(first.setDynamicColorEnabled(false) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(false, mapper.toDomain(second.data.first()).isDynamicColorEnabled)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    @Test
+    fun writeHistoryRetention_then_freshReadReturnsIt() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "retention.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertTrue(first.setHistoryRetention(HistoryRetention.Days7) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(HistoryRetention.Days7, mapper.toDomain(second.data.first()).historyRetention)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    @Test
+    fun outOfSetRetentionDisk_fallsBackToDefault() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "retention-corrupt.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        createTestSettingsDataStore(folder, fileName, s1)
+            .edit { it[StorageKeys.HISTORY_RETENTION_DAYS] = OUT_OF_SET_RETENTION_DAYS }
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(AppDefaults.HISTORY_RETENTION, mapper.toDomain(second.data.first()).historyRetention)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    @Test
+    fun writeTextSize_then_freshReadReturnsIt() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val fileName = "text-size.preferences_pb"
+
+        val s1 = CoroutineScope(SupervisorJob())
+        val first = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s1))
+        assertEquals(TextSize.Percent100, mapper.toDomain(first.data.first()).textSize)
+        assertTrue(first.setTextSize(TextSize.Percent150) is Result.Success)
+        s1.coroutineContext.job.cancelAndJoin()
+
+        val s2 = CoroutineScope(SupervisorJob())
+        val second = SettingsDataStore(createTestSettingsDataStore(folder, fileName, s2))
+        assertEquals(TextSize.Percent150, mapper.toDomain(second.data.first()).textSize)
+        s2.coroutineContext.job.cancelAndJoin()
+    }
+
+    // Concurrent writes
+
+    /**
+     * Concurrent writes to two different keys both persist, every time. Uses real coroutines,
+     * not virtual time, to exercise DataStore's actual serializer.
+     */
+    @Test
+    fun concurrentWrites_differentKeys_bothPersist() = runBlocking {
+        repeat(REPEAT_COUNT) { iteration ->
+            val folder = tempFolder.newFolder()
+            val scope = CoroutineScope(SupervisorJob())
+            val ds = SettingsDataStore(createTestSettingsDataStore(folder, "iter.preferences_pb", scope))
+
+            val jobs = listOf(
+                launch { ds.setThemeMode(ThemeMode.Dark) },
+                launch { ds.setSearchEngine(SearchEngine.Google) },
+            )
+            jobs.joinAll()
+
+            val snapshot = mapper.toDomain(ds.data.first())
+            assertEquals(
+                "iteration $iteration: themeMode lost",
+                ThemeMode.Dark,
+                snapshot.themeMode,
+            )
+            assertEquals(
+                "iteration $iteration: searchEngine lost",
+                SearchEngine.Google,
+                snapshot.searchEngine,
+            )
+            scope.coroutineContext.job.cancelAndJoin()
+        }
+    }
+
+    @Test
+    fun concurrentWrites_sameKey_lastWriterWins() = runBlocking {
+        val folder = tempFolder.newFolder()
+        val scope = CoroutineScope(SupervisorJob())
+        val ds = SettingsDataStore(createTestSettingsDataStore(folder, "same.preferences_pb", scope))
+
+        val jobs = listOf(
+            launch { ds.setThemeMode(ThemeMode.Dark) },
+            launch { ds.setThemeMode(ThemeMode.Light) },
+        )
+        jobs.joinAll()
+
+        val snapshot = mapper.toDomain(ds.data.first())
+        // Either Dark or Light persisted — both are valid; corruption / null is not.
+        assertNotNull(snapshot.themeMode)
+        assertTrue(
+            "themeMode must be Dark or Light, got ${snapshot.themeMode}",
+            snapshot.themeMode == ThemeMode.Dark || snapshot.themeMode == ThemeMode.Light,
+        )
+        scope.coroutineContext.job.cancelAndJoin()
+    }
+
+    private companion object {
+        // Concurrent writes must pass every one of at least 100 repetitions.
+        const val REPEAT_COUNT = 100
+
+        /** A day count that is not one of the four retention windows. */
+
+        const val OUT_OF_SET_RETENTION_DAYS = 45
+    }
+}

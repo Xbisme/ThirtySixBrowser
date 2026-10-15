@@ -1,906 +1,218 @@
-<!--
-================================================================================
-SYNC IMPACT REPORT
-================================================================================
-Version Change: (none) → 1.0.0 (INITIAL — project constitution created)
-                1.0.0 → 1.1.0 (MINOR — Principle III expanded with explicit
-                                No-Hardcode Rule + categorized constants table)
-                1.1.0 → 1.2.0 (MINOR — Principle XI signing rule scoped to
-                                "distribution" builds; debug-keystore fallback
-                                explicitly permitted for local dev/CI iteration
-                                with mandatory warning string)
-                1.2.0 → 1.3.0 (MINOR — Principle II permission rule reconciled
-                                with the manifest shipped by Spec 015:
-                                POST_NOTIFICATIONS removed from the minimum set;
-                                WRITE_EXTERNAL_STORAGE capped at maxSdkVersion 28
-                                admitted as the single documented legacy-storage
-                                exception)
-                1.3.0 → 1.4.0 (MINOR — §V gains the NON-NEGOTIABLE "Compose Phase
-                                Discipline" subsection; §X Phase 5 becomes 019
-                                ui-redesign + 020 optional tracker blocker, with a
-                                design-before-spec rule)
-                1.4.0 → 1.5.0 (MINOR — §X gains Phase 6 "Real browser" (020–023) and
-                                drops the optional tracker-blocker slot; §II defines
-                                the one permitted form of script injection; §I and
-                                §VII require protection data to ship in the APK)
-                1.5.0 → 1.5.1 (PATCH — Spec 021 fills in the permission rows that 1.5.0
-                                announced; no principle changes)
-                1.5.1 → 1.6.0 (MINOR — §X Phase 6 gains 024 privacy-tools: Spec 023's
-                                scope is split in two; §II, §VI, §VII re-pointed)
+# ThirtySix Browser Constitution
 
-Modified Principles (1.6.0, 2026-10-11, decided by the project lead):
-- II. Google Play Compliance — one-way script injection condition 3 now names Spec 024
-       (cookie-banner auto-decline, fingerprinting protection); Spec 023 injects no script.
-- VI. Testing Discipline — the rule-engine bullet keeps Spec 023 (host blocklist matcher,
-       HTTPS upgrade, URL-parameter stripping) and adds the per-site protection exception
-       list (023) and fireproof-site rules (024).
-- VII. Offline-First Architecture — "the Spec 023 privacy protections" becomes "the Spec
-       023 and 024 privacy protections".
-- X. Simplicity & Build Order — Phase 6 order is now 020 → 021 → 022 → 023 → 024,
-       MANDATORY. 023 `privacy-protection` keeps the network-level protections (tracker
-       blocking from an APK-bundled host list, HTTPS upgrade, tracking-parameter stripping
-       and referrer trimming, Global Privacy Control), every one on by default and
-       switchable off per site. New 024 `privacy-tools`: Fire button with fireproof sites,
-       per-site privacy dashboard, cookie-banner auto-decline and fingerprinting protection
-       through bundled scripts. "Design before spec" covers 024. Rationale names 023–024.
-- Bump rationale: MINOR — a new spec slot in a mandatory phase; nothing is removed, the
-       former 023 scope survives in full across 023 and 024. Reason for the split: seven
-       feature groups in one spec would exceed any previous spec in tasks and PR size.
+Android app: Kotlin, Jetpack Compose, Hilt, feature-first Clean Architecture with MVVM.
 
-Follow-up TODOs (1.6.0):
-- ✅ RESOLVED in the same change — TODO(SDD_ROADMAP_024): sdd-roadmap.md, dev-workflow.md, project-context.md and CLAUDE.md
-       still describe 023 as the full privacy scope and stop at 023 — split the row and add
-       024 in the same change as this amendment.
+**How this file works**
 
-Modified Sections (1.5.1, 2026-10-11, Spec 021 task T063):
-- Technical Standards → Android Permissions & Entitlements — rows added for CAMERA,
-       RECORD_AUDIO, ACCESS_COARSE_LOCATION / ACCESS_FINE_LOCATION (dangerous, requested
-       only after the person allows a site, or chooses to take a photo for an upload) and
-       MODIFY_AUDIO_SETTINGS (normal, required by WebView for audio capture). The
-       "Pending, Spec 021" note is replaced by these rows.
-- Bump rationale: PATCH — 1.5.0 already stated that Spec 021 would add these rows under
-       the point-of-use rule; nothing new is permitted beyond what it announced, except the
-       normal-level MODIFY_AUDIO_SETTINGS that the platform requires alongside RECORD_AUDIO.
-
-Modified Principles (1.5.0, 2026-10-11, decided by the project lead):
-- I. Privacy & Security First — new bullet: protection data (tracker host lists,
-       HTTPS-upgrade lists, parameter-stripping rules, injected scripts) ships inside the
-       APK, updates only with app releases, and is never fetched at runtime.
-- II. Google Play Compliance — the addJavascriptInterface bullet is replaced by a precise
-       rule: every JS→native bridge (addJavascriptInterface, WebMessageListener) stays
-       forbidden; one-way injection is allowed only for APK-bundled scripts via
-       WebViewCompat.addDocumentStartJavaScript (feature-detected, off when unsupported),
-       serving a spec-defined privacy protection, exposing nothing and receiving nothing,
-       with the spec documenting where it runs.
-- VI. Testing Discipline — unit-test list now names the Spec 023 rule engines (host
-       blocklist matcher, HTTPS upgrade, URL-parameter stripping) and Spec 020's
-       incoming-link / intent handling.
-- VII. Offline-First Architecture — the Spec 023 protections are on the list of features
-       that MUST work fully offline.
-- X. Simplicity & Build Order — new Phase 6 "Real browser", order MANDATORY: 020
-       default-browser-entry-points → 021 web-capabilities → 022 page-tools → 023
-       privacy-protection. The Phase 5 line "020 (Optional) — tracker blocker host list"
-       is removed; that scope moves into 023, which is not optional. "Design before
-       spec" explicitly covers the Phase 6 specs that add UI. Rationale reworded.
-- Technical Standards → Android Permissions — note added: Spec 021 will add CAMERA,
-       RECORD_AUDIO and ACCESS_FINE/COARSE_LOCATION to the table itself, requested only at
-       point of use.
-- Bump rationale: MINOR — a new phase and material expansion of §I, §II and §X; the only
-       removal is the obsolete optional-020 line, whose scope survives inside 023.
-
-Follow-up TODOs (1.5.0):
-- TODO(SDD_ROADMAP): sdd-roadmap.md, dev-workflow.md, project-context.md and CLAUDE.md
-       still describe 020 as the optional tracker blocker — renumber in the same change.
-- TODO(DESIGN_021_023): the UI for 021, 022, 023 and 020's set-as-default prompt is not
-       yet in the ThirtySix design system; design and approve before each
-       /speckit-specify (§X "Design before spec").
-
-Templates (1.5.0 re-check): plan-template.md, spec-template.md, tasks-template.md ✅ —
-       the Constitution Check loads principles at runtime; no template names Phase 6 or
-       specs 020–023.
-
-Modified Principles (1.4.0, 2026-10-10, decided by the project lead):
-- V. Performance Excellence — new subsection "Compose Phase Discipline (NON-NEGOTIABLE)",
-       nine review-checkable rules: read frame-rate state in the latest phase (offset /
-       graphicsLayer / drawBehind lambdas); pass it as `() -> T`; isolate high-frequency
-       state from screen state (precedent: BrowserScreen recomposing on every progress
-       tick); derivedStateOf / remember; stable parameters + compiler reports; lazy `key`
-       + `contentType`, no same-direction nesting; window insets on every bar (precedent:
-       address bar under the status bar, Specs 009–018); honest effect keys, no backwards
-       writes; recomposition counts measured per UI spec. The lazy-key bullet now points
-       at rule 6.
-- VI. Testing Discipline — host blocklist matcher reference renumbered Spec 019 → 020.
-- X. Simplicity & Build Order — Phase 5 is now 019 `ui-redesign` (from the approved
-       ThirtySix design system, violet brand replacing Deep Teal) then 020
-       `tracker-blocker-hostlist` (optional, renumbered). New "Design before spec" rule:
-       UI not yet in the design system is designed and approved before /speckit-specify;
-       features proposed while designing go to sdd-roadmap.md for a later version.
-- Development Workflow → Testing Gates — gates 9 (compiler report) and 10
-       (recomposition counts) added, UI specs only.
-- Development Workflow → Review Requirements — composable changes reviewed against
-       Compose Phase Discipline; UI changes must match the design system.
-- Bump rationale: MINOR — material expansion of §V and §X; no principle removed. Code
-       merged under 1.3.0 that violates the new rules (BrowserScreen progress read, the
-       address-bar insets) is not grandfathered: Spec 019 rebuilds those screens and
-       MUST comply.
-
-Follow-up TODOs (1.4.0):
-- TODO(COMPOSE_REPORTS): wire Compose compiler reports/metrics behind a Gradle property
-       and add a stability configuration file — first task of Spec 019.
-- TODO(COMPOSE_LINT): evaluate the detekt `compose-rules` ruleset (io.nlopez.compose.rules)
-       during Spec 019; version looked up at adoption per §IX. Not added by this amendment.
-- TODO(SDD_ROADMAP): sdd-roadmap.md, dev-workflow.md, project-context.md and CLAUDE.md
-       still list 019 as the tracker blocker — renumber in the same change as this
-       amendment.
-
-Templates (1.4.0 re-check): plan-template.md, spec-template.md, tasks-template.md ✅ —
-       the Constitution Check loads principles at runtime; no template names Spec 019
-       or the Phase 5 contents.
-
-Modified Principles (1.3.0):
-- II. Google Play Compliance — permission bullet: the minimum set is now `INTERNET` +
-       `ACCESS_NETWORK_STATE`, and any further permission MUST be justified in its spec
-       AND recorded in the Android Permissions & Entitlements table. New bullet:
-       `POST_NOTIFICATIONS` MUST NOT be declared while the app composes no notification
-       of its own (Spec 015 gate G9 Outcome A — the system download service notifies
-       under its own UID). Scoped Storage bullet: legacy storage permissions stay
-       forbidden except `WRITE_EXTERNAL_STORAGE` with `maxSdkVersion="28"`, justified in
-       specs/015-downloads-manager/plan.md Complexity Tracking; `MANAGE_EXTERNAL_STORAGE`
-       remains forbidden outright.
-- Technical Standards → Android Permissions & Entitlements — the table was amended
-       during Spec 015 (task T110) without a version bump, which left §II contradicting
-       it on both permissions. 1.3.0 records that change; the deviation note now points
-       at §II instead of "the three-permission minimum this table previously described".
-- Bump rationale: MINOR, not MAJOR — no principle is removed, and nothing that complied
-       with 1.2.0 stops complying (no spec ever declared POST_NOTIFICATIONS); the storage
-       exception was already approved during Spec 015.
-
-Modified Principles (1.1.0, 1.2.0):
-- III. Code Quality & Safety — added "No-Hardcode Rule (NON-NEGOTIABLE)" subsection
-       with 18-row category table mapping every literal type to its constants file,
-       plus the Constants file organization layout under core/constants/ and code
-       review enforcement guidance (grep red flags + Detekt MagicNumber rule).
-- XI. Build Configuration & Environment Separation — signing config rule split into
-       two scopes: (1) distribution builds MUST use a release keystore; (2) local
-       dev / CI iteration MAY fall back to the debug keystore when no release
-       keystore is configured, provided a mandatory warning is emitted and the
-       artifact is never uploaded to Play Store. Resolves Spec 001 Q2 clarification.
-
-Added Sections (v1.0.0 initial):
-- I.    Privacy & Security First: on-device only, no analytics, no account
-- II.   Google Play Compliance: category, permissions, scoped storage
-- III.  Code Quality & Safety: Android Lint, Detekt, ktlint, theme/string/route rules
-- IV.   Clean Architecture (MVVM): feature-first folder, layer isolation, Hilt DI
-- V.    Performance Excellence: 60fps, cold start, APK size limits
-- VI.   Testing Discipline: JUnit + Compose UI Test + Espresso gates
-- VII.  Offline-First Architecture: Room + DataStore, atomic writes, no cloud
-- VIII. Localization & Accessibility: 8 locales, TalkBack, contrast, touch target
-- IX.   Dependency Currency & 16KB Page Size Compliance: pub lookup + 16KB-verified
-- X.    Simplicity & Build Order: spec-driven, YAGNI, no speculative code
-- XI.   Build Configuration: debug/release only, no flavors, no hardcoded values
-
-Removed Sections: N/A
-
-Templates Requiring Updates:
-- .specify/templates/plan-template.md ✅ compatible — Constitution Check section dynamically loads
-- .specify/templates/spec-template.md ✅ compatible — no structural change needed
-- .specify/templates/tasks-template.md ✅ compatible — phase structure unchanged
-  (1.3.0 re-check: no template references the permission set — all three still ✅)
-
-Follow-up TODOs:
-- TODO(SIGNING): Configure signing config in Spec 001 ✅ DONE (FR-013, debug
-                 fallback active per v1.2.0 §XI). Generate real release keystore
-                 — DEFERRED until user supplies; debug-fallback continues until then.
-- TODO(PLAY_LISTING): Prepare Play Store listing assets (icon, screenshots, copy) before v1.0 release
-- TODO(MANIFEST_COMMENT): app/src/main/AndroidManifest.xml's permission comments still
-                 describe G9 as pending and cite a "three-row table". Comment-only drift in
-                 an application source file, outside a constitution amendment's scope —
-                 correct it in the next change that touches the manifest.
-                 ✅ DONE (Spec 016 T053, 2026-09-11): the comments now cite v1.3.0 §II, name
-                 WRITE_EXTERNAL_STORAGE as the single documented deviation, and record
-                 POST_NOTIFICATIONS as deliberately undeclared per Spec 015 G9 Outcome A.
-================================================================================
--->
-
-# ThirtySixBrowser Constitution
-
-> Google Play App Name: "ThirtySix Browser" (Category: Tools / Productivity)
+- Every MUST names the check that enforces it (**Enforced by**). A rule no machine can check
+  says **Review** and is checked by the reviewer.
+- A new MUST ships with its check in the same change. Otherwise it is written as SHOULD.
+- Rules hold for new code, and for old code once it is touched. A file that breaks a rule
+  before the rule existed is listed in that check's allowlist by path, never exempted in
+  silence.
+- Commands and the package map are in `AGENTS.md`. Reasons are in `docs/adr/`. This file
+  holds only rules.
 
 ## Core Principles
 
-### I. Privacy & Security First
-
-ThirtySixBrowser MUST process all data entirely on-device. No user data — bookmarks,
-history, tabs, settings, downloads, or browsing data — MUST ever be transmitted to any
-ThirtySix-controlled server. The app's core promise is privacy and minimalism; its own
-data practices MUST embody that promise without exception.
-
-- All user-created content (bookmarks, history, tabs, settings) MUST be stored
-  exclusively in on-device Room DB (`thirtysix_browser.db`) + DataStore Preferences —
-  zero cloud sync to any ThirtySix-controlled backend
-- No analytics SDK, crash reporting tool, or user tracking library MUST be included by
-  default; if ever added (e.g., Firebase Crashlytics for opt-in QA), MUST be opt-in only
-  with explicit user consent and disabled by default
-- No PII MUST be collected; no third-party tracking SDKs are permitted
-- WebView MUST disable third-party cookies by default in incognito mode and configure
-  safe defaults: `setAllowFileAccess(false)`, `setAllowContentAccess(false)`,
-  `setAllowFileAccessFromFileURLs(false)`, `setAllowUniversalAccessFromFileURLs(false)`
-- Incognito tabs MUST NOT write to history, MUST clear cookies/cache on tab close
-- The app MUST NOT request runtime permissions it does not actively use
-- Search queries typed in the address bar MUST NOT be logged or sent anywhere except
-  the user-selected search engine
-- Protection data — tracker host lists, HTTPS-upgrade lists, URL-parameter-stripping
-  rules and injected scripts — MUST ship inside the APK and change only with an app
-  release; the app MUST NOT fetch such data at runtime from any server, ThirtySix's or
-  anyone else's
-
-**Rationale**: A browser that leaks the URLs and search queries it handles is uniquely
-dangerous. On-device-only architecture eliminates the attack surface entirely — not as
-a marketing claim but as a structural constraint enforced at every layer.
-
-### II. Google Play Compliance
-
-All features MUST use Android's officially approved APIs. Google Play store positioning
-MUST accurately reflect the app's purpose. Policy compliance is a first-class design
-constraint.
-
-- Google Play category: Tools / Productivity — NEVER positioned as VPN, proxy, ad-blocker,
-  or privacy-focused security app (avoids stricter review categories)
-- WebView MUST be `android.webkit.WebView` — Google Play approved, no custom Chromium
-  build, no GeckoView (avoids large binary + sideload concerns)
-- Permissions MUST be the minimum set: `INTERNET`, `ACCESS_NETWORK_STATE`; any
-  additional permission MUST be justified in the spec, recorded in the Android
-  Permissions & Entitlements table below, and visible to the user
-- `POST_NOTIFICATIONS` MUST NOT be declared while the app composes no notification of
-  its own — download progress and completion are posted by the system download service
-  under its own UID (verified at Spec 015 gate G9)
-- Scoped Storage MUST be respected — downloads go to `MediaStore.Downloads` via
-  `DownloadManager`; NO `MANAGE_EXTERNAL_STORAGE`; legacy storage permissions are
-  forbidden except `WRITE_EXTERNAL_STORAGE` capped at `maxSdkVersion="28"` (Android
-  7.0–9.0, where Scoped Storage does not exist) — the single documented deviation,
-  justified in `specs/015-downloads-manager/plan.md` Complexity Tracking
-- Foreground service notifications (if added later for downloads) MUST follow Android
-  13+ runtime notification permission flow
-- Google Play data safety form MUST be accurate — declare zero data collected
-- Target SDK MUST stay current — `targetSdk = 36` for v1.0; bump within 12 months of
-  any new Android release per Play policy
-- Every JavaScript→native bridge is FORBIDDEN: `addJavascriptInterface`,
-  `WebMessageListener` / `addWebMessageListener`, and any equivalent that lets page
-  script call into the app or hand it data
-- One-way script injection is permitted only when ALL of these hold:
-  1. the script is bundled inside the APK — never downloaded, and never generated from
-     remote data;
-  2. it is installed with `WebViewCompat.addDocumentStartJavaScript`, feature-detected
-     first; on a WebView without the feature the protection is simply off;
-  3. it implements a privacy protection defined in a spec (Spec 024);
-  4. it exposes no native API and receives nothing back from the page;
-  5. the spec documents the origin rules for where it runs.
-
-**Rationale**: Google Play is the primary distribution channel. Positioning ThirtySix
-correctly (Tools, not VPN/Privacy) and using only Play-approved APIs is the compliant
-path to launch and updates without policy strikes.
-
-### III. Code Quality & Safety
-
-All code MUST use strict Kotlin analysis. State MUST be immutable. UI MUST use the theme
-system exclusively. **NO HARDCODED VALUES ANYWHERE — every literal MUST live in a named
-constant, resource, theme token, or BuildConfig field.**
-
-- Android Lint MUST be enforced — `./gradlew lintDebug` zero warnings/errors permitted
-- Detekt + ktlint MUST be configured — zero violations permitted before merge; Detekt
-  rule `MagicNumber` MUST be enabled (with the standard whitelist for `0`, `1`, `-1`,
-  `2`)
-- All ViewModel `UiState` classes MUST be immutable `data class` — exposed via
-  `StateFlow<UiState>`, mutated only via `MutableStateFlow.update { }`
-
-#### No-Hardcode Rule (NON-NEGOTIABLE)
-
-EVERY literal value EXCEPT the trivial whitelist below MUST be declared as a named
-constant in the appropriate location. Inline literals in feature code are a constitution
-violation and MUST be rejected at code review.
-
-**Trivial whitelist (allowed inline)**:
-- Loop / index math: `0`, `1`, `-1`, `2`
-- Empty strings: `""` for clearing, `" "` for separator (prefer named constant if reused)
-- `Color.Transparent`, `Color.Unspecified`, `Modifier` defaults
-- Test data inside `*Test.kt` files (test fixtures may be inline)
-
-**Categorized rules — what MUST be extracted, where it lives, and the violation
-example**:
-
-| Category | NEVER (violation) | ALWAYS (compliant) | Location |
-|----------|-------------------|--------------------|----------|
-| **User-facing strings** | `Text("Bookmarks")` | `Text(stringResource(R.string.bookmarks_title))` | `res/values-<locale>/strings.xml` |
-| **Colors** | `Color(0xFF1A73E8)` | `MaterialTheme.colorScheme.primary` | `presentation/theme/Color.kt` (theme tokens) |
-| **Typography** | `fontSize = 16.sp, fontWeight = FontWeight.Bold` | `MaterialTheme.typography.titleMedium` | `presentation/theme/Type.kt` |
-| **Shapes** | `RoundedCornerShape(12.dp)` | `MaterialTheme.shapes.medium` | `presentation/theme/Shape.kt` |
-| **Dimensions (reused ≥2 times)** | `Modifier.padding(16.dp)` repeated | `Modifier.padding(Spacing.md)` or `dimensionResource(R.dimen.spacing_md)` | `presentation/theme/Spacing.kt` or `res/values/dimens.xml` |
-| **Magic numbers / limits** | `if (tabs.size > 50) ...` | `if (tabs.size > BrowserLimits.MAX_TABS) ...` | `core/constants/BrowserLimits.kt` |
-| **Animation durations** | `delay(300)` | `delay(AnimationDurations.SHORT_MS)` | `core/constants/AnimationDurations.kt` |
-| **Timeouts** | `withTimeout(5_000)` | `withTimeout(NetworkTimeouts.WEBVIEW_LOAD_MS)` | `core/constants/NetworkTimeouts.kt` |
-| **URLs (default home, search)** | `"https://www.google.com/search?q=..."` | `UrlConstants.GOOGLE_SEARCH_TEMPLATE` | `core/constants/UrlConstants.kt` |
-| **Default values** | `searchEngine ?: "google"` | `searchEngine ?: AppDefaults.SEARCH_ENGINE` | `core/constants/AppDefaults.kt` |
-| **DataStore preference keys** | `stringPreferencesKey("theme_mode")` | `StorageKeys.THEME_MODE` | `core/constants/StorageKeys.kt` |
-| **Bundle / nav argument keys** | `arguments?.getString("tabId")` | `arguments?.getString(NavArgs.TAB_ID)` | `core/constants/NavArgs.kt` |
-| **Notification channel IDs** | `"download_progress"` | `NotificationChannels.DOWNLOAD_PROGRESS_ID` | `core/constants/NotificationChannels.kt` |
-| **Intent action / extra strings** | `Intent("com.raumanian...")` | `IntentActions.OPEN_TAB` | `core/constants/IntentActions.kt` |
-| **Database table / column names** | inside `@Entity(tableName = "bookmarks")` literals scattered | use `BookmarkEntity.TABLE_NAME` companion const referenced by both DAO and entity | inside the `@Entity` companion object |
-| **Regex patterns** | `Regex("^https?://...")` | `UrlPatterns.WEB_URL_REGEX` | `core/constants/UrlPatterns.kt` |
-| **File / asset paths** | `"file:///android_asset/onboarding.svg"` | `AssetPaths.ONBOARDING_SLIDE_1` | `core/constants/AssetPaths.kt` |
-| **Routes / destinations** | `navController.navigate("settings")` | `navController.navigate(AppDestination.Settings)` | `presentation/navigation/AppDestination.kt` |
-| **Build-variant values** | `if (BuildConfig.DEBUG) "dev-api"` else `"prod-api"` inline | declare `BuildConfig.SEARCH_API_BASE` via `buildConfigField(...)` in `build.gradle.kts` | `app/build.gradle.kts` `buildConfigField` |
-| **Date / time formats** | `SimpleDateFormat("yyyy-MM-dd")` | `DateFormats.ISO_DATE` | `core/constants/DateFormats.kt` |
-
-**Constants file organization** (under `core/constants/`):
-
-```
-core/constants/
-├── AppConstants.kt           # General app-wide (DB name, package suffixes, version markers)
-├── AppDefaults.kt            # Default user-overridable values (default search engine, home page)
-├── UrlConstants.kt           # Search engine templates, default home, about: URLs
-├── UrlPatterns.kt            # Regex for URL detection, hostname extraction
-├── StorageKeys.kt            # All DataStore preference keys
-├── NavArgs.kt                # All Bundle / nav argument key strings
-├── BrowserLimits.kt          # Max tabs, max history days, max bookmarks, etc.
-├── AnimationDurations.kt     # Tween/spring durations in ms
-├── NetworkTimeouts.kt        # WebView load timeout, download timeout
-├── NotificationChannels.kt   # Channel IDs + importance levels
-├── IntentActions.kt          # Custom intent action / extra strings
-├── AssetPaths.kt             # Asset file paths used at runtime
-└── DateFormats.kt            # SimpleDateFormat / DateTimeFormatter patterns
-```
-
-> A constants file MAY only declare `const val` (compile-time constants) or
-> `@JvmStatic val` inside an `object`. Mutable `var` in a constants object is FORBIDDEN.
-
-**Code review enforcement**:
-
-- Reviewers MUST grep new diffs for inline literals. Common red flags:
-  - `Color(0x` → must be in `Color.kt`
-  - `.dp)` standalone numbers → check for repetition; if repeated, extract
-  - `delay(`, `withTimeout(`, `Duration.ofSeconds(` → must reference a constants object
-  - `"http`, `"https` → must be in `UrlConstants.kt`
-  - `Text("` with literal text → must be `stringResource(...)`
-  - `stringPreferencesKey("` / `intPreferencesKey("` → must be in `StorageKeys.kt`
-- Detekt rule `MagicNumber` MUST flag undeclared numeric literals; suppression
-  (`@Suppress("MagicNumber")`) MUST include a code comment explaining the exemption
-- A spec MAY introduce new constants files; doing so MUST be documented in the spec's
-  `plan.md` so reviewers know where to look
-
-#### Other Quality Rules
-
-- Theme enforcement — MANDATORY:
-  - Colors MUST use `MaterialTheme.colorScheme.*` (or theme extensions for browser-specific
-    semantic colors like incognito-tint, address-bar-bg)
-  - Text styles MUST use `MaterialTheme.typography.*` — use `.copy()` for one-off overrides
-  - Shapes MUST use `MaterialTheme.shapes.*`
-- Localization — MANDATORY: all user-facing strings MUST use
-  `stringResource(R.string.*)` — NEVER hardcoded in Composable
-- Navigation — MANDATORY: all routes MUST use a typed `AppDestination` sealed class
-  (or Navigation 3 type-safe routes) — NEVER hardcode path strings
-- Resources — MANDATORY: drawable VectorDrawable preferred over PNG; no raster icons
-  unless required for branding (launcher icon exception)
-
-**Rationale**: Hardcoded values are the #1 source of regressions, broken localization,
-and brittle UI in Android apps. A literal scattered across 12 Composables means 12
-places to change when the design tweaks 16dp → 20dp, or when the search engine endpoint
-moves. Centralized constants make every cross-cutting change a one-line edit and make
-testing trivial (override one constant in tests instead of mocking 12 call sites).
-A code review that lets `Color(0xFF1A73E8)` slip through is a constitution violation.
-
-### IV. Clean Architecture (MVVM, Mandatory)
-
-The codebase MUST be organized by feature with three layers per feature.
-Each feature MUST be independently developable and testable. Unidirectional data flow
-is mandatory.
-
-- Top-level structure: `core/`, `data/`, `domain/`, `presentation/`, `di/` — NO
-  feature code outside these layers
-- `domain/` layer MUST be pure Kotlin — zero Android SDK or framework imports permitted
-  in `domain/model/`, `domain/repository/`, `domain/usecase/`
-- Repository pattern MUST abstract all data sources; ViewModels MUST NOT access DAOs
-  or DataStore directly
-- UseCase pattern MUST be used for all business logic; Repositories MUST NOT depend on
-  other Repositories (violates layer boundaries)
-- Dependency injection MUST use Hilt only; ALL `@Module` annotations MUST be in `di/`
-  package; no `@Inject` constructor parameters bypassing module boundaries
-- State management MUST follow MVVM unidirectional flow:
-  `UI Event → ViewModel → UseCase → Repository → DataSource → Flow → UiState → UI`
-
-```
-✅ Allowed:
-  ViewModel → UseCase → Repository → DataSource (Room/DataStore/WebView)
-  Repository → Core Service (e.g., DispatcherProvider)
-
-❌ Forbidden:
-  Repository → Repository
-  ViewModel → DAO (bypasses repository)
-  ViewModel → DataStore (bypasses repository)
-  Feature A → Feature B internal class
-  Composable → Repository (must go through ViewModel)
-```
-
-**Rationale**: Feature isolation enables the 18-spec roadmap to be implemented and
-tested incrementally. Clean Architecture boundaries ensure each component has a single
-responsibility — critical for solo developer maintainability.
-
-### V. Performance Excellence
-
-The app MUST feel native. 60fps is non-negotiable. WebView startup and tab switching
-are the primary performance-critical surfaces.
-
-- App cold start (intent → first frame ready) MUST be ≤ 1.5s on Pixel 5 / equivalent
-- WebView first paint after URL submitted MUST be limited only by network latency —
-  no app-side processing > 50ms before WebView starts loading
-- UI MUST maintain 60fps during tab switcher animation, settings list scroll, and
-  bookmark/history list scroll on Pixel 5+
-- All UI interactions (tap, swipe, navigation transitions) MUST respond within 100ms
-- Tab switcher grid MUST render ≤ 200ms for 10 tabs (snapshot bitmap-cached, not
-  re-rendered)
-- Compose `LazyColumn` / `LazyVerticalGrid` MUST use stable `key`s — never index-only
-  (and a `contentType`; see Compose Phase Discipline rule 6)
-- Main APK release size MUST remain ≤ 10MB (after R8); AAB upload ≤ 8MB
-- Performance benchmark device: Pixel 5 (minimum target for all 60fps validations);
-  also test on a low-end device (e.g., Pixel 3a or emulator with `--memory=2048`)
-- Process death recovery: app state (active tab, open tabs, scroll positions) MUST
-  restore correctly after Android kills the process in background
-
-**Rationale**: A browser that stutters, takes >1.5s to cold start, or loses tabs on
-process death feels broken. 60fps on Pixel 5 ensures the experience holds across the
-typical Android user base.
-
-#### Compose Phase Discipline (NON-NEGOTIABLE)
-
-Compose runs three phases — composition, layout, draw — and re-runs from the phase in
-which a changed state was **read**. A state read in a composable body re-runs all three;
-a read inside a layout lambda skips composition; a read inside a draw lambda only redraws.
-Every rule below is checkable in code review.
-
-1. **Frame-rate state is read in the latest phase that needs it.** Frame-rate state is
-   anything that changes per frame or per tick: scroll position, drag or sheet offset,
-   page-load or download progress, and every running animation value
-   (`animate*AsState`, `Animatable`, `Transition`, `InfiniteTransition`).
-   - position → `Modifier.offset { }` lambda (layout phase)
-   - alpha, scale, rotation, translation → `Modifier.graphicsLayer { }` lambda (draw
-     phase, own layer)
-   - color, progress, drawn shapes → `Modifier.drawBehind { }` /
-     `drawWithContent { }` / `Canvas` (draw phase)
-   - It MUST NOT be read in a composable body, and MUST NOT be passed to the value
-     overloads `Modifier.alpha(…)`, `scale(…)`, `offset(x = …dp)`, `background(color)`,
-     `fillMaxWidth(fraction)` or `size(…)`.
-2. **Frequently-changing values travel as lambdas.** A parameter carrying frame-rate
-   state is typed `() -> T`, and the lambda is invoked only inside a layout or draw
-   lambda. A lambda that wraps a value already read in the caller (`progress = { p }`
-   after `val p = state.progress`) does not satisfy this rule.
-3. **High-frequency state is isolated from screen state.** A screen collects its
-   `UiState` once, at the screen root, and hands each child only the fields it needs. A
-   high-frequency field (e.g. `LoadingState.Loading.progress`) MUST NOT live in the
-   state object a whole screen reads in composition: expose it as its own `StateFlow`
-   collected by the one consumer, or read it through a lambda. *Precedent*: through
-   Spec 018, `BrowserScreen` read `state.loadingState` in its body, so every WebView
-   progress tick recomposed the entire browser chrome.
-4. **Derived and expensive values are remembered.** State computed from frequently
-   changing state uses `derivedStateOf` (e.g. `firstVisibleItemIndex > 0` → show a
-   button). Expensive computations use `remember(keys)`. List item bodies MUST NOT
-   allocate lambdas, objects or `Modifier` chains that break skipping without
-   `remember`; ViewModel callbacks are passed as method references or remembered lambdas.
-5. **Composable parameters are stable.** UI models passed to composables are
-   `@Immutable` / `@Stable` data classes, use `kotlinx.collections.immutable`, or are
-   listed in the Compose compiler stability configuration file. A bare `List<T>`,
-   `Map<K, V>` or a domain class from another module is unstable unless so configured.
-   Compose compiler reports and metrics MUST be available behind a Gradle property;
-   every spec that touches UI attaches the report for its files, with zero
-   unexplained non-skippable restartable composables.
-6. **Lazy containers are keyed and typed.** `LazyColumn` / `LazyRow` /
-   `LazyVerticalGrid` items MUST declare a stable `key` **and** a `contentType`. Lazy
-   containers MUST NOT nest in the same scroll direction. Item composables take ids or
-   stable item models, never the whole `UiState`.
-7. **Every bar consumes window insets.** The app runs edge-to-edge
-   (`enableEdgeToEdge()`), so every top bar, bottom bar, sheet and floating control MUST
-   consume the relevant `WindowInsets` (`statusBars`, `navigationBars`, `ime`,
-   `displayCutout`). *Precedent*: from Spec 009 to Spec 018 the address bar was drawn
-   under the status bar.
-8. **Effects are keyed honestly and composition stays read-only.** `LaunchedEffect` /
-   `DisposableEffect` keys are exactly the values the effect depends on — never `Unit`
-   when the effect reads changing state; callbacks captured by long-lived effects go
-   through `rememberUpdatedState`. Composition MUST NOT write state it has already read
-   (no backwards writes).
-9. **Measured, not assumed.** Every spec that touches UI records, for each screen's hot
-   interaction (scroll, page load, drag), a Layout Inspector recomposition count showing
-   that the chrome around the moving part does not recompose per frame. The numbers go
-   in the spec's tasks.md device-gate results, beside the compiler report from rule 5.
-
-**Rationale**: Each of these mistakes looks harmless in a diff and costs frames on every
-scroll, drag and page load. Rules that name the phase, the API and the precedent turn a
-taste judgement into a review check.
-
-### VI. Testing Discipline
-
-Unit tests are REQUIRED for all business logic. Compose UI tests are REQUIRED for
-critical user flows. Integration tests for Room and DataStore are REQUIRED.
-
-- Unit tests MUST cover: repositories, ViewModels, use cases, mappers, URL parsing,
-  search engine URL builders, incoming-link and intent handling (Spec 020), and the
-  host blocklist matcher, HTTPS-upgrade and URL-parameter-stripping rules and the
-  per-site protection exception list (Spec 023), and the fireproof-site rules (Spec 024)
-- Compose UI tests MUST cover: address bar input flow, tab switcher tap, bookmark
-  add/delete, settings toggles, onboarding flow
-- Instrumented tests MUST cover: Room DAOs, DataStore read/write, WebView basic load
-  (using a localhost test page)
-- `./gradlew testDebugUnitTest` MUST pass with zero failures before any spec is
-  marked complete
-- `./gradlew lintDebug` MUST pass with zero warnings before any spec is marked
-  complete
-- `./gradlew detekt` MUST pass with zero violations before any spec is marked complete
-- Compose UI tests MUST run on at least one emulator API level (recommend API 35 with
-  16KB page size enabled) per CI run
-- Test coverage target: ≥ 70% for `domain/` and `data/` layers (no hard target for
-  `presentation/` due to Compose test cost)
-
-**Rationale**: A browser that fails to render bookmarks, drops history, or crashes on
-common URLs causes direct harm to users. Tests prevent regressions across an 18-spec
-roadmap.
-
-### VII. Offline-First Architecture
-
-All non-network features MUST operate without connectivity. All writes MUST be atomic.
-No data loss under any failure mode is acceptable.
-
-- ALL features (bookmarks, history, tabs, settings, downloads list view, and the
-  Spec 023 and 024 privacy protections) MUST function fully offline — the ONLY exception is
-  WebView page load + outbound search query
-- All user data MUST be persisted to Room DB (with `journal_mode = WAL`) within 500ms
-  of any change — partial writes MUST NOT corrupt existing data
-- No data loss on app crash — all user-created content MUST be recoverable on next
-  launch (Room + WAL provides this guarantee)
-- DataStore writes MUST use `suspend` API; never block main thread
-- Settings changes MUST be reflected in UI within 100ms (Flow-driven recomposition)
-- Process death MUST not lose tab state — open tabs persist via `TabEntity` rows in
-  Room; active tab ID persists via DataStore
-- Imports / data migrations MUST be atomic — Room migration failures MUST roll back,
-  not corrupt the DB
-- Database backups (Android Auto Backup) MUST be opt-in per `android:fullBackupContent`
-  rules in `AndroidManifest.xml` — bookmarks/history MAY be backed up; secrets (none
-  in v1) MUST be excluded
-
-**Rationale**: A browser is used in airplane mode, on the metro, in places with bad
-signal. Loss of bookmarks or open tabs because of a crash undermines trust.
-
-### VIII. Localization & Accessibility
-
-ThirtySixBrowser targets a global user audience. All locales MUST be supported from
-launch. All UI MUST comply with Android Accessibility guidelines.
-
-- Default locale: **English (EN)**
-- Supported locales: EN, VI, DE, RU, KO, JA, ZH, FR — all via `res/values-<locale>/strings.xml`;
-  no hardcoded strings in UI code
-- All user-facing strings MUST be externalized in `strings.xml` before any feature
-  implementation begins — never add a string directly to a Composable
-- TalkBack MUST be supported — all interactive elements require `contentDescription`
-  or `Modifier.semantics { contentDescription = ... }`
-- Decorative-only icons MUST set `contentDescription = null`
-- Color contrast MUST meet WCAG AA (4.5:1 for body text, 3:1 for large text) on both
-  light and dark themes
-- All interactive elements MUST have minimum touch target of 48×48dp
-- Dynamic font scaling MUST be supported — Compose default (`sp` units) handles this
-  if no hardcoded `dp` font sizes
-- RTL layout support is NOT required for v1.0 (no RTL locales in supported set)
-- Locale switching MUST take effect without app restart (use `AppCompatDelegate.setApplicationLocales`
-  with per-app language preferences API on Android 13+, fallback config-change recreate
-  on older)
-
-**Rationale**: 8 target locales cover the user communities where minimalist tool apps
-have strong demand. Accessibility is required for Play Store compliance and expands
-the addressable audience.
-
-### IX. Dependency Currency & 16KB Page Size Compliance (NON-NEGOTIABLE)
-
-All third-party packages MUST use the latest stable versions at the moment of addition.
-**ALL packages with native libraries (`.so` files) MUST be 16KB page size compatible**
-to support Android 15+ / Android 16+ devices.
-
-- **Before adding any package, the latest stable version MUST be looked up at that
-  exact moment** — NEVER use remembered, guessed, or previously researched version
-  numbers, even from the same session
-- Sources for version lookup: `central.sonatype.com`, `androidx` release notes,
-  `mvnrepository.com`, official GitHub releases
-- Hardcoded or memorized version numbers MUST NOT be used; always verify current versions
-- Version pinning MUST live in `gradle/libs.versions.toml` (version catalog) — no
-  inline version strings in `build.gradle.kts`
-- Major version upgrades MUST include explicit compatibility verification before adoption
-
-#### 16KB Page Size — CRITICAL
-
-Android 15 (API 35) introduced 16KB memory page size support. Android 16 (API 36)
-makes 16KB devices common. Native libraries (`.so`) compiled with the legacy 4KB
-alignment **WILL NOT LOAD** on 16KB devices, causing app crash on launch.
-
-- **Every package with `.so` files MUST be verified 16KB-compatible BEFORE merge**:
-  1. Check the library's release notes / changelog for "16KB page size" support
-  2. Build a release APK and verify alignment:
-     ```bash
-     ./gradlew assembleRelease
-     unzip -p app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/lib*.so | \
-       objdump -p - | grep LOAD | awk '{print $NF}'
-     # All values MUST be 0x4000 (16KB) or larger
-     ```
-  3. If any `.so` is < 0x4000 alignment → bump library version, find alternative, or
-     reject the addition
-- **NDK version**: NDK r27+ MUST be used (default 16KB-aligned `.so` output)
-- **AGP version**: AGP 8.5+ MINIMUM, AGP 8.7+ recommended
-- **Gradle properties** MUST include:
-  ```properties
-  android.bundle.enableUncompressedNativeLibs=true
-  ```
-- **CI gate**: A release build job MUST run `objdump` alignment check on every PR
-  that touches `libs.versions.toml` or `build.gradle.kts`
-- Pure Kotlin / Java libraries (no `.so`) are AUTOMATICALLY 16KB-safe — but transitive
-  dependencies MUST still be checked
-- Research documentation in `research.md` MUST include the date when versions were
-  verified AND 16KB compliance was confirmed
-
-#### Reference
-- https://developer.android.com/guide/practices/page-sizes
-- https://android-developers.googleblog.com/2024/08/adding-16-kb-page-size-to-android.html
-
-**Rationale**: Maven artifact versions change continuously. A version pinned during
-planning may introduce breaking changes by implementation time. The 16KB page size
-constraint is non-negotiable: shipping a `.so` aligned to 4KB on a 16KB device causes
-immediate crash on launch — a Play Store policy violation and a broken user experience
-on every modern Pixel device.
-
-### X. Simplicity & Build Order
-
-v1.0 MUST ship Phase 1–4 (Specs 001–018) complete and quality-gated. Feature additions
-MUST follow the spec roadmap. No speculative code is permitted.
-
-- **Phase order is MANDATORY** — no spec may be skipped or reordered without updating
-  `sdd-roadmap.md` first:
-  - Phase 1 (Foundation): 001–006 — project setup, architecture, theme, l10n, Room,
-    DataStore
-  - Phase 2 (Core Browser): 007–012 — WebView, navigation, omnibox, search, tabs,
-    incognito
-  - Phase 3 (Data Features): 013–015 — bookmarks, history, downloads
-  - Phase 4 (Settings & Polish): 016–018 — settings, splash, onboarding
-  - Phase 5 (only after 001–018 complete): 019 — UI redesign, a full rebuild of every
-    screen from the approved ThirtySix design system
-    (https://claude.ai/artifact/K4WG7e6faSAipieBwJHMys; violet brand replacing Deep
-    Teal)
-  - Phase 6 "Real browser" (only after 001–019 complete), in this order:
-    - 020 `default-browser-entry-points` — http/https `VIEW` + `BROWSABLE` intent
-      filters, text and links shared from other apps, and an offer to become the
-      default browser (`RoleManager` on API 29+, the system settings screen below it)
-    - 021 `web-capabilities` — file-upload chooser, fullscreen video, popups and
-      `window.open`, JS dialogs and HTTP auth, per-site camera / microphone / location
-      prompts remembered per origin, long-press menu on links and images
-    - 022 `page-tools` — find in page, share, desktop mode, text zoom, print / save as
-      PDF, address-bar autocomplete from local history and bookmarks
-    - 023 `privacy-protection` — tracker blocking from an APK-bundled host list, HTTPS
-      upgrade, tracking-parameter stripping and referrer trimming, Global Privacy
-      Control; every protection on by default and switchable off per site
-    - 024 `privacy-tools` — Fire button with fireproof sites, per-site privacy
-      dashboard, cookie-banner auto-decline and fingerprinting protection through
-      bundled scripts (§II)
-- **Design before spec**: a screen or feature whose UI is not yet in the design system
-  MUST be designed there and approved by the project lead before `/speckit-specify`
-  runs for it. In Phase 6 this covers 021, 022, 023, 024 and 020's set-as-default
-  prompt. New features proposed while designing are added to `sdd-roadmap.md` for
-  a later version; they MUST NOT be folded into the spec in progress.
-- **Implementation sequence within Phase 1 is MANDATORY**: 001 → 002 → (003, 004,
-  005, 006 parallel)
-- YAGNI applies to all implementation decisions: no speculative code, no future-use
-  abstractions, no features without a corresponding spec in the roadmap
-- Every new feature MUST have a corresponding spec in `sdd-roadmap.md` before
-  implementation begins
-- Code added speculatively for "future use" MUST NOT be merged
-- Pro tier / monetization is OUT OF SCOPE for v1.0 — entire app is free
-
-**Rationale**: Shipping a complete, polished basic browser is what defines v1.0
-success; a stripped-down or unpolished v1.0 would undermine the "minimalist, just works"
-positioning. Phase 6 then follows the same rule: the app must first be reachable as a
-browser (020) and handle the web properly (021, 022) before it adds protections
-(023, then the tools built on them in 024),
-because protections on a browser nobody can open links in protect nothing. Phase-gating
-enforces this.
-
-### XI. Build Configuration & Environment Separation
-
-Builds MUST use only `debug` and `release` types. NO build flavors. No environment-specific
-value MUST be hardcoded.
-
-- ONLY `debug` and `release` build types MUST be configured — NO `dev`, `staging`,
-  `prod` flavors (decision documented in `meeting-note.md`)
-- `debug` and `release` MAY have distinct application IDs ONLY if needed for parallel
-  install (e.g., `com.raumanian.thirtysix.browser` vs `com.raumanian.thirtysix.browser.debug`)
-- API endpoints, default search engine URLs, and other configurable values MUST be
-  defined in `BuildConfig` fields or `core/constants/` `object` — NEVER hardcoded
-  in Composable/ViewModel code
-- Signing config — two scopes:
-  - **Distribution builds** (Play Store upload, public release, any artifact shipped
-    to end users): `release` build type MUST use a release keystore loaded via
-    `local.properties` or environment variable. The release keystore file and
-    credentials MUST NEVER be committed to git.
-  - **Local dev / CI iteration** (when no release keystore is configured):
-    `assembleRelease` MAY fall back to the debug keystore (`~/.android/debug.keystore`)
-    so developers can verify R8/minify/proguard end-to-end without first generating a
-    release keystore. The fallback MUST:
-    1. emit a build-log warning containing the literal substring
-       `"release built with DEBUG signature — NOT for distribution"`,
-    2. activate ONLY when neither `local.properties` nor environment variables provide
-       release keystore credentials,
-    3. produce artifacts that MUST NOT be uploaded to Play Store under any circumstance.
-  - When release keystore credentials are present (via either source), the build MUST
-    automatically switch to the release keystore — no script changes required.
-- ProGuard / R8 MUST be enabled for `release` (`isMinifyEnabled = true` and
-  `isShrinkResources = true`) — Spec 001 enables R8 from the start (stricter than the
-  earlier "may start disabled" allowance, intentional baseline)
-- Java target: 11 (matches existing scaffold)
-- Kotlin JVM target: 11
-
-**Rationale**: Avoiding flavors keeps the build matrix simple for a solo dev. The 16KB
-constraint already complicates the dependency story; build flavors would multiply
-that complexity without adding value for a free, single-tier app.
-
-## Technical Standards
-
-### Platform & Stack
-
-- **Language**: Kotlin (latest stable from version catalog)
-- **UI**: Jetpack Compose + Material3 (Compose BOM)
-- **Min SDK**: 24 (Android 7.0+)
-- **Target SDK**: 36
-- **Compile SDK**: 36 (release with `minorApiLevel = 1`)
-- **Java target**: 11
-- **State Management**: ViewModel + StateFlow / SharedFlow (unidirectional data flow)
-- **Dependency Injection**: Hilt (all `@Module` in `di/` package)
-- **Navigation**: Navigation Compose with typed `AppDestination` sealed class
-- **Theming**: Material3 ColorScheme + dynamic color (Android 12+); light/dark/system
-- **Persistence**: Room (WAL mode) + DataStore Preferences
-- **Async**: kotlinx-coroutines + Flow
-- **WebView**: `android.webkit.WebView` wrapped in Compose `AndroidView`
-- **Download**: Android `DownloadManager`
-- **Splash**: `androidx.core:core-splashscreen`
-- **Locale**: `androidx.appcompat:appcompat` + per-app language API on Android 13+
-- **Test**: JUnit, Compose UI Test, Espresso, Truth, MockK / Turbine
-
-### Android Permissions & Entitlements
-
-| Permission | Purpose | Spec |
-|------------|---------|------|
-| `android.permission.INTERNET` | WebView page load | 007 |
-| `android.permission.ACCESS_NETWORK_STATE` | Offline detection | 007 |
-| `android.permission.WRITE_EXTERNAL_STORAGE` (`maxSdkVersion="28"`) | Write downloads to the **public** Downloads folder on Android 7.0–9.0, where Scoped Storage does not yet exist. Absent from the effective manifest on API 29+, requested at point of first use, never at launch. | 015 |
-| `android.permission.CAMERA` | A site the person allowed uses the camera (calls, scanning); photo/video capture for a page's file upload. Requested only after that choice, never at launch. | 021 |
-| `android.permission.RECORD_AUDIO` | A site the person allowed uses the microphone. Requested only after that choice. | 021 |
-| `android.permission.ACCESS_COARSE_LOCATION` / `ACCESS_FINE_LOCATION` | A site the person allowed uses location; the person may grant approximate only. Requested only after that choice; the engine is never told to retain it. | 021 |
-| `android.permission.MODIFY_AUDIO_SETTINGS` | *Normal* permission (granted at install, never prompted) that WebView requires alongside `RECORD_AUDIO` for a site's audio capture. | 021 |
-
-**`POST_NOTIFICATIONS` is deliberately NOT declared.** It was listed here against Spec 015
-until measured on a device, and the measurement said it is not needed: the download
-service's progress and completion notifications are posted by
-`com.android.providers.downloads` under **its own UID**, so the browser's own notification
-grant is irrelevant to them. Verified at Spec 015 gate G9 on Android 16 / API 36
-(`sdk_gphone64_arm64`, build `BE4B.251210.005`): with the permission neither declared nor
-granted, "Download complete" still appeared in the shade. Declaring it would have violated
-§I's "MUST NOT request runtime permissions it does not actively use". Should the app ever
-compose a notification of its own, this decision must be revisited.
-
-> **Spec 021 rows**: the camera, microphone and location permissions are asked for only
-> after the person chose an allow option for a site in the app's own dialog (or chose to
-> take a photo for an upload) — never at launch, and never for a site the person refused.
-> The matching hardware features are declared `required="false"`, so the app installs on
-> devices without a camera or GPS.
-
-> The storage row is the **documented deviation** from the two-permission minimum in §II —
-> see `specs/015-downloads-manager/plan.md` Complexity Tracking for
-> the justification and the rejected alternatives. `MANAGE_EXTERNAL_STORAGE` remains
-> forbidden outright.
-
-### Architecture
-
-```
-app/src/main/kotlin/com/raumanian/thirtysix/browser/
-├── core/
-│   ├── base/                # BaseViewModel, BaseUseCase
-│   ├── di/                  # Hilt qualifiers, dispatcher modules
-│   ├── error/               # AppError sealed class, Result wrapper
-│   ├── extensions/          # Context, Flow, String extensions
-│   ├── result/              # Result<T> wrapper
-│   ├── dispatcher/          # DispatcherProvider
-│   └── constants/           # AppConstants, UrlConstants, StorageKeys
-├── data/
-│   ├── local/
-│   │   ├── database/        # Room AppDatabase, DAOs
-│   │   ├── entity/          # *Entity classes
-│   │   └── datastore/       # SettingsDataStore
-│   ├── repository/          # *RepositoryImpl
-│   └── mapper/              # Entity ↔ Domain model
-├── domain/
-│   ├── model/               # Pure Kotlin models
-│   ├── repository/          # *Repository interfaces
-│   └── usecase/             # *UseCase
-├── presentation/
-│   ├── theme/               # Color, Typography, Shape, AppTheme
-│   ├── navigation/          # AppNavGraph, AppDestination
-│   ├── browser/             # BrowserScreen, BrowserViewModel
-│   ├── tabs/                # TabsScreen, TabsViewModel
-│   ├── bookmarks/           # BookmarksScreen, BookmarksViewModel
-│   ├── history/             # HistoryScreen, HistoryViewModel
-│   ├── downloads/           # DownloadsScreen, DownloadsViewModel
-│   ├── settings/            # SettingsScreen, SettingsViewModel
-│   └── onboarding/          # OnboardingScreen, OnboardingViewModel
-├── di/                      # Hilt modules: DatabaseModule, RepositoryModule, ...
-├── ThirtySixApplication.kt  # @HiltAndroidApp
-└── MainActivity.kt          # @AndroidEntryPoint, splash, navigation host
-```
-
-## Development Workflow
-
-### Testing Gates
-
-All specs MUST pass before marking complete:
-
-1. All unit tests pass (`./gradlew testDebugUnitTest`)
-2. All Compose UI tests pass (`./gradlew connectedDebugAndroidTest` if applicable)
-3. Static analysis with zero warnings (`./gradlew lintDebug`)
-4. Detekt + ktlint pass (`./gradlew detekt ktlintCheck`)
-5. No hardcoded strings in UI (`stringResource(R.string.*)` validation)
-6. No hardcoded colors / typography / magic numbers in feature code
-7. **Release APK builds and `.so` files are 16KB-aligned** (when applicable)
-8. App runs without crash on emulator API 35 with 16KB page size enabled
-9. **UI specs only** — Compose compiler report attached, with zero unexplained
-   non-skippable restartable composables in the spec's files (§V rule 5)
-10. **UI specs only** — Layout Inspector recomposition counts recorded for each changed
-    screen's hot interaction, showing no per-frame recomposition of its chrome (§V rule 9)
-
-### Review Requirements
-
-- All code changes MUST be reviewed before merge
-- Performance-sensitive changes MUST include before/after measurements (60fps,
-  cold start timing, APK size)
-- New permission additions MUST be justified in the spec
-- Every composable change MUST be reviewed against §V Compose Phase Discipline: where
-  each frame-rate state is read, whether it travels as a lambda, parameter stability,
-  lazy `key` + `contentType`, insets, and effect keys
-- UI changes MUST match the approved design system; a deviation is either fixed or
-  designed and approved first (§X)
-- Any new package addition MUST have version + 16KB compliance lookup documented
-  inline in `research.md` and `project-context.md`
-
-### Quality Checks
-
-- WebView code MUST be tested on at least one Android 7.0 (min SDK) emulator AND one
-  Android 16 (target SDK) device per significant change
-- App APK size MUST be measured after each new dependency is added
-- Tab switcher MUST be benchmarked on Pixel 5 with 10+ open tabs at each change to
-  the switcher code
-- Cold start MUST be benchmarked on Pixel 5 at the end of each phase
-- Locale switching MUST be visually verified across all 8 locales before v1.0 release
+### I. Feature-first Clean Architecture (NON-NEGOTIABLE)
+
+- Code lives in `core/` or `feature/<name>/`. Each feature has `data/`, `domain/`,
+  `presentation/` and `di/`. App-level wiring (`MainActivity`, `ThirtySixApplication`,
+  `navigation/`) is the only code allowed to reference several features.
+- Dependencies point inward: `presentation → domain ← data`. `di/` may see `domain` and `data`.
+- `domain/` is pure Kotlin. It imports no `android.*`, `androidx.*`, Retrofit, OkHttp or
+  kotlinx.serialization.
+- A feature never imports another feature, and `core/` never imports a feature. Code used by
+  two or more features moves to `core/`; one feature opens another only through callbacks
+  that `navigation/AppNavHost` fills.
+- Room entities never leave `data/`; mappers convert them at the boundary.
+
+**Enforced by**: `ArchitectureTest` (Konsist).
+
+### II. Every type has one home
+
+| Type | Package |
+|---|---|
+| `*ViewModel`, `*UiState` | `feature/<f>/presentation/<screen>/` (or `core/presentation/`) |
+| `*UseCase` | `feature/<f>/domain/usecase/` or `core/domain/usecase/` |
+| `*Repository` contract (`interface` or `abstract class`) | `…/domain/repository/` |
+| `*RepositoryImpl` | `feature/<f>/data/repository/` |
+| `*Dao` | `core/data/datasource/local/` |
+| `*Entity` | `core/data/datasource/local/entity/` |
+| Hilt `@Module` | `feature/<f>/di/` or `core/di/` |
+
+Domain models never carry a data-layer suffix (`Dto`, `Entity`, `Response`, `Request`).
+Implementations are named `<Interface>Impl`, recorded in `docs/adr/0001`.
+
+**Enforced by**: `PlacementTest` (Konsist).
+
+### III. Unidirectional data flow
+
+- `Screen → ViewModel → UseCase → Repository → DataSource`. A ViewModel may call a repository
+  interface directly when the use case would only forward the call.
+- A ViewModel never receives a DataSource, Dao, entity or a repository implementation.
+- A ViewModel exposes state as `StateFlow<XUiState>`. Mutable flows and Compose state stay
+  private. `UiState` is a `data class` or a `sealed` type with `val` properties only.
+- User input reaches the ViewModel as `onAction(XAction)`. One-off effects (navigate, toast)
+  are emitted as `XEvent`.
+- Dispatchers are injected. Only `di/` names `Dispatchers.IO` or `Dispatchers.Default`.
+  Long-lived collectors run in the injected `@ApplicationScope` scope.
+- DI is Hilt. Annotation processing runs on KSP; kapt is forbidden.
+
+**Enforced by**: `PlacementTest`, `ArchitectureTest.dispatchers are injected` (Konsist).
+**Review**: Action/Event shape (screens written before 2.0.0 move to it in Spec 026), KSP.
+
+### IV. Compose render discipline
+
+- State that changes every frame (scroll, drag offset, progress, animation values) is read
+  inside `Modifier.offset {}`, `graphicsLayer {}` or `drawBehind {}`, never in a composable
+  body. A parameter that carries it is typed `() -> T`.
+- A screen collects its `UiState` once, at the route, and passes each child only the fields it
+  needs. A field that changes many times per second is exposed as its own flow.
+- Values derived from changing state use `derivedStateOf`; expensive work uses `remember(keys)`.
+- Composable parameters are stable: `@Immutable` models, `kotlinx.collections.immutable`, or
+  types listed in `config/compose/stability.conf`.
+- Lazy lists give every item a stable `key` and a `contentType`, and never nest lists that
+  scroll the same direction.
+- The app is edge-to-edge, so every bar, sheet and floating control consumes `WindowInsets`.
+- Effect keys are exactly the values the effect reads; long-lived callbacks go through
+  `rememberUpdatedState`.
+
+**Enforced by**: ktlint compose-rules. A spec that adds UI attaches the Compose compiler
+report (`-PcomposeReports`) with zero unexplained non-skippable composables. **Review**:
+phase of each read, insets, effect keys.
+
+### V. No hardcoded values
+
+| Kind | Lives in |
+|---|---|
+| User-facing text | `res/values*/strings.xml` (all 8 locales) |
+| Colors, typography, shapes, spacing | `core/presentation/designsystem/theme/` |
+| Limits, timeouts, durations, defaults | a named `object` in `core/` or the feature that owns it |
+| Preference keys, nav arguments, intent extras | constants next to their single owner |
+| URLs and build-specific values | named constants or `BuildConfig` fields |
+
+Allowed inline: `0`, `1`, `-1`, `2`, `""`, and anything in tests or `@Preview`.
+
+**Enforced by**: `NoHardcodeTest` (Konsist: string literals in `Text`/`contentDescription`,
+`Color(0x…)` outside the theme), detekt `MagicNumber`, Android Lint `HardcodedText`,
+`MissingTranslation` and `ExtraTranslation` as errors. **Review**: `dp` values repeated in
+several places.
+
+### VI. Comments explain why, only where the code cannot (NON-NEGOTIABLE)
+
+- The default is no comment. Names, types and small functions carry the meaning.
+- Write a comment only for something the code cannot show: a non-obvious reason, a platform
+  quirk or workaround (link the issue), an outside constraint (API contract, store policy),
+  or an algorithm whose correctness is not evident.
+- Keep it to 1–3 lines. KDoc goes on public API only when the name and signature are not
+  enough. `@Suppress` gets a one-line reason.
+- Never in source:
+  - spec, task or requirement IDs and citations of planning documents or of this file;
+  - change history ("previously", "used to be"), authors or dates;
+  - comments that restate the code;
+  - ALL-CAPS or emoji banners;
+  - commented-out code;
+  - `TODO` without a ticket (write `TODO(APP-123): …`).
+- Traceability lives in commit messages, PR descriptions and `specs/`, not in code.
+
+**Enforced by**: detekt `ForbiddenComment` over main, test, androidTest and debug sources,
+`CommentPolicyTest` (a comment block is at most 5 lines; comments are at most 15% of a
+production file of 30+ lines), detekt `OutdatedDocumentation`. **Review**: comments that
+restate the code.
+
+### VII. Build and dependencies
+
+- Versions live only in `gradle/libs.versions.toml`. The latest stable version is looked up
+  when a dependency is added, never taken from memory, and the date is recorded in the PR.
+- AGP 9: no `org.jetbrains.kotlin.android` plugin. The Gradle daemon and unit tests run on
+  JDK 21 (`gradle/gradle-daemon-jvm.properties`); compilation targets Java 11.
+- Build types are `debug` and `release`; there are no product flavors.
+- `release` has `isMinifyEnabled` and `isShrinkResources` on. Every keep rule in
+  `proguard-rules.pro` has a one-line reason.
+- Every native library (`.so`) is 16 KB page aligned.
+- Signing keys and credentials are never committed. Distribution builds use the release
+  keystore; local and CI builds may fall back to the debug key with a printed warning.
+- The schema changes only through additive Room migrations with the exported schema JSON;
+  `fallbackToDestructiveMigration` is never used.
+
+**Enforced by**: `.specify/scripts/bash/verify-16kb-alignment.sh` on release builds,
+`AppDatabaseMigrationTest`. **Review**: catalog use, version lookup, keep rules.
+
+### VIII. Tests
+
+- Unit tests cover use cases, repositories, mappers and ViewModels. ViewModels are tested with
+  Turbine and a test main dispatcher.
+- Tests use fakes (`Fake*Repository`) for the project's own interfaces; mocks only for
+  third-party types.
+- Test folders mirror `main/`. Fakes of `core` contracts are in `core/testing/fake/`; a
+  feature's own fakes and sample data are in its `fake/` and `fixture/` folders.
+- DAOs are tested on in-memory Room. Critical flows have instrumented tests: opening a link
+  from another app, normal and incognito tabs, the bookmark star, history recording, Fire,
+  tracker blocking and incognito isolation.
+
+**Enforced by**: `./gradlew testDebugUnitTest` and `connectedDebugAndroidTest` in CI.
+Coverage target: every use case, repository, mapper and ViewModel has a test.
+
+## Product Constraints
+
+- **Data and privacy**: no account, no cloud sync, no analytics or crash reporting, and
+  nothing is sent to a server run by ThirtySix. All user data stays on the device; the
+  database is excluded from backup and device transfer, settings are included. Incognito
+  writes no history, favicons, screenshots or cookies to normal browsing.
+- **Web content**: `android.webkit.WebView` only. Page scripts come only from files in the
+  APK, run one way (nothing comes back to the app) and are installed in one place. No
+  `addJavascriptInterface` unless it is origin-gated and justified in a spec. Tracker lists
+  and other protection data ship in the APK and are never fetched.
+- **Permissions**: only the permissions in this table may be declared, and each one is
+  requested at the moment it is used.
+
+  | Permission | Why | Spec |
+  |---|---|---|
+  | `android.permission.INTERNET` | Load web pages | 007 |
+  | `android.permission.ACCESS_NETWORK_STATE` | Detect being offline | 007 |
+  | `android.permission.WRITE_EXTERNAL_STORAGE` (`maxSdkVersion="28"`) | Save downloads to the public Downloads folder on Android 7–9, before Scoped Storage | 015 |
+  | `android.permission.CAMERA` | A site the person allowed uses the camera; photo capture for an upload | 021 |
+  | `android.permission.RECORD_AUDIO` | A site the person allowed uses the microphone | 021 |
+  | `android.permission.ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION` | A site the person allowed uses location (approximate is enough) | 021 |
+  | `android.permission.MODIFY_AUDIO_SETTINGS` | Normal permission WebView needs with `RECORD_AUDIO` | 021 |
+
+  `POST_NOTIFICATIONS` is not declared: the system download service posts its own
+  notifications. `MANAGE_EXTERNAL_STORAGE` is never declared.
+
+- **Performance budgets**: cold start no more than 5% slower than the previous release,
+  measured in interleaved rounds on the same device; release APK ≤ 4 MB. Frame-time targets
+  are measured on a release build on Pixel 5-class hardware, never on an emulator
+  (`docs/adr/0017`).
+- **Locales**: EN (default), VI, DE, RU, KO, JA, ZH, FR. Accessibility: 48dp touch targets,
+  WCAG AA contrast, TalkBack labels on every interactive element.
+- **SDK levels**: minSdk 24, targetSdk 36, compileSdk 36. targetSdk is raised within 12
+  months of each Android release.
+- **Store**: Google Play, category Tools, content rating Everyone, free.
+
+## Quality Gates
+
+A spec is done only when all of these pass:
+
+1. `./gradlew detekt ktlintCheck`
+2. `./gradlew testDebugUnitTest`, which includes the architecture, placement, hardcode and comment tests
+3. `./gradlew lintDebug`
+4. Release builds: `./gradlew assembleRelease` and the 16 KB alignment script
+5. `./gradlew connectedDebugAndroidTest` (CI on API 29; locally on the 16 KB AVD)
+6. Specs with UI: the Compose compiler report, and a Layout Inspector recomposition count for
+   each changed screen's hot interaction
 
 ## Governance
 
-This constitution establishes non-negotiable principles for ThirtySixBrowser development.
-All implementation decisions MUST align with these principles.
+- This constitution overrides other project documents. `/speckit.plan` turns every
+  **Enforced by** line into a Constitution Check gate. A justified exception goes in the
+  plan's Complexity Tracking table.
+- When the code and this file disagree, one of them is fixed in the same change. Drift is
+  never left for later.
+- An amendment updates `AGENTS.md` and, when it changes a decision, adds an ADR, all in the
+  same commit. It adds one line to `docs/constitution-history.md`.
+- Versioning: MAJOR when a principle is removed or redefined, MINOR when a principle or
+  a check is added, PATCH for wording.
 
-### Amendment Process
-
-1. Proposed amendments MUST be documented with rationale
-2. Amendments MUST be reviewed for impact on existing specs and roadmap phases
-3. Breaking changes require migration plan before approval
-4. Version MUST be incremented according to semantic versioning:
-   - MAJOR: Principle removal or incompatible redefinition
-   - MINOR: New principle or material expansion of existing principle
-   - PATCH: Clarification or wording refinement
-
-### Compliance
-
-- All specs MUST verify compliance with relevant principles before implementation
-- Complexity exceeding these standards MUST be explicitly justified in the plan's
-  Complexity Tracking table
-- Deviations MUST be documented with rationale and approved by project lead (Xbism3)
-- Google Play policy changes MUST trigger an immediate constitution review
-- 16KB page size violations MUST trigger an immediate fix-or-revert — no merging on
-  red 16KB CI gate
-- Constitution supersedes all other practices; in case of conflict, the constitution wins
-
-**Version**: 1.6.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-11
+**Version**: 2.0.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-14

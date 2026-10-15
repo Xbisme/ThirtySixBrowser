@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build app/src/main/assets/protection/tracker_hosts.txt (Spec 023, research R1).
+"""Build app/src/main/assets/protection/tracker_hosts.txt.
 
 Run by hand when the list is refreshed. Never run from Gradle, CI or the app:
 the committed asset is what a release ships (Constitution §I).
@@ -151,7 +151,7 @@ def main() -> int:
     hosts = drop_covered_subdomains({h for h in privacy | ads | OWN_HOSTS if not is_never_block(h)})
 
     header = [
-        "# ThirtySix Browser tracker and ad-server hosts (Spec 023).",
+        "# ThirtySix Browser tracker and ad-server hosts.",
         "# Derived from EasyPrivacy and EasyList by The EasyList authors (https://easylist.to/),",
         "# used under CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).",
         "# Modified: host-level subset; ad-server hosts limited to popular domains",

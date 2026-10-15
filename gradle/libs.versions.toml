@@ -1,8 +1,6 @@
 [versions]
 # Build tools
-# NOTE: AGP 9.2.0 is latest stable (release 2026-04-28) but Android Studio only
-# supports 9.1.x at present. Pinned to 9.1.1 (latest 9.1.x). Re-evaluate when
-# Android Studio updates to support 9.2.x.
+# AGP held on 9.1.x: the Android Studio in use does not support 9.2 yet.
 agp = "9.1.1"
 kotlin = "2.3.21"
 
@@ -18,43 +16,29 @@ activityCompose = "1.13.0"
 # Compose BOM (resolves compose.ui + material3 versions)
 composeBom = "2026.04.01"
 
-# Hilt + KSP (Spec 002 — see specs/002-clean-architecture-skeleton-di/research.md)
-# Hilt 2.59.2 is the first AGP-9 compatible release (2026-02-20).
-# KSP 2.3.7 supports Kotlin 2.3.x (versioning decoupled from Kotlin since KSP 2.3.0).
+# Hilt 2.59.2 is the first AGP-9 compatible release. KSP versions are decoupled from Kotlin.
 hilt = "2.59.2"
 ksp = "2.3.7"
 
-# AndroidX Hilt + Lifecycle + Navigation (Spec 002)
+# AndroidX Hilt + Lifecycle + Navigation
 hiltNavigationCompose = "1.3.0"
-# lifecycle group is NOT managed by Compose BOM — pin separately.
+# The lifecycle group is not managed by the Compose BOM.
 lifecycle = "2.10.0"
 navigationCompose = "2.9.8"
 
-# Spec 005 — Room (verified developer.android.com/jetpack/androidx/releases/room 2026-05-01).
-# 2.8.4 (2025-11-19) is latest stable; Room 3.0 alpha-only excluded per Constitution §IX.
-# Pure Kotlin/Java, ZERO native (.so) — 16KB CI gate auto-passes.
-# minSdk floor 23 (since 2.8.0-rc02) — project minSdk 24 above floor.
+# Stable only: Room 3.0 is alpha.
 room = "2.8.4"
 
-# Spec 005 — Turbine (Cash App Flow testing). Verified GitHub Releases API +
-# Maven Central POM 2026-05-01. 1.2.1 (2025-06-11) is latest stable.
-# Pure-Kotlin JVM JAR (no .so) — pulls kotlinx-coroutines-core 1.10.2 transitively.
 turbine = "1.2.1"
+# Test and lint only.
+konsist = "0.18.1"
+composeRules = "0.6.8"
 
-# Spec 006 — DataStore Preferences (verified developer.android.com/jetpack/androidx/releases/datastore 2026-05-01).
-# 1.2.1 (released 2026-03-11) is latest stable; 1.3.0 line is alpha-only and excluded per Constitution §IX.
-# Pure Kotlin/Java, ZERO native (.so) — 16KB CI gate auto-passes.
-# minSdk floor 21 — project minSdk 24 above floor.
+# Stable only: the 1.3.0 line is alpha. Ships libdatastore_shared_counter.so (16 KB-aligned).
 datastore = "1.2.1"
 
-# Spec 005 — Robolectric (JVM Android shadow runtime). Verified Maven Central
-# + GitHub releases 2026-05-01. 4.16.1 (2026-01-21) is latest stable.
-# Robolectric DOES ship native code BUT it loads only into the JVM test process
-# — not packaged into release APK. Constitution §IX 16KB gate inspects release
-# APK only → does NOT apply to testImplementation Robolectric.
-# JDK requirement: SDK 36 emulation needs JDK 21; we pin Robolectric to SDK 34
-# via app/src/test/resources/robolectric.properties (Room behaviour is SDK-
-# independent for our entity/DAO tests). Launcher JDK is JBR 21 anyway.
+# Its native code loads only in the JVM test process, so the 16 KB release check does not apply.
+# The emulated SDK is pinned in app/src/test/resources/robolectric.properties.
 robolectric = "4.16.1"
 
 # Test
@@ -63,34 +47,15 @@ junitExt = "1.3.0"
 espressoCore = "3.7.0"
 coroutinesTest = "1.10.2"
 
-# Spec 014 — core library desugaring brings `java.time` (LocalDate / Instant /
-# DateTimeFormatter / FormatStyle) to minSdk 24. Build-time tool from Google's
-# Android team — emits backport `.dex` classes; not a third-party runtime lib.
-# Latest 2.x at lookup time 2026-05-08.
+# Core library desugaring: `java.time` on minSdk 24.
 desugar = "2.1.5"
 
-# Spec 016 — androidx.appcompat for in-app language switching. Below API 33,
-# AppCompatDelegate.setApplicationLocales only works on an AppCompatActivity
-# (specs/016-settings-screen/research.md R1, R2). Latest stable at lookup
-# 2026-09-11T04:16Z (Google Maven metadata + release notes). Zero .so across its
-# dependency graph — confirmed in a release-build spike, research.md R3.
+# Below API 33, AppCompatDelegate.setApplicationLocales works only on an AppCompatActivity.
 appcompat = "1.8.0"
 
-# Spec 016 — androidx.webkit for WebStorageCompat.deleteBrowsingData: complete
-# site-data removal including service workers and Cache Storage (research.md R5).
-# Latest STABLE at lookup 2026-09-11T04:16Z; the maven-metadata <release> tag points
-# at 1.18.0-alpha01, excluded per Constitution §IX. Zero .so in the AAR and its
-# declared AndroidX dependencies, confirmed in a release-build spike (research.md R3).
+# Stable only: maven-metadata's <release> tag points at an alpha.
 webkit = "1.17.0"
 
-# Spec 017 — androidx.core:core-splashscreen for the branded launch screen
-# (specs/017-splash-screen/research.md R1). Latest STABLE at lookup 2026-09-15
-# against Google Maven maven-metadata.xml: <latest> and <release> both point at
-# 1.2.0 (released 2025-11-05) — unlike androidx.webkit above, no alpha to exclude.
-# Library minSdk 21, below the project's 24. ZERO .so — verified by inspecting the
-# AAR itself, whose 39 entries are classes.jar plus resource XML only, not by
-# trusting release notes (Constitution §IX). Re-verified against the built APK at
-# gate G1.
 coreSplashscreen = "1.2.0"
 
 [libraries]
@@ -108,75 +73,48 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-# Spec 019 R4 — material-icons-core removed: every icon is a Material Symbols Rounded
-# VectorDrawable in res/drawable, referenced through presentation/theme/AppIcons.kt.
-
-# Hilt (Spec 002)
-# IMPORTANT: artifact for KSP wiring is `hilt-compiler` — NOT `hilt-android-compiler`.
-# The latter is the kapt-era artifact; using it with `ksp(...)` compiles silently
-# but generates ZERO Hilt code. See research.md Risk #4.
+# Hilt. With KSP use `hilt-compiler`: the kapt-era `hilt-android-compiler` compiles but generates nothing.
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
-# Spec 007 — Hilt instrumented-test runtime. Provides @HiltAndroidTest, HiltAndroidRule,
-# and @TestInstallIn for swapping Hilt bindings in androidTest only.
-# Pure Kotlin/Java, no .so. Pulls hilt-android transitively.
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 # Lifecycle ViewModel Compose (NOT BOM-managed — pin via `lifecycle` key)
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-# Spec 020 — LifecycleResumeEffect. Already on the classpath transitively (it provides
-# collectAsStateWithLifecycle); declared because the app now calls it directly. Same version key.
+# Already transitive; declared because the app calls LifecycleResumeEffect directly.
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 
 # Navigation Compose
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
-# Room (Spec 005). KSP processor artifact = `room-compiler` (same artifact ID for kapt
-# AND ksp wiring; build system distinguishes by configuration name).
+# Room
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 
-# Turbine (Spec 005) — Flow assertions in DAO unit tests.
 app-cash-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+konsist = { group = "com.lemonappdev", name = "konsist", version.ref = "konsist" }
+compose-rules-ktlint = { group = "io.nlopez.compose.rules", name = "ktlint", version.ref = "composeRules" }
 
-# DataStore Preferences (Spec 006) — key-value persistence wrapper. Single artifact;
-# transitively pulls androidx.datastore:datastore-core (also pure Kotlin) +
-# kotlinx-coroutines-core (already in catalog).
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
-# Spec 016 — AppCompatActivity + AppCompatDelegate per-app language API. Java + resources, no .so.
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-# Spec 016 — WebStorageCompat.deleteBrowsingData + WebViewFeature. Pure Java, no .so.
 androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
-# Spec 017 — SplashScreen compat for the branded launch screen. No .so. Its only runtime
-# dependencies are appcompat-resources 1.7.0 and annotation 1.8.1, both already in the graph
-# at newer versions (appcompat 1.8.0 from Spec 016), so Gradle adds no new artifact.
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 
 
-# Robolectric (Spec 005) — provides Android Context to Room in JVM unit tests.
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
-# Spec 014 — core library desugaring. Build-time tool from Google's Android team
-# emits backport `.dex` for `java.time` (LocalDate / Instant / DateTimeFormatter)
-# at minSdk 24. Wired as `coreLibraryDesugaring(...)` in `app/build.gradle.kts`,
-# NOT as `implementation`. APK delta ~150 KB.
+# Wired as `coreLibraryDesugaring(...)`, not `implementation`.
 android-desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitExt" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-# Spec 007 — Espresso-Web instrumented WebView assertions. Pinned to existing
-# espressoCore = "3.7.0" (Espresso family ships as a single coordinated train —
-# androidx.test.espresso:espresso-{core,web,contrib,intents,idling-resource}).
-# Pure Java JAR, ZERO native (.so) → 16KB CI gate auto-passes.
-# androidTestImplementation only — never bundled into release APK.
+# Espresso artifacts ship as one release train, so they share the espressoCore version.
 androidx-espresso-web = { group = "androidx.test.espresso", name = "espresso-web", version.ref = "espressoCore" }
-# Spec 021 T032 — stubs the system file picker in instrumented tests. Same Espresso train, test-only.
 androidx-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espressoCore" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
@@ -189,12 +127,12 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 
-# Spec 002 — KSP processor + Hilt Gradle plugin
+# KSP processor + Hilt Gradle plugin
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
 [bundles]
-# Compose UI essentials — gom các Compose libs hay đi cùng nhau (FR-004)
+# Compose UI libraries that are always used together
 compose = [
     "androidx-compose-ui",
     "androidx-compose-ui-graphics",

@@ -1,4 +1,4 @@
-// Spec 024 consent fixtures — every button carries data-choice (reject | accept | settings).
+// Test consent fixtures — every button carries data-choice (reject | accept | settings).
 // A click records the choice in localStorage and the title, and closes the banner.
 (function () {
   document.addEventListener('click', function (event) {

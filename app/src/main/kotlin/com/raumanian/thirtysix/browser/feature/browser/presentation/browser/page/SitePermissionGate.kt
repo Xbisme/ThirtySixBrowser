@@ -1,0 +1,67 @@
+package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page
+
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ApplySitePermissionChoiceUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ResolveSitePermissionUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SiteChoiceEffect
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SitePermissionChoice
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SitePermissionOutcome
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+
+/** The Android permissions each capability needs. Location: either grant counts. */
+fun SiteCapability.androidPermissions(): List<String> = when (this) {
+    SiteCapability.Camera -> listOf(Manifest.permission.CAMERA)
+    SiteCapability.Microphone -> listOf(Manifest.permission.RECORD_AUDIO)
+    SiteCapability.Location -> listOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+    )
+}
+
+/**
+ * Decides site permission requests for the browser screen from stored and one-time decisions and
+ * the Android permissions held. Holds no platform callback; the caller answers the request.
+ */
+@HiltViewModel
+class SitePermissionGate @Inject constructor(
+    private val resolveSitePermission: ResolveSitePermissionUseCase,
+    private val applySitePermissionChoice: ApplySitePermissionChoiceUseCase,
+    private val oneTimeGrants: OneTimeGrantStore,
+    @ApplicationContext private val context: Context,
+) : ViewModel() {
+
+    suspend fun resolve(request: PageRequest.Permission, hasUnsupported: Boolean): SitePermissionOutcome =
+        resolveSitePermission(
+            origin = request.origin,
+            capabilities = request.capabilities,
+            isIncognito = request.isIncognito,
+            hasUnsupported = hasUnsupported,
+            grantedOnce = { oneTimeGrants.has(request.tabId, request.generation, request.origin, it) },
+        )
+
+    suspend fun apply(choice: SitePermissionChoice, request: PageRequest.Permission): SiteChoiceEffect {
+        val effect = applySitePermissionChoice(choice, request.origin, request.askedCapabilities, request.isIncognito)
+        if (effect.grantOnce) {
+            oneTimeGrants.grant(request.tabId, request.generation, request.origin, request.askedCapabilities)
+        }
+        return effect
+    }
+
+    /** Whether the app holds the Android permission for every capability (location: fine or coarse). */
+    fun holdsSystemPermissions(capabilities: Set<SiteCapability>): Boolean = capabilities.all { capability ->
+        capability.androidPermissions().any {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    /** A tab's page changed: its one-time grants end. */
+    fun onPageChanged(tabId: Long) = oneTimeGrants.dropForTab(tabId)
+}

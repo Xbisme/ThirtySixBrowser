@@ -1,4 +1,4 @@
-/*! ThirtySix basic fingerprinting protection (Spec 024 research R9). ThirtySix's own code.
+/*! ThirtySix basic fingerprinting protection. ThirtySix's own code.
  * Called by the app's PrivacyScriptComposer as (function(cfg){...})({v, s, x}):
  *   s = per-session secret (hex), x = registrable domains with protection off.
  * Read-outs of drawings and audio carry slight noise, seeded per top-level site and session;
@@ -179,12 +179,12 @@
     });
   }
 
-  // Battery status: withheld (FR-027). Feature-detecting pages carry on without it.
+  // Battery status: withheld. Feature-detecting pages carry on without it.
   if (window.Navigator && 'getBattery' in Navigator.prototype) {
     try { delete Navigator.prototype.getBattery; } catch (e) { /* keep */ }
   }
 
-  // Media devices: no ids before the page has camera or microphone access (FR-028).
+  // Media devices: no ids before the page has camera or microphone access.
   // The engine already returns empty labels until then; ids are blanked in that same state.
   if (window.MediaDevices) {
     replace(MediaDevices.prototype, 'enumerateDevices', function (original) {

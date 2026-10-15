@@ -1,25 +1,25 @@
 <resources>
-    <!-- Spec 004 — French (fr) translation. Brand "ThirtySix" preserved per research.md R6. -->
+    <!-- French (fr) translation. Brand "ThirtySix" preserved -->
     <string name="app_name">Navigateur ThirtySix</string>
 
-    <!-- Spec 007 — French (fr) translations for Browser loading + error UI. -->
+    <!-- French (fr) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">Chargement de la page</string>
     <string name="browser_error_title">La page n\'a pas pu être chargée</string>
     <string name="browser_error_offline_hint">Vérifiez votre connexion Internet et réessayez.</string>
     <string name="browser_error_generic">Une erreur s\'est produite. Réessayez plus tard.</string>
 
-    <!-- Spec 008 — French (fr) translations for navigation bottom-bar a11y. -->
+    <!-- French (fr) translations for navigation bottom-bar a11y. -->
     <string name="browser_action_back">Précédent</string>
     <string name="browser_action_forward">Suivant</string>
     <string name="browser_action_reload">Recharger la page</string>
     <string name="browser_action_stop">Arrêter le chargement</string>
     <string name="browser_action_home">Accueil</string>
 
-    <!-- Spec 009 — French (fr) translations for address-bar hint + clear button. -->
+    <!-- French (fr) translations for address-bar hint + clear button. -->
     <string name="browser_address_bar_hint">Rechercher ou saisir une URL</string>
     <string name="browser_address_bar_clear_cd">Effacer la barre d\'adresse</string>
 
-    <!-- Spec 011 — French (fr) translations for tabs management. -->
+    <!-- French (fr) translations for tabs management. -->
     <string name="tabs_switcher_new_tab">Nouvel onglet</string>
     <string name="tabs_switcher_close_all">Fermer tous les onglets</string>
     <string name="tabs_switcher_close_all_confirm">Fermer tous les onglets ? Cette action est irréversible.</string>
@@ -34,7 +34,7 @@
         <item quantity="other">%1$d onglets</item>
     </plurals>
 
-    <!-- Spec 012 — Private / Incognito Mode. -->
+    <!-- Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Nouvel onglet privé</string>
     <string name="tabs_a11y_incognito_glyph">Onglet privé</string>
     <string name="tabs_error_max_incognito_tabs_reached">Maximum de %d onglets privés atteint</string>
@@ -43,13 +43,13 @@
     <string name="tabs_action_close_all_incognito">Fermer tous les onglets privés</string>
     <string name="tabs_close_all_incognito_confirm">Fermer tous les %d onglets privés ?</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <!-- Bookmarks CRUD. US1 star icon strings. -->
     <string name="bookmark_action_star_add_cd">Ajouter cette page aux favoris</string>
     <string name="bookmark_action_star_remove_cd">Retirer cette page des favoris</string>
     <string name="bookmark_added_snackbar">Favori enregistré</string>
     <string name="bookmark_removed_snackbar">Favori supprimé</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <!-- Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Favoris</string>
     <string name="bookmarks_section_folders">Dossiers</string>
     <string name="bookmarks_section_pages">Pages</string>
@@ -58,7 +58,7 @@
     <string name="bookmarks_action_back_to_parent_cd">Vers le dossier parent</string>
     <string name="bookmarks_breadcrumb_root_label">Racine</string>
 
-    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <!-- full bookmarks UI. -->
     <string name="bookmarks_action_new_folder_cd">Nouveau dossier</string>
     <string name="bookmarks_dialog_create_folder_title">Nouveau dossier</string>
     <string name="bookmarks_dialog_rename_folder_title">Renommer le dossier</string>
@@ -89,7 +89,7 @@
     <string name="bookmarks_action_add_cd">Ajouter un favori</string>
     <string name="bookmarks_dialog_add_title">Ajouter un favori</string>
 
-    <!-- Spec 014 — History view (French). -->
+    <!-- History view (French). -->
     <string name="history_screen_title">Historique</string>
     <string name="history_action_back">Retour</string>
     <string name="history_day_today">Aujourd\'hui</string>
@@ -98,13 +98,13 @@
     <string name="history_empty_body">Les pages visitées apparaîtront ici.</string>
     <string name="history_row_content_description">%1$s, %2$s, visité à %3$s</string>
 
-    <!-- Spec 014 US2 — search. -->
+    <!-- search. -->
     <string name="history_search_placeholder">Rechercher dans l\'historique</string>
     <string name="history_search_clear_content_description">Effacer la recherche</string>
     <string name="history_no_matches_title">Aucun résultat pour « %1$s »</string>
     <string name="history_no_matches_body">Essayez un autre mot ou vérifiez l\'orthographe.</string>
 
-    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <!-- long-press per-entry actions. -->
     <string name="history_action_open_in_new_tab">Ouvrir dans un nouvel onglet</string>
     <string name="history_action_delete_entry">Supprimer l\'entrée</string>
     <string name="history_action_copy_url">Copier l\'URL</string>
@@ -112,14 +112,14 @@
     <string name="history_snackbar_tab_cap_reached">Nombre maximum d\'onglets atteint. Fermez un onglet pour en ouvrir un nouveau.</string>
     <string name="history_snackbar_deletion_failed">Impossible de supprimer l\'entrée. Veuillez réessayer.</string>
 
-    <!-- Spec 014 US4 — clear all. -->
+    <!-- clear all. -->
     <string name="history_action_clear_all">Effacer tout l\'historique</string>
     <string name="history_clear_all_dialog_title">Effacer tout l\'historique ?</string>
     <string name="history_clear_all_dialog_body">Toutes les pages de votre historique de navigation seront définitivement supprimées. Cette action est irréversible.</string>
     <string name="history_clear_all_dialog_confirm">Effacer</string>
     <string name="history_clear_all_dialog_cancel">Annuler</string>
 
-    <!-- Spec 015 — downloads (US1) -->
+    <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Téléchargement de %1$s</string>
     <string name="downloads_service_unavailable">Les téléchargements ne sont pas disponibles sur cet appareil.</string>
     <string name="downloads_storage_permission_denied">L\'accès au stockage est nécessaire pour enregistrer les téléchargements.</string>
@@ -129,7 +129,7 @@
     <string name="downloads_storage_permission_rationale_confirm">Continuer</string>
     <string name="downloads_storage_permission_rationale_cancel">Plus tard</string>
 
-    <!-- Spec 015 — downloads (US2-US7) -->
+    <!-- downloads (US2-US7) -->
     <string name="downloads_screen_title">Téléchargements</string>
     <string name="downloads_action_back">Retour</string>
     <string name="downloads_state_pending">En attente</string>
@@ -163,7 +163,7 @@
     <string name="downloads_empty_body">Les fichiers que vous téléchargez apparaîtront ici.</string>
     <string name="downloads_operation_failed">Une erreur est survenue. Veuillez réessayer.</string>
 
-    <!-- Spec 016 — Settings screen scaffold. -->
+    <!-- Settings screen scaffold. -->
     <string name="settings_screen_title">Paramètres</string>
     <string name="settings_action_back">Retour</string>
     <string name="settings_action_cancel">Annuler</string>
@@ -174,21 +174,21 @@
     <string name="settings_section_about">À propos</string>
     <string name="settings_error_not_saved">Impossible d\'enregistrer le paramètre. Veuillez réessayer.</string>
 
-    <!-- Spec 016 US1 — theme. -->
+    <!-- theme. -->
     <string name="settings_theme_title">Thème</string>
     <string name="settings_theme_light">Clair</string>
     <string name="settings_theme_dark">Sombre</string>
     <string name="settings_theme_system">Valeur par défaut du système</string>
 
-    <!-- Spec 016 US2 — search engine. -->
+    <!-- search engine. -->
     <string name="settings_search_engine_title">Moteur de recherche</string>
 
-    <!-- Spec 016 US3 — app language. -->
+    <!-- app language. -->
     <string name="settings_language_title">Langue de l\'application</string>
     <string name="settings_language_follow_system">Utiliser la langue du système</string>
     <string name="settings_error_language_not_applied">Impossible de changer la langue. Veuillez réessayer.</string>
 
-    <!-- Spec 016 US4 — clear browsing data. -->
+    <!-- clear browsing data. -->
     <string name="settings_clear_browsing_data_title">Effacer les données de navigation</string>
     <string name="settings_clear_dialog_title">Effacer les données de navigation ?</string>
     <string name="settings_clear_category_history">Historique de navigation</string>
@@ -202,7 +202,7 @@
     <string name="settings_clear_done">Données de navigation effacées</string>
     <string name="settings_clear_partial_failure">Certaines données n\'ont pas pu être effacées. Veuillez réessayer.</string>
 
-    <!-- Spec 016 US5 — history retention. -->
+    <!-- history retention. -->
     <string name="settings_history_retention_title">Conserver l\'historique pendant</string>
     <plurals name="settings_history_retention_days">
         <item quantity="one">%d jour</item>
@@ -214,15 +214,14 @@
     <string name="settings_retention_shorten_confirm">Supprimer</string>
     <string name="settings_retention_prune_deferred">L\'historique plus ancien n\'a pas pu être supprimé maintenant. Il le sera au prochain démarrage de l\'application.</string>
 
-    <!-- Spec 016 US6 — dynamic color. -->
+    <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">Couleurs dynamiques</string>
     <string name="settings_dynamic_color_summary">Utiliser les couleurs de votre fond d\'écran</string>
 
-    <!-- Spec 016 US7 — About. -->
+    <!-- About. -->
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_privacy_statement">Cette application ne collecte aucune donnée personnelle et n\'envoie rien à un serveur exploité par ThirtySix. Votre historique, vos favoris, vos téléchargements et vos paramètres restent sur cet appareil.</string>
-    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
-         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <!-- onboarding: the privacy statement and option labels are reused from Settings. -->
     <string name="onboarding_welcome_title">Bienvenue dans ThirtySix</string>
     <string name="onboarding_welcome_body">Un navigateur discret qui ne vous gêne pas.</string>
     <string name="onboarding_language_title">Choisissez votre langue</string>
@@ -236,7 +235,7 @@
     <string name="onboarding_action_skip">Ignorer</string>
     <string name="onboarding_progress_a11y">Étape %1$d sur %2$d</string>
 
-    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <!-- bottom bar and hub -->
     <string name="nav_search">Rechercher</string>
     <string name="nav_tabs">Onglets</string>
     <string name="nav_menu">Menu</string>
@@ -253,7 +252,7 @@
         <item quantity="other">Onglets, %1$d ouverts</item>
     </plurals>
 
-    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <!-- Home page -->
     <string name="home_greeting_morning">Bonjour</string>
     <string name="home_greeting_afternoon">Bon après-midi</string>
     <string name="home_greeting_evening">Bonsoir</string>
@@ -264,7 +263,7 @@
     <string name="home_shortcut_tag_saved">Enregistré</string>
     <string name="home_shortcut_tag_recent">Récent</string>
 
-    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <!-- incognito new-tab page -->
     <string name="incognito_page_title">Vous naviguez en privé</string>
     <string name="incognito_page_subtitle">Les autres personnes qui utilisent ce téléphone ne verront pas ce que vous faites ici.</string>
     <string name="incognito_page_section_title">Quand vous fermez tous les onglets privés</string>
@@ -273,11 +272,11 @@
     <string name="incognito_page_point_screenshots">Les captures d\'écran sont bloquées tant qu\'un onglet privé est ouvert</string>
     <string name="incognito_page_footnote">Les fichiers téléchargés et les favoris enregistrés sont conservés. Les sites web et votre réseau peuvent toujours voir vos visites.</string>
 
-    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <!-- tab switcher modes -->
     <string name="tabs_chip_open">Ouverts</string>
     <string name="tabs_chip_incognito">Privé</string>
 
-    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <!-- default browser and entry points -->
     <string name="settings_section_general">Général</string>
     <string name="settings_default_browser_title">Navigateur par défaut</string>
     <string name="settings_default_browser_summary_not_default">ThirtySix n\'est pas votre navigateur par défaut. Appuyez pour changer.</string>
@@ -291,7 +290,7 @@
     <string name="entry_tab_limit_reused">Limite d\'onglets atteinte — ouvert dans l\'onglet actuel</string>
     <string name="entry_default_browser_unavailable">Les applis par défaut ne peuvent pas être modifiées sur cet appareil</string>
 
-    <!-- Spec 021 — web capabilities (contracts C2) -->
+    <!-- web capabilities -->
     <string name="site_capability_camera">caméra</string>
     <string name="site_capability_microphone">micro</string>
     <string name="site_capability_location">position</string>
@@ -349,7 +348,7 @@
     <string name="settings_clear_category_site_permissions_description">Les sites redemanderont la caméra, le micro et la position</string>
     <string name="file_chooser_title">Choisir un fichier</string>
 
-    <!-- Spec 022 — page tools -->
+    <!-- page tools -->
     <string name="hub_page_tools_title">Outils de la page</string>
     <string name="hub_tile_find_in_page">Rechercher dans la page</string>
     <string name="hub_tile_share">Partager</string>
@@ -369,7 +368,7 @@
     <string name="suggestion_bookmark_cd">Favori : %1$s, %2$s</string>
     <string name="suggestion_history_cd">Historique : %1$s, %2$s</string>
     <string name="share_page_title">Partager la page</string>
-    <!-- Spec 023 privacy protection -->
+    <!-- privacy protection -->
     <string name="hub_protection_site_title">Protection sur ce site</string>
     <string name="hub_protection_site_on">Traqueurs bloqués, balises de suivi retirées, connexion sécurisée en priorité</string>
     <string name="hub_protection_site_off">Désactivée pour %1$s. Les traqueurs peuvent se charger ici.</string>
@@ -393,7 +392,7 @@
         <item quantity="many">%1$d traqueurs bloqués sur cette page</item>
         <item quantity="other">%1$d traqueurs bloqués sur cette page</item>
     </plurals>
-    <!-- Spec 024 privacy tools -->
+    <!-- privacy tools -->
     <string name="fire_action">Feu</string>
     <string name="fire_action_tabs_cd">Feu : fermer tous les onglets et effacer les données de navigation</string>
     <string name="fire_confirm_title">Fermer tous les onglets et effacer les données ?</string>

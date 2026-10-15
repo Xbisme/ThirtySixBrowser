@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // The applicationId for debug build type carries the `.debug` suffix (FR-011);
+        // The applicationId for debug build type carries the `.debug` suffix;
         // androidTest runs against the debug variant, so the package name reflects that.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.raumanian.thirtysix.browser.debug", appContext.packageName)

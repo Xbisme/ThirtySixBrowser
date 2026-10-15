@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.core.di
 
-import com.raumanian.thirtysix.browser.core.dispatcher.DefaultDispatcherProvider
-import com.raumanian.thirtysix.browser.core.dispatcher.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Spec 017 — adaptive icon background. Replaces the project-template artwork (a green
-  #3DDC84 field with grid lines), which could not ship to a store listing (FR-001).
+  adaptive icon background. Replaces the project-template artwork (a green
+  #3DDC84 field with grid lines), which could not ship to a store listing.
 
   A flat brand field: the mark's disc is carried by the foreground layer, so the
   background is deliberately plain. Adaptive-icon layers are 108x108dp of which the
   outer 18dp per side may be cropped by the device's shape mask, so a flat fill is
-  also the only thing guaranteed to look correct under every mask (FR-005).
+  also the only thing guaranteed to look correct under every mask.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"

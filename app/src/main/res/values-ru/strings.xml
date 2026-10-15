@@ -1,25 +1,25 @@
 <resources>
-    <!-- Spec 004 — Russian (ru) translation. Brand "ThirtySix" preserved in Latin per research.md R6. -->
+    <!-- Russian (ru) translation. Brand "ThirtySix" preserved in Latin -->
     <string name="app_name">ThirtySix Браузер</string>
 
-    <!-- Spec 007 — Russian (ru) translations for Browser loading + error UI. -->
+    <!-- Russian (ru) translations for Browser loading + error UI. -->
     <string name="browser_loading_a11y">Загрузка страницы</string>
     <string name="browser_error_title">Не удалось загрузить страницу</string>
     <string name="browser_error_offline_hint">Проверьте подключение к Интернету и попробуйте снова.</string>
     <string name="browser_error_generic">Что-то пошло не так. Попробуйте открыть страницу позже.</string>
 
-    <!-- Spec 008 — Russian (ru) translations for navigation bottom-bar a11y. -->
+    <!-- Russian (ru) translations for navigation bottom-bar a11y. -->
     <string name="browser_action_back">Назад</string>
     <string name="browser_action_forward">Вперёд</string>
     <string name="browser_action_reload">Обновить страницу</string>
     <string name="browser_action_stop">Остановить загрузку</string>
     <string name="browser_action_home">Домой</string>
 
-    <!-- Spec 009 — Russian (ru) translations for address-bar hint + clear button. -->
+    <!-- Russian (ru) translations for address-bar hint + clear button. -->
     <string name="browser_address_bar_hint">Поиск или адрес</string>
     <string name="browser_address_bar_clear_cd">Очистить адресную строку</string>
 
-    <!-- Spec 011 — Russian (ru) translations for tabs management. -->
+    <!-- Russian (ru) translations for tabs management. -->
     <string name="tabs_switcher_new_tab">Новая вкладка</string>
     <string name="tabs_switcher_close_all">Закрыть все вкладки</string>
     <string name="tabs_switcher_close_all_confirm">Закрыть все вкладки? Это действие необратимо.</string>
@@ -35,7 +35,7 @@
         <item quantity="other">%1$d вкладки</item>
     </plurals>
 
-    <!-- Spec 012 — Private / Incognito Mode. -->
+    <!-- Private / Incognito Mode. -->
     <string name="tabs_action_new_incognito_tab">Новая вкладка инкогнито</string>
     <string name="tabs_a11y_incognito_glyph">Вкладка инкогнито</string>
     <string name="tabs_error_max_incognito_tabs_reached">Достигнут максимум: %d вкладок инкогнито</string>
@@ -44,13 +44,13 @@
     <string name="tabs_action_close_all_incognito">Закрыть все вкладки инкогнито</string>
     <string name="tabs_close_all_incognito_confirm">Закрыть все %d вкладок инкогнито?</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US1 star icon strings. -->
+    <!-- Bookmarks CRUD. US1 star icon strings. -->
     <string name="bookmark_action_star_add_cd">Добавить закладку для этой страницы</string>
     <string name="bookmark_action_star_remove_cd">Удалить закладку для этой страницы</string>
     <string name="bookmark_added_snackbar">Закладка сохранена</string>
     <string name="bookmark_removed_snackbar">Закладка удалена</string>
 
-    <!-- Spec 013 — Bookmarks CRUD. US2 strings. -->
+    <!-- Bookmarks CRUD. US2 strings. -->
     <string name="bookmarks_screen_title">Закладки</string>
     <string name="bookmarks_section_folders">Папки</string>
     <string name="bookmarks_section_pages">Страницы</string>
@@ -59,7 +59,7 @@
     <string name="bookmarks_action_back_to_parent_cd">К родительской папке</string>
     <string name="bookmarks_breadcrumb_root_label">Корень</string>
 
-    <!-- Spec 013 US3-US7 — full bookmarks UI. -->
+    <!-- full bookmarks UI. -->
     <string name="bookmarks_action_new_folder_cd">Новая папка</string>
     <string name="bookmarks_dialog_create_folder_title">Новая папка</string>
     <string name="bookmarks_dialog_rename_folder_title">Переименовать папку</string>
@@ -91,7 +91,7 @@
     <string name="bookmarks_action_add_cd">Добавить закладку</string>
     <string name="bookmarks_dialog_add_title">Добавить закладку</string>
 
-    <!-- Spec 014 — History view (Russian). -->
+    <!-- History view (Russian). -->
     <string name="history_screen_title">История</string>
     <string name="history_action_back">Назад</string>
     <string name="history_day_today">Сегодня</string>
@@ -100,13 +100,13 @@
     <string name="history_empty_body">Посещённые страницы появятся здесь.</string>
     <string name="history_row_content_description">%1$s, %2$s, посещено в %3$s</string>
 
-    <!-- Spec 014 US2 — search. -->
+    <!-- search. -->
     <string name="history_search_placeholder">Поиск в истории</string>
     <string name="history_search_clear_content_description">Очистить поиск</string>
     <string name="history_no_matches_title">Нет совпадений для «%1$s»</string>
     <string name="history_no_matches_body">Попробуйте другое слово или проверьте написание.</string>
 
-    <!-- Spec 014 US3 — long-press per-entry actions. -->
+    <!-- long-press per-entry actions. -->
     <string name="history_action_open_in_new_tab">Открыть в новой вкладке</string>
     <string name="history_action_delete_entry">Удалить запись</string>
     <string name="history_action_copy_url">Копировать URL</string>
@@ -114,14 +114,14 @@
     <string name="history_snackbar_tab_cap_reached">Достигнуто максимальное число вкладок. Закройте вкладку, чтобы открыть новую.</string>
     <string name="history_snackbar_deletion_failed">Не удалось удалить запись. Попробуйте ещё раз.</string>
 
-    <!-- Spec 014 US4 — clear all. -->
+    <!-- clear all. -->
     <string name="history_action_clear_all">Очистить всю историю</string>
     <string name="history_clear_all_dialog_title">Очистить всю историю?</string>
     <string name="history_clear_all_dialog_body">Все страницы из истории посещений будут удалены безвозвратно. Это действие нельзя отменить.</string>
     <string name="history_clear_all_dialog_confirm">Очистить</string>
     <string name="history_clear_all_dialog_cancel">Отмена</string>
 
-    <!-- Spec 015 — downloads (US1) -->
+    <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Загрузка %1$s</string>
     <string name="downloads_service_unavailable">Загрузки недоступны на этом устройстве.</string>
     <string name="downloads_storage_permission_denied">Для сохранения загрузок нужен доступ к хранилищу.</string>
@@ -131,7 +131,7 @@
     <string name="downloads_storage_permission_rationale_confirm">Продолжить</string>
     <string name="downloads_storage_permission_rationale_cancel">Не сейчас</string>
 
-    <!-- Spec 015 — downloads (US2-US7) -->
+    <!-- downloads (US2-US7) -->
     <string name="downloads_screen_title">Загрузки</string>
     <string name="downloads_action_back">Назад</string>
     <string name="downloads_state_pending">Ожидание</string>
@@ -165,7 +165,7 @@
     <string name="downloads_empty_body">Скачанные файлы появятся здесь.</string>
     <string name="downloads_operation_failed">Что-то пошло не так. Попробуйте ещё раз.</string>
 
-    <!-- Spec 016 — Settings screen scaffold. -->
+    <!-- Settings screen scaffold. -->
     <string name="settings_screen_title">Настройки</string>
     <string name="settings_action_back">Назад</string>
     <string name="settings_action_cancel">Отмена</string>
@@ -176,21 +176,21 @@
     <string name="settings_section_about">О приложении</string>
     <string name="settings_error_not_saved">Не удалось сохранить настройку. Попробуйте ещё раз.</string>
 
-    <!-- Spec 016 US1 — theme. -->
+    <!-- theme. -->
     <string name="settings_theme_title">Тема</string>
     <string name="settings_theme_light">Светлая</string>
     <string name="settings_theme_dark">Тёмная</string>
     <string name="settings_theme_system">Как в системе</string>
 
-    <!-- Spec 016 US2 — search engine. -->
+    <!-- search engine. -->
     <string name="settings_search_engine_title">Поисковая система</string>
 
-    <!-- Spec 016 US3 — app language. -->
+    <!-- app language. -->
     <string name="settings_language_title">Язык приложения</string>
     <string name="settings_language_follow_system">Как в системе</string>
     <string name="settings_error_language_not_applied">Не удалось сменить язык. Попробуйте ещё раз.</string>
 
-    <!-- Spec 016 US4 — clear browsing data. -->
+    <!-- clear browsing data. -->
     <string name="settings_clear_browsing_data_title">Очистить данные браузера</string>
     <string name="settings_clear_dialog_title">Очистить данные браузера?</string>
     <string name="settings_clear_category_history">История браузера</string>
@@ -204,7 +204,7 @@
     <string name="settings_clear_done">Данные браузера удалены</string>
     <string name="settings_clear_partial_failure">Не удалось удалить часть данных. Попробуйте ещё раз.</string>
 
-    <!-- Spec 016 US5 — history retention. -->
+    <!-- history retention. -->
     <string name="settings_history_retention_title">Хранить историю</string>
     <plurals name="settings_history_retention_days">
         <item quantity="one">%d день</item>
@@ -217,15 +217,14 @@
     <string name="settings_retention_shorten_confirm">Удалить</string>
     <string name="settings_retention_prune_deferred">Не удалось удалить старую историю сейчас. Она будет удалена при следующем запуске приложения.</string>
 
-    <!-- Spec 016 US6 — dynamic color. -->
+    <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">Динамические цвета</string>
     <string name="settings_dynamic_color_summary">Использовать цвета обоев</string>
 
-    <!-- Spec 016 US7 — About. -->
+    <!-- About. -->
     <string name="settings_about_version">Версия %1$s</string>
     <string name="settings_about_privacy_statement">Это приложение не собирает персональные данные и ничего не отправляет на серверы ThirtySix. История, закладки, загрузки и настройки хранятся только на этом устройстве.</string>
-    <!-- Spec 018 — onboarding. No privacy string here: FR-004 reuses
-         settings_about_privacy_statement. No option labels: reused from Spec 016. -->
+    <!-- onboarding: the privacy statement and option labels are reused from Settings. -->
     <string name="onboarding_welcome_title">Добро пожаловать в ThirtySix</string>
     <string name="onboarding_welcome_body">Тихий браузер, который не мешает.</string>
     <string name="onboarding_language_title">Выберите язык</string>
@@ -239,7 +238,7 @@
     <string name="onboarding_action_skip">Пропустить</string>
     <string name="onboarding_progress_a11y">Шаг %1$d из %2$d</string>
 
-    <!-- Spec 019 — bottom bar and hub (FR-020, FR-031) -->
+    <!-- bottom bar and hub -->
     <string name="nav_search">Поиск</string>
     <string name="nav_tabs">Вкладки</string>
     <string name="nav_menu">Меню</string>
@@ -257,7 +256,7 @@
         <item quantity="other">Вкладки, открыто %1$d</item>
     </plurals>
 
-    <!-- Spec 019 — Home page (FR-011, FR-013, FR-014) -->
+    <!-- Home page -->
     <string name="home_greeting_morning">Доброе утро</string>
     <string name="home_greeting_afternoon">Добрый день</string>
     <string name="home_greeting_evening">Добрый вечер</string>
@@ -268,7 +267,7 @@
     <string name="home_shortcut_tag_saved">Сохранено</string>
     <string name="home_shortcut_tag_recent">Недавнее</string>
 
-    <!-- Spec 019 — incognito new-tab page (FR-050) -->
+    <!-- incognito new-tab page -->
     <string name="incognito_page_title">Вы в режиме инкогнито</string>
     <string name="incognito_page_subtitle">Другие пользователи этого телефона не увидят, что вы здесь делаете.</string>
     <string name="incognito_page_section_title">Когда вы закроете все вкладки инкогнито</string>
@@ -277,11 +276,11 @@
     <string name="incognito_page_point_screenshots">Снимки экрана запрещены, пока открыта вкладка инкогнито</string>
     <string name="incognito_page_footnote">Скачанные файлы и сохранённые закладки остаются. Сайты и ваша сеть по-прежнему видят ваши посещения.</string>
 
-    <!-- Spec 019 — tab switcher modes (FR-040) -->
+    <!-- tab switcher modes -->
     <string name="tabs_chip_open">Открытые</string>
     <string name="tabs_chip_incognito">Инкогнито</string>
 
-    <!-- Spec 020 — default browser and entry points (contracts C3.6) -->
+    <!-- default browser and entry points -->
     <string name="settings_section_general">Общие</string>
     <string name="settings_default_browser_title">Браузер по умолчанию</string>
     <string name="settings_default_browser_summary_not_default">ThirtySix не является браузером по умолчанию. Нажмите, чтобы изменить.</string>
@@ -295,7 +294,7 @@
     <string name="entry_tab_limit_reused">Достигнут лимит вкладок — ссылка открыта в текущей вкладке</string>
     <string name="entry_default_browser_unavailable">На этом устройстве нельзя изменить приложения по умолчанию</string>
 
-    <!-- Spec 021 — web capabilities (contracts C2) -->
+    <!-- web capabilities -->
     <string name="site_capability_camera">камера</string>
     <string name="site_capability_microphone">микрофон</string>
     <string name="site_capability_location">геоданные</string>
@@ -353,7 +352,7 @@
     <string name="settings_clear_category_site_permissions_description">Сайты снова запросят камеру, микрофон и геоданные</string>
     <string name="file_chooser_title">Выберите файл</string>
 
-    <!-- Spec 022 — page tools -->
+    <!-- page tools -->
     <string name="hub_page_tools_title">Инструменты страницы</string>
     <string name="hub_tile_find_in_page">Найти на странице</string>
     <string name="hub_tile_share">Поделиться</string>
@@ -373,7 +372,7 @@
     <string name="suggestion_bookmark_cd">Закладка: %1$s, %2$s</string>
     <string name="suggestion_history_cd">История: %1$s, %2$s</string>
     <string name="share_page_title">Поделиться страницей</string>
-    <!-- Spec 023 privacy protection -->
+    <!-- privacy protection -->
     <string name="hub_protection_site_title">Защита на этом сайте</string>
     <string name="hub_protection_site_on">Трекеры блокируются, метки отслеживания удаляются, сначала защищённое соединение</string>
     <string name="hub_protection_site_off">Отключена для %1$s. Трекеры могут загружаться.</string>
@@ -398,7 +397,7 @@
         <item quantity="many">На этой странице заблокировано %1$d трекеров</item>
         <item quantity="other">На этой странице заблокировано %1$d трекера</item>
     </plurals>
-    <!-- Spec 024 privacy tools -->
+    <!-- privacy tools -->
     <string name="fire_action">Огонь</string>
     <string name="fire_action_tabs_cd">Огонь: закрыть все вкладки и удалить данные браузера</string>
     <string name="fire_confirm_title">Закрыть все вкладки и удалить данные?</string>

@@ -1,0 +1,14 @@
+package com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase
+
+import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
+import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
+import com.raumanian.thirtysix.browser.core.domain.util.Result
+import javax.inject.Inject
+
+class SetSitePermissionUseCase @Inject constructor(
+    private val repository: SitePermissionRepository,
+) {
+    suspend operator fun invoke(origin: String, capability: SiteCapability, decision: SiteDecision): Result<Unit> =
+        repository.save(origin, capability, decision)
+}

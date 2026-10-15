@@ -1,0 +1,73 @@
+package com.raumanian.thirtysix.browser.feature.settings.di
+
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.SettingsDataStore
+import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
+import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
+import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.feature.settings.data.mapper.SettingsMapper
+import com.raumanian.thirtysix.browser.feature.settings.data.repository.SettingsRepositoryImpl
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+
+/**
+ * Runs under a plain [Application]: ThirtySixApplication's start-up sweep would open Hilt's DataStore
+ * on the same file, failing with "multiple DataStores active for the same file".
+ */
+@RunWith(AndroidJUnit4::class)
+@Config(application = Application::class)
+class SettingsModuleSmokeTest {
+
+    private val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+    private val dispatcherProvider = object : DispatcherProvider {
+        override val main get() = Dispatchers.Unconfined
+        override val io get() = Dispatchers.Unconfined
+        override val default get() = Dispatchers.Unconfined
+        override val unconfined get() = Dispatchers.Unconfined
+    }
+
+    @After
+    fun tearDown() {
+        // The provider creates a real DataStore file; delete it so later test classes start clean.
+        val dataStoreFile = File(
+            context.filesDir,
+            "datastore/${AppConstants.SETTINGS_DATASTORE_FILE_NAME}.preferences_pb",
+        )
+        if (dataStoreFile.exists()) dataStoreFile.delete()
+    }
+
+    @Test
+    fun `provider yields a usable DataStore that the repository can round-trip`() = runBlocking {
+        val rawDataStore = SettingsDataStoreProviderModule.provideSettingsDataStore(
+            context,
+            dispatcherProvider,
+        )
+        assertNotNull(rawDataStore)
+
+        val repository = SettingsRepositoryImpl(SettingsDataStore(rawDataStore), SettingsMapper())
+
+        // observeSettings yields defaults on first emission
+        val initial = repository.observeSettings().first()
+        assertEquals(ThemeMode.System, initial.themeMode)
+
+        // Setter round-trip
+        val writeResult = repository.setThemeMode(ThemeMode.Dark)
+        assertTrue("setter must succeed", writeResult is Result.Success)
+
+        val updated = repository.observeSettings().first()
+        assertEquals(ThemeMode.Dark, updated.themeMode)
+    }
+}
