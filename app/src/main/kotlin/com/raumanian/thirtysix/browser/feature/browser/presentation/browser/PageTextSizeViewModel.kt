@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-/** The app-wide text size, in its own view model so [BrowserViewModel] needs no settings dependency. */
+/** The app-wide text size, in its own view model so [PageViewModel] needs no settings dependency. */
 @HiltViewModel
 class PageTextSizeViewModel @Inject constructor(settings: SettingsRepository) : ViewModel() {
     val textZoomPercent: StateFlow<Int> = settings.observeSettings()

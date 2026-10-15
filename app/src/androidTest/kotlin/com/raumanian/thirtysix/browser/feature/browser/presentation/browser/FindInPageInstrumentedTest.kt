@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 
 /**
  * Find in page against `find.html` (exactly 50 matches) through the real [BrowserWebView] and
- * [FindInPageBar]. The state reducer mirrors the view model's, which `BrowserViewModelFindTest` covers.
+ * [FindInPageBar]. The state reducer mirrors the view model's, which `FindInPageViewModelTest` covers.
  */
 @RunWith(AndroidJUnit4::class)
 class FindInPageInstrumentedTest {

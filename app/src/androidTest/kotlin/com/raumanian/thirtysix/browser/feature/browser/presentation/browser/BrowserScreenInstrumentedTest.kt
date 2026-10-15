@@ -16,29 +16,7 @@ import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.HiltTestActivity
 import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
-import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
-import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
-import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
-import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
-import com.raumanian.thirtysix.browser.core.domain.model.Tab
-import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
-import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
-import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
-import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
-import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.core.presentation.util.FireButton
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
+import com.raumanian.thirtysix.browser.feature.browser.fixture.BrowserScreenHolders
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,12 +26,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import java.io.File
-import java.io.OutputStream
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.hamcrest.Matchers.containsString
 import org.junit.Before
 import org.junit.Rule
@@ -89,42 +62,16 @@ class BrowserScreenInstrumentedTest {
     @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<HiltTestActivity>()
 
-    private lateinit var viewModel: BrowserViewModel
+    private lateinit var holders: BrowserScreenHolders
 
     @Before
     fun setUp() {
         hiltRule.inject()
         composeRule.activity.runOnUiThread {
-            // Built by hand with a fixed example.com URL and no-op repositories; class-scoped so the
-            // rotation test can re-attach the same view model after the activity is recreated.
-            val noopTabRepo = InstrumentedNoopTabRepository
-            val noopIncognitoRepo = InstrumentedNoopIncognitoTabRepository
-            val observeAllTabs = ObserveAllTabsUseCase(noopTabRepo, noopIncognitoRepo)
-            viewModel = BrowserViewModel(
-                defaultHomeUrl = TEST_PAGE_URL,
-                searchEngine = InstrumentedNoopSearchEngineRepository,
-                observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-                tabs = noopTabRepo,
-                observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
-                updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(noopTabRepo, noopIncognitoRepo),
-                faviconCache = InstrumentedNoopFaviconCache,
-                screenshotCache = InstrumentedNoopScreenshotCache,
-                isUrlBookmarked = IsUrlBookmarkedUseCase(InstrumentedNoopBookmarkRepository),
-                toggleBookmark = ToggleBookmarkUseCase(
-                    InstrumentedNoopBookmarkRepository,
-                    AddBookmarkUseCase(InstrumentedNoopBookmarkRepository),
-                ),
-                recordHistoryEntry = RecordHistoryEntryUseCase(
-                    InstrumentedNoopHistoryRepository,
-                ),
-                updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(InstrumentedNoopHistoryRepository),
-                startDownload = instrumentedNoOpStartDownloadUseCase(),
-            )
+            // Class-scoped, so the rotation test re-attaches the same holders after the activity is recreated.
+            holders = BrowserScreenHolders(TEST_PAGE_URL)
             composeRule.activity.setContent {
-                BrowserRoute(
-                    slots = NoSlots,
-                    viewModel = viewModel,
-                )
+                holders.Route()
             }
         }
     }
@@ -139,17 +86,14 @@ class BrowserScreenInstrumentedTest {
 
     @Test
     fun rotation_preservesCurrentUrlInUiState() {
-        // Configuration change: the same view model is re-attached, so the same URL renders again.
+        // Configuration change: the same holders are re-attached, so the same URL renders again.
         composeRule.waitForIdle()
 
         composeRule.activityRule.scenario.recreate()
 
         composeRule.activity.runOnUiThread {
             composeRule.activity.setContent {
-                BrowserRoute(
-                    slots = NoSlots,
-                    viewModel = viewModel,
-                )
+                holders.Route()
             }
         }
         composeRule.waitForIdle()
@@ -169,112 +113,3 @@ class BrowserScreenInstrumentedTest {
         // A CI emulator budget, not the production loading target.
     }
 }
-
-/** No-op [SearchEngineRepository]: the query branch is never reached here. */
-private object InstrumentedNoopSearchEngineRepository : SearchEngineRepository {
-    override suspend fun buildSearchUrl(query: String): String =
-        error("instrumented test should not reach the search-URL build path")
-}
-
-/** No-op [TabRepository]: no active tab, so the view model's collectors leave state alone. */
-private object InstrumentedNoopTabRepository : TabRepository {
-    // Hot, never completing: `ObserveAllTabsUseCase` combines upstreams that must stay subscribed.
-    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
-        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
-    override fun observeTabs(): Flow<List<Tab>> = state
-    override suspend fun createTab(url: String): Result<Tab> =
-        error("instrumented test should not reach createTab")
-    override suspend fun switchActiveTab(tabId: Long) = Unit
-    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
-    override suspend fun closeTab(tabId: Long) = Unit
-    override suspend fun closeAllTabs() = Unit
-    override suspend fun getTabCount(): Int = 0
-}
-
-/** No-op [IncognitoTabRepository]; hot for the same reason as [InstrumentedNoopTabRepository]. */
-private object InstrumentedNoopIncognitoTabRepository : IncognitoTabRepository {
-    private val state: kotlinx.coroutines.flow.MutableStateFlow<List<Tab>> =
-        kotlinx.coroutines.flow.MutableStateFlow(emptyList())
-    override fun observeTabs(): Flow<List<Tab>> = state
-    override suspend fun createTab(url: String): Result<Tab> =
-        error("instrumented test should not reach incognito createTab")
-    override suspend fun switchActiveTab(tabId: Long) = Unit
-    override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
-    override suspend fun closeTab(tabId: Long) = Unit
-    override suspend fun closeAll() = Unit
-    override suspend fun getCount(): Int = 0
-}
-
-/** No-op [FaviconCache]: icons may arrive while the page loads, but nothing is asserted on them. */
-private object InstrumentedNoopFaviconCache : FaviconCache {
-    private val state = MutableStateFlow(0L)
-    override val version: StateFlow<Long> = state.asStateFlow()
-    override suspend fun save(url: String, writeImage: (OutputStream) -> Unit) = Unit
-    override suspend fun clearAll() = Unit
-    override suspend fun retainOnly(hosts: Set<String>) = Unit
-    override fun fileFor(url: String): File? = null
-}
-
-/** No-op [ScreenshotCache]. */
-private object InstrumentedNoopScreenshotCache : ScreenshotCache {
-    private val state = MutableStateFlow(0L)
-    override val version: StateFlow<Long> = state.asStateFlow()
-    override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) = Unit
-    override fun fileFor(tabId: Long): File? = null
-    override suspend fun delete(tabId: Long) = Unit
-    override suspend fun clearAll() = Unit
-}
-
-/** No-op bookmark repository; the star icon has its own test. */
-private object InstrumentedNoopBookmarkRepository :
-    BookmarkRepository {
-    override fun observeBookmarksByFolder(folderId: Long?) =
-        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
-    override fun observeBookmarksByUrl(url: String) =
-        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
-    override fun observeRecentBookmarks(limit: Int) =
-        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
-    override suspend fun getAllBookmarks() = emptyList<Bookmark>()
-
-    override fun searchBookmarks(query: String) =
-        kotlinx.coroutines.flow.flowOf(emptyList<Bookmark>())
-    override suspend fun getBookmark(id: Long) = null
-    override suspend fun countBookmarksByUrl(url: String) = 0
-    override suspend fun addBookmark(bookmark: Bookmark) = Result.Success(0L)
-    override suspend fun updateBookmark(bookmark: Bookmark) = Result.Success(Unit)
-    override suspend fun deleteBookmark(id: Long) = Result.Success(Unit)
-    override suspend fun deleteMostRecentBookmarkByUrl(url: String) = Result.Success(0)
-    override suspend fun moveBookmarkToFolder(bookmarkId: Long, newParentId: Long?) = Result.Success(Unit)
-    override fun observeFoldersByParent(parentId: Long?) =
-        kotlinx.coroutines.flow.flowOf(emptyList<BookmarkFolder>())
-    override fun observeAllFolders() =
-        kotlinx.coroutines.flow.flowOf(emptyList<BookmarkFolder>())
-    override suspend fun getFolder(id: Long) = null
-    override suspend fun getAncestorChain(folderId: Long) = emptyList<BookmarkFolder>()
-    override suspend fun countDescendants(folderId: Long) =
-        BookmarkDescendantCount(0, 0)
-    override suspend fun createFolder(name: String, parentId: Long?) = Result.Success(0L)
-    override suspend fun renameFolder(folderId: Long, newName: String) = Result.Success(Unit)
-    override suspend fun moveFolder(folderId: Long, newParentId: Long?) = Result.Success(Unit)
-    override suspend fun deleteFolderCascade(folderId: Long) =
-        Result.Success(BookmarkDescendantCount(0, 0))
-}
-
-/** No-op [HistoryRepository]. */
-private object InstrumentedNoopHistoryRepository :
-    HistoryRepository {
-    override suspend fun recordVisit(url: String, title: String, visitedAt: Long): Long = 0L
-    override fun observeAll() =
-        kotlinx.coroutines.flow.flowOf(emptyList<HistoryEntry>())
-    override suspend fun pruneOlderThan(cutoffMillis: Long): Int = 0
-    override suspend fun updateTitle(id: Long, title: String): Int = 0
-    override suspend fun deleteById(id: Long): Int = 0
-    override suspend fun clearAll(): Int = 0
-    override suspend fun count(): Int = 0
-}
-
-private val NoSlots = BrowserSlots(
-    fireButton = FireButton(enabled = true, onClick = {}),
-    fireOverlay = {},
-    quickSettings = { _, _, _ -> },
-)

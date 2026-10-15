@@ -17,18 +17,18 @@ import kotlinx.coroutines.flow.StateFlow
 /** What each hub page tool does; the hub has already closed when this runs. */
 @Composable
 internal fun rememberPageToolHandler(
-    onAction: (BrowserAction) -> Unit,
+    onFindAction: (FindInPageAction) -> Unit,
     chrome: ChromeScrollState,
     actions: PageToolActions,
 ): (PageTool) -> Unit {
     val current = rememberUpdatedState(actions)
-    return remember(onAction, chrome) {
+    return remember(onFindAction, chrome) {
         { tool ->
             when (tool) {
                 PageTool.Find -> {
                     // The find bar replaces a showing top bar, not one slid away.
                     chrome.show()
-                    onAction(BrowserAction.Find.Opened)
+                    onFindAction(FindInPageAction.Opened)
                 }
                 PageTool.Share -> current.value.share()
                 PageTool.DesktopSite -> current.value.toggleDesktopSite()
@@ -67,14 +67,14 @@ internal fun rememberShareAction(currentUrl: () -> String, title: () -> String?)
  */
 @Composable
 internal fun rememberFindCallbacks(
-    onAction: (BrowserAction) -> Unit,
+    onFindAction: (FindInPageAction) -> Unit,
     findInPage: StateFlow<FindInPageState>,
     webViewActions: WebViewActionsHandle,
 ): FindInPageCallbacks =
-    remember(onAction, findInPage, webViewActions) {
+    remember(onFindAction, findInPage, webViewActions) {
         FindInPageCallbacks(
             onQueryChange = { text ->
-                onAction(BrowserAction.Find.QueryChanged(text))
+                onFindAction(FindInPageAction.QueryChanged(text))
                 val query = findInPage.value.query
                 if (query.isEmpty()) webViewActions.clearMatches() else webViewActions.findAll(query)
             },
@@ -82,7 +82,7 @@ internal fun rememberFindCallbacks(
             onNext = { webViewActions.findNext(true) },
             onClose = {
                 webViewActions.clearMatches()
-                onAction(BrowserAction.Find.Closed)
+                onFindAction(FindInPageAction.Closed)
             },
         )
     }

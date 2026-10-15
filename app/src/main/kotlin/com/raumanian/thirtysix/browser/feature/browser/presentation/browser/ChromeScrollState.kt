@@ -1,12 +1,8 @@
-@file:Suppress("ktlint:standard:function-naming") // Composables are PascalCase by Compose convention.
-
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 /**
@@ -35,11 +31,4 @@ class ChromeScrollState(maxOffsetPx: Float) {
     fun show() {
         offsetPx = 0f
     }
-}
-
-@Composable
-fun rememberChromeScrollState(maxOffsetPx: Float): ChromeScrollState {
-    val state = remember { ChromeScrollState(maxOffsetPx) }
-    state.maxOffsetPx = maxOffsetPx
-    return state
 }

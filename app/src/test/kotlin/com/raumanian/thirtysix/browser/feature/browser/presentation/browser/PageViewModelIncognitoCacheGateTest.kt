@@ -5,25 +5,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
-import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
-import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
+import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ToggleBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.UpdateHistoryEntryTitleUseCase
 import java.io.File
 import java.io.OutputStream
-import java.net.URLEncoder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,11 +32,11 @@ import org.junit.runner.RunWith
 
 /**
  * Incognito tabs write neither favicons nor screenshots to disk; normal tabs still do. Robolectric
- * is needed for real `Bitmap`s, so these live apart from the pure-JVM [BrowserViewModelTest].
+ * is needed for real `Bitmap`s, so these live apart from the pure-JVM [PageViewModelTest].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class BrowserViewModelIncognitoCacheGateTest {
+class PageViewModelIncognitoCacheGateTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -53,7 +47,7 @@ class BrowserViewModelIncognitoCacheGateTest {
     private fun newIncognitoActiveViewModel(
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
-    ): BrowserViewModel {
+    ): PageViewModel {
         val tabRepository = FakeTabRepository(homeUrl = "https://normal.example.com")
         val incognitoRepo = FakeIncognitoTabRepository()
         incognitoRepo.emit(
@@ -75,7 +69,7 @@ class BrowserViewModelIncognitoCacheGateTest {
     private fun newNormalActiveViewModel(
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
-    ): BrowserViewModel {
+    ): PageViewModel {
         val tabRepository = FakeTabRepository(homeUrl = "https://normal.example.com")
         val incognitoRepo = FakeIncognitoTabRepository()
         return buildVm(tabRepository, incognitoRepo, faviconCache, screenshotCache)
@@ -86,29 +80,22 @@ class BrowserViewModelIncognitoCacheGateTest {
         incognitoRepo: FakeIncognitoTabRepository,
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
-    ): BrowserViewModel {
+    ): PageViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
-        // Star use cases over a self-contained fake.
-        val bookmarkRepo = FakeBookmarkRepository()
-        val addBookmark = AddBookmarkUseCase(bookmarkRepo)
-        return BrowserViewModel(
-            defaultHomeUrl = "https://normal.example.com",
-            searchEngine = GoogleByteIdenticalRepository,
+        return PageViewModel(
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepository,
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
-            isUrlBookmarked = IsUrlBookmarkedUseCase(bookmarkRepo),
-            toggleBookmark = ToggleBookmarkUseCase(bookmarkRepo, addBookmark),
             updateHistoryEntryTitle = UpdateHistoryEntryTitleUseCase(
                 FakeHistoryRepository(),
             ),
             recordHistoryEntry = RecordHistoryEntryUseCase(
                 FakeHistoryRepository(),
             ),
-            startDownload = noOpStartDownloadUseCase(),
+            pageStore = CurrentPageRepositoryImpl("https://normal.example.com"),
         )
     }
 
@@ -120,10 +107,10 @@ class BrowserViewModelIncognitoCacheGateTest {
             screenshotCache = NoopScreenshotCache,
         )
         advanceUntilIdle()
-        assertEquals("incognito flag should propagate to UiState", true, vm.uiState.value.isIncognito)
+        assertEquals("incognito flag should propagate to UiState", true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(BrowserAction.Page.IconReceived("https://incognito.example.com", bmp))
+        vm.onAction(PageAction.IconReceived("https://incognito.example.com", bmp))
         advanceUntilIdle()
 
         assertEquals(
@@ -141,10 +128,10 @@ class BrowserViewModelIncognitoCacheGateTest {
             screenshotCache = recordingScreenshot,
         )
         advanceUntilIdle()
-        assertEquals(true, vm.uiState.value.isIncognito)
+        assertEquals(true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(BrowserAction.Page.ScreenshotReady(bmp))
+        vm.onAction(PageAction.ScreenshotReady(bmp))
         advanceUntilIdle()
 
         assertEquals(
@@ -162,10 +149,10 @@ class BrowserViewModelIncognitoCacheGateTest {
             screenshotCache = NoopScreenshotCache,
         )
         advanceUntilIdle()
-        assertEquals(false, vm.uiState.value.isIncognito)
+        assertEquals(false, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(BrowserAction.Page.IconReceived("https://example.com", bmp))
+        vm.onAction(PageAction.IconReceived("https://example.com", bmp))
         advanceUntilIdle()
 
         assertEquals(
@@ -217,12 +204,5 @@ class BrowserViewModelIncognitoCacheGateTest {
         override fun fileFor(tabId: Long): File? = null
         override suspend fun delete(tabId: Long) = Unit
         override suspend fun clearAll() = Unit
-    }
-
-    private object GoogleByteIdenticalRepository : SearchEngineRepository {
-        override suspend fun buildSearchUrl(query: String): String {
-            val encoded = URLEncoder.encode(query, Charsets.UTF_8.name())
-            return String.format(UrlConstants.GOOGLE_SEARCH_URL_TEMPLATE, encoded)
-        }
     }
 }
