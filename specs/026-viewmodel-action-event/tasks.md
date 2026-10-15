@@ -300,7 +300,7 @@ The two stories land together per feature because the holder's constructor (US3)
 ## Phase 6: Polish and delivery
 
 - [X] T048 Fill the "Use-case test disposition" table below: each removed test, its assertions, and where each one lands (deleted as pass-through / covered by `<test>` / moved to `<test>`).
-- [ ] T049 Push the branch and open PR `026-viewmodel-action-event` → `main`. The description has:
+- [X] T049 *(PR #44)* Push the branch and open PR `026-viewmodel-action-event` → `main`. The description has:
   - one line per commit
   - Baseline vs Results
   - Rule proof
