@@ -7,12 +7,9 @@ import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveTabsUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
@@ -59,10 +56,10 @@ class EntryPointViewModelTest {
         tabs: FakeTabRepository = FakeTabRepository(initialTabs = listOf(tab(1, 1L))),
     ) = EntryPointViewModel(
         relay = relay,
-        observeUserSettings = ObserveUserSettingsUseCase(settings),
+        settings = settings,
         resolve = ResolveIncomingRequestUseCase(),
         open = OpenIncomingRequestUseCase(
-            buildSearchUrl = BuildSearchUrlUseCase(TestSearchEngine),
+            searchEngine = TestSearchEngine,
             tabs = tabs,
             observeActiveTab = ObserveActiveTabUseCase(ObserveAllTabsUseCase(tabs, incognito)),
             clock = MonotonicClock { 0L },
@@ -70,7 +67,7 @@ class EntryPointViewModelTest {
         externalTabs = externalTabs,
         activeTabNavigation = navigation,
         messages = messages,
-        observeTabs = ObserveTabsUseCase(tabs),
+        tabs = tabs,
         closeTab = CloseTabUseCase(tabs, NoopScreenshots),
     )
 

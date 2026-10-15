@@ -4,7 +4,6 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.Sett
 import com.raumanian.thirtysix.browser.core.data.datasource.local.datastore.createTestSettingsDataStore
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
-import com.raumanian.thirtysix.browser.core.domain.usecase.GetUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import com.raumanian.thirtysix.browser.feature.settings.data.mapper.SettingsMapper
 import kotlinx.coroutines.CoroutineScope
@@ -77,14 +76,5 @@ class SettingsRepositoryCurrentSettingsTest {
         // emission: every read reports the persisted value.
         assertTrue(repository.currentSettings().isOnboardingCompleted)
         assertTrue(repository.currentSettings().isOnboardingCompleted)
-    }
-
-    @Test
-    fun `use case returns what the repository returns`() = runTest {
-        val getUserSettings = GetUserSettingsUseCase(repository)
-
-        assertFalse(getUserSettings().isOnboardingCompleted)
-        repository.setOnboardingCompleted(true)
-        assertTrue(getUserSettings().isOnboardingCompleted)
     }
 }

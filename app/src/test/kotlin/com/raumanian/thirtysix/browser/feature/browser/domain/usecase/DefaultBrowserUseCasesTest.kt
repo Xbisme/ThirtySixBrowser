@@ -6,7 +6,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.InviteState
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
-import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.RecordAppLaunchUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -42,7 +41,7 @@ class DefaultBrowserUseCasesTest {
 
     @Test
     fun `observe, dismiss and record go to the repository`() = runTest {
-        RecordAppLaunchUseCase(repository)()
+        repository.recordLaunch()
         DismissDefaultBrowserInviteUseCase(repository)()
         val state = ObserveDefaultBrowserInviteUseCase(repository)().first()
         assertEquals(InviteState(dismissed = true, launchCount = 1), state)

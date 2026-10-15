@@ -183,12 +183,12 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### entrypoint
 
-- [ ] T031 [US3] Remove `C/domain/usecase/GetUserSettingsUseCase.kt` and `F/entrypoint/domain/usecase/RecordAppLaunchUseCase.kt`.
+- [X] T031 [US3] Remove `C/domain/usecase/GetUserSettingsUseCase.kt` and `F/entrypoint/domain/usecase/RecordAppLaunchUseCase.kt`.
   - `M/MainActivity.kt` injects `SettingsRepository` (`currentSettings()`, `observeSettings()`) and `DefaultBrowserInviteRepository.recordLaunch()`.
   - `F/entrypoint/domain/usecase/OpenIncomingRequestUseCase.kt` injects `SearchEngineRepository.buildSearchUrl` in place of `BuildSearchUrlUseCase`.
   - `EntryPointViewModel` injects `SettingsRepository.observeSettings()` and `TabRepository.observeTabs()`. It has no action type (0 public functions); `events` and `browserHooks` are unchanged (ADR 0011).
   - Drop the record-launch case from `DefaultBrowserUseCasesTest`. `SettingsRepositoryCurrentSettingsTest` stays as it is (it tests the repository). Update `OpenIncomingRequestUseCaseTest` and `EntryPointViewModelTest`.
-- [ ] T032 [US2] Run `IncomingLinkInstrumentedTest` and `PopupInstrumentedTest`. Gate and **commit** `refactor(026): entrypoint uses contracts`.
+- [X] T032 *(IncomingLinkInstrumentedTest and PopupInstrumentedTest deferred: AVD not available; androidTest compiles)* [US2] Run `IncomingLinkInstrumentedTest` and `PopupInstrumentedTest`. Gate and **commit** `refactor(026): entrypoint uses contracts`.
 
 ### browser
 
@@ -396,4 +396,5 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | `FolderUseCasesTest.MoveFolder rejects cycle` | repository behaviour | covered by `BookmarkRepositoryImplTest.moveFolder rejects descendant as new parent` |
 | `FolderUseCasesTest.MoveBookmark updates parent folder` | repository behaviour | moved to `BookmarkRepositoryImplTest.moveBookmarkToFolder updates the parent folder` |
 | `BookmarksViewModelTest.consumeOpenUrl clears the signal` | the open signal is not repeated | rewritten as `an opened url is delivered once` |
+| `SettingsRepositoryCurrentSettingsTest.use case returns what the repository returns` | pass-through | deleted (the repository cases in the same file stay) |
 | `OnboardingViewModelTest`: back reports true / false | the return value told the screen to leave | rewritten as state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 does not move) |

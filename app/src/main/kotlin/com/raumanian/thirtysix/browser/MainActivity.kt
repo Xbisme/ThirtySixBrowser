@@ -13,16 +13,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.model.UserSettings
-import com.raumanian.thirtysix.browser.core.domain.usecase.GetUserSettingsUseCase
+import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserInviteRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveUserSettingsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
 import com.raumanian.thirtysix.browser.core.presentation.util.SecureWindowEffect
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SyncDefaultBrowserInviteUseCase
 import com.raumanian.thirtysix.browser.feature.browser.presentation.navigation.BROWSER_ROUTE
-import com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase.RecordAppLaunchUseCase
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingIntentReader
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.IncomingRequestRelay
 import com.raumanian.thirtysix.browser.feature.entrypoint.presentation.entry.LaunchCountPolicy
@@ -39,14 +38,10 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject
-    lateinit var observeUserSettings: ObserveUserSettingsUseCase
+    lateinit var settingsRepository: SettingsRepository
 
     @Inject
     lateinit var observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase
-
-    /** One-shot read for the start destination; see [onCreate]. */
-    @Inject
-    lateinit var getUserSettings: GetUserSettingsUseCase
 
     @Inject
     lateinit var fireCoordinator: FireCoordinator
@@ -61,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var dispatchers: DispatcherProvider
 
     @Inject
-    lateinit var recordAppLaunch: RecordAppLaunchUseCase
+    lateinit var defaultBrowserInvite: DefaultBrowserInviteRepository
 
     @Inject
     lateinit var syncDefaultBrowserInvite: SyncDefaultBrowserInviteUseCase
@@ -86,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             // A Fire run stopped part-way finishes before any tab is shown.
             fireCoordinator.resumeIfInterrupted()
-            val startDestination = if (getUserSettings().isOnboardingCompleted) {
+            val startDestination = if (settingsRepository.currentSettings().isOnboardingCompleted) {
                 BROWSER_ROUTE
             } else {
                 ONBOARDING_ROUTE
@@ -122,7 +117,7 @@ class MainActivity : AppCompatActivity() {
         returningFromDefaultBrowserScreen = false
         lifecycleScope.launch {
             syncDefaultBrowserInvite()
-            if (counts) recordAppLaunch()
+            if (counts) defaultBrowserInvite.recordLaunch()
         }
     }
 
@@ -154,7 +149,7 @@ class MainActivity : AppCompatActivity() {
     private fun renderApp(startDestination: String) {
         setContent {
             // The window background theme hides the gap until the persisted settings arrive.
-            val settings by observeUserSettings()
+            val settings by settingsRepository.observeSettings()
                 .collectAsStateWithLifecycle(initialValue = UserSettings.DEFAULT)
             val darkTheme = when (settings.themeMode) {
                 ThemeMode.Light -> false

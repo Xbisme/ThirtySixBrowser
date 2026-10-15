@@ -1,8 +1,8 @@
 package com.raumanian.thirtysix.browser.feature.entrypoint.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
+import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.BuildSearchUrlUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.MonotonicClock
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.first
  * so keep one instance per activity.
  */
 class OpenIncomingRequestUseCase @Inject constructor(
-    private val buildSearchUrl: BuildSearchUrlUseCase,
+    private val searchEngine: SearchEngineRepository,
     private val tabs: TabRepository,
     private val observeActiveTab: ObserveActiveTabUseCase,
     private val clock: MonotonicClock,
@@ -32,7 +32,7 @@ class OpenIncomingRequestUseCase @Inject constructor(
     suspend operator fun invoke(target: IncomingTarget): OpenOutcome {
         val url = when (target) {
             is IncomingTarget.Load -> target.url
-            is IncomingTarget.Search -> buildSearchUrl(target.text)
+            is IncomingTarget.Search -> searchEngine.buildSearchUrl(target.text)
             IncomingTarget.Rejected, IncomingTarget.Nothing -> return OpenOutcome.Failed
         }
         val now = clock.nowMs()
