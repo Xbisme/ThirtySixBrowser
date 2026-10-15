@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks
 
+import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
@@ -11,13 +12,7 @@ import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.CountFolderDescendantsUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.CreateFolderUseCase
-import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.DeleteBookmarkUseCase
-import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.DeleteFolderUseCase
-import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.MoveBookmarkUseCase
-import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.MoveFolderUseCase
-import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.ObserveAllFoldersUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.ObserveBookmarksByFolderUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.ObserveFolderPathUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.RenameFolderUseCase
@@ -72,7 +67,7 @@ class BookmarksViewModelTest {
         val vm = newViewModel(repo)
         advanceUntilIdle()
 
-        vm.onFolderTap(folder.copy(id = id))
+        vm.onAction(BookmarksAction.FolderTap(folder.copy(id = id)))
         advanceUntilIdle()
 
         val state = vm.uiState.first { it.currentFolderId == id }
@@ -88,26 +83,25 @@ class BookmarksViewModelTest {
         advanceUntilIdle()
 
         val bookmark = repo.getBookmark(bookmarkId)!!
-        vm.onBookmarkTap(bookmark)
+        vm.onAction(BookmarksAction.BookmarkTap(bookmark))
         advanceUntilIdle()
 
-        val state = vm.uiState.first { it.openUrl != null }
-        assertEquals("https://x.com", state.openUrl)
+        assertEquals(BookmarksEvent.OpenUrl("https://x.com"), vm.events.first())
     }
 
     @Test
-    fun `consumeOpenUrl clears the signal`() = runTest {
+    fun `an opened url is delivered once`() = runTest {
         val repo = FakeBookmarkRepository()
         val bookmarkId = repo.seedBookmark(Bookmark(0, "X", "https://x.com", null, 100L, 100L))
         val vm = newViewModel(repo)
         advanceUntilIdle()
-        vm.onBookmarkTap(repo.getBookmark(bookmarkId)!!)
+        vm.onAction(BookmarksAction.BookmarkTap(repo.getBookmark(bookmarkId)!!))
         advanceUntilIdle()
 
-        vm.consumeOpenUrl()
-        advanceUntilIdle()
-
-        assertNull(vm.uiState.first { it.openUrl == null }.openUrl)
+        vm.events.test {
+            assertEquals(BookmarksEvent.OpenUrl("https://x.com"), awaitItem())
+            expectNoEvents()
+        }
     }
 
     @Test
@@ -116,7 +110,7 @@ class BookmarksViewModelTest {
         val vm = newViewModel(repo)
         advanceUntilIdle()
 
-        vm.onCreateFolderClick()
+        vm.onAction(BookmarksAction.CreateFolderClick)
         advanceUntilIdle()
 
         val pending = vm.uiState.first { it.pendingDialog != null }.pendingDialog
@@ -132,20 +126,15 @@ class BookmarksViewModelTest {
         return BookmarksViewModel(
             observeBookmarksByFolder = ObserveBookmarksByFolderUseCase(repo),
             observeFolderPath = ObserveFolderPathUseCase(repo),
-            deleteBookmark = DeleteBookmarkUseCase(repo),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepo, incognitoRepo),
             createFolder = CreateFolderUseCase(repo),
             renameFolder = RenameFolderUseCase(repo),
-            moveFolder = MoveFolderUseCase(repo),
-            moveBookmark = MoveBookmarkUseCase(repo),
             updateBookmark = UpdateBookmarkUseCase(repo),
             addBookmark = AddBookmarkUseCase(repo),
-            deleteFolder = DeleteFolderUseCase(repo),
-            countDescendants = CountFolderDescendantsUseCase(repo),
             searchBookmarks = SearchBookmarksUseCase(repo),
             observeActiveTabIsIncognito = observeActiveTabIsIncognito,
             observeActiveTab = observeActiveTab,
-            observeAllFolders = ObserveAllFoldersUseCase(repo),
+            bookmarks = repo,
         )
     }
 }

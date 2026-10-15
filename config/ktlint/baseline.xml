@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <baseline version="1.0">
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/bookmarks/presentation/bookmarks/BookmarksScreen.kt">
-        <error line="137" column="13" source="compose:vm-forwarding-check" />
-        <error line="141" column="5" source="compose:vm-forwarding-check" />
-    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/browser/presentation/browser/BrowserScreen.kt">
         <error line="102" column="9" source="compose:vm-injection-check" />
         <error line="109" column="5" source="compose:vm-forwarding-check" />

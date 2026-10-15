@@ -37,27 +37,6 @@ class FolderUseCasesTest {
     }
 
     @Test
-    fun `MoveFolder rejects cycle (folder into descendant)`() = runTest {
-        val repo = FakeBookmarkRepository()
-        val a = (CreateFolderUseCase(repo)("A", null) as Result.Success).data
-        val b = (CreateFolderUseCase(repo)("B", a) as Result.Success).data
-        val result = MoveFolderUseCase(repo)(a, b)
-        assertTrue(result is Result.Error)
-        assertTrue((result as Result.Error).throwable is BookmarkException.FolderCycle)
-    }
-
-    @Test
-    fun `MoveBookmark updates parent folder`() = runTest {
-        val repo = FakeBookmarkRepository()
-        val folderId = (CreateFolderUseCase(repo)("F", null) as Result.Success).data
-        val bookmarkId = repo.seedBookmark(Bookmark(0, "B", "https://b.com", null, 1L, 1L))
-
-        MoveBookmarkUseCase(repo)(bookmarkId, folderId)
-
-        assertEquals(folderId, repo.getBookmark(bookmarkId)!!.parentFolderId)
-    }
-
-    @Test
     fun `UpdateBookmark validates URL and trims title`() = runTest {
         val repo = FakeBookmarkRepository()
         val id = repo.seedBookmark(Bookmark(0, "old", "https://old.com", null, 1L, 1L))

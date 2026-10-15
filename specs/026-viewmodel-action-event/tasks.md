@@ -171,15 +171,15 @@ The two stories land together per feature because the holder's constructor (US3)
 
 ### bookmarks
 
-- [ ] T028 [US3] Remove `F/bookmarks/domain/usecase/{CountFolderDescendantsUseCase,DeleteBookmarkUseCase,DeleteFolderUseCase,MoveBookmarkUseCase,MoveFolderUseCase,ObserveAllFoldersUseCase}.kt`. `BookmarksViewModel` injects `BookmarkRepository` (`countDescendants`, `deleteBookmark`, `deleteFolderCascade`, `moveBookmarkToFolder`, `moveFolder`, `observeAllFolders`).
+- [X] T028 [US3] Remove `F/bookmarks/domain/usecase/{CountFolderDescendantsUseCase,DeleteBookmarkUseCase,DeleteFolderUseCase,MoveBookmarkUseCase,MoveFolderUseCase,ObserveAllFoldersUseCase}.kt`. `BookmarksViewModel` injects `BookmarkRepository` (`countDescendants`, `deleteBookmark`, `deleteFolderCascade`, `moveBookmarkToFolder`, `moveFolder`, `observeAllFolders`).
   - For `T/feature/bookmarks/domain/usecase/{CountFolderDescendantsUseCaseTest,DeleteBookmarkUseCaseTest,DeleteFolderUseCaseTest}.kt` and the move and cycle cases of `FolderUseCasesTest.kt`, check the `BookmarkRepositoryImpl`/DAO tests and move any assertion not covered there (recursive count on a 4-level tree, empty folder 0, `BookmarkNotFound`, cascade counts, `FolderNotFound`, `FolderCycle`). Then delete the files or cases.
   - Fix `C/domain/model/BookmarkFolder.kt:3` so it says cycle prevention lives in `BookmarkRepositoryImpl` (research R1).
-- [ ] T029 [US2] Add `BookmarksAction` with 25 cases, one per `on…` function (`FolderTap`, `BackToParent`, `BreadcrumbSegmentTap`, `BookmarkTap`, `LongPressBookmark`, `LongPressFolder`, search open/close/query, create/add, rename/move/edit/delete clicks, `DialogDismiss`, the seven `Confirm…` cases with their parameters). `consumeOpenUrl` and `consumeErrorEvent` go. Add `BookmarksEvent`:
+- [X] T029 [US2] Add `BookmarksAction` with 25 cases, one per `on…` function (`FolderTap`, `BackToParent`, `BreadcrumbSegmentTap`, `BookmarkTap`, `LongPressBookmark`, `LongPressFolder`, search open/close/query, create/add, rename/move/edit/delete clicks, `DialogDismiss`, the seven `Confirm…` cases with their parameters). `consumeOpenUrl` and `consumeErrorEvent` go. Add `BookmarksEvent`:
   - `OpenUrl(url)`: **Keep**, `Channel(BUFFERED)`.
   - `Error(BookmarksErrorEvent)`: **Keep**.
 
   Both replace `UiState` fields. Split `BookmarksScreen.kt` into `BookmarksRoute` and `BookmarksScreen(state, onAction, onBack)`. `BookmarksContent` and `BookmarksDialogs` take `onAction`. `BookmarksNavigation.kt` calls the route.
-- [ ] T030 [US2] Update `BookmarksViewModelTest`: `openUrl` and `errorEvent` assertions read `events`. Delete the two `BookmarksScreen.kt` baseline lines. Gate and **commit** `refactor(026): bookmarks actions and events`.
+- [X] T030 [US2] Update `BookmarksViewModelTest`: `openUrl` and `errorEvent` assertions read `events`. Delete the two `BookmarksScreen.kt` baseline lines. Gate and **commit** `refactor(026): bookmarks actions and events`.
 
 ### entrypoint
 
@@ -387,4 +387,13 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 | `SettingsUseCasesTest.setDynamicColorEnabledUseCase_delegates` | pass-through | deleted |
 | `TabsViewModelTest.consumeErrorEvent clears the errorEvent field` | the error is not repeated | rewritten as `an error is delivered once` |
 | `TabsViewModelTest`: no error on a successful create | `errorEvent` stays null | now asserts the only event is `ShowBrowser` |
+| `CountFolderDescendantsUseCaseTest`: 4-level tree | repository behaviour | covered by `BookmarkRepositoryImplTest.countDescendants on 4-level tree…` |
+| `CountFolderDescendantsUseCaseTest`: empty folder → 0 | repository behaviour | moved to `BookmarkRepositoryImplTest.countDescendants on an empty folder is zero` |
+| `DeleteBookmarkUseCaseTest`: deletes existing | repository behaviour | moved to `BookmarkRepositoryImplTest.deleteBookmark removes an existing bookmark` |
+| `DeleteBookmarkUseCaseTest`: missing id → BookmarkNotFound | repository behaviour | covered by `BookmarkRepositoryImplTest.deleteBookmark fails for missing id` |
+| `DeleteFolderUseCaseTest`: cascade with counts, sibling kept | repository behaviour | covered by `BookmarkRepositoryImplTest.deleteFolderCascade removes folder and all descendants atomically` |
+| `DeleteFolderUseCaseTest`: FolderNotFound | repository behaviour | covered by `BookmarkRepositoryImplTest.deleteFolderCascade fails for non-existent folder` |
+| `FolderUseCasesTest.MoveFolder rejects cycle` | repository behaviour | covered by `BookmarkRepositoryImplTest.moveFolder rejects descendant as new parent` |
+| `FolderUseCasesTest.MoveBookmark updates parent folder` | repository behaviour | moved to `BookmarkRepositoryImplTest.moveBookmarkToFolder updates the parent folder` |
+| `BookmarksViewModelTest.consumeOpenUrl clears the signal` | the open signal is not repeated | rewritten as `an opened url is delivered once` |
 | `OnboardingViewModelTest`: back reports true / false | the return value told the screen to leave | rewritten as state assertions (`isFirstSlide` before `Back`; `Back` on slide 1 does not move) |
