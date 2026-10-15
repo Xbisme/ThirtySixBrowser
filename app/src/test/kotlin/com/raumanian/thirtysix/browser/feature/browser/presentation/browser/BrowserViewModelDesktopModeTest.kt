@@ -1,22 +1,19 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /** Desktop mode belongs to one tab and lives in memory only. */
@@ -26,11 +23,8 @@ class BrowserViewModelDesktopModeTest {
     private val dispatcher = StandardTestDispatcher()
     private val tabs = FakeTabRepository(initialTabs = listOf(tab(1L), tab(2L)))
 
-    @Before
-    fun setUp() = Dispatchers.setMain(dispatcher)
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(dispatcher)
 
     private fun TestScope.newViewModel(): BrowserViewModel {
         val vm = BrowserViewModelFixture(tabs = tabs).build()

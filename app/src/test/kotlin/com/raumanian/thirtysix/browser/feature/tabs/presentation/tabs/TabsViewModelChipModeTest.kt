@@ -9,13 +9,13 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.CreateIncognitoTabUse
 import com.raumanian.thirtysix.browser.core.domain.usecase.CreateTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SwitchActiveTabUseCase
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllIncognitoTabsUseCase
 import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllTabsUseCase
 import java.io.File
 import java.io.OutputStream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,13 +24,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /** The Open / Incognito chip modes of the tab switcher. */
@@ -41,11 +38,8 @@ class TabsViewModelChipModeTest {
     private val normal = FakeTabRepository(homeUrl = HOME_URL)
     private val incognito = FakeIncognitoTabRepository()
 
-    @Before
-    fun setUp() = Dispatchers.setMain(dispatcher)
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(dispatcher)
 
     private fun viewModel() = TabsViewModel(
         observeAllTabs = ObserveAllTabsUseCase(normal, incognito),

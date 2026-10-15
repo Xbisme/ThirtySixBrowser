@@ -10,6 +10,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetSearchEngineUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetThemeModeUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeAppLanguageController
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.feature.onboarding.domain.usecase.SetOnboardingCompletedUseCase
@@ -18,14 +19,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -33,9 +31,8 @@ class OnboardingViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
-    @Before fun setUp() = Dispatchers.setMain(dispatcher)
-
-    @After fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(dispatcher)
 
     private object TestDispatchers : DispatcherProvider {
         override val main: CoroutineDispatcher get() = Dispatchers.Main

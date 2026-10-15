@@ -2,25 +2,22 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions
 
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.SuggestionSource
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.FilterAddressSuggestionsUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.LoadAddressSuggestionsSourceUseCase
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /** One load per session, nothing suggested for the unchanged page address, nothing written. */
@@ -31,11 +28,8 @@ class AddressSuggestionsViewModelTest {
     private val bookmarks = CountingBookmarks()
     private val history = FakeHistoryRepository()
 
-    @Before
-    fun setUp() = Dispatchers.setMain(dispatcher)
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(dispatcher)
 
     private fun TestScope.newViewModel(): AddressSuggestionsViewModel {
         val vm = AddressSuggestionsViewModel(

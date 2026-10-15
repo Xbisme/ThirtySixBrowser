@@ -4,25 +4,23 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptBundles
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveFireproofSitesUseCase
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.PageProtectionStatus
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SetSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SetSiteProtectionUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -34,9 +32,11 @@ class ProtectionViewModelTest {
     private val fireproof = FakeFireproofSiteRepository()
     private lateinit var viewModel: ProtectionViewModel
 
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
+
     @Before
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
         viewModel = ProtectionViewModel(
             test.engine,
             SetSiteProtectionUseCase(test.exceptions, test.incognito),
@@ -45,9 +45,6 @@ class ProtectionViewModelTest {
             PrivacyScriptInputs(NoSession, NoBundles, test.exceptions, test.incognito),
         )
     }
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
 
     @Test
     fun `status follows the attached monitor and survives a late detach of the old one`() = runTest {

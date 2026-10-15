@@ -45,7 +45,7 @@ Gradle calls are prefixed with `JAVA_HOME="/Applications/Android Studio.app/Cont
 
 **Purpose**: baseline numbers to compare against (SC-001, SC-007).
 
-- [ ] T001 Run quickstart G0 on `0372d0f` (the branch tip before any change) and record it in the "Baseline" table at the end of this file:
+- [X] T001 *(host numbers recorded; instrumented count and cold start deferred until the AVD can run)* Run quickstart G0 on `0372d0f` (the branch tip before any change) and record it in the "Baseline" table at the end of this file:
   - unit test count (`./gradlew testDebugUnitTest`)
   - instrumented test count on `TA016_API36_16K`
   - release APK bytes (`app/build/outputs/apk/release/app-release.apk`)
@@ -61,8 +61,8 @@ Gradle calls are prefixed with `JAVA_HOME="/Applications/Android Studio.app/Cont
 
 **Purpose**: the shared test rule and event helper that every feature commit uses.
 
-- [ ] T003 Create `T/core/testing/MainDispatcherRule.kt`: `class MainDispatcherRule(val dispatcher: TestDispatcher = UnconfinedTestDispatcher()) : TestWatcher()` with `Dispatchers.setMain(dispatcher)` in `starting` and `Dispatchers.resetMain()` in `finished` (JUnit 4).
-- [ ] T004 [P] Switch these 22 files from `@Before setMain` / `@After resetMain` to `@get:Rule val mainDispatcherRule = MainDispatcherRule(<the dispatcher the file uses today>)`. The dispatcher type must stay the same (`StandardTestDispatcher` or `UnconfinedTestDispatcher`); drop the emptied `@Before`/`@After` functions.
+- [X] T003 Create `T/core/testing/MainDispatcherRule.kt`: `class MainDispatcherRule(val dispatcher: TestDispatcher = UnconfinedTestDispatcher()) : TestWatcher()` with `Dispatchers.setMain(dispatcher)` in `starting` and `Dispatchers.resetMain()` in `finished` (JUnit 4).
+- [X] T004 [P] Switch these 22 files from `@Before setMain` / `@After resetMain` to `@get:Rule val mainDispatcherRule = MainDispatcherRule(<the dispatcher the file uses today>)`. The dispatcher type must stay the same (`StandardTestDispatcher` or `UnconfinedTestDispatcher`); drop the emptied `@Before`/`@After` functions.
   - `T/core/presentation/util/BaseViewModelTest.kt`
   - `T/feature/bookmarks/presentation/bookmarks/BookmarksViewModelTest.kt`
   - `T/feature/browser/presentation/browser/{BrowserViewModelDesktopModeTest,BrowserViewModelFindTest,BrowserViewModelHistoryRecordSequenceTest,BrowserViewModelIncognitoCacheGateTest,BrowserViewModelStarToggleTest,BrowserViewModelTest}.kt`
@@ -77,7 +77,7 @@ Gradle calls are prefixed with `JAVA_HOME="/Applications/Android Studio.app/Cont
   - `T/feature/settings/presentation/settings/{SettingsViewModelDefaultBrowserTest,SettingsViewModelTest}.kt`
   - `T/feature/sitepermission/presentation/sitepermissions/SitePermissionsViewModelTest.kt`
   - `T/feature/tabs/presentation/tabs/{TabsViewModelChipModeTest,TabsViewModelTest}.kt`
-- [ ] T005 Add `` `main dispatcher is set only by the rule` `` to `T/architecture/ArchitectureTest.kt`: Konsist `scopeFromTest(moduleName = "app")`, every file except `MainDispatcherRule.kt` must not contain `Dispatchers.setMain`, `additionalMessage = "use MainDispatcherRule"`. Prove it as in quickstart G2 step 3 on a scratch change, then revert. Run G1. **Commit** `test(026): one main dispatcher rule`.
+- [X] T005 Add `` `main dispatcher is set only by the rule` `` to `T/architecture/ArchitectureTest.kt`: Konsist `scopeFromTest(moduleName = "app")`, every file except `MainDispatcherRule.kt` must not contain `Dispatchers.setMain`, `additionalMessage = "use MainDispatcherRule"`. Prove it as in quickstart G2 step 3 on a scratch change, then revert. Run G1. **Commit** `test(026): one main dispatcher rule`.
 - [ ] T006 Create `C/presentation/util/EventEffect.kt`: `@Composable fun <E> EventEffect(events: Flow<E>, onEvent: suspend (E) -> Unit)`. It wraps `val latest by rememberUpdatedState(onEvent)` and `LaunchedEffect(events) { events.collect { latest(it) } }`; collection is not lifecycle-gated (research R4). Run G1. **Commit** `feat(026): EventEffect`.
 
 **Checkpoint**: unit suite green with the rule in place; `EventEffect` available.
@@ -353,14 +353,14 @@ Task: "T034 [US2] hub, suggestions, protection actions in F/browser/presentation
 
 | Measure | Value |
 |---|---|
-| Unit tests | |
-| Instrumented tests (`TA016_API36_16K`) | |
-| Release APK bytes | |
-| Cold start median (ms), 10 interleaved | |
-| Compose restartable / non-skippable | |
-| ktlint baseline entries | 23 (expected) |
-| Test files calling `Dispatchers.setMain` | 22 (expected) |
-| Use cases | 82 (expected) |
+| Unit tests | 959 (0 failed) |
+| Instrumented tests (`TA016_API36_16K`) | deferred: owner's machine busy (GPU), run when the owner says the AVD is free |
+| Release APK bytes | 3,742,047 |
+| Cold start median (ms), 10 interleaved | deferred (device) |
+| Compose restartable / non-skippable | 208 / 0 |
+| ktlint baseline entries | 23 |
+| Test files calling `Dispatchers.setMain` | 22 |
+| Use cases | 82 |
 
 ## Results (T044–T047)
 

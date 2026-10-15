@@ -1,19 +1,17 @@
 package com.raumanian.thirtysix.browser.feature.privacy.presentation.protectionexceptions
 
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.ObserveProtectionExceptionsUseCase
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -21,17 +19,16 @@ class ProtectionExceptionsViewModelTest {
     private val repository = FakeProtectionExceptionRepository()
     private lateinit var viewModel: ProtectionExceptionsViewModel
 
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
+
     @Before
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
         viewModel = ProtectionExceptionsViewModel(
             ObserveProtectionExceptionsUseCase(repository),
             RemoveProtectionExceptionsUseCase(repository),
         )
     }
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
 
     @Test
     fun `an empty list is loaded and shown as empty`() {

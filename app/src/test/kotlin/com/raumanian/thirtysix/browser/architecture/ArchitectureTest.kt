@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.architecture
 
+import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.architecture.KoArchitectureCreator.assertArchitecture
 import com.lemonappdev.konsist.api.architecture.Layer
 import com.lemonappdev.konsist.api.verify.assertTrue
@@ -58,6 +59,13 @@ class ArchitectureTest {
             }
     }
 
+    @Test
+    fun `main dispatcher is set only by the rule`() {
+        Konsist.scopeFromTest(moduleName = "app").files
+            .filterNot { it.name == "MainDispatcherRule" || it.packagee?.name == "$ROOT.architecture" }
+            .assertTrue(additionalMessage = "use MainDispatcherRule") { file -> !file.text.contains(SET_MAIN) }
+    }
+
     private fun featureOf(packageName: String?): String? = packageName
         ?.substringAfter("$ROOT.feature.", missingDelimiterValue = "")
         ?.substringBefore('.')
@@ -66,6 +74,8 @@ class ArchitectureTest {
     private companion object {
         // detekt's InjectDispatcher needs type resolution, which the plain detekt task does not run.
         val NAMED_DISPATCHERS = listOf("Dispatchers.IO", "Dispatchers.Default")
+
+        const val SET_MAIN = "Dispatchers.setMain"
 
         val FORBIDDEN_IN_DOMAIN = listOf(
             "android.",

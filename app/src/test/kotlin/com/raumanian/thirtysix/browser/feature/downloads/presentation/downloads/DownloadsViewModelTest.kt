@@ -7,6 +7,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveDownloadsUseCa
 import com.raumanian.thirtysix.browser.core.domain.usecase.ResolveDownloadStatusUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.feature.downloads.domain.usecase.CancelDownloadUseCase
 import com.raumanian.thirtysix.browser.feature.downloads.domain.usecase.DeleteDownloadedFileUseCase
 import com.raumanian.thirtysix.browser.feature.downloads.domain.usecase.OpenDownloadedFileUseCase
@@ -17,20 +18,16 @@ import com.raumanian.thirtysix.browser.feature.downloads.fake.RecordingGateway
 import com.raumanian.thirtysix.browser.feature.downloads.fake.testItem
 import com.raumanian.thirtysix.browser.feature.downloads.fake.testRecord
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -38,11 +35,8 @@ class DownloadsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    @Before
-    fun setUp() = Dispatchers.setMain(testDispatcher)
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(testDispatcher)
 
     private fun viewModel(
         repository: InMemoryDownloadsRepository,

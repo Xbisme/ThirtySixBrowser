@@ -1,26 +1,20 @@
 package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsDefaultBrowserUseCase
-import kotlinx.coroutines.Dispatchers
+import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 /** The default-browser row reflects the system state, re-read on demand. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelDefaultBrowserTest {
 
-    @Before
-    fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
-
-    @After
-    fun tearDown() = Dispatchers.resetMain()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     @Test
     fun `the initial state is read from the system`() {
