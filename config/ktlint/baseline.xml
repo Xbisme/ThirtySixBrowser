@@ -35,9 +35,6 @@
         <error line="83" column="5" source="compose:vm-forwarding-check" />
         <error line="116" column="5" source="compose:vm-forwarding-check" />
     </file>
-    <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/sitepermission/presentation/sitepermissions/SitePermissionsScreen.kt">
-        <error line="95" column="5" source="compose:vm-forwarding-check" />
-    </file>
     <file name="src/main/kotlin/com/raumanian/thirtysix/browser/feature/tabs/presentation/tabs/TabsScreen.kt">
         <error line="82" column="5" source="compose:vm-forwarding-check" />
     </file>

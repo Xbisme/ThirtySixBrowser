@@ -39,7 +39,7 @@ import com.raumanian.thirtysix.browser.core.presentation.util.iconRes
 import com.raumanian.thirtysix.browser.core.presentation.util.labelRes
 /** Remembered decisions grouped by site. Incognito tabs never write anything shown here. */
 @Composable
-fun SitePermissionsScreen(
+fun SitePermissionsRoute(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: SitePermissionsViewModel = hiltViewModel(),
@@ -47,13 +47,27 @@ fun SitePermissionsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val navigateBack: () -> Unit = { navController.popBackStack() }
     BackHandler(onBack = navigateBack)
+    SitePermissionsScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        onBack = navigateBack,
+        modifier = modifier,
+    )
+}
 
+@Composable
+fun SitePermissionsScreen(
+    state: SitePermissionsUiState,
+    onAction: (SitePermissionsAction) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             SettingsTopBar(
-                onBackClick = navigateBack,
+                onBackClick = onBack,
                 title = stringResource(R.string.site_permissions_title),
                 action = if (state.sites.isEmpty()) {
                     null
@@ -61,7 +75,7 @@ fun SitePermissionsScreen(
                     {
                         PillButton(
                             label = stringResource(R.string.site_permissions_remove_all),
-                            onClick = viewModel::onRemoveAllClick,
+                            onClick = { onAction(SitePermissionsAction.RemoveAllClick) },
                             style = PillStyle.Danger,
                             modifier = Modifier.testTag(TEST_TAG_SITE_PERMISSIONS_REMOVE_ALL),
                         )
@@ -87,18 +101,18 @@ fun SitePermissionsScreen(
                 }
             }
             state.sites.forEachIndexed { index, site ->
-                siteGroup(site, showDivider = index > 0, viewModel = viewModel)
+                siteGroup(site, showDivider = index > 0, onAction = onAction)
             }
         }
     }
 
-    SitePermissionsDialogs(state = state, viewModel = viewModel)
+    SitePermissionsDialogs(state = state, onAction = onAction)
 }
 
 private fun LazyListScope.siteGroup(
     site: SitePermissionsSite,
     showDivider: Boolean,
-    viewModel: SitePermissionsViewModel,
+    onAction: (SitePermissionsAction) -> Unit,
 ) {
     item(key = "site:${site.origin}", contentType = CONTENT_TYPE_HEADER) {
         SettingsSectionHeader(title = SiteOrigin.display(site.origin), showDivider = showDivider)
@@ -110,7 +124,7 @@ private fun LazyListScope.siteGroup(
                 value = decisionLabel(decision),
                 icon = capability.iconRes(),
                 tone = SettingsIconTone.Primary,
-                onClick = { viewModel.onDecisionClick(site.origin, capability, decision) },
+                onClick = { onAction(SitePermissionsAction.DecisionClick(site.origin, capability, decision)) },
             )
         }
     }
@@ -121,7 +135,7 @@ private fun LazyListScope.siteGroup(
         ) {
             PillButton(
                 label = stringResource(R.string.site_permissions_remove_site),
-                onClick = { viewModel.onRemoveSite(site.origin) },
+                onClick = { onAction(SitePermissionsAction.RemoveSite(site.origin)) },
                 style = PillStyle.Danger,
             )
         }
@@ -129,7 +143,7 @@ private fun LazyListScope.siteGroup(
 }
 
 @Composable
-private fun SitePermissionsDialogs(state: SitePermissionsUiState, viewModel: SitePermissionsViewModel) {
+private fun SitePermissionsDialogs(state: SitePermissionsUiState, onAction: (SitePermissionsAction) -> Unit) {
     state.editing?.let { edit ->
         ChoiceDialog(
             title = stringResource(
@@ -140,8 +154,8 @@ private fun SitePermissionsDialogs(state: SitePermissionsUiState, viewModel: Sit
             options = listOf(SiteDecision.Allow, SiteDecision.Deny),
             selected = edit.current,
             optionLabel = { decisionLabel(it) },
-            onSelect = viewModel::onDecisionChosen,
-            onDismiss = viewModel::onEditDismissed,
+            onSelect = { onAction(SitePermissionsAction.DecisionChosen(it)) },
+            onDismiss = { onAction(SitePermissionsAction.EditDismissed) },
             cancelLabel = stringResource(R.string.settings_action_cancel),
         )
     }
@@ -151,8 +165,8 @@ private fun SitePermissionsDialogs(state: SitePermissionsUiState, viewModel: Sit
             body = stringResource(R.string.site_permissions_remove_all_confirm_body),
             confirmLabel = stringResource(R.string.site_permissions_remove_all_confirm_action),
             cancelLabel = stringResource(R.string.settings_action_cancel),
-            onConfirm = viewModel::onRemoveAllConfirmed,
-            onDismiss = viewModel::onRemoveAllDismissed,
+            onConfirm = { onAction(SitePermissionsAction.RemoveAllConfirmed) },
+            onDismiss = { onAction(SitePermissionsAction.RemoveAllDismissed) },
         )
     }
 }

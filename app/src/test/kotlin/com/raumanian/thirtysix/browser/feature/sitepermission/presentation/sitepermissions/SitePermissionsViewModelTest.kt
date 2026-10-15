@@ -4,9 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
-import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.ObserveSitePermissionsUseCase
 import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.RemoveSitePermissionsUseCase
-import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.SetSitePermissionUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -25,8 +23,7 @@ class SitePermissionsViewModelTest {
     val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private fun viewModel() = SitePermissionsViewModel(
-        ObserveSitePermissionsUseCase(repository),
-        SetSitePermissionUseCase(repository),
+        repository,
         RemoveSitePermissionsUseCase(repository),
     )
 
@@ -58,8 +55,8 @@ class SitePermissionsViewModelTest {
         repository.save(A, SiteCapability.Camera, SiteDecision.Allow)
         val viewModel = viewModel()
 
-        viewModel.onDecisionClick(A, SiteCapability.Camera, SiteDecision.Allow)
-        viewModel.onDecisionChosen(SiteDecision.Deny)
+        viewModel.onAction(SitePermissionsAction.DecisionClick(A, SiteCapability.Camera, SiteDecision.Allow))
+        viewModel.onAction(SitePermissionsAction.DecisionChosen(SiteDecision.Deny))
 
         assertNull(viewModel.uiState.value.editing)
         assertEquals(SiteDecision.Deny, repository.decisionsFor(A)[SiteCapability.Camera])
@@ -71,7 +68,7 @@ class SitePermissionsViewModelTest {
         repository.save(B, SiteCapability.Camera, SiteDecision.Allow)
         val viewModel = viewModel()
 
-        viewModel.onRemoveSite(A)
+        viewModel.onAction(SitePermissionsAction.RemoveSite(A))
 
         assertEquals(listOf(B), viewModel.uiState.value.sites.map { it.origin })
     }
@@ -81,13 +78,13 @@ class SitePermissionsViewModelTest {
         repository.save(A, SiteCapability.Camera, SiteDecision.Allow)
         val viewModel = viewModel()
 
-        viewModel.onRemoveAllClick()
+        viewModel.onAction(SitePermissionsAction.RemoveAllClick)
         assertTrue(viewModel.uiState.value.isConfirmingRemoveAll)
-        viewModel.onRemoveAllDismissed()
+        viewModel.onAction(SitePermissionsAction.RemoveAllDismissed)
         assertEquals(1, viewModel.uiState.value.sites.size)
 
-        viewModel.onRemoveAllClick()
-        viewModel.onRemoveAllConfirmed()
+        viewModel.onAction(SitePermissionsAction.RemoveAllClick)
+        viewModel.onAction(SitePermissionsAction.RemoveAllConfirmed)
         assertTrue(viewModel.uiState.value.sites.isEmpty())
     }
 
