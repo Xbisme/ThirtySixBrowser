@@ -13,6 +13,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.feature.browser.data.repository.CurrentPageRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.IsUrlBookmarkedUseCase
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.RecordHistoryEntryUseCase
@@ -31,6 +32,10 @@ internal class BrowserHoldersFixture(
     val bookmarks = FakeBookmarkRepository()
 
     fun buildFind(): FindInPageViewModel = FindInPageViewModel(pageStore)
+
+    val tabSessions = FakeTabSessionRepository()
+
+    fun buildTabSession(): TabSessionViewModel = TabSessionViewModel(pageStore, tabSessions)
 
     fun buildPageActions(): PageActionsViewModel = PageActionsViewModel(
         defaultHomeUrl = url,

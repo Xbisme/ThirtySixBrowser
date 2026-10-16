@@ -82,30 +82,30 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 
 **Goal**: FR-001, FR-002, FR-004, FR-005. **Independent test**: quickstart G3 step 1 (SC-001).
 
-- [ ] T009 [US1] Add the session holder:
+- [X] T009 [US1] *(as built: the 1 s batching lives in `TabSessionHooks.saveSoon`, where the engine state is captured, so busy single-page sites do not capture on every history change; `TabSessionAction.Save(tabId, state)` is written at once. `DownloadRequestViewModel` moved to `PageRequestHolders` to keep `rememberBrowserPageHolders` within 5 parameters)* [US1] Add the session holder:
   - `B/TabSessionViewModel.kt`, `B/TabSessionAction.kt` (`Save(tabId, state)`), `B/TabSessionEvent.kt` (`ClearLiveHistory`, Keep), `B/TabSessionUiState.kt` (`loadedTabId: Long?`).
   - **The bytes never enter UI state or composable parameters** (constitution IV: `ByteArray` is not stable). The holder keeps the loaded bytes privately, and exposes a read-only lookup property `savedState: SavedTabStateLookup`. That is a `fun interface` `(tabId: Long) -> ByteArray?`, the same pattern as `desktopMode`.
   - It reads the active tab from `CurrentPageRepository` and loads its session whenever the tab id changes. `loadedTabId` becomes that id once the read completes.
   - `Save` debounces per tab by `TabSessionLimits.SAVE_DEBOUNCE_MS = 1_000`; a flush is used for release and stop.
 
   Test: `T/feature/browser/presentation/browser/TabSessionViewModelTest.kt`.
-- [ ] T010 [US1] Wire the route in `B/BrowserRoute.kt`:
+- [X] T010 [US1] Wire the route in `B/BrowserRoute.kt`:
   - obtain `TabSessionViewModel` in `BrowserPageHolders` (`rememberBrowserPageHolders`);
   - collect its state;
   - pass `loadedTabId` into `BrowserScreenState`, and the `savedState` lookup into `BrowserScreenSources`;
   - add `TabSessionEventEffect` in `B/BrowserEffects.kt`.
 
   Also update `A/feature/browser/fixture/BrowserScreenHolders.kt`.
-- [ ] T011 [US1] Restore before the first load in `B/BrowserWebView.kt` and `B/BrowserContent.kt`:
+- [X] T011 [US1] Restore before the first load in `B/BrowserWebView.kt` and `B/BrowserContent.kt`:
   - `TabWebView` composes `BrowserWebView` only once `loadedTabId` equals the active tab id.
   - In `factory`, after `buildConfiguredWebView` wires the client and protections, read `sources.savedState(tabId)` and decode it with `TabStateCodec`. If `restoreState` returns non-null with entries, skip the initial `loadProtected` and set `skipNextLoad` for the tab switch's `loadUrl`. Otherwise load as today.
   - Adopted pop-ups never restore.
   - Renderer recovery (a new generation) restores from the last save first.
-- [ ] T012 [US1] Add the save triggers:
+- [X] T012 [US1] Add the save triggers:
   - `B/BrowserWebView.kt`: after `onPageFinished` and `doUpdateVisitedHistory`, send `TabSessionAction.Save` with `WebViewCompat.saveState(wv, bundle, MAX_STATE_BYTES, includeForwardState = true)` when `WebViewFeature.SAVE_STATE` is supported, else `wv.saveState(bundle)`, encoded by the codec.
   - `B/WebViewLifecycle.kt`: save and flush on `ON_STOP`.
   - No save while the tab shows Home.
-- [ ] T013 [US1] Add the instrumented test `A/feature/browser/presentation/browser/TabHistoryRestoreTest.kt`. Using `AssetPageServer`, it loads pages A→B→C, recreates the activity with a fresh holder set over the same database, and asserts `canGoBack` twice back to A. A second case asserts Forward after going back.
+- [ ] T013 *(written; it runs a real WebView save → new WebView restore → Back/Forward, and waits for an AVD run)* [US1] Add the instrumented test `A/feature/browser/presentation/browser/TabHistoryRestoreTest.kt`. Using `AssetPageServer`, it loads pages A→B→C, recreates the activity with a fresh holder set over the same database, and asserts `canGoBack` twice back to A. A second case asserts Forward after going back.
 
   A fresh holder set over the same database stands in for a new process. The real process kill is covered by G3 step 1 (`am kill`).
 
@@ -115,7 +115,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 
 **Goal**: FR-001 for tab switches, and FR-006 in memory. **Independent test**: quickstart G3 step 2 (SC-002).
 
-- [ ] T014 [US2] Save at once before release in `B/BrowserWebView.kt`'s `DisposableEffect.onDispose`, before `releaseWebView`. Skip this when the renderer is gone. Test: extend `TabSessionViewModelTest` so a flush bypasses the debounce.
+- [X] T014 [US2] Save at once before release in `B/BrowserWebView.kt`'s `DisposableEffect.onDispose`, before `releaseWebView`. Skip this when the renderer is gone. Test: extend `TabSessionViewModelTest` so a flush bypasses the debounce.
 - [ ] T015 [US2] Add the instrumented test `A/feature/browser/presentation/browser/TabSwitchHistoryTest.kt`:
   - two normal tabs, A→B in tab 1, switch to tab 2 and back: Back reaches A;
   - the same for an incognito tab, which never writes to the DAO (asserted through the repository's database).

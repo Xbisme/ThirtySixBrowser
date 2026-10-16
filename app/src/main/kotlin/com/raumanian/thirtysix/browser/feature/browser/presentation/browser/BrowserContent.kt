@@ -70,13 +70,7 @@ private fun TabWebView(
     hosts: BrowserScreenHosts,
     frame: BrowserFrame,
 ) {
-    val activeTabId = state.activeTab?.id ?: 0L
     val chrome = frame.ui.chrome
-    val findOpenNow by rememberUpdatedState(frame.findOpen)
-    val onScrollDelta = rememberScrollDeltaHandler(chrome) { findOpenNow }
-    val onDownloadRequested = rememberDownloadRequests(actions.onDownloadAction)
-    val context = LocalContext.current
-    val incognitoProfile = remember(context) { context.incognitoWebProfile() }
     val topBarHeightPx = frame.ui.topBarHeightPx
     val findBarHeight = with(LocalDensity.current) { topBarHeightPx.toDp() }
     Box(
@@ -87,31 +81,55 @@ private fun TabWebView(
             .padding(bottom = findBarPagePadding(frame.findOpen, findBarHeight))
             .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
     ) {
-        key(activeTabId) {
-            // A tab a page opened adopts the page's WebView.
-            val adopted = remember { state.activeTab?.url?.let(sources.popups::take) }
-            BrowserWebView(
-                state = state.page,
-                actions = hosts.webViewActions,
-                callbacks = BrowserWebViewCallbacks(
-                    onLoadStarted = { actions.onPageAction(PageAction.LoadStarted(it)) },
-                    onProgressChanged = { actions.onPageAction(PageAction.ProgressChanged(it)) },
-                    onLoadFinished = { actions.onPageAction(PageAction.LoadFinished(it)) },
-                    onLoadFailed = { actions.onPageAction(PageAction.LoadFailed(it)) },
-                    onDownloadRequested = onDownloadRequested,
-                    pageRequests = frame.pageSession,
-                    onFindResult = { ordinal, total -> actions.onFindAction(FindInPageAction.Result(ordinal, total)) },
-                ),
-                navigationCallbacks = pageNavigationCallbacks(actions.onPageAction, onScrollDelta),
-                incognitoProfile = incognitoProfile,
-                modifier = Modifier.fillMaxSize(),
-                adopted = adopted,
-                textZoomPercent = state.textZoomPercent,
-                desktopMode = remember { sources.desktopMode.isDesktop(activeTabId) },
-                protection = sources.protectionHooks,
-            )
+        // Built only once the tab's saved back and forward has been read, so it can be restored first.
+        if (state.isTabReady) {
+            key(state.activeTab?.id ?: 0L) {
+                TabPage(state, sources, actions, hosts, frame)
+            }
         }
     }
+}
+
+@Composable
+private fun TabPage(
+    state: BrowserScreenState,
+    sources: BrowserScreenSources,
+    actions: BrowserScreenActions,
+    hosts: BrowserScreenHosts,
+    frame: BrowserFrame,
+) {
+    val activeTabId = state.activeTab?.id ?: 0L
+    val findOpenNow by rememberUpdatedState(frame.findOpen)
+    val onScrollDelta = rememberScrollDeltaHandler(frame.ui.chrome) { findOpenNow }
+    val onDownloadRequested = rememberDownloadRequests(actions.onDownloadAction)
+    val context = LocalContext.current
+    val incognitoProfile = remember(context) { context.incognitoWebProfile() }
+    // A tab a page opened adopts the page's WebView.
+    val adopted = remember { state.activeTab?.url?.let(sources.popups::take) }
+    val session = remember {
+        state.activeTab?.let { TabSessionHooks(it.id, sources.savedState, actions.onTabSessionAction) }
+    }
+    BrowserWebView(
+        state = state.page,
+        actions = hosts.webViewActions,
+        callbacks = BrowserWebViewCallbacks(
+            onLoadStarted = { actions.onPageAction(PageAction.LoadStarted(it)) },
+            onProgressChanged = { actions.onPageAction(PageAction.ProgressChanged(it)) },
+            onLoadFinished = { actions.onPageAction(PageAction.LoadFinished(it)) },
+            onLoadFailed = { actions.onPageAction(PageAction.LoadFailed(it)) },
+            onDownloadRequested = onDownloadRequested,
+            pageRequests = frame.pageSession,
+            onFindResult = { ordinal, total -> actions.onFindAction(FindInPageAction.Result(ordinal, total)) },
+        ),
+        navigationCallbacks = pageNavigationCallbacks(actions.onPageAction, onScrollDelta),
+        incognitoProfile = incognitoProfile,
+        modifier = Modifier.fillMaxSize(),
+        adopted = adopted,
+        textZoomPercent = state.textZoomPercent,
+        desktopMode = remember { sources.desktopMode.isDesktop(activeTabId) },
+        protection = sources.protectionHooks,
+        session = session,
+    )
 }
 
 private fun pageNavigationCallbacks(onPageAction: (PageAction) -> Unit, onScrollDelta: (Float) -> Unit) =

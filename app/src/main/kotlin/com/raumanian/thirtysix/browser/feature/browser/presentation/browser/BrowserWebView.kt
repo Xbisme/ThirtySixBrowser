@@ -61,6 +61,7 @@ internal fun BrowserWebView(
     textZoomPercent: Int = BrowserLimits.TEXT_SIZE_PERCENT_100,
     desktopMode: Boolean = false,
     protection: ProtectionHooks? = null,
+    session: TabSessionHooks? = null,
 ) {
     // A page-created WebView is adopted by the first generation only; a renderer-loss replacement is built fresh.
     val adoptable = remember { arrayOf(adopted) }
@@ -70,7 +71,7 @@ internal fun BrowserWebView(
     val textZoom = rememberUpdatedState(textZoomPercent)
     LaunchedEffect(textZoomPercent) { host.current?.settings?.textZoom = textZoomPercent }
 
-    PauseWithLifecycle { host.current }
+    PauseWithLifecycle(shownWebView = { host.current }, onStop = { wv -> session?.saveNow(wv) })
 
     val isIncognito = state.isIncognito
 
@@ -102,6 +103,7 @@ internal fun BrowserWebView(
                     host = host,
                     protection = guard[0],
                     incognitoProfile = incognitoProfile,
+                    session = session,
                 ).also { wv ->
                     instance[0] = wv
                     host.current = wv
@@ -115,7 +117,10 @@ internal fun BrowserWebView(
                 guard[0]?.let { protection?.unprotect(it) }
                 guard[0] = null
                 instance[0]?.let { wv ->
-                    releaseWebView(wv, isIncognito, rendererGone = generation != host.generation)
+                    val rendererGone = generation != host.generation
+                    if (!rendererGone) session?.saveNow(wv)
+                    actions.detachFrom(wv)
+                    releaseWebView(wv, isIncognito, rendererGone)
                     if (host.current === wv) host.current = null
                 }
                 instance[0] = null
@@ -159,6 +164,7 @@ private fun buildConfiguredWebView(
     host: WebViewHost,
     protection: WebViewProtection?,
     incognitoProfile: IncognitoWebProfile,
+    session: TabSessionHooks?,
 ): WebView = webView.also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
@@ -180,6 +186,7 @@ private fun buildConfiguredWebView(
         },
         pageRequests = callbacks.pageRequests,
         protection = protection,
+        onHistoryCommitted = { session?.saveSoon(wv) },
     )
     // Incognito downloads are recorded like any other, so the incognito flag is deliberately not consulted.
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
@@ -199,13 +206,15 @@ private fun buildConfiguredWebView(
         incognitoProfile = incognitoProfile,
         newPopupWebView = { context -> newPopupWebView(context, state.isIncognito, incognitoProfile) },
     )
-    wireActions(wv, actions, host, adopted, protection)
-
     // No initial load when the state is seeded to Failed (keeps the error UI), after a renderer crash
     // (so a crashing page waits for Reload instead of looping), or for an adopted pop-up (already navigating).
     val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
     val loadable = host.loadInitialUrl && state.loadingState !is LoadingState.Failed
-    if (!adopted && loadable && !isHome) {
+    // A restored tab reloads its own current page, with this client and the protections already attached.
+    val restored = !adopted && loadable && session?.restore(wv) == true
+    wireActions(wv, actions, host, skipFirstLoad = adopted || restored, protection)
+    val needsLoad = !adopted && !restored
+    if (needsLoad && loadable && !isHome) {
         wv.loadProtected(state.currentUrl, protection)
     }
 }
@@ -214,9 +223,10 @@ private fun wireActions(
     wv: WebView,
     actions: WebViewActionsHandle,
     host: WebViewHost,
-    adopted: Boolean,
+    skipFirstLoad: Boolean,
     protection: WebViewProtection?,
 ) {
+    actions.attachTo(wv)
     actions.goBack = { if (wv.canGoBack()) wv.goBack() }
     actions.goForward = { if (wv.canGoForward()) wv.goForward() }
     // `reload()` on an empty WebView (after a renderer crash) does nothing, so load the tab's address instead.
@@ -230,9 +240,9 @@ private fun wireActions(
     actions.findAll = { text -> wv.findAllAsync(text) }
     actions.findNext = { forward -> wv.findNext(forward) }
     actions.clearMatches = { wv.clearMatches() }
-    // The reserved Home address is never handed to the WebView. An adopted pop-up skips the
-    // tab switch's load of its placeholder address once.
-    var skipNextLoad = adopted
+    // The reserved Home address is never handed to the WebView. An adopted pop-up, already navigating,
+    // and a restored tab, already reloading its page, skip the tab switch's load once.
+    var skipNextLoad = skipFirstLoad
     actions.loadUrl = { url ->
         when {
             skipNextLoad -> skipNextLoad = false
@@ -319,6 +329,7 @@ private class BrowserWebViewClient(
     private val onRendererGone: (crashed: Boolean) -> Unit,
     private val pageRequests: PageRequestSink,
     private val protection: WebViewProtection?,
+    private val onHistoryCommitted: () -> Unit,
 ) : WebViewClient() {
 
     /**
@@ -365,6 +376,7 @@ private class BrowserWebViewClient(
         // A failed HTTPS attempt's error page is not a visit: the http:// page replacing it reports its own events.
         if (view != null && protection?.onPageFinished(view, url) == true) return
         url?.let(onLoadFinished)
+        onHistoryCommitted()
         // Capture the tab preview once the page has had time to paint.
         val v = view ?: return
         v.postDelayed({ captureScreenshot(v) }, SCREENSHOT_DELAY_MS)
@@ -401,6 +413,7 @@ private class BrowserWebViewClient(
         url?.let(onUrlChange)
         onCanGoBackChange(v.canGoBack())
         onCanGoForwardChange(v.canGoForward())
+        onHistoryCommitted()
     }
 
     override fun onReceivedError(

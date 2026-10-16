@@ -11,14 +11,16 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 
 /** Pauses the shown WebView while the screen is stopped and resumes it when started. */
 @Composable
-internal fun PauseWithLifecycle(shownWebView: () -> WebView?) {
+internal fun PauseWithLifecycle(shownWebView: () -> WebView?, onStop: (WebView) -> Unit = {}) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val currentWebView by rememberUpdatedState(shownWebView)
+    val currentOnStop by rememberUpdatedState(onStop)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> currentWebView()?.onPause()
                 Lifecycle.Event.ON_RESUME -> currentWebView()?.onResume()
+                Lifecycle.Event.ON_STOP -> currentWebView()?.let(currentOnStop)
                 else -> Unit
             }
         }
