@@ -116,7 +116,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 **Goal**: FR-001 for tab switches, and FR-006 in memory. **Independent test**: quickstart G3 step 2 (SC-002).
 
 - [X] T014 [US2] Save at once before release in `B/BrowserWebView.kt`'s `DisposableEffect.onDispose`, before `releaseWebView`. Skip this when the renderer is gone. Test: extend `TabSessionViewModelTest` so a flush bypasses the debounce.
-- [ ] T015 [US2] Add the instrumented test `A/feature/browser/presentation/browser/TabSwitchHistoryTest.kt`:
+- [ ] T015 *(the save-on-release and restore-on-create path is covered by `TabHistoryRestoreTest` with real WebViews and by `TabSessionViewModelTest`. The two-tab and incognito switch runs in the G3 walk)* [US2] Add the instrumented test `A/feature/browser/presentation/browser/TabSwitchHistoryTest.kt`:
   - two normal tabs, A→B in tab 1, switch to tab 2 and back: Back reaches A;
   - the same for an incognito tab, which never writes to the DAO (asserted through the repository's database).
 
@@ -181,7 +181,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - **Indicator**: a circular arrow; offset and scale read only in `graphicsLayer {}`; primary color at the threshold and a disabled tint when unavailable; semantics "Back"/"Forward" from new strings `swipe_navigation_back` and `swipe_navigation_forward` (8 locales).
   - **Wiring**: `B/BrowserContent.kt` gets a `SwipeNavigationState` in `BrowserScreenUi`, and the gesture is enabled only per FR-015 and FR-018.
   - **Release**: calls `webViewActions.goBack()` or `goForward()`.
-- [ ] T026 [US4] Add the instrumented test `A/feature/browser/presentation/browser/SwipeNavigationTest.kt`:
+- [ ] T026 *(`SwipeNavigationTest` is written: real pointer events on a `BrowserPageView` for back and forward, a short swipe, a vertical drag, and swiping switched off. It waits for an AVD run)* [US4] Add the instrumented test `A/feature/browser/presentation/browser/SwipeNavigationTest.kt`:
   - injected horizontal swipes on an asset page with history go back and forward;
   - a vertical scroll and an asset carousel page do not;
   - with the setting off, nothing happens;
@@ -195,7 +195,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T027 Add `docs/adr/0028-tab-sessions-kept-by-the-engine.md`, following the template format. It covers:
+- [X] T027 Add `docs/adr/0028-tab-sessions-kept-by-the-engine.md`, following the template format. It covers:
   - the engine state and its bound;
   - the codec over `Parcel`;
   - Room with cascade, and incognito in memory;
