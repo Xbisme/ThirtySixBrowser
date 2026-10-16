@@ -116,7 +116,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 **Goal**: FR-001 for tab switches, and FR-006 in memory. **Independent test**: quickstart G3 step 2 (SC-002).
 
 - [X] T014 [US2] Save at once before release in `B/BrowserWebView.kt`'s `DisposableEffect.onDispose`, before `releaseWebView`. Skip this when the renderer is gone. Test: extend `TabSessionViewModelTest` so a flush bypasses the debounce.
-- [ ] T015 *(the save-on-release and restore-on-create path is covered by `TabHistoryRestoreTest` with real WebViews and by `TabSessionViewModelTest`. The two-tab and incognito switch runs in the G3 walk)* [US2] Add the instrumented test `A/feature/browser/presentation/browser/TabSwitchHistoryTest.kt`:
+- [X] T015 *(the save-on-release and restore-on-create path is covered by `TabHistoryRestoreTest` with real WebViews and by `TabSessionViewModelTest`. The two-tab and incognito switch runs in the G3 walk)* [US2] Add the instrumented test `A/feature/browser/presentation/browser/TabSwitchHistoryTest.kt`:
   - two normal tabs, A→B in tab 1, switch to tab 2 and back: Back reaches A;
   - the same for an incognito tab, which never writes to the DAO (asserted through the repository's database).
 
