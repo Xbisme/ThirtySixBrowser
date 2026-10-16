@@ -40,5 +40,6 @@ DuckDuckGo's Android browser solves the first problem by storing each tab's `Web
 - Back and forward survive tab switches, app restarts and process death, up to the bound. At most the page that was loading when the process died is missing.
 - A system or WebView update that changes the engine's state format only costs the history: the tab loads its address as before.
 - A tab's WebView is built one database read later than before, on a switch and at start.
-- adb-injected drags did not scroll an inner horizontal scroller in the spike, while the page itself scrolled. Whether a real finger can scroll it is checked by hand on a device. Chromium reports root overscroll only for scroll the page did not use, so such a drag should not start a swipe.
+- Chromium reports root overscroll only for scroll the page did not use, so a drag on a carousel or a map does not start a swipe.
+- The tab preview is copied from the screen with `PixelCopy`. The older `view.draw()` capture left a page's inner scrollers unable to take a drag after the next Back, so those drags turned into swipes. That was what blocked inner scrollers in the spike. API 24 and 25 have no `PixelCopy` for a window and keep the placeholder preview.
 - Pop-up WebViews are `BrowserPageView` too, so an adopted pop-up tab can be swiped like any other.

@@ -3,11 +3,13 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.print.PrintManager
+import android.view.PixelCopy
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.HttpAuthHandler
@@ -37,6 +39,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfil
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
+import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.BuildLongPressMenuUseCase
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequest
@@ -391,29 +394,53 @@ private class BrowserWebViewClient(
         v.postDelayed({ captureScreenshot(v) }, SCREENSHOT_DELAY_MS)
     }
 
+    // Copied from the screen, never `view.draw()`: a software draw of the WebView leaves the page's own
+    // scrollers (carousels, maps) unable to take a drag after the next back or forward navigation.
+    // PixelCopy needs API 26; older devices keep the placeholder preview.
     private fun captureScreenshot(view: WebView) {
-        if (view.width <= 0 || view.height <= 0) return
-        try {
-            // Crop the top of the WebView to 16:9 before scaling, so a portrait surface is not squashed.
-            val targetW = AppConstants.SCREENSHOT_TARGET_WIDTH_PX
-            val targetH = AppConstants.SCREENSHOT_TARGET_HEIGHT_PX
-            val cropHeight = ((view.width.toLong() * targetH) / targetW)
-                .toInt()
-                .coerceAtMost(view.height)
-                .coerceAtLeast(1)
-            val source = androidx.core.graphics.createBitmap(
-                view.width,
-                cropHeight,
-                Bitmap.Config.ARGB_8888,
-            )
-            view.draw(android.graphics.Canvas(source))
-            val scaled = source.scale(targetW, targetH, filter = true)
-            if (scaled !== source) source.recycle()
-            onScreenshotReady(scaled)
-        } catch (e: OutOfMemoryError) {
-            // Large surface, low memory: the tab keeps its placeholder preview.
-            android.util.Log.w("BrowserWebView", "Screenshot OOM", e)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val window = view.context.findActivity()?.window
+        val area = previewArea(view)
+        val source = area?.let { newPreviewBitmap(it.width(), it.height()) }
+        if (window == null || source == null) return
+        val onCopied = PixelCopy.OnPixelCopyFinishedListener { result ->
+            if (result == PixelCopy.SUCCESS) {
+                val scaled = source.scale(
+                    AppConstants.SCREENSHOT_TARGET_WIDTH_PX,
+                    AppConstants.SCREENSHOT_TARGET_HEIGHT_PX,
+                    filter = true,
+                )
+                if (scaled !== source) source.recycle()
+                onScreenshotReady(scaled)
+            } else {
+                source.recycle()
+            }
         }
+        try {
+            PixelCopy.request(window, area, source, onCopied, Handler(Looper.getMainLooper()))
+        } catch (e: IllegalArgumentException) {
+            // A window being rebuilt, as on rotation, has no surface yet: this preview is skipped.
+            android.util.Log.w("BrowserWebView", "Screenshot skipped", e)
+            source.recycle()
+        }
+    }
+
+    /** The top of the WebView cropped to 16:9 in window coordinates, so a portrait surface is not squashed. */
+    private fun previewArea(view: WebView): Rect? {
+        if (view.width <= 0 || view.height <= 0 || !view.isAttachedToWindow) return null
+        val cropHeight = (
+            (view.width.toLong() * AppConstants.SCREENSHOT_TARGET_HEIGHT_PX) / AppConstants.SCREENSHOT_TARGET_WIDTH_PX
+            ).toInt().coerceIn(1, view.height)
+        val origin = IntArray(2).also(view::getLocationInWindow)
+        return Rect(origin[0], origin[1], origin[0] + view.width, origin[1] + cropHeight)
+    }
+
+    private fun newPreviewBitmap(width: Int, height: Int): Bitmap? = try {
+        androidx.core.graphics.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    } catch (e: OutOfMemoryError) {
+        // Large surface, low memory: the tab keeps its placeholder preview.
+        android.util.Log.w("BrowserWebView", "Screenshot OOM", e)
+        null
     }
 
     // Fires after every history commit, including fragment and pushState navigations.

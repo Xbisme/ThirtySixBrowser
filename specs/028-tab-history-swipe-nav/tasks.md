@@ -247,7 +247,7 @@ The MVP is Phases 1–3: the reported defect fixed for reopening the app. US2 ad
 
 | Measure | Value | Pass |
 |---|---|---|
-| Unit tests | 987, 0 failed (943 at baseline) | yes |
+| Unit tests | 988, 0 failed (943 at baseline) | yes |
 | detekt, ktlint, lintDebug | clean | yes |
 | Compose restartable / non-skippable | 228 / 0 (was 225 / 0) | yes |
 | Release APK | 3,776,883 B (+18,452 B, +0.49 %), under the 4 MB budget | yes |
@@ -261,3 +261,4 @@ The MVP is Phases 1–3: the reported defect fixed for reopening the app. US2 ad
 | Fire (API 24 AVD) | `tab_sessions` goes from 1 to 0 and history to 0, no crash | yes |
 | Incognito (API 24 AVD) | two incognito pages: database counts and rows unchanged, and no incognito URL anywhere in the database files | yes |
 | Galaxy A55, by hand | pages A→B→C, force-stop, reopen: C, then Back to B and to A. Swipe right goes back, swipe left goes forward. A swipe pulled back under the threshold cancels. The arrow shows on the side of the swipe | yes |
+| Carousel after Back | Found on the A55: after Back, a drag on a page's carousel went forward instead of scrolling it. The cause predates this branch: the tab preview was drawn with `view.draw()`, and that software draw left inner scrollers dead after the next navigation. Previews are now copied with `PixelCopy` (API 26+; API 24–25 keep the placeholder). AVD, real app, `adb input swipe` (carousel → link → Back → drag): `view.draw` build navigated to the next page; `PixelCopy` build scrolled the carousel (scrollLeft 190), 2 / 2. `BrowserCarouselAfterBackTest` covers the flow in the test activity, where the old capture does not reproduce it. The first full run after the change caught a crash: on rotation the window has no surface yet and `PixelCopy.request` throws; that preview is now skipped. Full suite on `TA016_API36_16K` afterwards: 205, 0 failed, 1 skipped | yes |
