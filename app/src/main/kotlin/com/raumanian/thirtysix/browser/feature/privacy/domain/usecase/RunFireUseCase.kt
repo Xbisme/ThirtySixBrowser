@@ -16,6 +16,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
@@ -34,6 +35,7 @@ import kotlinx.coroutines.withContext
 class RunFireUseCase @Inject constructor(
     private val fireproofSites: FireproofSiteRepository,
     private val history: HistoryRepository,
+    private val clearHistory: ClearBrowsingHistoryUseCase,
     private val tabs: TabRepository,
     private val incognitoTabs: IncognitoTabRepository,
     private val sitePermissions: SitePermissionRepository,
@@ -67,7 +69,7 @@ class RunFireUseCase @Inject constructor(
             tabs.closeAllTabs()
         }
 
-        run(FireStep.History, failed) { history.clearAll() }
+        run(FireStep.History, failed) { clearHistory() }
 
         // Cookies, site data and the web page cache, keeping fireproof sites.
         val path = clearSiteData(keepSites, hosts, isKept, failed)

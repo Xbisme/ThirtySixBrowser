@@ -130,6 +130,7 @@ private fun BrowserRouteEffects(
     val webViewActions = hosts.webViewActions
     val snackbarHostState = hosts.snackbarHostState
     BrowserEventEffects(events = holders.addressBar.events, webViewActions = webViewActions)
+    TabSessionEventEffect(events = holders.tabSession.events, webViewActions = webViewActions)
     HubEventEffect(events = tools.hub.events, snackbarHostState = snackbarHostState)
     DownloadRequestEventEffect(events = pageRequests.downloadRequests.events, snackbarHostState = snackbarHostState)
     PageActionsEventEffect(

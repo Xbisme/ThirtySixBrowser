@@ -4,12 +4,12 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
-import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoProtectionExceptions
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.settings.domain.model.ClearBrowsingDataCategory
@@ -24,7 +24,7 @@ import kotlinx.coroutines.CancellationException
  */
 @Suppress("LongParameterList") // each collaborator clears one kind of data
 class ClearBrowsingDataUseCase @Inject constructor(
-    private val historyRepository: HistoryRepository,
+    private val clearHistory: ClearBrowsingHistoryUseCase,
     private val webDataCleaner: WebDataCleaner,
     private val cookieJarSnapshotManager: CookieJarSnapshotManager,
     private val faviconCache: FaviconCache,
@@ -43,7 +43,7 @@ class ClearBrowsingDataUseCase @Inject constructor(
         var siteDataOutcome: SiteDataClearOutcome? = null
 
         if (ClearBrowsingDataCategory.History in categories) {
-            if (!step { historyRepository.clearAll() }) failed += ClearBrowsingDataCategory.History
+            if (!step { clearHistory() }) failed += ClearBrowsingDataCategory.History
         }
 
         if (ClearBrowsingDataCategory.CookiesAndSiteData in categories) {

@@ -7,10 +7,12 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
+import com.raumanian.thirtysix.browser.core.domain.model.TabSession
 import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
@@ -22,6 +24,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabReposit
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
@@ -80,8 +83,10 @@ class RunFireUseCaseTest {
         }
     }
 
+    private val tabSessions = FakeTabSessionRepository()
     private val useCase = RunFireUseCase(
-        fireproof, history, tabs, incognito, permissions, grants, web, cookies,
+        fireproof, history, ClearBrowsingHistoryUseCase(history, tabSessions),
+        tabs, incognito, permissions, grants, web, cookies,
         favicons, screenshots, bookmarks, failures, session, observer, TestDispatchers,
     )
 
@@ -100,6 +105,16 @@ class RunFireUseCaseTest {
         assertTrue(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
         assertFalse("cache already emptied by the complete path", FakeWebDataCleaner.CALL_CLEAR_WEB_CACHE in log)
         assertTrue(FakeScreenshotCache.CALL_CLEAR_ALL in log)
+    }
+
+    @Test
+    fun `fire clears every tab's saved back and forward`() = runTest {
+        tabSessions.save(TabSession(1L, byteArrayOf(1), 1L))
+        tabSessions.save(TabSession(-1L, byteArrayOf(2), 1L))
+
+        useCase()
+
+        assertTrue(tabSessions.sessions.isEmpty())
     }
 
     @Test

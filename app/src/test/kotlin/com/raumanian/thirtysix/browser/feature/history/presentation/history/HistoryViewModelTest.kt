@@ -5,6 +5,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
@@ -15,6 +16,7 @@ import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.feature.history.domain.model.HistoryDayBucket
 import java.io.File
 import java.io.OutputStream
@@ -468,6 +470,7 @@ class HistoryViewModelTest {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepo, incognitoRepo)
         return HistoryViewModel(
             history = historyRepository,
+            clearHistory = ClearBrowsingHistoryUseCase(historyRepository, FakeTabSessionRepository()),
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepo, incognitoRepo),

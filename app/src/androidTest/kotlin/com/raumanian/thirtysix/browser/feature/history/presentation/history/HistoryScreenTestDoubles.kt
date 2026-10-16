@@ -7,12 +7,14 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.fake.NoopTabSessionRepository
 import java.io.File
 import java.io.OutputStream
 import kotlinx.coroutines.CoroutineDispatcher
@@ -157,6 +159,7 @@ internal fun buildHistoryViewModel(
     val observeAllTabs = ObserveAllTabsUseCase(tabRepository, InstrumentedNoopIncognitoRepository)
     return HistoryViewModel(
         history = historyRepository,
+        clearHistory = ClearBrowsingHistoryUseCase(historyRepository, NoopTabSessionRepository),
         observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
         observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
         updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(

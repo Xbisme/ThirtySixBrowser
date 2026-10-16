@@ -30,6 +30,15 @@ internal fun BrowserEventEffects(events: Flow<AddressBarEvent>, webViewActions: 
     }
 }
 
+@Composable
+internal fun TabSessionEventEffect(events: Flow<TabSessionEvent>, webViewActions: WebViewActionsHandle) {
+    EventEffect(events) { event ->
+        when (event) {
+            TabSessionEvent.ClearLiveHistory -> webViewActions.clearHistory()
+        }
+    }
+}
+
 /** A page-mode change acts at once; star and tab-limit messages never hold it up. */
 @Composable
 internal fun PageActionsEventEffect(

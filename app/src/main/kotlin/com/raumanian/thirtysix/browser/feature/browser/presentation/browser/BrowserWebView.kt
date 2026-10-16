@@ -193,6 +193,12 @@ private fun buildConfiguredWebView(
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
     wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }
+    // `clearHistory` reports no history change, so Back and Forward are switched off here.
+    actions.clearHistory = {
+        wv.clearHistory()
+        navigationCallbacks.onCanGoBackChange(false)
+        navigationCallbacks.onCanGoForwardChange(false)
+    }
     // Long-press menu on links and images; anything else keeps text selection.
     wv.setOnLongClickListener { onLongPress(wv, callbacks.pageRequests) }
     wv.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->

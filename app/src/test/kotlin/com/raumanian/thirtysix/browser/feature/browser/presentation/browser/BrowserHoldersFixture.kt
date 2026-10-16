@@ -35,7 +35,8 @@ internal class BrowserHoldersFixture(
 
     val tabSessions = FakeTabSessionRepository()
 
-    fun buildTabSession(): TabSessionViewModel = TabSessionViewModel(pageStore, tabSessions)
+    fun buildTabSession(): TabSessionViewModel =
+        TabSessionViewModel(pageStore, tabSessions, ObserveAllTabsUseCase(tabs, incognitoTabs))
 
     fun buildPageActions(): PageActionsViewModel = PageActionsViewModel(
         defaultHomeUrl = url,

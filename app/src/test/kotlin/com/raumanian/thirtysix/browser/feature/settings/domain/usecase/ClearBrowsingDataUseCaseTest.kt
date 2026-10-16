@@ -3,6 +3,8 @@ package com.raumanian.thirtysix.browser.feature.settings.domain.usecase
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
+import com.raumanian.thirtysix.browser.core.domain.model.TabSession
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
@@ -11,6 +13,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeHistoryRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.feature.settings.domain.model.ClearBrowsingDataCategory
@@ -39,8 +42,9 @@ class ClearBrowsingDataUseCaseTest {
     private val protectionExceptions = FakeProtectionExceptionRepository()
     private val incognitoProtection = IncognitoProtectionExceptionStore()
     private val fireproof = FakeFireproofSiteRepository()
+    private val tabSessions = FakeTabSessionRepository()
     private val useCase = ClearBrowsingDataUseCase(
-        history,
+        ClearBrowsingHistoryUseCase(history, tabSessions),
         web,
         cookies,
         favicons,
@@ -138,6 +142,17 @@ class ClearBrowsingDataUseCaseTest {
         )
         assertEquals(ClearBrowsingDataCategory.entries.toSet(), result.requested)
         assertTrue(result.failed.isEmpty())
+    }
+
+    @Test
+    fun `clearing history also clears every tab's saved back and forward`() = runTest {
+        tabSessions.save(TabSession(1L, byteArrayOf(1), 1L))
+        tabSessions.save(TabSession(-1L, byteArrayOf(2), 1L))
+
+        useCase(setOf(ClearBrowsingDataCategory.History))
+
+        assertTrue(tabSessions.sessions.isEmpty())
+        assertEquals(1L, tabSessions.clears.value)
     }
 
     @Test

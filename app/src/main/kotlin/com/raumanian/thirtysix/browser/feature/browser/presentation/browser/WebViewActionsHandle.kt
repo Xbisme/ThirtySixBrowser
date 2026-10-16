@@ -18,6 +18,9 @@ internal class WebViewActionsHandle {
 
     var clearMatches: () -> Unit = {}
 
+    /** Drops the page's back and forward, keeping the page itself. */
+    var clearHistory: () -> Unit = {}
+
     /** Switches the page mode and reloads the tab's address. */
     var setDesktopMode: (Boolean) -> Unit = {}
 
@@ -45,6 +48,7 @@ internal class WebViewActionsHandle {
         findAll = {}
         findNext = {}
         clearMatches = {}
+        clearHistory = {}
         setDesktopMode = {}
         print = {}
     }

@@ -4,6 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.FireState
 import com.raumanian.thirtysix.browser.core.domain.model.FireStep
 import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
 import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
@@ -16,6 +17,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeIncognitoTabReposit
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
 import com.raumanian.thirtysix.browser.feature.privacy.domain.repository.FireMarkerRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -110,6 +112,7 @@ class FireCoordinatorImplTest {
     private fun runFire() = RunFireUseCase(
         FakeFireproofSiteRepository(),
         FakeHistoryRepository(),
+        ClearBrowsingHistoryUseCase(FakeHistoryRepository(), FakeTabSessionRepository()),
         FakeTabRepository(),
         FakeIncognitoTabRepository(),
         FakeSitePermissionRepository(),

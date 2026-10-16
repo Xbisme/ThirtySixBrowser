@@ -8,6 +8,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
 @Suppress("TooManyFunctions", "LongParameterList")
 class HistoryViewModel @Inject constructor(
     private val history: HistoryRepository,
+    private val clearHistory: ClearBrowsingHistoryUseCase,
     observeActiveTab: ObserveActiveTabUseCase,
     observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
     private val updateActiveTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase,
@@ -192,7 +194,7 @@ class HistoryViewModel @Inject constructor(
     private fun onClearAllConfirmed() {
         viewModelScope.launch {
             try {
-                runCatching { history.clearAll() }
+                runCatching { clearHistory() }
                     .onFailure { cause ->
                         snackbarEvents.tryEmit(HistoryErrorEvent.DeletionFailed(cause))
                     }
