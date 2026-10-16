@@ -30,7 +30,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - 2 × 12 speed-compiled cold starts on `TA016_API36_16K`.
 
   Keep the `e89632d` debug and release APKs in the session scratchpad.
-- [ ] T002 Run the spike on `TA016_API36_16K`, `TA016_API29_CI` and `TA016_API24`. Use a throwaway instrumented test or debug code that is never committed, and record the answers in research R2/R5.
+- [X] T002 *(API 29 and 24 settled by the restore tests: the fallback `saveState` bundle encodes and restores)* Run the spike on `TA016_API36_16K`, `TA016_API29_CI` and `TA016_API24`. Use a throwaway instrumented test or debug code that is never committed, and record the answers in research R2/R5.
   - **(a)** The value types and size of the bundle from `WebViewCompat.saveState(wv, b, 256 KiB, true)` after 5 navigations.
   - **(b)** The main-thread time of that call. If it is over 5 ms, T012 saves after loads with a 3 s debounce instead of 1 s. The release and stop saves stay immediate.
   - **(c)** Whether `WebView.onOverScrolled` fires with `clampedX` for:
@@ -138,7 +138,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - The holder sweeps with `retainOnly(ids of ObserveAllTabsUseCase)` whenever the tab list changes.
 
   Tests are in `TabSessionViewModelTest`.
-- [ ] T019 *(the unit side is covered: `RunFireUseCaseTest`, `ClearBrowsingDataUseCaseTest`, `ClearBrowsingHistoryUseCaseTest`, and `TabSessionRepositoryImplTest` for "incognito never reaches the database". The end-to-end checks run in G3 steps 3–4 on the AVD)* [US3] Add the instrumented test `A/feature/browser/presentation/browser/TabHistoryPrivacyTest.kt`:
+- [X] T019 *(the unit side is covered: `RunFireUseCaseTest`, `ClearBrowsingDataUseCaseTest`, `ClearBrowsingHistoryUseCaseTest`, and `TabSessionRepositoryImplTest` for "incognito never reaches the database". The end-to-end checks run in G3 steps 3–4 on the AVD)* [US3] Add the instrumented test `A/feature/browser/presentation/browser/TabHistoryPrivacyTest.kt`:
   - closing a tab leaves no `tab_sessions` row;
   - Fire leaves none;
   - after "Clear browsing data → History" the open tab has no Back;
@@ -256,4 +256,8 @@ The MVP is Phases 1–3: the reported defect fixed for reopening the app. US2 ad
 | Upgrade over `e89632d` debug (AVD) | 4 tabs, 1 bookmark, history kept; `tab_sessions` created; no crash | yes |
 | Process kill (AVD, `am kill` in background) | 5 pages, kill, reopen: the last page, then Back through all 4 earlier pages | yes |
 | Tab switch (AVD) | two tabs with their own pages: each tab's Back reaches its own earlier page after switching | yes |
+| Cold start, release, speed-compiled, 2 passes, 38 runs each (AVD) | Starts fall into two modes, about 120 ms and about 330 ms, in both builds. Fast mode: 122.5 → 121 ms. Slow mode: 335.5 → 339.5 ms. Overall median: 320.5 → 331 ms (+3.3 %) | yes (≤ 5 %) |
+| API 29 (WebView 74, no `SAVE_STATE`, so the `saveState` fallback runs) and API 24 | `TabHistoryRestoreTest` and `SwipeNavigationTest`: 8 / 8 on each. API 24 smoke: force-stop, reopen, Back works, no crash | yes |
+| Fire (API 24 AVD) | `tab_sessions` goes from 1 to 0 and history to 0, no crash | yes |
+| Incognito (API 24 AVD) | two incognito pages: database counts and rows unchanged, and no incognito URL anywhere in the database files | yes |
 | Galaxy A55, by hand | pages A→B→C, force-stop, reopen: C, then Back to B and to A. Swipe right goes back, swipe left goes forward. A swipe pulled back under the threshold cancels. The arrow shows on the side of the swipe | yes |
