@@ -39,8 +39,10 @@ class TabSessionRepositoryImpl @Inject constructor(
             incognito[session.tabId] = session
             return
         }
+        // The tab may have closed meanwhile (a pop-up closing itself): the foreign key then refuses
+        // the row, and a lost save of a gone tab is right.
         withContext(dispatchers.io) {
-            dao.upsert(TabSessionEntity(session.tabId, session.state, session.savedAt))
+            readOrNull { dao.upsert(TabSessionEntity(session.tabId, session.state, session.savedAt)) }
         }
     }
 
@@ -49,12 +51,12 @@ class TabSessionRepositoryImpl @Inject constructor(
             incognito.remove(tabId)
             return
         }
-        withContext(dispatchers.io) { dao.delete(tabId) }
+        withContext(dispatchers.io) { readOrNull { dao.delete(tabId) } }
     }
 
     override suspend fun retainOnly(tabIds: Set<Long>) {
         incognito.keys.retainAll(tabIds)
-        withContext(dispatchers.io) { dao.deleteNotIn(tabIds.filter { it > 0L }) }
+        withContext(dispatchers.io) { readOrNull { dao.deleteNotIn(tabIds.filter { it > 0L }) } }
     }
 
     override suspend fun clearAll() {
@@ -63,7 +65,7 @@ class TabSessionRepositoryImpl @Inject constructor(
         clearCount.update { it + 1 }
     }
 
-    // A row that cannot be read is treated as missing: the tab then loads its address.
+    // A failed read is a missing session (the tab loads its address); a failed write loses one save.
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private suspend fun <T> readOrNull(block: suspend () -> T?): T? = try {
         block()

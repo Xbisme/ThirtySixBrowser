@@ -74,6 +74,14 @@ class TabSessionRepositoryImplTest {
     }
 
     @Test
+    fun `saving for a tab that has closed is dropped without an error`() = runTest {
+        repository.save(TabSession(12_345L, byteArrayOf(1), 5L))
+
+        assertNull(repository.get(12_345L))
+        assertEquals(0, rowCount())
+    }
+
+    @Test
     fun `a missing session reads as null`() = runTest {
         assertNull(repository.get(42L))
         assertNull(repository.get(-42L))

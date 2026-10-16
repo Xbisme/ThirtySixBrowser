@@ -105,7 +105,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - `B/BrowserWebView.kt`: after `onPageFinished` and `doUpdateVisitedHistory`, send `TabSessionAction.Save` with `WebViewCompat.saveState(wv, bundle, MAX_STATE_BYTES, includeForwardState = true)` when `WebViewFeature.SAVE_STATE` is supported, else `wv.saveState(bundle)`, encoded by the codec.
   - `B/WebViewLifecycle.kt`: save and flush on `ON_STOP`.
   - No save while the tab shows Home.
-- [ ] T013 *(written; it runs a real WebView save → new WebView restore → Back/Forward, and waits for an AVD run)* [US1] Add the instrumented test `A/feature/browser/presentation/browser/TabHistoryRestoreTest.kt`. Using `AssetPageServer`, it loads pages A→B→C, recreates the activity with a fresh holder set over the same database, and asserts `canGoBack` twice back to A. A second case asserts Forward after going back.
+- [X] T013 *(written; it runs a real WebView save → new WebView restore → Back/Forward, and waits for an AVD run)* [US1] Add the instrumented test `A/feature/browser/presentation/browser/TabHistoryRestoreTest.kt`. Using `AssetPageServer`, it loads pages A→B→C, recreates the activity with a fresh holder set over the same database, and asserts `canGoBack` twice back to A. A second case asserts Forward after going back.
 
   A fresh holder set over the same database stands in for a new process. The real process kill is covered by G3 step 1 (`am kill`).
 
@@ -181,7 +181,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - **Indicator**: a circular arrow; offset and scale read only in `graphicsLayer {}`; primary color at the threshold and a disabled tint when unavailable; semantics "Back"/"Forward" from new strings `swipe_navigation_back` and `swipe_navigation_forward` (8 locales).
   - **Wiring**: `B/BrowserContent.kt` gets a `SwipeNavigationState` in `BrowserScreenUi`, and the gesture is enabled only per FR-015 and FR-018.
   - **Release**: calls `webViewActions.goBack()` or `goForward()`.
-- [ ] T026 *(`SwipeNavigationTest` is written: real pointer events on a `BrowserPageView` for back and forward, a short swipe, a vertical drag, and swiping switched off. It waits for an AVD run)* [US4] Add the instrumented test `A/feature/browser/presentation/browser/SwipeNavigationTest.kt`:
+- [X] T026 *(`SwipeNavigationTest` is written: real pointer events on a `BrowserPageView` for back and forward, a short swipe, a vertical drag, and swiping switched off. It waits for an AVD run)* [US4] Add the instrumented test `A/feature/browser/presentation/browser/SwipeNavigationTest.kt`:
   - injected horizontal swipes on an asset page with history go back and forward;
   - a vertical scroll and an asset carousel page do not;
   - with the setting off, nothing happens;
@@ -252,4 +252,8 @@ The MVP is Phases 1–3: the reported defect fixed for reopening the app. US2 ad
 | Compose restartable / non-skippable | 228 / 0 (was 225 / 0) | yes |
 | Release APK | 3,776,883 B (+18,452 B, +0.49 %), under the 4 MB budget | yes |
 | 16 KB alignment | all native libs aligned | yes |
+| Instrumented, `TA016_API36_16K` | 197, 0 failed (189 + `TabHistoryRestoreTest` 4 + `SwipeNavigationTest` 4; 1 skipped, the template test). The first run found a crash: a pop-up tab closing itself saved its session after its row was gone, and the foreign key threw. Session writes no longer throw; regression test added | yes |
+| Upgrade over `e89632d` debug (AVD) | 4 tabs, 1 bookmark, history kept; `tab_sessions` created; no crash | yes |
+| Process kill (AVD, `am kill` in background) | 5 pages, kill, reopen: the last page, then Back through all 4 earlier pages | yes |
+| Tab switch (AVD) | two tabs with their own pages: each tab's Back reaches its own earlier page after switching | yes |
 | Galaxy A55, by hand | pages A→B→C, force-stop, reopen: C, then Back to B and to A. Swipe right goes back, swipe left goes forward. A swipe pulled back under the threshold cancels. The arrow shows on the side of the swipe | yes |
