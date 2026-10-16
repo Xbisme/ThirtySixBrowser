@@ -11,10 +11,12 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.HistoryDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.SitePermissionDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.SiteProtectionExceptionDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.TabDao
+import com.raumanian.thirtysix.browser.core.data.datasource.local.TabSessionDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration1To2
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration2To3
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration3To4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration4To5
+import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration5To6
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,6 +39,7 @@ object DatabaseModule {
                 Migration2To3.MIGRATION_2_3,
                 Migration3To4.MIGRATION_3_4,
                 Migration4To5.MIGRATION_4_5,
+                Migration5To6.MIGRATION_5_6,
             )
             .build()
 
@@ -64,4 +67,7 @@ object DatabaseModule {
 
     @Provides
     fun provideTabDao(db: AppDatabase): TabDao = db.tabDao()
+
+    @Provides
+    fun provideTabSessionDao(db: AppDatabase): TabSessionDao = db.tabSessionDao()
 }

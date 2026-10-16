@@ -10,10 +10,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.FireproofSiteEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SiteProtectionExceptionEntity
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabSessionEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration1To2
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration2To3
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration3To4
 import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration4To5
+import com.raumanian.thirtysix.browser.core.data.datasource.local.migration.Migration5To6
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -104,6 +106,31 @@ class AppDatabaseMigrationTest {
         assertEquals("tabs lost", 2, db.countOf("tabs"))
         assertEquals(0, db.countOf(SiteProtectionExceptionEntity.TABLE_NAME))
         assertEquals(0, db.countOf(FireproofSiteEntity.TABLE_NAME))
+    }
+
+    @Test
+    fun `migrating on to v6 adds an empty tab_sessions table and keeps every row`() = runTest {
+        createVersionOneDatabaseWithData()
+
+        val db = openAtCurrentVersion()
+
+        assertEquals("bookmarks lost", 1, db.countOf("bookmarks"))
+        assertEquals("history entries lost", 2, db.countOf("history_entries"))
+        assertEquals("tabs lost", 2, db.countOf("tabs"))
+        assertEquals(0, db.countOf(TabSessionEntity.TABLE_NAME))
+    }
+
+    @Test
+    fun `tab_sessions accepts writes and goes with its migrated tab`() = runTest {
+        createVersionOneDatabaseWithData()
+
+        val db = openAtCurrentVersion()
+        db.tabSessionDao().upsert(TabSessionEntity(1L, byteArrayOf(7), 1L))
+        assertEquals(1, db.countOf(TabSessionEntity.TABLE_NAME))
+
+        db.tabDao().deleteAll()
+
+        assertEquals(0, db.countOf(TabSessionEntity.TABLE_NAME))
     }
 
     @Test
@@ -198,6 +225,7 @@ class AppDatabaseMigrationTest {
                 Migration2To3.MIGRATION_2_3,
                 Migration3To4.MIGRATION_3_4,
                 Migration4To5.MIGRATION_4_5,
+                Migration5To6.MIGRATION_5_6,
             )
             .allowMainThreadQueries()
             .build()

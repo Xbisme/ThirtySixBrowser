@@ -23,7 +23,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 
 ## Phase 1: Setup
 
-- [ ] T001 Record G0 on `main` `e89632d` in "Baseline" at the end of this file:
+- [X] T001 Record G0 on `main` `e89632d` in "Baseline" at the end of this file:
   - unit and instrumented counts;
   - release APK bytes;
   - Compose report;
@@ -42,20 +42,20 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 
 ## Phase 2: Foundational (blocks every story)
 
-- [ ] T003 Add the domain types:
+- [X] T003 Add the domain types:
   - `M/core/domain/model/TabSession.kt`: `data class TabSession(tabId: Long, state: ByteArray, savedAt: Long)`. `equals`/`hashCode` use `tabId` and `savedAt` only.
   - `M/core/domain/repository/TabSessionRepository.kt`, as in [contracts/tab-session-repository.md](contracts/tab-session-repository.md): `clears: StateFlow<Long>`, `get`, `save`, `delete`, `retainOnly`, `clearAll`.
-- [ ] T004 Add the Room table:
+- [X] T004 Add the Room table:
   - `L/entity/TabSessionEntity.kt`: table `tab_sessions`; `tab_id INTEGER NOT NULL` primary key with `FOREIGN KEY → tabs(id) ON DELETE CASCADE`; `state BLOB NOT NULL`; `saved_at INTEGER NOT NULL`.
   - `L/TabSessionDao.kt`: `get(tabId)`, `upsert`, `delete(tabId)`, `deleteNotIn(ids)`, `deleteAll`.
   - `L/migration/Migration5To6.kt`: additive `CREATE TABLE IF NOT EXISTS tab_sessions (...)`.
   - Register the entity and set `SCHEMA_VERSION = 6` in `L/AppDatabase.kt`.
   - Add the migration and provide the DAO in `M/core/di/DatabaseModule.kt`.
   - Export `app/schemas/.../6.json`.
-- [ ] T005 [P] Add the data tests:
+- [X] T005 [P] Add the data tests:
   - `T/core/data/datasource/local/TabSessionDaoTest.kt`: upsert/get; `deleteNotIn`; deleting the tab row removes its session, which proves the cascade is on.
   - Extend `T/core/data/datasource/local/AppDatabaseMigrationTest.kt` with "migrating on to v6 adds an empty tab_sessions table and keeps every row".
-- [ ] T006 Add `M/feature/tabs/data/repository/TabSessionRepositoryImpl.kt` and bind it in `M/feature/tabs/di/`.
+- [X] T006 Add `M/feature/tabs/data/repository/TabSessionRepositoryImpl.kt` and bind it in `M/feature/tabs/di/`.
   - `tabId < 0` → an in-memory map only; such a save never reaches the DAO.
   - A state over `TabSessionLimits.MAX_STATE_BYTES = 256 * 1024` is rejected.
   - `get` swallows read errors and returns `null`.
@@ -63,8 +63,8 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - All work runs on the injected IO dispatcher.
 
   Test: `T/feature/tabs/data/repository/TabSessionRepositoryImplTest.kt`, which checks every rule in the contract table.
-- [ ] T007 [P] Add `T/core/testing/fake/FakeTabSessionRepository.kt`, which records saves and counts clears.
-- [ ] T008 [P] Add `B/TabStateCodec.kt`: `encode(Bundle): ByteArray?` and `decode(ByteArray): Bundle?`.
+- [X] T007 [P] Add `T/core/testing/fake/FakeTabSessionRepository.kt`, which records saves and counts clears.
+- [X] T008 [P] Add `B/TabStateCodec.kt`: `encode(Bundle): ByteArray?` and `decode(ByteArray): Bundle?`.
   - Format: a version byte, then length-prefixed `(key, ByteArray)` pairs.
   - A bundle with any non-`ByteArray` value encodes to `null`.
   - An unknown version or a malformed input decodes to `null`.
@@ -238,6 +238,10 @@ The MVP is Phases 1–3: the reported defect fixed for reopening the app. US2 ad
 
 | Measure | Value |
 |---|---|
+| Unit / instrumented | 943 / 189 (PR #47 at `e89632d`) |
+| Release APK | 3,758,431 B |
+| Compose restartable / non-skippable | 225 / 0 |
+| Cold start | measured in T029 against the kept `e89632d` release APK on an AVD, interleaved. It is not measured on the owner's phone, which holds their own release install |
 
 ## Results (T028–T029)
 
