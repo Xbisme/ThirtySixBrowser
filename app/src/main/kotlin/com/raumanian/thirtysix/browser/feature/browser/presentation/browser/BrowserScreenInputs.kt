@@ -20,6 +20,7 @@ data class BrowserScreenState(
     val activeTab: Tab?,
     val textZoomPercent: Int,
     val loadedTabId: Long? = null,
+    val swipeNavigationEnabled: Boolean = false,
 ) {
     /** The active tab's saved back and forward has been read, so its WebView may be built. */
     val isTabReady: Boolean

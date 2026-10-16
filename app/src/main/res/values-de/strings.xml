@@ -214,6 +214,8 @@
     <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">Dynamische Farben</string>
     <string name="settings_dynamic_color_summary">Farben aus deinem Hintergrundbild verwenden</string>
+    <string name="settings_swipe_navigation_title">Wischen für zurück und vorwärts</string>
+    <string name="settings_swipe_navigation_summary">Seitlich über eine Seite wischen, um zur vorherigen oder nächsten Seite zu gehen</string>
 
     <!-- About. -->
     <string name="settings_about_version">Version %1$s</string>

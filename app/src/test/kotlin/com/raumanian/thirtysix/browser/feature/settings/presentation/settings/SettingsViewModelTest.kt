@@ -524,6 +524,22 @@ class SettingsViewModelTest {
     // ──────── Dynamic color ────────
 
     @Test
+    fun `turning swipe navigation off writes once and the state follows`() = runTest {
+        val repository = FakeSettingsRepository()
+        val viewModel = settingsViewModel(settingsRepository = repository)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isSwipeNavigationEnabled)
+
+        viewModel.onAction(SettingsAction.SwipeNavigationToggled(false))
+        advanceUntilIdle()
+        viewModel.onAction(SettingsAction.SwipeNavigationToggled(false))
+        advanceUntilIdle()
+
+        assertEquals(listOf(FakeSettingsRepository.CALL_SET_SWIPE_NAVIGATION), repository.writes)
+        assertFalse(viewModel.uiState.value.isSwipeNavigationEnabled)
+    }
+
+    @Test
     fun `turning dynamic color on writes once`() = runTest {
         // The default is off, so the first meaningful toggle turns it on.
         val repository = FakeSettingsRepository()

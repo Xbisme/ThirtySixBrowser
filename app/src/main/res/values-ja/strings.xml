@@ -211,6 +211,8 @@
     <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">ダイナミック カラー</string>
     <string name="settings_dynamic_color_summary">壁紙の色を使用</string>
+    <string name="settings_swipe_navigation_title">スワイプで戻る・進む</string>
+    <string name="settings_swipe_navigation_summary">ページを横にスワイプして前または次のページへ移動</string>
 
     <!-- About. -->
     <string name="settings_about_version">バージョン %1$s</string>

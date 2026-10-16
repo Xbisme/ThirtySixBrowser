@@ -9,6 +9,7 @@ data class UserSettings(
     val historyRetention: HistoryRetention,
     val isOnboardingCompleted: Boolean,
     val textSize: TextSize = AppDefaults.TEXT_SIZE,
+    val isSwipeNavigationEnabled: Boolean = AppDefaults.SWIPE_NAVIGATION_ENABLED,
 ) {
     companion object {
         // Initial value while settings load, so the first frame needs no disk read. Its onboarding
@@ -20,6 +21,7 @@ data class UserSettings(
             historyRetention = AppDefaults.HISTORY_RETENTION,
             isOnboardingCompleted = AppDefaults.IS_ONBOARDING_COMPLETED,
             textSize = AppDefaults.TEXT_SIZE,
+            isSwipeNavigationEnabled = AppDefaults.SWIPE_NAVIGATION_ENABLED,
         )
     }
 }

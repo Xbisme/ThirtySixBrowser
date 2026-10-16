@@ -179,6 +179,17 @@ private fun LazyListScope.appearanceSection(state: SettingsUiState, onAction: (S
             modifier = Modifier.testTag(TEST_TAG_SETTINGS_TEXT_SIZE_ROW),
         )
     }
+    item(key = KEY_ROW_SWIPE_NAVIGATION, contentType = CONTENT_TYPE_SWITCH_ROW) {
+        SettingsSwitchRow(
+            title = stringResource(R.string.settings_swipe_navigation_title),
+            summary = stringResource(R.string.settings_swipe_navigation_summary),
+            checked = state.isSwipeNavigationEnabled,
+            icon = AppIcons.ArrowForward,
+            tone = SettingsIconTone.Peach,
+            onCheckedChange = { onAction(SettingsAction.SwipeNavigationToggled(it)) },
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_SWIPE_NAVIGATION_ROW),
+        )
+    }
     // Dynamic color does not exist below Android 12, so neither does its control.
     if (state.isDynamicColorSupported) {
         item(key = KEY_ROW_DYNAMIC_COLOR, contentType = CONTENT_TYPE_SWITCH_ROW) {
@@ -296,6 +307,7 @@ private const val KEY_SECTION_ABOUT: String = "section_about"
 private const val KEY_ROW_DEFAULT_BROWSER: String = "row_default_browser"
 private const val KEY_ROW_THEME: String = "row_theme"
 private const val KEY_ROW_DYNAMIC_COLOR: String = "row_dynamic_color"
+private const val KEY_ROW_SWIPE_NAVIGATION: String = "row_swipe_navigation"
 private const val KEY_ROW_TEXT_SIZE: String = "row_text_size"
 private const val KEY_ROW_LANGUAGE: String = "row_language"
 private const val KEY_ROW_SEARCH_ENGINE: String = "row_search_engine"
@@ -316,6 +328,7 @@ const val TEST_TAG_SETTINGS_DEFAULT_BROWSER_ROW: String = "settings_default_brow
 const val TEST_TAG_SETTINGS_THEME_ROW: String = "settings_theme_row"
 const val TEST_TAG_SETTINGS_TEXT_SIZE_ROW: String = "settings_text_size_row"
 const val TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW: String = "settings_dynamic_color_row"
+const val TEST_TAG_SETTINGS_SWIPE_NAVIGATION_ROW: String = "settings_swipe_navigation_row"
 const val TEST_TAG_SETTINGS_LANGUAGE_ROW: String = "settings_language_row"
 const val TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW: String = "settings_search_engine_row"
 const val TEST_TAG_SETTINGS_RETENTION_ROW: String = "settings_retention_row"

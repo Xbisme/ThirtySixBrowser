@@ -26,11 +26,11 @@ class BrowserPageHolders(
     val tabSession: TabSessionViewModel,
 )
 
-/** The screen's tools: the hub, address suggestions, the text size and site protection. */
+/** The screen's tools: the hub, address suggestions, the page settings and site protection. */
 class BrowserToolHolders(
     val hub: HubViewModel,
     val suggestions: AddressSuggestionsViewModel,
-    val pageTextSize: PageTextSizeViewModel,
+    val pageSettings: PageSettingsViewModel,
     val protection: ProtectionViewModel,
 )
 
@@ -57,10 +57,10 @@ fun rememberBrowserPageHolders(
 fun rememberBrowserToolHolders(
     hub: HubViewModel = hiltViewModel(),
     suggestions: AddressSuggestionsViewModel = hiltViewModel(),
-    pageTextSize: PageTextSizeViewModel = hiltViewModel(),
+    pageSettings: PageSettingsViewModel = hiltViewModel(),
     protection: ProtectionViewModel = hiltViewModel(),
-): BrowserToolHolders = remember(hub, suggestions, pageTextSize, protection) {
-    BrowserToolHolders(hub, suggestions, pageTextSize, protection)
+): BrowserToolHolders = remember(hub, suggestions, pageSettings, protection) {
+    BrowserToolHolders(hub, suggestions, pageSettings, protection)
 }
 
 @Composable
@@ -94,8 +94,8 @@ fun BrowserRoute(
     val activeTab by holders.page.activeTab.collectAsStateWithLifecycle()
     // Held as State, not delegated: reading `.value` here would recompose on every tick.
     val progress: State<Float> = holders.page.loadProgress.collectAsStateWithLifecycle()
-    // The app-wide text size changes rarely; the WebView and the hub read it.
-    val textZoomPercent by tools.pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
+    // Text size and the swipe switch change rarely; the WebView, the hub and the page read them.
+    val pageSettings by tools.pageSettings.uiState.collectAsStateWithLifecycle()
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -106,7 +106,8 @@ fun BrowserRoute(
             page = browserUiState(currentPage, pageState, addressBarState, actionsState),
             tabCount = tabCount,
             activeTab = activeTab,
-            textZoomPercent = textZoomPercent,
+            textZoomPercent = pageSettings.textZoomPercent,
+            swipeNavigationEnabled = pageSettings.swipeNavigationEnabled,
             loadedTabId = sessionState.loadedTabId,
         ),
         sources = browserScreenSources(holders, tools, pageRequests),

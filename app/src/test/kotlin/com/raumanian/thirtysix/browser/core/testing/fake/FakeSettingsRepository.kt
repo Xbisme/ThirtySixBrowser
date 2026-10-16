@@ -55,6 +55,9 @@ class FakeSettingsRepository(
     override suspend fun setTextSize(size: TextSize): Result<Unit> =
         write(CALL_SET_TEXT_SIZE) { copy(textSize = size) }
 
+    override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> =
+        write(CALL_SET_SWIPE_NAVIGATION) { copy(isSwipeNavigationEnabled = enabled) }
+
     private fun write(name: String, transform: UserSettings.() -> UserSettings): Result<Unit> {
         writes += name
         callLog += name
@@ -73,5 +76,6 @@ class FakeSettingsRepository(
         const val CALL_SET_HISTORY_RETENTION: String = "settings.setHistoryRetention"
         const val CALL_SET_ONBOARDING_COMPLETED: String = "settings.setOnboardingCompleted"
         const val CALL_SET_TEXT_SIZE: String = "settings.setTextSize"
+        const val CALL_SET_SWIPE_NAVIGATION: String = "settings.setSwipeNavigationEnabled"
     }
 }

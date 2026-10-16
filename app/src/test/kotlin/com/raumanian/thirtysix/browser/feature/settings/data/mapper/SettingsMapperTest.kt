@@ -54,6 +54,14 @@ class SettingsMapperTest {
     }
 
     @Test
+    fun swipeNavigation_defaultsToOn_andReadsTheStoredValue() {
+        assertEquals(true, mapper.toDomain(mutablePreferencesOf()).isSwipeNavigationEnabled)
+        val prefs = mutablePreferencesOf().toMutablePreferences()
+        prefs[StorageKeys.SWIPE_NAVIGATION_ENABLED] = false
+        assertEquals(false, mapper.toDomain(prefs).isSwipeNavigationEnabled)
+    }
+
+    @Test
     fun storedDynamicColorTrue_isTrue() {
         val prefs = mutablePreferencesOf().toMutablePreferences()
         prefs[StorageKeys.DYNAMIC_COLOR_ENABLED] = true

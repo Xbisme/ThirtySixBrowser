@@ -15,7 +15,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
+import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.BrowserErrorState
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomePage
@@ -87,6 +90,7 @@ private fun TabWebView(
                 TabPage(state, sources, actions, hosts, frame)
             }
         }
+        SwipeNavigationIndicator(frame.ui.swipe)
     }
 }
 
@@ -109,6 +113,7 @@ private fun TabPage(
     val session = remember {
         state.activeTab?.let { TabSessionHooks(it.id, sources.savedState, actions.onTabSessionAction) }
     }
+    val swipe = rememberSwipeNavigation(state, frame)
     BrowserWebView(
         state = state.page,
         actions = hosts.webViewActions,
@@ -129,7 +134,21 @@ private fun TabPage(
         desktopMode = remember { sources.desktopMode.isDesktop(activeTabId) },
         protection = sources.protectionHooks,
         session = session,
+        swipe = swipe,
     )
+}
+
+/** Swiping is off on Home and the incognito start page, and while the address bar or the find bar is in use. */
+@Composable
+private fun rememberSwipeNavigation(state: BrowserScreenState, frame: BrowserFrame): SwipeNavigationHooks {
+    val page = state.page
+    val enabled by rememberUpdatedState(
+        state.swipeNavigationEnabled && !page.isHomeContent && !page.isAddressBarFocused && !frame.findOpen,
+    )
+    val rtl by rememberUpdatedState(LocalLayoutDirection.current == LayoutDirection.Rtl)
+    val thresholdPx = with(LocalDensity.current) { Dimens.swipeNavigationThreshold.toPx() }
+    val swipeState = frame.ui.swipe
+    return remember(swipeState, thresholdPx) { SwipeNavigationHooks(swipeState, { enabled }, { rtl }, thresholdPx) }
 }
 
 private fun pageNavigationCallbacks(onPageAction: (PageAction) -> Unit, onScrollDelta: (Float) -> Unit) =

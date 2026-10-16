@@ -83,6 +83,9 @@ internal class InstrumentedFakeSettingsRepository(
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         write { copy(isOnboardingCompleted = value) }
 
+    override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> =
+        write { copy(isSwipeNavigationEnabled = enabled) }
+
     private fun write(transform: UserSettings.() -> UserSettings): Result<Unit> {
         if (failNextWrite) {
             failNextWrite = false

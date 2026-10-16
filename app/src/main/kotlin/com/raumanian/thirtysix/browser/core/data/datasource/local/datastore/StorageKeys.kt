@@ -25,6 +25,8 @@ object StorageKeys {
 
     val TEXT_ZOOM_PERCENT = intPreferencesKey("text_zoom_percent")
 
+    val SWIPE_NAVIGATION_ENABLED = booleanPreferencesKey("swipe_navigation_enabled")
+
     /** Set across a Fire run; still `true` at start-up means the run must finish before any tab shows. */
     val FIRE_IN_PROGRESS = booleanPreferencesKey("fire_in_progress")
 }

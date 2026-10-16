@@ -62,6 +62,7 @@ internal fun BrowserWebView(
     desktopMode: Boolean = false,
     protection: ProtectionHooks? = null,
     session: TabSessionHooks? = null,
+    swipe: SwipeNavigationHooks? = null,
 ) {
     // A page-created WebView is adopted by the first generation only; a renderer-loss replacement is built fresh.
     val adoptable = remember { arrayOf(adopted) }
@@ -86,7 +87,8 @@ internal fun BrowserWebView(
             factory = { context ->
                 val toAdopt = adoptable[0].also { adoptable[0] = null }
                 // An incognito WebView gets the session's own profile before anything else touches it.
-                val fresh = toAdopt ?: WebViewProfiles.prepare(WebView(context), state.isIncognito, incognitoProfile)
+                val fresh = toAdopt
+                    ?: WebViewProfiles.prepare(BrowserPageView(context), state.isIncognito, incognitoProfile)
                 val webView = preparePageTools(fresh, actions, textZoom.value, desktopMode)
                     // Without explicit params AndroidView lays the WebView out as WRAP_CONTENT, and
                     // Chromium then gives the page a layout viewport 0 px tall: pages sized with
@@ -105,6 +107,7 @@ internal fun BrowserWebView(
                     incognitoProfile = incognitoProfile,
                     session = session,
                 ).also { wv ->
+                    (wv as? BrowserPageView)?.swipe = swipe
                     instance[0] = wv
                     host.current = wv
                 }
@@ -268,7 +271,7 @@ private fun newPopupWebView(
     incognito: Boolean,
     incognitoProfile: IncognitoWebProfile,
 ): WebView =
-    WebViewProfiles.prepare(WebView(context), incognito, incognitoProfile).also { popup ->
+    WebViewProfiles.prepare(BrowserPageView(context), incognito, incognitoProfile).also { popup ->
         applySecuritySettings(popup)
         if (incognito) applyIncognitoSettings(popup)
         // Until its tab adopts it, the pop-up must load in place: a WebView with no client hands

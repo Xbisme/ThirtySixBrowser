@@ -78,6 +78,7 @@ class SettingsViewModel @Inject constructor(
                         searchEngine = stored.searchEngine,
                         historyRetention = stored.historyRetention,
                         textSize = stored.textSize,
+                        isSwipeNavigationEnabled = stored.isSwipeNavigationEnabled,
                     )
                 }
             }
@@ -107,6 +108,7 @@ class SettingsViewModel @Inject constructor(
             SettingsAction.ShortenRetentionConfirmed -> onShortenRetentionConfirmed()
             SettingsAction.ShortenRetentionCancelled -> dismissDialog()
             is SettingsAction.DynamicColorToggled -> onDynamicColorToggled(action.enabled)
+            is SettingsAction.SwipeNavigationToggled -> onSwipeNavigationToggled(action.enabled)
         }
     }
 
@@ -228,6 +230,11 @@ class SettingsViewModel @Inject constructor(
     private fun onDynamicColorToggled(enabled: Boolean) {
         if (enabled == _uiState.value.isDynamicColorEnabled) return
         persist { settings.setDynamicColorEnabled(enabled) }
+    }
+
+    private fun onSwipeNavigationToggled(enabled: Boolean) {
+        if (enabled == _uiState.value.isSwipeNavigationEnabled) return
+        persist { settings.setSwipeNavigationEnabled(enabled) }
     }
 
     private fun openDialog(dialog: SettingsDialog) {

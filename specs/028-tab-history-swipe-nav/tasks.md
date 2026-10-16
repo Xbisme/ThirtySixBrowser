@@ -153,7 +153,7 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
 
 **Goal**: FR-011 to FR-018. **Independent test**: quickstart G3 steps 7–8 (SC-007, SC-008).
 
-- [ ] T020 [US4] Add the setting:
+- [X] T020 [US4] Add the setting:
   - DataStore key `swipe_navigation_enabled` (default `true`) in `L/datastore/SettingsDataStore.kt`;
   - `UserSettings.isSwipeNavigationEnabled` in `M/core/domain/model/UserSettings.kt`, with the default in `AppDefaults`;
   - `setSwipeNavigationEnabled` in `M/core/domain/repository/SettingsRepository.kt` and `M/feature/settings/data/repository/SettingsRepositoryImpl.kt`;
@@ -161,23 +161,23 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - `T/core/testing/fake/FakeSettingsRepository.kt`.
 
   Tests: the mapper and repository tests.
-- [ ] T021 [US4] Add the Settings row:
+- [X] T021 *(as built: the indicator reuses `browser_action_back`/`browser_action_forward`, so only the two Settings strings were added)* [US4] Add the Settings row:
   - `SettingsAction.SwipeNavigationChanged(enabled)`, state field, and a switch row in `M/feature/settings/presentation/settings/` (`SettingsAction.kt`, `SettingsUiState.kt`, `SettingsViewModel.kt`, `SettingsScreen.kt`);
   - strings `settings_swipe_navigation_title` and `settings_swipe_navigation_summary` in `app/src/main/res/values*/strings.xml` (8 locales).
 
   Tests: `SettingsViewModelTest`, plus an instrumented check of the row in `SettingsScreen*Test`.
-- [ ] T022 [US4] Rename `B/PageTextSizeViewModel.kt` to `B/PageSettingsViewModel.kt`, which exposes `StateFlow<PageSettingsUiState(textZoomPercent, swipeNavigationEnabled)>`. Update `BrowserToolHolders`, the route and the tests.
-- [ ] T023 [US4] Add the swipe state:
+- [X] T022 [US4] Rename `B/PageTextSizeViewModel.kt` to `B/PageSettingsViewModel.kt`, which exposes `StateFlow<PageSettingsUiState(textZoomPercent, swipeNavigationEnabled)>`. Update `BrowserToolHolders`, the route and the tests.
+- [X] T023 [US4] Add the swipe state:
   - `B/SwipeNavigationState.kt`: a `@Stable` class with `direction`, a per-frame `progress`, and `available`;
   - `SwipeNavigationLimits` with a `THRESHOLD` dp, the 2:1 horizontal ratio and the 24 dp fallback edge.
 
   Test: `T/feature/browser/presentation/browser/SwipeNavigationStateTest.kt` covers progress clamping, cancel, and LTR/RTL direction mapping.
-- [ ] T024 [US4] Add `B/BrowserPageView.kt`, a `WebView` subclass:
+- [X] T024 *(as built: the gesture starts only when three things hold. The drag is mostly sideways, the page reported overscroll since touch-down, and `canScrollHorizontally` is false that way. The spike could not settle whether a real finger scrolls an inner carousel, because adb-injected drags did not scroll it; this is checked by hand in G3)* [US4] Add `B/BrowserPageView.kt`, a `WebView` subclass:
   - it watches touches in `dispatchTouchEvent` and overscroll in `onOverScrolled`, per [contracts/swipe-navigation.md](contracts/swipe-navigation.md) and the T002 result;
   - it reports start, progress, release and cancel through a `SwipeNavigationListener`.
 
   Use it in place of `WebView(context)` in `B/BrowserWebView.kt`, for both the page and pop-ups. Test the gesture logic, separated into a pure `SwipeGestureTracker`, in `T/.../SwipeGestureTrackerTest.kt`.
-- [ ] T025 [US4] Add `B/SwipeNavigationIndicator.kt` and the wiring:
+- [X] T025 [US4] Add `B/SwipeNavigationIndicator.kt` and the wiring:
   - **Indicator**: a circular arrow; offset and scale read only in `graphicsLayer {}`; primary color at the threshold and a disabled tint when unavailable; semantics "Back"/"Forward" from new strings `swipe_navigation_back` and `swipe_navigation_forward` (8 locales).
   - **Wiring**: `B/BrowserContent.kt` gets a `SwipeNavigationState` in `BrowserScreenUi`, and the gesture is enabled only per FR-015 and FR-018.
   - **Release**: calls `webViewActions.goBack()` or `goForward()`.
