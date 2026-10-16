@@ -247,3 +247,9 @@ The MVP is Phases 1–3: the reported defect fixed for reopening the app. US2 ad
 
 | Measure | Value | Pass |
 |---|---|---|
+| Unit tests | 987, 0 failed (943 at baseline) | yes |
+| detekt, ktlint, lintDebug | clean | yes |
+| Compose restartable / non-skippable | 228 / 0 (was 225 / 0) | yes |
+| Release APK | 3,776,883 B (+18,452 B, +0.49 %), under the 4 MB budget | yes |
+| 16 KB alignment | all native libs aligned | yes |
+| Galaxy A55, by hand | pages A→B→C, force-stop, reopen: C, then Back to B and to A. Swipe right goes back, swipe left goes forward. A swipe pulled back under the threshold cancels. The arrow shows on the side of the swipe | yes |
