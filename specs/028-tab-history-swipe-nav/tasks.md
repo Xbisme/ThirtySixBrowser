@@ -204,14 +204,14 @@ description: "Task list for Spec 028 Tab History and Swipe Navigation"
   - the swipe signal.
 
   **Commit** `docs(028): ADR 0028`.
-- [ ] T028 Run G3 (quickstart steps 1–9) on `TA016_API36_16K` and a smoke on `TA016_API24`, including the instrumented suite and an upgrade over the `e89632d` build. Also:
+- [X] T028 Run G3 (quickstart steps 1–9) on `TA016_API36_16K` and a smoke on `TA016_API24`, including the instrumented suite and an upgrade over the `e89632d` build. Also:
   - repeat steps 7–8 with three-button navigation (`adb shell cmd overlay enable com.android.internal.systemui.navbar.threebutton`, restore gestural afterwards) for FR-016;
   - confirm `app/src/main/res/xml/data_extraction_rules.xml` and `backup_rules.xml` still exclude the database for FR-010.
 
   Record "Results".
-- [ ] T029 Run G4: `lintDebug`, `assembleRelease`, 16 KB alignment, the Compose report with zero unexplained non-skippable composables, the Layout Inspector counts from T026, APK size vs T001, and cold start vs T001 (SC-006).
-- [ ] T030 Push and open the PR with the results and the attribution footer. Merge with CI 6/6 once the owner agrees.
-- [ ] T031 Write the memory note after the merge.
+- [X] T029 *(as run: every item except the Layout Inspector counts, which need Android Studio by hand and were not taken; swipe progress is read only in `graphicsLayer`)* Run G4: `lintDebug`, `assembleRelease`, 16 KB alignment, the Compose report with zero unexplained non-skippable composables, the Layout Inspector counts from T026, APK size vs T001, and cold start vs T001 (SC-006).
+- [X] T030 *(PR #48; CI's API 29 run caught two Settings tests that missed rows pushed below the fold by the new switch, fixed by scrolling to them)* Push and open the PR with the results and the attribution footer. Merge with CI 6/6 once the owner agrees.
+- [X] T031 Write the memory note after the merge.
 
 ## Dependencies
 
