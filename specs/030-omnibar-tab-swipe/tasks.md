@@ -17,21 +17,21 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Baseline on `030-omnibar-tab-swipe` at `3feed8a` (code = `main` `8e5a0ca`): record the unit and instrumented test counts and the release APK size in "Gate Results" below
+- [X] T001 Baseline on `030-omnibar-tab-swipe` at `3feed8a` (code = `main` `8e5a0ca`): record the unit and instrumented test counts and the release APK size in "Gate Results" below
 
 ## Phase 2: Foundational (blocks all stories)
 
-- [ ] T002 [P] Add `TabNeighbours(previous: Tab?, next: Tab?)` in `M/core/domain/model/TabNeighbours.kt`
-- [ ] T003 [P] Add `TabOrder` in `M/core/domain/util/TabOrder.kt`:
+- [X] T002 [P] Add `TabNeighbours(previous: Tab?, next: Tab?)` in `M/core/domain/model/TabNeighbours.kt`
+- [X] T003 [P] Add `TabOrder` in `M/core/domain/util/TabOrder.kt`:
   - `inOpeningOrder(tabs)` sorts by `position ASC, createdAt ASC, |id| ASC`;
   - `neighbours(tabs, activeId)` takes the same-`isIncognito` tabs of the active one in that order and returns the ones before and after. A `null` or unknown `activeId` gives `TabNeighbours(null, null)`.
-- [ ] T004 Tests in `T/core/domain/util/TabOrderTest.kt`:
+- [X] T004 Tests in `T/core/domain/util/TabOrderTest.kt`:
   - ties on `position` broken by `createdAt`, then by id magnitude, for negative incognito ids too;
   - neighbours in the middle and at both ends;
   - a single tab;
   - normal and incognito mixed: neighbours never cross kinds;
   - an unknown active id.
-- [ ] T005 [P] Change the KDoc of `position` in `M/core/domain/model/Tab.kt` to say it is the order tabs are shown and swiped in. Add `docs/adr/0030-tabs-in-opening-order.md`: tabs are shown and swiped in opening order, "active" stays the newest `lastActiveAt`, and closing hands the active mark to the neighbour (research R1, R2).
+- [X] T005 [P] Change the KDoc of `position` in `M/core/domain/model/Tab.kt` to say it is the order tabs are shown and swiped in. Add `docs/adr/0030-tabs-in-opening-order.md`: tabs are shown and swiped in opening order, "active" stays the newest `lastActiveAt`, and closing hands the active mark to the neighbour (research R1, R2).
 
 ## Phase 3: User Story 1 – Swipe to the neighbouring tab (P1) 🎯 MVP
 
@@ -243,7 +243,7 @@ MVP = Phases 1–3: the swipe works with a stable order, and the Tabs screen mat
 
 | Gate | Status | Result |
 |---|---|---|
-| T001 Baseline | — | |
+| T001 Baseline | ✅ 2026-10-17, code = `main` `8e5a0ca` | 1,040 unit tests, 0 failures; 204 instrumented `@Test`s; release APK 3,818,443 B (`741a393` build, app code identical) |
 | G1/T035 Quality gates | — | |
 | Size | — | |
 | Cold start | — | |
