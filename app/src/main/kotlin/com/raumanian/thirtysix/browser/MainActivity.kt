@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -71,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        keepClearedFocusOutOfCompose()
         receiveLaunchIntent(savedInstanceState)
         // A rotation recreates the activity: the stop that preceded it happened on the old
         // instance, so the new one learns it from the bundle and skips its first count.
@@ -104,6 +106,17 @@ class MainActivity : AppCompatActivity() {
         }
         if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
         incomingIntentReader.read(intent)?.let(incomingRequestRelay::submit)
+    }
+
+    /**
+     * Below Android 9, clearing focus hands it back to the first focusable view, which put the
+     * cursor straight back into the field just closed. The content frame now takes it instead.
+     */
+    private fun keepClearedFocusOutOfCompose() {
+        findViewById<ViewGroup>(android.R.id.content).apply {
+            isFocusableInTouchMode = true
+            descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
+        }
     }
 
     /** The default-browser state may have changed in system settings while the app was away. */
