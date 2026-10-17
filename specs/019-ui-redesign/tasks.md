@@ -329,10 +329,10 @@ Each increment leaves every Spec 007–018 behaviour working and all tests green
 | G12 Dynamic color | — not run | Needs three wallpapers changed by hand; dynamic color is off by default (FR-005a). |
 | G13 Recomposition | ⏸ needs a person | Layout Inspector is GUI-only. ⚠️ The **before** baseline (T004) now has to be taken by checking out `25cad6b`, the last `main` before PR #27. |
 | G14 Frame time | ✅ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | **SC-005 PASS** via `dumpsys gfxinfo`, app rendering at 60 Hz (FrameInterval 16.6 ms): page scroll (Wikipedia, 20 flings) **p95 14 ms**; Home scroll (vertical + card row) **p95 14 ms**; hub drag only (12 cycles, sheet opened outside the window) **p95 15 ms**, p99 19 ms; tab swipe (10 swipes) **p95 10 ms**. None of the four needs seeded data, so the release-seeding blocker does not apply. Caveat: the A55 (Exynos 1480) is faster than a Pixel 5 — this is Pixel-5-class-or-better evidence. |
-| G15 Size & start | ⚠️ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | APK **3,235,164 B** after the hub-string fix (+100,188 B, budget 3,544,576 B). Cold start, Spec 018 vs 019 release built from `492e4f3` / `54e090a`, interleaved rounds of 10: **returning user 433.5 → 451.5 ms (+4.2%, inside +5%)**; **first run (onboarding) ≈265 → ≈345 ms (≈+30%, FAILS the +5% of SC-010)** — happens once per install; open. New tab → Home: 1–2 frames, **median ≈57 ms, max 84 ms** (≤ 300 ms). |
+| G15 Size & start | ✅ accepted (ADR 0029) · 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | APK **3,235,164 B** after the hub-string fix (+100,188 B, budget 3,544,576 B). Cold start, Spec 018 vs 019 release built from `492e4f3` / `54e090a`, interleaved rounds of 10: **returning user 433.5 → 451.5 ms (+4.2%, inside +5%)**; **first run (onboarding) ≈265 → ≈345 ms (≈+30%, FAILS the +5% of SC-010)** — happens once per install. **Accepted 2026-10-17 (ADR 0029)**: the gap is shader compilation for the new onboarding visuals (7 programs vs 2), paid on the first launch after an install only. New tab → Home: 1–2 frames, **median ≈57 ms, max 84 ms** (≤ 300 ms). |
 | G16 Tab switcher ≤ 200 ms | ✅ 2026-10-11, Galaxy A55 (SM-A556E, Android 16), release | 10 tabs, 10 opens: **median 104 ms**, max 131 ms (framestats: tap-frame vsync → completion of the heaviest following frame). |
 | G17 Reduced motion | — not run | |
-| TalkBack | ⏸ DEFERRED to a person | As Specs 016–018. |
+| TalkBack | ✅ owner | Checked by the owner by hand (reported 2026-10-17). |
 
 ## Notes
 
