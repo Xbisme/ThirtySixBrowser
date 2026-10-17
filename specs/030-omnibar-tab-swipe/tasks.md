@@ -210,7 +210,7 @@
   - SC-005 frame timing on the A55 release build (check `mCurrentFocus` first; restore the owner's state afterwards);
   - SC-008 cold start interleaved against `8e5a0ca`;
   - the recomposition counts from T033a.
-- [ ] T038 PR with the gate results; update the project memory
+- [X] T038 PR with the gate results; update the project memory
 
 ## Implementation notes
 
