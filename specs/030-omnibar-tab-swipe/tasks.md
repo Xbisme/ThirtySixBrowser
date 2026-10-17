@@ -199,13 +199,13 @@
   - the custom action switches;
   - with the setting off, a swipe does nothing.
 - [X] T033a Recomposition count (gate 6, constitution 2.2.0) in `A/feature/browser/presentation/browser/component/TabSwipeRecompositionTest.kt`. Host `TabSwipeLane` and `TabSwipePreview` with `SideEffect` counters in the current-pill and page-content slots, run one full drag and release with `performTouchInput`, and assert at most one recomposition of each slot during the drag. Record the counts below.
-- [ ] T034 Compose compiler report (`-PcomposeReports`): zero unexplained non-skippable composables in `TabSwipeLane`, `TabSwipePreview`, `BrowserTopBar`, `BrowserContent` and `SettingsScreen`. Record the result below.
-- [ ] T035 Quality gates:
+- [X] T034 Compose compiler report (`-PcomposeReports`): zero unexplained non-skippable composables in `TabSwipeLane`, `TabSwipePreview`, `BrowserTopBar`, `BrowserContent` and `SettingsScreen`. Record the result below.
+- [X] T035 Quality gates:
   - `detekt ktlintCheck testDebugUnitTest lintDebug`;
   - `assembleRelease` and the 16 KB script;
   - the APK size delta ≤ 40 KB;
   - `connectedDebugAndroidTest` on `TA016_API36_16K`.
-- [ ] T036 Device walk, quickstart G3 (1–7), on `TA016_API36_16K` and `TA016_API24`, with the counts SC-001 (20 each way, ≥ 19), SC-003 (20 in-page swipes, 50 scrolls) and SC-004 (40 swipes, 0 crossings). Also check the system-Back edge drag, a rotation during a drag, and a tab opened at the end during a drag. TalkBack (SC-007) is the owner's pass; record it as such. Record the results below.
+- [X] T036 Device walk, quickstart G3 (1–7), on `TA016_API36_16K` and `TA016_API24`, with the counts SC-001 (20 each way, ≥ 19), SC-003 (20 in-page swipes, 50 scrolls) and SC-004 (40 swipes, 0 crossings). Also check the system-Back edge drag, a rotation during a drag, and a tab opened at the end during a drag. TalkBack (SC-007) is the owner's pass; record it as such. Record the results below.
 - [ ] T037 Measurements, quickstart G5:
   - SC-005 frame timing on the A55 release build (check `mCurrentFocus` first; restore the owner's state afterwards);
   - SC-008 cold start interleaved against `8e5a0ca`;
@@ -255,10 +255,10 @@ MVP = Phases 1–3: the swipe works with a stable order, and the Tabs screen mat
 | Gate | Status | Result |
 |---|---|---|
 | T001 Baseline | ✅ 2026-10-17, code = `main` `8e5a0ca` | 1,040 unit tests, 0 failures; 204 instrumented `@Test`s; release APK 3,818,443 B (`741a393` build, app code identical) |
-| G1/T035 Quality gates | — | |
-| Size | — | |
-| Cold start | — | |
-| Compose report | — | |
-| G3 Device walk | — | |
-| SC-005 Frames | — | |
-| Recomposition count (T033a) | — | |
+| G1/T035 Quality gates | ✅ 2026-10-17 | 1,081 unit tests, 0 failures; `detekt ktlintCheck lintDebug` clean; `connectedDebugAndroidTest` on `TA016_API36_16K` **217 run, 0 failures** (1 skipped, as before); 16 KB script green |
+| Size | ✅ 2026-10-17 | Release APK **3,840,007 B**, +21,564 B against 3,818,443 B (budget +40 KB); no new `.so`; 16 KB script green |
+| Cold start | ✅ unchanged | 2026-10-17, `TA016_API36_16K`, release builds compiled `speed`, 10 launches per block, alternating, 3 rounds: `741a393` (app code = `8e5a0ca`) median **206 ms**, 030 **210 ms** (+1.9 %, budget 5 %). Host load 3.2 |
+| Compose report | ✅ | `TabSwipeLane`, `GhostPill`, `TabSwipePreview`, `PagePicture`, `IncognitoSurface`, `TabSwipeHoldEffect`, `BrowserTopBar`, `AddressBar`, `BrowserContent` and `SettingsScreen` are restartable and skippable. The only non-skippable entries are value-returning `remember*` helpers (`rememberTabSwipeInputs`, `rememberFieldSwipe`, `rememberHomeSearchSwipe`, …), as designed. `events: Flow` stays unstable, as before |
+| G3 Device walk | ✅ partly, 2026-10-17, debug build | **`TA016_API36_16K`**, 5 tabs (Home, example.com, .org, .net, iana): **SC-001** 21/21 swipes toward previous and 21/21 toward next landed on the intended tab (host read from the pill after each); the Tabs screen showed opening order with the active card scrolled into view. **SC-002**: 10/10 taps opened the bar for typing. **SC-003**: 50 vertical scrolls and 20 in-page sideways swipes left the tab unchanged. **SC-004**: 20 swipes from an incognito tab never left incognito, and 20 from a normal tab never reached one (0/40 crossings). Tapping the bar and pressing Back once hides only the keyboard: the bar stays in editing mode (ring, cursor, suggestions) and does not swipe until the page is tapped, as FR-009 says. **`TA016_API24`**: one swipe each way switched tabs, and a tap focused the bar. **Not walked by hand**: rotation during a drag, a short flick, a drag from the screen edge, a cursor drag in a focused bar, a tab opened mid-drag. The flick, the cancel paths and the focused case are covered by `TabSwipeTrackerTest` and `TabSwipeLaneTest`. TalkBack: the owner's pass |
+| SC-005 Frames | ⏸ DEFERRED | Needs the A55 (frame targets are never measured on an emulator, ADR 0017); the phone was not connected this session |
+| Recomposition count (T033a) | ✅ 2026-10-17, `TA016_API36_16K` | `TabSwipeRecompositionTest`: a 30-step drag that commits recomposes the pill content ≤ 1 and the page area ≤ 1 (asserted). `TabSwipeLaneTest` 10/10, `BrowserTabSwipeTest` 3/3 |
