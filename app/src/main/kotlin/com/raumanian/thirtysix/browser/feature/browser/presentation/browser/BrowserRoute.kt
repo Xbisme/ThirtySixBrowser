@@ -22,23 +22,24 @@ class BrowserPageHolders(
     val page: PageViewModel,
     val addressBar: AddressBarViewModel,
     val findInPage: FindInPageViewModel,
-    val downloadRequests: DownloadRequestViewModel,
     val pageActions: PageActionsViewModel,
+    val tabSession: TabSessionViewModel,
 )
 
-/** The screen's tools: the hub, address suggestions, the text size and site protection. */
+/** The screen's tools: the hub, address suggestions, the page settings and site protection. */
 class BrowserToolHolders(
     val hub: HubViewModel,
     val suggestions: AddressSuggestionsViewModel,
-    val pageTextSize: PageTextSizeViewModel,
+    val pageSettings: PageSettingsViewModel,
     val protection: ProtectionViewModel,
 )
 
-/** What answers the page's own requests: pop-up tabs, long-press menus and site permissions. */
+/** What answers the page's own requests: pop-up tabs, long-press menus, site permissions and downloads. */
 class PageRequestHolders(
     val popupTabs: PopupTabs,
     val longPressActions: LongPressActions,
     val permissionGate: SitePermissionGate,
+    val downloadRequests: DownloadRequestViewModel,
 )
 
 @Composable
@@ -46,20 +47,20 @@ fun rememberBrowserPageHolders(
     page: PageViewModel = hiltViewModel(),
     addressBar: AddressBarViewModel = hiltViewModel(),
     findInPage: FindInPageViewModel = hiltViewModel(),
-    downloadRequests: DownloadRequestViewModel = hiltViewModel(),
     pageActions: PageActionsViewModel = hiltViewModel(),
-): BrowserPageHolders = remember(page, addressBar, findInPage, downloadRequests, pageActions) {
-    BrowserPageHolders(page, addressBar, findInPage, downloadRequests, pageActions)
+    tabSession: TabSessionViewModel = hiltViewModel(),
+): BrowserPageHolders = remember(page, addressBar, findInPage, pageActions, tabSession) {
+    BrowserPageHolders(page, addressBar, findInPage, pageActions, tabSession)
 }
 
 @Composable
 fun rememberBrowserToolHolders(
     hub: HubViewModel = hiltViewModel(),
     suggestions: AddressSuggestionsViewModel = hiltViewModel(),
-    pageTextSize: PageTextSizeViewModel = hiltViewModel(),
+    pageSettings: PageSettingsViewModel = hiltViewModel(),
     protection: ProtectionViewModel = hiltViewModel(),
-): BrowserToolHolders = remember(hub, suggestions, pageTextSize, protection) {
-    BrowserToolHolders(hub, suggestions, pageTextSize, protection)
+): BrowserToolHolders = remember(hub, suggestions, pageSettings, protection) {
+    BrowserToolHolders(hub, suggestions, pageSettings, protection)
 }
 
 @Composable
@@ -67,8 +68,9 @@ fun rememberPageRequestHolders(
     popupTabs: PopupTabs = hiltViewModel(),
     longPressActions: LongPressActions = hiltViewModel(),
     permissionGate: SitePermissionGate = hiltViewModel(),
-): PageRequestHolders = remember(popupTabs, longPressActions, permissionGate) {
-    PageRequestHolders(popupTabs, longPressActions, permissionGate)
+    downloadRequests: DownloadRequestViewModel = hiltViewModel(),
+): PageRequestHolders = remember(popupTabs, longPressActions, permissionGate, downloadRequests) {
+    PageRequestHolders(popupTabs, longPressActions, permissionGate, downloadRequests)
 }
 
 /**
@@ -87,26 +89,29 @@ fun BrowserRoute(
     val currentPage by holders.page.currentPage.collectAsStateWithLifecycle()
     val addressBarState by holders.addressBar.uiState.collectAsStateWithLifecycle()
     val actionsState by holders.pageActions.uiState.collectAsStateWithLifecycle()
+    val sessionState by holders.tabSession.uiState.collectAsStateWithLifecycle()
     val tabCount by holders.page.tabCount.collectAsStateWithLifecycle()
     val activeTab by holders.page.activeTab.collectAsStateWithLifecycle()
     // Held as State, not delegated: reading `.value` here would recompose on every tick.
     val progress: State<Float> = holders.page.loadProgress.collectAsStateWithLifecycle()
-    // The app-wide text size changes rarely; the WebView and the hub read it.
-    val textZoomPercent by tools.pageTextSize.textZoomPercent.collectAsStateWithLifecycle()
+    // Text size and the swipe switch change rarely; the WebView, the hub and the page read them.
+    val pageSettings by tools.pageSettings.uiState.collectAsStateWithLifecycle()
     val webViewActions = remember { WebViewActionsHandle() }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    BrowserRouteEffects(holders, tools, webViewActions, snackbarHostState)
+    BrowserRouteEffects(holders, tools, pageRequests, BrowserEffectHosts(webViewActions, snackbarHostState))
 
     BrowserScreen(
         state = BrowserScreenState(
             page = browserUiState(currentPage, pageState, addressBarState, actionsState),
             tabCount = tabCount,
             activeTab = activeTab,
-            textZoomPercent = textZoomPercent,
+            textZoomPercent = pageSettings.textZoomPercent,
+            swipeNavigationEnabled = pageSettings.swipeNavigationEnabled,
+            loadedTabId = sessionState.loadedTabId,
         ),
         sources = browserScreenSources(holders, tools, pageRequests),
-        actions = browserScreenActions(holders, tools),
+        actions = browserScreenActions(holders, tools, pageRequests),
         hosts = remember(webViewActions, snackbarHostState, slots, progress) {
             BrowserScreenHosts(webViewActions, snackbarHostState, slots, progress = { progress.value })
         },
@@ -114,16 +119,21 @@ fun BrowserRoute(
     )
 }
 
+private class BrowserEffectHosts(val webViewActions: WebViewActionsHandle, val snackbarHostState: SnackbarHostState)
+
 @Composable
 private fun BrowserRouteEffects(
     holders: BrowserPageHolders,
     tools: BrowserToolHolders,
-    webViewActions: WebViewActionsHandle,
-    snackbarHostState: SnackbarHostState,
+    pageRequests: PageRequestHolders,
+    hosts: BrowserEffectHosts,
 ) {
+    val webViewActions = hosts.webViewActions
+    val snackbarHostState = hosts.snackbarHostState
     BrowserEventEffects(events = holders.addressBar.events, webViewActions = webViewActions)
+    TabSessionEventEffect(events = holders.tabSession.events, webViewActions = webViewActions)
     HubEventEffect(events = tools.hub.events, snackbarHostState = snackbarHostState)
-    DownloadRequestEventEffect(events = holders.downloadRequests.events, snackbarHostState = snackbarHostState)
+    DownloadRequestEventEffect(events = pageRequests.downloadRequests.events, snackbarHostState = snackbarHostState)
     PageActionsEventEffect(
         events = holders.pageActions.events,
         webViewActions = webViewActions,
@@ -145,17 +155,23 @@ private fun browserScreenSources(
     protectionDashboard = tools.protection.dashboard,
     protectionHooks = tools.protection.hooks,
     desktopMode = holders.pageActions.desktopMode,
+    savedState = holders.tabSession.savedState,
     popups = pageRequests.popupTabs,
     longPressActions = pageRequests.longPressActions,
     permissionGate = pageRequests.permissionGate,
 )
 
-private fun browserScreenActions(holders: BrowserPageHolders, tools: BrowserToolHolders) = BrowserScreenActions(
+private fun browserScreenActions(
+    holders: BrowserPageHolders,
+    tools: BrowserToolHolders,
+    pageRequests: PageRequestHolders,
+) = BrowserScreenActions(
     onPageAction = holders.page::onAction,
     onAddressBarAction = holders.addressBar::onAction,
     onFindAction = holders.findInPage::onAction,
-    onDownloadAction = holders.downloadRequests::onAction,
+    onDownloadAction = pageRequests.downloadRequests::onAction,
     onPageActionsAction = holders.pageActions::onAction,
+    onTabSessionAction = holders.tabSession::onAction,
     tools = BrowserToolActions(
         onHubAction = tools.hub::onAction,
         onSuggestionsAction = tools.suggestions::onAction,

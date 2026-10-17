@@ -211,6 +211,8 @@
     <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">동적 색상</string>
     <string name="settings_dynamic_color_summary">배경화면의 색상 사용</string>
+    <string name="settings_swipe_navigation_title">스와이프로 뒤로·앞으로 이동</string>
+    <string name="settings_swipe_navigation_summary">페이지를 옆으로 스와이프하여 이전 또는 다음 페이지로 이동</string>
 
     <!-- About. -->
     <string name="settings_about_version">버전 %1$s</string>

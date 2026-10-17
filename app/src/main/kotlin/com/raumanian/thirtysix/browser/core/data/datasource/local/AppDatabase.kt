@@ -10,6 +10,8 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.History
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SiteProtectionExceptionEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEntity
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabSessionEntity
+
 @Database(
     entities = [
         BookmarkEntity::class,
@@ -20,6 +22,7 @@ import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEnti
         SitePermissionEntity::class,
         SiteProtectionExceptionEntity::class,
         TabEntity::class,
+        TabSessionEntity::class,
     ],
     version = AppDatabase.SCHEMA_VERSION,
     exportSchema = true,
@@ -35,12 +38,13 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun sitePermissionDao(): SitePermissionDao
     abstract fun siteProtectionExceptionDao(): SiteProtectionExceptionDao
     abstract fun tabDao(): TabDao
+    abstract fun tabSessionDao(): TabSessionDao
 
     companion object {
         const val DATABASE_NAME = "thirtysix_browser.db"
 
         // Every bump needs a registered additive Migration and a committed schema export;
         // destructive fallback is never used, so user data always survives an upgrade.
-        const val SCHEMA_VERSION = 5
+        const val SCHEMA_VERSION = 6
     }
 }

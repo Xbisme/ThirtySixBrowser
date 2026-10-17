@@ -211,6 +211,8 @@
     <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">动态取色</string>
     <string name="settings_dynamic_color_summary">使用壁纸中的颜色</string>
+    <string name="settings_swipe_navigation_title">滑动后退和前进</string>
+    <string name="settings_swipe_navigation_summary">在页面上横向滑动，转到上一页或下一页</string>
 
     <!-- About. -->
     <string name="settings_about_version">版本 %1$s</string>

@@ -257,6 +257,8 @@
     <!-- dynamic color (Android 12+ only). -->
     <string name="settings_dynamic_color_title">Dynamic color</string>
     <string name="settings_dynamic_color_summary">Use colors from your wallpaper</string>
+    <string name="settings_swipe_navigation_title">Swipe to go back and forward</string>
+    <string name="settings_swipe_navigation_summary">Swipe sideways across a page to go to the previous or next page</string>
 
     <!-- About. The app name comes from app_name. -->
     <string name="settings_about_version">Version %1$s</string>

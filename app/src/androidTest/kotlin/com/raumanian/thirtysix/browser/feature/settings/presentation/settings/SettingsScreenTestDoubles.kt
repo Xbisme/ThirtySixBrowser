@@ -25,9 +25,11 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.fake.NoopTabSessionRepository
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedFakeHistoryRepository
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedImmediateDispatchers
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedNoopFaviconCacheForHistory
@@ -80,6 +82,9 @@ internal class InstrumentedFakeSettingsRepository(
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         write { copy(isOnboardingCompleted = value) }
+
+    override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> =
+        write { copy(isSwipeNavigationEnabled = enabled) }
 
     private fun write(transform: UserSettings.() -> UserSettings): Result<Unit> {
         if (failNextWrite) {
@@ -172,7 +177,7 @@ internal fun settingsViewModel(
     setAppLanguage: SetAppLanguageUseCase =
         SetAppLanguageUseCase(appLanguageController, InstrumentedImmediateDispatchers),
     clearBrowsingData: ClearBrowsingDataUseCase = ClearBrowsingDataUseCase(
-        historyRepository = historyRepository,
+        clearHistory = ClearBrowsingHistoryUseCase(historyRepository, NoopTabSessionRepository),
         webDataCleaner = webDataCleaner,
         cookieJarSnapshotManager = InstrumentedNoopCookieJarSnapshotManager,
         faviconCache = InstrumentedNoopFaviconCacheForHistory,

@@ -3,11 +3,13 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.print.PrintManager
+import android.view.PixelCopy
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.HttpAuthHandler
@@ -37,6 +39,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfil
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
+import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.BuildLongPressMenuUseCase
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequest
@@ -61,6 +64,8 @@ internal fun BrowserWebView(
     textZoomPercent: Int = BrowserLimits.TEXT_SIZE_PERCENT_100,
     desktopMode: Boolean = false,
     protection: ProtectionHooks? = null,
+    session: TabSessionHooks? = null,
+    swipe: SwipeNavigationHooks? = null,
 ) {
     // A page-created WebView is adopted by the first generation only; a renderer-loss replacement is built fresh.
     val adoptable = remember { arrayOf(adopted) }
@@ -70,7 +75,7 @@ internal fun BrowserWebView(
     val textZoom = rememberUpdatedState(textZoomPercent)
     LaunchedEffect(textZoomPercent) { host.current?.settings?.textZoom = textZoomPercent }
 
-    PauseWithLifecycle { host.current }
+    PauseWithLifecycle(shownWebView = { host.current }, onStop = { wv -> session?.saveNow(wv) })
 
     val isIncognito = state.isIncognito
 
@@ -85,7 +90,8 @@ internal fun BrowserWebView(
             factory = { context ->
                 val toAdopt = adoptable[0].also { adoptable[0] = null }
                 // An incognito WebView gets the session's own profile before anything else touches it.
-                val fresh = toAdopt ?: WebViewProfiles.prepare(WebView(context), state.isIncognito, incognitoProfile)
+                val fresh = toAdopt
+                    ?: WebViewProfiles.prepare(BrowserPageView(context), state.isIncognito, incognitoProfile)
                 val webView = preparePageTools(fresh, actions, textZoom.value, desktopMode)
                     // Without explicit params AndroidView lays the WebView out as WRAP_CONTENT, and
                     // Chromium then gives the page a layout viewport 0 px tall: pages sized with
@@ -102,7 +108,9 @@ internal fun BrowserWebView(
                     host = host,
                     protection = guard[0],
                     incognitoProfile = incognitoProfile,
+                    session = session,
                 ).also { wv ->
+                    (wv as? BrowserPageView)?.swipe = swipe
                     instance[0] = wv
                     host.current = wv
                 }
@@ -115,7 +123,10 @@ internal fun BrowserWebView(
                 guard[0]?.let { protection?.unprotect(it) }
                 guard[0] = null
                 instance[0]?.let { wv ->
-                    releaseWebView(wv, isIncognito, rendererGone = generation != host.generation)
+                    val rendererGone = generation != host.generation
+                    if (!rendererGone) session?.saveNow(wv)
+                    actions.detachFrom(wv)
+                    releaseWebView(wv, isIncognito, rendererGone)
                     if (host.current === wv) host.current = null
                 }
                 instance[0] = null
@@ -159,6 +170,7 @@ private fun buildConfiguredWebView(
     host: WebViewHost,
     protection: WebViewProtection?,
     incognitoProfile: IncognitoWebProfile,
+    session: TabSessionHooks?,
 ): WebView = webView.also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
@@ -180,12 +192,19 @@ private fun buildConfiguredWebView(
         },
         pageRequests = callbacks.pageRequests,
         protection = protection,
+        onHistoryCommitted = { session?.saveSoon(wv) },
     )
     // Incognito downloads are recorded like any other, so the incognito flag is deliberately not consulted.
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
     }
     wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }
+    // `clearHistory` reports no history change, so Back and Forward are switched off here.
+    actions.clearHistory = {
+        wv.clearHistory()
+        navigationCallbacks.onCanGoBackChange(false)
+        navigationCallbacks.onCanGoForwardChange(false)
+    }
     // Long-press menu on links and images; anything else keeps text selection.
     wv.setOnLongClickListener { onLongPress(wv, callbacks.pageRequests) }
     wv.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
@@ -199,13 +218,15 @@ private fun buildConfiguredWebView(
         incognitoProfile = incognitoProfile,
         newPopupWebView = { context -> newPopupWebView(context, state.isIncognito, incognitoProfile) },
     )
-    wireActions(wv, actions, host, adopted, protection)
-
     // No initial load when the state is seeded to Failed (keeps the error UI), after a renderer crash
     // (so a crashing page waits for Reload instead of looping), or for an adopted pop-up (already navigating).
     val isHome = state.currentUrl == UrlConstants.HOME_PAGE_URL
     val loadable = host.loadInitialUrl && state.loadingState !is LoadingState.Failed
-    if (!adopted && loadable && !isHome) {
+    // A restored tab reloads its own current page, with this client and the protections already attached.
+    val restored = !adopted && loadable && session?.restore(wv) == true
+    wireActions(wv, actions, host, skipFirstLoad = adopted || restored, protection)
+    val needsLoad = !adopted && !restored
+    if (needsLoad && loadable && !isHome) {
         wv.loadProtected(state.currentUrl, protection)
     }
 }
@@ -214,9 +235,10 @@ private fun wireActions(
     wv: WebView,
     actions: WebViewActionsHandle,
     host: WebViewHost,
-    adopted: Boolean,
+    skipFirstLoad: Boolean,
     protection: WebViewProtection?,
 ) {
+    actions.attachTo(wv)
     actions.goBack = { if (wv.canGoBack()) wv.goBack() }
     actions.goForward = { if (wv.canGoForward()) wv.goForward() }
     // `reload()` on an empty WebView (after a renderer crash) does nothing, so load the tab's address instead.
@@ -230,9 +252,9 @@ private fun wireActions(
     actions.findAll = { text -> wv.findAllAsync(text) }
     actions.findNext = { forward -> wv.findNext(forward) }
     actions.clearMatches = { wv.clearMatches() }
-    // The reserved Home address is never handed to the WebView. An adopted pop-up skips the
-    // tab switch's load of its placeholder address once.
-    var skipNextLoad = adopted
+    // The reserved Home address is never handed to the WebView. An adopted pop-up, already navigating,
+    // and a restored tab, already reloading its page, skip the tab switch's load once.
+    var skipNextLoad = skipFirstLoad
     actions.loadUrl = { url ->
         when {
             skipNextLoad -> skipNextLoad = false
@@ -252,7 +274,7 @@ private fun newPopupWebView(
     incognito: Boolean,
     incognitoProfile: IncognitoWebProfile,
 ): WebView =
-    WebViewProfiles.prepare(WebView(context), incognito, incognitoProfile).also { popup ->
+    WebViewProfiles.prepare(BrowserPageView(context), incognito, incognitoProfile).also { popup ->
         applySecuritySettings(popup)
         if (incognito) applyIncognitoSettings(popup)
         // Until its tab adopts it, the pop-up must load in place: a WebView with no client hands
@@ -319,6 +341,7 @@ private class BrowserWebViewClient(
     private val onRendererGone: (crashed: Boolean) -> Unit,
     private val pageRequests: PageRequestSink,
     private val protection: WebViewProtection?,
+    private val onHistoryCommitted: () -> Unit,
 ) : WebViewClient() {
 
     /**
@@ -365,34 +388,59 @@ private class BrowserWebViewClient(
         // A failed HTTPS attempt's error page is not a visit: the http:// page replacing it reports its own events.
         if (view != null && protection?.onPageFinished(view, url) == true) return
         url?.let(onLoadFinished)
+        onHistoryCommitted()
         // Capture the tab preview once the page has had time to paint.
         val v = view ?: return
         v.postDelayed({ captureScreenshot(v) }, SCREENSHOT_DELAY_MS)
     }
 
+    // Copied from the screen, never `view.draw()`: a software draw of the WebView leaves the page's own
+    // scrollers (carousels, maps) unable to take a drag after the next back or forward navigation.
+    // PixelCopy needs API 26; older devices keep the placeholder preview.
     private fun captureScreenshot(view: WebView) {
-        if (view.width <= 0 || view.height <= 0) return
-        try {
-            // Crop the top of the WebView to 16:9 before scaling, so a portrait surface is not squashed.
-            val targetW = AppConstants.SCREENSHOT_TARGET_WIDTH_PX
-            val targetH = AppConstants.SCREENSHOT_TARGET_HEIGHT_PX
-            val cropHeight = ((view.width.toLong() * targetH) / targetW)
-                .toInt()
-                .coerceAtMost(view.height)
-                .coerceAtLeast(1)
-            val source = androidx.core.graphics.createBitmap(
-                view.width,
-                cropHeight,
-                Bitmap.Config.ARGB_8888,
-            )
-            view.draw(android.graphics.Canvas(source))
-            val scaled = source.scale(targetW, targetH, filter = true)
-            if (scaled !== source) source.recycle()
-            onScreenshotReady(scaled)
-        } catch (e: OutOfMemoryError) {
-            // Large surface, low memory: the tab keeps its placeholder preview.
-            android.util.Log.w("BrowserWebView", "Screenshot OOM", e)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val window = view.context.findActivity()?.window
+        val area = previewArea(view)
+        val source = area?.let { newPreviewBitmap(it.width(), it.height()) }
+        if (window == null || source == null) return
+        val onCopied = PixelCopy.OnPixelCopyFinishedListener { result ->
+            if (result == PixelCopy.SUCCESS) {
+                val scaled = source.scale(
+                    AppConstants.SCREENSHOT_TARGET_WIDTH_PX,
+                    AppConstants.SCREENSHOT_TARGET_HEIGHT_PX,
+                    filter = true,
+                )
+                if (scaled !== source) source.recycle()
+                onScreenshotReady(scaled)
+            } else {
+                source.recycle()
+            }
         }
+        try {
+            PixelCopy.request(window, area, source, onCopied, Handler(Looper.getMainLooper()))
+        } catch (e: IllegalArgumentException) {
+            // A window being rebuilt, as on rotation, has no surface yet: this preview is skipped.
+            android.util.Log.w("BrowserWebView", "Screenshot skipped", e)
+            source.recycle()
+        }
+    }
+
+    /** The top of the WebView cropped to 16:9 in window coordinates, so a portrait surface is not squashed. */
+    private fun previewArea(view: WebView): Rect? {
+        if (view.width <= 0 || view.height <= 0 || !view.isAttachedToWindow) return null
+        val cropHeight = (
+            (view.width.toLong() * AppConstants.SCREENSHOT_TARGET_HEIGHT_PX) / AppConstants.SCREENSHOT_TARGET_WIDTH_PX
+            ).toInt().coerceIn(1, view.height)
+        val origin = IntArray(2).also(view::getLocationInWindow)
+        return Rect(origin[0], origin[1], origin[0] + view.width, origin[1] + cropHeight)
+    }
+
+    private fun newPreviewBitmap(width: Int, height: Int): Bitmap? = try {
+        androidx.core.graphics.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    } catch (e: OutOfMemoryError) {
+        // Large surface, low memory: the tab keeps its placeholder preview.
+        android.util.Log.w("BrowserWebView", "Screenshot OOM", e)
+        null
     }
 
     // Fires after every history commit, including fragment and pushState navigations.
@@ -401,6 +449,7 @@ private class BrowserWebViewClient(
         url?.let(onUrlChange)
         onCanGoBackChange(v.canGoBack())
         onCanGoForwardChange(v.canGoForward())
+        onHistoryCommitted()
     }
 
     override fun onReceivedError(

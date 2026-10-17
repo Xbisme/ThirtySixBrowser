@@ -18,13 +18,28 @@ internal class WebViewActionsHandle {
 
     var clearMatches: () -> Unit = {}
 
+    /** Drops the page's back and forward, keeping the page itself. */
+    var clearHistory: () -> Unit = {}
+
     /** Switches the page mode and reloads the tab's address. */
     var setDesktopMode: (Boolean) -> Unit = {}
 
     var print: (jobName: String) -> Unit = {}
 
+    private var owner: Any? = null
+
+    fun attachTo(webView: Any) {
+        owner = webView
+    }
+
+    /** Detaches only when [webView] is still the one wired, so a replacement's wiring survives. */
+    fun detachFrom(webView: Any) {
+        if (owner === webView) detach()
+    }
+
     /** Called when the renderer is gone: that WebView must not be used again until a replacement re-wires this. */
     fun detach() {
+        owner = null
         goBack = {}
         goForward = {}
         reload = {}
@@ -33,6 +48,7 @@ internal class WebViewActionsHandle {
         findAll = {}
         findNext = {}
         clearMatches = {}
+        clearHistory = {}
         setDesktopMode = {}
         print = {}
     }

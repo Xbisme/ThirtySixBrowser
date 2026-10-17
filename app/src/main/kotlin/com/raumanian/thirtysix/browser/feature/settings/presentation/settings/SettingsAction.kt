@@ -49,4 +49,6 @@ sealed interface SettingsAction {
     data object ShortenRetentionCancelled : SettingsAction
 
     data class DynamicColorToggled(val enabled: Boolean) : SettingsAction
+
+    data class SwipeNavigationToggled(val enabled: Boolean) : SettingsAction
 }

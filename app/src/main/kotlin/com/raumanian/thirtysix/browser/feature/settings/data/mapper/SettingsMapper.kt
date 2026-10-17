@@ -25,5 +25,7 @@ class SettingsMapper @Inject constructor() {
         isOnboardingCompleted = prefs[StorageKeys.IS_ONBOARDING_COMPLETED]
             ?: AppDefaults.IS_ONBOARDING_COMPLETED,
         textSize = TextSize.fromPercentOrDefault(prefs[StorageKeys.TEXT_ZOOM_PERCENT]),
+        isSwipeNavigationEnabled = prefs[StorageKeys.SWIPE_NAVIGATION_ENABLED]
+            ?: AppDefaults.SWIPE_NAVIGATION_ENABLED,
     )
 }

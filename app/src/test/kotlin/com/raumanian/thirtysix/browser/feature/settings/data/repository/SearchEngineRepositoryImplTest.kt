@@ -169,4 +169,6 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
         com.raumanian.thirtysix.browser.core.domain.util.Result.Success(Unit)
 
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = error("not used in this test")
+
+    override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> = error("not used in this test")
 }

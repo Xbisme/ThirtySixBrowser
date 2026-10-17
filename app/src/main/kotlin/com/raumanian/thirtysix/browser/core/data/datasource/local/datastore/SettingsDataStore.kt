@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
  * Used by the settings repository and the default-browser invitation, whose keys stay out of `UserSettings`.
  */
 @Singleton
+@Suppress("TooManyFunctions") // One typed setter per stored preference.
 class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Preferences>) {
 
     val data: Flow<Preferences> = dataStore.data
@@ -41,6 +42,10 @@ class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Pre
 
     suspend fun setTextSize(size: TextSize): Result<Unit> = editCatching { prefs ->
         prefs[StorageKeys.TEXT_ZOOM_PERCENT] = size.percent
+    }
+
+    suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> = editCatching { prefs ->
+        prefs[StorageKeys.SWIPE_NAVIGATION_ENABLED] = enabled
     }
 
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = editCatching { prefs ->

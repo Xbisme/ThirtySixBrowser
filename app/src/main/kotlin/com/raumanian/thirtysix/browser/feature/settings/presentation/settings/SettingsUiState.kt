@@ -7,14 +7,12 @@ import com.raumanian.thirtysix.browser.core.domain.model.TextSize
 import com.raumanian.thirtysix.browser.core.domain.model.ThemeMode
 import com.raumanian.thirtysix.browser.core.domain.util.AppDefaults
 import com.raumanian.thirtysix.browser.feature.settings.domain.model.ClearBrowsingDataCategory
-/**
- * Settings-backed fields start at the defaults, so the first frame is right before the snapshot
- * arrives. [appLanguage] comes from the platform, never from settings.
- */
+/** Settings fields start at the defaults until the snapshot arrives; [appLanguage] comes from the platform. */
 data class SettingsUiState(
     val themeMode: ThemeMode = AppDefaults.THEME_MODE,
     val isDynamicColorEnabled: Boolean = AppDefaults.DYNAMIC_COLOR_ENABLED,
     val isDynamicColorSupported: Boolean = false,
+    val isSwipeNavigationEnabled: Boolean = AppDefaults.SWIPE_NAVIGATION_ENABLED,
     val searchEngine: SearchEngine = AppDefaults.SEARCH_ENGINE,
     val historyRetention: HistoryRetention = AppDefaults.HISTORY_RETENTION,
     val textSize: TextSize = AppDefaults.TEXT_SIZE,

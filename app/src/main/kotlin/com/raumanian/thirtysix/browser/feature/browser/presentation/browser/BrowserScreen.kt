@@ -97,9 +97,10 @@ internal fun BrowserScreen(
 @Composable
 private fun BrowserScreenEffects(state: BrowserScreenState, ui: BrowserScreenUi, webViewActions: WebViewActionsHandle) {
     val activeTab = state.activeTab
-    LaunchedEffect(activeTab?.id) {
-        // Tab switch: a fresh load on the re-keyed WebView.
-        activeTab?.let { webViewActions.loadUrl(it.url) }
+    val ready = state.isTabReady
+    LaunchedEffect(activeTab?.id, ready) {
+        // Tab switch: a fresh load on the re-keyed WebView, once it exists; a restored one skips it.
+        if (ready) activeTab?.let { webViewActions.loadUrl(it.url) }
     }
     val page = state.page
     LaunchedEffect(page.loadingState, page.isAddressBarFocused) {

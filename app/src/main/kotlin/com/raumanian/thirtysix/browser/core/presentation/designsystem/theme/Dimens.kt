@@ -47,4 +47,8 @@ object Dimens {
     val pageDot: Dp = 6.dp
     val pageDotActive: Dp = 24.dp
     val incognitoCoin: Dp = 72.dp
+    val swipeIndicator: Dp = 48.dp
+
+    // How far a sideways swipe must travel, once the page cannot scroll further, to go back or forward.
+    val swipeNavigationThreshold: Dp = 96.dp
 }

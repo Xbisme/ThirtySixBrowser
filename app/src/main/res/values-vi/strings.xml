@@ -211,6 +211,8 @@
     <!-- dynamic color. -->
     <string name="settings_dynamic_color_title">Màu động</string>
     <string name="settings_dynamic_color_summary">Dùng màu từ hình nền của bạn</string>
+    <string name="settings_swipe_navigation_title">Vuốt để quay lại và đi tiếp</string>
+    <string name="settings_swipe_navigation_summary">Vuốt ngang trên trang để về trang trước hoặc trang sau</string>
 
     <!-- About. -->
     <string name="settings_about_version">Phiên bản %1$s</string>

@@ -16,6 +16,8 @@ object AppDefaults {
     // Off so new users see the brand violet; only an unset key falls back to this.
     const val DYNAMIC_COLOR_ENABLED: Boolean = false
 
+    const val SWIPE_NAVIGATION_ENABLED: Boolean = true
+
     val HISTORY_RETENTION: HistoryRetention = HistoryRetention.Days90
 
     val TEXT_SIZE: TextSize = TextSize.Percent100

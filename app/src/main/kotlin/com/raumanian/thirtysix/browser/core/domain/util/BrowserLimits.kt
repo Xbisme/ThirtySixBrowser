@@ -88,4 +88,9 @@ object BrowserLimits {
     const val SITE_DATA_DELETE_TIMEOUT_MS: Long = 5_000L
 
     const val FIRE_SECRET_BYTES: Int = 16
+
+    // A tab's saved back and forward is cut to this size, oldest pages first.
+    const val TAB_STATE_MAX_BYTES: Int = 256 * 1024
+
+    const val TAB_STATE_SAVE_DEBOUNCE_MS: Long = 1_000L
 }

@@ -19,7 +19,13 @@ data class BrowserScreenState(
     val tabCount: Int,
     val activeTab: Tab?,
     val textZoomPercent: Int,
-)
+    val loadedTabId: Long? = null,
+    val swipeNavigationEnabled: Boolean = false,
+) {
+    /** The active tab's saved back and forward has been read, so its WebView may be built. */
+    val isTabReady: Boolean
+        get() = activeTab == null || activeTab.id == loadedTabId
+}
 
 /** What the browser screen reads besides its state: flows its parts collect, and objects the WebView uses. */
 data class BrowserScreenSources(
@@ -30,6 +36,7 @@ data class BrowserScreenSources(
     val protectionDashboard: StateFlow<PageDashboardState?>,
     val protectionHooks: ProtectionHooks,
     val desktopMode: DesktopModeLookup,
+    val savedState: SavedTabStateLookup,
     val popups: PopupTabs,
     val longPressActions: LongPressActions,
     val permissionGate: SitePermissionGate,
@@ -42,6 +49,7 @@ data class BrowserScreenActions(
     val onFindAction: (FindInPageAction) -> Unit,
     val onDownloadAction: (DownloadRequestAction) -> Unit,
     val onPageActionsAction: (PageActionsAction) -> Unit,
+    val onTabSessionAction: (TabSessionAction) -> Unit,
     val tools: BrowserToolActions,
 )
 
