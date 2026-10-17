@@ -4,10 +4,14 @@ import androidx.room.withTransaction
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
 import com.raumanian.thirtysix.browser.core.data.datasource.local.BookmarkDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.BookmarkFolderDao
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkEntity
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkFolderEntity
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkException
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode
+import com.raumanian.thirtysix.browser.core.domain.model.ImportOutcome
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
@@ -136,7 +140,7 @@ class BookmarkRepositoryImpl @Inject constructor(
             }
             val now = System.currentTimeMillis()
             folderDao.insert(
-                com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkFolderEntity(
+                BookmarkFolderEntity(
                     name = name,
                     parentId = parentId,
                     createdAt = now,
@@ -196,6 +200,81 @@ class BookmarkRepositoryImpl @Inject constructor(
         // Delete the bookmarks before their folder: the FK rule is SET NULL, so deleting
         // the folder first would move them to the root instead of removing them.
         bookmarkDao.deleteByParentFolder(folderId)
+    }
+
+    override suspend fun countBookmarks(): Int = withContext(dispatchers.io) { bookmarkDao.count() }
+
+    override suspend fun countFolders(): Int = withContext(dispatchers.io) { folderDao.count() }
+
+    override suspend fun getBookmarkTree(): BookmarkTreeNode.Folder =
+        withContext(dispatchers.io) {
+            val (folders, bookmarks) = database.withTransaction {
+                folderDao.getAll() to bookmarkDao.getAllNewestFirst()
+            }
+            val foldersByParent = folders.groupBy { it.parentId }
+                .mapValues { (_, children) -> children.sortedWith(compareBy({ it.name }, { it.id })) }
+            val linksByParent = bookmarks.groupBy { it.parentFolderId }
+                .mapValues { (_, links) -> links.sortedWith(compareBy({ it.sortOrder }, { it.id })) }
+
+            fun childrenOf(parentId: Long?): List<BookmarkTreeNode> =
+                foldersByParent[parentId].orEmpty().map { BookmarkTreeNode.Folder(it.name, childrenOf(it.id)) } +
+                    linksByParent[parentId].orEmpty().map { BookmarkTreeNode.Link(it.title, it.url, it.createdAt) }
+
+            BookmarkTreeNode.Folder(name = "", children = childrenOf(null))
+        }
+
+    // All or nothing: one transaction, under a new top-level folder renamed "name (n)" when taken.
+    override suspend fun importTree(rootName: String, tree: BookmarkTreeNode.Folder): Result<ImportOutcome> =
+        runCatchingResult {
+            database.withTransaction {
+                val takenNames = folderDao.getDirectChildren(null).mapTo(HashSet()) { it.name }
+                val name = if (rootName !in takenNames) {
+                    rootName
+                } else {
+                    generateSequence(2) { it + 1 }.map { "$rootName ($it)" }.first { it !in takenNames }
+                }
+                val writer = TreeWriter(startedAt = System.currentTimeMillis())
+                val rootId = writer.insertFolder(name, parentId = null)
+                writer.insertChildren(tree.children, rootId)
+                ImportOutcome(
+                    folderId = rootId,
+                    folderName = name,
+                    bookmarksAdded = writer.bookmarks,
+                    foldersAdded = writer.folders,
+                )
+            }
+        }
+
+    private inner class TreeWriter(private val startedAt: Long) {
+        var bookmarks = 0
+            private set
+        var folders = 0
+            private set
+
+        suspend fun insertFolder(name: String, parentId: Long?): Long =
+            folderDao.insert(BookmarkFolderEntity(name = name, parentId = parentId, createdAt = startedAt))
+                .also { folders++ }
+
+        suspend fun insertChildren(children: List<BookmarkTreeNode>, parentId: Long) {
+            for (child in children) {
+                when (child) {
+                    is BookmarkTreeNode.Folder -> insertChildren(child.children, insertFolder(child.name, parentId))
+                    is BookmarkTreeNode.Link -> {
+                        bookmarkDao.insert(
+                            BookmarkEntity(
+                                title = child.title,
+                                url = child.url,
+                                parentFolderId = parentId,
+                                createdAt = startedAt,
+                                // Rows share one createdAt; the running order keeps the file's order.
+                                sortOrder = startedAt + bookmarks,
+                            ),
+                        )
+                        bookmarks++
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun <T> runCatchingResult(block: suspend () -> T): Result<T> =

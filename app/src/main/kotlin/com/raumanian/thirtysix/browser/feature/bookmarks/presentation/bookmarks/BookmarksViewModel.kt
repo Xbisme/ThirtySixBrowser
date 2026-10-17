@@ -119,6 +119,10 @@ class BookmarksViewModel @Inject constructor(
         when (action) {
             is BookmarksAction.FolderTap -> currentFolderIdFlow.value = action.folder.id
             BookmarksAction.BackToParent -> onBackToParent()
+            is BookmarksAction.OpenFolder -> {
+                onSearchClose()
+                currentFolderIdFlow.value = action.folderId
+            }
             is BookmarksAction.BreadcrumbSegmentTap -> currentFolderIdFlow.value = action.folderId
             is BookmarksAction.BookmarkTap -> onBookmarkTap(action.bookmark)
             is BookmarksAction.LongPressBookmark -> showDialog(PendingBookmarkDialog.BookmarkActions(action.bookmark))

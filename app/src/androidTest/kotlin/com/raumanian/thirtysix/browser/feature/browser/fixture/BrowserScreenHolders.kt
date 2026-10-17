@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.model.ImportOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
@@ -172,6 +174,11 @@ private object NoopBookmarkRepository :
     override suspend fun moveFolder(folderId: Long, newParentId: Long?) = Result.Success(Unit)
     override suspend fun deleteFolderCascade(folderId: Long) =
         Result.Success(BookmarkDescendantCount(0, 0))
+    override suspend fun countBookmarks() = 0
+    override suspend fun countFolders() = 0
+    override suspend fun getBookmarkTree() = BookmarkTreeNode.Folder("", emptyList())
+    override suspend fun importTree(rootName: String, tree: BookmarkTreeNode.Folder) =
+        Result.Success(ImportOutcome(0L, rootName, 0, 0))
 }
 
 private object NoopHistoryRepository :

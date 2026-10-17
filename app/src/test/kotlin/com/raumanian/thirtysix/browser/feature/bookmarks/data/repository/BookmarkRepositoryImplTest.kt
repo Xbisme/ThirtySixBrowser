@@ -3,12 +3,18 @@ package com.raumanian.thirtysix.browser.feature.bookmarks.data.repository
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.data.datasource.local.AppDatabase
+import com.raumanian.thirtysix.browser.core.data.datasource.local.BookmarkDao
+import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkEntity
 import com.raumanian.thirtysix.browser.core.data.datasource.local.inMemoryAppDatabase
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkException
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Folder
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Link
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -224,6 +230,88 @@ class BookmarkRepositoryImplTest {
         repo.moveBookmarkToFolder(id, folderId)
 
         assertEquals(folderId, repo.getBookmark(id)!!.parentFolderId)
+    }
+
+    @Test
+    fun `importTree keeps nesting and link order under a new top-level folder`() = runTest {
+        val tree = Folder(
+            "",
+            listOf(
+                Link("Zeta", "https://z.example", null),
+                Folder("Inner", listOf(Link("B", "https://b.example", null), Link("A", "https://a.example", null))),
+                Link("Alpha", "https://a.example", null),
+            ),
+        )
+
+        val outcome = (repo.importTree("Imported", tree) as Result.Success).data
+
+        assertEquals("Imported", outcome.folderName)
+        assertEquals(4, outcome.bookmarksAdded)
+        assertEquals(2, outcome.foldersAdded)
+        val root = repo.getBookmarkTree().children.single() as Folder
+        assertEquals("Imported", root.name)
+        assertEquals(
+            listOf("Inner", "Zeta", "Alpha"),
+            root.children.map { (it as? Folder)?.name ?: (it as Link).title },
+        )
+        assertEquals(listOf("B", "A"), (root.children.first() as Folder).children.map { (it as Link).title })
+    }
+
+    @Test
+    fun `importTree adds a number when the folder name is taken`() = runTest {
+        repo.createFolder("Imported", null)
+        repo.importTree("Imported", Folder("", emptyList()))
+
+        val outcome = (repo.importTree("Imported", Folder("", emptyList())) as Result.Success).data
+
+        assertEquals("Imported (3)", outcome.folderName)
+    }
+
+    @Test
+    fun `importTree writes nothing when an insert fails part-way`() = runTest {
+        repo.addBookmark(bookmark(url = "https://kept.example", title = "Kept"))
+        val failing = BookmarkRepositoryImpl(
+            bookmarkDao = FailingOnThirdInsert(db.bookmarkDao()),
+            folderDao = db.bookmarkFolderDao(),
+            database = db,
+            dispatchers = TestDispatcherProvider(),
+        )
+        val tree = Folder("", List(5) { Link("L$it", "https://l$it.example", null) })
+
+        val result = failing.importTree("Imported", tree)
+
+        assertTrue(result is Result.Error)
+        assertEquals(1, repo.countBookmarks())
+        assertEquals(0, repo.countFolders())
+    }
+
+    @Test
+    fun `getBookmarkTree lists folders by name then links by sort order`() = runTest {
+        val b = (repo.createFolder("b", null) as Result.Success).data
+        repo.createFolder("a", null)
+        repo.addBookmark(bookmark(url = "https://2.example", title = "2", createdAt = 2L))
+        repo.addBookmark(bookmark(url = "https://1.example", title = "1", createdAt = 1L))
+        repo.addBookmark(bookmark(url = "https://in.example", title = "in", parentFolderId = b))
+
+        val tree = repo.getBookmarkTree()
+
+        assertEquals(
+            listOf("a", "b", "1", "2"),
+            tree.children.map { (it as? Folder)?.name ?: (it as Link).title },
+        )
+        assertEquals("in", ((tree.children[1] as Folder).children.single() as Link).title)
+        assertEquals(3, repo.countBookmarks())
+        assertEquals(2, repo.countFolders())
+        assertTrue(repo.observeAllFolders().first().isNotEmpty())
+    }
+
+    private class FailingOnThirdInsert(private val delegate: BookmarkDao) : BookmarkDao by delegate {
+        private var inserts = 0
+
+        override suspend fun insert(bookmark: BookmarkEntity): Long {
+            if (++inserts == 3) throw IOException("disk full")
+            return delegate.insert(bookmark)
+        }
     }
 
     private fun bookmark(

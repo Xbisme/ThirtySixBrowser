@@ -73,6 +73,7 @@ fun AppNavHost(
                 onSitePermissions = navController::navigateToSitePermissions,
                 onProtectionExceptions = navController::navigateToProtectionExceptions,
                 onFireproofSites = navController::navigateToFireproofSites,
+                onBookmarkTransfer = { navController.navigateToBookmarks(openTransfer = true) },
             ),
         )
         sitePermissionsScreen(navController = navController)
@@ -107,7 +108,7 @@ private fun browserSlots(navController: NavHostController, entryPointViewModel: 
             openSettings = navController::navigateToSettings,
             openDownloads = navController::navigateToDownloads,
             openHistory = navController::navigateToHistory,
-            openBookmarks = navController::navigateToBookmarks,
+            openBookmarks = { navController.navigateToBookmarks() },
         ),
     )
 

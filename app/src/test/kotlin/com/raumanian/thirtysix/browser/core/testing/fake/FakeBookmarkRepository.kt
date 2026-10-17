@@ -4,6 +4,8 @@ import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkException
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode
+import com.raumanian.thirtysix.browser.core.domain.model.ImportOutcome
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.flow.Flow
@@ -197,6 +199,55 @@ open class FakeBookmarkRepository : BookmarkRepository {
         deleteSubtree(folderId)
         foldersFlow.value = foldersFlow.value - folderId
         return Result.Success(count)
+    }
+
+    var importFailure: Throwable? = null
+    var importCalls: Int = 0
+        private set
+
+    override suspend fun countBookmarks(): Int = bookmarksFlow.value.size
+
+    override suspend fun countFolders(): Int = foldersFlow.value.size
+
+    override suspend fun getBookmarkTree(): BookmarkTreeNode.Folder {
+        fun childrenOf(parentId: Long?): List<BookmarkTreeNode> =
+            foldersFlow.value.values.filter { it.parentId == parentId }.sortedWith(compareBy({ it.name }, { it.id }))
+                .map { BookmarkTreeNode.Folder(it.name, childrenOf(it.id)) } +
+                bookmarksFlow.value.values.filter { it.parentFolderId == parentId }
+                    .sortedWith(compareBy({ it.sortOrder }, { it.id }))
+                    .map { BookmarkTreeNode.Link(it.title, it.url, it.createdAt) }
+        return BookmarkTreeNode.Folder("", childrenOf(null))
+    }
+
+    override suspend fun importTree(rootName: String, tree: BookmarkTreeNode.Folder): Result<ImportOutcome> {
+        importCalls++
+        importFailure?.let { return Result.Error(it) }
+        val taken = foldersFlow.value.values.filter { it.parentId == null }.map { it.name }.toSet()
+        val name = if (rootName !in taken) {
+            rootName
+        } else {
+            generateSequence(2) { it + 1 }.map { "$rootName ($it)" }.first { it !in taken }
+        }
+        var bookmarks = 0
+        var folders = 0
+        var order = 0L
+        fun insert(children: List<BookmarkTreeNode>, parentId: Long) {
+            children.forEach { child ->
+                when (child) {
+                    is BookmarkTreeNode.Folder -> {
+                        folders++
+                        insert(child.children, seedFolder(BookmarkFolder(0L, child.name, parentId, 0L)))
+                    }
+                    is BookmarkTreeNode.Link -> {
+                        bookmarks++
+                        seedBookmark(Bookmark(0L, child.title, child.url, parentId, 0L, order++))
+                    }
+                }
+            }
+        }
+        val rootId = seedFolder(BookmarkFolder(0L, name, null, 0L))
+        insert(tree.children, rootId)
+        return Result.Success(ImportOutcome(rootId, name, bookmarks, folders + 1))
     }
 
     private fun deleteSubtree(folderId: Long) {

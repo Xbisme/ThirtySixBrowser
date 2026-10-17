@@ -110,6 +110,7 @@ fun SettingsScreen(
             generalSection(state = state, onMakeDefault = onMakeDefault)
             appearanceSection(state = state, onAction = onAction)
             languageAndSearchSection(state = state, onAction = onAction)
+            bookmarksSection(onBookmarkTransfer = destinations.onBookmarkTransfer)
             privacySection(
                 state = state,
                 onAction = onAction,
@@ -230,6 +231,20 @@ private fun LazyListScope.languageAndSearchSection(state: SettingsUiState, onAct
     }
 }
 
+private fun LazyListScope.bookmarksSection(onBookmarkTransfer: () -> Unit) {
+    sectionHeader(key = KEY_SECTION_BOOKMARKS, titleRes = R.string.settings_section_bookmarks)
+    item(key = KEY_ROW_BOOKMARK_TRANSFER, contentType = CONTENT_TYPE_ROW) {
+        SettingsValueRow(
+            title = stringResource(R.string.settings_bookmark_transfer_title),
+            value = stringResource(R.string.settings_bookmark_transfer_summary),
+            icon = AppIcons.Bookmarks,
+            tone = SettingsIconTone.Primary,
+            onClick = onBookmarkTransfer,
+            modifier = Modifier.testTag(TEST_TAG_SETTINGS_BOOKMARK_TRANSFER_ROW),
+        )
+    }
+}
+
 private fun LazyListScope.privacySection(
     state: SettingsUiState,
     onAction: (SettingsAction) -> Unit,
@@ -302,6 +317,7 @@ private fun LazyListScope.aboutSection(state: SettingsUiState) {
 private const val KEY_SECTION_GENERAL: String = "section_general"
 private const val KEY_SECTION_APPEARANCE: String = "section_appearance"
 private const val KEY_SECTION_LANGUAGE_AND_SEARCH: String = "section_language_and_search"
+private const val KEY_SECTION_BOOKMARKS: String = "section_bookmarks"
 private const val KEY_SECTION_PRIVACY: String = "section_privacy"
 private const val KEY_SECTION_ABOUT: String = "section_about"
 private const val KEY_ROW_DEFAULT_BROWSER: String = "row_default_browser"
@@ -316,6 +332,7 @@ private const val KEY_ROW_CLEAR_BROWSING_DATA: String = "row_clear_browsing_data
 private const val KEY_ROW_SITE_PERMISSIONS: String = "row_site_permissions"
 private const val KEY_ROW_PROTECTION_EXCEPTIONS: String = "row_protection_exceptions"
 private const val KEY_ROW_FIREPROOF_SITES: String = "row_fireproof_sites"
+private const val KEY_ROW_BOOKMARK_TRANSFER: String = "row_bookmark_transfer"
 private const val KEY_ROW_ABOUT: String = "row_about"
 private const val CONTENT_TYPE_HEADER: String = "header"
 private const val CONTENT_TYPE_ROW: String = "value_row"
@@ -336,4 +353,5 @@ const val TEST_TAG_SETTINGS_CLEAR_ROW: String = "settings_clear_row"
 const val TEST_TAG_SETTINGS_SITE_PERMISSIONS_ROW: String = "settings_site_permissions_row"
 const val TEST_TAG_SETTINGS_PROTECTION_EXCEPTIONS_ROW: String = "settings_protection_exceptions_row"
 const val TEST_TAG_SETTINGS_FIREPROOF_SITES_ROW: String = "settings_fireproof_sites_row"
+const val TEST_TAG_SETTINGS_BOOKMARK_TRANSFER_ROW: String = "settings_bookmark_transfer_row"
 const val TEST_TAG_SETTINGS_ABOUT: String = "settings_about"

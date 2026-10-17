@@ -56,4 +56,7 @@ interface BookmarkFolderDao {
 
     @Query("SELECT * FROM ${BookmarkFolderEntity.TABLE_NAME}")
     fun observeAll(): Flow<List<BookmarkFolderEntity>>
+
+    @Query("SELECT * FROM ${BookmarkFolderEntity.TABLE_NAME}")
+    suspend fun getAll(): List<BookmarkFolderEntity>
 }

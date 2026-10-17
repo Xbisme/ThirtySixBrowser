@@ -408,4 +408,39 @@
     <string name="settings_clear_category_fireproof_sites">ファイアから保護したサイト</string>
     <string name="settings_clear_category_fireproof_sites_description">ファイアを使ったときに残らなくなります</string>
     <string name="settings_about_notice_autoconsent">Cookie バナーのルールは DuckDuckGo の autoconsent（https://github.com/duckduckgo/autoconsent）を MPL 2.0 の下で使用しています。</string>
+
+    <!-- Bookmark import and export -->
+    <string name="bookmarks_action_more_cd">その他のオプション</string>
+    <string name="bookmarks_transfer_sheet_title">ブックマーク ファイル</string>
+    <string name="bookmarks_transfer_import">ブックマークをインポート</string>
+    <string name="bookmarks_transfer_export">ブックマークをエクスポート</string>
+    <string name="bookmarks_import_folder_name">%1$s にインポート</string>
+    <string name="bookmarks_import_untitled_folder">名前のないフォルダ</string>
+    <string name="bookmarks_transfer_importing">ブックマークをインポートしています…</string>
+    <string name="bookmarks_transfer_exporting">ブックマークをエクスポートしています…</string>
+    <string name="bookmarks_import_done_title">ブックマークをインポートしました</string>
+    <string name="bookmarks_import_open_folder">フォルダを開く</string>
+    <string name="bookmarks_import_done_dismiss">完了</string>
+    <string name="bookmarks_import_error_not_bookmarks">ブックマーク ファイルではありません。他のブラウザでブックマークを HTML ファイルとしてエクスポートしてから、もう一度お試しください。</string>
+    <string name="bookmarks_import_error_nothing">このファイルにはウェブのブックマークがありません。</string>
+    <string name="bookmarks_import_error_too_large">ファイルが大きすぎるか、ブックマーク 10,000 件・フォルダ 1,000 個の上限を超えます。</string>
+    <string name="bookmarks_import_error_read">ファイルを開けませんでした。</string>
+    <string name="bookmarks_import_error_write">ブックマークを保存できませんでした。何もインポートされていません。</string>
+    <string name="bookmarks_export_nothing">エクスポートするブックマークはまだありません。</string>
+    <string name="bookmarks_export_error_write">ファイルを保存できませんでした。</string>
+    <string name="settings_section_bookmarks">ブックマーク</string>
+    <string name="settings_bookmark_transfer_title">ブックマークのインポートとエクスポート</string>
+    <string name="settings_bookmark_transfer_summary">他のブラウザとの間でブックマークを移す</string>
+    <plurals name="bookmarks_import_done_added">
+        <item quantity="other">%1$d 件のブックマークを「%2$s」に追加しました。</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_duplicates">
+        <item quantity="other">重複 %1$d 件をスキップしました。</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_unsupported">
+        <item quantity="other">ウェブページ以外の %1$d 件を除外しました。</item>
+    </plurals>
+    <plurals name="bookmarks_export_done">
+        <item quantity="other">%1$d 件のブックマークをエクスポートしました。</item>
+    </plurals>
 </resources>

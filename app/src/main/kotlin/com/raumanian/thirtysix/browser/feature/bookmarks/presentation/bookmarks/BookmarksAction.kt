@@ -8,6 +8,8 @@ sealed interface BookmarksAction {
 
     data object BackToParent : BookmarksAction
 
+    data class OpenFolder(val folderId: Long) : BookmarksAction
+
     data class BreadcrumbSegmentTap(val folderId: Long?) : BookmarksAction
 
     data class BookmarkTap(val bookmark: Bookmark) : BookmarksAction

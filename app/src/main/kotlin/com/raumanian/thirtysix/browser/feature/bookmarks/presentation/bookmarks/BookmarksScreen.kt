@@ -19,9 +19,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,10 +78,13 @@ private const val CONTENT_TYPE_SEARCH_RESULT = "search_result"
  * [BookmarksUiState.pendingDialog].
  */
 @Composable
+@Suppress("LongParameterList")
 fun BookmarksRoute(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     viewModel: BookmarksViewModel = hiltViewModel(),
+    transferViewModel: BookmarkTransferViewModel = hiltViewModel(),
+    openTransfer: Boolean = false,
     onShowBrowser: () -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -104,23 +111,42 @@ fun BookmarksRoute(
         }
     }
 
+    val transferState by transferViewModel.uiState.collectAsStateWithLifecycle()
+    // Settings opens this screen to offer the transfer: once, not again after rotation.
+    var transferOffered by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(openTransfer) {
+        if (openTransfer && !transferOffered) {
+            transferOffered = true
+            transferViewModel.onAction(BookmarkTransferAction.SheetOpen)
+        }
+    }
+    BookmarkTransferHost(
+        state = transferState,
+        events = transferViewModel.events,
+        onAction = transferViewModel::onAction,
+        onOpenFolder = { viewModel.onAction(BookmarksAction.OpenFolder(it)) },
+        showMessage = { message -> scope.launch { snackbarHostState.showSnackbar(message) } },
+    )
+
     BookmarksScreen(
         state = state,
         snackbarHostState = snackbarHostState,
         onAction = viewModel::onAction,
         onExitScreen = { navController.popBackStack() },
+        onMore = { transferViewModel.onAction(BookmarkTransferAction.SheetOpen) },
         modifier = modifier,
     )
 }
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "LongParameterList")
 fun BookmarksScreen(
     state: BookmarksUiState,
     snackbarHostState: SnackbarHostState,
     onAction: (BookmarksAction) -> Unit,
     onExitScreen: () -> Unit,
     modifier: Modifier = Modifier,
+    onMore: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -134,6 +160,7 @@ fun BookmarksScreen(
                 onBackToParent = { onAction(BookmarksAction.BackToParent) },
                 onExitScreen = onExitScreen,
                 onCreateFolder = { onAction(BookmarksAction.CreateFolderClick) },
+                onMore = onMore,
             )
         },
         floatingActionButton = {

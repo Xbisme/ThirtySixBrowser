@@ -408,4 +408,39 @@
     <string name="settings_clear_category_fireproof_sites">Trang được giữ lại</string>
     <string name="settings_clear_category_fireproof_sites_description">Các trang không còn được giữ lại khi đốt dữ liệu</string>
     <string name="settings_about_notice_autoconsent">Quy tắc xử lý banner cookie lấy từ autoconsent của DuckDuckGo (https://github.com/duckduckgo/autoconsent), dùng theo giấy phép MPL 2.0.</string>
+
+    <!-- Bookmark import and export -->
+    <string name="bookmarks_action_more_cd">Tùy chọn khác</string>
+    <string name="bookmarks_transfer_sheet_title">Tệp dấu trang</string>
+    <string name="bookmarks_transfer_import">Nhập dấu trang</string>
+    <string name="bookmarks_transfer_export">Xuất dấu trang</string>
+    <string name="bookmarks_import_folder_name">Đã nhập %1$s</string>
+    <string name="bookmarks_import_untitled_folder">Thư mục không tên</string>
+    <string name="bookmarks_transfer_importing">Đang nhập dấu trang…</string>
+    <string name="bookmarks_transfer_exporting">Đang xuất dấu trang…</string>
+    <string name="bookmarks_import_done_title">Đã nhập dấu trang</string>
+    <string name="bookmarks_import_open_folder">Mở thư mục</string>
+    <string name="bookmarks_import_done_dismiss">Xong</string>
+    <string name="bookmarks_import_error_not_bookmarks">Đây không phải tệp dấu trang. Hãy xuất dấu trang thành tệp HTML từ trình duyệt kia rồi thử lại.</string>
+    <string name="bookmarks_import_error_nothing">Tệp này không có dấu trang web nào.</string>
+    <string name="bookmarks_import_error_too_large">Tệp quá lớn, hoặc sẽ vượt giới hạn 10.000 dấu trang và 1.000 thư mục.</string>
+    <string name="bookmarks_import_error_read">Không mở được tệp.</string>
+    <string name="bookmarks_import_error_write">Không lưu được dấu trang. Chưa có gì được nhập.</string>
+    <string name="bookmarks_export_nothing">Bạn chưa có dấu trang nào để xuất.</string>
+    <string name="bookmarks_export_error_write">Không lưu được tệp.</string>
+    <string name="settings_section_bookmarks">Dấu trang</string>
+    <string name="settings_bookmark_transfer_title">Nhập và xuất dấu trang</string>
+    <string name="settings_bookmark_transfer_summary">Chuyển dấu trang sang hoặc từ trình duyệt khác</string>
+    <plurals name="bookmarks_import_done_added">
+        <item quantity="other">Đã thêm %1$d dấu trang vào “%2$s”.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_duplicates">
+        <item quantity="other">Đã bỏ qua %1$d mục trùng.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_unsupported">
+        <item quantity="other">Đã bỏ %1$d mục không phải trang web.</item>
+    </plurals>
+    <plurals name="bookmarks_export_done">
+        <item quantity="other">Đã xuất %1$d dấu trang.</item>
+    </plurals>
 </resources>
