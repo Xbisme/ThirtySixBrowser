@@ -11,6 +11,7 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.prot
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.ProtectionHooks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionsAction
 import com.raumanian.thirtysix.browser.feature.browser.presentation.suggestions.AddressSuggestionsUiState
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /** The screen's snapshot: the page and its chrome, the tab strip's count and the app-wide text size. */
@@ -21,6 +22,7 @@ data class BrowserScreenState(
     val textZoomPercent: Int,
     val loadedTabId: Long? = null,
     val swipeNavigationEnabled: Boolean = false,
+    val tabSwipe: TabSwipeUiState = TabSwipeUiState(),
 ) {
     /** The active tab's saved back and forward has been read, so its WebView may be built. */
     val isTabReady: Boolean
@@ -40,7 +42,11 @@ data class BrowserScreenSources(
     val popups: PopupTabs,
     val longPressActions: LongPressActions,
     val permissionGate: SitePermissionGate,
+    val tabScreenshots: TabScreenshots = TabScreenshots { null },
+    val screenshotVersion: StateFlow<Long> = NO_SCREENSHOTS,
 )
+
+private val NO_SCREENSHOTS: StateFlow<Long> = MutableStateFlow(0L)
 
 /** Where the browser screen sends input: one entry point per state holder. */
 data class BrowserScreenActions(
@@ -58,6 +64,7 @@ data class BrowserToolActions(
     val onHubAction: (HubAction) -> Unit,
     val onSuggestionsAction: (AddressSuggestionsAction) -> Unit,
     val onProtectionAction: (ProtectionAction) -> Unit,
+    val onTabSwipeAction: (TabSwipeAction) -> Unit = {},
 )
 
 /** Made once by the route and shared by the screen's parts. */

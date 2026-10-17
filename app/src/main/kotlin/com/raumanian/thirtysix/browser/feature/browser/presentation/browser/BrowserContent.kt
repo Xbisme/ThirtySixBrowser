@@ -6,20 +6,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.BrowserErrorState
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TabSwipePreview
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeCallbacks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomePage
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeSearchBar
@@ -40,27 +46,67 @@ internal fun BrowserContent(
     val density = LocalDensity.current
     val topInset = with(density) { frame.ui.topBarHeightPx.toDp() }
     val bottomInset = with(density) { frame.ui.bottomBarHeightPx.toDp() }
-    TabWebView(state, sources, actions, hosts, frame)
-    (page.loadingState as? LoadingState.Failed)?.let { failed ->
-        BrowserErrorState(
-            reason = failed.reason,
-            modifier = Modifier.fillMaxSize().padding(top = topInset, bottom = bottomInset),
+    val tabSwipe = frame.ui.tabSwipe
+    TabSwipeHoldEffect(tabSwipe, state.activeTab?.id)
+    // One emitter: the incoming tab's preview sits over the page and Home alike.
+    Box(modifier = Modifier.fillMaxSize()) {
+        TabWebView(state, sources, actions, hosts, frame)
+        (page.loadingState as? LoadingState.Failed)?.let { failed ->
+            BrowserErrorState(
+                reason = failed.reason,
+                modifier = Modifier.fillMaxSize().padding(top = topInset, bottom = bottomInset),
+            )
+        }
+        if (page.isHomeContent) {
+            val searchSwipe = rememberHomeSearchSwipe(state, actions, frame)
+            val baseCallbacks = rememberHomeCallbacks(actions, hosts.webViewActions, hosts.slots)
+            val homeCallbacks = remember(baseCallbacks, searchSwipe) {
+                baseCallbacks.copy(searchFieldModifier = searchSwipe.lane.then(searchSwipe.field))
+            }
+            Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = tabSwipe.fraction * size.width }) {
+                HomeOverlay(
+                    isIncognito = page.isIncognito,
+                    callbacks = homeCallbacks,
+                    suggestions = {
+                        AddressSuggestionList(
+                            stateFlow = sources.suggestions,
+                            onPick = { suggestion -> homeCallbacks.onSearchSubmit(suggestion.url) },
+                        )
+                    },
+                    searchFocus = frame.ui.homeSearchFocus,
+                    bottomPadding = bottomInset,
+                )
+            }
+        }
+        val screenshotVersion = sources.screenshotVersion.collectAsStateWithLifecycle()
+        TabSwipePreview(
+            state = tabSwipe,
+            screenshots = sources.tabScreenshots,
+            screenshotVersion = { screenshotVersion.value },
+            topInset = topInset,
         )
     }
-    if (page.isHomeContent) {
-        val homeCallbacks = rememberHomeCallbacks(actions, hosts.webViewActions, hosts.slots)
-        HomeOverlay(
-            isIncognito = page.isIncognito,
-            callbacks = homeCallbacks,
-            suggestions = {
-                AddressSuggestionList(
-                    stateFlow = sources.suggestions,
-                    onPick = { suggestion -> homeCallbacks.onSearchSubmit(suggestion.url) },
-                )
-            },
-            searchFocus = frame.ui.homeSearchFocus,
-            bottomPadding = bottomInset,
-        )
+}
+
+/** After a swipe commits, the incoming preview stays until the new tab's page is on screen. */
+@Composable
+private fun TabSwipeHoldEffect(tabSwipe: TabSwipeState, activeTabId: Long?) {
+    LaunchedEffect(activeTabId) {
+        if (tabSwipe.holding) tabSwipe.awaitPageThenRelease(waitForPage = tabSwipe.incoming?.isHome != true)
+    }
+}
+
+/** On Home and the incognito start page, their search field takes the address pill's swipe and actions. */
+@Composable
+private fun rememberHomeSearchSwipe(
+    state: BrowserScreenState,
+    actions: BrowserScreenActions,
+    frame: BrowserFrame,
+): FieldSwipe {
+    var focused by remember { mutableStateOf(false) }
+    val swipe = rememberFieldSwipe(frame.ui.tabSwipe, state.tabSwipe, !focused, actions.tools.onTabSwipeAction)
+    return remember(swipe) {
+        FieldSwipe(lane = Modifier.onFocusChanged { focused = it.isFocused }.then(swipe.lane), field = swipe.field)
     }
 }
 
@@ -82,7 +128,10 @@ private fun TabWebView(
             // While finding, the bars stay put, so the page is shortened by the find bar's height:
             // otherwise its end would sit below the screen, unreachable.
             .padding(bottom = findBarPagePadding(frame.findOpen, findBarHeight))
-            .graphicsLayer { translationY = topBarHeightPx * (1f - chrome.hiddenFraction) },
+            .graphicsLayer {
+                translationY = topBarHeightPx * (1f - chrome.hiddenFraction)
+                translationX = frame.ui.tabSwipe.fraction * size.width
+            },
     ) {
         // Built only once the tab's saved back and forward has been read, so it can be restored first.
         if (state.isTabReady) {
@@ -125,6 +174,7 @@ private fun TabPage(
             onDownloadRequested = onDownloadRequested,
             pageRequests = frame.pageSession,
             onFindResult = { ordinal, total -> actions.onFindAction(FindInPageAction.Result(ordinal, total)) },
+            onPageVisible = frame.ui.tabSwipe::onPageVisible,
         ),
         navigationCallbacks = pageNavigationCallbacks(actions.onPageAction, onScrollDelta),
         incognitoProfile = incognitoProfile,
@@ -178,7 +228,7 @@ private fun HomeOverlay(
                 engine = null,
                 onSubmit = callbacks.onSearchSubmit,
                 focusRequester = searchFocus,
-                hooks = HomeSearchHooks(),
+                hooks = HomeSearchHooks(fieldModifier = callbacks.searchFieldModifier),
             )
         }
     } else {

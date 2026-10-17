@@ -49,8 +49,10 @@ internal fun BrowserTopBar(
     onStarTap: () -> Unit,
     onReloadOrStop: () -> Unit,
     modifier: Modifier = Modifier,
+    addressFieldModifier: Modifier = Modifier,
     progress: () -> Float = { 0f },
     focusRequester: FocusRequester? = null,
+    addressLane: @Composable (pill: @Composable () -> Unit) -> Unit = { pill -> pill() },
 ) {
     val colors = ThirtySixTheme.colors
     val background = if (state.isIncognito) colors.surfaceIncognito else MaterialTheme.colorScheme.surface
@@ -75,13 +77,16 @@ internal fun BrowserTopBar(
                 ),
             ) {
                 Box(modifier = Modifier.weight(1f)) {
-                    AddressBar(
-                        state = state,
-                        callbacks = addressBarCallbacks,
-                        isLoading = isLoading,
-                        progress = progress,
-                        focusRequester = focusRequester,
-                    )
+                    addressLane {
+                        AddressBar(
+                            state = state,
+                            callbacks = addressBarCallbacks,
+                            isLoading = isLoading,
+                            progress = progress,
+                            focusRequester = focusRequester,
+                            fieldModifier = addressFieldModifier,
+                        )
+                    }
                 }
                 TopBarActions(
                     state = state,

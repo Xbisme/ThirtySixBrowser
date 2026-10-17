@@ -97,13 +97,13 @@
 
 **Gesture and visuals**
 
-- [ ] T016 [US1] Add `TabSwipeTracker` in `M/BR/TabSwipeTracker.kt`, pure Kotlin like `SwipeGestureTracker`:
+- [X] T016 [US1] Add `TabSwipeTracker` in `M/BR/TabSwipeTracker.kt`, pure Kotlin like `SwipeGestureTracker`:
   - inputs: `down(x, y)`, `move(x, y)`, `pointerAdded()`, `up(velocityX)`, `cancel()`, plus `canStart: Boolean` and the `hasPrevious`/`hasNext` flags captured at down;
   - it claims the gesture only after `touchSlop` with `|dx| ≥ SIDEWAYS_RATIO·|dy|`. A vertical-first move rejects it for the rest of the touch;
   - output: `Progress(offsetPx)`, damped by `EDGE_RESISTANCE` toward a side with no tab, then `Commit(side)` or `Return`;
   - commit when `|offset| ≥ COMMIT_FRACTION·laneWidth` or `|velocity| ≥ flick` toward a side with a tab;
   - RTL mirrors which side is next.
-- [ ] T017 [US1] Tracker tests in `T/feature/browser/presentation/browser/TabSwipeTrackerTest.kt`:
+- [X] T017 [US1] Tracker tests in `T/feature/browser/presentation/browser/TabSwipeTrackerTest.kt`:
   - no claim under slop;
   - no claim at a 1:1 diagonal;
   - a claim at 3:1;
@@ -113,21 +113,21 @@
   - a second pointer returns;
   - RTL;
   - `canStart = false` never claims.
-- [ ] T018 [US1] Add `TabSwipeState` (`@Stable`) in `M/BR/TabSwipeState.kt`:
+- [X] T018 [US1] Add `TabSwipeState` (`@Stable`) in `M/BR/TabSwipeState.kt`:
   - fields `offsetPx` (`mutableFloatStateOf`), `incoming`, `settling` and `holdPreview`;
   - `Animatable`-backed `settleTo(target, animate)`;
   - `rememberTabSwipeState()`.
-- [ ] T019 [US1] Add `Modifier.tabSwipe(state, tracker inputs, neighbours, onCommit)` in `M/BR/TabSwipeModifier.kt`:
+- [X] T019 [US1] Add `Modifier.tabSwipe(state, tracker inputs, neighbours, onCommit)` in `M/BR/TabSwipeModifier.kt`:
   - `pointerInput` with `awaitEachGesture`, reading `PointerEventPass.Initial`;
   - it feeds `TabSwipeTracker` and consumes changes only once the tracker has claimed;
   - `VelocityTracker` gives the release velocity;
   - it cancels if the incoming tab on the dragged side changes or disappears during the drag. Other list changes do not cancel (FR-011, research R5);
   - it ignores pointers that go down inside `WindowInsets.systemGestures`, and sets no gesture exclusion (FR-010);
   - one line of comment on why the Initial pass is used.
-- [ ] T020 [US1] Add the lane and the preview:
+- [X] T020 [US1] Add the lane and the preview:
   - **lane**, `M/BR/component/TabSwipeLane.kt`: a clipped `Box` holding the current pill, moved with `graphicsLayer { translationX = state.offsetPx }`, and a ghost pill for `incoming` one lane width away, showing the host or `browser_tab_swipe_home_label`;
   - **preview**, `M/BR/component/TabSwipePreview.kt`: draws the screenshot through `rememberFileImage`, or `SeededMeshArt` seeded from the host, or the Home look. Its position is set only in `graphicsLayer`.
-- [ ] T021 [US1] Wire it into the browser:
+- [X] T021 [US1] Wire it into the browser:
   - `BrowserRoute.kt`: add `TabSwipeViewModel` to the holders and collect `uiState` once;
   - `BrowserScreenInputs.kt`: add `tabSwipe: TabSwipeUiState` to `BrowserScreenState`, and `onTabSwipeAction` to `BrowserScreenActions`;
   - `BrowserScreen.kt`: `rememberTabSwipeState()` goes into `BrowserFrame`;
@@ -135,7 +135,7 @@
   - `BrowserContent.kt`: offset the `TabWebView` box and the Home overlay by `offsetPx × screenWidth / laneWidth` in `graphicsLayer`, and place `TabSwipePreview` beside them;
   - on commit, send `SwitchTo(announce = false)`. Keep `holdPreview` until the new tab's `WebViewClient.onPageCommitVisible` (forward it as a `BrowserWebViewCallbacks` callback) or `PREVIEW_HOLD_MAX_MS`, then reset the offset when `activeTab.id` changes. Do not use `LoadStarted` or progress: they come before anything is drawn;
   - on the AVD, check whether `onPageCommitVisible` fires for a tab restored from saved state. If it does not, end the hold on the WebView's first draw after the re-key instead (research R4). Record the finding in "Implementation notes".
-- [ ] T022 [US1] Home and the incognito start page: `HomeSearchBar` in `M/feature/browser/presentation/home/HomeHero.kt` takes a `modifier` from `HomeOverlay`. `BrowserContent.kt` passes `Modifier.tabSwipe(…)` there, with `canStart = enabled && !homeSearchFocused`.
+- [X] T022 [US1] Home and the incognito start page: `HomeSearchBar` in `M/feature/browser/presentation/home/HomeHero.kt` takes a `modifier` from `HomeOverlay`. `BrowserContent.kt` passes `Modifier.tabSwipe(…)` there, with `canStart = enabled && !homeSearchFocused`.
 - [X] T023 [US1] Add `browser_tab_swipe_home_label` to `app/src/main/res/values*/strings.xml` in all 8 locales
 
 **Checkpoint**: US1 works on the AVD (quickstart G3.1–G3.2, G3.5).
@@ -144,8 +144,8 @@
 
 **Goal**: no swipe crosses kinds, and an incognito neighbour shows nothing of its page. **Independent test**: quickstart G3.3.
 
-- [ ] T024 [US2] `TabSwipePreview` and the ghost pill draw `ThirtySixTheme.colors.surfaceIncognito` with `AppIcons.Incognito` for `isIncognito` previews. No file is read and no title is drawn. The lane in an incognito tab uses the incognito pill colours, as `addressWellStyle` does.
-- [ ] T025 [US2] Tests:
+- [X] T024 [US2] `TabSwipePreview` and the ghost pill draw `ThirtySixTheme.colors.surfaceIncognito` with `AppIcons.Incognito` for `isIncognito` previews. No file is read and no title is drawn. The lane in an incognito tab uses the incognito pill colours, as `addressWellStyle` does.
+- [X] T025 [US2] Tests:
   - in `TabSwipeViewModelTest`, with N1, N2 and I1, I2: from N2 there is no incognito neighbour, from I1 `previous` is `null` and `next` is I2, and an incognito preview has an empty title and host;
   - in `ObserveTabNeighboursUseCaseTest`: when the last incognito tab is closed, the neighbours fall back to the normal head's.
 
@@ -153,11 +153,11 @@
 
 **Goal**: taps, editing, the in-page swipe and scrolling behave as before. **Independent test**: quickstart G3.4.
 
-- [ ] T026 [US3] Extra tracker tests in `TabSwipeTrackerTest`:
+- [X] T026 [US3] Extra tracker tests in `TabSwipeTrackerTest`:
   - a tap that drifts 0.9× slop sideways is not claimed;
   - a drag that turns sideways only after a vertical start stays rejected;
   - `canStart = false` (focused, or find bar open) never claims.
-- [ ] T027 [US3] Compose UI test in `T/feature/browser/presentation/browser/component/TabSwipeLaneTest.kt` (Robolectric):
+- [X] T027 [US3] Compose UI test in `T/feature/browser/presentation/browser/component/TabSwipeLaneTest.kt` (Robolectric):
   - `performClick` on the pill calls the field's focus and never `onCommit`;
   - `swipeLeft` on an unfocused pill calls `onCommit(next)`;
   - `swipeLeft` while focused does not.
@@ -166,7 +166,7 @@
 
 **Goal**: accessibility actions, reduced motion and a Settings switch. **Independent test**: quickstart G3.6.
 
-- [ ] T028 [P] [US4] Add `rememberAnimationsEnabled()`, which is false only when "Remove animations" is on (an animator duration scale of 0, FR-015), in `M/core/presentation/util/AnimationsEnabled.kt`. It uses `ValueAnimator.areAnimatorsEnabled()` on API 26+, and `Settings.Global.getFloat(ANIMATOR_DURATION_SCALE, 1f) != 0f` on API 24–25. `TabSwipeState.settleTo` snaps when it is false. Test both branches in `T/core/presentation/util/AnimationsEnabledTest.kt` (Robolectric `@Config(sdk = [25, 34])`).
+- [X] T028 [P] [US4] Add `rememberAnimationsEnabled()`, which is false only when "Remove animations" is on (an animator duration scale of 0, FR-015), in `M/core/presentation/util/AnimationsEnabled.kt`. It uses `ValueAnimator.areAnimatorsEnabled()` on API 26+, and `Settings.Global.getFloat(ANIMATOR_DURATION_SCALE, 1f) != 0f` on API 24–25. `TabSwipeState.settleTo` snaps when it is false. Test both branches in `T/core/presentation/util/AnimationsEnabledTest.kt` (Robolectric `@Config(sdk = [25, 34])`).
 - [X] T029 [US4] Add the setting end to end:
   - `StorageKeys.TAB_SWIPE_ENABLED = booleanPreferencesKey("tab_swipe_enabled")`;
   - `AppDefaults.TAB_SWIPE_ENABLED = true`;
@@ -181,24 +181,24 @@
   - `SettingsAction.TabSwipeToggled(enabled)` is handled in `SettingsViewModel`;
   - add `settings_tab_swipe_title` and `settings_tab_swipe_summary` in all 8 locales;
   - test it in `T/feature/settings/presentation/settings/SettingsViewModelTest.kt`.
-- [ ] T031 [US4] Accessibility actions:
+- [X] T031 [US4] Accessibility actions:
   - in `TabSwipeLane` and on the Home search field, add `semantics { customActions = … }` with `browser_a11y_next_tab` when `next != null` and `browser_a11y_previous_tab` when `previous != null`. Each sends `SwitchTo(announce = true)`. They are present whatever the setting;
   - in `BrowserRoute`, collect `TabSwipeEvent.Announce` and call `LocalView.current.announceForAccessibility`:
     - a normal tab: `browser_a11y_switched_to_tab` with the title, else the host, else `browser_tab_swipe_home_label`;
     - an incognito tab: `browser_a11y_switched_to_incognito_tab`;
   - add these 4 strings in all 8 locales.
-- [ ] T032 [US4] Tests:
+- [X] T032 [US4] Tests:
   - in `TabSwipeLaneTest`, the custom actions are listed only for existing sides, and invoking one calls `SwitchTo(announce = true)`;
   - with the setting off, `swipeLeft` does nothing but the actions remain.
 
 ## Phase 7: Polish and gates
 
-- [ ] T033 Instrumented `A/feature/browser/presentation/browser/BrowserTabSwipeTest.kt` on `MainActivity`, with the per-test DataStore module (AGENTS.md):
+- [X] T033 Instrumented `A/feature/browser/presentation/browser/BrowserTabSwipeTest.kt` on `MainActivity`, with the per-test DataStore module (AGENTS.md):
   - open three tabs, swipe the pill left and right, and check the active tab through the Tabs screen order;
   - a tap focuses the pill;
   - the custom action switches;
   - with the setting off, a swipe does nothing.
-- [ ] T033a Recomposition count (gate 6, constitution 2.2.0) in `A/feature/browser/presentation/browser/component/TabSwipeRecompositionTest.kt`. Host `TabSwipeLane` and `TabSwipePreview` with `SideEffect` counters in the current-pill and page-content slots, run one full drag and release with `performTouchInput`, and assert at most one recomposition of each slot during the drag. Record the counts below.
+- [X] T033a Recomposition count (gate 6, constitution 2.2.0) in `A/feature/browser/presentation/browser/component/TabSwipeRecompositionTest.kt`. Host `TabSwipeLane` and `TabSwipePreview` with `SideEffect` counters in the current-pill and page-content slots, run one full drag and release with `performTouchInput`, and assert at most one recomposition of each slot during the drag. Record the counts below.
 - [ ] T034 Compose compiler report (`-PcomposeReports`): zero unexplained non-skippable composables in `TabSwipeLane`, `TabSwipePreview`, `BrowserTopBar`, `BrowserContent` and `SettingsScreen`. Record the result below.
 - [ ] T035 Quality gates:
   - `detekt ktlintCheck testDebugUnitTest lintDebug`;
@@ -216,6 +216,11 @@
 
 - **T023**: no new string. The ghost pill and the announcement reuse `browser_action_home` ("Home"), so there are 6 new strings, not 7.
 - **T029/T030** were done together with T014, so `TabSwipeViewModel` reads `isTabSwipeEnabled` from the start, with no placeholder. The four accessibility strings were added in the same commit and are used by T031.
+- **T027/T032** are instrumented (`TabSwipeLaneTest`), not Robolectric: the unit tests have no Compose UI setup. A shared `TabSwipeHarness` hosts the lane around a plain text field, laid out as the browser does; `TabSwipeRecompositionTest` and `BrowserTabSwipeTest` use it too. `BrowserTabSwipeTest` drives the real `TabSwipeViewModel` over the real tab store through Hilt, not the whole browser screen.
+- **Found while testing**: two quick swipes made the text field read the second press as a double tap and enter selection mode, taking focus (and the keyboard). A press that comes within the double-tap timeout of a swipe is now consumed before the field sees it; `twoQuickSwipesNeverFocusTheField` covers it. The cost: a tap within ~300 ms of a swipe does not open the bar for typing.
+- **Preview**: the saved picture is the top 16:9 of the page at 480 px, so it is drawn at full width from the top (`FillWidth`) over the surface colour, not cropped to fill the screen. Home slides in as the plain surface.
+- **Ghost pill**: its label is centred so it can be read while the pill is only partly in.
+- **Hold release**: `WebViewClient.onPageCommitVisible` is forwarded as `BrowserWebViewCallbacks.onPageVisible`; Home ends the hold as soon as the tab is active.
 - **`TabSwipeViewModel`** exposes `screenshots: TabScreenshots` (a `fun interface`) rather than a public function, because ViewModels take input only through `onAction` (ArchitectureTest).
 
 ## Dependencies

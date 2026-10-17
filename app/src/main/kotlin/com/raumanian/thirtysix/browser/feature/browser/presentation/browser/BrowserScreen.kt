@@ -25,6 +25,7 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.comp
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.BrowserBottomBarCallbacks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.BrowserTopBar
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.FindInPageBar
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TabSwipeLane
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.BrowserPageRequests
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.FullscreenOverlay
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PopupEffects
@@ -126,6 +127,8 @@ private fun BoxScope.BrowserTopChrome(
         onSuggestionsAction = actions.tools.onSuggestionsAction,
         currentUrl = { currentPage.currentUrl },
     )
+    val canSwipe = !page.isAddressBarFocused && !frame.findOpen
+    val swipe = rememberFieldSwipe(ui.tabSwipe, state.tabSwipe, canSwipe, actions.tools.onTabSwipeAction)
     FindOrTopBar(
         findOpen = frame.findOpen,
         showTopBar = !page.isHomeContent,
@@ -154,6 +157,8 @@ private fun BoxScope.BrowserTopChrome(
                 },
                 progress = hosts.progress,
                 focusRequester = ui.addressFocus,
+                addressLane = { pill -> TabSwipeLane(ui.tabSwipe, page.isIncognito, swipe.lane, pill) },
+                addressFieldModifier = swipe.field,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .onSizeChanged { ui.onTopBarHeight(it.height) }

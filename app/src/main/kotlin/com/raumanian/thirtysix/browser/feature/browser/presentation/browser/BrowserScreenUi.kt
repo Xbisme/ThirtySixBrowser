@@ -21,6 +21,7 @@ internal class BrowserScreenUi(dashboardOpen: MutableState<Boolean>) {
     val homeSearchFocus = FocusRequester()
     val chrome = ChromeScrollState(maxOffsetPx = 0f)
     val swipe = SwipeNavigationState()
+    val tabSwipe = TabSwipeState()
 
     var topBarHeightPx by mutableIntStateOf(0)
         private set
