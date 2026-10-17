@@ -74,8 +74,9 @@ detekt and `CommentPolicyTest` enforce this.
 ## Tests
 
 Mirror `main/`. Fakes of core contracts are in `core/testing/fake/`; a feature's own fakes and
-sample data in its `fake/` and `fixture/`. State-holder tests set the main dispatcher
-with `MainDispatcherRule`. Instrumented tests that launch `MainActivity` replace
+sample data in its `fake/` and `fixture/`. A spec with UI adds an instrumented test that drives
+its hot interaction and asserts an upper bound on recompositions. State-holder tests set the
+main dispatcher with `MainDispatcherRule`. Instrumented tests that launch `MainActivity` replace
 `SettingsDataStoreProviderModule` with a per-test DataStore.
 
 ## Devices

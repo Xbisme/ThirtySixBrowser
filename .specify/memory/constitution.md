@@ -203,8 +203,9 @@ A spec is done only when all of these pass:
 3. `./gradlew lintDebug`
 4. Release builds: `./gradlew assembleRelease` and the 16 KB alignment script
 5. `./gradlew connectedDebugAndroidTest` (CI on API 29; locally on the 16 KB AVD)
-6. Specs with UI: the Compose compiler report, and a Layout Inspector recomposition count for
-   each changed screen's hot interaction
+6. Specs with UI: the Compose compiler report, and a recomposition count for each changed
+   screen's hot interaction: an instrumented test that runs the interaction and asserts an
+   upper bound on recompositions, or a Layout Inspector count when no test can drive it
 
 ## Governance
 
@@ -218,4 +219,4 @@ A spec is done only when all of these pass:
 - Versioning: MAJOR when a principle is removed or redefined, MINOR when a principle or
   a check is added, PATCH for wording.
 
-**Version**: 2.1.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-15
+**Version**: 2.2.0 | **Ratified**: 2026-04-30 | **Last Amended**: 2026-10-17
