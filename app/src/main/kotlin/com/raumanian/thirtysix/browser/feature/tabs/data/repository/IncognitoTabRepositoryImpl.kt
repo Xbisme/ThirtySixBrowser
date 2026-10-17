@@ -9,6 +9,8 @@ import com.raumanian.thirtysix.browser.core.domain.repository.MaxIncognitoTabsRe
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.domain.util.TabOrder
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,6 +40,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
 
     private val state: MutableStateFlow<List<Tab>> = MutableStateFlow(emptyList())
     private val nextId: AtomicLong = AtomicLong(0L)
+    private val nextPosition: AtomicInteger = AtomicInteger(0)
     private val mutex: Mutex = Mutex()
 
     /** Whether the running session uses its own profile; decided when it begins. Guarded by [mutex]. */
@@ -70,7 +73,7 @@ class IncognitoTabRepositoryImpl @Inject constructor(
                     id = nextId.decrementAndGet(),
                     url = url,
                     title = "",
-                    position = state.value.size,
+                    position = nextPosition.getAndIncrement(),
                     createdAt = now,
                     lastActiveAt = lastActiveAt ?: now,
                     isIncognito = true,
@@ -102,8 +105,13 @@ class IncognitoTabRepositoryImpl @Inject constructor(
     override suspend fun closeTab(tabId: Long) =
         withContext(dispatchers.io) {
             mutex.withLock {
-                val sizeBefore = state.value.size
-                state.value = state.value.filterNot { it.id == tabId }
+                val before = state.value
+                val closed = before.firstOrNull { it.id == tabId }
+                state.value = before.filterNot { it.id == tabId }
+                if (closed != null && closed.lastActiveAt >= before.maxOf(Tab::lastActiveAt)) {
+                    handActiveMark(before, closed)
+                }
+                val sizeBefore = before.size
                 val sizeAfter = state.value.size
                 // Restore after removing the tab, so the jar wipe inside the restore also
                 // clears the cookies this tab created.
@@ -121,6 +129,14 @@ class IncognitoTabRepositoryImpl @Inject constructor(
         }
 
     override suspend fun getCount(): Int = state.value.size
+
+    /** As for normal tabs: the heir inherits the closed tab's stamp. Caller holds [mutex]. */
+    private fun handActiveMark(before: List<Tab>, closed: Tab) {
+        val heirId = TabOrder.heirOf(before, closed.id)?.id ?: return
+        state.value = state.value.map { tab ->
+            if (tab.id == heirId) tab.copy(lastActiveAt = maxOf(tab.lastActiveAt, closed.lastActiveAt)) else tab
+        }
+    }
 
     /** `0 → 1`: a profile of its own where the engine has profiles, else the jar snapshot. */
     private suspend fun beginSession() {

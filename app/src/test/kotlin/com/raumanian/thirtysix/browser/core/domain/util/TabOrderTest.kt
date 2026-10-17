@@ -65,6 +65,15 @@ class TabOrderTest {
     }
 
     @Test
+    fun `the heir is the next tab, or the previous one for the last tab`() {
+        val tabs = listOf(tab(1, 0), tab(2, 1), tab(3, 2))
+
+        assertEquals(3L, TabOrder.heirOf(tabs, 2L)?.id)
+        assertEquals(2L, TabOrder.heirOf(tabs, 3L)?.id)
+        assertEquals(null, TabOrder.heirOf(listOf(tab(1, 0)), 1L))
+    }
+
+    @Test
     fun `an unknown or missing active tab has no neighbours`() {
         val tabs = listOf(tab(1, 0), tab(2, 1))
 

@@ -10,6 +10,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedExce
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.domain.util.TabOrder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -125,6 +126,60 @@ class TabRepositoryImplTest {
     }
 
     @Test
+    fun `closing the active middle tab makes the next one active`() = runTest {
+        val (_, b, c) = threeTabs(activeIndex = 1)
+
+        repository.closeTab(b)
+
+        assertEquals(c, activeId())
+    }
+
+    @Test
+    fun `closing the active last tab makes the previous one active`() = runTest {
+        val (_, b, c) = threeTabs(activeIndex = 2)
+
+        repository.closeTab(c)
+
+        assertEquals(b, activeId())
+    }
+
+    @Test
+    fun `closing a background tab leaves the active tab alone`() = runTest {
+        val (a, b, _) = threeTabs(activeIndex = 0)
+
+        repository.closeTab(b)
+
+        assertEquals(a, activeId())
+    }
+
+    @Test
+    fun `the heir takes the closed tab's stamp, not the current time`() = runTest {
+        val (_, b, c) = threeTabs(activeIndex = 1)
+
+        repository.closeTab(b)
+
+        assertEquals(LATEST_ACTIVE, tabDao.getById(c)!!.lastActiveAt)
+    }
+
+    @Test
+    fun `the opening order survives a new repository over the same database`() = runTest {
+        threeTabs(activeIndex = 2)
+        val reopened = TabRepositoryImpl(tabDao = tabDao, homeUrl = HOME_URL, dispatchers = TestDispatcherProvider())
+
+        val order = TabOrder.inOpeningOrder(reopened.observeTabs().first()).map { it.url }
+
+        assertEquals(listOf("https://a.com", "https://b.com", "https://c.com"), order)
+    }
+
+    /** Tabs a, b, c opened in that order; the one at [activeIndex] has the newest stamp. */
+    private suspend fun threeTabs(activeIndex: Int): List<Long> = listOf("a", "b", "c").mapIndexed { i, name ->
+        val stamp = if (i == activeIndex) LATEST_ACTIVE else i.toLong() + 1
+        tabDao.insert(entity(url = "https://$name.com", position = i, createdAt = i.toLong(), lastActiveAt = stamp))
+    }
+
+    private suspend fun activeId(): Long = tabDao.getAll().maxBy { it.lastActiveAt }.id
+
+    @Test
     fun `closeAllTabs wipes and seeds a single fresh home tab`() = runTest {
         tabDao.insert(entity(url = "https://a.com", lastActiveAt = 1L))
         tabDao.insert(entity(url = "https://b.com", lastActiveAt = 2L))
@@ -177,6 +232,7 @@ class TabRepositoryImplTest {
     private companion object {
         const val HOME_URL: String = "https://www.google.com/"
         const val MISSING_ID: Long = 9_999L
+        const val LATEST_ACTIVE: Long = 1_000L
     }
 
     private class TestDispatcherProvider : DispatcherProvider {

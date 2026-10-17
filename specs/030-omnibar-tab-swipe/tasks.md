@@ -39,7 +39,7 @@
 
 **Order and close**
 
-- [ ] T006 [US1] Close heir in `M/feature/tabs/data/repository/TabRepositoryImpl.kt` `closeTab`, inside the existing `seedMutex` block:
+- [X] T006 [US1] Close heir in `M/feature/tabs/data/repository/TabRepositoryImpl.kt` `closeTab`, inside the existing `seedMutex` block:
   - read all rows;
   - `wasActive` = the closed row has the newest `lastActiveAt`;
   - delete the row;
@@ -47,8 +47,8 @@
   - the empty-table home seed stays as it is.
 
   Update the `closeTab` KDoc in `M/core/domain/repository/TabRepository.kt`, which currently says "the most recently active survivor becomes active", to "the neighbour in opening order becomes active".
-- [ ] T007 [US1] The same heir rule in `M/feature/tabs/data/repository/IncognitoTabRepositoryImpl.kt` `closeTab`, inside its `mutex`. The session still ends at `1 → 0`. Replace `position = state.value.size` with a running `AtomicInteger` counter that is never reused, so positions never repeat after closes (research R1).
-- [ ] T008 [US1] Repository tests:
+- [X] T007 [US1] The same heir rule in `M/feature/tabs/data/repository/IncognitoTabRepositoryImpl.kt` `closeTab`, inside its `mutex`. The session still ends at `1 → 0`. Replace `position = state.value.size` with a running `AtomicInteger` counter that is never reused, so positions never repeat after closes (research R1).
+- [X] T008 [US1] Repository tests:
   - in `T/feature/tabs/data/repository/TabRepositoryImplTest.kt`:
     - closing the active middle tab activates the next;
     - closing the active last tab activates the previous;
@@ -59,8 +59,8 @@
     - the same three cases;
     - positions after open, close, open are distinct and increasing;
     - closing the last incognito tab still ends the session.
-- [ ] T009 [US1] Close-precedence test in a new `T/core/domain/usecase/ObserveAllTabsUseCaseTest.kt`, using the real repository implementations over in-memory Room and the incognito repository. With an incognito tab active, closing the active normal tab does not take over: the head stays the incognito tab.
-- [ ] T010 [US1] Tabs screen in opening order:
+- [X] T009 [US1] Close-precedence test in a new `T/core/domain/usecase/ObserveAllTabsUseCaseTest.kt`, using the real repository implementations over in-memory Room and the incognito repository. With an incognito tab active, closing the active normal tab does not take over: the head stays the incognito tab.
+- [X] T010 [US1] Tabs screen in opening order:
   - `M/feature/tabs/presentation/tabs/TabsViewModel.kt` maps `observeAllTabs()` through `TabOrder.inOpeningOrder` before the mode filter, and keeps `activeTabId` from the newest `lastActiveAt`;
   - `M/feature/tabs/presentation/tabs/TabsScreen.kt` scrolls the grid to the active card once, when the screen opens (`LaunchedEffect(Unit)` keyed on the first non-empty list).
 

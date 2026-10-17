@@ -17,4 +17,10 @@ object TabOrder {
         val index = sameKind.indexOf(active)
         return TabNeighbours(previous = sameKind.getOrNull(index - 1), next = sameKind.getOrNull(index + 1))
     }
+
+    /** The tab that becomes active when [closedId] closes: the one after it, or the one before it if it was last. */
+    fun heirOf(tabs: List<Tab>, closedId: Long): Tab? {
+        val (previous, next) = neighbours(tabs, closedId)
+        return next ?: previous
+    }
 }

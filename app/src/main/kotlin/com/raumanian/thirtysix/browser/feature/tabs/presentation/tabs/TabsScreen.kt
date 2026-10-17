@@ -17,13 +17,16 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -274,7 +277,18 @@ private fun TabsGrid(
     } else {
         state.tabs.size - state.incognitoTabCount < BrowserLimits.MAX_TABS
     }
+    val gridState = rememberLazyGridState()
+    val activeIndex = state.visibleTabs.indexOfFirst { it.id == state.activeTabId }
+    var scrolledForMode by remember { mutableStateOf<TabsMode?>(null) }
+    // Tabs are in opening order, so the active card can be anywhere: bring it into view once per mode.
+    LaunchedEffect(state.mode, activeIndex, scrolledForMode) {
+        if (scrolledForMode != state.mode && activeIndex >= 0) {
+            gridState.scrollToItem(activeIndex)
+            scrolledForMode = state.mode
+        }
+    }
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Adaptive(minSize = Dimens.tabCardMinWidth),
         contentPadding = PaddingValues(
             start = Spacing.md,

@@ -21,7 +21,7 @@ interface TabRepository {
 
     suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String)
 
-    /** Closing the last tab creates a fresh home tab; the most recently active survivor becomes active. */
+    /** Closing the last tab seeds a home tab; closing the active one hands that to its opening-order neighbour. */
     suspend fun closeTab(tabId: Long)
 
     /** Leaves exactly one fresh home tab. */
