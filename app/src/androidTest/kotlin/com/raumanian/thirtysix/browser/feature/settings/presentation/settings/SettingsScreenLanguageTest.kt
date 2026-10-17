@@ -1,13 +1,16 @@
 package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
@@ -22,6 +25,13 @@ class SettingsScreenLanguageTest {
     @get:Rule
     val composeRule = createComposeRule()
 
+    /** Small screens keep the row below the fold. */
+    private fun languageRow(): SemanticsNodeInteraction {
+        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LIST)
+            .performScrollToNode(hasTestTag(TEST_TAG_SETTINGS_LANGUAGE_ROW))
+        return composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW)
+    }
+
     private fun render(controller: InstrumentedFakeAppLanguageController) {
         composeRule.setContent {
             ThirtySixTheme { SettingsRoute(viewModel = settingsViewModel(appLanguageController = controller)) }
@@ -32,7 +42,7 @@ class SettingsScreenLanguageTest {
     fun languageRow_showsTheCurrentLanguage() {
         render(InstrumentedFakeAppLanguageController(currentLanguage = AppLanguage.Japanese))
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW).assertTextContains(JAPANESE_ENDONYM)
+        languageRow().assertTextContains(JAPANESE_ENDONYM)
     }
 
     /** The eight names are endonyms whatever language the test device runs in. */
@@ -40,7 +50,7 @@ class SettingsScreenLanguageTest {
     fun chooser_listsFollowSystemAndTheEightEndonyms() {
         render(InstrumentedFakeAppLanguageController())
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW).performClick()
+        languageRow().performClick()
 
         composeRule.onAllNodes(isSettingsChoiceOption()).assertCountEquals(AppLanguage.entries.size)
         EXPECTED_ENDONYMS.forEach { endonym ->
@@ -55,13 +65,13 @@ class SettingsScreenLanguageTest {
         val controller = InstrumentedFakeAppLanguageController()
         render(controller)
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW).performClick()
+        languageRow().performClick()
         composeRule.onNode(isSettingsChoiceOption() and hasText(GERMAN_ENDONYM))
             .performScrollTo()
             .performClick()
         composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { controller.applied.toList() == listOf(AppLanguage.German) }
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LANGUAGE_ROW).assertTextContains(GERMAN_ENDONYM)
+        languageRow().assertTextContains(GERMAN_ENDONYM)
     }
 
     private companion object {

@@ -1,13 +1,16 @@
 package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.raumanian.thirtysix.browser.R
@@ -27,6 +30,13 @@ class SettingsScreenSearchEngineTest {
     private val google = context.getString(R.string.search_engine_name_google)
     private val bing = context.getString(R.string.search_engine_name_bing)
 
+    /** Small screens keep the row below the fold. */
+    private fun searchEngineRow(): SemanticsNodeInteraction {
+        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LIST)
+            .performScrollToNode(hasTestTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW))
+        return composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW)
+    }
+
     private fun render(repository: InstrumentedFakeSettingsRepository) {
         composeRule.setContent {
             ThirtySixTheme { SettingsRoute(viewModel = settingsViewModel(settingsRepository = repository)) }
@@ -37,14 +47,14 @@ class SettingsScreenSearchEngineTest {
     fun searchEngineRow_showsTheCurrentEngine() {
         render(InstrumentedFakeSettingsRepository())
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW).assertTextContains(google)
+        searchEngineRow().assertTextContains(google)
     }
 
     @Test(timeout = SETTINGS_TEST_TIMEOUT_MS)
     fun chooser_listsExactlyTheThreeEngines() {
         render(InstrumentedFakeSettingsRepository())
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW).performClick()
+        searchEngineRow().performClick()
 
         val options = composeRule.onAllNodes(isSettingsChoiceOption())
         options.assertCountEquals(SearchEngine.entries.size)
@@ -57,10 +67,10 @@ class SettingsScreenSearchEngineTest {
         val repository = InstrumentedFakeSettingsRepository()
         render(repository)
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW).performClick()
+        searchEngineRow().performClick()
         composeRule.onNode(isSettingsChoiceOption() and hasText(bing)).performClick()
         composeRule.waitUntil(SETTINGS_TEST_TIMEOUT_MS) { repository.current.searchEngine == SearchEngine.Bing }
 
-        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_SEARCH_ENGINE_ROW).assertTextContains(bing)
+        searchEngineRow().assertTextContains(bing)
     }
 }
