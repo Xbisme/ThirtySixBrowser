@@ -40,6 +40,36 @@ class NetscapeBookmarkParserTest {
     }
 
     @Test
+    fun `chromium writer output keeps raw ampersands, quoted hrefs and unwrapped other bookmarks`() {
+        val file = parseFixture("chrome-writer.html")
+
+        assertEquals(listOf(5, 3, 0, 0), file.counts())
+        assertEquals(
+            listOf("Bookmarks bar", "Other root item", "From other bookmarks"),
+            file.root.children.map { (it as? Folder)?.name ?: (it as Link).title },
+        )
+        val bar = file.root.folder("Bookmarks bar")
+        val search = bar.children.first() as Link
+        assertEquals("https://www.google.com/search?q=a&b=1&copy=2", search.url)
+        assertEquals("Search & <more>", search.title)
+        val quoted = bar.folder("Tin tức").children.map { it as Link }.last()
+        assertEquals("https://example.com/say?q=\"hi\"", quoted.url)
+        assertEquals(listOf("Mobile item"), file.root.folder("From other bookmarks").titles())
+    }
+
+    @Test
+    fun `firefox writer output reads the entry that shares a line with a separator`() {
+        val file = parseFixture("firefox-writer.html")
+
+        assertEquals(listOf(4, 2, 0, 1), file.counts())
+        assertEquals(listOf("About Us"), file.root.titles())
+        val toolbar = file.root.folder("Bookmarks Toolbar").children.map { it as Link }
+        assertEquals(listOf("Example & Co", "Next"), toolbar.map { it.title })
+        assertEquals("https://example.com/?a=1&b=2", toolbar.first().url)
+        assertEquals(listOf("Unfiled"), file.root.folder("Other Bookmarks").titles())
+    }
+
+    @Test
     fun `firefox export ignores separators, descriptions, icons and place queries`() {
         val file = parseFixture("firefox.html")
 
