@@ -77,7 +77,7 @@ During a drag:
 **Commit** (FR-002, FR-007):
 1. `Animatable` finishes the slide.
 2. Then `TabSwipeAction.SwitchTo(id)` calls `SwitchToTabUseCase`, the same path as the Tabs screen.
-3. The preview stays over the page until the new tab's WebView reports its first visible frame (`onPageCommitVisible`, or the restored page's first draw), or until `TabSwipeLimits.PREVIEW_HOLD_MAX_MS` = 600 ms. A blank WebView never shows between the slide and the page.
+3. The preview stays over the page until the new tab's WebView reports `WebViewClient.onPageCommitVisible` (API 23+, so on every supported level), or until `TabSwipeLimits.PREVIEW_HOLD_MAX_MS` = 600 ms. A blank WebView never shows between the slide and the page. `LoadStarted` and the first progress tick are not used: they arrive before anything is drawn. Whether `onPageCommitVisible` fires for a tab restored from `saveState` is checked on the AVD in T021. If it does not, the restored case ends the hold on the WebView's first `onDraw` after the re-key.
 4. The offset resets when the active tab's id changes.
 
 **Reduced motion** (FR-015): there is no helper today. Add `core/presentation/util/rememberAnimationsEnabled()`, which reads `ValueAnimator.areAnimatorsEnabled()` (API 26+) or `Settings.Global.ANIMATOR_DURATION_SCALE != 0` (API 24–25). When animations are off, the commit and the return snap with no `Animatable`. The finger-following drag stays, since it is direct manipulation and not an animation.
@@ -100,7 +100,7 @@ During a drag:
 - Spec 027 split the screen into holders, one job each.
 - The switch reuses `SwitchToTabUseCase`, so a swiped tab is treated exactly like one picked elsewhere (FR-007).
 
-**Mid-drag changes** (FR-011): the drag keeps the neighbour id it started with. If a new `TabSwipeUiState` arrives with a different neighbour on that side, the drag cancels and springs back.
+**Mid-drag changes** (FR-011): the drag keeps the incoming tab id it started with. If a new `TabSwipeUiState` arrives with a different tab on that side, or none, the drag cancels and springs back. Other list changes leave the drag alone.
 
 ## R6 — The Tabs screen in opening order
 
@@ -137,4 +137,5 @@ Settings are already included in backup, so this one is too.
 
 - **SC-005**: frame timing on the A55 release build with `dumpsys gfxinfo` while scripting 20 swipes. The owner allows release builds on it; check `mCurrentFocus` first (ADR 0017).
 - **SC-008**: cold start in alternating blocks on `TA016_API36_16K` against `8e5a0ca`, as done for 029.
-- **Layout Inspector**: the recomposition count during one drag needs Android Studio. It is recorded as DEFERRED unless the owner runs it.
+- **Recomposition count** (gate 6, constitution 2.2.0, ADR 0031): an instrumented `TabSwipeRecompositionTest`. It hosts `TabSwipeLane` and `TabSwipePreview` with `SideEffect` counters in their content slots, drives one full drag with `performTouchInput`, and asserts that the current pill content recomposes at most once and the page content at most once during the drag.
+- **System Back area**: a touch that starts inside `WindowInsets.systemGestures` goes to the system. Its drag reaches the pill only when it starts outside that inset, and no gesture exclusion is set (FR-010).

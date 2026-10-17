@@ -86,7 +86,7 @@ sealed interface TabSwipeEvent {
 | `offsetPx` | `mutableFloatStateOf` | Every frame. Read only in `graphicsLayer`. |
 | `incoming` | `mutableStateOf<TabPreview?>` | Once per drag. |
 | `settling` | `mutableStateOf<Boolean>` | Twice per drag. |
-| `holdPreview` | `mutableStateOf<Boolean>` | Set on commit, cleared on the new tab's first frame or after 600 ms. |
+| `holdPreview` | `mutableStateOf<Boolean>` | Set on commit. Cleared on the new tab's `onPageCommitVisible`, or its first draw when restored, or after 600 ms. |
 
 State transitions:
 

@@ -24,7 +24,7 @@ A sideways drag on the address pill, or on the Home search field in its place, s
 **Target Platform**: Android 7.0–16, 16 KB pages
 **Project Type**: single-module Android app
 **Performance Goals**:
-- a drag recomposes nothing per frame;
+- a drag recomposes the pill and the page content at most once each (asserted by `TabSwipeRecompositionTest`);
 - ≤ 1 % janky frames during swipes on the A55 release build;
 - cold start within 5 %.
 
@@ -44,14 +44,14 @@ A sideways drag on the address pill, or on the Home search field in its place, s
 
 ## Constitution Check
 
-*Gated against constitution **2.1.0**.*
+*Gated against constitution **2.2.0**.*
 
 | Principle | Status | Note |
 |---|---|---|
 | I Feature-first | ✅ | `TabOrder` and `TabNeighbours` go in `core/domain`, because both the tabs and browser features use them. The browser never imports `feature/tabs`. The preview uses `SeededMeshArt` and `rememberFileImage`, which are already in `core/presentation`. |
 | II One home | ✅ | Placement:<br>• `ObserveTabNeighboursUseCase` in `feature/browser/domain/usecase`;<br>• `TabSwipeViewModel` with its `UiState`, `Action` and `Event` in `feature/browser/presentation/browser/`;<br>• the limits in a named object. |
 | III Unidirectional flow | ✅ | The holder takes `onAction(TabSwipeAction)` and emits `TabSwipeEvent.Announce`. The switch calls the existing `SwitchToTabUseCase`. Neighbours come through a use case, since it combines two sources and applies the ordering. Dispatchers are injected. |
-| IV Compose | ✅ | `offsetPx` is read only in `graphicsLayer`, and composition reads `incoming` once per drag. Effect keys are the active tab id and `incoming`. The new composables take `@Immutable TabPreview`. Attached: the Compose report, and a Layout Inspector count for one drag (or DEFERRED with a reason, as in 028). |
+| IV Compose | ✅ | `offsetPx` is read only in `graphicsLayer`, and composition reads `incoming` once per drag. Effect keys are the active tab id and `incoming`. The new composables take `@Immutable TabPreview`. Attached: the Compose report, and the recomposition count from `TabSwipeRecompositionTest` (gate 6, constitution 2.2.0). |
 | V No hardcoded values | ✅ | `TabSwipeLimits` holds the fraction, velocity, resistance, ratio and hold time. The strings are in all 8 locales. |
 | VI Comments | ✅ | Only the Initial-pass claim and the inherited `lastActiveAt` need a "why". |
 | VII Build and data | ✅ | No migration and no dependency. R8: no reflection. |
@@ -136,6 +136,8 @@ docs/adr/0030-tabs-in-opening-order.md                                  new
 | A user expects the Tabs screen's old most-recent-first order | This is the owner's decision (clarification). Scrolling to the active card keeps it easy to find. |
 | The neighbour changes because a page opens a tab mid-drag | The drag compares the neighbour id it started with and cancels on a change (R5). |
 | Below API 26 there is no `ValueAnimator.areAnimatorsEnabled()` | Read `Settings.Global.ANIMATOR_DURATION_SCALE` there. |
+| With gesture navigation, a drag that starts near the pill's screen-side end lands in the system Back area | That drag stays the system's (spec edge case, FR-010). No gesture exclusion is set. G3 checks that a drag started mid-pill switches and a drag from the screen edge goes Back. |
+| `onPageCommitVisible` may not fire for a tab restored from saved state | T021 checks it on the AVD. The fallback ends the hold on the first draw, with 600 ms as the cap. |
 
 ## Complexity Tracking
 

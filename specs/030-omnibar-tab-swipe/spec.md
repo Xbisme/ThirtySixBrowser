@@ -102,7 +102,7 @@ People who use TalkBack, Switch Access or a keyboard can reach the next and prev
 1. **Given** TalkBack is on and a neighbouring tab exists, **When** the person opens the address bar's actions, **Then** "Next tab" and "Previous tab" are offered, and each one switches and announces the new tab's title.
 2. **Given** there is no tab on one side, **When** the actions are read, **Then** the action for that side is not offered.
 3. **Given** the swipe setting is off, **When** the person drags the address bar sideways, **Then** nothing moves and no tab changes. The accessibility actions remain.
-4. **Given** the system's animations are off or reduced, **When** a swipe passes the threshold, **Then** the new tab appears at once with no slide, and a release before the threshold returns at once.
+4. **Given** the system's animations are turned off, **When** a swipe passes the threshold, **Then** the new tab appears at once with no slide, and a release before the threshold returns at once.
 5. **Given** a fresh install, **When** Settings is opened, **Then** the swipe-between-tabs switch is on.
 
 ---
@@ -110,13 +110,14 @@ People who use TalkBack, Switch Access or a keyboard can reach the next and prev
 ### Edge Cases
 
 - **The bars are hidden by scrolling.** The swipe needs the address bar on screen. Scrolling up brings it back, as today.
-- **A tab is closed or opened during a drag**, for example by a page. The drag ends without switching, and the bar slides back.
+- **The incoming tab changes during a drag**, for example because a page opens a tab at the end or the incoming tab is closed. The drag ends without switching, and the bar slides back. A change elsewhere in the list, which leaves the incoming tab the same, does not end the drag.
 - **The neighbouring tab has no preview yet**, such as a tab restored after a restart that has not loaded. It slides in with the same placeholder the Tabs screen uses.
 - **The neighbouring tab is Home or the incognito start page.** It slides in showing that page's look. After the switch the tab shows Home, as it does when picked from the Tabs screen.
 - **A switch while the current page is loading.** The current tab's load continues as it would after a switch from the Tabs screen.
 - **The keyboard is open** because the address bar is being edited. No tab swipe starts.
 - **Two fingers.** A second finger cancels the swipe.
 - **Rotation or window resize during a drag.** The drag ends without switching.
+- **A drag that starts in the system Back gesture area** at the screen edge belongs to the system and goes Back, as today. The tab swipe starts only from touches outside that area.
 
 ## Requirements *(mandatory)*
 
@@ -140,7 +141,7 @@ People who use TalkBack, Switch Access or a keyboard can reach the next and prev
 - **FR-008**: A tap on the address bar MUST open it for typing as today. A drag on the bar MUST start a tab swipe only after it has clearly moved sideways, and MUST NOT open the bar for typing.
 - **FR-009**: The tab swipe MUST NOT start while the address bar is being edited, while the find bar is open, for a mostly vertical drag, or for a drag that starts outside the address bar.
 - **FR-010**: Spec 028's in-page swipe, vertical scrolling, pinch-zoom and the system Back gesture MUST keep their current behaviour.
-- **FR-011**: A second finger, a tab list change, or a rotation during a drag MUST end the drag without switching.
+- **FR-011**: A second finger, a change of the incoming tab, or a rotation during a drag MUST end the drag without switching.
 
 **Previews and privacy**
 
@@ -150,7 +151,7 @@ People who use TalkBack, Switch Access or a keyboard can reach the next and prev
 **Access and settings**
 
 - **FR-014**: The address bar MUST offer "Next tab" and "Previous tab" accessibility actions when a tab of the same kind exists on that side. Using one MUST switch tabs and announce the new tab.
-- **FR-015**: When the system's animations are off or reduced, the switch and the return MUST happen without sliding.
+- **FR-015**: When the system's animations are turned off ("Remove animations", an animator duration scale of 0), the switch and the return MUST happen without sliding.
 - **FR-016**: Settings MUST offer a switch to turn swiping between tabs on and off, separate from Spec 028's switch. It is on by default and remembered across restarts. While it is off, sideways drags on the address bar do nothing; the accessibility actions stay.
 - **FR-017**: All new text MUST be available in the app's 8 languages.
 

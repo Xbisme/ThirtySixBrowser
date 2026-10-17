@@ -54,6 +54,7 @@
     - closing the active last tab activates the previous;
     - closing a background tab leaves the active tab alone;
     - closing the only tab still seeds Home;
+    - the order survives a reopen: close and reopen the in-memory database's repository and read A, B, C again (FR-005b);
   - in `IncognitoTabRepositoryImplTest.kt`:
     - the same three cases;
     - positions after open, close, open are distinct and increasing;
@@ -120,7 +121,8 @@
   - `pointerInput` with `awaitEachGesture`, reading `PointerEventPass.Initial`;
   - it feeds `TabSwipeTracker` and consumes changes only once the tracker has claimed;
   - `VelocityTracker` gives the release velocity;
-  - it cancels if the neighbour id on the dragged side changes during the drag (research R5);
+  - it cancels if the incoming tab on the dragged side changes or disappears during the drag. Other list changes do not cancel (FR-011, research R5);
+  - it ignores pointers that go down inside `WindowInsets.systemGestures`, and sets no gesture exclusion (FR-010);
   - one line of comment on why the Initial pass is used.
 - [ ] T020 [US1] Add the lane and the preview:
   - **lane**, `M/BR/component/TabSwipeLane.kt`: a clipped `Box` holding the current pill, moved with `graphicsLayer { translationX = state.offsetPx }`, and a ghost pill for `incoming` one lane width away, showing the host or `browser_tab_swipe_home_label`;
@@ -131,7 +133,8 @@
   - `BrowserScreen.kt`: `rememberTabSwipeState()` goes into `BrowserFrame`;
   - `component/BrowserTopBar.kt`: wrap the `AddressBar` in `TabSwipeLane`, with `canStart = enabled && !isAddressBarFocused`;
   - `BrowserContent.kt`: offset the `TabWebView` box and the Home overlay by `offsetPx × screenWidth / laneWidth` in `graphicsLayer`, and place `TabSwipePreview` beside them;
-  - on commit, send `SwitchTo(announce = false)`. Keep `holdPreview` until the new tab's first frame (`PageAction.LoadStarted`/first progress after the re-key) or `PREVIEW_HOLD_MAX_MS`, then reset the offset when `activeTab.id` changes.
+  - on commit, send `SwitchTo(announce = false)`. Keep `holdPreview` until the new tab's `WebViewClient.onPageCommitVisible` (forward it as a `BrowserWebViewCallbacks` callback) or `PREVIEW_HOLD_MAX_MS`, then reset the offset when `activeTab.id` changes. Do not use `LoadStarted` or progress: they come before anything is drawn;
+  - on the AVD, check whether `onPageCommitVisible` fires for a tab restored from saved state. If it does not, end the hold on the WebView's first draw after the re-key instead (research R4). Record the finding in "Implementation notes".
 - [ ] T022 [US1] Home and the incognito start page: `HomeSearchBar` in `M/feature/browser/presentation/home/HomeHero.kt` takes a `modifier` from `HomeOverlay`. `BrowserContent.kt` passes `Modifier.tabSwipe(…)` there, with `canStart = enabled && !homeSearchFocused`.
 - [ ] T023 [US1] Add `browser_tab_swipe_home_label` to `app/src/main/res/values*/strings.xml` in all 8 locales
 
@@ -163,7 +166,7 @@
 
 **Goal**: accessibility actions, reduced motion and a Settings switch. **Independent test**: quickstart G3.6.
 
-- [ ] T028 [P] [US4] Add `rememberAnimationsEnabled()` in `M/core/presentation/util/AnimationsEnabled.kt`. It uses `ValueAnimator.areAnimatorsEnabled()` on API 26+, and `Settings.Global.getFloat(ANIMATOR_DURATION_SCALE, 1f) != 0f` on API 24–25. `TabSwipeState.settleTo` snaps when it is false. Test both branches in `T/core/presentation/util/AnimationsEnabledTest.kt` (Robolectric `@Config(sdk = [25, 34])`).
+- [ ] T028 [P] [US4] Add `rememberAnimationsEnabled()`, which is false only when "Remove animations" is on (an animator duration scale of 0, FR-015), in `M/core/presentation/util/AnimationsEnabled.kt`. It uses `ValueAnimator.areAnimatorsEnabled()` on API 26+, and `Settings.Global.getFloat(ANIMATOR_DURATION_SCALE, 1f) != 0f` on API 24–25. `TabSwipeState.settleTo` snaps when it is false. Test both branches in `T/core/presentation/util/AnimationsEnabledTest.kt` (Robolectric `@Config(sdk = [25, 34])`).
 - [ ] T029 [US4] Add the setting end to end:
   - `StorageKeys.TAB_SWIPE_ENABLED = booleanPreferencesKey("tab_swipe_enabled")`;
   - `AppDefaults.TAB_SWIPE_ENABLED = true`;
@@ -195,17 +198,18 @@
   - a tap focuses the pill;
   - the custom action switches;
   - with the setting off, a swipe does nothing.
+- [ ] T033a Recomposition count (gate 6, constitution 2.2.0) in `A/feature/browser/presentation/browser/component/TabSwipeRecompositionTest.kt`. Host `TabSwipeLane` and `TabSwipePreview` with `SideEffect` counters in the current-pill and page-content slots, run one full drag and release with `performTouchInput`, and assert at most one recomposition of each slot during the drag. Record the counts below.
 - [ ] T034 Compose compiler report (`-PcomposeReports`): zero unexplained non-skippable composables in `TabSwipeLane`, `TabSwipePreview`, `BrowserTopBar`, `BrowserContent` and `SettingsScreen`. Record the result below.
 - [ ] T035 Quality gates:
   - `detekt ktlintCheck testDebugUnitTest lintDebug`;
   - `assembleRelease` and the 16 KB script;
   - the APK size delta ≤ 40 KB;
   - `connectedDebugAndroidTest` on `TA016_API36_16K`.
-- [ ] T036 Device walk, quickstart G3 (1–7), on `TA016_API36_16K` and `TA016_API24`. Record the results below.
+- [ ] T036 Device walk, quickstart G3 (1–7), on `TA016_API36_16K` and `TA016_API24`, with the counts SC-001 (20 each way, ≥ 19), SC-003 (20 in-page swipes, 50 scrolls) and SC-004 (40 swipes, 0 crossings). Also check the system-Back edge drag, a rotation during a drag, and a tab opened at the end during a drag. TalkBack (SC-007) is the owner's pass; record it as such. Record the results below.
 - [ ] T037 Measurements, quickstart G5:
   - SC-005 frame timing on the A55 release build (check `mCurrentFocus` first; restore the owner's state afterwards);
   - SC-008 cold start interleaved against `8e5a0ca`;
-  - the Layout Inspector count, or DEFERRED.
+  - the recomposition counts from T033a.
 - [ ] T038 PR with the gate results; update the project memory
 
 ## Dependencies
@@ -246,4 +250,4 @@ MVP = Phases 1–3: the swipe works with a stable order, and the Tabs screen mat
 | Compose report | — | |
 | G3 Device walk | — | |
 | SC-005 Frames | — | |
-| Layout Inspector | — | |
+| Recomposition count (T033a) | — | |
