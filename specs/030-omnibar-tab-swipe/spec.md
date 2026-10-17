@@ -24,6 +24,8 @@ What the app has now:
 
 - Q: Where does the swipe start: the address pill at the top, the bottom bar, or both? → A: The address pill at the top, and on Home and the incognito start page the search field that stands in its place. The bottom bar is unchanged.
 - Q: Which order do "previous" and "next" follow? → A: The order tabs were opened in, for the swipe and for the Tabs screen alike. The Tabs screen stops putting the most recently used tab first.
+- Q: Where does a tab opened by a page (a link that opens a new tab, or "Open in new tab") go in the order? → A: At the end, like every other new tab.
+- Q: When the current tab is closed, which tab is shown next? → A: The one after it in the order, or the one before it when it was the last. No longer the most recently used tab.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -47,7 +49,8 @@ In a left-to-right language, dragging toward the left shows the next tab and dra
 6. **Given** a fast flick toward a side with a tab, **When** the flick is short but quick, **Then** it switches as if the threshold had been passed.
 7. **Given** the person swipes three times toward "next" from the first of four tabs, **When** each swipe completes, **Then** the second, third and fourth tabs become current in turn. The order does not change because of the swipes.
 8. **Given** tabs A, B, C opened in that order, **When** the person opens the Tabs screen after any number of switches, **Then** the cards are in the order A, B, C, and the current tab is marked, not moved.
-9. **Given** tabs A, B, C, **When** the person opens a new tab, **Then** it goes after C, and "next" from C reaches it.
+9. **Given** tabs A, B, C, **When** the person opens a new tab, or a page in A opens a link in a new tab, **Then** it goes after C, and "next" from C reaches it.
+10. **Given** tabs A, B, C with B current, **When** the person closes B, **Then** C is shown. **Given** C current, **When** C is closed, **Then** B is shown.
 
 ---
 
@@ -128,6 +131,7 @@ People who use TalkBack, Switch Access or a keyboard can reach the next and prev
 - **FR-005**: "Previous" and "next" MUST follow the order the tabs were opened in. Switching tabs, by swipe or otherwise, MUST NOT change that order, so repeated swipes in one direction walk through every tab of that kind.
 - **FR-005a**: The Tabs screen MUST list tabs in the same order, oldest opened first, with the current tab marked in place. A new tab, including one opened by a page, MUST go at the end.
 - **FR-005b**: The order MUST survive restarts for normal tabs. Closing a tab MUST leave the others in their order.
+- **FR-005c**: Closing the current tab MUST show the next tab of the same kind in the order, or the previous one when the closed tab was the last. Closing the only tab of a kind keeps today's behaviour.
 - **FR-006**: A swipe MUST move only between tabs of the same kind as the current tab: normal to normal, incognito to incognito.
 - **FR-007**: A tab reached by swiping MUST behave exactly like one picked from the Tabs screen: its page, its Back and Forward, and its place as the most recently used tab.
 
