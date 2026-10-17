@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -56,6 +57,7 @@ fun BookmarksTopBar(
     onBackToParent: () -> Unit,
     onExitScreen: () -> Unit,
     onCreateFolder: () -> Unit,
+    onMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val rootTitle = stringResource(R.string.bookmarks_screen_title)
@@ -96,6 +98,13 @@ fun BookmarksTopBar(
                     contentDescription = stringResource(R.string.bookmarks_action_new_folder_cd),
                     onClick = onCreateFolder,
                     style = RoundIconStyle.Bare,
+                )
+                RoundIconButton(
+                    icon = AppIcons.MoreVert,
+                    contentDescription = stringResource(R.string.bookmarks_action_more_cd),
+                    onClick = onMore,
+                    style = RoundIconStyle.Bare,
+                    modifier = Modifier.testTag(TEST_TAG_BOOKMARKS_MORE),
                 )
             }
         }
@@ -170,3 +179,5 @@ private fun BookmarksSearchWell(
         },
     )
 }
+
+const val TEST_TAG_BOOKMARKS_MORE: String = "bookmarks_more"

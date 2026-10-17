@@ -8,4 +8,5 @@ data class SettingsDestinations(
     val onSitePermissions: () -> Unit = {},
     val onProtectionExceptions: () -> Unit = {},
     val onFireproofSites: () -> Unit = {},
+    val onBookmarkTransfer: () -> Unit = {},
 )

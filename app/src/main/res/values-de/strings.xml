@@ -413,4 +413,43 @@
     <string name="settings_clear_category_fireproof_sites">Feuerfeste Websites</string>
     <string name="settings_clear_category_fireproof_sites_description">Websites werden beim Feuer nicht mehr behalten</string>
     <string name="settings_about_notice_autoconsent">Die Regeln für Cookie-Banner stammen aus autoconsent von DuckDuckGo (https://github.com/duckduckgo/autoconsent), verwendet unter MPL 2.0.</string>
+
+    <!-- Bookmark import and export -->
+    <string name="bookmarks_action_more_cd">Weitere Optionen</string>
+    <string name="bookmarks_transfer_sheet_title">Lesezeichendatei</string>
+    <string name="bookmarks_transfer_import">Lesezeichen importieren</string>
+    <string name="bookmarks_transfer_export">Lesezeichen exportieren</string>
+    <string name="bookmarks_import_folder_name">Importiert am %1$s</string>
+    <string name="bookmarks_import_untitled_folder">Unbenannter Ordner</string>
+    <string name="bookmarks_transfer_importing">Lesezeichen werden importiert…</string>
+    <string name="bookmarks_transfer_exporting">Lesezeichen werden exportiert…</string>
+    <string name="bookmarks_import_done_title">Lesezeichen importiert</string>
+    <string name="bookmarks_import_open_folder">Ordner öffnen</string>
+    <string name="bookmarks_import_done_dismiss">Fertig</string>
+    <string name="bookmarks_import_error_not_bookmarks">Das ist keine Lesezeichendatei. Exportiere die Lesezeichen im anderen Browser als HTML-Datei und versuche es erneut.</string>
+    <string name="bookmarks_import_error_nothing">Diese Datei enthält keine Web-Lesezeichen.</string>
+    <string name="bookmarks_import_error_too_large">Die Datei ist zu groß oder würde das Limit von 10.000 Lesezeichen und 1.000 Ordnern überschreiten.</string>
+    <string name="bookmarks_import_error_read">Die Datei konnte nicht geöffnet werden.</string>
+    <string name="bookmarks_import_error_write">Die Lesezeichen konnten nicht gespeichert werden. Es wurde nichts importiert.</string>
+    <string name="bookmarks_export_nothing">Du hast noch keine Lesezeichen zum Exportieren.</string>
+    <string name="bookmarks_export_error_write">Die Datei konnte nicht gespeichert werden.</string>
+    <string name="settings_section_bookmarks">Lesezeichen</string>
+    <string name="settings_bookmark_transfer_title">Lesezeichen importieren und exportieren</string>
+    <string name="settings_bookmark_transfer_summary">Lesezeichen in einen anderen Browser oder aus einem anderen Browser übertragen</string>
+    <plurals name="bookmarks_import_done_added">
+        <item quantity="one">%1$d Lesezeichen zu „%2$s“ hinzugefügt.</item>
+        <item quantity="other">%1$d Lesezeichen zu „%2$s“ hinzugefügt.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_duplicates">
+        <item quantity="one">%1$d Duplikat übersprungen.</item>
+        <item quantity="other">%1$d Duplikate übersprungen.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_unsupported">
+        <item quantity="one">%1$d Eintrag ohne Webseite ausgelassen.</item>
+        <item quantity="other">%1$d Einträge ohne Webseite ausgelassen.</item>
+    </plurals>
+    <plurals name="bookmarks_export_done">
+        <item quantity="one">%1$d Lesezeichen exportiert.</item>
+        <item quantity="other">%1$d Lesezeichen exportiert.</item>
+    </plurals>
 </resources>

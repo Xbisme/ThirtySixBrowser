@@ -423,4 +423,51 @@
     <string name="settings_clear_category_fireproof_sites">Огнеупорные сайты</string>
     <string name="settings_clear_category_fireproof_sites_description">Сайты перестанут сохраняться при «Огне»</string>
     <string name="settings_about_notice_autoconsent">Правила для баннеров cookie взяты из autoconsent от DuckDuckGo (https://github.com/duckduckgo/autoconsent) и используются по лицензии MPL 2.0.</string>
+
+    <!-- Bookmark import and export -->
+    <string name="bookmarks_action_more_cd">Другие действия</string>
+    <string name="bookmarks_transfer_sheet_title">Файл закладок</string>
+    <string name="bookmarks_transfer_import">Импорт закладок</string>
+    <string name="bookmarks_transfer_export">Экспорт закладок</string>
+    <string name="bookmarks_import_folder_name">Импорт %1$s</string>
+    <string name="bookmarks_import_untitled_folder">Папка без названия</string>
+    <string name="bookmarks_transfer_importing">Импорт закладок…</string>
+    <string name="bookmarks_transfer_exporting">Экспорт закладок…</string>
+    <string name="bookmarks_import_done_title">Закладки импортированы</string>
+    <string name="bookmarks_import_open_folder">Открыть папку</string>
+    <string name="bookmarks_import_done_dismiss">Готово</string>
+    <string name="bookmarks_import_error_not_bookmarks">Это не файл закладок. Экспортируйте закладки в HTML-файл в другом браузере и повторите попытку.</string>
+    <string name="bookmarks_import_error_nothing">В этом файле нет веб-закладок.</string>
+    <string name="bookmarks_import_error_too_large">Файл слишком большой или превысит лимит в 10 000 закладок и 1 000 папок.</string>
+    <string name="bookmarks_import_error_read">Не удалось открыть файл.</string>
+    <string name="bookmarks_import_error_write">Не удалось сохранить закладки. Ничего не импортировано.</string>
+    <string name="bookmarks_export_nothing">У вас пока нет закладок для экспорта.</string>
+    <string name="bookmarks_export_error_write">Не удалось сохранить файл.</string>
+    <string name="settings_section_bookmarks">Закладки</string>
+    <string name="settings_bookmark_transfer_title">Импорт и экспорт закладок</string>
+    <string name="settings_bookmark_transfer_summary">Перенос закладок в другой браузер или из него</string>
+    <plurals name="bookmarks_import_done_added">
+        <item quantity="one">%1$d закладка добавлена в «%2$s».</item>
+        <item quantity="few">%1$d закладки добавлены в «%2$s».</item>
+        <item quantity="many">%1$d закладок добавлено в «%2$s».</item>
+        <item quantity="other">%1$d закладки добавлено в «%2$s».</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_duplicates">
+        <item quantity="one">Пропущен %1$d дубликат.</item>
+        <item quantity="few">Пропущено %1$d дубликата.</item>
+        <item quantity="many">Пропущено %1$d дубликатов.</item>
+        <item quantity="other">Пропущено %1$d дубликата.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_unsupported">
+        <item quantity="one">Пропущена %1$d запись, которая не является веб-страницей.</item>
+        <item quantity="few">Пропущено %1$d записи, которые не являются веб-страницами.</item>
+        <item quantity="many">Пропущено %1$d записей, которые не являются веб-страницами.</item>
+        <item quantity="other">Пропущено %1$d записи, которые не являются веб-страницами.</item>
+    </plurals>
+    <plurals name="bookmarks_export_done">
+        <item quantity="one">Экспортирована %1$d закладка.</item>
+        <item quantity="few">Экспортировано %1$d закладки.</item>
+        <item quantity="many">Экспортировано %1$d закладок.</item>
+        <item quantity="other">Экспортировано %1$d закладки.</item>
+    </plurals>
 </resources>

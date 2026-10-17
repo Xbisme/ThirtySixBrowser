@@ -418,4 +418,47 @@
     <string name="settings_clear_category_fireproof_sites">Sites protégés du feu</string>
     <string name="settings_clear_category_fireproof_sites_description">Les sites ne sont plus conservés quand vous utilisez Feu</string>
     <string name="settings_about_notice_autoconsent">Les règles pour les bannières de cookies proviennent d\'autoconsent de DuckDuckGo (https://github.com/duckduckgo/autoconsent), utilisé sous MPL 2.0.</string>
+
+    <!-- Bookmark import and export -->
+    <string name="bookmarks_action_more_cd">Plus d’options</string>
+    <string name="bookmarks_transfer_sheet_title">Fichier de favoris</string>
+    <string name="bookmarks_transfer_import">Importer des favoris</string>
+    <string name="bookmarks_transfer_export">Exporter les favoris</string>
+    <string name="bookmarks_import_folder_name">Importés le %1$s</string>
+    <string name="bookmarks_import_untitled_folder">Dossier sans nom</string>
+    <string name="bookmarks_transfer_importing">Importation des favoris…</string>
+    <string name="bookmarks_transfer_exporting">Exportation des favoris…</string>
+    <string name="bookmarks_import_done_title">Favoris importés</string>
+    <string name="bookmarks_import_open_folder">Ouvrir le dossier</string>
+    <string name="bookmarks_import_done_dismiss">OK</string>
+    <string name="bookmarks_import_error_not_bookmarks">Ce n’est pas un fichier de favoris. Exportez vos favoris au format HTML depuis l’autre navigateur, puis réessayez.</string>
+    <string name="bookmarks_import_error_nothing">Ce fichier ne contient aucun favori web.</string>
+    <string name="bookmarks_import_error_too_large">Ce fichier est trop volumineux ou dépasserait la limite de 10 000 favoris et 1 000 dossiers.</string>
+    <string name="bookmarks_import_error_read">Impossible d’ouvrir le fichier.</string>
+    <string name="bookmarks_import_error_write">Impossible d’enregistrer les favoris. Rien n’a été importé.</string>
+    <string name="bookmarks_export_nothing">Vous n’avez encore aucun favori à exporter.</string>
+    <string name="bookmarks_export_error_write">Impossible d’enregistrer le fichier.</string>
+    <string name="settings_section_bookmarks">Favoris</string>
+    <string name="settings_bookmark_transfer_title">Importer et exporter des favoris</string>
+    <string name="settings_bookmark_transfer_summary">Transférer des favoris depuis ou vers un autre navigateur</string>
+    <plurals name="bookmarks_import_done_added">
+        <item quantity="one">%1$d favori ajouté à « %2$s ».</item>
+        <item quantity="many">%1$d favoris ajoutés à « %2$s ».</item>
+        <item quantity="other">%1$d favoris ajoutés à « %2$s ».</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_duplicates">
+        <item quantity="one">%1$d doublon ignoré.</item>
+        <item quantity="many">%1$d doublons ignorés.</item>
+        <item quantity="other">%1$d doublons ignorés.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_unsupported">
+        <item quantity="one">%1$d élément qui n’est pas une page web a été exclu.</item>
+        <item quantity="many">%1$d éléments qui ne sont pas des pages web ont été exclus.</item>
+        <item quantity="other">%1$d éléments qui ne sont pas des pages web ont été exclus.</item>
+    </plurals>
+    <plurals name="bookmarks_export_done">
+        <item quantity="one">%1$d favori exporté.</item>
+        <item quantity="many">%1$d favoris exportés.</item>
+        <item quantity="other">%1$d favoris exportés.</item>
+    </plurals>
 </resources>

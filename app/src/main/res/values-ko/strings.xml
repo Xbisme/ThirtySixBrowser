@@ -408,4 +408,39 @@
     <string name="settings_clear_category_fireproof_sites">파이어 보호 사이트</string>
     <string name="settings_clear_category_fireproof_sites_description">파이어를 사용할 때 더 이상 유지되지 않음</string>
     <string name="settings_about_notice_autoconsent">쿠키 배너 규칙은 DuckDuckGo의 autoconsent(https://github.com/duckduckgo/autoconsent)에서 가져왔으며 MPL 2.0에 따라 사용합니다.</string>
+
+    <!-- Bookmark import and export -->
+    <string name="bookmarks_action_more_cd">옵션 더보기</string>
+    <string name="bookmarks_transfer_sheet_title">북마크 파일</string>
+    <string name="bookmarks_transfer_import">북마크 가져오기</string>
+    <string name="bookmarks_transfer_export">북마크 내보내기</string>
+    <string name="bookmarks_import_folder_name">%1$s에 가져옴</string>
+    <string name="bookmarks_import_untitled_folder">이름 없는 폴더</string>
+    <string name="bookmarks_transfer_importing">북마크를 가져오는 중…</string>
+    <string name="bookmarks_transfer_exporting">북마크를 내보내는 중…</string>
+    <string name="bookmarks_import_done_title">북마크를 가져왔습니다</string>
+    <string name="bookmarks_import_open_folder">폴더 열기</string>
+    <string name="bookmarks_import_done_dismiss">완료</string>
+    <string name="bookmarks_import_error_not_bookmarks">북마크 파일이 아닙니다. 다른 브라우저에서 북마크를 HTML 파일로 내보낸 후 다시 시도하세요.</string>
+    <string name="bookmarks_import_error_nothing">이 파일에는 웹 북마크가 없습니다.</string>
+    <string name="bookmarks_import_error_too_large">파일이 너무 크거나 북마크 10,000개, 폴더 1,000개 한도를 넘습니다.</string>
+    <string name="bookmarks_import_error_read">파일을 열 수 없습니다.</string>
+    <string name="bookmarks_import_error_write">북마크를 저장할 수 없습니다. 아무것도 가져오지 않았습니다.</string>
+    <string name="bookmarks_export_nothing">아직 내보낼 북마크가 없습니다.</string>
+    <string name="bookmarks_export_error_write">파일을 저장할 수 없습니다.</string>
+    <string name="settings_section_bookmarks">북마크</string>
+    <string name="settings_bookmark_transfer_title">북마크 가져오기 및 내보내기</string>
+    <string name="settings_bookmark_transfer_summary">다른 브라우저와 북마크 주고받기</string>
+    <plurals name="bookmarks_import_done_added">
+        <item quantity="other">북마크 %1$d개를 “%2$s”에 추가했습니다.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_duplicates">
+        <item quantity="other">중복 %1$d개를 건너뛰었습니다.</item>
+    </plurals>
+    <plurals name="bookmarks_import_done_unsupported">
+        <item quantity="other">웹 페이지가 아닌 항목 %1$d개를 제외했습니다.</item>
+    </plurals>
+    <plurals name="bookmarks_export_done">
+        <item quantity="other">북마크 %1$d개를 내보냈습니다.</item>
+    </plurals>
 </resources>

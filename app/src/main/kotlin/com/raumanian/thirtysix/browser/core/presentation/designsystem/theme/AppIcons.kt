@@ -68,6 +68,10 @@ object AppIcons {
 
     @DrawableRes val Edit = R.drawable.ic_edit
 
+    @DrawableRes val FileOpen = R.drawable.ic_file_open
+
+    @DrawableRes val FileSave = R.drawable.ic_file_save
+
     @DrawableRes val Folder = R.drawable.ic_folder
 
     @DrawableRes val FolderFilled = R.drawable.ic_folder_filled

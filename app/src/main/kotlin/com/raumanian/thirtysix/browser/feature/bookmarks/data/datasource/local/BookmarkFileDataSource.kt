@@ -1,7 +1,7 @@
 package com.raumanian.thirtysix.browser.feature.bookmarks.data.datasource.local
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.BookmarkTransferLimits
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,7 +26,7 @@ class BookmarkFileDataSource @Inject constructor(
 
     suspend fun readText(uri: String): ReadOutcome = withContext(dispatchers.io) {
         try {
-            val input = context.contentResolver.openInputStream(Uri.parse(uri)) ?: return@withContext ReadOutcome.Failed
+            val input = context.contentResolver.openInputStream(uri.toUri()) ?: return@withContext ReadOutcome.Failed
             val bytes = input.use { stream ->
                 val out = ByteArrayOutputStream()
                 val buffer = ByteArray(BUFFER_BYTES)
@@ -51,7 +51,7 @@ class BookmarkFileDataSource @Inject constructor(
 
     suspend fun write(uri: String, content: (Writer) -> Unit): Boolean = withContext(dispatchers.io) {
         try {
-            val output = context.contentResolver.openOutputStream(Uri.parse(uri), WRITE_TRUNCATE)
+            val output = context.contentResolver.openOutputStream(uri.toUri(), WRITE_TRUNCATE)
                 ?: return@withContext false
             output.bufferedWriter(Charsets.UTF_8).use(content)
             true

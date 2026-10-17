@@ -76,6 +76,22 @@ class BookmarksViewModelTest {
     }
 
     @Test
+    fun `open folder by id leaves search and shows that folder`() = runTest {
+        val repo = FakeBookmarkRepository()
+        val id = repo.seedFolder(BookmarkFolder(0, "Imported", null, 1L))
+        val vm = newViewModel(repo)
+        vm.onAction(BookmarksAction.SearchOpenClick)
+        advanceUntilIdle()
+
+        vm.onAction(BookmarksAction.OpenFolder(id))
+        advanceUntilIdle()
+
+        val state = vm.uiState.first { it.currentFolderId == id }
+        assertEquals(false, state.isSearchActive)
+        assertEquals(listOf("Imported"), state.breadcrumb.map { it.name })
+    }
+
+    @Test
     fun `bookmark tap emits openUrl signal for navigation pop`() = runTest {
         val repo = FakeBookmarkRepository()
         val bookmarkId = repo.seedBookmark(Bookmark(0, "X", "https://x.com", null, 100L, 100L))
