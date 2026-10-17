@@ -23,11 +23,11 @@ The person exported their bookmarks from another browser and has the file on the
 
 **Why this priority**: This is how people move to ThirtySix. Without it, switching costs a long manual retype, and the people with the most bookmarks are the ones most put off.
 
-**Independent Test**: Export bookmarks from Chrome on a computer (folders, nested folders, about 200 links), copy the file to the phone, import it. The new folder holds the same folders and links, in the same order.
+**Independent Test**: Export bookmarks from Chrome on a computer (folders, nested folders, about 200 links), copy the file to the phone, import it. The new folder holds the same folders and links, with the links in the same order.
 
 **Acceptance Scenarios**:
 
-1. **Given** a bookmark file from another browser, **When** the person imports it, **Then** a new folder named like "Imported 17 Oct 2026" appears at the top level of Bookmarks, and it holds the file's folders and links in the file's order.
+1. **Given** a bookmark file from another browser, **When** the person imports it, **Then** a new folder named like "Imported 17 Oct 2026" appears at the top level of Bookmarks, and it holds the file's folders and links. Links keep the file's order; folders appear in the app's usual name order.
 2. **Given** the person already has bookmarks, **When** they import a file, **Then** none of their existing bookmarks or folders are changed, moved or removed.
 3. **Given** a file whose folders are nested several levels deep, **When** it is imported, **Then** the same nesting appears inside the new folder.
 4. **Given** a file that holds the same address twice in one folder, **When** it is imported, **Then** that folder holds it once.
@@ -47,7 +47,7 @@ The person chooses Export, picks where to save the file with the system file pic
 
 **Acceptance Scenarios**:
 
-1. **Given** bookmarks in folders and at the top level, **When** the person exports, **Then** the file holds every bookmark and folder, nested as in the app and in the app's order.
+1. **Given** bookmarks in folders and at the top level, **When** the person exports, **Then** the file holds every bookmark and folder, nested and ordered as the app shows them (folders by name, then links).
 2. **Given** an exported file, **When** it is imported into Chrome, Firefox or Samsung Internet, **Then** that browser shows the same folders and links with the same titles.
 3. **Given** an exported file, **When** it is imported back into ThirtySix, **Then** the new dated folder holds the same tree as the export.
 4. **Given** the file picker opens, **When** it suggests a name, **Then** the name says it is ThirtySix bookmarks and includes the date.
@@ -69,7 +69,7 @@ The person picks the wrong file, a damaged file, or a huge one. The app tells th
 1. **Given** a file that is not a bookmark file (a photo, a PDF, a plain text note), **When** it is imported, **Then** the app says the file is not a bookmark file and nothing is added.
 2. **Given** a bookmark file with no links in it, **When** it is imported, **Then** the app says there was nothing to import and no folder is created.
 3. **Given** a bookmark file cut off part-way or with broken markup, **When** it is imported, **Then** every link that can be read is imported in its folder, and nothing else is changed.
-4. **Given** a file larger than the size limit, or with more entries than the entry limit, **When** it is imported, **Then** the app says the file is too large and nothing is added.
+4. **Given** a file larger than the size limit, or one that would take the app over its bookmark or folder limit, **When** it is imported, **Then** the app says the file is too large and nothing is added.
 5. **Given** an import is running, **When** the person leaves the screen, rotates the phone or switches apps, **Then** the import either completes fully or adds nothing. It never leaves part of a file imported.
 6. **Given** an import or export is running, **When** the person keeps using the app, **Then** the app stays responsive.
 7. **Given** the person cancels the file picker, **When** they return, **Then** nothing happens and no message is shown.
@@ -83,12 +83,12 @@ The person finds Import and Export from the Bookmarks screen's menu, and also in
 
 **Why this priority**: Both actions are rare, so they should not crowd the screens, but they must be easy to find when needed.
 
-**Independent Test**: From the Bookmarks screen, open the top bar menu: Import and Export are there. From Settings, open the bookmarks row: the same two actions are there.
+**Independent Test**: From the Bookmarks screen, open the top bar menu: Import and Export are there. From Settings, tap the bookmarks row: the Bookmarks screen opens with the same two actions offered.
 
 **Acceptance Scenarios**:
 
 1. **Given** the Bookmarks screen, **When** the person opens its top bar menu, **Then** it offers Import bookmarks and Export bookmarks.
-2. **Given** Settings, **When** the person looks for bookmarks, **Then** a row leads to Import bookmarks and Export bookmarks.
+2. **Given** Settings, **When** the person taps the import and export bookmarks row, **Then** the Bookmarks screen opens with Import bookmarks and Export bookmarks offered.
 3. **Given** an import finished from Settings, **When** the person chooses to open the new folder, **Then** the Bookmarks screen opens on that folder.
 4. **Given** the active tab is incognito, **When** the person imports or exports, **Then** it works the same, because bookmarks are not incognito data.
 
@@ -119,13 +119,13 @@ The person finds Import and Export from the Bookmarks screen's menu, and also in
 - **FR-001**: The app MUST let the person pick a file to import with the system file picker, without asking for any storage permission.
 - **FR-002**: The app MUST read the Netscape bookmark file format as exported by current Chrome, Firefox, Safari, Edge, Samsung Internet and DuckDuckGo.
 - **FR-003**: An import MUST create one new top-level folder named "Imported" followed by the date in the app's language, adding a number when that name is taken. Everything from the file MUST go inside it.
-- **FR-004**: The import MUST keep the file's folder tree and the order of folders and links within each folder.
+- **FR-004**: The import MUST keep the file's folder tree and the order of links within each folder. Folders are shown in the app's usual name order, because the app keeps no folder order.
 - **FR-005**: The import MUST keep only `http` and `https` addresses. Every other entry MUST be counted as unsupported and left out.
 - **FR-006**: Within one folder of the import, a repeat of an address already added to that folder MUST be skipped and counted as a duplicate.
 - **FR-007**: An entry with no title MUST take its address as its title. Titles and folder names MUST be cut to the existing bookmark limits. Character references MUST be decoded.
 - **FR-008**: The import MUST NOT change, move or remove any bookmark or folder that existed before it.
 - **FR-009**: The import MUST be all or nothing. If it fails or is interrupted, no folder and no bookmark from it remain.
-- **FR-010**: The import MUST refuse files larger than 10 MB and files with more than 20,000 entries (links plus folders), with a message, before adding anything.
+- **FR-010**: The import MUST refuse, with a message and before adding anything, a file larger than 10 MB, and a file whose import would take the app over its existing limits of 10,000 bookmarks or 1,000 folders in total.
 - **FR-011**: Folders deeper than 32 levels below the dated folder MUST be flattened into their deepest allowed parent. Their links MUST be kept.
 - **FR-012**: A file that is not a bookmark file, or holds no importable link, MUST produce a clear message and add nothing. No empty dated folder may be left behind.
 - **FR-013**: A partly broken bookmark file MUST import every link that can be read, in the folder it can be placed in.
@@ -134,7 +134,7 @@ The person finds Import and Export from the Bookmarks screen's menu, and also in
 **Export (Story 2)**
 
 - **FR-015**: The app MUST let the person choose where to save the file with the system file picker, without asking for any storage permission. The suggested name MUST identify ThirtySix bookmarks and the date.
-- **FR-016**: The export MUST write every bookmark and folder in the Netscape bookmark file format, with the app's nesting and order, empty folders included.
+- **FR-016**: The export MUST write every bookmark and folder in the Netscape bookmark file format, with the app's nesting and the order the app shows (folders by name, then links), empty folders included.
 - **FR-017**: The exported file MUST import with the same folders, links and titles into Chrome, Firefox and Samsung Internet, and back into ThirtySix.
 - **FR-018**: Titles and folder names MUST be escaped so that any title, including ones holding markup characters or non-Latin text, reads back exactly.
 - **FR-019**: The export MUST reflect the bookmarks at the moment it starts.
@@ -147,7 +147,7 @@ The person finds Import and Export from the Bookmarks screen's menu, and also in
 - **FR-023**: An import or export MUST survive rotation and the person switching apps. It finishes or fails as a whole and reports its result when the person comes back.
 - **FR-024**: Neither direction MUST make any network request. Icons and other links inside the file MUST NOT be fetched, and scripts in the file MUST NOT run.
 - **FR-025**: The Bookmarks screen's top bar menu MUST offer Import bookmarks and Export bookmarks.
-- **FR-026**: Settings MUST have a row that leads to Import bookmarks and Export bookmarks.
+- **FR-026**: Settings MUST have a row that opens the Bookmarks screen with Import bookmarks and Export bookmarks offered.
 - **FR-027**: Choosing to open the imported folder MUST show the Bookmarks screen on that folder, from either entry point.
 - **FR-028**: Cancelling the file picker MUST do nothing and show nothing.
 - **FR-029**: Every new text MUST exist in all 8 app languages, and every new control MUST have a TalkBack label. The result message MUST be announced.
@@ -164,7 +164,7 @@ The person finds Import and Export from the Bookmarks screen's menu, and also in
 
 - **SC-001**: Files exported by Chrome, Firefox, Safari, Edge, Samsung Internet and DuckDuckGo each import with 100% of their web links present, in the right folders and order.
 - **SC-002**: A ThirtySix export imported into Chrome, Firefox and Samsung Internet shows 100% of the bookmarks with the same titles and folders.
-- **SC-003**: Export then import back into ThirtySix yields an identical tree (titles, addresses, nesting, order) for a set of 1,000 bookmarks that includes markup characters, emoji and text in all 8 app languages.
+- **SC-003**: Export then import back into ThirtySix yields an identical tree (titles, addresses, nesting, order as the app shows it) for a set of 1,000 bookmarks that includes markup characters, emoji and text in all 8 app languages.
 - **SC-004**: Importing 5,000 bookmarks finishes within 5 seconds, and exporting 5,000 bookmarks within 3 seconds, on the reference device. The screen keeps responding during both.
 - **SC-005**: Over a set of at least 10 bad files (not a bookmark file, empty, truncated, oversized, too many entries, 100-level nesting, interrupted mid-import), the app never crashes, and the bookmark data is byte-for-byte unchanged after each failed import.
 - **SC-006**: No network request is made during any import or export, checked with a proxy on a file full of icon and image links.
@@ -179,4 +179,5 @@ The person finds Import and Export from the Bookmarks screen's menu, and also in
 - **No scheduled or automatic export.** Export happens only when the person asks.
 - **Where the file comes from.** The person gets the file onto the phone themselves (download, cable, cloud drive app). Any location the system file picker shows is accepted, including cloud drive providers; reading from them is the provider's business.
 - **Reference device.** Timing in SC-004 is measured on the release build on the owner's Galaxy A55, or recorded as deferred per `docs/adr/0017`.
+- **Folder order.** The app has always listed folders by name and stores no folder order. Import and export follow that; adding a folder order would need a database change and is out of scope.
 - **Bookmark star.** The star on a page reflects whether its address is bookmarked anywhere, as today, so imported duplicates of existing bookmarks keep it filled.
