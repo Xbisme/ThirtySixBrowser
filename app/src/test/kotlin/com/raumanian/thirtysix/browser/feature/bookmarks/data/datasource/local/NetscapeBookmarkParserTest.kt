@@ -88,6 +88,16 @@ class NetscapeBookmarkParserTest {
     }
 
     @Test
+    fun `a real duckduckgo android export keeps its order and unescaped ampersands`() {
+        val file = parseFixture("duckduckgo-android-export.html")
+
+        assertEquals(listOf(4, 1, 0, 0), file.counts())
+        val links = file.root.folder("DuckDuckGo Bookmarks").children.map { it as Link }
+        assertEquals("https://duckduckgo.com/?q=go&atb=v500-3ru&ko=-1&t=ddg_android&ia=web", links.first().url)
+        assertEquals("Báo VnExpress - Báo tiếng Việt nhiều người xem nhất", links[2].title)
+    }
+
+    @Test
     fun `a truncated file keeps every link read before the cut`() {
         val file = parseFixture("truncated.html")
 
