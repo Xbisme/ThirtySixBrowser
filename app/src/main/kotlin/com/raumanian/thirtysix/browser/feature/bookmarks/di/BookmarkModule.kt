@@ -1,7 +1,9 @@
 package com.raumanian.thirtysix.browser.feature.bookmarks.di
 
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.feature.bookmarks.data.repository.BookmarkFileRepositoryImpl
 import com.raumanian.thirtysix.browser.feature.bookmarks.data.repository.BookmarkRepositoryImpl
+import com.raumanian.thirtysix.browser.feature.bookmarks.domain.repository.BookmarkFileRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,4 +17,7 @@ abstract class BookmarkModule {
     @Binds
     @Singleton
     abstract fun bindBookmarkRepository(impl: BookmarkRepositoryImpl): BookmarkRepository
+
+    @Binds
+    abstract fun bindBookmarkFileRepository(impl: BookmarkFileRepositoryImpl): BookmarkFileRepository
 }

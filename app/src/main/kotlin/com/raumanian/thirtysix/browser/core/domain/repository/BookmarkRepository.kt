@@ -52,7 +52,6 @@ interface BookmarkRepository {
 
     suspend fun renameFolder(folderId: Long, newName: String): Result<Unit>
 
-    /** Rejects a move that would create a cycle. */
     suspend fun moveFolder(folderId: Long, newParentId: Long?): Result<Unit>
 
     /** One transaction; returns the number of descendants removed, excluding the folder. */
@@ -62,12 +61,7 @@ interface BookmarkRepository {
 
     suspend fun countFolders(): Int
 
-    /** Every folder and bookmark read in one transaction: child folders by name, then links in list order. */
     suspend fun getBookmarkTree(): BookmarkTreeNode.Folder
 
-    /**
-     * Writes [tree] under a new top-level folder named [rootName], or `rootName (n)` when that name
-     * is taken, in one transaction: on failure nothing is written. Links keep their order in [tree].
-     */
     suspend fun importTree(rootName: String, tree: BookmarkTreeNode.Folder): Result<ImportOutcome>
 }

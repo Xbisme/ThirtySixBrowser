@@ -223,6 +223,7 @@ class BookmarkRepositoryImpl @Inject constructor(
             BookmarkTreeNode.Folder(name = "", children = childrenOf(null))
         }
 
+    // All or nothing: one transaction, under a new top-level folder renamed "name (n)" when taken.
     override suspend fun importTree(rootName: String, tree: BookmarkTreeNode.Folder): Result<ImportOutcome> =
         runCatchingResult {
             database.withTransaction {
