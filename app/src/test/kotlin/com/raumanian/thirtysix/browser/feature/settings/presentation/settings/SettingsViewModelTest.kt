@@ -540,6 +540,23 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `tab swipe is on by default, and turning it off writes once and the state follows`() = runTest {
+        val repository = FakeSettingsRepository()
+        val viewModel = settingsViewModel(settingsRepository = repository)
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.isTabSwipeEnabled)
+
+        viewModel.onAction(SettingsAction.TabSwipeToggled(false))
+        advanceUntilIdle()
+        viewModel.onAction(SettingsAction.TabSwipeToggled(false))
+        advanceUntilIdle()
+
+        assertEquals(listOf(FakeSettingsRepository.CALL_SET_TAB_SWIPE), repository.writes)
+        assertFalse(viewModel.uiState.value.isTabSwipeEnabled)
+        assertTrue(viewModel.uiState.value.isSwipeNavigationEnabled)
+    }
+
+    @Test
     fun `turning dynamic color on writes once`() = runTest {
         // The default is off, so the first meaningful toggle turns it on.
         val repository = FakeSettingsRepository()

@@ -27,5 +27,6 @@ class SettingsMapper @Inject constructor() {
         textSize = TextSize.fromPercentOrDefault(prefs[StorageKeys.TEXT_ZOOM_PERCENT]),
         isSwipeNavigationEnabled = prefs[StorageKeys.SWIPE_NAVIGATION_ENABLED]
             ?: AppDefaults.SWIPE_NAVIGATION_ENABLED,
+        isTabSwipeEnabled = prefs[StorageKeys.TAB_SWIPE_ENABLED] ?: AppDefaults.TAB_SWIPE_ENABLED,
     )
 }

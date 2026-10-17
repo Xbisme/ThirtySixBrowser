@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.presentation.util.EventEffect
@@ -73,6 +74,24 @@ internal fun HubEventEffect(events: Flow<HubEvent>, snackbarHostState: SnackbarH
     EventEffect(events) { event ->
         when (event) {
             HubEvent.MaxIncognitoTabsReached -> snackbarHostState.showSnackbar(maxIncognitoMessage)
+        }
+    }
+}
+
+/** Spoken after a switch through the accessibility actions, which show no slide. */
+@Composable
+internal fun TabSwipeEventEffect(events: Flow<TabSwipeEvent>) {
+    val view = LocalView.current
+    val home = stringResource(R.string.browser_action_home)
+    val incognito = stringResource(R.string.browser_a11y_switched_to_incognito_tab)
+    val switchedTo = stringResource(R.string.browser_a11y_switched_to_tab)
+    EventEffect(events) { event ->
+        when (event) {
+            is TabSwipeEvent.Announce -> {
+                val tab = event.preview
+                val name = tab.title.ifBlank { tab.host }.ifBlank { home }
+                view.announceForAccessibility(if (tab.isIncognito) incognito else switchedTo.format(name))
+            }
         }
     }
 }

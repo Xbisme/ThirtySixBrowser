@@ -71,6 +71,7 @@ internal fun AddressBar(
     state: BrowserUiState,
     callbacks: AddressBarCallbacks,
     modifier: Modifier = Modifier,
+    fieldModifier: Modifier = Modifier,
     isLoading: Boolean = false,
     progress: () -> Float = { 0f },
     focusRequester: FocusRequester? = null,
@@ -134,7 +135,8 @@ internal fun AddressBar(
                 .fillMaxWidth()
                 .testTag(TEST_TAG_ADDRESS_BAR)
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-                .onFocusChanged { focusState -> callbacks.onFocusChange(focusState.isFocused) },
+                .onFocusChanged { focusState -> callbacks.onFocusChange(focusState.isFocused) }
+                .then(fieldModifier),
             singleLine = true,
             textStyle = MaterialTheme.typography.bodyLarge.copy(color = style.content),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),

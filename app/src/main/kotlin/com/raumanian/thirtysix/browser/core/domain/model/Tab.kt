@@ -4,7 +4,7 @@ data class Tab(
     val id: Long,
     val url: String,
     val title: String,
-    /** Insertion order; only a tiebreaker until drag-to-reorder exists. */
+    /** Opening order: the order tabs are shown and swiped in. Switching tabs never changes it. */
     val position: Int,
     val createdAt: Long,
     /** The active tab is the one with the latest value. */

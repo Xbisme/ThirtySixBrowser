@@ -10,6 +10,7 @@ data class UserSettings(
     val isOnboardingCompleted: Boolean,
     val textSize: TextSize = AppDefaults.TEXT_SIZE,
     val isSwipeNavigationEnabled: Boolean = AppDefaults.SWIPE_NAVIGATION_ENABLED,
+    val isTabSwipeEnabled: Boolean = AppDefaults.TAB_SWIPE_ENABLED,
 ) {
     companion object {
         // Initial value while settings load, so the first frame needs no disk read. Its onboarding
@@ -22,6 +23,7 @@ data class UserSettings(
             isOnboardingCompleted = AppDefaults.IS_ONBOARDING_COMPLETED,
             textSize = AppDefaults.TEXT_SIZE,
             isSwipeNavigationEnabled = AppDefaults.SWIPE_NAVIGATION_ENABLED,
+            isTabSwipeEnabled = AppDefaults.TAB_SWIPE_ENABLED,
         )
     }
 }

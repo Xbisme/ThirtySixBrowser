@@ -18,6 +18,8 @@ object AppDefaults {
 
     const val SWIPE_NAVIGATION_ENABLED: Boolean = true
 
+    const val TAB_SWIPE_ENABLED: Boolean = true
+
     val HISTORY_RETENTION: HistoryRetention = HistoryRetention.Days90
 
     val TEXT_SIZE: TextSize = TextSize.Percent100

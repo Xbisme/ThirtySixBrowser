@@ -222,6 +222,12 @@
     <string name="settings_dynamic_color_summary">Использовать цвета обоев</string>
     <string name="settings_swipe_navigation_title">Смахивание назад и вперёд</string>
     <string name="settings_swipe_navigation_summary">Проведите по странице в сторону, чтобы перейти на предыдущую или следующую страницу</string>
+    <string name="settings_tab_swipe_title">Смахивание адресной строки для смены вкладок</string>
+    <string name="settings_tab_swipe_summary">Сдвиньте адресную строку в сторону, чтобы перейти к предыдущей или следующей вкладке</string>
+    <string name="browser_a11y_next_tab">Следующая вкладка</string>
+    <string name="browser_a11y_previous_tab">Предыдущая вкладка</string>
+    <string name="browser_a11y_switched_to_tab">Открыта вкладка: %1$s</string>
+    <string name="browser_a11y_switched_to_incognito_tab">Открыта вкладка инкогнито</string>
 
     <!-- About. -->
     <string name="settings_about_version">Версия %1$s</string>

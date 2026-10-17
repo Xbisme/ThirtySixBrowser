@@ -125,6 +125,33 @@ class TabsViewModelTest {
         }
     }
 
+    @Test
+    fun `cards stay in opening order after switches, with the active card marked in place`() = runTest(testDispatcher) {
+        val repository = FakeTabRepository(homeUrl = HOME_URL)
+        repository.emit(
+            listOf(
+                Tab(id = 1L, url = "https://a.com", title = "", position = 0, createdAt = 0L, lastActiveAt = 100L),
+                Tab(id = 2L, url = "https://b.com", title = "", position = 1, createdAt = 1L, lastActiveAt = 300L),
+                Tab(id = 3L, url = "https://c.com", title = "", position = 2, createdAt = 2L, lastActiveAt = 200L),
+            ),
+        )
+        val vm = newViewModel(repository)
+
+        vm.uiState.test {
+            var current = awaitItem()
+            while (current.tabs.size < 3) current = awaitItem()
+            assertEquals(listOf(1L, 2L, 3L), current.visibleTabs.map(Tab::id))
+            assertEquals(2L, current.activeTabId)
+
+            vm.onAction(TabsAction.TabClick(3L))
+            advanceUntilIdle()
+            current = expectMostRecentItem()
+            assertEquals(listOf(1L, 2L, 3L), current.visibleTabs.map(Tab::id))
+            assertEquals(3L, current.activeTabId)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun incognitoTab(id: Long, lastActiveAt: Long) = Tab(
         id = id,
         url = "https://example.com/$id",

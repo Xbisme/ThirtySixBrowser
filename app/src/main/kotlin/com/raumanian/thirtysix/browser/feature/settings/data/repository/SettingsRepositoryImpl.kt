@@ -44,6 +44,8 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> =
         dataStore.setSwipeNavigationEnabled(enabled)
 
+    override suspend fun setTabSwipeEnabled(enabled: Boolean): Result<Unit> = dataStore.setTabSwipeEnabled(enabled)
+
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> =
         dataStore.setOnboardingCompleted(value)
 }

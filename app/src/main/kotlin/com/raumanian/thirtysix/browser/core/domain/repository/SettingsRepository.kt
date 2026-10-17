@@ -34,4 +34,6 @@ interface SettingsRepository {
     suspend fun setTextSize(size: TextSize): Result<Unit>
 
     suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit>
+
+    suspend fun setTabSwipeEnabled(enabled: Boolean): Result<Unit>
 }

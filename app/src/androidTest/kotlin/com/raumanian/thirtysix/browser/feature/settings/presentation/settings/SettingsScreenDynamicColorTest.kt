@@ -2,9 +2,11 @@ package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import org.junit.Rule
@@ -38,6 +40,9 @@ class SettingsScreenDynamicColorTest {
             }
         }
 
+        // Below the fold on small screens: the lazy list composes it only once it is in view.
+        composeRule.onNodeWithTag(TEST_TAG_SETTINGS_LIST)
+            .performScrollToNode(hasTestTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW))
         // Dynamic color starts off, so the toggle turns it on.
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).assertIsOff()
         composeRule.onNodeWithTag(TEST_TAG_SETTINGS_DYNAMIC_COLOR_ROW).performClick()

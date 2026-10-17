@@ -27,6 +27,8 @@ object StorageKeys {
 
     val SWIPE_NAVIGATION_ENABLED = booleanPreferencesKey("swipe_navigation_enabled")
 
+    val TAB_SWIPE_ENABLED = booleanPreferencesKey("tab_swipe_enabled")
+
     /** Set across a Fire run; still `true` at start-up means the run must finish before any tab shows. */
     val FIRE_IN_PROGRESS = booleanPreferencesKey("fire_in_progress")
 }

@@ -12,6 +12,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.CloseTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.domain.util.TabOrder
 import com.raumanian.thirtysix.browser.core.presentation.util.TabsErrorEvent
 import com.raumanian.thirtysix.browser.feature.tabs.domain.usecase.CloseAllTabsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,10 +79,10 @@ class TabsViewModel @Inject constructor(
     )
 
     val uiState: StateFlow<TabsUiState> = combine(
-        observeAllTabs().map { tabs ->
-            val activeId = tabs.maxByOrNull(Tab::lastActiveAt)?.id
-            val incognitoCount = tabs.count(Tab::isIncognito)
-            Triple(tabs, activeId, incognitoCount)
+        observeAllTabs().map { mostRecentFirst ->
+            val activeId = mostRecentFirst.maxByOrNull(Tab::lastActiveAt)?.id
+            val incognitoCount = mostRecentFirst.count(Tab::isIncognito)
+            Triple(TabOrder.inOpeningOrder(mostRecentFirst), activeId, incognitoCount)
         },
         localState,
     ) { (tabs, activeId, incognitoCount), local ->

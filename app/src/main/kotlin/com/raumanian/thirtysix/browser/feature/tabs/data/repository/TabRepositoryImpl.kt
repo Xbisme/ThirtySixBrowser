@@ -8,6 +8,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.domain.util.TabOrder
 import com.raumanian.thirtysix.browser.feature.tabs.data.mapper.toDomain
 import javax.inject.Inject
 import javax.inject.Named
@@ -80,13 +81,27 @@ class TabRepositoryImpl @Inject constructor(
     }
 
     override suspend fun closeTab(tabId: Long) {
-        val tab = tabDao.getById(tabId) ?: return
         seedMutex.withLock {
+            val rows = tabDao.getAll()
+            val tab = rows.firstOrNull { it.id == tabId } ?: return
             tabDao.delete(tab)
-            if (tabDao.count() == 0) {
+            if (rows.size == 1) {
                 seedHomeTabLocked()
+            } else if (tab.lastActiveAt >= rows.maxOf(TabEntity::lastActiveAt)) {
+                handActiveMark(rows, tab)
             }
         }
+    }
+
+    /**
+     * The heir inherits the closed tab's stamp instead of "now", so a normal heir never jumps ahead
+     * of an incognito tab that is active in front of it.
+     */
+    private suspend fun handActiveMark(rows: List<TabEntity>, closed: TabEntity) {
+        val tabs = rows.mapNotNull { entity -> runCatching { entity.toDomain() }.getOrNull() }
+        val heirId = TabOrder.heirOf(tabs, closed.id)?.id ?: return
+        val heir = rows.first { it.id == heirId }
+        tabDao.update(heir.copy(lastActiveAt = maxOf(heir.lastActiveAt, closed.lastActiveAt)))
     }
 
     override suspend fun closeAllTabs() {

@@ -61,6 +61,8 @@ data class HomeCallbacks(
     val onSearchTextChange: (String) -> Unit = {},
     /** Gaining or losing focus starts or ends a suggestion session. */
     val onSearchFocusChange: (Boolean) -> Unit = {},
+    /** Lets the browser put the tab swipe and its accessibility actions on the search field. */
+    val searchFieldModifier: Modifier = Modifier,
 )
 
 /**
@@ -153,6 +155,7 @@ fun HomeContent(
                     onTextChange = callbacks.onSearchTextChange,
                     onFocusChange = callbacks.onSearchFocusChange,
                     suggestions = searchSuggestions,
+                    fieldModifier = callbacks.searchFieldModifier,
                 ),
             )
         }

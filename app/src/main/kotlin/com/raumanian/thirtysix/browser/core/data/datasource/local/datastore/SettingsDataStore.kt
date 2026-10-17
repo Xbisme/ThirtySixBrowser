@@ -48,6 +48,10 @@ class SettingsDataStore @Inject constructor(private val dataStore: DataStore<Pre
         prefs[StorageKeys.SWIPE_NAVIGATION_ENABLED] = enabled
     }
 
+    suspend fun setTabSwipeEnabled(enabled: Boolean): Result<Unit> = editCatching { prefs ->
+        prefs[StorageKeys.TAB_SWIPE_ENABLED] = enabled
+    }
+
     suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = editCatching { prefs ->
         prefs[StorageKeys.IS_ONBOARDING_COMPLETED] = value
     }

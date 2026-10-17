@@ -175,6 +175,8 @@ data class HomeSearchHooks(
     val onTextChange: (String) -> Unit = {},
     val onFocusChange: (Boolean) -> Unit = {},
     val suggestions: @Composable () -> Unit = {},
+    /** Lets the browser put the tab swipe and its accessibility actions on the field. */
+    val fieldModifier: Modifier = Modifier,
 )
 
 /** Submits exactly as the address bar does. Without an [engine] the engine's initial is left out. */
@@ -204,6 +206,7 @@ internal fun HomeSearchBar(
             .fillMaxWidth()
             .focusRequester(focusRequester)
             .onFocusChanged { hooks.onFocusChange(it.isFocused) }
+            .then(hooks.fieldModifier)
             .testTag(TEST_TAG_HOME_SEARCH),
         decorationBox = { inner ->
             Row(

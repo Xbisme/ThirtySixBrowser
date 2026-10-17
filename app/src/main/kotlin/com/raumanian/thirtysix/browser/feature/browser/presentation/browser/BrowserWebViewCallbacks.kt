@@ -18,4 +18,6 @@ internal data class BrowserWebViewCallbacks(
     val pageRequests: PageRequestSink = PageRequestSink.None,
     /** 0-based active match and the number of matches. */
     val onFindResult: (activeOrdinal: Int, total: Int) -> Unit = { _, _ -> },
+    /** The page has drawn its first frame since a navigation began. */
+    val onPageVisible: () -> Unit = {},
 )

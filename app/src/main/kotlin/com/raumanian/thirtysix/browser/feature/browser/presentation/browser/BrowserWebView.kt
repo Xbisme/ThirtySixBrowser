@@ -193,6 +193,7 @@ private fun buildConfiguredWebView(
         pageRequests = callbacks.pageRequests,
         protection = protection,
         onHistoryCommitted = { session?.saveSoon(wv) },
+        onPageVisible = callbacks.onPageVisible,
     )
     // Incognito downloads are recorded like any other, so the incognito flag is deliberately not consulted.
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
@@ -342,6 +343,7 @@ private class BrowserWebViewClient(
     private val pageRequests: PageRequestSink,
     private val protection: WebViewProtection?,
     private val onHistoryCommitted: () -> Unit,
+    private val onPageVisible: () -> Unit,
 ) : WebViewClient() {
 
     /**
@@ -382,6 +384,10 @@ private class BrowserWebViewClient(
             onUrlChange(it)
             onLoadStarted(it)
         }
+    }
+
+    override fun onPageCommitVisible(view: WebView?, url: String?) {
+        onPageVisible()
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {

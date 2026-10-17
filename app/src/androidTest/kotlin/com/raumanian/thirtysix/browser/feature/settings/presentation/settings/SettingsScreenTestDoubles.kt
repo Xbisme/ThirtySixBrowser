@@ -86,6 +86,9 @@ internal class InstrumentedFakeSettingsRepository(
     override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> =
         write { copy(isSwipeNavigationEnabled = enabled) }
 
+    override suspend fun setTabSwipeEnabled(enabled: Boolean): Result<Unit> =
+        write { copy(isTabSwipeEnabled = enabled) }
+
     private fun write(transform: UserSettings.() -> UserSettings): Result<Unit> {
         if (failNextWrite) {
             failNextWrite = false

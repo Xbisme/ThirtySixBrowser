@@ -183,6 +183,66 @@ class IncognitoTabRepositoryImplTest {
     }
 
     @Test
+    fun `closing the active middle tab makes the next one active`() = runTest {
+        val (_, b, c) = threeTabs(activeIndex = 1)
+
+        repository.closeTab(b)
+
+        assertEquals(c, activeId())
+    }
+
+    @Test
+    fun `closing the active last tab makes the previous one active`() = runTest {
+        val (_, b, c) = threeTabs(activeIndex = 2)
+
+        repository.closeTab(c)
+
+        assertEquals(b, activeId())
+    }
+
+    @Test
+    fun `closing a background tab leaves the active tab alone`() = runTest {
+        val (a, b, _) = threeTabs(activeIndex = 0)
+
+        repository.closeTab(b)
+
+        assertEquals(a, activeId())
+    }
+
+    @Test
+    fun `positions never repeat after a close`() = runTest {
+        val (a, _, _) = threeTabs(activeIndex = 2)
+        repository.closeTab(a)
+        repository.createTab("https://d.com/")
+
+        val positions = repository.observeTabs().first().map { it.position }
+
+        assertEquals(positions.size, positions.toSet().size)
+        assertEquals(listOf(1, 2, 3), positions.sorted())
+    }
+
+    @Test
+    fun `closing the last incognito tab still ends the session`() = runTest {
+        val id = (repository.createTab("https://only.com/") as Result.Success).data.id
+
+        repository.closeTab(id)
+
+        assertEquals(1, cookieManager.restoreCount)
+    }
+
+    /** Tabs opened in order; the one at [activeIndex] is switched to last, a few milliseconds later. */
+    private suspend fun threeTabs(activeIndex: Int): List<Long> {
+        val ids = listOf("a", "b", "c").map { name ->
+            (repository.createTab("https://$name.com/") as Result.Success).data.id
+        }
+        Thread.sleep(STAMP_GAP_MS)
+        repository.switchActiveTab(ids[activeIndex])
+        return ids
+    }
+
+    private suspend fun activeId(): Long = repository.observeTabs().first().first().id
+
+    @Test
     fun `8 - concurrent createTab and closeTab serialize via mutex (no torn state)`() = runTest {
         // Pre-seed 5 incognito tabs (well under the cap) to give close ops something to chew on.
         val seeded = (0 until 5).map { i ->
@@ -281,6 +341,7 @@ class IncognitoTabRepositoryImplTest {
 
     private companion object {
         const val UNKNOWN_ID: Long = -9_999L
+        const val STAMP_GAP_MS: Long = 5L
     }
 
     private class TestDispatcherProvider : DispatcherProvider {

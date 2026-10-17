@@ -13,6 +13,7 @@ data class SettingsUiState(
     val isDynamicColorEnabled: Boolean = AppDefaults.DYNAMIC_COLOR_ENABLED,
     val isDynamicColorSupported: Boolean = false,
     val isSwipeNavigationEnabled: Boolean = AppDefaults.SWIPE_NAVIGATION_ENABLED,
+    val isTabSwipeEnabled: Boolean = AppDefaults.TAB_SWIPE_ENABLED,
     val searchEngine: SearchEngine = AppDefaults.SEARCH_ENGINE,
     val historyRetention: HistoryRetention = AppDefaults.HISTORY_RETENTION,
     val textSize: TextSize = AppDefaults.TEXT_SIZE,
