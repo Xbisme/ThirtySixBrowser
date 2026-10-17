@@ -3,6 +3,8 @@ package com.raumanian.thirtysix.browser.core.domain.repository
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkDescendantCount
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode
+import com.raumanian.thirtysix.browser.core.domain.model.ImportOutcome
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 
@@ -55,4 +57,17 @@ interface BookmarkRepository {
 
     /** One transaction; returns the number of descendants removed, excluding the folder. */
     suspend fun deleteFolderCascade(folderId: Long): Result<BookmarkDescendantCount>
+
+    suspend fun countBookmarks(): Int
+
+    suspend fun countFolders(): Int
+
+    /** Every folder and bookmark read in one transaction: child folders by name, then links in list order. */
+    suspend fun getBookmarkTree(): BookmarkTreeNode.Folder
+
+    /**
+     * Writes [tree] under a new top-level folder named [rootName], or `rootName (n)` when that name
+     * is taken, in one transaction: on failure nothing is written. Links keep their order in [tree].
+     */
+    suspend fun importTree(rootName: String, tree: BookmarkTreeNode.Folder): Result<ImportOutcome>
 }
