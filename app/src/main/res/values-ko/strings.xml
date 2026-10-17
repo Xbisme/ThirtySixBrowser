@@ -213,6 +213,12 @@
     <string name="settings_dynamic_color_summary">배경화면의 색상 사용</string>
     <string name="settings_swipe_navigation_title">스와이프로 뒤로·앞으로 이동</string>
     <string name="settings_swipe_navigation_summary">페이지를 옆으로 스와이프하여 이전 또는 다음 페이지로 이동</string>
+    <string name="settings_tab_swipe_title">주소창을 밀어 탭 전환</string>
+    <string name="settings_tab_swipe_summary">주소창을 옆으로 밀어 이전 탭이나 다음 탭으로 이동</string>
+    <string name="browser_a11y_next_tab">다음 탭</string>
+    <string name="browser_a11y_previous_tab">이전 탭</string>
+    <string name="browser_a11y_switched_to_tab">%1$s 탭으로 전환됨</string>
+    <string name="browser_a11y_switched_to_incognito_tab">시크릿 탭으로 전환됨</string>
 
     <!-- About. -->
     <string name="settings_about_version">버전 %1$s</string>

@@ -259,6 +259,12 @@
     <string name="settings_dynamic_color_summary">Use colors from your wallpaper</string>
     <string name="settings_swipe_navigation_title">Swipe to go back and forward</string>
     <string name="settings_swipe_navigation_summary">Swipe sideways across a page to go to the previous or next page</string>
+    <string name="settings_tab_swipe_title">Swipe the address bar to switch tabs</string>
+    <string name="settings_tab_swipe_summary">Slide the address bar sideways to go to the previous or next tab</string>
+    <string name="browser_a11y_next_tab">Next tab</string>
+    <string name="browser_a11y_previous_tab">Previous tab</string>
+    <string name="browser_a11y_switched_to_tab">Switched to %1$s</string>
+    <string name="browser_a11y_switched_to_incognito_tab">Switched to an incognito tab</string>
 
     <!-- About. The app name comes from app_name. -->
     <string name="settings_about_version">Version %1$s</string>

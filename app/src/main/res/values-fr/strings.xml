@@ -219,6 +219,12 @@
     <string name="settings_dynamic_color_summary">Utiliser les couleurs de votre fond d\'écran</string>
     <string name="settings_swipe_navigation_title">Balayer pour reculer et avancer</string>
     <string name="settings_swipe_navigation_summary">Balayez la page sur le côté pour aller à la page précédente ou suivante</string>
+    <string name="settings_tab_swipe_title">Balayer la barre d’adresse pour changer d’onglet</string>
+    <string name="settings_tab_swipe_summary">Faites glisser la barre d’adresse sur le côté pour passer à l’onglet précédent ou suivant</string>
+    <string name="browser_a11y_next_tab">Onglet suivant</string>
+    <string name="browser_a11y_previous_tab">Onglet précédent</string>
+    <string name="browser_a11y_switched_to_tab">Onglet affiché : %1$s</string>
+    <string name="browser_a11y_switched_to_incognito_tab">Onglet privé affiché</string>
 
     <!-- About. -->
     <string name="settings_about_version">Version %1$s</string>

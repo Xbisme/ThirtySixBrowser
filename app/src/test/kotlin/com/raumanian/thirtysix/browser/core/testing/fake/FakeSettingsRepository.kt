@@ -58,6 +58,9 @@ class FakeSettingsRepository(
     override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> =
         write(CALL_SET_SWIPE_NAVIGATION) { copy(isSwipeNavigationEnabled = enabled) }
 
+    override suspend fun setTabSwipeEnabled(enabled: Boolean): Result<Unit> =
+        write(CALL_SET_TAB_SWIPE) { copy(isTabSwipeEnabled = enabled) }
+
     private fun write(name: String, transform: UserSettings.() -> UserSettings): Result<Unit> {
         writes += name
         callLog += name
@@ -77,5 +80,6 @@ class FakeSettingsRepository(
         const val CALL_SET_ONBOARDING_COMPLETED: String = "settings.setOnboardingCompleted"
         const val CALL_SET_TEXT_SIZE: String = "settings.setTextSize"
         const val CALL_SET_SWIPE_NAVIGATION: String = "settings.setSwipeNavigationEnabled"
+        const val CALL_SET_TAB_SWIPE: String = "settings.setTabSwipeEnabled"
     }
 }

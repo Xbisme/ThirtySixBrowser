@@ -216,6 +216,12 @@
     <string name="settings_dynamic_color_summary">Farben aus deinem Hintergrundbild verwenden</string>
     <string name="settings_swipe_navigation_title">Wischen für zurück und vorwärts</string>
     <string name="settings_swipe_navigation_summary">Seitlich über eine Seite wischen, um zur vorherigen oder nächsten Seite zu gehen</string>
+    <string name="settings_tab_swipe_title">Adressleiste wischen, um Tabs zu wechseln</string>
+    <string name="settings_tab_swipe_summary">Adressleiste seitlich ziehen, um zum vorherigen oder nächsten Tab zu wechseln</string>
+    <string name="browser_a11y_next_tab">Nächster Tab</string>
+    <string name="browser_a11y_previous_tab">Vorheriger Tab</string>
+    <string name="browser_a11y_switched_to_tab">Zu %1$s gewechselt</string>
+    <string name="browser_a11y_switched_to_incognito_tab">Zu einem Inkognito-Tab gewechselt</string>
 
     <!-- About. -->
     <string name="settings_about_version">Version %1$s</string>

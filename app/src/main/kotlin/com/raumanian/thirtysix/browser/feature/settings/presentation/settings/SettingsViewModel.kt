@@ -79,6 +79,7 @@ class SettingsViewModel @Inject constructor(
                         historyRetention = stored.historyRetention,
                         textSize = stored.textSize,
                         isSwipeNavigationEnabled = stored.isSwipeNavigationEnabled,
+                        isTabSwipeEnabled = stored.isTabSwipeEnabled,
                     )
                 }
             }
@@ -109,6 +110,7 @@ class SettingsViewModel @Inject constructor(
             SettingsAction.ShortenRetentionCancelled -> dismissDialog()
             is SettingsAction.DynamicColorToggled -> onDynamicColorToggled(action.enabled)
             is SettingsAction.SwipeNavigationToggled -> onSwipeNavigationToggled(action.enabled)
+            is SettingsAction.TabSwipeToggled -> onTabSwipeToggled(action.enabled)
         }
     }
 
@@ -235,6 +237,11 @@ class SettingsViewModel @Inject constructor(
     private fun onSwipeNavigationToggled(enabled: Boolean) {
         if (enabled == _uiState.value.isSwipeNavigationEnabled) return
         persist { settings.setSwipeNavigationEnabled(enabled) }
+    }
+
+    private fun onTabSwipeToggled(enabled: Boolean) {
+        if (enabled == _uiState.value.isTabSwipeEnabled) return
+        persist { settings.setTabSwipeEnabled(enabled) }
     }
 
     private fun openDialog(dialog: SettingsDialog) {

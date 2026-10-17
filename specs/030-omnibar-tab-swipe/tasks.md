@@ -68,27 +68,27 @@
 
 **Neighbours and holder**
 
-- [ ] T011 [P] [US1] Add `ObserveTabNeighboursUseCase` in `M/feature/browser/domain/usecase/ObserveTabNeighboursUseCase.kt`. It maps `ObserveAllTabsUseCase()` to `TabOrder.neighbours(tabs, tabs.maxByOrNull(Tab::lastActiveAt)?.id)` and applies `distinctUntilChanged`. Test it in `T/feature/browser/domain/usecase/ObserveTabNeighboursUseCaseTest.kt` with the core fakes: it follows a switch, it follows a close, and it never crosses kinds.
-- [ ] T012 [P] [US1] Add `TabSwipeLimits` in `M/BR/TabSwipeLimits.kt`:
+- [X] T011 [P] [US1] Add `ObserveTabNeighboursUseCase` in `M/feature/browser/domain/usecase/ObserveTabNeighboursUseCase.kt`. It maps `ObserveAllTabsUseCase()` to `TabOrder.neighbours(tabs, tabs.maxByOrNull(Tab::lastActiveAt)?.id)` and applies `distinctUntilChanged`. Test it in `T/feature/browser/domain/usecase/ObserveTabNeighboursUseCaseTest.kt` with the core fakes: it follows a switch, it follows a close, and it never crosses kinds.
+- [X] T012 [P] [US1] Add `TabSwipeLimits` in `M/BR/TabSwipeLimits.kt`:
   - `COMMIT_FRACTION = 0.33f`
   - `FLICK_VELOCITY_DP_PER_S = 1_000f`
   - `EDGE_RESISTANCE = 0.25f`
   - `SIDEWAYS_RATIO = 2f`
   - `PREVIEW_HOLD_MAX_MS = 600L`
-- [ ] T013 [US1] Add the holder's types:
+- [X] T013 [US1] Add the holder's types:
   - `TabPreview(tabId, isIncognito, isHome, host, title)`, `@Immutable`, with `host` = "" for Home and incognito, and `title` = "" for incognito: never shown or spoken;
   - `TabSwipeUiState(previous, next, enabled)`;
   - `TabSwipeAction.SwitchTo(tabId, announce)`;
   - `TabSwipeEvent.Announce(preview)`.
 
   They go in `M/BR/TabSwipeUiState.kt`, `TabSwipeAction.kt` and `TabSwipeEvent.kt`.
-- [ ] T014 [US1] Add `TabSwipeViewModel` in `M/BR/TabSwipeViewModel.kt` (`@HiltViewModel`):
+- [X] T014 [US1] Add `TabSwipeViewModel` in `M/BR/TabSwipeViewModel.kt` (`@HiltViewModel`):
   - `uiState` combines `ObserveTabNeighboursUseCase` and `SettingsRepository.observeSettings().map { it.isTabSwipeEnabled }`. Until T029 adds that field, use `true`;
   - `screenshotVersion` comes from `ScreenshotCache.version`, and `screenshotFor(tabId)` returns `null` for incognito;
   - `onAction(SwitchTo)` calls `SwitchToTabUseCase`, then sends `Announce` only when `announce` is true.
 
   Home is detected with `UrlConstants.HOME_PAGE_URL`, as `TabSwitcherCard` does.
-- [ ] T015 [US1] Tests in `T/feature/browser/presentation/browser/TabSwipeViewModelTest.kt`, using Turbine and `MainDispatcherRule`:
+- [X] T015 [US1] Tests in `T/feature/browser/presentation/browser/TabSwipeViewModelTest.kt`, using Turbine and `MainDispatcherRule`:
   - neighbours become previews;
   - a Home neighbour has `isHome` set and an empty host;
   - `SwitchTo` switches through the fake repositories;
@@ -136,7 +136,7 @@
   - on commit, send `SwitchTo(announce = false)`. Keep `holdPreview` until the new tab's `WebViewClient.onPageCommitVisible` (forward it as a `BrowserWebViewCallbacks` callback) or `PREVIEW_HOLD_MAX_MS`, then reset the offset when `activeTab.id` changes. Do not use `LoadStarted` or progress: they come before anything is drawn;
   - on the AVD, check whether `onPageCommitVisible` fires for a tab restored from saved state. If it does not, end the hold on the WebView's first draw after the re-key instead (research R4). Record the finding in "Implementation notes".
 - [ ] T022 [US1] Home and the incognito start page: `HomeSearchBar` in `M/feature/browser/presentation/home/HomeHero.kt` takes a `modifier` from `HomeOverlay`. `BrowserContent.kt` passes `Modifier.tabSwipe(…)` there, with `canStart = enabled && !homeSearchFocused`.
-- [ ] T023 [US1] Add `browser_tab_swipe_home_label` to `app/src/main/res/values*/strings.xml` in all 8 locales
+- [X] T023 [US1] Add `browser_tab_swipe_home_label` to `app/src/main/res/values*/strings.xml` in all 8 locales
 
 **Checkpoint**: US1 works on the AVD (quickstart G3.1–G3.2, G3.5).
 
@@ -167,7 +167,7 @@
 **Goal**: accessibility actions, reduced motion and a Settings switch. **Independent test**: quickstart G3.6.
 
 - [ ] T028 [P] [US4] Add `rememberAnimationsEnabled()`, which is false only when "Remove animations" is on (an animator duration scale of 0, FR-015), in `M/core/presentation/util/AnimationsEnabled.kt`. It uses `ValueAnimator.areAnimatorsEnabled()` on API 26+, and `Settings.Global.getFloat(ANIMATOR_DURATION_SCALE, 1f) != 0f` on API 24–25. `TabSwipeState.settleTo` snaps when it is false. Test both branches in `T/core/presentation/util/AnimationsEnabledTest.kt` (Robolectric `@Config(sdk = [25, 34])`).
-- [ ] T029 [US4] Add the setting end to end:
+- [X] T029 [US4] Add the setting end to end:
   - `StorageKeys.TAB_SWIPE_ENABLED = booleanPreferencesKey("tab_swipe_enabled")`;
   - `AppDefaults.TAB_SWIPE_ENABLED = true`;
   - `UserSettings.isTabSwipeEnabled`;
@@ -176,7 +176,7 @@
   - the fake in `T/core/testing/fake/`.
 
   Then switch `TabSwipeViewModel` from the T014 placeholder to the real field.
-- [ ] T030 [US4] The Settings row in `M/feature/settings/presentation/settings/SettingsScreen.kt`:
+- [X] T030 [US4] The Settings row in `M/feature/settings/presentation/settings/SettingsScreen.kt`:
   - placed under the swipe navigation row, key `row_tab_swipe`, test tag `settings_tab_swipe_row`;
   - `SettingsAction.TabSwipeToggled(enabled)` is handled in `SettingsViewModel`;
   - add `settings_tab_swipe_title` and `settings_tab_swipe_summary` in all 8 locales;
@@ -211,6 +211,12 @@
   - SC-008 cold start interleaved against `8e5a0ca`;
   - the recomposition counts from T033a.
 - [ ] T038 PR with the gate results; update the project memory
+
+## Implementation notes
+
+- **T023**: no new string. The ghost pill and the announcement reuse `browser_action_home` ("Home"), so there are 6 new strings, not 7.
+- **T029/T030** were done together with T014, so `TabSwipeViewModel` reads `isTabSwipeEnabled` from the start, with no placeholder. The four accessibility strings were added in the same commit and are used by T031.
+- **`TabSwipeViewModel`** exposes `screenshots: TabScreenshots` (a `fun interface`) rather than a public function, because ViewModels take input only through `onAction` (ArchitectureTest).
 
 ## Dependencies
 

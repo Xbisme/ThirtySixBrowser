@@ -171,4 +171,6 @@ private class FakeSettingsRepository(initialEngine: SearchEngine) : SettingsRepo
     override suspend fun setOnboardingCompleted(value: Boolean): Result<Unit> = error("not used in this test")
 
     override suspend fun setSwipeNavigationEnabled(enabled: Boolean): Result<Unit> = error("not used in this test")
+
+    override suspend fun setTabSwipeEnabled(enabled: Boolean): Result<Unit> = error("not used in this test")
 }
