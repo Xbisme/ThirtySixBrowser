@@ -22,10 +22,10 @@ suspend fun importTree(rootName: String, tree: BookmarkTreeNode.Folder): Result<
 
 ```kotlin
 interface BookmarkFileRepository {
-    /** Reads and parses the file at [uri]. Never throws. */
-    suspend fun read(uri: String): BookmarkFileReadResult
-    /** Writes [tree] to [uri], replacing its content. */
-    suspend fun write(uri: String, tree: BookmarkTreeNode.Folder): Result<Unit>
+    /** Reads and parses the file at [uri]. Never throws; a blank folder name becomes [untitledFolderName]. */
+    suspend fun read(uri: String, untitledFolderName: String): BookmarkFileReadResult
+    /** Replaces the file's content; `false` when it cannot be written. */
+    suspend fun write(uri: String, tree: BookmarkTreeNode.Folder): Boolean
 }
 
 sealed interface BookmarkFileReadResult {
@@ -46,12 +46,12 @@ The implementation is `BookmarkFileRepositoryImpl` in `data/repository`. It is b
 
 | Use case | Input | Output | Rules |
 |---|---|---|---|
-| `ImportBookmarksUseCase` | `uri`, `folderBaseName` | `BookmarkImportResult` | 1. Read the file. A `Parsed` result with `linkCount == 0` → `NothingToImport`.<br>2. Count against `MAX_BOOKMARKS` and `MAX_FOLDERS` → `TooLarge`.<br>3. `importTree`; a failure → `WriteFailed`. |
+| `ImportBookmarksUseCase` | `uri`, `BookmarkImportNames(folderBaseName, untitledFolderName)` | `BookmarkImportResult` | 1. Read the file. A `Parsed` result with `linkCount == 0` → `NothingToImport`.<br>2. Count against `MAX_BOOKMARKS` and `MAX_FOLDERS` → `TooLarge`.<br>3. `importTree`; a failure → `WriteFailed`. |
 | `ExportBookmarksUseCase` | `uri` | `BookmarkExportResult` | `getBookmarkTree`. Empty → `NothingToExport`. Otherwise `write`; a failure → `WriteFailed`. |
 
 The ViewModel checks "anything to export?" with the repository counts before opening the picker. A one-call use case is not written for it.
 
-## Parser behaviour (`NetscapeBookmarkParser.parse(reader): ParseOutcome`)
+## Parser behaviour (`NetscapeBookmarkParser.parse(text, untitledFolderName): ParsedBookmarkFile?`)
 
 | Input | Result |
 |---|---|
@@ -75,19 +75,21 @@ The ViewModel checks "anything to export?" with the repository counts before ope
 
 ## UI (`feature/bookmarks/presentation/bookmarks/`)
 
-| Action | Effect |
-|---|---|
-| `TransferMenuClick` | open `BookmarkTransferSheet` |
-| `ImportClick` | close sheet; event `LaunchImportPicker` |
-| `ExportClick` | close sheet; if counts are 0 → `transfer = ExportDone(NothingToExport)`, else event `LaunchExportPicker(suggestedName)` |
-| `ImportFilePicked(uri, folderBaseName)` | `transfer = Importing` → `ImportDone(result)` |
-| `ExportFilePicked(uri)` | `transfer = Exporting` → `ExportDone(result)` |
-| `TransferResultDismiss` | `transfer = Idle` |
-| `OpenImportedFolder(folderId)` | `transfer = Idle`; navigate into the folder |
+The transfer has its own holder, `BookmarkTransferViewModel`, beside `BookmarksViewModel`. That one was already over the function limit, and the two share nothing but "open this folder". The route owns both, the two launchers and the `openTransfer` argument. `BookmarkTransferHost` takes the hoisted state, events and `onAction`.
 
-- The route owns the two launchers.
+| `BookmarkTransferAction` | Effect |
+|---|---|
+| `SheetOpen` / `SheetDismiss` | Open or close `BookmarkTransferSheet`. |
+| `ImportClick` | Close the sheet. When idle, emit `LaunchImportPicker`. |
+| `ExportClick(suggestedFileName)` | Close the sheet. When idle, check the counts: both 0 → `ExportFinished(NothingToExport)`; otherwise `LaunchExportPicker(name)`. |
+| `ImportFilePicked(uri, names)` | `progress = Importing`. The result is either `Imported(result)`, shown as the summary dialog, or `Idle` plus `ImportFailed(result)`, shown as a snackbar. |
+| `ExportFilePicked(uri)` | `progress = Exporting` → `Idle` plus `ExportFinished(result)`, shown as a snackbar. |
+| `SummaryDismiss` | `progress = Idle`. |
+| `OpenImportedFolder(id)` | `progress = Idle` plus `OpenFolder(id)`. The route sends `BookmarksAction.OpenFolder(id)`. |
+
 - A `null` URI from a launcher sends nothing.
-- When the nav argument `openTransfer=true` is present, the route sends `TransferMenuClick` once, on first composition.
+- While a transfer runs, a second pick or a sheet action is ignored.
+- `openTransfer=true` sends `SheetOpen` once. A `rememberSaveable` flag stops rotation from sending it again.
 
 ## Navigation
 

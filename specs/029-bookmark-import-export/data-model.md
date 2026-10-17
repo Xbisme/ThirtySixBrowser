@@ -60,25 +60,23 @@ sealed interface BookmarkExportResult {
 }
 ```
 
-## State in the Bookmarks screen
+## State of the transfer
 
-`BookmarksUiState` gains:
+`BookmarkTransferUiState(isSheetOpen, progress)` holds the state. `progress` is one of:
 
-- `transfer: BookmarkTransferState`, one of:
-  - `Idle`;
-  - `Importing`;
-  - `Exporting`;
-  - `ImportDone(result)`;
-  - `ExportDone(result)`.
-- `isTransferSheetOpen: Boolean`.
+- `Idle`;
+- `Importing`;
+- `Exporting`;
+- `Imported(result)`.
 
 ```text
-Idle ──Import picked──▶ Importing ──▶ ImportDone ──dismiss / Open folder──▶ Idle
-Idle ──Export picked──▶ Exporting ──▶ ExportDone ──dismiss──▶ Idle
+Idle ──file picked──▶ Importing ──▶ Imported ──Done / Open folder──▶ Idle
+                                └─(failure)──▶ Idle + message
+Idle ──file picked──▶ Exporting ──▶ Idle + message
 ```
 
-- While the state is `Importing` or `Exporting`, the sheet's actions are disabled, so only one transfer runs at a time.
-- `NothingToExport` is decided before the picker opens. The ViewModel checks the counts on `ExportClick` and emits `BookmarksEvent.LaunchExportPicker(suggestedName)` only when something exists.
+- While the state is `Importing` or `Exporting`, sheet actions and picks are ignored.
+- `NothingToExport` is decided before the picker opens.
 
 ## Limits
 
@@ -88,6 +86,7 @@ These are new constants in `feature/bookmarks/domain/model/BookmarkTransferLimit
 |---|---|
 | `MAX_IMPORT_FILE_BYTES` | 10 × 1024 × 1024 |
 | `MAX_IMPORT_DEPTH` | 32 |
-| `SNIFF_BYTES` | 1024 |
+| `SNIFF_CHARS` | 1024 |
+| `EXPORT_FILE_NAME_PATTERN` | `thirtysix-bookmarks-%s.html` |
 
 The existing limits, `BrowserLimits.MAX_BOOKMARKS` and `BrowserLimits.MAX_FOLDERS`, are reused.
