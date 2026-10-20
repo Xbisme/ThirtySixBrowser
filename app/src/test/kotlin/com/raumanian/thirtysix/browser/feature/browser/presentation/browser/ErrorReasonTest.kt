@@ -17,12 +17,6 @@ class ErrorReasonTest {
     }
 
     @Test
-    fun `HttpError maps to generic`() {
-        assertEquals(R.string.browser_error_generic, ErrorReason.HttpError(HTTP_NOT_FOUND).toUserMessageRes())
-        assertEquals(R.string.browser_error_generic, ErrorReason.HttpError(HTTP_SERVER_ERROR).toUserMessageRes())
-    }
-
-    @Test
     fun `SslError maps to generic`() {
         assertEquals(R.string.browser_error_generic, ErrorReason.SslError.toUserMessageRes())
     }
@@ -30,10 +24,5 @@ class ErrorReasonTest {
     @Test
     fun `Generic maps to generic`() {
         assertEquals(R.string.browser_error_generic, ErrorReason.Generic.toUserMessageRes())
-    }
-
-    private companion object {
-        const val HTTP_NOT_FOUND: Int = 404
-        const val HTTP_SERVER_ERROR: Int = 500
     }
 }

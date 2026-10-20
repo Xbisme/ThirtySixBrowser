@@ -2,8 +2,10 @@ package com.raumanian.thirtysix.browser.core.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
@@ -30,6 +32,7 @@ object SettingsDataStoreProviderModule {
         @ApplicationContext context: Context,
         dispatcherProvider: DispatcherProvider,
     ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
         scope = CoroutineScope(dispatcherProvider.io + SupervisorJob()),
         produceFile = { context.preferencesDataStoreFile(AppConstants.SETTINGS_DATASTORE_FILE_NAME) },
     )

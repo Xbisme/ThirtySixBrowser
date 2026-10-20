@@ -3,8 +3,10 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import android.content.Context
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -22,6 +24,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import java.io.File
+import java.net.ServerSocket
 import javax.inject.Singleton
 import org.junit.Before
 import org.junit.Rule
@@ -29,8 +32,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * With the state seeded to Failed, the screen shows the error UI instead of the WebView. A real
- * failing load was unreliable on the emulator; the error mapping itself is covered by JVM tests.
+ * The error UI replaces the WebView, both for a state seeded to Failed and for a real load that
+ * fails, and stays there once the engine finishes its own error page.
  */
 @HiltAndroidTest
 // The browser screen reads settings (text size), so each test gets its own DataStore file:
@@ -56,37 +59,55 @@ class BrowserScreenOfflineErrorTest {
     @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<HiltTestActivity>()
 
-    private lateinit var holders: BrowserScreenHolders
-
     @Before
     fun setUp() {
         hiltRule.inject()
-        composeRule.activity.runOnUiThread {
-            // Seeded to Failed before setContent: the WebView never loads, so nothing can flip the
-            // state back to Loaded before the assertion.
-            holders = BrowserScreenHolders(SAMPLE_PAGE_URL)
-            holders.page.apply {
-                onAction(PageAction.LoadStarted(SAMPLE_PAGE_URL))
-                onAction(PageAction.LoadFailed(ErrorReason.NetworkUnavailable))
-            }
-            composeRule.activity.setContent {
-                holders.Route()
-            }
-        }
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun errorState_rendersWhenInitialStateIsFailed() {
+        show(
+            BrowserScreenHolders(SAMPLE_PAGE_URL).apply {
+                // Seeded before setContent: the WebView never loads, so nothing can flip the state.
+                page.onAction(PageAction.LoadStarted(SAMPLE_PAGE_URL))
+                page.onAction(PageAction.LoadFailed(ErrorReason.NetworkUnavailable))
+            },
+        )
         composeRule.waitUntilExactlyOneExists(
             matcher = hasTestTag(TEST_TAG_BROWSER_ERROR_STATE),
             timeoutMillis = ERROR_STATE_TIMEOUT_MS,
         )
     }
 
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun errorState_staysAfterARealLoadFails() {
+        // Nothing listens on a port just released, so the load is refused at once, offline too.
+        val closedPort = ServerSocket(0).use { it.localPort }
+        show(BrowserScreenHolders("http://127.0.0.1:$closedPort/"))
+        composeRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag(TEST_TAG_BROWSER_ERROR_STATE),
+            timeoutMillis = REAL_LOAD_TIMEOUT_MS,
+        )
+        composeRule.waitForIdle()
+        Thread.sleep(ENGINE_ERROR_PAGE_SETTLE_MS)
+        composeRule.onNodeWithTag(TEST_TAG_BROWSER_ERROR_STATE).assertIsDisplayed()
+    }
+
+    private fun show(holders: BrowserScreenHolders) {
+        composeRule.activity.runOnUiThread {
+            composeRule.activity.setContent { holders.Route() }
+        }
+    }
+
     private companion object {
         // Pure recomposition with the state pre-seeded; no network involved.
         const val ERROR_STATE_TIMEOUT_MS: Long = 5_000L
+        const val REAL_LOAD_TIMEOUT_MS: Long = 10_000L
+
+        // Time for the engine's own error page to report progress and finish.
+        const val ENGINE_ERROR_PAGE_SETTLE_MS: Long = 2_000L
     }
 }
 

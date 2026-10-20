@@ -178,23 +178,23 @@
 
 **Goal**: the error screen stays; site error pages show; embedded SSL errors do not fail the page; a corrupt DataStore resets. **Independent test**: quickstart Q4, Q4b, Q5 and Q8.
 
-- [ ] T044 [P] [US5] In `T/feature/browser/presentation/browser/PageViewModelTest.kt`, add failing tests:
+- [X] T044 [P] [US5] In `T/feature/browser/presentation/browser/PageViewModelTest.kt`, add failing tests:
   - `LoadStarted`, `LoadFailed(DnsFailure)`, `Progress(100)`, `LoadFinished` ends in `Failed(DnsFailure)` and writes no history row;
   - a following `LoadStarted` gives `Loading`.
-- [ ] T045 [US5] In `M/BR/PageViewModel.kt`:
+- [X] T045 [US5] In `M/BR/PageViewModel.kt`:
   - `onProgressChanged` (lines 135-156): when `clamped >= MAX_PROGRESS` and the state is `Failed`, keep it, but still reset `_loadProgress`;
   - `onLoadFinished` (lines 158-167): after consuming `pendingHistoryUrl`, return early if the state is `Failed`.
 
   Make T044 green.
-- [ ] T046 [US5] In `M/BR/BrowserWebView.kt`, `onReceivedHttpError` (lines 477-486) no longer calls `onLoadFailed`. Delete the override if nothing else remains in it. Delete `ErrorReason.HttpError` in `M/BR/ErrorReason.kt` and its case in `T/BR/ErrorReasonTest.kt`. Add a one-line comment that states the reason itself (a site's own error page is shown, as other browsers do), with no reference to an ADR, spec or FR (Constitution §VI).
-- [ ] T047a [P] [US5] Write `T/BR/MainFrameSslErrorTest.kt` first, failing: `isMainFrameSslError(errorUrl = "https://cdn.bad/x.png", mainFrameUrl = "https://good.example/")` is false; equal URLs are true; a `null` main-frame URL (an error before `onPageStarted`) is true.
-- [ ] T047 [US5] Add `internal fun isMainFrameSslError(errorUrl: String?, mainFrameUrl: String?): Boolean` in `M/BR/MainFrameSslError.kt`; it is true when `mainFrameUrl == null || errorUrl == mainFrameUrl`. Then, in `BrowserWebViewClient` (`M/BR/BrowserWebView.kt`):
+- [X] T046 [US5] In `M/BR/BrowserWebView.kt`, `onReceivedHttpError` (lines 477-486) no longer calls `onLoadFailed`. Delete the override if nothing else remains in it. Delete `ErrorReason.HttpError` in `M/BR/ErrorReason.kt` and its case in `T/BR/ErrorReasonTest.kt`. Add a one-line comment that states the reason itself (a site's own error page is shown, as other browsers do), with no reference to an ADR, spec or FR (Constitution §VI).
+- [X] T047a [P] [US5] Write `T/BR/MainFrameSslErrorTest.kt` first, failing: `isMainFrameSslError(errorUrl = "https://cdn.bad/x.png", mainFrameUrl = "https://good.example/")` is false; equal URLs are true; a `null` main-frame URL (an error before `onPageStarted`) is true.
+- [X] T047 [US5] Add `internal fun isMainFrameSslError(errorUrl: String?, mainFrameUrl: String?): Boolean` in `M/BR/MainFrameSslError.kt`; it is true when `mainFrameUrl == null || errorUrl == mainFrameUrl`. Then, in `BrowserWebViewClient` (`M/BR/BrowserWebView.kt`):
   - store `mainFrameUrl` in `onPageStarted`;
   - in `onReceivedSslError`, keep `handler?.cancel()` first and the HTTPS-upgrade fallback second, then call `onLoadFailed(SslError)` only when `isMainFrameSslError(error?.url, mainFrameUrl)`. Make T047a green.
-- [ ] T048 [US5] Change `A/BR/BrowserScreenOfflineErrorTest.kt` to also drive a real failing load: a host under `.invalid`, or the asset server returning a connection reset. Assert that the error screen is still displayed after `waitForIdle` plus 2 s. Keep the existing seeded case.
-- [ ] T049 [P] [US5] Write the Robolectric test `T/core/di/SettingsDataStoreCorruptionTest.kt` first: write garbage bytes to the DataStore file, build the store the way the module does, and check that `data.first()` returns empty preferences without throwing.
-- [ ] T050 [US5] In `M/core/di/SettingsDataStoreProviderModule.kt` (lines 32-35), pass `corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() }`. Make T049 green.
-- [ ] T051 [US5] Run G1. Commit `fix(browser): sticky error screen, main-frame SSL only, DataStore reset (031 US5)`.
+- [X] T048 [US5] Change `A/BR/BrowserScreenOfflineErrorTest.kt` to also drive a real failing load: a host under `.invalid`, or the asset server returning a connection reset. Assert that the error screen is still displayed after `waitForIdle` plus 2 s. Keep the existing seeded case.
+- [X] T049 [P] [US5] Write the Robolectric test `T/core/di/SettingsDataStoreCorruptionTest.kt` first: write garbage bytes to the DataStore file, build the store the way the module does, and check that `data.first()` returns empty preferences without throwing.
+- [X] T050 [US5] In `M/core/di/SettingsDataStoreProviderModule.kt` (lines 32-35), pass `corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() }`. Make T049 green.
+- [X] T051 [US5] Run G1. Commit `fix(browser): sticky error screen, main-frame SSL only, DataStore reset (031 US5)`.
 
 ## Phase 7: User Story 2 – The address bar never runs script (P1)
 

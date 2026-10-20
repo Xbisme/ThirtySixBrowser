@@ -353,12 +353,18 @@ private class BrowserWebViewClient(
     private val onPageVisible: () -> Unit,
 ) : WebViewClient() {
 
+    // Set when the request goes out: a main page's certificate error arrives before onPageStarted.
+    @Volatile
+    private var mainFrameUrl: String? = null
+
     /**
      * Runs on a WebView IO thread. Main-frame requests are never blocked; listed third-party
      * requests get an empty response.
      */
-    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? =
-        request?.let { protection?.intercept(it) }
+    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+        if (request?.isForMainFrame == true) mainFrameUrl = request.url.toString()
+        return request?.let { protection?.intercept(it) }
+    }
 
     /** Non-web schemes may go to other apps, as [ExternalLinkPolicy] decides. */
     @Suppress("ReturnCount")
@@ -393,6 +399,7 @@ private class BrowserWebViewClient(
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         pageRequests.onNavigationStarted()
+        mainFrameUrl = url
         url?.let { protection?.monitor?.onPageStarted(it) }
         url?.let {
             // URL first, so the address bar mirrors the (redirected) URL on the tick the load starts.
@@ -473,6 +480,7 @@ private class BrowserWebViewClient(
         onHistoryCommitted()
     }
 
+    // HTTP 4xx and 5xx responses are not errors here: the site's own error page is shown, as other browsers do.
     override fun onReceivedError(
         view: WebView?,
         request: WebResourceRequest?,
@@ -489,17 +497,6 @@ private class BrowserWebViewClient(
         onLoadFailed(reason)
     }
 
-    override fun onReceivedHttpError(
-        view: WebView?,
-        request: WebResourceRequest?,
-        errorResponse: WebResourceResponse?,
-    ) {
-        // Sub-resource errors (including blocked responses) never reach the error UI; an HTTP error is
-        // the site's answer, never a reason to fall back to http://.
-        if (request?.isForMainFrame != true || errorResponse == null) return
-        onLoadFailed(ErrorReason.HttpError(errorResponse.statusCode))
-    }
-
     override fun onReceivedSslError(
         view: WebView?,
         handler: SslErrorHandler?,
@@ -508,7 +505,7 @@ private class BrowserWebViewClient(
         handler?.cancel()
         // A certificate failure on an HTTPS upgrade falls back to http://.
         if (protection?.fallBackIfUpgrade(error?.url) == true) return
-        onLoadFailed(ErrorReason.SslError)
+        if (isMainFrameSslError(error?.url, mainFrameUrl)) onLoadFailed(ErrorReason.SslError)
     }
 
     /** Basic/digest sign-in: credentials go to this one request only and are never stored. */

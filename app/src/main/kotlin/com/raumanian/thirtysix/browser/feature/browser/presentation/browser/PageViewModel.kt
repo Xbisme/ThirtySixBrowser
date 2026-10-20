@@ -127,6 +127,11 @@ class PageViewModel @Inject constructor(
 
     // Progress goes to [loadProgress]; [uiState] changes only when the loading state itself changes.
     private fun onProgressChanged(newProgress: Int) {
+        // The engine's own error page reports progress too; the error screen stays until a new load.
+        if (_uiState.value.loadingState is LoadingState.Failed) {
+            _loadProgress.value = 0f
+            return
+        }
         val clamped = newProgress.coerceIn(0, MAX_PROGRESS)
         if (clamped >= MAX_PROGRESS) {
             _loadProgress.value = 0f
@@ -155,6 +160,11 @@ class PageViewModel @Inject constructor(
         val shouldRecord = pendingHistoryUrl != null
         pendingHistoryUrl = null
         _loadProgress.value = 0f
+        if (_uiState.value.loadingState is LoadingState.Failed) {
+            pageStore.setUrl(url)
+            persistActiveTabState(url)
+            return
+        }
         if (_uiState.value.loadingState !is LoadingState.Loaded || pageStore.page.value.url != url) {
             pageStore.setUrl(url)
             _uiState.update { it.copy(loadingState = LoadingState.Loaded) }
