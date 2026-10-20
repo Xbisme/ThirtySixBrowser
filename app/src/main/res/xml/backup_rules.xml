@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?><!--
    Auto Backup, Android 11 and lower. The database (bookmarks, history, tabs) with its WAL files
-   and the web data (cookies, site storage) stay on the device. Settings are backed up through
-   the default; adding any <include> would switch to exclude-by-default.
+   and the web data (cookies, site storage, WebView's visited-site prefs) stay on the device.
+   Settings are backed up through the default; adding any <include> would switch to
+   exclude-by-default.
 -->
 <full-backup-content>
     <exclude domain="database" path="thirtysix_browser.db"/>
     <exclude domain="database" path="thirtysix_browser.db-wal"/>
     <exclude domain="database" path="thirtysix_browser.db-shm"/>
     <exclude domain="root" path="app_webview/"/>
+    <exclude domain="sharedpref" path="AwOriginVisitLoggerPrefs.xml"/>
+    <exclude domain="sharedpref" path="WebViewChromiumPrefs.xml"/>
 </full-backup-content>
