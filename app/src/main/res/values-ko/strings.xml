@@ -118,6 +118,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">%1$s 다운로드 중</string>
     <string name="downloads_service_unavailable">이 기기에서는 다운로드를 사용할 수 없습니다.</string>
+    <string name="downloads_unsupported_snackbar">지원되지 않는 다운로드 유형입니다</string>
     <string name="downloads_storage_permission_denied">다운로드를 저장하려면 저장소 접근 권한이 필요합니다.</string>
     <string name="downloads_storage_permission_denied_permanently">저장소 접근이 차단되어 있습니다. 설정에서 허용하면 다운로드를 저장할 수 있습니다.</string>
     <string name="downloads_storage_permission_rationale_title">저장소 접근을 허용할까요?</string>
@@ -332,6 +333,9 @@
     <string name="long_press_copied">복사됨</string>
     <string name="popup_blocked">팝업 차단됨</string>
     <string name="popup_open">열기</string>
+    <string name="external_app_offer">이 페이지에서 다른 앱을 열려고 합니다</string>
+    <string name="external_app_confirm_title">다른 앱에서 열까요?</string>
+    <string name="external_app_confirm_body">해당 앱에서 이 링크를 볼 수 있습니다.</string>
     <string name="settings_site_permissions">사이트 권한</string>
     <string name="settings_site_permissions_summary">사이트별 카메라, 마이크, 위치</string>
     <string name="site_permissions_title">사이트 권한</string>

@@ -20,7 +20,7 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Record the baseline on `031-audit-fixes`, branched from `main` at `600c9a9`, in "Gate Results" at the end of this file:
+- [X] T001 Record the baseline on `031-audit-fixes`, branched from `main` at `600c9a9`, in "Gate Results" at the end of this file:
   - unit test count;
   - instrumented test count;
   - release APK size;
@@ -28,7 +28,7 @@
 
 ## Phase 2: Foundational (blocks the stories noted)
 
-- [ ] T002 [P] Add `docs/adr/0032-external-app-handoff.md`. It records:
+- [X] T002 [P] Add `docs/adr/0032-external-app-handoff.md`. It records:
   - the gesture and main-frame rule;
   - the snackbar offer for untapped attempts and the incognito confirmation;
   - the safe intent (`BROWSABLE`, no component or selector);
@@ -36,7 +36,7 @@
   - HTTP status errors show the site's own page.
 
   Add one line to `docs/adr/README.md` if that index exists. Blocks US1 and US5 commits.
-- [ ] T003 [P] Add the new strings in `RES/values/strings.xml` and the 7 locale folders (`values-vi`, `-de`, `-ru`, `-ko`, `-ja`, `-zh`, `-fr`):
+- [X] T003 [P] Add the new strings in `RES/values/strings.xml` and the 7 locale folders (`values-vi`, `-de`, `-ru`, `-ko`, `-ja`, `-zh`, `-fr`):
   - `external_app_offer` = "This page wants to open another app";
   - `external_app_confirm_title` = "Open in another app?";
   - `external_app_confirm_body` = "The app will see this link.";
@@ -50,31 +50,31 @@
 
 **Policy (pure)**
 
-- [ ] T004 [P] [US1] Write `T/feature/browser/domain/usecase/ExternalLinkPolicyTest.kt` first. It covers every row of the contract table:
+- [X] T004 [P] [US1] Write `T/feature/browser/domain/usecase/ExternalLinkPolicyTest.kt` first. It covers every row of the contract table:
   - sub-frame → `Drop`;
   - main frame, no gesture → `Offer`;
   - main frame, gesture, normal → `Launch`;
   - main frame, gesture, incognito → `Confirm`;
   - `javascript:`, `file:` and `content:` → `Drop` in every row.
-- [ ] T005 [US1] Create `M/feature/browser/domain/model/ExternalNavigation.kt` with `data class ExternalNavigation(val url: String, val scheme: String, val isMainFrame: Boolean, val hasGesture: Boolean, val isIncognito: Boolean)` and `sealed interface ExternalLinkDecision { Drop, Offer, Confirm, Launch }`. Then create `M/feature/browser/domain/usecase/ExternalLinkPolicy.kt`, a pure `object` with `fun decide(nav: ExternalNavigation): ExternalLinkDecision` and the set of never-handed-off schemes. Make T004 green.
+- [X] T005 [US1] Create `M/feature/browser/domain/model/ExternalNavigation.kt` with `data class ExternalNavigation(val url: String, val scheme: String, val isMainFrame: Boolean, val hasGesture: Boolean, val isIncognito: Boolean)` and `sealed interface ExternalLinkDecision { Drop, Offer, Confirm, Launch }`. Then create `M/feature/browser/domain/usecase/ExternalLinkPolicy.kt`, a pure `object` with `fun decide(nav: ExternalNavigation): ExternalLinkDecision` and the set of never-handed-off schemes. Make T004 green.
 
 **Launcher (Android)**
 
-- [ ] T006 [P] [US1] Write the Robolectric test `T/BR/page/ExternalAppLauncherTest.kt` first. It checks:
+- [X] T006 [P] [US1] Write the Robolectric test `T/BR/page/ExternalAppLauncherTest.kt` first. It checks:
   - a `market:` URL builds `ACTION_VIEW` with `CATEGORY_BROWSABLE`, `component == null` and `selector == null`;
   - an `intent://x#Intent;component=com.evil/.Hidden;S.browser_fallback_url=https%3A%2F%2Fexample.com;end` has its component and selector cleared;
   - when no activity resolves (Robolectric `ShadowPackageManager` with no match), `launch` returns `"https://example.com"`;
   - a `javascript:` fallback returns `null`;
   - a malformed `intent:` returns `null` and does not throw.
-- [ ] T007 [US1] Create `M/BR/page/ExternalAppLauncher.kt` with `fun launch(context: Context, url: String): String?`. It returns a fallback URL to load, or `null`. It follows the contract's "Launch" steps 1–3, and its only log is `"External app hand-off failed"` with the throwable and no address. Make T006 green.
+- [X] T007 [US1] Create `M/BR/page/ExternalAppLauncher.kt` with `fun launch(context: Context, url: String): String?`. It returns a fallback URL to load, or `null`. It follows the contract's "Launch" steps 1–3, and its only log is `"External app hand-off failed"` with the throwable and no address. Make T006 green.
 
 **Wiring**
 
-- [ ] T008 [US1] In `M/BR/page/PageRequest.kt`, add `class OpenExternalApp(tabId, generation, origin, private val onOpen: () -> Unit) : PageRequest(...)` with `fun open() = settle(onOpen)` and `override fun cancel() = settle {}`.
-- [ ] T009 [US1] In `M/BR/page/PageRequestSink.kt`:
+- [X] T008 [US1] In `M/BR/page/PageRequest.kt`, add `class OpenExternalApp(tabId, generation, origin, private val onOpen: () -> Unit) : PageRequest(...)` with `fun open() = settle(onOpen)` and `override fun cancel() = settle {}`.
+- [X] T009 [US1] In `M/BR/page/PageRequestSink.kt`:
   - add `fun onExternalAppOffered(url: String, generation: Long) = Unit`;
   - implement it in `M/BR/page/PageSession.kt`, next to `override fun onPopupBlocked` (line 97). It emits an `ExternalAppOffer(url, generation)` event on a `Channel`/`SharedFlow`, the same way `PopupTabs.events` does, and drops offers whose generation is not the current page's.
-- [ ] T010 [US1] Rewrite `shouldOverrideUrlLoading` in `M/BR/BrowserWebView.kt` (lines 356-377):
+- [X] T010 [US1] Rewrite `shouldOverrideUrlLoading` in `M/BR/BrowserWebView.kt` (lines 356-377):
   - web schemes keep today's `WEB_NATIVE_SCHEMES` branch;
   - otherwise, build `ExternalNavigation` from `request.url`, `request.isForMainFrame`, `request.hasGesture()` and `pageRequests.context()?.isIncognito`, then call `ExternalLinkPolicy.decide`:
     - `Drop` → `true`;
@@ -84,18 +84,18 @@
   - `handOff` calls `ExternalAppLauncher.launch` and, when it returns a fallback, loads it with `view.loadProtected(fallback, protection)`.
 
   Remove the old inline intent code and its `@Suppress("TooGenericExceptionCaught")`.
-- [ ] T011 [P] [US1] Create `M/BR/page/ExternalAppEffects.kt`, modelled on `PopupEffects.kt`. It collects offers, calls `showSnackbar(message = external_app_offer, actionLabel = open)`, and on `ActionPerformed` re-decides the offer with `hasGesture = true`, so normal tabs launch and incognito tabs enqueue `OpenExternalApp`. Wire it in `M/BR/BrowserScreen.kt` next to `PopupEffects`, using the same `snackbarHostState`.
-- [ ] T012 [P] [US1] Create `M/BR/page/ExternalAppDialog.kt` with `SiteDialogFrame`: title `external_app_confirm_title`, body `external_app_confirm_body`, buttons Open (`request.open()`) and the frame's Cancel (`request.cancel()`). Dispatch `PageRequest.OpenExternalApp` to it in `M/BR/page/PageRequestHost.kt`, in the same `when` as the other request kinds. Both buttons are 48 dp and labelled for TalkBack.
+- [X] T011 [P] [US1] Create `M/BR/page/ExternalAppEffects.kt`, modelled on `PopupEffects.kt`. It collects offers, calls `showSnackbar(message = external_app_offer, actionLabel = open)`, and on `ActionPerformed` re-decides the offer with `hasGesture = true`, so normal tabs launch and incognito tabs enqueue `OpenExternalApp`. Wire it in `M/BR/BrowserScreen.kt` next to `PopupEffects`, using the same `snackbarHostState`.
+- [X] T012 [P] [US1] Create `M/BR/page/ExternalAppDialog.kt` with `SiteDialogFrame`: title `external_app_confirm_title`, body `external_app_confirm_body`, buttons Open (`request.open()`) and the frame's Cancel (`request.cancel()`). Dispatch `PageRequest.OpenExternalApp` to it in `M/BR/page/PageRequestHost.kt`, in the same `when` as the other request kinds. Both buttons are 48 dp and labelled for TalkBack.
 
 **Instrumented**
 
-- [ ] T013 [US1] Update `A/BR/ExternalIntentCrashSafetyInstrumentedTest.kt` to the new behavior: a malformed or unhandled external URL still does not crash, now through the launcher.
-- [ ] T014 [US1] Create `A/BR/ExternalAppHandoffTest.kt` with `AssetPageServer` pages in `app/src/androidTest/assets/`:
+- [X] T013 [US1] Update `A/BR/ExternalIntentCrashSafetyInstrumentedTest.kt` to the new behavior: a malformed or unhandled external URL still does not crash, now through the launcher.
+- [X] T014 [US1] Create `A/BR/ExternalAppHandoffTest.kt` with `AssetPageServer` pages in `app/src/androidTest/assets/`:
   - (a) a page `external-untapped.html` runs, one per load, 10 untapped attempts on the main frame: `location = …`, `location.replace`, `location.assign`, `<meta http-equiv=refresh>`, a `setTimeout` redirect, `window.open` in the same tab, an auto-submitted `<form action="market://…">`, an `<a>` `.click()` from script, `history` push then assign, and a 302 from the asset server to `market://`. Each starts no activity (Espresso-Intents `intended(...)` count 0) and shows the `external_app_offer` snackbar (SC-001);
   - (b) an iframe redirect to `tel:1` shows no snackbar and starts no activity;
   - (c) in an incognito tab, a tapped `market:` link shows the dialog; Cancel starts no activity, and Open starts one with `CATEGORY_BROWSABLE`;
   - (d) a recomposition counter on the page host stays ≤ 2 while the dialog is shown (gate 6).
-- [ ] T015 [US1] Run G1. Commit `fix(browser): pages open other apps only after a tap (031 US1)`.
+- [X] T015 [US1] Run G1. Commit `fix(browser): pages open other apps only after a tap (031 US1)`.
 
 ## Phase 4: User Story 3 – Sign-ins and private data stay where the person put them (P1)
 
@@ -326,9 +326,9 @@ Before each deletion, run `grep -rn "<name>" app/src` again. Delete a test only 
 
 | Gate | Baseline (T001) | Final (T081–T083) |
 |---|---|---|
-| Unit tests | | |
-| Instrumented tests | | |
-| Release APK size | | |
-| `main` Kotlin lines | | |
+| Unit tests | 1081, 0 failures (`52a6080`) | |
+| Instrumented tests | 218 `@Test` methods | |
+| Release APK size | 3,840,007 B | |
+| `main` Kotlin lines | 31,443 | |
 | Cold start vs `main` | n/a | |
 | Quickstart Q1–Q10 | n/a | |

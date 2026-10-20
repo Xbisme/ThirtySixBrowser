@@ -118,6 +118,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">正在下载 %1$s</string>
     <string name="downloads_service_unavailable">此设备不支持下载功能。</string>
+    <string name="downloads_unsupported_snackbar">不支持此类下载</string>
     <string name="downloads_storage_permission_denied">保存下载内容需要存储权限。</string>
     <string name="downloads_storage_permission_denied_permanently">存储权限已被阻止。请在“设置”中开启后才能保存下载内容。</string>
     <string name="downloads_storage_permission_rationale_title">允许访问存储空间？</string>
@@ -332,6 +333,9 @@
     <string name="long_press_copied">已复制</string>
     <string name="popup_blocked">已拦截弹出式窗口</string>
     <string name="popup_open">打开</string>
+    <string name="external_app_offer">此网页想要打开其他应用</string>
+    <string name="external_app_confirm_title">要在其他应用中打开吗？</string>
+    <string name="external_app_confirm_body">该应用将会看到此链接。</string>
     <string name="settings_site_permissions">网站权限</string>
     <string name="settings_site_permissions_summary">每个网站的摄像头、麦克风和位置信息</string>
     <string name="site_permissions_title">网站权限</string>

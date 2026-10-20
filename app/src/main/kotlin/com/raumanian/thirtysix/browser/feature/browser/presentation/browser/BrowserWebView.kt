@@ -40,8 +40,12 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.BuildLongPressMenuUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ExternalLinkPolicy
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.ExternalAppLauncher
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PendingPopupWebViewClient
@@ -353,9 +357,8 @@ private class BrowserWebViewClient(
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? =
         request?.let { protection?.intercept(it) }
 
-    /** Non-web schemes go to other apps; a malformed URI or missing handler is swallowed instead of crashing. */
-    @Suppress("TooGenericExceptionCaught", "ReturnCount")
-    // Generic catch: any platform call here may throw on a misbehaving handler app or malformed URI.
+    /** Non-web schemes may go to other apps, as [ExternalLinkPolicy] decides. */
+    @Suppress("ReturnCount")
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val uri = request?.url ?: return false
         val scheme = uri.scheme?.lowercase() ?: return false
@@ -363,17 +366,26 @@ private class BrowserWebViewClient(
             // A page's own http(s) navigation may be upgraded or cleaned.
             return view != null && protection?.overrideNavigation(view, request) == true
         }
-        val context = view?.context ?: return false
-        try {
-            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        val page = pageRequests.context()
+        if (view == null || page == null) return true
+        val url = uri.toString()
+        val navigation = ExternalNavigation(url, scheme, request.isForMainFrame, request.hasGesture(), page.isIncognito)
+        when (ExternalLinkPolicy.decide(navigation)) {
+            ExternalLinkDecision.Drop -> Unit
+            ExternalLinkDecision.Offer -> pageRequests.onExternalAppOffered(url, page.generation)
+            ExternalLinkDecision.Confirm -> {
+                val origin = view.url?.let(SiteOrigin::of).orEmpty()
+                pageRequests.enqueue(
+                    PageRequest.OpenExternalApp(page.tabId, page.generation, origin) { handOff(view, url) },
+                )
             }
-            context.startActivity(intent)
-        } catch (t: Throwable) {
-            // The address is not logged.
-            android.util.Log.w("BrowserWebView", "External intent dispatch failed", t)
+            ExternalLinkDecision.Launch -> handOff(view, url)
         }
         return true
+    }
+
+    private fun handOff(view: WebView, url: String) {
+        ExternalAppLauncher.launch(view.context, url)?.let { view.loadProtected(it, protection) }
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -608,8 +620,8 @@ private const val FOCUS_NODE_HREF_URL: String = "url"
 
 private const val BLANK_PAGE: String = "about:blank"
 
-/** Schemes the WebView loads itself; anything else is handed to another app. */
-private val WEB_NATIVE_SCHEMES: Set<String> = setOf("http", "https", "about", "data")
+/** Schemes the WebView loads itself; anything else goes to the hand-off policy. */
+private val WEB_NATIVE_SCHEMES: Set<String> = setOf("http", "https", "about", "data", "blob")
 
 // Gives the page time to paint (fade-ins, progressive images) before the preview is captured.
 private const val SCREENSHOT_DELAY_MS: Long = 200L

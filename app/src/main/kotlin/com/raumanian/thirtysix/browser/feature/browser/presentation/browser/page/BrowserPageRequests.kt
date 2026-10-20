@@ -76,6 +76,10 @@ private fun rememberPageRequestRenderers(
                     HttpAuthDialog(request, done = done)
                     true
                 }
+                is PageRequest.OpenExternalApp -> {
+                    ExternalAppDialog(request, done)
+                    true
+                }
                 is PageRequest.LongPress -> longPress?.let {
                     LongPressHost(request, it, done)
                     true

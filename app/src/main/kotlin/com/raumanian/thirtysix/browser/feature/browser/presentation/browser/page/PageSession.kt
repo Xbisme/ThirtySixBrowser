@@ -6,7 +6,14 @@ import android.webkit.WebView
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SitePermissionOutcome
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+
+/** A page's untapped attempt to open another app, offered to the person with Open. */
+data class ExternalAppOffer(val url: String, val generation: Long)
 
 /**
  * The page on screen and its generation, which moves on every main-frame navigation and tab
@@ -25,6 +32,12 @@ class PageSession(
 
     /** The current page's dialog flood control. */
     val dialogs = DialogSuppression()
+
+    private val _externalAppOffers = MutableSharedFlow<ExternalAppOffer>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val externalAppOffers: SharedFlow<ExternalAppOffer> = _externalAppOffers.asSharedFlow()
 
     private var tabId: Long? = null
     private var isIncognito: Boolean = false
@@ -98,6 +111,10 @@ class PageSession(
         // The opener may have been replaced while the address was awaited (its window then
         // never navigates and reports nothing): such a late notice would cover the real one.
         context()?.takeIf { it.generation == generation }?.let { popups?.onBlocked(target, it) }
+    }
+
+    override fun onExternalAppOffered(url: String, generation: Long) {
+        if (context()?.generation == generation) _externalAppOffers.tryEmit(ExternalAppOffer(url, generation))
     }
 
     override fun onCloseWindow(window: WebView) {

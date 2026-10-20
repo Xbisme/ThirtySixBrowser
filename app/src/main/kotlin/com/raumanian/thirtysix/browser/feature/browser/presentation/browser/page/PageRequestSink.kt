@@ -31,8 +31,10 @@ interface PageRequestSink {
 
     fun adoptPopup(popup: WebView) = popup.destroy()
 
-    /** A blocked window's address, or `null`; a notice for a page since replaced is dropped. */
+    /** A blocked window's address, or `null`; this and an untapped app offer from a replaced page are dropped. */
     fun onPopupBlocked(target: String?, generation: Long) = Unit
+
+    fun onExternalAppOffered(url: String, generation: Long) = Unit
 
     fun onCloseWindow(window: WebView) = Unit
 

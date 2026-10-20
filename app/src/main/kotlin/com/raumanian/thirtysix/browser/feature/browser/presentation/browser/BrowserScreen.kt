@@ -27,6 +27,7 @@ import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.comp
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.FindInPageBar
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TabSwipeLane
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.BrowserPageRequests
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.ExternalAppEffects
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.FullscreenOverlay
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PopupEffects
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.rememberPageSession
@@ -93,6 +94,13 @@ internal fun BrowserScreen(
         longPress = rememberLongPressHooks(state, sources, actions, hosts),
     )
     PopupEffects(popups = sources.popups, snackbarHostState = hosts.snackbarHostState)
+    val currentPage by rememberUpdatedState(state.page)
+    ExternalAppEffects(
+        session = pageSession,
+        snackbarHostState = hosts.snackbarHostState,
+        pageUrl = { currentPage.currentUrl },
+        loadFallback = { hosts.webViewActions.loadUrl(it) },
+    )
 }
 
 @Composable

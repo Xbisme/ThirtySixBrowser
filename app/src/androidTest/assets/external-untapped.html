@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width">
+<title>external</title>
+</head>
+<body style="margin:0">
+<script>
+  var target = 'market://details?id=' + (location.search.substring(1) || 'none');
+  var attempts = {
+    assignProperty: function () { location = target; },
+    replace: function () { location.replace(target); },
+    assign: function () { location.assign(target); },
+    metaRefresh: function () {
+      var meta = document.createElement('meta');
+      meta.httpEquiv = 'refresh';
+      meta.content = '0;url=' + target;
+      document.head.appendChild(meta);
+    },
+    timeout: function () { setTimeout(function () { location.href = target; }, 300); },
+    windowOpenSelf: function () { window.open(target, '_self'); },
+    formSubmit: function () {
+      var form = document.createElement('form');
+      form.action = target;
+      form.method = 'get';
+      document.body.appendChild(form);
+      form.submit();
+    },
+    scriptClick: function () {
+      var link = document.createElement('a');
+      link.href = target;
+      document.body.appendChild(link);
+      link.click();
+    },
+    historyThenAssign: function () {
+      history.pushState({}, '', '?pushed');
+      location.assign(target);
+    },
+    serverRedirect: function () { location.href = '/redirect?to=' + encodeURIComponent(target); },
+    iframe: function () {
+      var frame = document.createElement('iframe');
+      frame.srcdoc = "<script>location.href = 'tel:1';<\/script>";
+      document.body.appendChild(frame);
+    },
+    link: function () {
+      var link = document.createElement('a');
+      link.href = 'market://details?id=tapped';
+      link.textContent = 'open';
+      link.style.cssText = 'position:fixed;inset:0;display:block;width:100%;height:100%';
+      document.body.appendChild(link);
+      document.title = 'ready';
+    }
+  };
+  var attempt = attempts[location.search.substring(1)];
+  if (attempt) attempt();
+</script>
+</body>
+</html>

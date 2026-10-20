@@ -151,6 +151,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Downloading %1$s</string>
     <string name="downloads_service_unavailable">Downloads aren\'t available on this device.</string>
+    <string name="downloads_unsupported_snackbar" tools:ignore="UnusedResources">This kind of download isn\'t supported</string>
     <string name="downloads_storage_permission_denied">Storage access is needed to save downloads.</string>
     <string name="downloads_storage_permission_denied_permanently">Storage access is blocked. Enable it in Settings to save downloads.</string>
     <string name="downloads_storage_permission_rationale_title">Allow storage access?</string>
@@ -367,6 +368,9 @@
     <string name="long_press_copied">Copied</string>
     <string name="popup_blocked">Pop-up blocked</string>
     <string name="popup_open">Open</string>
+    <string name="external_app_offer">This page wants to open another app</string>
+    <string name="external_app_confirm_title">Open in another app?</string>
+    <string name="external_app_confirm_body">The app will see this link.</string>
     <string name="settings_site_permissions">Site permissions</string>
     <string name="settings_site_permissions_summary">Camera, microphone and location for each site</string>
     <string name="site_permissions_title">Site permissions</string>

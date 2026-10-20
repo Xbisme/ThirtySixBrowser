@@ -118,6 +118,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Đang tải %1$s</string>
     <string name="downloads_service_unavailable">Thiết bị này không dùng được tính năng tải xuống.</string>
+    <string name="downloads_unsupported_snackbar">Không hỗ trợ kiểu tải xuống này</string>
     <string name="downloads_storage_permission_denied">Cần quyền truy cập bộ nhớ để lưu tệp tải về.</string>
     <string name="downloads_storage_permission_denied_permanently">Quyền truy cập bộ nhớ đang bị chặn. Hãy bật trong Cài đặt để lưu tệp tải về.</string>
     <string name="downloads_storage_permission_rationale_title">Cho phép truy cập bộ nhớ?</string>
@@ -332,6 +333,9 @@
     <string name="long_press_copied">Đã sao chép</string>
     <string name="popup_blocked">Đã chặn cửa sổ bật lên</string>
     <string name="popup_open">Mở</string>
+    <string name="external_app_offer">Trang này muốn mở một ứng dụng khác</string>
+    <string name="external_app_confirm_title">Mở bằng ứng dụng khác?</string>
+    <string name="external_app_confirm_body">Ứng dụng đó sẽ thấy liên kết này.</string>
     <string name="settings_site_permissions">Quyền trang web</string>
     <string name="settings_site_permissions_summary">Camera, micrô và vị trí cho từng trang</string>
     <string name="site_permissions_title">Quyền trang web</string>
