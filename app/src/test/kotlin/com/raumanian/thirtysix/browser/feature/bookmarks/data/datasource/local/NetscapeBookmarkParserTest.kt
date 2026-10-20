@@ -1,14 +1,20 @@
 package com.raumanian.thirtysix.browser.feature.bookmarks.data.datasource.local
 
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Folder
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Link
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.BookmarkTransferLimits
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.ParsedBookmarkFile
+import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.UpdateBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.fixture.BookmarkFiles
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NetscapeBookmarkParserTest {
@@ -40,10 +46,10 @@ class NetscapeBookmarkParserTest {
     }
 
     @Test
-    fun `chromium writer output keeps raw ampersands and unwrapped other bookmarks, and skips a raw quote`() {
+    fun `chromium writer output keeps raw ampersands, quoted hrefs and unwrapped other bookmarks`() {
         val file = parseFixture("chrome-writer.html")
 
-        assertEquals(listOf(4, 3, 0, 1), file.counts())
+        assertEquals(listOf(5, 3, 0, 0), file.counts())
         assertEquals(
             listOf("Bookmarks bar", "Other root item", "From other bookmarks"),
             file.root.children.map { (it as? Folder)?.name ?: (it as Link).title },
@@ -52,7 +58,8 @@ class NetscapeBookmarkParserTest {
         val search = bar.children.first() as Link
         assertEquals("https://www.google.com/search?q=a&b=1&copy=2", search.url)
         assertEquals("Search & <more>", search.title)
-        assertEquals(listOf("VnExpress"), bar.folder("Tin tức").titles())
+        val quoted = bar.folder("Tin tức").children.map { it as Link }.last()
+        assertEquals("https://example.com/say?q=%22hi%22", quoted.url)
         assertEquals(listOf("Mobile item"), file.root.folder("From other bookmarks").titles())
     }
 
@@ -223,6 +230,17 @@ class NetscapeBookmarkParserTest {
         val file = parse("<DL><DT><A HREF=\"https://1.example\">t1<DT><A HREF=\"https://2.example\">t2</A></DL>")!!
 
         assertEquals(listOf("t1", "t2"), file.root.titles())
+    }
+
+    @Test
+    fun `characters illegal in an address are encoded, and the result passes an edit`() = runTest {
+        val file = parse("<DL><DT><A HREF=\"https://maps.example/a b|c?q=%41{x}^`<y>\\\">m</A></DL>")!!
+
+        val url = (file.root.children.single() as Link).url
+        assertEquals("https://maps.example/a%20b%7Cc?q=%41%7Bx%7D%5E%60%3Cy%3E%5C", url)
+        val repo = FakeBookmarkRepository()
+        val id = repo.seedBookmark(Bookmark(0, "m", url, null, 1L, 1L))
+        assertTrue(UpdateBookmarkUseCase(repo)(id, "m", url, null) is Result.Success)
     }
 
     @Test

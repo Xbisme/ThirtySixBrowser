@@ -243,6 +243,7 @@
 - [X] T060 [US6] In `M/feature/bookmarks/data/datasource/local/NetscapeBookmarkParser.kt`:
   - lines 157-163: end the text at the smallest index among `</tag`, `<dt` and `<dl`, case-insensitive;
   - lines 127-129: accept a link only when `BookmarkUrlValidator.validate(url)` (`M/core/domain/util/BookmarkUrlValidator.kt`) succeeds, store its normalized value, and count it as skipped otherwise.
+  - done: before validating, the parser percent-encodes characters a URI forbids but browsers export (space, `"`, `|`, `{`, `}`, `^`, `` ` ``, `<`, `>`, `\`, and a `%` not followed by two hex digits). Existing escapes and reserved characters are left as they are. Only what still fails is skipped; the explicit http(s) prefix check stays.
 
   Make T059 green.
 - [X] T061 [US6] Run G1. Commit `fix(bookmarks): incognito open, fast search, tolerant import (031 US6)`.

@@ -109,8 +109,8 @@ class NetscapeBookmarkParser @Inject constructor() {
         private fun addLink(rawHref: String?, rawTitle: String) {
             sawLink = sawLink || rawHref != null
             pendingFolder = null
-            val raw = rawHref?.let(::decodeEntities)?.trim().orEmpty()
-            val url = (BookmarkUrlValidator.validate(raw) as? Result.Success)?.data.takeIf { isSupported(raw) }
+            val encoded = encodeUnsafe(rawHref?.let(::decodeEntities)?.trim().orEmpty())
+            val url = (BookmarkUrlValidator.validate(encoded) as? Result.Success)?.data.takeIf { isSupported(encoded) }
             val level = stack.last()
             when {
                 url == null -> unsupported++
@@ -126,6 +126,15 @@ class NetscapeBookmarkParser @Inject constructor() {
 
         private fun clean(raw: String, maxLength: Int): String =
             decodeEntities(raw).replace(WHITESPACE, " ").trim().take(maxLength)
+
+        // Browsers export some characters a URI forbids; encoding them keeps the link editable later.
+        private fun encodeUnsafe(url: String): String = buildString(url.length) {
+            url.forEachIndexed { i, c ->
+                val loneEscape =
+                    c == '%' && !HEX_PAIR.matches(url.substring(i + 1, minOf(i + HEX_PAIR_END, url.length)))
+                if (c in UNSAFE_CHARS || loneEscape) append(PERCENT_FORMAT.format(c.code)) else append(c)
+            }
+        }
 
         private fun isSupported(url: String): Boolean =
             url.length <= BrowserLimits.MAX_BOOKMARK_URL_LENGTH &&
@@ -226,6 +235,10 @@ class NetscapeBookmarkParser @Inject constructor() {
         private val SKIPPED_CONTENT = setOf("script", "style")
         private val SUPPORTED_SCHEMES = listOf("http://", "https://")
         private val ENTRY_BOUNDARIES = listOf("<dt", "<dl")
+        private const val UNSAFE_CHARS = " \"|{}^`<>\\"
+        private const val PERCENT_FORMAT = "%%%02X"
+        private const val HEX_PAIR_END = 3
+        private val HEX_PAIR = Regex("[0-9A-Fa-f]{2}")
         private val INNER_TAG = Regex("<[^>]*>")
         private val WHITESPACE = Regex("\\s+")
         private val ENTITY = Regex("&(#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[a-zA-Z]{2,6});")
