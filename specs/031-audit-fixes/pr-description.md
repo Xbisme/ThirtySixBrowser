@@ -59,14 +59,14 @@ Q1–Q10 ran on `TA016_API36_16K`, and Q6 also ran on `TA016_API29_CI`. The A55 
 | # | Result | Device | Notes |
 |---|---|---|---|
 | Q1 | Pass | API 36 | An `onload` redirect to `market://` or `tel:` opens nothing, and the snackbar shows. "Open" sends `VIEW` + `BROWSABLE` with no component, and the Dialer opens. |
-| Q1b | **Fail** | API 36 | A tapped link to `/redirect-to-tel` (302 to `tel:123`) does not open the app directly. It shows the offer snackbar, so the gesture is lost across the redirect. This is safe, but it needs an extra tap. The R1 fallback (a last-tap window) is not implemented yet and needs a decision. |
+| Q1b | Pass (after b4350b2) | API 36 | A tapped link to `/redirect?to=tel%3A123` (302 to `tel:123`) first showed the offer snackbar: WebView drops `hasGesture` on a server redirect. With the R1 fallback, a main-frame redirect within 1 s of the last tap counts as tapped, and the Dialer intent starts with no snackbar. `ExternalAppHandoffTest.aTappedLinkThatRedirectsToAnotherApp_opensItWithoutAnOffer` drives this and failed before the fix. |
 | Q2 | Pass | API 36 | An iframe setting `location` to `tel:123` opens nothing and shows no snackbar. |
 | Q3 | Pass | API 36 | In incognito, tapping a `tel:` link shows "Open in another app?". Cancel stays on the page, and Open launches the Dialer. |
 | Q3b | Pass | API 36 | An `intent://…;S.browser_fallback_url=https://example.com` link loads example.com in the same tab, and Back returns to the page. |
 | Q4 | Pass | API 36 | The error screen is still showing 5 s after each of 10 runs: 5 fresh `*.invalid` loads and 5 reloads (SC-004). |
 | Q4b | Pass | API 36 | `https://example.com/does-not-exist-404` (HTTP 404) shows the site's own page. |
 | Q5 | Pass | API 36 | A page with `<img src="https://expired.badssl.com/…">` shows, and its history row is written. On `main` the same page gets no history row (checked on API 29). `https://expired.badssl.com/` itself shows the error screen. |
-| Q6 | Pass | API 36, API 29 | `bmgr backupnow` to LocalTransport after setting a cookie. The backup set has no `app_webview/`, and `f/datastore/thirtysix_settings.preferences_pb` is present (SC-005). |
+| Q6 | Pass (after 3035e19) | API 36, API 29 | `bmgr backupnow` to LocalTransport after setting a cookie. The backup set has no `app_webview/`, and `f/datastore/thirtysix_settings.preferences_pb` is present (SC-005). A later look found `sp/AwOriginVisitLoggerPrefs.xml` (WebView's hashed visited origins) and `sp/WebViewChromiumPrefs.xml` in the set; both are now excluded. Rechecked on API 36: the set holds only `f/datastore/…` and `f/profileInstalled`. |
 | Q7 | Pass, 20/20 | API 36 | Two sites, `127.0.0.1` (fireproof) and `localhost` (not), each get a session cookie on disk. Fire runs with a 1 s step delay from `FIRE_STEP_DELAY`, and the process is killed with `kill -9` at 3.0–6.8 s, stepping 0.2 s across the cookie step. On relaunch, the fireproof site still sends its cookie, the other sends none, and the fireproof row remains (SC-002). |
 | Q8 | Pass, 10/10 | API 36 | With garbage written to `files/datastore/thirtysix_settings.preferences_pb`, the app opens onboarding with no crash, and the bookmark is intact (SC-007). |
 | Q9 | Pass | API 36 | `BookmarkSearchScaleTest`, with 10,000 bookmarks: median 8 ms over 5 runs (budget 300 ms; 15,211 ms before the fix) (SC-006). The by-eye typing check was not run. |
@@ -93,6 +93,8 @@ Q1–Q10 ran on `TA016_API36_16K`, and Q6 also ran on `TA016_API29_CI`. The A55 
 - **T047: the main-frame URL is also captured in `shouldInterceptRequest`.** On WebView 133, a main page's certificate error arrives before `onPageStarted`, so the address is recorded when the main-frame request goes out. `onPageStarted` still updates it.
 - **T057a:** the 10,000-bookmark file is generated at test time by `LargeBookmarkFile`, not committed as an asset (about 0.8 MB, the same on every run).
 - **FR-005 trade-off:** input with a dot and no whitespace, such as `kotlin.coroutines`, still opens as an address.
-- **Q1b** fails (see above). The R1 last-tap fallback is not implemented and is left for the owner to decide.
+- **Q1b: the R1 last-tap fallback is built** (b4350b2). `BrowserPageView` records the last `ACTION_UP` without consuming it, and `ExternalLinkPolicy.isTapped` treats a main-frame redirect within `BrowserLimits.EXTERNAL_TAP_WINDOW_MS` (1 s) of it as tapped.
+- **The open-app offer ends with its page** (d158826). The snackbar had an action, so it was Indefinite and stayed on later pages. It is now `Long`, and `PageSession` holds the offer as state that a new page generation clears. While testing this, a page that redirects from its first script turned out to reach `shouldOverrideUrlLoading` before its own `onPageStarted` is delivered, so its offer was tagged with the previous generation (Open then did nothing). The offer is now posted behind that queued callback.
+- **WebView's shared prefs are excluded from backup** (3035e19): `AwOriginVisitLoggerPrefs.xml` and `WebViewChromiumPrefs.xml`, in all three rule blocks, with `BackupRulesTest`.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
