@@ -302,7 +302,7 @@ Before each deletion, run `grep -rn "<name>" app/src` again. Delete a test only 
   Done: 10 interleaved rounds of release builds on `TA016_API36_16K` (fresh install each round, one warm-up launch, then 3 `am start -W` launches). Median TotalTime is 201.5 ms on `main` and 207.5 ms here (+3.0 %); the median of the per-round medians is 204.5 vs 208.5 ms (+2.0 %). The APK is 3,843,719 B, which is +3,712 B.
 - [X] T084 Run `python3 scripts/comment-check.py` on every changed `.kt` file. Grep the diff for `FR-`, `T0` and `Spec 031` in source, and expect none.
   Done: 169 changed `.kt` files pass the check. The added lines in main, test, androidTest and debug sources contain no `FR-`, `T0nn`, `Spec 031` or `ADR`.
-- [ ] T085 Fill in "Gate Results" below. Write the PR description with:
+- [X] T085 Fill in "Gate Results" below. Write the PR description with:
   - one line per audit item and its FR;
   - the quickstart Q results;
   - the SC-009 line count.
