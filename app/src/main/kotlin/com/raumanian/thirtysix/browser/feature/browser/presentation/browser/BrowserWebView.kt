@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
+import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
@@ -421,8 +422,10 @@ private class BrowserWebViewClient(
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
+        // A redirect overridden above still finishes here with the other app's address; the page never left.
+        val handedOff = url != null && url.toUri().scheme?.lowercase() !in WEB_NATIVE_SCHEMES
         // A failed HTTPS attempt's error page is not a visit: the http:// page replacing it reports its own events.
-        if (view != null && protection?.onPageFinished(view, url) == true) return
+        if (handedOff || (view != null && protection?.onPageFinished(view, url) == true)) return
         url?.let(onLoadFinished)
         onHistoryCommitted()
         // Capture the tab preview once the page has had time to paint.

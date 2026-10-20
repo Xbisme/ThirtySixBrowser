@@ -66,6 +66,7 @@ class ExternalAppHandoffTest {
     private val snackbars = SnackbarHostState()
     private val actions = WebViewActionsHandle()
     private val titles = CopyOnWriteArrayList<String>()
+    private val reportedUrls = CopyOnWriteArrayList<String>()
     private var pageCompositions = 0
 
     @Before
@@ -109,15 +110,15 @@ class ExternalAppHandoffTest {
             },
             actions = actions,
             callbacks = BrowserWebViewCallbacks(
-                onLoadStarted = {},
+                onLoadStarted = { reportedUrls += it },
                 onProgressChanged = {},
-                onLoadFinished = {},
+                onLoadFinished = { reportedUrls += it },
                 onLoadFailed = {},
                 onDownloadRequested = {},
                 pageRequests = session,
             ),
             navigationCallbacks = BrowserNavigationCallbacks(
-                onUrlChange = {},
+                onUrlChange = { reportedUrls += it },
                 onCanGoBackChange = {},
                 onCanGoForwardChange = {},
                 onTitleChange = { titles += it },
@@ -213,6 +214,9 @@ class ExternalAppHandoffTest {
         assertEquals(Intent.ACTION_VIEW, intent.action)
         assertEquals(Uri.parse(REDIRECTED_TARGET), intent.data)
         assertNull(snackbars.currentSnackbarData)
+        Thread.sleep(RENDER_MS)
+        composeRule.waitForIdle()
+        assertTrue("reported $reportedUrls", reportedUrls.none { it.startsWith(REDIRECTED_TARGET) })
     }
 
     private fun dialogShown(): Boolean =
