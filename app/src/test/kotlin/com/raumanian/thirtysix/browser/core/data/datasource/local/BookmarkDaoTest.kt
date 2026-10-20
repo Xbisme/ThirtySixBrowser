@@ -46,6 +46,17 @@ class BookmarkDaoTest {
     }
 
     @Test
+    fun `searchByTitleOrUrl returns only the newest matches up to the limit`() = runTest {
+        (1L..4L).forEach {
+            bookmarkDao.insert(BookmarkEntity(title = "B$it", url = "https://b$it.com", createdAt = it, sortOrder = 0L))
+        }
+        bookmarkDao.searchByTitleOrUrl("b", limit = 2).test {
+            assertEquals(listOf("https://b4.com", "https://b3.com"), awaitItem().map { it.url })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `insert returns positive id and getById round-trips`() = runTest {
         val now = System.currentTimeMillis()
         val id = bookmarkDao.insert(

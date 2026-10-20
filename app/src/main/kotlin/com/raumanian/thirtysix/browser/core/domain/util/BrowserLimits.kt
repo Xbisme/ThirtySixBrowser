@@ -18,6 +18,8 @@ object BrowserLimits {
 
     const val SEARCH_MIN_CHARS: Int = 2
 
+    const val BOOKMARK_SEARCH_MAX_RESULTS: Int = 50
+
     const val MAX_HISTORY_QUERY_LENGTH: Int = 200
 
     // No "keep forever": the history list loads the whole table (~300 B/row), so its size must stay bounded.

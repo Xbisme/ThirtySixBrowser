@@ -40,10 +40,10 @@ class NetscapeBookmarkParserTest {
     }
 
     @Test
-    fun `chromium writer output keeps raw ampersands, quoted hrefs and unwrapped other bookmarks`() {
+    fun `chromium writer output keeps raw ampersands and unwrapped other bookmarks, and skips a raw quote`() {
         val file = parseFixture("chrome-writer.html")
 
-        assertEquals(listOf(5, 3, 0, 0), file.counts())
+        assertEquals(listOf(4, 3, 0, 1), file.counts())
         assertEquals(
             listOf("Bookmarks bar", "Other root item", "From other bookmarks"),
             file.root.children.map { (it as? Folder)?.name ?: (it as Link).title },
@@ -52,8 +52,7 @@ class NetscapeBookmarkParserTest {
         val search = bar.children.first() as Link
         assertEquals("https://www.google.com/search?q=a&b=1&copy=2", search.url)
         assertEquals("Search & <more>", search.title)
-        val quoted = bar.folder("Tin tức").children.map { it as Link }.last()
-        assertEquals("https://example.com/say?q=\"hi\"", quoted.url)
+        assertEquals(listOf("VnExpress"), bar.folder("Tin tức").titles())
         assertEquals(listOf("Mobile item"), file.root.folder("From other bookmarks").titles())
     }
 
@@ -210,6 +209,28 @@ class NetscapeBookmarkParserTest {
         assertEquals(BrowserLimits.MAX_BOOKMARK_TITLE_LENGTH, folder.titles()[1].length)
         assertEquals("upper", folder.titles()[2])
         assertEquals(2, file.unsupportedSkipped)
+    }
+
+    @Test
+    fun `a folder name without its close tag ends at the next list`() {
+        val file = parse("<DT><H3>Work<DL><p><DT><A HREF=\"https://a.example\">a</A></DL>")!!
+
+        assertEquals(listOf("a"), file.root.folder("Work").titles())
+    }
+
+    @Test
+    fun `a link title without its close tag ends at the next entry`() {
+        val file = parse("<DL><DT><A HREF=\"https://1.example\">t1<DT><A HREF=\"https://2.example\">t2</A></DL>")!!
+
+        assertEquals(listOf("t1", "t2"), file.root.titles())
+    }
+
+    @Test
+    fun `an address the bookmark validator rejects is skipped`() {
+        val file = parse("<DL><DT><A HREF=\"https:// x\">bad</A><DT><A HREF=\"https://ok.example\">ok</A></DL>")!!
+
+        assertEquals(listOf("ok"), file.root.titles())
+        assertEquals(1, file.unsupportedSkipped)
     }
 
     @Test

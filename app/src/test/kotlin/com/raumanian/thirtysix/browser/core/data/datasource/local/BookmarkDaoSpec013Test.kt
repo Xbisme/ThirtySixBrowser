@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.core.data.datasource.local
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.BookmarkEntity
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -99,7 +100,7 @@ class BookmarkDaoSpec013Test {
         dao.insert(bookmark(url = "https://kotlin-lang.org", title = "Kotlin Docs"))
         dao.insert(bookmark(url = "https://example.com/foo", title = "Bar"))
 
-        dao.searchByTitleOrUrl("KOTLIN").test {
+        dao.searchByTitleOrUrl("KOTLIN", BrowserLimits.BOOKMARK_SEARCH_MAX_RESULTS).test {
             val first = awaitItem()
             assertEquals(1, first.size)
             assertEquals("Kotlin Docs", first[0].title)
@@ -112,7 +113,7 @@ class BookmarkDaoSpec013Test {
         dao.insert(bookmark(url = "https://github.com/anthropics", title = "Anthropic"))
         dao.insert(bookmark(url = "https://duckduckgo.com", title = "DDG"))
 
-        dao.searchByTitleOrUrl("github").test {
+        dao.searchByTitleOrUrl("github", BrowserLimits.BOOKMARK_SEARCH_MAX_RESULTS).test {
             val first = awaitItem()
             assertEquals(1, first.size)
             assertTrue(first[0].url.contains("github"))
@@ -126,7 +127,7 @@ class BookmarkDaoSpec013Test {
         dao.insert(bookmark(url = "https://b.com", title = "test2", createdAt = 200L))
         dao.insert(bookmark(url = "https://c.com", title = "test3", createdAt = 300L))
 
-        dao.searchByTitleOrUrl("test").test {
+        dao.searchByTitleOrUrl("test", BrowserLimits.BOOKMARK_SEARCH_MAX_RESULTS).test {
             val first = awaitItem()
             assertEquals(3, first.size)
             assertEquals("test3", first[0].title)

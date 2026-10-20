@@ -57,12 +57,13 @@ open class FakeBookmarkRepository : BookmarkRepository {
     override suspend fun getAllBookmarks(): List<Bookmark> =
         bookmarksFlow.value.values.sortedWith(compareByDescending<Bookmark> { it.createdAt }.thenByDescending { it.id })
 
-    override fun searchBookmarks(query: String): Flow<List<Bookmark>> =
+    override fun searchBookmarks(query: String, limit: Int): Flow<List<Bookmark>> =
         bookmarksFlow.asStateFlow().map { map ->
             val q = query.lowercase()
             map.values
                 .filter { it.title.lowercase().contains(q) || it.url.lowercase().contains(q) }
                 .sortedByDescending { it.createdAt }
+                .take(limit)
         }
 
     override suspend fun getBookmark(id: Long): Bookmark? = bookmarksFlow.value[id]

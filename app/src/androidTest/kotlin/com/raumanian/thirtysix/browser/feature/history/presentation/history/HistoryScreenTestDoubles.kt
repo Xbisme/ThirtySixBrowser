@@ -8,7 +8,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -118,7 +117,7 @@ internal class InstrumentedFakeTabRepository(
     override suspend fun getTabCount(): Int = state.value.size
 }
 
-/** No-op [IncognitoTabRepository] — the History screen never writes incognito tabs. */
+/** No-op [IncognitoTabRepository]: these screens start with no incognito tab. */
 internal object InstrumentedNoopIncognitoRepository : IncognitoTabRepository {
     private val state: MutableStateFlow<List<Tab>> = MutableStateFlow(emptyList())
     override fun observeTabs(): Flow<List<Tab>> = state.asStateFlow()
@@ -161,7 +160,6 @@ internal fun buildHistoryViewModel(
         history = historyRepository,
         clearHistory = ClearBrowsingHistoryUseCase(historyRepository, NoopTabSessionRepository),
         observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-        observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
         updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(
             tabRepository,
             InstrumentedNoopIncognitoRepository,

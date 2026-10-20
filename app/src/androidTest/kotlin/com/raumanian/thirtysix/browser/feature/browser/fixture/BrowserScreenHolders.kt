@@ -150,7 +150,7 @@ private object NoopBookmarkRepository :
         flowOf(emptyList<Bookmark>())
     override suspend fun getAllBookmarks() = emptyList<Bookmark>()
 
-    override fun searchBookmarks(query: String) =
+    override fun searchBookmarks(query: String, limit: Int) =
         flowOf(emptyList<Bookmark>())
     override suspend fun getBookmark(id: Long) = null
     override suspend fun countBookmarksByUrl(url: String) = 0

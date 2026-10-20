@@ -7,9 +7,9 @@ import com.raumanian.thirtysix.browser.core.domain.model.BookmarkException
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.CreateFolderUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.ObserveBookmarksByFolderUseCase
@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -48,7 +49,6 @@ class BookmarksViewModel @Inject constructor(
     private val updateBookmark: UpdateBookmarkUseCase,
     private val addBookmark: AddBookmarkUseCase,
     private val searchBookmarks: SearchBookmarksUseCase,
-    private val observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
     observeActiveTab: ObserveActiveTabUseCase,
     private val bookmarks: BookmarkRepository,
 ) : ViewModel() {
@@ -64,8 +64,6 @@ class BookmarksViewModel @Inject constructor(
 
     private val currentFolderIdFlow: MutableStateFlow<Long?> = MutableStateFlow(null)
     private val searchQueryFlow: MutableStateFlow<String> = MutableStateFlow("")
-
-    private var lastKnownIsIncognito: Boolean = false
 
     init {
         currentFolderIdFlow
@@ -88,8 +86,8 @@ class BookmarksViewModel @Inject constructor(
 
         searchQueryFlow
             .flatMapLatest { query ->
-                if (query.isBlank()) {
-                    kotlinx.coroutines.flow.flowOf(emptyList())
+                if (query.trim().length < BrowserLimits.SEARCH_MIN_CHARS) {
+                    flowOf(emptyList())
                 } else {
                     searchBookmarks(query)
                 }
@@ -100,10 +98,6 @@ class BookmarksViewModel @Inject constructor(
             .launchIn(viewModelScope)
 
         // Kept current so a tap never writes an incognito tab's URL as a normal one.
-        observeActiveTabIsIncognito()
-            .onEach { lastKnownIsIncognito = it }
-            .launchIn(viewModelScope)
-
         observeActiveTab()
             .onEach { tab -> activeTabId = tab?.id ?: 0L }
             .launchIn(viewModelScope)
@@ -162,12 +156,12 @@ class BookmarksViewModel @Inject constructor(
 
     private fun onBookmarkTap(bookmark: Bookmark) {
         viewModelScope.launch {
-            if (activeTabId > 0L) {
+            if (activeTabId != 0L) {
                 updateActiveTabUrlAndTitle(
                     tabId = activeTabId,
                     url = bookmark.url,
                     title = bookmark.title,
-                    isIncognito = lastKnownIsIncognito,
+                    isIncognito = activeTabId < 0L,
                 )
             }
             _uiState.update { state -> state.copy(isSearchActive = false, searchQuery = "") }

@@ -216,35 +216,36 @@
 
 **Goal**: opening works from incognito, search stays fast, import recovers. **Independent test**: quickstart Q9 and Q10.
 
-- [ ] T055 [P] [US6] In `T/feature/history/presentation/history/HistoryViewModelTest.kt` and `T/feature/bookmarks/presentation/bookmarks/BookmarksViewModelTest.kt`, add failing tests: with active tab id `-3`, a tap calls `updateActiveTabUrlAndTitle(tabId = -3, isIncognito = true)` and `FakeHistoryRepository` records no new row, and with no active tab (`0L`) it calls nothing.
-- [ ] T056 [US6] In `M/feature/history/presentation/history/HistoryViewModel.kt` (line 121) and `M/feature/bookmarks/presentation/bookmarks/BookmarksViewModel.kt` (line 165), use the guard `activeTabId != 0L` with `isIncognito = activeTabId < 0L`. Remove the `ObserveActiveTabIsIncognitoUseCase` dependency and `lastKnownIsIncognito` from both, and from their test setup. Make T055 green.
-- [ ] T057 [P] [US6] In `T/feature/bookmarks/domain/usecase/SearchBookmarksUseCaseTest.kt`, add failing tests:
+- [X] T055 [P] [US6] In `T/feature/history/presentation/history/HistoryViewModelTest.kt` and `T/feature/bookmarks/presentation/bookmarks/BookmarksViewModelTest.kt`, add failing tests: with active tab id `-3`, a tap calls `updateActiveTabUrlAndTitle(tabId = -3, isIncognito = true)` and `FakeHistoryRepository` records no new row, and with no active tab (`0L`) it calls nothing.
+- [X] T056 [US6] In `M/feature/history/presentation/history/HistoryViewModel.kt` (line 121) and `M/feature/bookmarks/presentation/bookmarks/BookmarksViewModel.kt` (line 165), use the guard `activeTabId != 0L` with `isIncognito = activeTabId < 0L`. Remove the `ObserveActiveTabIsIncognitoUseCase` dependency and `lastKnownIsIncognito` from both, and from their test setup. Make T055 green.
+- [X] T057 [P] [US6] In `T/feature/bookmarks/domain/usecase/SearchBookmarksUseCaseTest.kt`, add failing tests:
   - folder paths are built without any `getAncestorChain` call (the fake counts calls; expect 0);
   - a folder cycle A→B→A ends without looping;
   - at most `BOOKMARK_SEARCH_MAX_RESULTS` results come back.
 
   In `T/core/data/datasource/local/BookmarkDaoTest.kt`, add a test that `searchByTitleOrUrl(query, limit = 2)` returns the 2 newest.
-- [ ] T057a [P] [US6] Add the scale check:
+- [X] T057a [P] [US6] Add the scale check:
   - generate `app/src/androidTest/assets/bookmarks-10k.html` once with `NetscapeBookmarkWriter`: 10,000 `https://` links in 200 folders nested up to 5 deep, written by a small test-only helper `A/feature/bookmarks/fixture/LargeBookmarkFile.kt`;
+    - done: the helper writes the file at test time instead of a committed asset (about 0.8 MB of generated text, the same on every run);
   - add `A/feature/bookmarks/data/BookmarkSearchScaleTest.kt`: import the file into an in-memory database, then time `SearchBookmarksUseCase("ht").first()` with `measureTimeMillis` over 5 runs after one warm-up. Assert the median is < 300 ms (SC-006) and record it in Gate Results;
   - the test fails on the unfixed code (thousands of ancestor reads).
-- [ ] T058 [US6] Make the search fast:
+- [X] T058 [US6] Make the search fast:
   - add `BOOKMARK_SEARCH_MAX_RESULTS: Int = 50` to `M/core/domain/util/BrowserLimits.kt`;
   - `M/core/data/datasource/local/BookmarkDao.kt` (lines 85-93): add `LIMIT :limit` and a `limit: Int` parameter, then thread it through `BookmarkRepository.searchBookmarks` and `BookmarkRepositoryImpl`;
   - `M/feature/bookmarks/domain/usecase/SearchBookmarksUseCase.kt`: `combine(repository.searchBookmarks(query, LIMIT), repository.observeAllFolders())`, then build each path from an `associateBy { it.id }` map. Walk parents with a `visited` set, root first, and remove the old comment;
   - `BookmarksViewModel.kt` (lines 89-100): skip queries with `trim().length < BrowserLimits.SEARCH_MIN_CHARS`.
 
   Make T057 green.
-- [ ] T059 [P] [US6] In `T/feature/bookmarks/data/datasource/local/NetscapeBookmarkParserTest.kt`, add failing tests:
+- [X] T059 [P] [US6] In `T/feature/bookmarks/data/datasource/local/NetscapeBookmarkParserTest.kt`, add failing tests:
   - `<DT><H3>Work<DL><p><DT><A HREF="https://a.example">a</A></DL>` imports folder "Work" with link "a";
   - `<DT><A HREF="https://1.example">t1<DT><A HREF="https://2.example">t2</A>` imports both links, titled "t1" and "t2";
   - `HREF="https:// x"` is skipped and counted as skipped.
-- [ ] T060 [US6] In `M/feature/bookmarks/data/datasource/local/NetscapeBookmarkParser.kt`:
+- [X] T060 [US6] In `M/feature/bookmarks/data/datasource/local/NetscapeBookmarkParser.kt`:
   - lines 157-163: end the text at the smallest index among `</tag`, `<dt` and `<dl`, case-insensitive;
   - lines 127-129: accept a link only when `BookmarkUrlValidator.validate(url)` (`M/core/domain/util/BookmarkUrlValidator.kt`) succeeds, store its normalized value, and count it as skipped otherwise.
 
   Make T059 green.
-- [ ] T061 [US6] Run G1. Commit `fix(bookmarks): incognito open, fast search, tolerant import (031 US6)`.
+- [X] T061 [US6] Run G1. Commit `fix(bookmarks): incognito open, fast search, tolerant import (031 US6)`.
 
 ## Phase 9: User Story 7 – Limits hold under pressure (P3)
 
@@ -330,5 +331,6 @@ Before each deletion, run `grep -rn "<name>" app/src` again. Delete a test only 
 | Instrumented tests | 218 `@Test` methods | |
 | Release APK size | 3,840,007 B | |
 | `main` Kotlin lines | 31,443 | |
+| Bookmark search, 10k bookmarks (T057a, `TA016_API36_16K`) | median 15,211 ms (unfixed) | median 9 ms (< 300 ms) |
 | Cold start vs `main` | n/a | |
 | Quickstart Q1–Q10 | n/a | |
