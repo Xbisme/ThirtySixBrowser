@@ -43,7 +43,7 @@ class BrowserWebViewRendererRecoveryTest {
                     onProgressChanged = {},
                     onLoadFinished = {},
                     onLoadFailed = { failures += it },
-                    onDownloadRequested = { _, _, _, _ -> },
+                    onDownloadRequested = {},
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
                     onUrlChange = {},

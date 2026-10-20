@@ -10,6 +10,7 @@ import javax.inject.Inject
 /**
  * Pairs each record with its live status (here, so the repository never touches the platform).
  * A handle the platform has pruned resolves from the file alone: Complete if present, else Missing.
+ * Without a recorded URI it is Missing, since a same-named file may belong to another download.
  */
 class ResolveDownloadStatusUseCase @Inject constructor(
     private val gateway: DownloadManagerGateway,
@@ -54,7 +55,7 @@ class ResolveDownloadStatusUseCase @Inject constructor(
     }
 
     private suspend fun resolveForgotten(record: DownloadRecord): DownloadStatus =
-        if (gateway.fileExists(record.localUri, record.fileName)) {
+        if (record.localUri != null && gateway.fileExists(record.localUri, record.fileName)) {
             DownloadStatus.Complete()
         } else {
             DownloadStatus.Missing

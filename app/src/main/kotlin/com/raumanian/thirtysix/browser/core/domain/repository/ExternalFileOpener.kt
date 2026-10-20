@@ -4,5 +4,5 @@ package com.raumanian.thirtysix.browser.core.domain.repository
 interface ExternalFileOpener {
 
     /** False when no app can open it or the platform refused; `ActivityNotFoundException` never escapes. */
-    fun open(contentUri: String, mimeType: String): Boolean
+    fun open(contentUri: String, mimeType: String, fileName: String): Boolean
 }

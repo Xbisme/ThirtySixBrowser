@@ -30,7 +30,7 @@ class OpenDownloadedFileUseCase @Inject constructor(
         item.status !is DownloadStatus.Complete -> OpenDownloadResult.NotComplete
         else -> when (val uri = resolveReadableUri(item)) {
             null -> OpenDownloadResult.FileMissing
-            else -> if (opener.open(uri, item.record.mimeType)) {
+            else -> if (opener.open(uri, item.record.mimeType, item.record.fileName)) {
                 OpenDownloadResult.Opened
             } else {
                 OpenDownloadResult.NoAppAvailable

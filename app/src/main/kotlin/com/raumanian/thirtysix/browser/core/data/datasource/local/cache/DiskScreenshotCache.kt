@@ -32,7 +32,7 @@ class DiskScreenshotCache @Inject constructor(
         if (tabId <= 0L) return@withContext
         val file = fileForId(tabId)
         try {
-            file.outputStream().use(writeImage)
+            file.writeAtomically(writeImage)
             versionState.update { it + 1 }
         } catch (e: java.io.IOException) {
             android.util.Log.w(LOG_TAG, "Failed to write screenshot for tab $tabId", e)

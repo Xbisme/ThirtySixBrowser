@@ -59,20 +59,37 @@ class SanitizeDownloadFileNameUseCase @Inject constructor() {
         return bound(safe)
     }
 
-    /** Bounds the length but keeps the extension; the cap is every Android filesystem's limit. */
+    /**
+     * Bounds the UTF-8 size to the filesystem limit, cutting whole code points from the end of the
+     * base name; the extension goes only when not even one base character fits beside it.
+     */
     private fun bound(name: String): String {
-        val max = BrowserLimits.MAX_DOWNLOAD_FILENAME_LENGTH
-        val extension = name.substringAfterLast('.', missingDelimiterValue = "")
-        return when {
-            name.length <= max -> name
-            extension.isEmpty() || extension.length >= max -> name.take(max)
-            else -> name.substring(0, name.length - extension.length - 1)
-                .take(max - extension.length - 1) + "." + extension
-        }
+        val max = BrowserLimits.MAX_FILE_NAME_BYTES
+        if (name.utf8Size() <= max) return name
+        val dot = name.lastIndexOf('.')
+        val base = if (dot > 0) name.substring(0, dot) else name
+        val extension = if (dot > 0) name.substring(dot) else ""
+        val cutBase = base.takeUtf8Bytes(max - extension.utf8Size())
+        return if (cutBase.isEmpty()) base.takeUtf8Bytes(max) else cutBase + extension
     }
 
+    private fun String.takeUtf8Bytes(limit: Int): String {
+        var end = 0
+        var bytes = 0
+        while (end < length) {
+            val next = offsetByCodePoints(end, 1)
+            bytes += substring(end, next).utf8Size()
+            if (bytes > limit) break
+            end = next
+        }
+        return substring(0, end)
+    }
+
+    private fun String.utf8Size(): Int = toByteArray(Charsets.UTF_8).size
+
+    // A literal `+` is never a space in a filename, but URLDecoder would turn it into one.
     private fun decodePercent(value: String): String =
-        runCatching { URLDecoder.decode(value, Charsets.UTF_8.name()) }.getOrDefault(value)
+        runCatching { URLDecoder.decode(value.replace("+", "%2B"), Charsets.UTF_8.name()) }.getOrDefault(value)
 
     private companion object {
         const val FALLBACK_NAME = "download"

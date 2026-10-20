@@ -133,34 +133,34 @@
 
 **Goal**: delete removes only its own file; downloads open, carry sign-ins and keep their names; captures and caches never break. **Independent test**: the US4 scenarios in the spec, plus the unit tests below.
 
-- [ ] T030 [P] [US4] In `T/core/domain/usecase/ResolveDownloadStatusUseCaseTest.kt`, add failing tests:
+- [X] T030 [P] [US4] In `T/core/domain/usecase/ResolveDownloadStatusUseCaseTest.kt`, add failing tests:
   - a forgotten record with `localUri == null` whose name exists on disk gives `Missing`;
   - the same record with `localUri != null` and an existing file gives `Complete`.
-- [ ] T031 [US4] In `M/core/domain/usecase/ResolveDownloadStatusUseCase.kt` lines 56-61, `resolveForgotten` returns `Missing` when `record.localUri == null`, and otherwise probes as today. Make T030 green.
-- [ ] T032 [P] [US4] In `T/feature/downloads/data/datasource/local/AndroidExternalFileOpenerTest.kt` (Robolectric; create if missing), add a failing test: a record named `a.pdf` with type `application/octet-stream`, and one with an empty type, both send `ACTION_VIEW` with type `application/pdf`. An unknown extension sends `*/*`.
-- [ ] T033 [US4] In `M/feature/downloads/data/datasource/local/AndroidExternalFileOpener.kt` lines 20-29, take the type from `MimeTypeMap.getSingleton().getMimeTypeFromExtension(...)` when the stored type is blank or `application/octet-stream`, falling back to `*/*`. Make T032 green.
-- [ ] T034 [P] [US4] In `T/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCaseTest.kt`, add failing tests:
+- [X] T031 [US4] In `M/core/domain/usecase/ResolveDownloadStatusUseCase.kt` lines 56-61, `resolveForgotten` returns `Missing` when `record.localUri == null`, and otherwise probes as today. Make T030 green.
+- [X] T032 [P] [US4] In `T/feature/downloads/data/datasource/local/AndroidExternalFileOpenerTest.kt` (Robolectric; create if missing), add a failing test: a record named `a.pdf` with type `application/octet-stream`, and one with an empty type, both send `ACTION_VIEW` with type `application/pdf`. An unknown extension sends `*/*`.
+- [X] T033 [US4] In `M/feature/downloads/data/datasource/local/AndroidExternalFileOpener.kt` lines 20-29, take the type from `MimeTypeMap.getSingleton().getMimeTypeFromExtension(...)` when the stored type is blank or `application/octet-stream`, falling back to `*/*`. Make T032 green.
+- [X] T034 [P] [US4] In `T/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCaseTest.kt`, add failing tests:
   - `filename*=UTF-8''C++Primer.pdf` gives `C++Primer.pdf`;
   - 150 CJK characters plus `.pdf` give a name of ≤ 255 UTF-8 bytes ending in `.pdf`;
   - a cut that would fall inside a surrogate pair (emoji) keeps the pair whole;
   - an extension longer than 255 bytes on its own gives a base name of ≤ 255 bytes with no extension;
   - a base name of 4-byte characters that cannot all fit keeps at least one whole character before the extension.
-- [ ] T035 [US4] In `M/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCase.kt` lines 62-75:
+- [X] T035 [US4] In `M/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCase.kt` lines 62-75:
   - decode with `URLDecoder.decode(value.replace("+", "%2B"), Charsets.UTF_8)`;
   - replace the character cap with a byte cap of `BrowserLimits.MAX_FILE_NAME_BYTES = 255`, added in `M/core/domain/util/BrowserLimits.kt`: drop whole code points from the end of the base name until the full name fits, and drop the extension only if the extension alone exceeds the cap.
 
   Make T034 green.
-- [ ] T036 [P] [US4] In `T/feature/browser/domain/usecase/StartDownloadUseCaseTest.kt`, add failing tests:
+- [X] T036 [P] [US4] In `T/feature/browser/domain/usecase/StartDownloadUseCaseTest.kt`, add failing tests:
   - `blob:https://x/1` and `data:text/plain,hi` return `StartDownloadResult.Unsupported` and never call the gateway;
   - `cookies` and `referer` arrive unchanged in the `DownloadOrder` the fake gateway receives.
-- [ ] T037 [US4] Change the download types:
+- [X] T037 [US4] Change the download types:
   - `M/core/domain/model/DownloadOrder.kt`: add `val cookies: String?`, with KDoc "Never logged or stored";
   - `M/feature/browser/domain/usecase/StartDownloadUseCase.kt`: add a `cookies: String? = null` parameter, return `Unsupported` for any scheme other than `http(s)` before sanitising, and pass `cookies` into the order;
   - add `data object Unsupported` to `StartDownloadResult`, and to `DownloadSnackbarEvent` in `M/BR/DownloadSnackbarEvent.kt`;
   - map it in `M/BR/DownloadRequestViewModel.kt`, and show `downloads_unsupported_snackbar` in `DownloadRequestEventEffect` in `M/BR/BrowserEffects.kt`.
 
   Make T036 green.
-- [ ] T038 [US4] Pass the cookies and referer from the WebView:
+- [X] T038 [US4] Pass the cookies and referer from the WebView:
   - in `M/BR/BrowserWebView.kt` `setDownloadListener` (line 199), read the cookies from the tab's own profile cookie manager:
     - an incognito tab on an engine with `WebViewFeature.MULTI_PROFILE` uses its profile's `cookieManager` (`M/BR/WebViewProfiles.kt`, `M/core/data/util/IncognitoProfiles.kt`);
     - an incognito tab without profiles uses `CookieManager.getInstance()`, which at that moment holds the incognito jar swapped in by `CookieJarSnapshotManager`;
@@ -168,11 +168,11 @@
   - put this choice in one function, `cookieManagerFor(isIncognito)`, next to the profile lookup, and cover both incognito branches with a Robolectric test in `T/BR/WebViewProfilesTest.kt` (`WebViewFeature` stubbed);
   - pass the cookies and `wv.url` as the referer through `callbacks.onDownloadRequested` to the view model;
   - in `M/feature/downloads/data/datasource/local/AndroidDownloadManagerGateway.kt` lines 25-33, call `addRequestHeader("Cookie", it)` and `addRequestHeader("Referer", it)` when the values are non-null.
-- [ ] T039 [P] [US4] Write `T/BR/page/CaptureFilesTest.kt` (Robolectric) first, failing: two calls to `newPhoto` leave both files on disk, and `clear` removes both.
-- [ ] T040 [US4] In `M/BR/page/CaptureFiles.kt` lines 21-22, remove the `clear(context)` call from `newPhoto`. Make T039 green. Confirm that the session dispose in `M/BR/page/BrowserPageRequests.kt` (line 31) still calls `clear`.
-- [ ] T041 [P] [US4] Write failing tests in `T/core/data/datasource/local/cache/DiskScreenshotCacheTest.kt` (new) and `DiskFaviconCacheTest.kt`: a save whose write throws partway (a bitmap compress stub that throws, or a read-only directory) leaves no final file and no `.tmp` file.
-- [ ] T042 [US4] Create `M/core/data/datasource/local/cache/AtomicFile.kt` with `internal inline fun File.writeAtomically(block: (OutputStream) -> Unit)`. It writes to `File(parentFile, "$name.tmp")` and then calls `renameTo(this)`, deleting the temp file on any throwable before rethrowing. Use it in `DiskFaviconCache.kt` (lines 39-46) and `DiskScreenshotCache.kt` (lines 33-39). Make T041 green.
-- [ ] T043 [US4] Run G1. Commit `fix(downloads): safe delete, open type, cookies, names, captures and caches (031 US4)`.
+- [X] T039 [P] [US4] Write `T/BR/page/CaptureFilesTest.kt` (Robolectric) first, failing: two calls to `newPhoto` leave both files on disk, and `clear` removes both.
+- [X] T040 [US4] In `M/BR/page/CaptureFiles.kt` lines 21-22, remove the `clear(context)` call from `newPhoto`. Make T039 green. Confirm that the session dispose in `M/BR/page/BrowserPageRequests.kt` (line 31) still calls `clear`.
+- [X] T041 [P] [US4] Write failing tests in `T/core/data/datasource/local/cache/DiskScreenshotCacheTest.kt` (new) and `DiskFaviconCacheTest.kt`: a save whose write throws partway (a bitmap compress stub that throws, or a read-only directory) leaves no final file and no `.tmp` file.
+- [X] T042 [US4] Create `M/core/data/datasource/local/cache/AtomicFile.kt` with `internal inline fun File.writeAtomically(block: (OutputStream) -> Unit)`. It writes to `File(parentFile, "$name.tmp")` and then calls `renameTo(this)`, deleting the temp file on any throwable before rethrowing. Use it in `DiskFaviconCache.kt` (lines 39-46) and `DiskScreenshotCache.kt` (lines 33-39). Make T041 green.
+- [X] T043 [US4] Run G1. Commit `fix(downloads): safe delete, open type, cookies, names, captures and caches (031 US4)`.
 
 ## Phase 6: User Story 5 – Errors are shown correctly; a bad settings file does not lock the person out (P1)
 

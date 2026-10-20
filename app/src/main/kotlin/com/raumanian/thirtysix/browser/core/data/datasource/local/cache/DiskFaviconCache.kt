@@ -38,7 +38,7 @@ class DiskFaviconCache @Inject constructor(
         val key = keyFor(url) ?: return@withContext
         val file = File(cacheDir, "$key.png")
         try {
-            file.outputStream().use(writeImage)
+            file.writeAtomically(writeImage)
             versionState.update { it + 1 }
         } catch (e: java.io.IOException) {
             // The placeholder icon stands in; the address is never logged.

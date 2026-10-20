@@ -151,7 +151,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Downloading %1$s</string>
     <string name="downloads_service_unavailable">Downloads aren\'t available on this device.</string>
-    <string name="downloads_unsupported_snackbar" tools:ignore="UnusedResources">This kind of download isn\'t supported</string>
+    <string name="downloads_unsupported_snackbar">This kind of download isn\'t supported</string>
     <string name="downloads_storage_permission_denied">Storage access is needed to save downloads.</string>
     <string name="downloads_storage_permission_denied_permanently">Storage access is blocked. Enable it in Settings to save downloads.</string>
     <string name="downloads_storage_permission_rationale_title">Allow storage access?</string>

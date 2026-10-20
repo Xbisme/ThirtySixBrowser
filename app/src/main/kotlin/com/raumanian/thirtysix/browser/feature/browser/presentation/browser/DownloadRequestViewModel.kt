@@ -36,10 +36,18 @@ class DownloadRequestViewModel @Inject constructor(
     // Incognito downloads are recorded like any other; the tab's incognito state is not consulted.
     private fun onRequested(request: DownloadRequestAction.Requested) {
         viewModelScope.launch {
-            val result = startDownload(request.url, request.contentDisposition, request.mimeType, request.userAgent)
+            val result = startDownload(
+                url = request.url,
+                contentDisposition = request.contentDisposition,
+                mimeType = request.mimeType,
+                userAgent = request.userAgent,
+                referer = request.referer,
+                cookies = request.cookies,
+            )
             val event = when (result) {
                 is StartDownloadResult.Started -> DownloadSnackbarEvent.Started(result.fileName)
                 StartDownloadResult.ServiceUnavailable -> DownloadSnackbarEvent.ServiceUnavailable
+                StartDownloadResult.Unsupported -> DownloadSnackbarEvent.Unsupported
             }
             eventChannel.trySend(event)
         }

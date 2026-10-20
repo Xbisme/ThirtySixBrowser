@@ -8,12 +8,7 @@ internal data class BrowserWebViewCallbacks(
     val onLoadFinished: (String) -> Unit,
     val onLoadFailed: (ErrorReason) -> Unit,
     // The content length is dropped: the downloads list reads the size from the platform when shown.
-    val onDownloadRequested: (
-        url: String,
-        userAgent: String,
-        contentDisposition: String?,
-        mimeType: String?,
-    ) -> Unit,
+    val onDownloadRequested: (DownloadRequestAction.Requested) -> Unit,
     /** Inert by default, so tests that build the WebView directly need nothing. */
     val pageRequests: PageRequestSink = PageRequestSink.None,
     /** 0-based active match and the number of matches. */

@@ -7,9 +7,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import java.io.File
 
 /**
- * Photos taken for a page's file upload, in `cacheDir/capture/`. Only the newest is kept; older
- * ones go when the next capture starts or the browser screen leaves, not on navigation, since a
- * page may still be uploading.
+ * Photos taken for a page's file upload, in `cacheDir/capture/`. All are kept until the browser
+ * screen leaves, not removed on navigation or the next capture, since a page may still be uploading.
  */
 object CaptureFiles {
     private const val PREFIX = "capture-"
@@ -19,7 +18,6 @@ object CaptureFiles {
 
     /** A fresh, empty file for the camera app, shared through the app's `FileProvider`. */
     fun newPhoto(context: Context): Pair<File, Uri>? = runCatching {
-        clear(context)
         val folder = dir(context).apply { mkdirs() }
         val file = File.createTempFile(PREFIX, SUFFIX, folder)
         val authority = context.packageName + AppConstants.FILE_PROVIDER_AUTHORITY_SUFFIX

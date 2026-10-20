@@ -49,7 +49,7 @@ class TextZoomInstrumentedTest {
                     onProgressChanged = {},
                     onLoadFinished = { loadsFinished.incrementAndGet() },
                     onLoadFailed = {},
-                    onDownloadRequested = { _, _, _, _ -> },
+                    onDownloadRequested = {},
                 ),
                 navigationCallbacks = BrowserNavigationCallbacks(
                     onUrlChange = {},

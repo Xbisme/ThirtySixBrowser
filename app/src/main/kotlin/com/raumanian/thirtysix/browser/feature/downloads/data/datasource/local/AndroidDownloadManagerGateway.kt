@@ -28,6 +28,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
             if (request.mimeType.isNotEmpty()) setMimeType(request.mimeType)
             if (request.userAgent.isNotEmpty()) addRequestHeader(HEADER_USER_AGENT, request.userAgent)
             request.referer?.takeIf { it.isNotEmpty() }?.let { addRequestHeader(HEADER_REFERER, it) }
+            request.cookies?.takeIf { it.isNotEmpty() }?.let { addRequestHeader(HEADER_COOKIE, it) }
             // The platform renders progress and completion notifications; the app composes none.
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         }
@@ -95,6 +96,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
     private companion object {
         const val HEADER_USER_AGENT = "User-Agent"
         const val HEADER_REFERER = "Referer"
+        const val HEADER_COOKIE = "Cookie"
         const val DOWNLOAD_PROVIDER_PACKAGE = "com.android.providers.downloads"
         val DISABLED_STATES = setOf(
             android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED,

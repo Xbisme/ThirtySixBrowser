@@ -112,7 +112,7 @@ class ExternalAppHandoffTest {
                 onProgressChanged = {},
                 onLoadFinished = {},
                 onLoadFailed = {},
-                onDownloadRequested = { _, _, _, _ -> },
+                onDownloadRequested = {},
                 pageRequests = session,
             ),
             navigationCallbacks = BrowserNavigationCallbacks(

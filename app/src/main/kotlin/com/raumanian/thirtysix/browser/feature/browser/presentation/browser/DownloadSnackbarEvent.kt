@@ -8,6 +8,8 @@ sealed class DownloadSnackbarEvent {
     /** The platform download service is unavailable; nothing was recorded. */
     data object ServiceUnavailable : DownloadSnackbarEvent()
 
+    data object Unsupported : DownloadSnackbarEvent()
+
     data object StoragePermissionDenied : DownloadSnackbarEvent()
 
     /** The platform will not show the dialog again, so the message points at system settings. */

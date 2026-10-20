@@ -102,12 +102,14 @@ internal fun DownloadRequestEventEffect(events: Flow<DownloadSnackbarEvent>, sna
     val scope = rememberCoroutineScope()
     val startedTemplate = stringResource(R.string.downloads_started_snackbar)
     val serviceUnavailable = stringResource(R.string.downloads_service_unavailable)
+    val unsupported = stringResource(R.string.downloads_unsupported_snackbar)
     val permissionDenied = stringResource(R.string.downloads_storage_permission_denied)
     val permissionDeniedPermanently = stringResource(R.string.downloads_storage_permission_denied_permanently)
     EventEffect(events) { event ->
         val message = when (event) {
             is DownloadSnackbarEvent.Started -> startedTemplate.format(event.fileName)
             DownloadSnackbarEvent.ServiceUnavailable -> serviceUnavailable
+            DownloadSnackbarEvent.Unsupported -> unsupported
             DownloadSnackbarEvent.StoragePermissionDenied -> permissionDenied
             DownloadSnackbarEvent.StoragePermissionPermanentlyDenied -> permissionDeniedPermanently
         }

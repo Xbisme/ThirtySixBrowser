@@ -99,7 +99,7 @@ internal class InstrumentedGateway(
 }
 
 private object InstrumentedNoopOpener : ExternalFileOpener {
-    override fun open(contentUri: String, mimeType: String): Boolean = true
+    override fun open(contentUri: String, mimeType: String, fileName: String): Boolean = true
 }
 
 private object InstrumentedNoopClipboard : ClipboardWriter {

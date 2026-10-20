@@ -69,10 +69,8 @@ internal fun rememberAddressBarCallbacks(
 @Composable
 internal fun rememberDownloadRequests(
     onAction: (DownloadRequestAction) -> Unit,
-): (String, String, String?, String?) -> Unit = rememberDownloadRequestHandler(
-    onGrant = { url, userAgent, disposition, mimeType ->
-        onAction(DownloadRequestAction.Requested(url, userAgent, disposition, mimeType))
-    },
+): (DownloadRequestAction.Requested) -> Unit = rememberDownloadRequestHandler(
+    onGrant = onAction,
     onDeny = { permanently -> onAction(DownloadRequestAction.StoragePermissionDenied(permanently)) },
 )
 
@@ -86,12 +84,25 @@ internal fun rememberLongPressHooks(
     val context = LocalContext.current
     val longPressDownload = rememberDownloadRequests(actions.onDownloadAction)
     val currentIncognito by rememberUpdatedState(state.page.isIncognito)
+    val currentPageUrl by rememberUpdatedState(state.page.currentUrl)
     return remember(sources.longPressActions, hosts.snackbarHostState, longPressDownload) {
         LongPressHooks(
             actions = sources.longPressActions,
             snackbarHostState = hosts.snackbarHostState,
             isIncognito = { currentIncognito },
-            onDownload = { url -> longPressDownload(url, WebSettings.getDefaultUserAgent(context), null, null) },
+            onDownload = { url ->
+                val jar = WebViewProfiles.cookieManagerFor(currentIncognito, context.incognitoWebProfile())
+                longPressDownload(
+                    DownloadRequestAction.Requested(
+                        url = url,
+                        userAgent = WebSettings.getDefaultUserAgent(context),
+                        contentDisposition = null,
+                        mimeType = null,
+                        referer = currentPageUrl,
+                        cookies = jar?.getCookie(url),
+                    ),
+                )
+            },
         )
     }
 }

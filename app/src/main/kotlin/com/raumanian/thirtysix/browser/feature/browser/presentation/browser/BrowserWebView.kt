@@ -199,9 +199,12 @@ private fun buildConfiguredWebView(
         onHistoryCommitted = { session?.saveSoon(wv) },
         onPageVisible = callbacks.onPageVisible,
     )
-    // Incognito downloads are recorded like any other, so the incognito flag is deliberately not consulted.
+    // Incognito downloads are recorded like any other; the flag only picks the jar the cookies come from.
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
-        callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
+        val cookies = WebViewProfiles.cookieManagerFor(state.isIncognito, incognitoProfile)?.getCookie(url)
+        callbacks.onDownloadRequested(
+            DownloadRequestAction.Requested(url, userAgent, contentDisposition, mimeType, wv.url, cookies),
+        )
     }
     wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }
     // `clearHistory` reports no history change, so Back and Forward are switched off here.

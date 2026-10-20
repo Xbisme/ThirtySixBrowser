@@ -113,7 +113,7 @@ internal class InMemoryDownloadsRepository(
 internal class RecordingFileOpener(private val succeeds: Boolean = true) : ExternalFileOpener {
     val opened = mutableListOf<Pair<String, String>>()
 
-    override fun open(contentUri: String, mimeType: String): Boolean {
+    override fun open(contentUri: String, mimeType: String, fileName: String): Boolean {
         opened += contentUri to mimeType
         return succeeds
     }
