@@ -140,19 +140,6 @@ class TabSessionRepositoryImplTest {
     }
 
     @Test
-    fun `delete removes one session of either kind`() = runTest {
-        val id = newTab()
-        repository.save(TabSession(id, byteArrayOf(1), 1L))
-        repository.save(TabSession(-1L, byteArrayOf(2), 1L))
-
-        repository.delete(id)
-        repository.delete(-1L)
-
-        assertNull(repository.get(id))
-        assertNull(repository.get(-1L))
-    }
-
-    @Test
     fun `clearAll empties both stores and counts the clear`() = runTest {
         val id = newTab()
         repository.save(TabSession(id, byteArrayOf(1), 1L))

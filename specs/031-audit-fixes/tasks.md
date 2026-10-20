@@ -266,21 +266,27 @@
 
 Before each deletion, run `grep -rn "<name>" app/src` again. Delete a test only when it tests nothing but the removed member.
 
-- [ ] T069 [P] [US8] Delete `TabSessionRepository.delete` (`M/core/domain/repository/TabSessionRepository.kt`), its implementation, `TabSessionDao.delete(tabId)`, the fake's override and their tests.
-- [ ] T070 [P] [US8] Delete `HistoryDao.getRecent`, `getById` and `delete(entry)` (`M/core/data/datasource/local/HistoryDao.kt`) and their DAO tests.
-- [ ] T071 [P] [US8] Delete `TabRepository.getTabCount` and `IncognitoTabRepository.getCount`, with their implementations, fakes and tests. Rewrite any androidTest that used `getTabCount` to count from `observeAllTabs().first()`.
-- [ ] T072 [P] [US8] Delete `DownloadManagerGateway.isAvailable` (`M/core/domain/repository/DownloadManagerGateway.kt`) and, in `AndroidDownloadManagerGateway.kt` (lines 82-102), `isDownloadProviderDisabled`, `DISABLED_STATES` and `DOWNLOAD_PROVIDER_PACKAGE`. Remove the override from all 5 fakes.
-- [ ] T073 [P] [US8] Delete `DownloadsRepository.count`, `DownloadsRepositoryImpl.count` (lines 35-36), `DownloadRecordDao.count` and `BookmarkRepository.getFolder` (`BookmarkRepositoryImpl.kt` lines 101-102), with their fakes and tests.
-- [ ] T074 [US8] Replace the forwarding use cases with direct repository calls (Constitution III):
+- [X] T069 [P] [US8] Delete `TabSessionRepository.delete` (`M/core/domain/repository/TabSessionRepository.kt`), its implementation, `TabSessionDao.delete(tabId)`, the fake's override and their tests.
+- [X] T070 [P] [US8] Delete `HistoryDao.getRecent`, `getById` and `delete(entry)` (`M/core/data/datasource/local/HistoryDao.kt`) and their DAO tests.
+- [X] T071 [P] [US8] Delete `TabRepository.getTabCount` and `IncognitoTabRepository.getCount`, with their implementations, fakes and tests. Rewrite any androidTest that used `getTabCount` to count from `observeAllTabs().first()`.
+- [X] T072 [P] [US8] Delete `DownloadManagerGateway.isAvailable` (`M/core/domain/repository/DownloadManagerGateway.kt`) and, in `AndroidDownloadManagerGateway.kt` (lines 82-102), `isDownloadProviderDisabled`, `DISABLED_STATES` and `DOWNLOAD_PROVIDER_PACKAGE`. Remove the override from all 5 fakes.
+  Done: the override was in 7 fakes, all removed.
+- [X] T073 [P] [US8] Delete `DownloadsRepository.count`, `DownloadsRepositoryImpl.count` (lines 35-36), `DownloadRecordDao.count` and `BookmarkRepository.getFolder` (`BookmarkRepositoryImpl.kt` lines 101-102), with their fakes and tests.
+- [X] T074 [US8] Replace the forwarding use cases with direct repository calls (Constitution III):
   - delete `RemoveSitePermissionsUseCase`, `RemoveProtectionExceptionsUseCase` and `RemoveFireproofSitesUseCase`;
   - in `FireproofSitesViewModel.kt`, `ProtectionExceptionsViewModel.kt` and `SitePermissionsViewModel.kt`, call `if (x == null) repository.clearAll() else repository.remove(x)` directly;
   - move their test cases into the view-model tests.
-- [ ] T075 [US8] Create `M/core/data/util/RunIoCatching.kt` with `internal suspend fun <T> runIoCatching(dispatcher: CoroutineDispatcher, block: suspend () -> T): Result<T>`. Make it behave exactly like the existing private `runIo`, including that `CancellationException` is rethrown. Replace the three private copies in `SitePermissionRepositoryImpl.kt` (line 51), `FireproofSiteRepositoryImpl.kt` (line 57) and `ProtectionExceptionRepositoryImpl.kt` (line 58).
-- [ ] T076 [US8] Create `M/core/domain/model/FireproofSites.kt` with `object FireproofSites { fun originsFor(site: String): List<String> = listOf(site, "www.$site") }`. Use it in `RunFireUseCase.kt` (lines 143-160, removing `WWW_PREFIX`), `IncognitoSnapshotOrigins.kt` (line 25, removing `WWW`) and `AndroidWebDataCleaner.kt` (line 89). Add `T/core/domain/model/FireproofSitesTest.kt`.
+  Done: each view model calls `remove`/`removeSite` from the one-site action and `clearAll` from the confirmed remove-all action; `FireproofSitesViewModelTest` is new, and the use-case tests keep only what the remaining API does.
+- [X] T075 [US8] Create `M/core/data/util/RunIoCatching.kt` with `internal suspend fun <T> runIoCatching(dispatcher: CoroutineDispatcher, block: suspend () -> T): Result<T>`. Make it behave exactly like the existing private `runIo`, including that `CancellationException` is rethrown. Replace the three private copies in `SitePermissionRepositoryImpl.kt` (line 51), `FireproofSiteRepositoryImpl.kt` (line 57) and `ProtectionExceptionRepositoryImpl.kt` (line 58).
+  Done: the three copies were identical (`withContext(io)`, `Result.Success`, rethrow `CancellationException`, `Result.Error` for any other `Exception`).
+- [X] T076 [US8] Create `M/core/domain/model/FireproofSites.kt` with `object FireproofSites { fun originsFor(site: String): List<String> = listOf(site, "www.$site") }`. Use it in `RunFireUseCase.kt` (lines 143-160, removing `WWW_PREFIX`), `IncognitoSnapshotOrigins.kt` (line 25, removing `WWW`) and `AndroidWebDataCleaner.kt` (line 89). Add `T/core/domain/model/FireproofSitesTest.kt`.
 - [ ] T077 [P] [US8] In `BookmarkTransferViewModel.kt` (lines 69-77), remove the "nothing to export" pre-check and rely on `ExportBookmarksUseCase`'s result. Keep the view-model test for the empty case and point it at the use case's outcome.
-- [ ] T078 [P] [US8] In `M/ThirtySixApplication.kt` (lines 34-36), inject `@ApplicationScope CoroutineScope` instead of building `CoroutineScope(SupervisorJob() + io)`.
-- [ ] T079 [P] [US8] In `M/core/domain/usecase/CloseTabUseCase.kt` (line 16), delete the comment about a tab re-created with the same id, because ids are AUTOINCREMENT. If the guard under it exists only for that case, delete the guard too and keep its test passing.
+  Not done: the pre-check is not a duplicate in what the person sees. Without it, an empty library opens the system save picker, which creates an empty file before the use case reports "nothing to export". Left as is because this phase must not change what the person sees.
+- [X] T078 [P] [US8] In `M/ThirtySixApplication.kt` (lines 34-36), inject `@ApplicationScope CoroutineScope` instead of building `CoroutineScope(SupervisorJob() + io)`.
+- [X] T079 [P] [US8] In `M/core/domain/usecase/CloseTabUseCase.kt` (line 16), delete the comment about a tab re-created with the same id, because ids are AUTOINCREMENT. If the guard under it exists only for that case, delete the guard too and keep its test passing.
+  Done: only the comment went. There is no guard; the screenshot is still deleted on close, which frees its file.
 - [ ] T080 [US8] Run G1. For SC-009, run `git diff --numstat HEAD~1 -- app/src/main` on the US8 commit: deleted minus added lines must be ≥ 150. Record it in Gate Results. Commit `refactor: remove unused and duplicated code (031 US8)`.
+  G1 green and committed. SC-009 not met: `git diff --numstat HEAD~1 -- app/src/main` gives 57 added, 186 deleted, net 129 (< 150), with T077 not done.
 
 ## Phase 11: Polish and cross-cutting
 
@@ -335,3 +341,4 @@ Before each deletion, run `grep -rn "<name>" app/src` again. Delete a test only 
 | Bookmark search, 10k bookmarks (T057a, `TA016_API36_16K`) | median 15,211 ms (unfixed) | median 9 ms (< 300 ms) |
 | Cold start vs `main` | n/a | |
 | Quickstart Q1–Q10 | n/a | |
+| SC-009 cleanup, US8 commit (T080) | n/a | 186 deleted − 57 added = 129 lines (< 150) |

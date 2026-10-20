@@ -34,10 +34,10 @@ class IncognitoStressInstrumentedTest {
         hiltRule.inject()
 
         // Settle starting state.
-        if (incognitoRepository.getCount() > 0) {
+        if (incognitoRepository.observeTabs().first().size > 0) {
             incognitoRepository.closeAll()
         }
-        assertEquals(0, incognitoRepository.getCount())
+        assertEquals(0, incognitoRepository.observeTabs().first().size)
 
         val runtime = Runtime.getRuntime()
         runtime.gc()
@@ -58,7 +58,7 @@ class IncognitoStressInstrumentedTest {
         assertEquals(
             "incognito pool is empty after $STRESS_CYCLES cycles",
             0,
-            incognitoRepository.getCount(),
+            incognitoRepository.observeTabs().first().size,
         )
         assertEquals(emptyList<Any>(), incognitoRepository.observeTabs().first())
 

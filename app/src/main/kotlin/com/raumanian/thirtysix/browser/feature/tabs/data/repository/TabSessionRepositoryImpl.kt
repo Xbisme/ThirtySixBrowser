@@ -53,14 +53,6 @@ class TabSessionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun delete(tabId: Long) {
-        if (tabId < 0L) {
-            incognito.remove(tabId)
-            return
-        }
-        withContext(dispatchers.io) { readOrNull { dao.delete(tabId) } }
-    }
-
     override suspend fun retainOnly(tabIds: Set<Long>) {
         val normalIds = tabIds.filter { it > 0L }
         if (normalIds.isEmpty()) return

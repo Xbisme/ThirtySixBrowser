@@ -98,9 +98,6 @@ class BookmarkRepositoryImpl @Inject constructor(
     override fun observeAllFolders(): Flow<List<BookmarkFolder>> =
         folderDao.observeAll().map { list -> list.map(BookmarkFolderMapper::toDomain) }
 
-    override suspend fun getFolder(id: Long): BookmarkFolder? =
-        withContext(dispatchers.io) { folderDao.getById(id)?.let(BookmarkFolderMapper::toDomain) }
-
     override suspend fun getAncestorChain(folderId: Long): List<BookmarkFolder> =
         withContext(dispatchers.io) {
             val chain = ArrayDeque<BookmarkFolder>()

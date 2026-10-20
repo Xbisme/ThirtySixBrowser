@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.privacy.presentation.protectione
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +16,7 @@ import kotlinx.coroutines.launch
 /** Sites the person turned protection off for; incognito choices never appear here. */
 @HiltViewModel
 class ProtectionExceptionsViewModel @Inject constructor(
-    exceptions: ProtectionExceptionRepository,
-    private val removeExceptions: RemoveProtectionExceptionsUseCase,
+    private val exceptions: ProtectionExceptionRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProtectionExceptionsUiState())
     val uiState: StateFlow<ProtectionExceptionsUiState> = _uiState.asStateFlow()
@@ -39,14 +37,14 @@ class ProtectionExceptionsViewModel @Inject constructor(
     }
 
     private fun onTurnOn(site: String) {
-        viewModelScope.launch { removeExceptions(site) }
+        viewModelScope.launch { exceptions.remove(site) }
     }
 
     private fun onTurnAllOnClick() = _uiState.update { it.copy(isConfirmingTurnAllOn = true) }
 
     private fun onTurnAllOnConfirmed() {
         _uiState.update { it.copy(isConfirmingTurnAllOn = false) }
-        viewModelScope.launch { removeExceptions(null) }
+        viewModelScope.launch { exceptions.clearAll() }
     }
 
     private fun onTurnAllOnDismissed() = _uiState.update { it.copy(isConfirmingTurnAllOn = false) }

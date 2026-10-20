@@ -17,7 +17,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepo
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.feature.settings.presentation.settings.SETTINGS_TEST_TIMEOUT_MS
-import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.RemoveSitePermissionsUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -35,10 +34,7 @@ class SitePermissionsScreenTest {
     private val repository = InMemorySitePermissions()
 
     private fun render() {
-        val viewModel = SitePermissionsViewModel(
-            repository,
-            RemoveSitePermissionsUseCase(repository),
-        )
+        val viewModel = SitePermissionsViewModel(repository)
         composeRule.setContent { ThirtySixTheme { SitePermissionsRoute(viewModel = viewModel) } }
     }
 

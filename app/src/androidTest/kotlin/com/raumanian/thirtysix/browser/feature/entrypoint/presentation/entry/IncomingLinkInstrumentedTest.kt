@@ -86,7 +86,7 @@ class IncomingLinkInstrumentedTest {
     private fun viewIntent(url: String) =
         Intent(Intent.ACTION_VIEW, Uri.parse(url)).setClass(context, MainActivity::class.java)
 
-    private suspend fun tabCount(): Int = tabRepository.getTabCount()
+    private suspend fun tabCount(): Int = tabRepository.observeTabs().first().size
 
     /** Waits until the tab count reaches [expected]; returns the last count seen. */
     private suspend fun awaitTabCount(expected: Int): Int {

@@ -14,9 +14,6 @@ interface TabSessionDao {
     @Query("SELECT * FROM ${TabSessionEntity.TABLE_NAME} WHERE ${TabSessionEntity.COL_TAB_ID} = :tabId")
     suspend fun get(tabId: Long): TabSessionEntity?
 
-    @Query("DELETE FROM ${TabSessionEntity.TABLE_NAME} WHERE ${TabSessionEntity.COL_TAB_ID} = :tabId")
-    suspend fun delete(tabId: Long): Int
-
     @Query("DELETE FROM ${TabSessionEntity.TABLE_NAME} WHERE ${TabSessionEntity.COL_TAB_ID} NOT IN (:tabIds)")
     suspend fun deleteNotIn(tabIds: List<Long>): Int
 

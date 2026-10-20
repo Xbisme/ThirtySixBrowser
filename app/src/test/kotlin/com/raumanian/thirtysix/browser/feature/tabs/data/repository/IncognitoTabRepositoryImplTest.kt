@@ -129,18 +129,18 @@ class IncognitoTabRepositoryImplTest {
         repository.createTab("https://a.com/")
         repository.createTab("https://b.com/")
         repository.createTab("https://c.com/")
-        assertEquals(3, repository.getCount())
+        assertEquals(3, repository.observeTabs().first().size)
 
         repository.closeAll()
 
-        assertEquals(0, repository.getCount())
+        assertEquals(0, repository.observeTabs().first().size)
         assertEquals(emptyList<Any>(), repository.observeTabs().first())
         assertEquals("closeAll restores exactly once", 1, cookieManager.restoreCount)
     }
 
     @Test
     fun `5b - closeAll on empty state is a no-op (no spurious restore)`() = runTest {
-        assertEquals(0, repository.getCount())
+        assertEquals(0, repository.observeTabs().first().size)
         repository.closeAll()
         assertEquals(0, cookieManager.restoreCount)
     }
@@ -151,7 +151,7 @@ class IncognitoTabRepositoryImplTest {
             val r = repository.createTab("https://t$i.com/")
             assertTrue("seed#$i should succeed", r is Result.Success)
         }
-        assertEquals(BrowserLimits.MAX_INCOGNITO_TABS, repository.getCount())
+        assertEquals(BrowserLimits.MAX_INCOGNITO_TABS, repository.observeTabs().first().size)
 
         val overflow = repository.createTab("https://overflow.com/")
 
@@ -160,7 +160,7 @@ class IncognitoTabRepositoryImplTest {
         assertEquals(
             "count must remain at the cap (no row inserted)",
             BrowserLimits.MAX_INCOGNITO_TABS,
-            repository.getCount(),
+            repository.observeTabs().first().size,
         )
         assertEquals(
             "snapshot captured exactly once for the whole session",
@@ -267,18 +267,18 @@ class IncognitoTabRepositoryImplTest {
         assertEquals(
             "5 seeded - 5 closed + 10 created = 10",
             10,
-            repository.getCount(),
+            repository.observeTabs().first().size,
         )
     }
 
     @Test
     fun `9 - closeTab on unknown tabId is a no-op`() = runTest {
         repository.createTab("https://a.com/")
-        val before = repository.getCount()
+        val before = repository.observeTabs().first().size
 
         repository.closeTab(UNKNOWN_ID)
 
-        assertEquals(before, repository.getCount())
+        assertEquals(before, repository.observeTabs().first().size)
         assertEquals(
             "no spurious restore on unknown-id close (state did not transition 1→0)",
             0,

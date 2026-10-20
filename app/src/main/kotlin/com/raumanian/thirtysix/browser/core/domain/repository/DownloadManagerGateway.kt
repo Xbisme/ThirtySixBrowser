@@ -39,6 +39,4 @@ interface DownloadManagerGateway {
      * provider's row. True only once the file is verified gone.
      */
     suspend fun deleteFile(transferHandle: Long, fileName: String): Boolean
-
-    suspend fun isAvailable(): Boolean
 }

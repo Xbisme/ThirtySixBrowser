@@ -118,8 +118,6 @@ open class FakeBookmarkRepository : BookmarkRepository {
     override fun observeAllFolders(): Flow<List<BookmarkFolder>> =
         foldersFlow.asStateFlow().map { map -> map.values.toList() }
 
-    override suspend fun getFolder(id: Long): BookmarkFolder? = foldersFlow.value[id]
-
     override suspend fun getAncestorChain(folderId: Long): List<BookmarkFolder> {
         val chain = ArrayDeque<BookmarkFolder>()
         var current: Long? = folderId

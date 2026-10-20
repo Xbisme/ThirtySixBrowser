@@ -9,6 +9,7 @@ import android.webkit.WebView
 import androidx.webkit.CookieManagerCompat
 import androidx.webkit.WebStorageCompat
 import androidx.webkit.WebViewFeature
+import com.raumanian.thirtysix.browser.core.domain.model.FireproofSites
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
@@ -88,10 +89,7 @@ class AndroidWebDataCleaner @Inject constructor(
     ): SiteDataPath? {
         val startedAt = SystemClock.elapsedRealtime()
         val queryHosts = buildSet {
-            keepSites.forEach { site ->
-                add(site)
-                add(WWW_PREFIX + site)
-            }
+            keepSites.flatMapTo(this, FireproofSites::originsFor)
             candidateHosts.filterTo(this, isKept)
         }
         val path = runCatching {
@@ -213,7 +211,6 @@ class AndroidWebDataCleaner @Inject constructor(
 
     private companion object {
         const val LOG_TAG: String = "WebDataCleaner"
-        const val WWW_PREFIX: String = "www."
         const val COOKIE_SEPARATOR: String = "; "
         val SCHEMES: List<String> = listOf("https", "http")
     }

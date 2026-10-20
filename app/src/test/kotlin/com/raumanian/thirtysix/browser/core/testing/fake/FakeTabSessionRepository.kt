@@ -19,10 +19,6 @@ class FakeTabSessionRepository : TabSessionRepository {
         sessions[session.tabId] = session
     }
 
-    override suspend fun delete(tabId: Long) {
-        sessions.remove(tabId)
-    }
-
     override suspend fun retainOnly(tabIds: Set<Long>) {
         sessions.keys.retainAll(tabIds)
     }

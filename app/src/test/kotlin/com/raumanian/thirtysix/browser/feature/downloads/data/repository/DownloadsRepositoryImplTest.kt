@@ -8,6 +8,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.DownloadRecord
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadsRepository
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -51,7 +52,7 @@ class DownloadsRepositoryImplTest {
     @Test
     fun `insert returns the new row id`() = runTest {
         assertTrue(repository.insert(record()) > 0)
-        assertEquals(1, repository.count())
+        assertEquals(1, repository.observeAll().first().size)
     }
 
     @Test
@@ -96,22 +97,12 @@ class DownloadsRepositoryImplTest {
     }
 
     @Test
-    fun `count reflects inserts and deletes`() = runTest {
-        assertEquals(0, repository.count())
-        val id = repository.insert(record(handle = 1L))
-        repository.insert(record(fileName = "b.pdf", handle = 2L))
-        assertEquals(2, repository.count())
-        repository.deleteById(id)
-        assertEquals(1, repository.count())
-    }
-
-    @Test
     fun `two records may share a transfer handle - no unique constraint blocks the insert`() = runTest {
         // The platform allocates handles; a service that reset its counters must never be
         // able to make an insert fail and lose the user's download.
         repository.insert(record(fileName = "a.pdf", handle = 77L))
         repository.insert(record(fileName = "b.pdf", handle = 77L))
-        assertEquals(2, repository.count())
+        assertEquals(2, repository.observeAll().first().size)
     }
 
     private class TestDispatcherProvider : DispatcherProvider {

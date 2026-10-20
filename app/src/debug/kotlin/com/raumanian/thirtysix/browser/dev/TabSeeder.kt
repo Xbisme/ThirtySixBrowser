@@ -19,6 +19,7 @@ import com.raumanian.thirtysix.browser.core.presentation.util.webpWriter
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -62,7 +63,7 @@ class TabSeeder : BroadcastReceiver() {
         // Bounded by the cap, so a repository that stops counting new tabs cannot loop forever.
         var stopped = false
         repeat(BrowserLimits.MAX_TABS) {
-            val total = tabRepository.getTabCount()
+            val total = tabRepository.observeTabs().first().size
             if (stopped || total >= goal) return@repeat
             val url = "https://seed-tab-$total.example.com/"
             when (val result = tabRepository.createTab(url)) {
@@ -84,7 +85,8 @@ class TabSeeder : BroadcastReceiver() {
                 }
             }
         }
-        Log.i(TAG, "created $created tabs; total=${tabRepository.getTabCount()} (cap ${BrowserLimits.MAX_TABS})")
+        val total = tabRepository.observeTabs().first().size
+        Log.i(TAG, "created $created tabs; total=$total (cap ${BrowserLimits.MAX_TABS})")
     }
 
     private fun placeholder(width: Int, height: Int, index: Int): Bitmap =

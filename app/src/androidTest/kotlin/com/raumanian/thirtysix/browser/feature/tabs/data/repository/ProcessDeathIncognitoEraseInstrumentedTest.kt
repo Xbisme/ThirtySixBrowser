@@ -43,14 +43,14 @@ class ProcessDeathIncognitoEraseInstrumentedTest {
         // test APK shares one Hilt container across @HiltAndroidTest classes,
         // so leftover tabs from a prior test would otherwise pollute counts.
         tabRepository.closeAllTabs()
-        if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
+        if (incognitoRepository.observeTabs().first().size > 0) incognitoRepository.closeAll()
     }
 
     @After
     fun tearDown() = runBlocking {
         // Same rationale as @Before: a leaked tab breaks the next test class's counts.
         tabRepository.closeAllTabs()
-        if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
+        if (incognitoRepository.observeTabs().first().size > 0) incognitoRepository.closeAll()
     }
 
     @Test(timeout = TEST_TIMEOUT_MS)
@@ -80,7 +80,7 @@ class ProcessDeathIncognitoEraseInstrumentedTest {
                 "incognito repo stays empty across Activity recreate",
                 incognitoRepository.observeTabs().first().isEmpty(),
             )
-            assertEquals(0, incognitoRepository.getCount())
+            assertEquals(0, incognitoRepository.observeTabs().first().size)
         }
     }
 

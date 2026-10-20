@@ -130,7 +130,6 @@ class TabSessionViewModelTest {
         override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
         override suspend fun closeTab(tabId: Long) = Unit
         override suspend fun closeAllTabs() = Unit
-        override suspend fun getTabCount(): Int = 0
     }
 
     @Test

@@ -55,7 +55,7 @@ class OpenIncomingRequestUseCaseTest {
         assertEquals(2, all.size)
         assertEquals("https://example.org/a", all.single { it.id == (outcome as OpenOutcome.OpenedInNewTab).tabId }.url)
         // The use case has no path to the incognito store at all; it stays empty.
-        assertEquals(0, incognito.getCount())
+        assertEquals(0, incognito.observeTabs().first().size)
     }
 
     @Test
@@ -123,7 +123,7 @@ class OpenIncomingRequestUseCaseTest {
 
         assertEquals(OpenOutcome.OpenedInExistingTab(7L, "https://example.org/a", loadInPlace = false), outcome)
         assertEquals("https://example.org/a", tabs.observeTabs().first().single { it.id == 7L }.url)
-        assertEquals(1, incognito.getCount())
+        assertEquals(1, incognito.observeTabs().first().size)
     }
 
     @Test

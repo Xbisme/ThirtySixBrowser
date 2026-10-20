@@ -83,27 +83,14 @@ class AndroidDownloadManagerGateway @Inject constructor(
             !file.exists()
         }.getOrDefault(false)
 
-    override suspend fun isAvailable(): Boolean = runCatching {
-        downloadManager != null && !isDownloadProviderDisabled()
-    }.getOrDefault(false)
-
     // `setFilterById` is vararg-only, so the spread copy is forced.
     @Suppress("SpreadOperator")
     private fun buildQuery(transferHandles: List<Long>): DownloadManager.Query =
         DownloadManager.Query().setFilterById(*transferHandles.toLongArray())
 
-    private fun isDownloadProviderDisabled(): Boolean = runCatching {
-        context.packageManager.getApplicationEnabledSetting(DOWNLOAD_PROVIDER_PACKAGE) in DISABLED_STATES
-    }.getOrDefault(false)
-
     private companion object {
         const val HEADER_USER_AGENT = "User-Agent"
         const val HEADER_REFERER = "Referer"
         const val HEADER_COOKIE = "Cookie"
-        const val DOWNLOAD_PROVIDER_PACKAGE = "com.android.providers.downloads"
-        val DISABLED_STATES = setOf(
-            android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER,
-        )
     }
 }

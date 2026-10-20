@@ -4,6 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkException
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -24,7 +25,7 @@ class FolderUseCasesTest {
         val longName = "x".repeat(500)
         val result = CreateFolderUseCase(repo)(longName, null)
         val id = (result as Result.Success).data
-        val folder = repo.getFolder(id)!!
+        val folder = repo.observeAllFolders().first().find { it.id == id }!!
         assertTrue(folder.name.length <= 100)
     }
 
@@ -33,7 +34,7 @@ class FolderUseCasesTest {
         val repo = FakeBookmarkRepository()
         val id = (CreateFolderUseCase(repo)("Old", null) as Result.Success).data
         RenameFolderUseCase(repo)(id, "New")
-        assertEquals("New", repo.getFolder(id)!!.name)
+        assertEquals("New", repo.observeAllFolders().first().find { it.id == id }!!.name)
     }
 
     @Test

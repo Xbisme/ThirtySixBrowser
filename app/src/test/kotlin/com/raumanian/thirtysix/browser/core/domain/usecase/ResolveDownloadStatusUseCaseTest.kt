@@ -246,6 +246,5 @@ class ResolveDownloadStatusUseCaseTest {
         override suspend fun contentUriFor(transferHandle: Long): String? = contentUri
         override suspend fun resolvedFileNameFor(transferHandle: Long): String? = resolvedName
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
-        override suspend fun isAvailable() = true
     }
 }

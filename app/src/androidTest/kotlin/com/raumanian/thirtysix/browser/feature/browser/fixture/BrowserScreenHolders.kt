@@ -107,7 +107,6 @@ private object NoopTabRepository : TabRepository {
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
     override suspend fun closeTab(tabId: Long) = Unit
     override suspend fun closeAllTabs() = Unit
-    override suspend fun getTabCount(): Int = 0
 }
 
 private object NoopIncognitoTabRepository : IncognitoTabRepository {
@@ -119,7 +118,6 @@ private object NoopIncognitoTabRepository : IncognitoTabRepository {
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
     override suspend fun closeTab(tabId: Long) = Unit
     override suspend fun closeAll() = Unit
-    override suspend fun getCount(): Int = 0
 }
 
 private object NoopFaviconCache : FaviconCache {
@@ -163,7 +161,6 @@ private object NoopBookmarkRepository :
         flowOf(emptyList<BookmarkFolder>())
     override fun observeAllFolders() =
         flowOf(emptyList<BookmarkFolder>())
-    override suspend fun getFolder(id: Long) = null
     override suspend fun getAncestorChain(folderId: Long) = emptyList<BookmarkFolder>()
     override suspend fun countDescendants(folderId: Long) =
         BookmarkDescendantCount(0, 0)

@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.tabs.data.repository
 
+import com.raumanian.thirtysix.browser.core.domain.model.FireproofSites
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
@@ -23,7 +24,7 @@ class IncognitoSnapshotOrigins @Inject constructor(
         }.getOrElse { emptyList() }
         val hosts = runCatching { historyRepository.distinctHosts() }.getOrElse { emptySet() } +
             runCatching {
-                fireproofSites.observeAll().first().flatMap { listOf(it.site, "$WWW${it.site}") }
+                fireproofSites.observeAll().first().flatMap { FireproofSites.originsFor(it.site) }
             }.getOrElse { emptyList() }
         return (tabOrigins + hosts.flatMap { host -> listOf("$HTTPS$host", "$HTTP$host") }).distinct()
     }
@@ -39,6 +40,5 @@ class IncognitoSnapshotOrigins @Inject constructor(
     private companion object {
         const val HTTPS = "https://"
         const val HTTP = "http://"
-        const val WWW = "www."
     }
 }

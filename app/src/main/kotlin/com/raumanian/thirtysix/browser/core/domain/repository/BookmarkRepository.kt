@@ -41,8 +41,6 @@ interface BookmarkRepository {
 
     fun observeAllFolders(): Flow<List<BookmarkFolder>>
 
-    suspend fun getFolder(id: Long): BookmarkFolder?
-
     /** Ancestors root → leaf; empty when the folder is missing or at the root. */
     suspend fun getAncestorChain(folderId: Long): List<BookmarkFolder>
 

@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.core.data.datasource.local
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.DownloadRecordEntity
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -46,7 +47,7 @@ class DownloadRecordDaoTest {
     @Test
     fun `insert returns a positive row id and the record reads back`() = runTest {
         val id = dao.insert(record())
-        assertEquals(1, dao.count())
+        assertEquals(1, dao.observeAll().first().size)
         assertEquals("a.pdf", dao.getById(id)?.fileName)
     }
 

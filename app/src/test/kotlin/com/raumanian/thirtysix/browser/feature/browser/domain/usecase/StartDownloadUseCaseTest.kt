@@ -185,7 +185,6 @@ class StartDownloadUseCaseTest {
         override suspend fun fileExists(localUri: String?, fileName: String) = false
         override suspend fun resolvedFileNameFor(transferHandle: Long): String? = null
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
-        override suspend fun isAvailable() = handle != null
     }
 
     private class FakeDownloadsRepository : DownloadsRepository {
@@ -202,6 +201,5 @@ class StartDownloadUseCaseTest {
         override suspend fun getById(id: Long): DownloadRecord? = inserted.firstOrNull { it.id == id }
         override suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String) = Unit
         override suspend fun deleteById(id: Long) = false
-        override suspend fun count(): Int = inserted.size
     }
 }

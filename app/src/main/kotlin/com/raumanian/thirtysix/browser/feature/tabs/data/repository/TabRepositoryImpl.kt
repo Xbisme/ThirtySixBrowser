@@ -111,8 +111,6 @@ class TabRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getTabCount(): Int = tabDao.count()
-
     private suspend fun ensureAtLeastOneTab() {
         // Fast path — most cold starts already have ≥ 1 tab.
         if (tabDao.count() > 0) return
