@@ -1,8 +1,11 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Every row of the hand-off table, and the schemes never handed off. */
@@ -54,6 +57,22 @@ class ExternalLinkPolicyTest {
                 assertEquals(url, ExternalLinkDecision.Drop, decision)
             }
         }
+    }
+
+    @Test
+    fun `a redirect soon after a tap counts as tapped`() {
+        val window = BrowserLimits.EXTERNAL_TAP_WINDOW_MS
+        assertTrue(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = 0L))
+        assertTrue(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = window))
+    }
+
+    @Test
+    fun `a late redirect, one never tapped, or a plain navigation keeps the gesture it reports`() {
+        val window = BrowserLimits.EXTERNAL_TAP_WINDOW_MS
+        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = window + 1))
+        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = null))
+        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = false, sinceLastTapMs = 0L))
+        assertTrue(ExternalLinkPolicy.isTapped(hasGesture = true, isRedirect = false, sinceLastTapMs = null))
     }
 
     private companion object {

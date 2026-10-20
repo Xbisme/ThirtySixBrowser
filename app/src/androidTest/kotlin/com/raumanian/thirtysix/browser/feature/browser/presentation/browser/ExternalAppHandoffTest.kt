@@ -189,6 +189,21 @@ class ExternalAppHandoffTest {
         assertNull(intent.component)
     }
 
+    @Test
+    fun aTappedLinkThatRedirectsToAnotherApp_opensItWithoutAnOffer() {
+        start("redirectLink")
+        composeRule.waitUntil(TIMEOUT_MS) { READY in titles }
+        Thread.sleep(RENDER_MS)
+
+        tapPage()
+        composeRule.waitUntil(TIMEOUT_MS) { startedIntents().isNotEmpty() }
+
+        val intent = startedIntents().single()
+        assertEquals(Intent.ACTION_VIEW, intent.action)
+        assertEquals(Uri.parse(REDIRECTED_TARGET), intent.data)
+        assertNull(snackbars.currentSnackbarData)
+    }
+
     private fun dialogShown(): Boolean =
         composeRule.onAllNodes(hasText(context.getString(R.string.external_app_confirm_title)))
             .fetchSemanticsNodes()
@@ -202,6 +217,7 @@ class ExternalAppHandoffTest {
         const val PAGE = "external-untapped.html"
         const val READY = "ready"
         const val TAPPED_TARGET = "market://details?id=tapped"
+        const val REDIRECTED_TARGET = "tel:123"
         const val TIMEOUT_MS = 15_000L
         const val SETTLE_MS = 3_000L
         const val RENDER_MS = 1_000L

@@ -8,6 +8,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.print.PrintManager
 import android.view.PixelCopy
 import android.view.ViewGroup
@@ -378,7 +379,9 @@ private class BrowserWebViewClient(
         val page = pageRequests.context()
         if (view == null || page == null) return true
         val url = uri.toString()
-        val navigation = ExternalNavigation(url, scheme, request.isForMainFrame, request.hasGesture(), page.isIncognito)
+        val sinceTap = (view as? BrowserPageView)?.lastTapUptimeMs?.let { SystemClock.uptimeMillis() - it }
+        val tapped = ExternalLinkPolicy.isTapped(request.hasGesture(), request.isRedirect, sinceTap)
+        val navigation = ExternalNavigation(url, scheme, request.isForMainFrame, tapped, page.isIncognito)
         when (ExternalLinkPolicy.decide(navigation)) {
             ExternalLinkDecision.Drop -> Unit
             ExternalLinkDecision.Offer -> pageRequests.onExternalAppOffered(url, page.generation)

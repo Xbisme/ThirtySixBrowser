@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 
@@ -13,4 +14,8 @@ object ExternalLinkPolicy {
         nav.isIncognito -> ExternalLinkDecision.Confirm
         else -> ExternalLinkDecision.Launch
     }
+
+    // WebView drops the gesture bit on a server redirect, so a redirect right after a tap counts as tapped.
+    fun isTapped(hasGesture: Boolean, isRedirect: Boolean, sinceLastTapMs: Long?): Boolean =
+        hasGesture || isRedirect && sinceLastTapMs != null && sinceLastTapMs in 0..BrowserLimits.EXTERNAL_TAP_WINDOW_MS
 }
