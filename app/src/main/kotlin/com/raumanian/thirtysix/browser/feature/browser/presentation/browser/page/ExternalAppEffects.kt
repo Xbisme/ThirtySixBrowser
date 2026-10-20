@@ -2,6 +2,7 @@
 
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
@@ -18,8 +19,9 @@ import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ExternalLi
 import kotlinx.coroutines.flow.collectLatest
 
 /**
- * Offers a page's untapped attempt to open another app, latest attempt only. Open counts as the
- * tap: a normal tab opens the app, an incognito tab asks first. [loadFallback] loads a web fallback.
+ * Offers a page's untapped attempt to open another app, latest attempt only, until its page is
+ * replaced. Open counts as the tap: a normal tab opens the app, an incognito tab asks first.
+ * [loadFallback] loads a web fallback.
  */
 @Composable
 fun ExternalAppEffects(
@@ -34,8 +36,9 @@ fun ExternalAppEffects(
     val currentPageUrl by rememberUpdatedState(pageUrl)
     val currentLoadFallback by rememberUpdatedState(loadFallback)
     LaunchedEffect(session) {
-        session.externalAppOffers.collectLatest { offer ->
-            val result = snackbarHostState.showSnackbar(message = message, actionLabel = open)
+        session.externalAppOffer.collectLatest { offer ->
+            if (offer == null) return@collectLatest
+            val result = snackbarHostState.showSnackbar(message, open, duration = SnackbarDuration.Long)
             val page = session.context()?.takeIf { it.generation == offer.generation }
             if (result != SnackbarResult.ActionPerformed || page == null) return@collectLatest
             val handOff = { ExternalAppLauncher.launch(context, offer.url)?.let(currentLoadFallback) }

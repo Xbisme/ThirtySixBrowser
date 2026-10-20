@@ -9,6 +9,7 @@ import android.net.Uri
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -146,6 +147,16 @@ class ExternalAppHandoffTest {
             composeRule.runOnUiThread { snackbars.currentSnackbarData?.dismiss() }
             composeRule.waitUntil(TIMEOUT_MS) { snackbars.currentSnackbarData == null }
         }
+    }
+
+    @Test
+    fun anOffer_timesOut_andEndsWithItsPage() {
+        start("assign")
+        composeRule.waitUntil(TIMEOUT_MS) { offerShown() }
+        assertEquals(SnackbarDuration.Long, snackbars.currentSnackbarData?.visuals?.duration)
+
+        composeRule.runOnUiThread { actions.loadUrl(server.url(PAGE)) }
+        composeRule.waitUntil(TIMEOUT_MS) { snackbars.currentSnackbarData == null }
     }
 
     @Test

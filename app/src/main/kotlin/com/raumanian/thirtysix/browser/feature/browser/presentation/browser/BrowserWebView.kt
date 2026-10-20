@@ -384,7 +384,12 @@ private class BrowserWebViewClient(
         val navigation = ExternalNavigation(url, scheme, request.isForMainFrame, tapped, page.isIncognito)
         when (ExternalLinkPolicy.decide(navigation)) {
             ExternalLinkDecision.Drop -> Unit
-            ExternalLinkDecision.Offer -> pageRequests.onExternalAppOffered(url, page.generation)
+            // A page that redirects from its first script gets here before its own onPageStarted,
+            // which is already queued: posting behind it ties the offer to that page.
+            ExternalLinkDecision.Offer -> view.post {
+                val current = pageRequests.context()?.takeIf { it.tabId == page.tabId }
+                current?.let { pageRequests.onExternalAppOffered(url, it.generation) }
+            }
             ExternalLinkDecision.Confirm -> {
                 val origin = view.url?.let(SiteOrigin::of).orEmpty()
                 pageRequests.enqueue(

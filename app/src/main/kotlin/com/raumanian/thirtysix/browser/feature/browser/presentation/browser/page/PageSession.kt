@@ -6,10 +6,9 @@ import android.webkit.WebView
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SitePermissionOutcome
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /** A page's untapped attempt to open another app, offered to the person with Open. */
@@ -33,11 +32,10 @@ class PageSession(
     /** The current page's dialog flood control. */
     val dialogs = DialogSuppression()
 
-    private val _externalAppOffers = MutableSharedFlow<ExternalAppOffer>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
-    val externalAppOffers: SharedFlow<ExternalAppOffer> = _externalAppOffers.asSharedFlow()
+    private val _externalAppOffer = MutableStateFlow<ExternalAppOffer?>(null)
+
+    /** The current page's latest offer; null once the page is replaced. */
+    val externalAppOffer: StateFlow<ExternalAppOffer?> = _externalAppOffer.asStateFlow()
 
     private var tabId: Long? = null
     private var isIncognito: Boolean = false
@@ -114,7 +112,7 @@ class PageSession(
     }
 
     override fun onExternalAppOffered(url: String, generation: Long) {
-        if (context()?.generation == generation) _externalAppOffers.tryEmit(ExternalAppOffer(url, generation))
+        if (context()?.generation == generation) _externalAppOffer.value = ExternalAppOffer(url, generation)
     }
 
     override fun onCloseWindow(window: WebView) {
@@ -125,6 +123,7 @@ class PageSession(
 
     private fun advance(previous: PageContext?) {
         generation += 1
+        _externalAppOffer.value = null
         queue.dropStale(tabId, generation)
         previous?.let { permissionGate?.onPageChanged(it.tabId) }
     }
