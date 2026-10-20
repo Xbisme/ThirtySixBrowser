@@ -101,33 +101,33 @@
 
 **Goal**: fireproof survives every Fire; no web data in backup; no cookie in logs; incognito never leaks through a race. **Independent test**: quickstart Q6 and Q7.
 
-- [ ] T016 [P] [US3] In `T/feature/privacy/domain/usecase/RunFireUseCaseTest.kt`, add a failing test:
+- [X] T016 [P] [US3] In `T/feature/privacy/domain/usecase/RunFireUseCaseTest.kt`, add a failing test:
   - `FakeFireproofSiteRepository` (`T/core/testing/fake/`) gets a mode where `currentSites()` returns empty while `observeAll()` emits `["example.com"]`;
   - Fire must take the keep-sites path, and `FakeWebDataCleaner` must record no `clearCookiesAndSiteData()`.
-- [ ] T017 [US3] In `M/feature/privacy/domain/usecase/RunFireUseCase.kt` line 56, use `val keepSites = fireproofSites.observeAll().first().mapTo(HashSet()) { it.site }`. In `M/feature/tabs/data/repository/IncognitoSnapshotOrigins.kt` line 25, read the same way, which makes its function `suspend` if it is not already, and update its caller. Make T016 green.
-- [ ] T017a [US3] In `A/feature/privacy/data/FireDataTest.kt`, add a case: mark `example.com` fireproof and set a cookie for it and one for `other.example`; write an interrupted-Fire marker; build a fresh `FireproofSiteRepositoryImpl` whose cache has not loaded yet; run `FireCoordinator.resumeIfInterrupted()`. The `example.com` cookie is kept and the other one is gone. It fails before T017.
-- [ ] T018 [US3] Make the cookie engine replaceable, then test:
+- [X] T017 [US3] In `M/feature/privacy/domain/usecase/RunFireUseCase.kt` line 56, use `val keepSites = fireproofSites.observeAll().first().mapTo(HashSet()) { it.site }`. In `M/feature/tabs/data/repository/IncognitoSnapshotOrigins.kt` line 25, read the same way, which makes its function `suspend` if it is not already, and update its caller. Make T016 green.
+- [X] T017a [US3] In `A/feature/privacy/data/FireDataTest.kt`, add a case: mark `example.com` fireproof and set a cookie for it and one for `other.example`; write an interrupted-Fire marker; build a fresh `FireproofSiteRepositoryImpl` whose cache has not loaded yet; run `FireCoordinator.resumeIfInterrupted()`. The `example.com` cookie is kept and the other one is gone. It fails before T017.
+- [X] T018 [US3] Make the cookie engine replaceable, then test:
   - `AndroidWebDataCleaner` (`M/feature/settings/data/datasource/local/AndroidWebDataCleaner.kt`) calls `CookieManager.getInstance()` directly, and Robolectric's cookie manager always answers at once. Add a constructor parameter `private val cookieManager: Provider<CookieManager>` (`javax.inject.Provider`), bound by a `@Provides` returning `CookieManager.getInstance()` in `M/feature/settings/di/`. Replace every `CookieManager.getInstance()` in the class with `cookieManager.get()`;
   - in `T/feature/settings/data/datasource/local/AndroidWebDataCleanerTest.kt` (Robolectric; create if missing), add a failing test with a `CookieManager` subclass whose `removeAllCookies` never calls back: after the timeout (virtual time), the kept cookies were written back with `setCookie`.
-- [ ] T019 [US3] In `M/feature/settings/data/datasource/local/AndroidWebDataCleaner.kt` (lines 98-104), call `writeCookies(kept)` after the wait whether it timed out or not. The timeout still returns the failure outcome. Make T018 green.
-- [ ] T020 [P] [US3] In `RES/xml/backup_rules.xml`, add `<exclude domain="root" path="app_webview/"/>`. In `RES/xml/data_extraction_rules.xml`, add the same line to both `<cloud-backup>` and `<device-transfer>`. Update each file's header comment to say web data stays on the device too.
-- [ ] T021 [P] [US3] In `M/feature/privacy/data/datasource/local/CookieJarSnapshotManagerImpl.kt`, remove `origin=$origin` and `pair=$trimmed` from the `Log` calls at lines 48 and 80, keeping a fixed message and the throwable. Then run `grep -rn "Log\." M/` and read every hit in files that handle URLs, hosts or cookies, including multi-line calls and `+` concatenation. Fix any log that includes a URL, host, cookie name or value.
-- [ ] T022 [P] [US3] In `T/feature/privacy/data/datasource/local/CookieJarSnapshotManagerImplTest.kt` (create if missing), add a failing test: a remove callback that never fires must not block a later call beyond `BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS`. Use virtual time.
-- [ ] T023 [US3] In `CookieJarSnapshotManagerImpl.kt`, wrap the awaits at lines 71 and 103-111 in `withTimeoutOrNull(BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS)`. Make T022 green.
-- [ ] T024 [P] [US3] In `T/feature/browser/presentation/browser/PageViewModelTest.kt`, add failing tests:
+- [X] T019 [US3] In `M/feature/settings/data/datasource/local/AndroidWebDataCleaner.kt` (lines 98-104), call `writeCookies(kept)` after the wait whether it timed out or not. The timeout still returns the failure outcome. Make T018 green.
+- [X] T020 [P] [US3] In `RES/xml/backup_rules.xml`, add `<exclude domain="root" path="app_webview/"/>`. In `RES/xml/data_extraction_rules.xml`, add the same line to both `<cloud-backup>` and `<device-transfer>`. Update each file's header comment to say web data stays on the device too.
+- [X] T021 [P] [US3] In `M/feature/privacy/data/datasource/local/CookieJarSnapshotManagerImpl.kt`, remove `origin=$origin` and `pair=$trimmed` from the `Log` calls at lines 48 and 80, keeping a fixed message and the throwable. Then run `grep -rn "Log\." M/` and read every hit in files that handle URLs, hosts or cookies, including multi-line calls and `+` concatenation. Fix any log that includes a URL, host, cookie name or value.
+- [X] T022 [P] [US3] In `T/feature/privacy/data/datasource/local/CookieJarSnapshotManagerImplTest.kt` (create if missing), add a failing test: a remove callback that never fires must not block a later call beyond `BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS`. Use virtual time.
+- [X] T023 [US3] In `CookieJarSnapshotManagerImpl.kt`, wrap the awaits at lines 71 and 103-111 in `withTimeoutOrNull(BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS)`. Make T022 green.
+- [X] T024 [P] [US3] In `T/feature/browser/presentation/browser/PageViewModelTest.kt`, add failing tests:
   - (a) after `setActiveTab(incognitoTab)`, `isIncognito` is true in the same emission as the tab;
   - (b) a screenshot result that arrives after a switch to another tab is saved under the captured tab id;
   - (c) a screenshot or icon captured from an incognito tab is never saved.
-- [ ] T025 [US3] In `M/feature/browser/data/repository/CurrentPageRepositoryImpl.kt`, `setActiveTab` sets `isIncognito = tab?.isIncognito ?: false` in the same `update`. Delete `setIncognito` there, in `M/feature/browser/domain/repository/CurrentPageRepository.kt`, and in its fake. In `M/BR/PageViewModel.kt`, remove the `ObserveActiveTabIsIncognitoUseCase` collection (lines 93-102). The use case itself stays, because `MainActivity` and `DefaultBrowserInviteViewModel` still use it.
-- [ ] T026 [US3] Make the PixelCopy result and `onReceivedIcon` carry the tab id and incognito flag captured when the WebView is built (`key(activeTab.id)` in `M/BR/BrowserWebView.kt` and `M/BR/BrowserWebViewCallbacks.kt`). `PageViewModel` saves under that id and drops the result when it is incognito. Make T024 green.
-- [ ] T027 [P] [US3] In `T/feature/tabs/data/repository/TabSessionRepositoryImplTest.kt`, add failing tests: (a) `save` for an incognito id after `retainOnly` dropped it leaves no entry; (b) `retainOnly(emptyList())` deletes nothing (FR-033, kept here because it is the same file).
-- [ ] T028 [US3] In `M/feature/tabs/data/repository/TabSessionRepositoryImpl.kt`:
+- [X] T025 [US3] In `M/feature/browser/data/repository/CurrentPageRepositoryImpl.kt`, `setActiveTab` sets `isIncognito = tab?.isIncognito ?: false` in the same `update`. Delete `setIncognito` there, in `M/feature/browser/domain/repository/CurrentPageRepository.kt`, and in its fake. In `M/BR/PageViewModel.kt`, remove the `ObserveActiveTabIsIncognitoUseCase` collection (lines 93-102). The use case itself stays, because `MainActivity` and `DefaultBrowserInviteViewModel` still use it.
+- [X] T026 [US3] Make the PixelCopy result and `onReceivedIcon` carry the tab id and incognito flag captured when the WebView is built (`key(activeTab.id)` in `M/BR/BrowserWebView.kt` and `M/BR/BrowserWebViewCallbacks.kt`). `PageViewModel` saves under that id and drops the result when it is incognito. Make T024 green.
+- [X] T027 [P] [US3] In `T/feature/tabs/data/repository/TabSessionRepositoryImplTest.kt`, add failing tests: (a) `save` for an incognito id after `retainOnly` dropped it leaves no entry; (b) `retainOnly(emptyList())` deletes nothing (FR-033, kept here because it is the same file).
+- [X] T028 [US3] In `M/feature/tabs/data/repository/TabSessionRepositoryImpl.kt`:
   - add a `closedIncognito` set: `retainOnly` adds the negative ids it drops, and `save` ignores them;
   - clear the set when the incognito session ends, which is when no incognito ids remain;
   - make `retainOnly` return early when the positive id list is empty.
 
   Make T027 green.
-- [ ] T029 [US3] Run G1. Commit `fix(privacy): fireproof, backup, logs and incognito flag (031 US3)`.
+- [X] T029 [US3] Run G1. Commit `fix(privacy): fireproof, backup, logs and incognito flag (031 US3)`.
 
 ## Phase 5: User Story 4 – Files are never deleted or broken by mistake (P1)
 

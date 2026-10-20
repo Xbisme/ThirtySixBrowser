@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -50,11 +49,9 @@ class PageViewModelTest {
         val incognitoRepo = FakeIncognitoTabRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
-        val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
         return PageViewModel(
             observeActiveTab = observeActiveTab,
             tabs = tabRepository,
-            observeActiveTabIsIncognito = observeActiveTabIsIncognito,
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,

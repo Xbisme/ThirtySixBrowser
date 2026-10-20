@@ -16,7 +16,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -55,7 +54,6 @@ class BrowserScreenHolders(startUrl: String) {
     val page = PageViewModel(
         observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
         tabs = NoopTabRepository,
-        observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
         updateActiveTabUrlAndTitle = updateActiveTab,
         faviconCache = NoopFaviconCache,
         screenshotCache = NoopScreenshotCache,

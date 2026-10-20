@@ -22,7 +22,9 @@ class IncognitoSnapshotOrigins @Inject constructor(
             tabRepository.observeTabs().first().mapNotNull { tab -> originOf(tab.url) }
         }.getOrElse { emptyList() }
         val hosts = runCatching { historyRepository.distinctHosts() }.getOrElse { emptySet() } +
-            runCatching { fireproofSites.currentSites().flatMap { listOf(it, "$WWW$it") } }.getOrElse { emptyList() }
+            runCatching {
+                fireproofSites.observeAll().first().flatMap { listOf(it.site, "$WWW${it.site}") }
+            }.getOrElse { emptyList() }
         return (tabOrigins + hosts.flatMap { host -> listOf("$HTTPS$host", "$HTTP$host") }).distinct()
     }
 

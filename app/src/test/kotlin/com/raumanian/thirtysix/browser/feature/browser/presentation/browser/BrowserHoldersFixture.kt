@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -59,7 +58,6 @@ internal class BrowserHoldersFixture(
         return PageViewModel(
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabs,
-            observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabs, incognitoTabs),
             faviconCache = FakeFaviconCache(),
             screenshotCache = FakeScreenshotCache(),

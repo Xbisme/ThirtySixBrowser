@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.BrowserErrorState
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.TabSwipePreview
@@ -176,7 +177,7 @@ private fun TabPage(
             onFindResult = { ordinal, total -> actions.onFindAction(FindInPageAction.Result(ordinal, total)) },
             onPageVisible = frame.ui.tabSwipe::onPageVisible,
         ),
-        navigationCallbacks = pageNavigationCallbacks(actions.onPageAction, onScrollDelta),
+        navigationCallbacks = pageNavigationCallbacks(actions.onPageAction, onScrollDelta, state.activeTab),
         incognitoProfile = incognitoProfile,
         modifier = Modifier.fillMaxSize(),
         adopted = adopted,
@@ -201,14 +202,17 @@ private fun rememberSwipeNavigation(state: BrowserScreenState, frame: BrowserFra
     return remember(swipeState, thresholdPx) { SwipeNavigationHooks(swipeState, { enabled }, { rtl }, thresholdPx) }
 }
 
-private fun pageNavigationCallbacks(onPageAction: (PageAction) -> Unit, onScrollDelta: (Float) -> Unit) =
+// The WebView keeps the callbacks of its first composition, so results name the tab it was built for.
+private fun pageNavigationCallbacks(onPageAction: (PageAction) -> Unit, onScrollDelta: (Float) -> Unit, tab: Tab?) =
     BrowserNavigationCallbacks(
         onUrlChange = { onPageAction(PageAction.UrlChanged(it)) },
         onCanGoBackChange = { onPageAction(PageAction.CanGoBackChanged(it)) },
         onCanGoForwardChange = { onPageAction(PageAction.CanGoForwardChanged(it)) },
         onTitleChange = { onPageAction(PageAction.TitleReceived(it)) },
-        onIconReceived = { url, icon -> onPageAction(PageAction.IconReceived(url, icon)) },
-        onScreenshotReady = { onPageAction(PageAction.ScreenshotReady(it)) },
+        onIconReceived = { url, icon -> onPageAction(PageAction.IconReceived(url, icon, tab?.isIncognito ?: false)) },
+        onScreenshotReady = { bitmap ->
+            tab?.let { onPageAction(PageAction.ScreenshotReady(bitmap, it.id, it.isIncognito)) }
+        },
         onScrollDelta = onScrollDelta,
     )
 

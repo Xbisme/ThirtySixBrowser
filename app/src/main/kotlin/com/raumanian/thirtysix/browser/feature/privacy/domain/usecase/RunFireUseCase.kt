@@ -53,7 +53,7 @@ class RunFireUseCase @Inject constructor(
 
     suspend operator fun invoke(): FireResult {
         val failed = mutableSetOf<FireStep>()
-        val keepSites = fireproofSites.currentSites()
+        val keepSites = fireproofSites.observeAll().first().mapTo(HashSet()) { it.site }
         val isKept: (String) -> Boolean = { host -> IsSiteFireproofUseCase.matches(host, keepSites) }
 
         // Candidate hosts are read before anything that holds them is cleared.

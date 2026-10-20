@@ -3,8 +3,10 @@ package com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local
 import android.util.Log
 import android.webkit.CookieManager
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +14,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Per-origin cookie snapshot over the public `CookieManager` API. Every platform call is wrapped,
@@ -21,6 +24,7 @@ import kotlinx.coroutines.withContext
 @Singleton
 class CookieJarSnapshotManagerImpl @Inject constructor(
     private val dispatchers: DispatcherProvider,
+    private val cookieManagers: Provider<CookieManager>,
 ) : CookieJarSnapshotManager {
 
     private val mutex: Mutex = Mutex()
@@ -33,7 +37,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
             mutex.withLock {
                 // A snapshot is never overwritten, so opening a second incognito tab does not re-capture.
                 if (snapshot != null) return@withLock
-                val cookieManager = runCatching { CookieManager.getInstance() }
+                val cookieManager = runCatching { cookieManagers.get() }
                     .getOrNull()
                 if (cookieManager == null) {
                     snapshot = CookieJarSnapshot.EMPTY
@@ -45,7 +49,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
                     .associateWith { origin ->
                         runCatching { cookieManager.getCookie(origin).orEmpty() }
                             .getOrElse { e ->
-                                Log.w(LOG_TAG, "getCookie failed for origin=$origin", e)
+                                Log.w(LOG_TAG, "getCookie failed", e)
                                 ""
                             }
                     }
@@ -61,7 +65,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
         withContext(dispatchers.io) {
             mutex.withLock {
                 val held = snapshot ?: return@withLock
-                val cookieManager = runCatching { CookieManager.getInstance() }
+                val cookieManager = runCatching { cookieManagers.get() }
                     .getOrNull()
                 if (cookieManager == null) {
                     snapshot = null
@@ -77,7 +81,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
                         if (trimmed.isEmpty()) return@forEach
                         runCatching { cookieManager.setCookie(origin, trimmed) }
                             .onFailure { e ->
-                                Log.w(LOG_TAG, "setCookie failed origin=$origin pair=$trimmed", e)
+                                Log.w(LOG_TAG, "setCookie failed", e)
                             }
                     }
                 }
@@ -101,10 +105,12 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
     // The callback form of removeAllCookies throws on a thread without a Looper (API 29, older
     // WebView), and the IO dispatcher has none, so the call hops to Main.
     private suspend fun removeAllCookiesAwait(cookieManager: CookieManager) {
-        withContext(Dispatchers.Main.immediate) {
-            suspendCancellableCoroutine<Unit> { continuation ->
-                cookieManager.removeAllCookies {
-                    if (continuation.isActive) continuation.resume(Unit)
+        withTimeoutOrNull(BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS) {
+            withContext(Dispatchers.Main.immediate) {
+                suspendCancellableCoroutine<Unit> { continuation ->
+                    cookieManager.removeAllCookies {
+                        if (continuation.isActive) continuation.resume(Unit)
+                    }
                 }
             }
         }

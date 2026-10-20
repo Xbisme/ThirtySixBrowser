@@ -22,14 +22,13 @@ class CurrentPageRepositoryImpl @Inject constructor(
     override fun setTitle(title: String) = state.update { it.copy(title = title) }
 
     override fun setActiveTab(tab: Tab?) = state.update { current ->
+        val incognito = tab?.isIncognito ?: false
         if (current.activeTab?.id == tab?.id) {
-            current.copy(activeTab = tab)
+            current.copy(activeTab = tab, isIncognito = incognito)
         } else {
-            current.copy(activeTab = tab, title = "", generation = current.generation + 1)
+            current.copy(activeTab = tab, isIncognito = incognito, title = "", generation = current.generation + 1)
         }
     }
-
-    override fun setIncognito(incognito: Boolean) = state.update { it.copy(isIncognito = incognito) }
 
     override fun startNewPage() = state.update { it.copy(title = "", generation = it.generation + 1) }
 }

@@ -154,6 +154,17 @@ class RunFireUseCaseTest {
     }
 
     @Test
+    fun `fireproof sites are kept even before the in-memory list has loaded`() = runTest {
+        fireproof.add("example.com")
+        fireproof.cacheLoaded = false
+
+        useCase()
+
+        assertEquals(setOf("example.com"), web.lastClearExcept?.first)
+        assertFalse(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
+    }
+
+    @Test
     fun `a partial clear on an older engine is the fallback path and the cache is still cleared`() = runTest {
         web.siteDataOutcome = SiteDataClearOutcome.Partial
 

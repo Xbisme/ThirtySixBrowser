@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local
 
+import android.webkit.CookieManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher
@@ -23,7 +24,7 @@ class CookieJarSnapshotManagerDiscardTest {
 
     @Before
     fun setUp() {
-        manager = CookieJarSnapshotManagerImpl(UnconfinedDispatchers)
+        manager = CookieJarSnapshotManagerImpl(UnconfinedDispatchers) { CookieManager.getInstance() }
     }
 
     @Test

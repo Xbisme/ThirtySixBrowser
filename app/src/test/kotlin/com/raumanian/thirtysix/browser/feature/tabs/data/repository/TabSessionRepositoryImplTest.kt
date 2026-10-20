@@ -105,6 +105,41 @@ class TabSessionRepositoryImplTest {
     }
 
     @Test
+    fun `a late save for an incognito tab that has closed leaves nothing behind`() = runTest {
+        val normal = newTab()
+        repository.retainOnly(setOf(normal, -1L))
+        repository.retainOnly(setOf(normal))
+
+        repository.save(TabSession(-1L, byteArrayOf(1), 1L))
+
+        assertNull(repository.get(-1L))
+    }
+
+    @Test
+    fun `an incognito tab of a later session is saved again`() = runTest {
+        val normal = newTab()
+        repository.retainOnly(setOf(normal, -1L))
+        repository.retainOnly(setOf(normal))
+        repository.retainOnly(setOf(normal, -2L))
+
+        repository.save(TabSession(-2L, byteArrayOf(2), 1L))
+
+        assertArrayEquals(byteArrayOf(2), repository.get(-2L)?.state)
+    }
+
+    @Test
+    fun `an empty normal keep-set deletes nothing`() = runTest {
+        val id = newTab()
+        repository.save(TabSession(id, byteArrayOf(1), 1L))
+        repository.save(TabSession(-1L, byteArrayOf(2), 1L))
+
+        repository.retainOnly(emptySet())
+
+        assertArrayEquals(byteArrayOf(1), repository.get(id)?.state)
+        assertArrayEquals(byteArrayOf(2), repository.get(-1L)?.state)
+    }
+
+    @Test
     fun `delete removes one session of either kind`() = runTest {
         val id = newTab()
         repository.save(TabSession(id, byteArrayOf(1), 1L))

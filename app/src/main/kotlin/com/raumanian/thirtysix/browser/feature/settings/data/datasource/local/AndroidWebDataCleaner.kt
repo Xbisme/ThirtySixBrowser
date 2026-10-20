@@ -17,6 +17,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CancellationException
@@ -32,6 +33,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 class AndroidWebDataCleaner @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val dispatchers: DispatcherProvider,
+    private val cookieManager: Provider<CookieManager>,
 ) : WebDataCleaner {
 
     override suspend fun clearCookiesAndSiteData(): SiteDataClearOutcome {
@@ -96,12 +98,9 @@ class AndroidWebDataCleaner @Inject constructor(
             val kept = readCookies(queryHosts)
             val siteDataPath = deleteSiteDataExcept(candidateHosts.filterNot(isKept).toSet(), isKept)
             val removed = withTimeoutOrNull(BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS) { removeAllCookies() } != null
-            if (removed) {
-                writeCookies(kept)
-                siteDataPath
-            } else {
-                null
-            }
+            // A timed-out removal must not cost the fireproof cookies, so they go back either way.
+            writeCookies(kept)
+            if (removed) siteDataPath else null
         }.getOrElse { error ->
             if (error is CancellationException) throw error
             Log.w(LOG_TAG, "Clearing site data except fireproof sites failed", error)
@@ -119,7 +118,7 @@ class AndroidWebDataCleaner @Inject constructor(
     // Keyed by (name, domain, path) so a cookie seen from several addresses is written back once.
     // Without GET_COOKIE_INFO only name=value is available, so attributes are lost.
     private suspend fun readCookies(hosts: Set<String>): Collection<KeptCookie> = withContext(dispatchers.main) {
-        val manager = CookieManager.getInstance()
+        val manager = cookieManager.get()
         val kept = LinkedHashMap<String, KeptCookie>()
         for (host in hosts) {
             for (scheme in SCHEMES) {
@@ -142,7 +141,7 @@ class AndroidWebDataCleaner @Inject constructor(
     private suspend fun writeCookies(cookies: Collection<KeptCookie>) {
         if (cookies.isEmpty()) return
         val manager = withContext(dispatchers.main) {
-            CookieManager.getInstance().also { manager ->
+            cookieManager.get().also { manager ->
                 cookies.forEach { cookie -> manager.setCookie(cookie.url, cookie.restoreString) }
             }
         }
@@ -165,7 +164,8 @@ class AndroidWebDataCleaner @Inject constructor(
                 SiteDataPath.PerSite
             } else {
                 val storage = WebStorage.getInstance()
-                readStorageOrigins()
+                val origins = withTimeoutOrNull(BrowserLimits.SITE_DATA_DELETE_TIMEOUT_MS) { readStorageOrigins() }
+                origins.orEmpty()
                     .filterNot { origin -> urlHostOrNull(origin)?.let(isKept) == true }
                     .forEach { origin -> storage.deleteOrigin(origin) }
                 SiteDataPath.Fallback
@@ -182,7 +182,7 @@ class AndroidWebDataCleaner @Inject constructor(
     }
 
     private suspend fun removeAllCookies() = withContext(dispatchers.main) {
-        val manager = CookieManager.getInstance()
+        val manager = cookieManager.get()
         suspendCancellableCoroutine { continuation ->
             manager.removeAllCookies { if (continuation.isActive) continuation.resume(Unit) }
         }
@@ -198,14 +198,14 @@ class AndroidWebDataCleaner @Inject constructor(
             }
             SiteDataClearOutcome.Complete
         } else {
-            val cookieManager = CookieManager.getInstance()
+            val manager = cookieManager.get()
             suspendCancellableCoroutine { continuation ->
-                cookieManager.removeAllCookies {
+                manager.removeAllCookies {
                     if (continuation.isActive) continuation.resume(Unit)
                 }
             }
             // The cookie store writes to disk lazily; flush so the removal survives process death.
-            withContext(dispatchers.io) { cookieManager.flush() }
+            withContext(dispatchers.io) { manager.flush() }
             WebStorage.getInstance().deleteAllData()
             SiteDataClearOutcome.Partial
         }

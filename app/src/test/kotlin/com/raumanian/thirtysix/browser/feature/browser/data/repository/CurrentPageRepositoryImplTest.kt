@@ -25,11 +25,20 @@ class CurrentPageRepositoryImplTest {
     fun `every write is visible at once`() {
         store.setUrl("https://a.example/")
         store.setTitle("A")
-        store.setIncognito(true)
 
         assertEquals("https://a.example/", store.page.value.url)
         assertEquals("A", store.page.value.title)
-        assertTrue(store.page.value.isIncognito)
+    }
+
+    @Test
+    fun `the incognito flag arrives in the same emission as its tab`() {
+        store.setActiveTab(tab(-1L).copy(isIncognito = true))
+        val incognito = store.page.value
+        store.setActiveTab(tab(1L))
+        val normal = store.page.value
+
+        assertTrue(incognito.isIncognito)
+        assertFalse(normal.isIncognito)
     }
 
     @Test

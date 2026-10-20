@@ -22,6 +22,13 @@ class TabSessionRepositoryImpl @Inject constructor(
 ) : TabSessionRepository {
 
     private val incognito = ConcurrentHashMap<Long, TabSession>()
+
+    // A WebView can save after its incognito tab closed; ids are never reused, so a closed one stays refused.
+    private val closedIncognito: MutableSet<Long> = ConcurrentHashMap.newKeySet()
+
+    @Volatile
+    private var lastOpenIncognito: Set<Long> = emptySet()
+
     private val clearCount = MutableStateFlow(0L)
 
     override val clears: StateFlow<Long> = clearCount.asStateFlow()
@@ -36,7 +43,7 @@ class TabSessionRepositoryImpl @Inject constructor(
     override suspend fun save(session: TabSession) {
         if (session.state.size > BrowserLimits.TAB_STATE_MAX_BYTES) return
         if (session.tabId < 0L) {
-            incognito[session.tabId] = session
+            if (session.tabId !in closedIncognito) incognito[session.tabId] = session
             return
         }
         // The tab may have closed meanwhile (a pop-up closing itself): the foreign key then refuses
@@ -55,8 +62,15 @@ class TabSessionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun retainOnly(tabIds: Set<Long>) {
+        val normalIds = tabIds.filter { it > 0L }
+        if (normalIds.isEmpty()) return
+        val open = tabIds.filterTo(HashSet()) { it < 0L }
+        // A new incognito session: the last one's late saves have long landed, so its refusals can go.
+        if (lastOpenIncognito.isEmpty() && open.isNotEmpty()) closedIncognito.clear()
+        closedIncognito += (lastOpenIncognito + incognito.keys) - open
+        lastOpenIncognito = open
         incognito.keys.retainAll(tabIds)
-        withContext(dispatchers.io) { readOrNull { dao.deleteNotIn(tabIds.filter { it > 0L }) } }
+        withContext(dispatchers.io) { readOrNull { dao.deleteNotIn(normalIds) } }
     }
 
     override suspend fun clearAll() {
