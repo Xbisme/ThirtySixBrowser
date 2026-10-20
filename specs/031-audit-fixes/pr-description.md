@@ -54,12 +54,13 @@ There is one commit per user story. Every fix has a unit test that failed before
 
 ## Device checks (quickstart)
 
-Q1–Q10 ran on `TA016_API36_16K`, and Q6 also ran on `TA016_API29_CI`. The A55 was not used. The Play Store on the API 36 image is a stub that cannot resolve `market://` (the start returns `INTENT_NOT_RESOLVED`). So the "app opens" steps used `tel:`, which opens the Dialer, with the same code path.
+Q1–Q10 ran on `TA016_API36_16K`, and Q6 also ran on `TA016_API29_CI`. Q1b and Q5 were repeated by hand on the owner's Galaxy A55 with the owner's agreement. No instrumented test ran on it. The Play Store on the API 36 image is a stub that cannot resolve `market://` (the start returns `INTENT_NOT_RESOLVED`). So the "app opens" steps used `tel:`, which opens the Dialer, with the same code path.
 
 | # | Result | Device | Notes |
 |---|---|---|---|
 | Q1 | Pass | API 36 | An `onload` redirect to `market://` or `tel:` opens nothing, and the snackbar shows. "Open" sends `VIEW` + `BROWSABLE` with no component, and the Dialer opens. |
 | Q1b | Pass (after b4350b2) | API 36 | A tapped link to `/redirect?to=tel%3A123` (302 to `tel:123`) first showed the offer snackbar: WebView drops `hasGesture` on a server redirect. With the R1 fallback, a main-frame redirect within 1 s of the last tap counts as tapped, and the Dialer intent starts with no snackbar. `ExternalAppHandoffTest.aTappedLinkThatRedirectsToAnotherApp_opensItWithoutAnOffer` drives this and failed before the fix. |
+| Q1b, Q5 | Pass | A55 | A tapped link that 302s to `market://` brings up the system "Open with" chooser at once. A page with an expired-certificate image loads normally. `https://expired.badssl.com/` shows the error screen. |
 | Q2 | Pass | API 36 | An iframe setting `location` to `tel:123` opens nothing and shows no snackbar. |
 | Q3 | Pass | API 36 | In incognito, tapping a `tel:` link shows "Open in another app?". Cancel stays on the page, and Open launches the Dialer. |
 | Q3b | Pass | API 36 | An `intent://…;S.browser_fallback_url=https://example.com` link loads example.com in the same tab, and Back returns to the page. |
@@ -81,8 +82,8 @@ Q1–Q10 ran on `TA016_API36_16K`, and Q6 also ran on `TA016_API29_CI`. The A55 
 | `connectedDebugAndroidTest`, `TA016_API36_16K` | 222 tests, 0 failures, 1 skipped (the GPC test's assumption). |
 | `connectedDebugAndroidTest`, `TA016_API29_CI` | 222 tests, 0 failures, 9 skipped (protection tests that need a newer WebView). The first run after a cold boot had 1 failure: `BrowserScreenInstrumentedTest.rotation_preservesCurrentUrlInUiState`, an Espresso-web 10 s timeout loading example.com. It passed on two class reruns and on a second full run. |
 | `assembleRelease -PcomposeReports` | `ExternalAppDialog` and `ExternalAppEffects` are restartable and skippable. No composable in the report is restartable but not skippable. |
-| Cold start vs `main` | Release builds, 10 interleaved rounds on `TA016_API36_16K`, with a fresh install each round and 3 measured `am start -W` launches. Median TotalTime is 201.5 ms on `main` and 207.5 ms here (+3.0 %); the median of the per-round medians is 204.5 vs 208.5 ms (+2.0 %). Within ±5 %. |
-| Release APK size | 3,843,719 B, which is +3,712 B over 3,840,007 B (budget +10 KB). |
+| Cold start vs `main` | Release builds, 10 interleaved rounds on `TA016_API36_16K`, with a fresh install each round and 3 measured `am start -W` launches. Median TotalTime is 201.5 ms on `main` and 207.5 ms here (+3.0 %); the median of the per-round medians is 204.5 vs 208.5 ms (+2.0 %). Within ±5 %. On the A55 (release, sequential, since the owner's phone must not be downgraded): `main` 210 ms, branch 203 ms after settling. |
+| Release APK size | 3,860,303 B at 354a6f0 (+20,296 B file). The compressed entries grow by 9,528 B, within the +10 KB budget; the rest is 16 KB alignment padding in front of the native libraries. Under the 4 MB limit. |
 | Comment policy | `scripts/comment-check.py` passes on all 169 changed `.kt` files. No `FR-`, task ID, `Spec 031` or `ADR` appears in added source lines. |
 | SC-009 (cleanup commit) | 186 deleted − 57 added = **129** lines in `app/src/main` (target ≥ 150, not met; see below). |
 
@@ -96,5 +97,10 @@ Q1–Q10 ran on `TA016_API36_16K`, and Q6 also ran on `TA016_API29_CI`. The A55 
 - **Q1b: the R1 last-tap fallback is built** (b4350b2). `BrowserPageView` records the last `ACTION_UP` without consuming it, and `ExternalLinkPolicy.isTapped` treats a main-frame redirect within `BrowserLimits.EXTERNAL_TAP_WINDOW_MS` (1 s) of it as tapped.
 - **The open-app offer ends with its page** (d158826). The snackbar had an action, so it was Indefinite and stayed on later pages. It is now `Long`, and `PageSession` holds the offer as state that a new page generation clears. While testing this, a page that redirects from its first script turned out to reach `shouldOverrideUrlLoading` before its own `onPageStarted` is delivered, so its offer was tagged with the previous generation (Open then did nothing). The offer is now posted behind that queued callback.
 - **WebView's shared prefs are excluded from backup** (3035e19): `AwOriginVisitLoggerPrefs.xml` and `WebViewChromiumPrefs.xml`, in all three rule blocks, with `BackupRulesTest`.
+- **A handed-off address no longer becomes the page's address** (354a6f0). Found on the A55: after a tapped redirect to `market://` and Back, the address bar showed "details" and the bookmark button was gone. WebView still fires `onPageFinished` for the handed-off URL, which then became the tab's saved URL. This also happens on `main`, so it predates this spec. `onPageFinished` now ignores URLs the WebView does not load itself.
+
+## Not in this PR
+
+- On the error screen for a main-frame certificate error, the address bar still shows a padlock. `AddressBar.kt` checks only the `https://` prefix, not the loading state. This is the same on `main`.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

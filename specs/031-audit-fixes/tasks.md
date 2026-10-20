@@ -340,9 +340,9 @@ Before each deletion, run `grep -rn "<name>" app/src` again. Delete a test only 
 |---|---|---|
 | Unit tests | 1081, 0 failures (`52a6080`) | 1140, 0 failures |
 | Instrumented tests | 218 `@Test` methods | 222 run: API 36 0 failures, 1 skipped; API 29 0 failures, 9 skipped (1 flaky failure on the first run, see T081) |
-| Release APK size | 3,840,007 B | 3,843,719 B (+3,712 B) |
+| Release APK size | 3,840,007 B | 3,860,303 B at 354a6f0 (+20,296 B file). Compressed entries +9,528 B (`classes.dex` +5.6 KB, `resources.arsc` +3.6 KB); the rest is 16 KB alignment padding before the native libraries. Under the 4 MB limit |
 | `main` Kotlin lines | 31,443 | 31,736 |
 | Bookmark search, 10k bookmarks (T057a, `TA016_API36_16K`) | median 15,211 ms (unfixed) | median 9 ms (< 300 ms) |
-| Cold start vs `main` | n/a | median 207.5 vs 201.5 ms (+3.0 %), 10 interleaved rounds |
-| Quickstart Q1–Q10 | n/a | all pass except Q1b (fails, waiting for a decision) |
+| Cold start vs `main` | n/a | AVD: median 207.5 vs 201.5 ms (+3.0 %), 10 interleaved rounds. A55 release builds, sequential (no downgrade on the owner's phone): `main` 210 ms (10 runs), branch 203 ms (15 runs after settling; 227.5 ms in the first 10 right after install) |
+| Quickstart Q1–Q10 | n/a | all pass on the AVDs. Q1b and Q5 also pass on the A55 (`.debug` app, local server over `adb reverse`) |
 | SC-009 cleanup, US8 commit (T080) | n/a | 186 deleted − 57 added = 129 lines (< 150) |
