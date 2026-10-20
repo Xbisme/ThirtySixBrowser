@@ -52,6 +52,7 @@ import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dime
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Spacing
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.BrowserUiState
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.LoadingState
 internal const val TEST_TAG_ADDRESS_BAR: String = "address_bar"
 
 internal const val TEST_TAG_ADDRESS_BAR_CLEAR: String = "address_bar_clear"
@@ -212,16 +213,19 @@ private data class AddressWellStyle(
     val ring: Color,
 )
 
+@DrawableRes
+internal fun addressLeadingIcon(incognito: Boolean, focused: Boolean, url: String, loading: LoadingState): Int = when {
+    incognito -> AppIcons.Incognito
+    !focused && loading !is LoadingState.Failed && url.startsWith(HTTPS_PREFIX, ignoreCase = true) -> AppIcons.Lock
+    else -> AppIcons.Search
+}
+
 @Composable
 private fun addressWellStyle(state: BrowserUiState): AddressWellStyle {
     val scheme = MaterialTheme.colorScheme
     val colors = ThirtySixTheme.colors
     val incognito = state.isIncognito
-    val leading = when {
-        incognito -> AppIcons.Incognito
-        !state.isAddressBarFocused && state.currentUrl.startsWith(HTTPS_PREFIX, ignoreCase = true) -> AppIcons.Lock
-        else -> AppIcons.Search
-    }
+    val leading = addressLeadingIcon(incognito, state.isAddressBarFocused, state.currentUrl, state.loadingState)
     val ring = when {
         state.isAddressBarFocused -> scheme.primary
         incognito -> colors.glassStroke

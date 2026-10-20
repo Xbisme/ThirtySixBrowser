@@ -99,8 +99,6 @@ Q1–Q10 ran on `TA016_API36_16K`, and Q6 also ran on `TA016_API29_CI`. Q1b and 
 - **WebView's shared prefs are excluded from backup** (3035e19): `AwOriginVisitLoggerPrefs.xml` and `WebViewChromiumPrefs.xml`, in all three rule blocks, with `BackupRulesTest`.
 - **A handed-off address no longer becomes the page's address** (354a6f0). Found on the A55: after a tapped redirect to `market://` and Back, the address bar showed "details" and the bookmark button was gone. WebView still fires `onPageFinished` for the handed-off URL, which then became the tab's saved URL. This also happens on `main`, so it predates this spec. `onPageFinished` now ignores URLs the WebView does not load itself.
 
-## Not in this PR
-
-- On the error screen for a main-frame certificate error, the address bar still shows a padlock. `AddressBar.kt` checks only the `https://` prefix, not the loading state. This is the same on `main`.
+- **No padlock on a failed load.** On the error screen for a main-frame certificate error, the address bar still showed a padlock: `AddressBar.kt` checked only the `https://` prefix, the same on `main`. The rule is now `addressLeadingIcon`, which shows no lock while the load has failed, with `AddressLeadingIconTest`.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
