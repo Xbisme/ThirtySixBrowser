@@ -56,6 +56,18 @@ class PopupWebViewRegistry @Inject constructor() {
         openers.remove(webView)
     }
 
+    /** Destroys the pop-up still waiting for [tabId], whose tab closed before it was shown. */
+    fun forgetTab(tabId: Long) = release { tabs[it] == tabId }
+
+    fun clear() = release { true }
+
+    private fun release(matches: (WebView) -> Boolean) {
+        waiting.values.filter(matches).forEach { webView ->
+            forget(webView)
+            webView.destroy()
+        }
+    }
+
     private companion object {
         const val PLACEHOLDER_FRAGMENT = "#thirtysix-popup-"
     }

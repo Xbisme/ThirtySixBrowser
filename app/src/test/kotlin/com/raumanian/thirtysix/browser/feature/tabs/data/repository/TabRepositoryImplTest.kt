@@ -12,8 +12,12 @@ import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.domain.util.TabOrder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -213,6 +217,20 @@ class TabRepositoryImplTest {
 
         // No row materialized.
         assertNull(tabDao.getById(MISSING_ID))
+    }
+
+    @Test
+    fun `two concurrent creates at one below the cap make exactly one tab`() = runBlocking {
+        repeat(BrowserLimits.MAX_TABS - 1) { i -> tabDao.insert(entity(url = "https://t$i.com", position = i)) }
+
+        val results = withContext(Dispatchers.Default) {
+            List(2) { async { repository.createTab("https://new.com/") } }.awaitAll()
+        }
+
+        val rows = tabDao.getAll()
+        assertEquals(BrowserLimits.MAX_TABS, rows.size)
+        assertEquals(1, results.count { it is Result.Error && it.throwable is MaxTabsReachedException })
+        assertEquals(rows.size, rows.map { it.position }.distinct().size)
     }
 
     private fun entity(

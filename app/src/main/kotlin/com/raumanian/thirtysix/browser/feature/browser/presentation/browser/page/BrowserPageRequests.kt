@@ -27,6 +27,7 @@ fun rememberPageSession(
     DisposableEffect(session) {
         onDispose {
             session.queue.dispose()
+            popups?.releaseWaiting()
             session.fullscreen.exit()
             CaptureFiles.clear(context)
         }

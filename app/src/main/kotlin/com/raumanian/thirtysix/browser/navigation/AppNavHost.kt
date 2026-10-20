@@ -84,6 +84,7 @@ fun AppNavHost(
             onFinish = {
                 navController.navigate(BROWSER_ROUTE) {
                     popUpTo(ONBOARDING_ROUTE) { inclusive = true }
+                    launchSingleTop = true
                 }
             },
         )

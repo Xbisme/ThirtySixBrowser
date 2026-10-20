@@ -251,13 +251,13 @@
 
 **Goal**: the tab cap, many downloads, a double tap and the pop-up release all hold. **Independent test**: the US7 scenarios.
 
-- [ ] T062 [P] [US7] In `T/feature/tabs/data/repository/TabRepositoryImplTest.kt` (in-memory Room), add a failing test: with 49 tabs, two `async { createTab() }` calls on a multi-thread dispatcher give exactly 50 tabs, one limit refusal and distinct positions.
-- [ ] T063 [US7] In `M/feature/tabs/data/repository/TabRepositoryImpl.kt` (lines 55-69), wrap count, `maxPosition` and insert in `seedMutex.withLock { … }`. Make T062 green.
-- [ ] T064 [P] [US7] In `T/feature/downloads/data/datasource/local/AndroidDownloadManagerGatewayTest.kt` (Robolectric; create if missing), add a failing test: `queryStatuses` with 1,200 handles issues at least 3 queries of ≤ 500 ids, and returns a map that covers every known handle.
-- [ ] T065 [US7] Create `M/feature/downloads/domain/model/DownloadLimits.kt` with `object DownloadLimits { const val STATUS_QUERY_CHUNK: Int = 500 }`. In `AndroidDownloadManagerGateway.kt` (lines 37-49, 88-89), run the query per `chunked(STATUS_QUERY_CHUNK)` and merge the maps. Make T064 green.
-- [ ] T066 [US7] In `M/navigation/AppNavHost.kt` (lines 84-88), add `launchSingleTop = true` to the onboarding-exit `navigate` options.
-- [ ] T067 [US7] In `M/BR/page/PopupWebViewRegistry.kt`, add `fun forgetTab(tabId: Long)`, which destroys and removes any WebView waiting for that tab, and `fun clear()`. Call `forgetTab` where a tab is closed in the browser screen, and `clear` in the browser screen's dispose, next to `PageRequestQueue.dispose()`. Add a unit test in `T/BR/page/PopupWebViewRegistryTest.kt` (Robolectric): a waiting WebView is destroyed and removed by both calls.
-- [ ] T068 [US7] Run G1. Commit `fix(tabs): tab cap, download chunks, onboarding, pop-up release (031 US7)`.
+- [X] T062 [P] [US7] In `T/feature/tabs/data/repository/TabRepositoryImplTest.kt` (in-memory Room), add a failing test: with 49 tabs, two `async { createTab() }` calls on a multi-thread dispatcher give exactly 50 tabs, one limit refusal and distinct positions.
+- [X] T063 [US7] In `M/feature/tabs/data/repository/TabRepositoryImpl.kt` (lines 55-69), wrap count, `maxPosition` and insert in `seedMutex.withLock { … }`. Make T062 green.
+- [X] T064 [P] [US7] In `T/feature/downloads/data/datasource/local/AndroidDownloadManagerGatewayTest.kt` (Robolectric; create if missing), add a failing test: `queryStatuses` with 1,200 handles issues at least 3 queries of ≤ 500 ids, and returns a map that covers every known handle.
+- [X] T065 [US7] Create `M/feature/downloads/domain/model/DownloadLimits.kt` with `object DownloadLimits { const val STATUS_QUERY_CHUNK: Int = 500 }`. In `AndroidDownloadManagerGateway.kt` (lines 37-49, 88-89), run the query per `chunked(STATUS_QUERY_CHUNK)` and merge the maps. Make T064 green.
+- [X] T066 [US7] In `M/navigation/AppNavHost.kt` (lines 84-88), add `launchSingleTop = true` to the onboarding-exit `navigate` options.
+- [X] T067 [US7] In `M/BR/page/PopupWebViewRegistry.kt`, add `fun forgetTab(tabId: Long)`, which destroys and removes any WebView waiting for that tab, and `fun clear()`. Call `forgetTab` where a tab is closed in the browser screen, and `clear` in the browser screen's dispose, next to `PageRequestQueue.dispose()`. Add a unit test in `T/BR/page/PopupWebViewRegistryTest.kt` (Robolectric): a waiting WebView is destroyed and removed by both calls. Done: tabs close in the tabs feature, which cannot reach this registry, so `PopupTabs` calls `forgetTab` for every id that leaves its tab list; the browser screen's dispose calls `clear` through `PopupTabs.releaseWaiting()`.
+- [X] T068 [US7] Run G1. Commit `fix(tabs): tab cap, download chunks, onboarding, pop-up release (031 US7)`.
 
 ## Phase 10: User Story 8 – Less code to keep correct (P3)
 

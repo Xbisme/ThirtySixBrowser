@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
+import com.raumanian.thirtysix.browser.feature.downloads.domain.model.DownloadLimits
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,9 +43,11 @@ class AndroidDownloadManagerGateway @Inject constructor(
                 val manager = downloadManager
                 when (manager) {
                     null -> emptyMap()
-                    else -> manager.query(buildQuery(transferHandles))
-                        ?.use(DownloadStatusCursorMapper::readAll)
-                        .orEmpty()
+                    else -> buildMap<Long, DownloadStatus> {
+                        transferHandles.chunked(DownloadLimits.STATUS_QUERY_CHUNK).forEach { chunk ->
+                            manager.query(buildQuery(chunk))?.use { putAll(DownloadStatusCursorMapper.readAll(it)) }
+                        }
+                    }
                 }
             }.getOrDefault(emptyMap())
         }

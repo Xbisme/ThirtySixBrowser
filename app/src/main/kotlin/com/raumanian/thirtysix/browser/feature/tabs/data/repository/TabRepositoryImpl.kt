@@ -22,7 +22,7 @@ import kotlinx.coroutines.sync.withLock
 /**
  * Normal tabs over [TabDao], adding seeding of one home tab when empty, ordering by
  * `lastActiveAt` descending then `id` (the DAO orders by `position`), and a cap that fails
- * [createTab] with [MaxTabsReachedException]. Seeding and close-all share one [Mutex].
+ * [createTab] with [MaxTabsReachedException]. Seeding, creating and closing share one [Mutex].
  */
 @Suppress("TooManyFunctions") // One function per contract member.
 class TabRepositoryImpl @Inject constructor(
@@ -52,7 +52,7 @@ class TabRepositoryImpl @Inject constructor(
         insertTab(url, lastActiveAt = activeAt - 1)
 
     /** [lastActiveAt] `null` → now, making the new tab the active one. */
-    private suspend fun insertTab(url: String, lastActiveAt: Long?): Result<Tab> {
+    private suspend fun insertTab(url: String, lastActiveAt: Long?): Result<Tab> = seedMutex.withLock {
         if (tabDao.count() >= BrowserLimits.MAX_TABS) {
             return Result.Error(throwable = MaxTabsReachedException())
         }
@@ -66,7 +66,7 @@ class TabRepositoryImpl @Inject constructor(
             lastActiveAt = lastActiveAt ?: now,
         )
         val newId = tabDao.insert(entity)
-        return Result.Success(entity.copy(id = newId).toDomain())
+        Result.Success(entity.copy(id = newId).toDomain())
     }
 
     override suspend fun switchActiveTab(tabId: Long) {
