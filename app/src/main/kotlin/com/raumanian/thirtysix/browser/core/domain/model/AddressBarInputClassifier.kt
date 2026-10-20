@@ -7,20 +7,20 @@ private val newlineRegex = Regex(UrlPatterns.ADDRESS_BAR_NEWLINE_REGEX)
 
 /**
  * Classifies address-bar input: newlines become spaces, blank input is [AddressBarSubmitResult.Empty],
- * anything matching the URL heuristic becomes a URL (`https://` added when no scheme was typed),
- * and the rest is a search query.
+ * an `http`, `https` or `about` address stays as typed, dotted input without spaces becomes a URL
+ * with `https://` added, and the rest is a search query.
  */
 fun classifyAddressBarInput(raw: String): AddressBarSubmitResult {
     val cleaned = raw.replace(newlineRegex, " ").trim()
     if (cleaned.isEmpty()) return AddressBarSubmitResult.Empty
-    return if (urlHeuristicRegex.matches(cleaned)) {
-        val target = if (cleaned.contains("://")) {
-            cleaned
-        } else {
+    val target = when {
+        SCHEME_SEPARATOR in cleaned ->
+            cleaned.takeIf { it.substringBefore(SCHEME_SEPARATOR).lowercase() in UrlConstants.ADDRESS_BAR_SCHEMES }
+        cleaned.none(Char::isWhitespace) && urlHeuristicRegex.matches(cleaned) ->
             "${UrlConstants.HTTPS_SCHEME_PREFIX}$cleaned"
-        }
-        AddressBarSubmitResult.Url(target)
-    } else {
-        AddressBarSubmitResult.Query(cleaned)
+        else -> null
     }
+    return target?.let(AddressBarSubmitResult::Url) ?: AddressBarSubmitResult.Query(cleaned)
 }
+
+private const val SCHEME_SEPARATOR = "://"

@@ -200,17 +200,17 @@
 
 **Goal**: only web schemes load, and sentences with a dot are searched. **Independent test**: the US2 scenarios.
 
-- [ ] T052 [P] [US2] In `T/core/domain/model/AddressBarInputClassifierTest.kt`, add failing cases:
+- [X] T052 [P] [US2] In `T/core/domain/model/AddressBarInputClassifierTest.kt`, add failing cases:
   - `javascript://%0Aalert(1)`, `foo://bar` and `how to use node.js` give `Query`;
   - `example.com`, `https://x.y`, `http://a.b/c d` and `about:blank` keep their current result;
   - `kotlin.coroutines` stays a `Url`, the accepted trade-off.
-- [ ] T053 [US2] In `M/core/domain/util/UrlConstants.kt`, add `ADDRESS_BAR_SCHEMES = setOf("http", "https", "about")`. In `M/core/domain/model/AddressBarInputClassifier.kt`:
+- [X] T053 [US2] In `M/core/domain/util/UrlConstants.kt`, add `ADDRESS_BAR_SCHEMES = setOf("http", "https", "about")`. In `M/core/domain/model/AddressBarInputClassifier.kt`:
   - input containing `://` is a `Url` only if its scheme, lower-cased, is in that set;
   - input with no scheme becomes a URL only if it matches the dot heuristic and has no whitespace;
   - everything else is a `Query`.
 
   Make T052 green.
-- [ ] T054 [US2] Run G1. Commit `fix(browser): address bar loads only web schemes (031 US2)`.
+- [X] T054 [US2] Run G1. Commit `fix(browser): address bar loads only web schemes (031 US2)`.
 
 ## Phase 8: User Story 6 – History, bookmarks and search work in every mode and at any size (P2)
 

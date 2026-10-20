@@ -149,4 +149,25 @@ class AddressBarInputClassifierTest {
             classifyAddressBarInput("c++ vs rust"),
         )
     }
+
+    // Only web schemes load
+
+    @Test
+    fun `non-web schemes and sentences with a dot are searched`() {
+        listOf("javascript://%0Aalert(1)", "foo://bar", "how to use node.js").forEach { input ->
+            assertEquals(AddressBarSubmitResult.Query(input), classifyAddressBarInput(input))
+        }
+    }
+
+    @Test
+    fun `web addresses keep their result`() {
+        assertEquals(AddressBarSubmitResult.Url("https://example.com"), classifyAddressBarInput("example.com"))
+        assertEquals(AddressBarSubmitResult.Url("https://x.y"), classifyAddressBarInput("https://x.y"))
+        assertEquals(AddressBarSubmitResult.Url("http://a.b/c d"), classifyAddressBarInput("http://a.b/c d"))
+        assertEquals(AddressBarSubmitResult.Query("about:blank"), classifyAddressBarInput("about:blank"))
+        assertEquals(
+            AddressBarSubmitResult.Url("https://kotlin.coroutines"),
+            classifyAddressBarInput("kotlin.coroutines"),
+        )
+    }
 }
