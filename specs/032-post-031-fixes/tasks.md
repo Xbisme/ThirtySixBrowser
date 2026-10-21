@@ -21,32 +21,32 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Record the baseline in "Gate Results" at the end of this file: unit test count, instrumented `@Test` count, release APK size, and the `main` Kotlin line count. Use `032-post-031-fixes` at `29fe731`.
+- [X] T001 Record the baseline in "Gate Results" at the end of this file: unit test count, instrumented `@Test` count, release APK size, and the `main` Kotlin line count. Use `032-post-031-fixes` at `29fe731`.
 
 ## Phase 2: Foundational
 
-- [ ] T002 [P] Update the "gesture" paragraph of `docs/adr/0032-external-app-handoff.md`. A redirect counts as tapped only when the main-frame navigation that started its chain had a gesture. Finger lifts are not tracked.
+- [X] T002 [P] Update the "gesture" paragraph of `docs/adr/0032-external-app-handoff.md`. A redirect counts as tapped only when the main-frame navigation that started its chain had a gesture. Finger lifts are not tracked.
 
 ## Phase 3: User Story 1 – Pages still cannot open other apps on their own (P1) 🎯 MVP
 
 **Goal**: only a tapped navigation and its redirects may hand off; `intent:` links never re-enter this app. **Independent test**: quickstart Q1, Q1b, Q2.
 
-- [ ] T003 [P] [US1] In `T/feature/browser/domain/usecase/ExternalLinkPolicyTest.kt`, replace the time-window cases with failing ones:
+- [X] T003 [P] [US1] In `T/feature/browser/domain/usecase/ExternalLinkPolicyTest.kt`, replace the time-window cases with failing ones:
   - `isTapped(hasGesture=false, isRedirect=true, navigationTapped=true)` is true;
   - `(false, true, false)` is false;
   - `(false, false, true)` is false;
   - `(true, *, *)` is true.
-- [ ] T004 [US1] In `M/feature/browser/domain/usecase/ExternalLinkPolicy.kt`, change `isTapped` to take `navigationTapped: Boolean`, with no time. Delete `EXTERNAL_TAP_WINDOW_MS` from `M/core/domain/util/BrowserLimits.kt`, and delete `lastTapUptimeMs` with its `ACTION_UP` stamping from `M/BR/BrowserPageView.kt`. Make T003 green.
-- [ ] T005 [US1] In `M/BR/BrowserWebView.kt` `BrowserWebViewClient`:
+- [X] T004 [US1] In `M/feature/browser/domain/usecase/ExternalLinkPolicy.kt`, change `isTapped` to take `navigationTapped: Boolean`, with no time. Delete `EXTERNAL_TAP_WINDOW_MS` from `M/core/domain/util/BrowserLimits.kt`, and delete `lastTapUptimeMs` with its `ACTION_UP` stamping from `M/BR/BrowserPageView.kt`. Make T003 green.
+- [X] T005 [US1] In `M/BR/BrowserWebView.kt` `BrowserWebViewClient`:
   - add `private var navigationTapped = false`;
   - in `shouldOverrideUrlLoading`, for `request.isForMainFrame && !request.isRedirect`, set it to `request.hasGesture()` before any branch, on the web and non-web paths alike;
   - pass it to `isTapped`;
   - reset it to `false` before every app-issued `loadProtected`, through a small reset hook on the client that `wireActions` and the initial load call. A typed or restored address that redirects to an app is then offered, not launched.
-- [ ] T006 [US1] In `A/BR/ExternalAppHandoffTest.kt`, add a failing case with a new asset page `scroll-redirect.html`. Its `touchend` handler sets `location` to `/redirect?to=tel%3A1`. Swipe up on it, then check that no `ACTION_VIEW tel:1` is intended and the offer snackbar shows. The existing tapped-redirect case must stay green.
-- [ ] T007 [P] [US1] In `T/BR/page/ExternalAppLauncherTest.kt`, add failing cases. `intent://x#Intent;scheme=https;package=<applicationId>;end` returns `"https://x"` and starts nothing. `intent://y#Intent;scheme=https;end` returns `"https://y"` and starts nothing.
-- [ ] T008 [US1] In `M/BR/page/ExternalAppLauncher.kt`, after parsing: if the intent data scheme is `http(s)`, or `intent.package == context.packageName`, return the data URL as the fallback (when it is http(s)) without starting anything. Make T007 green.
-- [ ] T009 [US1] Remove the duplicated decision from `M/BR/page/ExternalAppEffects.kt`. On "Open", call the same hand-off used by `BrowserWebViewClient`: expose `fun handOffTapped(url)` on `PageSession` (`M/BR/page/PageSession.kt`), which re-runs `ExternalLinkPolicy.decide` with `hasGesture = true`. Keep the existing offer tests green.
-- [ ] T010 [US1] Run G1. Run `ExternalAppHandoffTest` and `ExternalIntentCrashSafetyInstrumentedTest` on `emulator-5554`. Commit `fix(browser): only a tapped navigation hands off, intent links stay in the tab (032 US1)`, with the body naming FR-001, FR-002 and FR-029 (partly).
+- [X] T006 [US1] In `A/BR/ExternalAppHandoffTest.kt`, add a failing case with a new asset page `scroll-redirect.html`. Its `touchend` handler sets `location` to `/redirect?to=tel%3A1`. Swipe up on it, then check that no `ACTION_VIEW tel:1` is intended and the offer snackbar shows. The existing tapped-redirect case must stay green.
+- [X] T007 [P] [US1] In `T/BR/page/ExternalAppLauncherTest.kt`, add failing cases. `intent://x#Intent;scheme=https;package=<applicationId>;end` returns `"https://x"` and starts nothing. `intent://y#Intent;scheme=https;end` returns `"https://y"` and starts nothing.
+- [X] T008 [US1] In `M/BR/page/ExternalAppLauncher.kt`, after parsing: if the intent data scheme is `http(s)`, or `intent.package == context.packageName`, return the data URL as the fallback (when it is http(s)) without starting anything. Make T007 green.
+- [X] T009 [US1] Remove the duplicated decision from `M/BR/page/ExternalAppEffects.kt`. On "Open", call the same hand-off used by `BrowserWebViewClient`: expose `fun handOffTapped(url)` on `PageSession` (`M/BR/page/PageSession.kt`), which re-runs `ExternalLinkPolicy.decide` with `hasGesture = true`. Keep the existing offer tests green.
+- [X] T010 [US1] Run G1. Run `ExternalAppHandoffTest` and `ExternalIntentCrashSafetyInstrumentedTest` on `emulator-5554`. Commit `fix(browser): only a tapped navigation hands off, intent links stay in the tab (032 US1)`, with the body naming FR-001, FR-002 and FR-029 (partly).
 
 ## Phase 4: User Story 2 – Sign-ins and private data stay put (P1)
 
@@ -185,9 +185,9 @@ The MVP is US1, because it is the security regression. Then US2 (leaks and crash
 
 | Gate | Baseline (T001) | Final (T048–T049) |
 |---|---|---|
-| Unit tests | | |
-| Instrumented tests | | |
-| Release APK size | | |
-| `main` Kotlin lines | | |
+| Unit tests | 1147, 0 failures | |
+| Instrumented tests | 225 `@Test` | |
+| Release APK size | 3,860,303 B | |
+| `main` Kotlin lines | 31,763 | |
 | Quickstart Q1–Q8 | n/a | |
 | Import 10k / 10 MB unclosed | n/a | |

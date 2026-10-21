@@ -8,7 +8,6 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.print.PrintManager
 import android.view.PixelCopy
 import android.view.ViewGroup
@@ -42,7 +41,6 @@ import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
-import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.BuildLongPressMenuUseCase
@@ -180,7 +178,7 @@ private fun buildConfiguredWebView(
 ): WebView = webView.also { wv ->
     applySecuritySettings(wv)
     if (state.isIncognito) applyIncognitoSettings(wv)
-    wv.webViewClient = BrowserWebViewClient(
+    val client = BrowserWebViewClient(
         onLoadStarted = callbacks.onLoadStarted,
         onLoadFinished = callbacks.onLoadFinished,
         onLoadFailed = callbacks.onLoadFailed,
@@ -201,6 +199,7 @@ private fun buildConfiguredWebView(
         onHistoryCommitted = { session?.saveSoon(wv) },
         onPageVisible = callbacks.onPageVisible,
     )
+    wv.webViewClient = client
     // Incognito downloads are recorded like any other; the flag only picks the jar the cookies come from.
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         val cookies = WebViewProfiles.cookieManagerFor(state.isIncognito, incognitoProfile)?.getCookie(url)
@@ -234,10 +233,10 @@ private fun buildConfiguredWebView(
     val loadable = host.loadInitialUrl && state.loadingState !is LoadingState.Failed
     // A restored tab reloads its own current page, with this client and the protections already attached.
     val restored = !adopted && loadable && session?.restore(wv) == true
-    wireActions(wv, actions, host, skipFirstLoad = adopted || restored, protection)
+    wireActions(wv, actions, host, skipFirstLoad = adopted || restored, client)
     val needsLoad = !adopted && !restored
     if (needsLoad && loadable && !isHome) {
-        wv.loadProtected(state.currentUrl, protection)
+        client.load(wv, state.currentUrl)
     }
 }
 
@@ -246,16 +245,23 @@ private fun wireActions(
     actions: WebViewActionsHandle,
     host: WebViewHost,
     skipFirstLoad: Boolean,
-    protection: WebViewProtection?,
+    client: BrowserWebViewClient,
 ) {
     actions.attachTo(wv)
-    actions.goBack = { if (wv.canGoBack()) wv.goBack() }
-    actions.goForward = { if (wv.canGoForward()) wv.goForward() }
+    actions.goBack = {
+        client.forgetTap()
+        if (wv.canGoBack()) wv.goBack()
+    }
+    actions.goForward = {
+        client.forgetTap()
+        if (wv.canGoForward()) wv.goForward()
+    }
     // `reload()` on an empty WebView (after a renderer crash) does nothing, so load the tab's address instead.
     actions.reload = {
+        client.forgetTap()
         when {
             wv.url != null -> wv.reload()
-            host.currentUrl != UrlConstants.HOME_PAGE_URL -> wv.loadProtected(host.currentUrl, protection)
+            host.currentUrl != UrlConstants.HOME_PAGE_URL -> client.load(wv, host.currentUrl)
         }
     }
     actions.stopLoading = { wv.stopLoading() }
@@ -268,7 +274,7 @@ private fun wireActions(
     actions.loadUrl = { url ->
         when {
             skipNextLoad -> skipNextLoad = false
-            url != UrlConstants.HOME_PAGE_URL -> wv.loadProtected(url, protection)
+            url != UrlConstants.HOME_PAGE_URL -> client.load(wv, url)
         }
     }
 }
@@ -359,6 +365,20 @@ private class BrowserWebViewClient(
     @Volatile
     private var mainFrameUrl: String? = null
 
+    // WebView drops the gesture on a server redirect, so a redirect inherits the gesture of the
+    // main-frame navigation that started its chain. Main thread only.
+    private var navigationTapped = false
+
+    fun forgetTap() {
+        navigationTapped = false
+    }
+
+    /** An address the app loads itself starts an untapped chain, so its redirect to an app is offered. */
+    fun load(view: WebView, url: String) {
+        forgetTap()
+        view.loadProtected(url, protection)
+    }
+
     /**
      * Runs on a WebView IO thread. Main-frame requests are never blocked; listed third-party
      * requests get an empty response.
@@ -373,6 +393,7 @@ private class BrowserWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val uri = request?.url ?: return false
         val scheme = uri.scheme?.lowercase() ?: return false
+        if (request.isForMainFrame && !request.isRedirect) navigationTapped = request.hasGesture()
         if (scheme in WEB_NATIVE_SCHEMES) {
             // A page's own http(s) navigation may be upgraded or cleaned.
             return view != null && protection?.overrideNavigation(view, request) == true
@@ -380,34 +401,34 @@ private class BrowserWebViewClient(
         val page = pageRequests.context()
         if (view == null || page == null) return true
         val url = uri.toString()
-        val sinceTap = (view as? BrowserPageView)?.lastTapUptimeMs?.let { SystemClock.uptimeMillis() - it }
-        val tapped = ExternalLinkPolicy.isTapped(request.hasGesture(), request.isRedirect, sinceTap)
+        val tapped = ExternalLinkPolicy.isTapped(request.hasGesture(), request.isRedirect, navigationTapped)
         val navigation = ExternalNavigation(url, scheme, request.isForMainFrame, tapped, page.isIncognito)
-        when (ExternalLinkPolicy.decide(navigation)) {
-            ExternalLinkDecision.Drop -> Unit
+        pageRequests.handOff(
+            navigation,
+            page,
+            origin = { view.url?.let(SiteOrigin::of).orEmpty() },
+            launch = { handOff(view, url) },
             // A page that redirects from its first script gets here before its own onPageStarted,
             // which is already queued: posting behind it ties the offer to that page.
-            ExternalLinkDecision.Offer -> view.post {
-                val current = pageRequests.context()?.takeIf { it.tabId == page.tabId }
-                current?.let { pageRequests.onExternalAppOffered(url, it.generation) }
-            }
-            ExternalLinkDecision.Confirm -> {
-                val origin = view.url?.let(SiteOrigin::of).orEmpty()
-                pageRequests.enqueue(
-                    PageRequest.OpenExternalApp(page.tabId, page.generation, origin) { handOff(view, url) },
-                )
-            }
-            ExternalLinkDecision.Launch -> handOff(view, url)
-        }
+            offer = {
+                view.post {
+                    val current = pageRequests.context()?.takeIf { it.tabId == page.tabId }
+                    current?.let { pageRequests.onExternalAppOffered(url, it.generation) }
+                }
+            },
+        )
         return true
     }
 
     private fun handOff(view: WebView, url: String) {
-        ExternalAppLauncher.launch(view.context, url)?.let { view.loadProtected(it, protection) }
+        ExternalAppLauncher.launch(view.context, url)?.let { load(view, it) }
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         pageRequests.onNavigationStarted()
+        // A navigation that never reached shouldOverrideUrlLoading, such as a form post, must not
+        // inherit the previous page's tap.
+        forgetTap()
         mainFrameUrl = url
         url?.let { protection?.monitor?.onPageStarted(it) }
         url?.let {

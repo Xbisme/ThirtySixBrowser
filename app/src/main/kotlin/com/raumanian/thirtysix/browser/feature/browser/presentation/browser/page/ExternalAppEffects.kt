@@ -13,9 +13,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
-import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
-import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
-import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ExternalLinkPolicy
 import kotlinx.coroutines.flow.collectLatest
 
 /**
@@ -41,16 +38,8 @@ fun ExternalAppEffects(
             val result = snackbarHostState.showSnackbar(message, open, duration = SnackbarDuration.Long)
             val page = session.context()?.takeIf { it.generation == offer.generation }
             if (result != SnackbarResult.ActionPerformed || page == null) return@collectLatest
-            val handOff = { ExternalAppLauncher.launch(context, offer.url)?.let(currentLoadFallback) }
-            val scheme = offer.url.substringBefore(':').lowercase()
-            val tapped = ExternalNavigation(offer.url, scheme, isMainFrame = true, hasGesture = true, page.isIncognito)
-            when (ExternalLinkPolicy.decide(tapped)) {
-                ExternalLinkDecision.Launch -> handOff()
-                ExternalLinkDecision.Confirm -> {
-                    val origin = SiteOrigin.of(currentPageUrl()).orEmpty()
-                    session.enqueue(PageRequest.OpenExternalApp(page.tabId, page.generation, origin) { handOff() })
-                }
-                ExternalLinkDecision.Drop, ExternalLinkDecision.Offer -> Unit
+            session.handOffTapped(offer.url, origin = { SiteOrigin.of(currentPageUrl()).orEmpty() }) {
+                ExternalAppLauncher.launch(context, offer.url)?.let(currentLoadFallback)
             }
         }
     }

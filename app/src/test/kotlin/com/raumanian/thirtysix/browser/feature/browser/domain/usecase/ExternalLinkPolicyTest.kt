@@ -1,6 +1,5 @@
 package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
-import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 import org.junit.Assert.assertEquals
@@ -60,19 +59,17 @@ class ExternalLinkPolicyTest {
     }
 
     @Test
-    fun `a redirect soon after a tap counts as tapped`() {
-        val window = BrowserLimits.EXTERNAL_TAP_WINDOW_MS
-        assertTrue(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = 0L))
-        assertTrue(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = window))
+    fun `a redirect counts as tapped only when its navigation was tapped`() {
+        assertTrue(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, navigationTapped = true))
+        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, navigationTapped = false))
     }
 
     @Test
-    fun `a late redirect, one never tapped, or a plain navigation keeps the gesture it reports`() {
-        val window = BrowserLimits.EXTERNAL_TAP_WINDOW_MS
-        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = window + 1))
-        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = true, sinceLastTapMs = null))
-        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = false, sinceLastTapMs = 0L))
-        assertTrue(ExternalLinkPolicy.isTapped(hasGesture = true, isRedirect = false, sinceLastTapMs = null))
+    fun `a plain navigation keeps the gesture it reports`() {
+        assertFalse(ExternalLinkPolicy.isTapped(hasGesture = false, isRedirect = false, navigationTapped = true))
+        for ((isRedirect, navigationTapped) in FLAG_PAIRS) {
+            assertTrue(ExternalLinkPolicy.isTapped(hasGesture = true, isRedirect, navigationTapped))
+        }
     }
 
     private companion object {

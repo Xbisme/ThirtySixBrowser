@@ -7,12 +7,9 @@ import android.webkit.WebView
 /** The tab's WebView. It reports touches and overscroll, so a sideways swipe the page did not use can navigate. */
 internal class BrowserPageView(context: Context) : WebView(context) {
     var swipe: SwipeNavigationHooks? = null
-    var lastTapUptimeMs: Long? = null
-        private set
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         swipe?.onTouch(this, event)
-        if (event.actionMasked == MotionEvent.ACTION_UP) lastTapUptimeMs = event.eventTime
         return super.dispatchTouchEvent(event)
     }
 

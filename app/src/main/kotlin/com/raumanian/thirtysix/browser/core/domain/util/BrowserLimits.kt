@@ -59,8 +59,6 @@ object BrowserLimits {
 
     const val BLOCKED_POPUP_ADDRESS_WAIT_MS: Long = 1_000L
 
-    const val EXTERNAL_TAP_WINDOW_MS: Long = 1_000L
-
     const val TEXT_SIZE_PERCENT_50: Int = 50
 
     const val TEXT_SIZE_PERCENT_75: Int = 75

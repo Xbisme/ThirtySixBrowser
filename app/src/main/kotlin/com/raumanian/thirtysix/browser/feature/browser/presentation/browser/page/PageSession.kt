@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.pag
 import android.view.View
 import android.webkit.WebChromeClient.CustomViewCallback
 import android.webkit.WebView
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SitePermissionOutcome
 import kotlinx.coroutines.CoroutineScope
@@ -113,6 +114,14 @@ class PageSession(
 
     override fun onExternalAppOffered(url: String, generation: Long) {
         if (context()?.generation == generation) _externalAppOffer.value = ExternalAppOffer(url, generation)
+    }
+
+    /** The offer's Open counts as the tap: the same hand-off as a tapped link on the current page. */
+    fun handOffTapped(url: String, origin: () -> String, launch: () -> Unit) {
+        val page = context() ?: return
+        val scheme = url.substringBefore(':').lowercase()
+        val tapped = ExternalNavigation(url, scheme, isMainFrame = true, hasGesture = true, page.isIncognito)
+        handOff(tapped, page, origin, launch, offer = {})
     }
 
     override fun onCloseWindow(window: WebView) {

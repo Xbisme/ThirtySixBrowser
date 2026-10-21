@@ -33,8 +33,12 @@ own error page with the browser's error screen.
 ## Consequences
 
 - A page can no longer bounce the person into another app; a tap, or the snackbar's Open, is always
-  needed. A server redirect after a tap keeps the gesture in Chromium; if a device shows otherwise,
-  a short last-tap window for redirects is the fallback.
+  needed. WebView drops the gesture on a server redirect, so a main-frame redirect counts as tapped
+  only when the main-frame navigation that started its chain had a gesture. Finger lifts are not
+  tracked: a scroll's end is not a tap. An address the app loads itself (typed, restored, a
+  fallback) starts an untapped chain, so its redirect to an app is offered.
+- An `intent:` address that names this app's package, or carries an `http(s)` address, is never
+  handed off: its address loads in the same tab.
 - No `queryIntentActivities` before launch, so no `<queries>` declarations: the catch on
   `ActivityNotFoundException` covers a missing app.
 - `ExternalLinkPolicyTest` covers the decision table, `ExternalAppLauncherTest` the safe intent and
