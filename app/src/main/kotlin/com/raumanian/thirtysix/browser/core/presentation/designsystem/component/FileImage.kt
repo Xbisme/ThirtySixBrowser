@@ -17,7 +17,8 @@ import kotlinx.coroutines.withContext
 @Composable
 fun rememberFileImage(file: File?): State<ImageBitmap?> {
     val ioDispatcher = LocalIoDispatcher.current
-    return produceState<ImageBitmap?>(initialValue = null, file?.absolutePath, file?.lastModified()) {
+    // Callers hand a new File when the image may have changed, so the instance joins the path as a key.
+    return produceState<ImageBitmap?>(initialValue = null, file?.absolutePath, file?.let(System::identityHashCode)) {
         value = withContext(ioDispatcher) {
             file?.takeIf { it.exists() && it.length() > 0L }
                 ?.let { runCatching { BitmapFactory.decodeFile(it.absolutePath) }.getOrNull() }

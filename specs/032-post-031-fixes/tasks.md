@@ -163,9 +163,11 @@
 
 ## Phase 8: User Story 6 – Smaller fixes (P3)
 
-- [ ] T045 [P] [US6] In `M/core/presentation/designsystem/component/FileImage.kt`, move `lastModified()` into the IO-side producer keyed by the path, so composition reads no disk. Keep `rememberFileImage` callers unchanged.
-- [ ] T046 [P] [US6] In `M/feature/sitepermission/presentation/sitepermissions/SitePermissionsScreen.kt` (line 94), add `contentType` to the empty item.
-- [ ] T047 [US6] Run G1. Commit `fix: off-main-thread file metadata, list content types (032 US6)` (FR-027, FR-028).
+- [X] T045 [P] [US6] In `M/core/presentation/designsystem/component/FileImage.kt`, move `lastModified()` into the IO-side producer keyed by the path, so composition reads no disk. Keep `rememberFileImage` callers unchanged.
+
+  Note: keyed by the path and the `File` instance, not the path alone. Callers `remember` a new `File` when their image version changes, and a favicon can appear later at the same path; a path-only key would never reload it. The IO block already checks the file, so `lastModified()` is no longer read at all.
+- [X] T046 [P] [US6] In `M/feature/sitepermission/presentation/sitepermissions/SitePermissionsScreen.kt` (line 94), add `contentType` to the empty item.
+- [X] T047 [US6] Run G1. Commit `fix: off-main-thread file metadata, list content types (032 US6)` (FR-027, FR-028).
 
 ## Phase 9: Polish
 
