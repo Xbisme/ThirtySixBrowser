@@ -69,16 +69,16 @@
 - [X] T016 [US2] In `M/feature/privacy/domain/usecase/RunFireUseCase.kt`:
   - read the keep set with `runCatching`;
   - on failure, add the three dependent steps to `failed` and skip them; never use an empty set;
-  - use `restoreSnapshot()`'s result for `CloseIncognito` and force the full wipe in `clearSiteData` when it is false;
+  - use `restoreSnapshot()`'s result (surfaced through `IncognitoTabRepository.closeAll(): Boolean`) for `CloseIncognito`; a false result only marks that step failed, and the cookie step keeps its normal keep-set path, as FR-006 says;
   - replace the per-origin `removeSite` loop with one `removeSites`, throwing inside `run` on `Result.Error`.
 
   In `FireCoordinatorImpl` (`M/feature/privacy/…/FireCoordinator*.kt`), wrap the run so any throwable becomes a failed result and the marker is cleared. Add a test that a throwing use case clears the marker. Make T014 green.
 - [X] T017 [P] [US2] Add `T/core/data/datasource/local/SitePermissionDaoTest.kt` cases (in-memory Room): `deleteOrigins` removes exactly those origins.
 - [X] T018 [US2] Sweep the upload photos:
-  - create `M/core/domain/repository/CaptureCache.kt` (`suspend fun clear()`) and `M/feature/browser/data/repository/CaptureCacheImpl.kt`, which calls `CaptureFiles.clear(context)` on the injected IO dispatcher;
+  - create `M/core/domain/repository/CaptureCache.kt` (`suspend fun clear()`) and `M/feature/browser/data/repository/CaptureCacheImpl.kt`, which empties the same capture folder on the injected IO dispatcher (data may not import `CaptureFiles`, which is in presentation);
   - bind it in `M/feature/browser/di/`;
   - inject it into `RunFireUseCase` and call it in its cleanup step, inside `run`;
-  - in `M/BR/page/BrowserPageRequests.kt` `rememberPageSession`, call `CaptureFiles.clear(context)` once when the session is created, off the main thread.
+  - in `M/BR/page/BrowserPageRequests.kt` `rememberPageSession`, call `CaptureFiles.clear(context)` once when the session is created, in a `LaunchedEffect` on `LocalIoDispatcher`; the clear on dispose stays.
 
   Add `T/feature/browser/data/repository/CaptureCacheImplTest.kt` (Robolectric).
 - [X] T019 [P] [US2] In `T/feature/settings/presentation/settings/SettingsViewModelTest.kt`, add a failing test: start clearing, cancel `viewModelScope` (clear the VM), and check that every chosen category still ran on the fake use case.

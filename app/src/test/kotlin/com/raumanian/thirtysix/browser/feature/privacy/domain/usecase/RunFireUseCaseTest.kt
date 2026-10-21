@@ -286,15 +286,15 @@ class RunFireUseCaseTest {
     }
 
     @Test
-    fun `a failed cookie restore marks close-incognito failed and wipes every cookie`() = runTest {
+    fun `a failed cookie restore marks close-incognito failed and still keeps fireproof sites`() = runTest {
         fireproof.add("example.com")
         cookies.restoreResult = false
 
         val result = useCase()
 
         assertTrue(FireStep.CloseIncognito in result.failedSteps)
-        assertTrue(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
-        assertEquals(null, web.lastClearExcept)
+        assertEquals(setOf("example.com"), web.lastClearExcept?.first)
+        assertFalse(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
     }
 
     @Test

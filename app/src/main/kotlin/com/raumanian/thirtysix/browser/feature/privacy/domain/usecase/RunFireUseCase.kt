@@ -67,8 +67,8 @@ class RunFireUseCase @Inject constructor(
         val hosts = collected?.hosts.orEmpty()
 
         // Incognito ends first: its teardown restores the pre-incognito cookie jar.
-        val jarRestored = run(FireStep.CloseIncognito, failed) { incognitoTabs.closeAll() } == true
-        if (!jarRestored) failed += FireStep.CloseIncognito
+        val jarRestored = run(FireStep.CloseIncognito, failed) { incognitoTabs.closeAll() }
+        if (jarRestored != true) failed += FireStep.CloseIncognito
 
         // closeAllTabs leaves exactly one fresh Home tab.
         run(FireStep.CloseTabs, failed) {
@@ -83,7 +83,7 @@ class RunFireUseCase @Inject constructor(
             clearWebCache(failed)
             null
         } else {
-            clearKeptSiteData(keepSites, hosts, collected, forceFullWipe = !jarRestored, failed)
+            clearKeptSiteData(keepSites, hosts, collected, failed)
         }
 
         // In-memory session traces and upload photos, so nothing links visits before and after Fire.
@@ -100,13 +100,12 @@ class RunFireUseCase @Inject constructor(
         keepSites: Set<String>,
         hosts: Set<String>,
         collected: Collected?,
-        forceFullWipe: Boolean,
         failed: MutableSet<FireStep>,
     ): SiteDataPath? {
         val isKept: (String) -> Boolean = { host -> IsSiteFireproofUseCase.matches(host, keepSites) }
 
         // Cookies, site data and the web page cache, keeping fireproof sites.
-        val path = clearSiteData(keepSites, hosts, isKept, forceFullWipe, failed)
+        val path = clearSiteData(keepSites, hosts, isKept, failed)
 
         run(FireStep.SitePermissions, failed) { clearPermissions(collected?.permissionOrigins.orEmpty(), isKept) }
 
@@ -133,14 +132,12 @@ class RunFireUseCase @Inject constructor(
         keepSites: Set<String>,
         hosts: Set<String>,
         isKept: (String) -> Boolean,
-        forceFullWipe: Boolean,
         failed: MutableSet<FireStep>,
     ): SiteDataPath? {
         val path = run(FireStep.CookiesAndSiteData, failed) {
             // Never leave a set-aside incognito snapshot that could be written back.
             cookieJar.discardSetAsideCookies()
-            // After a failed restore, incognito cookies may sit on fireproof hosts too, so nothing is kept.
-            if (keepSites.isEmpty() || forceFullWipe) {
+            if (keepSites.isEmpty()) {
                 when (webDataCleaner.clearCookiesAndSiteData()) {
                     SiteDataClearOutcome.Complete -> SiteDataPath.Complete
                     SiteDataClearOutcome.Partial -> SiteDataPath.Fallback
