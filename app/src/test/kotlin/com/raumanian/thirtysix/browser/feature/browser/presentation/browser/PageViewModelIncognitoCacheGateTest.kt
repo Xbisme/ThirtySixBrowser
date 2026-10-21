@@ -69,8 +69,9 @@ class PageViewModelIncognitoCacheGateTest {
     private fun newNormalActiveViewModel(
         faviconCache: FaviconCache,
         screenshotCache: ScreenshotCache,
+        initialTabs: List<Tab> = emptyList(),
     ): PageViewModel {
-        val tabRepository = FakeTabRepository(homeUrl = "https://normal.example.com")
+        val tabRepository = FakeTabRepository(homeUrl = "https://normal.example.com", initialTabs = initialTabs)
         val incognitoRepo = FakeIncognitoTabRepository()
         return buildVm(tabRepository, incognitoRepo, faviconCache, screenshotCache)
     }
@@ -164,7 +165,14 @@ class PageViewModelIncognitoCacheGateTest {
     @Test
     fun `a preview arriving after a tab switch is saved under the tab it came from`() = runTest(testDispatcher) {
         val recordingScreenshot = RecordingScreenshotCache()
-        val vm = newNormalActiveViewModel(faviconCache = NoopFaviconCache, screenshotCache = recordingScreenshot)
+        val vm = newNormalActiveViewModel(
+            faviconCache = NoopFaviconCache,
+            screenshotCache = recordingScreenshot,
+            initialTabs = listOf(
+                normalTab(ACTIVE_TAB_ID, lastActiveAt = 2L),
+                normalTab(PREVIOUS_TAB_ID, lastActiveAt = 1L),
+            ),
+        )
         advanceUntilIdle()
         val active = vm.currentPage.value.activeTab?.id
 
@@ -193,6 +201,28 @@ class PageViewModelIncognitoCacheGateTest {
             assertEquals(0, recordingScreenshot.saveCallCount)
             assertEquals(0, recordingFavicon.saveCallCount)
         }
+
+    @Test
+    fun `a preview for a tab that was closed is not saved`() = runTest(testDispatcher) {
+        val recordingScreenshot = RecordingScreenshotCache()
+        val vm = newNormalActiveViewModel(faviconCache = NoopFaviconCache, screenshotCache = recordingScreenshot)
+        advanceUntilIdle()
+
+        val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        vm.onAction(PageAction.ScreenshotReady(bmp, tabId = PREVIOUS_TAB_ID, isIncognito = false))
+        advanceUntilIdle()
+
+        assertEquals(0, recordingScreenshot.saveCallCount)
+    }
+
+    private fun normalTab(id: Long, lastActiveAt: Long) = Tab(
+        id = id,
+        url = "https://normal.example.com",
+        title = "",
+        position = id.toInt(),
+        createdAt = lastActiveAt,
+        lastActiveAt = lastActiveAt,
+    )
 
     private object NoopFaviconCache : FaviconCache {
         private val state = MutableStateFlow(0L)
@@ -239,6 +269,7 @@ class PageViewModelIncognitoCacheGateTest {
     }
 
     private companion object {
+        const val ACTIVE_TAB_ID = 1L
         const val PREVIOUS_TAB_ID = 42L
     }
 }

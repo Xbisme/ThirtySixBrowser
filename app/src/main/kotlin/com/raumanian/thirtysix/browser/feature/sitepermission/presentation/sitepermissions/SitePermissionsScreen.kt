@@ -91,7 +91,7 @@ fun SitePermissionsScreen(
                 .testTag(TEST_TAG_SITE_PERMISSIONS_LIST),
         ) {
             if (state.isLoaded && state.sites.isEmpty()) {
-                item(key = KEY_EMPTY) {
+                item(key = KEY_EMPTY, contentType = CONTENT_TYPE_EMPTY) {
                     Text(
                         text = stringResource(R.string.site_permissions_empty),
                         style = MaterialTheme.typography.bodyLarge,
@@ -180,6 +180,7 @@ private fun decisionLabel(decision: SiteDecision): String = stringResource(
 )
 
 private const val KEY_EMPTY: String = "empty"
+private const val CONTENT_TYPE_EMPTY: String = "empty"
 private const val CONTENT_TYPE_HEADER: String = "header"
 private const val CONTENT_TYPE_ROW: String = "row"
 private const val CONTENT_TYPE_ACTION: String = "action"

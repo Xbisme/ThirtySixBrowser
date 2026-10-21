@@ -1,15 +1,20 @@
 package com.raumanian.thirtysix.browser.feature.privacy.domain.usecase
 
+import com.raumanian.thirtysix.browser.core.domain.model.FireResult
 import com.raumanian.thirtysix.browser.core.domain.model.FireState
+import com.raumanian.thirtysix.browser.core.domain.model.FireStep
 import com.raumanian.thirtysix.browser.core.domain.util.ApplicationScope
 import com.raumanian.thirtysix.browser.feature.privacy.domain.repository.FireMarkerRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -70,8 +75,14 @@ class FireCoordinatorImpl @Inject constructor(
         mutableState.update { current -> if (current is FireState.Finished) FireState.Idle else current }
     }
 
-    private suspend fun runMarked() = run {
+    // Any throw ends as a failed run with the marker cleared, so a resumed run cannot block every launch.
+    private suspend fun runMarked(): FireResult {
         marker.setFireInProgress(true)
-        runFire().also { marker.setFireInProgress(false) }
+        val result = runCatching { runFire() }.getOrElse { error ->
+            if (error is CancellationException && !currentCoroutineContext().isActive) throw error
+            FireResult(failedSteps = FireStep.entries.toSet(), siteDataPath = null)
+        }
+        marker.setFireInProgress(false)
+        return result
     }
 }

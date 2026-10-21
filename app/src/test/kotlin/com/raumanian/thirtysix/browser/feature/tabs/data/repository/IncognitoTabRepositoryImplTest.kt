@@ -139,6 +139,14 @@ class IncognitoTabRepositoryImplTest {
     }
 
     @Test
+    fun `5d - closeAll reports a cookie restore that could not wipe the jar`() = runTest {
+        repository.createTab("https://a.com/")
+        cookieManager.restoreResult = false
+
+        assertFalse(repository.closeAll())
+    }
+
+    @Test
     fun `5b - closeAll on empty state is a no-op (no spurious restore)`() = runTest {
         assertEquals(0, repository.observeTabs().first().size)
         repository.closeAll()

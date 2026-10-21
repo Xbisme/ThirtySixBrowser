@@ -17,6 +17,7 @@ import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.core.domain.model.FireState
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.CaptureCache
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
@@ -120,6 +121,8 @@ class FireDataTest {
     @Inject lateinit var favicons: FaviconCache
 
     @Inject lateinit var screenshots: ScreenshotCache
+
+    @Inject lateinit var captures: CaptureCache
 
     @Inject lateinit var bookmarks: BookmarkRepository
 
@@ -273,7 +276,7 @@ class FireDataTest {
         val coldFire = FireCoordinatorImpl(
             RunFireUseCase(
                 coldRepository, history, clearHistory, tabs, incognitoTabs, sitePermissions, grants,
-                webDataCleaner, cookieJar, favicons, screenshots, bookmarks, httpsFailures, scriptSession,
+                webDataCleaner, cookieJar, favicons, screenshots, captures, bookmarks, httpsFailures, scriptSession,
                 stepObserver, dispatchers,
             ),
             marker,

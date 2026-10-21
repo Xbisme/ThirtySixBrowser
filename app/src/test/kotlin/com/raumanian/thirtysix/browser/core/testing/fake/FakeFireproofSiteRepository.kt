@@ -6,6 +6,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.Result
 import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 /**
@@ -17,8 +18,10 @@ class FakeFireproofSiteRepository(initial: Set<String> = emptySet()) : Fireproof
     var writes: Int = 0
         private set
     var cacheLoaded: Boolean = true
+    var observeAllError: Throwable? = null
 
-    override fun observeAll(): Flow<List<FireproofSite>> = state.map { it.reversed() }
+    override fun observeAll(): Flow<List<FireproofSite>> =
+        observeAllError?.let { error -> flow { throw error } } ?: state.map { it.reversed() }
     override fun currentSites(): Set<String> =
         if (cacheLoaded) state.value.mapTo(HashSet()) { it.site } else emptySet()
 

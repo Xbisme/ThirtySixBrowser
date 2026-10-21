@@ -31,6 +31,12 @@ class AndroidExternalFileOpenerTest {
     }
 
     @Test
+    fun `every type a server uses for a forced download counts as generic`() {
+        listOf("binary/octet-stream", "application/force-download", "application/x-download", "application/download")
+            .forEach { assertEquals(it, "application/pdf", sentType("a.pdf", it)) }
+    }
+
+    @Test
     fun `an empty type is replaced by the type of the extension`() {
         assertEquals("application/pdf", sentType("a.pdf", ""))
     }

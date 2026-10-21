@@ -62,6 +62,17 @@ class SitePermissionRepositoryImplTest {
     }
 
     @Test
+    fun `removing several sites at once leaves the others`() = runTest {
+        repository.save(A, SiteCapability.Camera, SiteDecision.Allow)
+        repository.save(B, SiteCapability.Microphone, SiteDecision.Deny)
+
+        val result = repository.removeSites(listOf(A, A))
+
+        assertTrue(result is Result.Success)
+        assertEquals(listOf(B), repository.observeAll().first().map { it.origin })
+    }
+
+    @Test
     fun `clear all removes everything`() = runTest {
         repository.save(A, SiteCapability.Camera, SiteDecision.Allow)
         repository.save(B, SiteCapability.Location, SiteDecision.Allow)

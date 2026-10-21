@@ -16,5 +16,8 @@ interface SitePermissionRepository {
 
     suspend fun removeSite(origin: String): Result<Unit>
 
+    /** One all-or-nothing delete. */
+    suspend fun removeSites(origins: Collection<String>): Result<Unit>
+
     suspend fun clearAll(): Result<Unit>
 }

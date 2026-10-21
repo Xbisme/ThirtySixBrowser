@@ -1,6 +1,7 @@
 package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import app.cash.turbine.test
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
@@ -20,6 +21,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -431,6 +433,99 @@ class PageViewModelTest {
         assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
 
+    // ---------- After a failure ----------
+
+    @Test
+    fun `a tab switch while Failed goes back to Idle`() = runTest(testDispatcher) {
+        val repo = FakeTabRepository(initialTabs = listOf(tab(TAB_A, lastActiveAt = 2L), tab(TAB_B, lastActiveAt = 1L)))
+        val vm = newViewModel(tabRepository = repo)
+        advanceUntilIdle()
+        vm.onAction(PageAction.LoadStarted("https://missing.example"))
+        vm.onAction(PageAction.LoadFailed(ErrorReason.DnsFailure))
+        assertTrue(vm.screenState().loadingState is LoadingState.Failed)
+
+        repo.switchActiveTab(TAB_B)
+        advanceUntilIdle()
+
+        assertEquals(TAB_B, vm.currentPage.value.activeTab?.id)
+        assertEquals(LoadingState.Idle, vm.screenState().loadingState)
+    }
+
+    @Test
+    fun `the error page title changes neither the page, the tab nor the history row`() = runTest(testDispatcher) {
+        val repo = FakeTabRepository()
+        val historyRepo = FakeHistoryRepository()
+        val vm = newViewModel(tabRepository = repo, historyRepository = historyRepo)
+        advanceUntilIdle()
+        vm.onAction(PageAction.UrlChanged("https://example.com"))
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFinished("https://example.com"))
+        advanceUntilIdle()
+        vm.onAction(PageAction.TitleReceived("Example"))
+        advanceUntilIdle()
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFailed(ErrorReason.NetworkUnavailable))
+        val titleBefore = vm.currentPage.value.title
+
+        vm.onAction(PageAction.TitleReceived(ERROR_PAGE_TITLE))
+        advanceUntilIdle()
+
+        assertEquals(titleBefore, vm.currentPage.value.title)
+        assertEquals("Example", historyRepo.recorded.single().title)
+        assertTrue(repo.observeTabs().first().none { it.title == ERROR_PAGE_TITLE })
+    }
+
+    @Test
+    fun `a reload that fails keeps the tab's title`() = runTest(testDispatcher) {
+        val repo = FakeTabRepository()
+        val vm = newViewModel(tabRepository = repo)
+        advanceUntilIdle()
+        vm.onAction(PageAction.UrlChanged("https://example.com"))
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFinished("https://example.com"))
+        vm.onAction(PageAction.TitleReceived("Example"))
+        advanceUntilIdle()
+
+        vm.onAction(PageAction.UrlChanged("https://example.com"))
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFailed(ErrorReason.NetworkUnavailable))
+        vm.onAction(PageAction.LoadFinished("https://example.com"))
+        advanceUntilIdle()
+
+        assertEquals("Example", repo.observeTabs().first().single().title)
+    }
+
+    @Test
+    fun `Retry while Failed shows Loading at once`() = runTest {
+        val vm = newViewModel()
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFailed(ErrorReason.NetworkUnavailable))
+
+        vm.onAction(PageAction.Retry)
+
+        assertEquals(LoadingState.Loading, vm.screenState().loadingState)
+    }
+
+    @Test
+    fun `Retry on a loaded page leaves the state alone`() = runTest {
+        val vm = newViewModel()
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFinished("https://example.com"))
+
+        vm.onAction(PageAction.Retry)
+
+        assertEquals(LoadingState.Loaded, vm.screenState().loadingState)
+    }
+
+    private fun tab(id: Long, lastActiveAt: Long) = Tab(
+        id = id,
+        url = "https://tab$id.example",
+        title = "",
+        position = id.toInt(),
+        createdAt = lastActiveAt,
+        lastActiveAt = lastActiveAt,
+    )
+
     // ---------- Home inside a tab ----------
 
     @Test
@@ -442,6 +537,9 @@ class PageViewModelTest {
 
     private companion object {
         const val ISOLATION_TICKS = 50
+        const val TAB_A: Long = 1L
+        const val TAB_B: Long = 2L
+        const val ERROR_PAGE_TITLE: String = "Webpage not available"
         const val EARLY_PROGRESS: Int = 25
         const val MID_PROGRESS: Int = 50
         const val NEAR_PROGRESS: Int = 99

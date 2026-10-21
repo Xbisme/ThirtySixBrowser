@@ -6,6 +6,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.FireproofSites
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.CaptureCache
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
@@ -21,6 +22,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryU
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.domain.util.urlHostOrNull
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -45,6 +47,7 @@ class RunFireUseCase @Inject constructor(
     private val cookieJar: CookieJarSnapshotManager,
     private val favicons: FaviconCache,
     private val screenshots: ScreenshotCache,
+    private val captures: CaptureCache,
     private val bookmarks: BookmarkRepository,
     private val httpsFailures: HttpsUpgradeFailures,
     private val scriptSession: PrivacyScriptSession,
@@ -54,15 +57,18 @@ class RunFireUseCase @Inject constructor(
 
     suspend operator fun invoke(): FireResult {
         val failed = mutableSetOf<FireStep>()
-        val keepSites = fireproofSites.observeAll().first().mapTo(HashSet()) { it.site }
-        val isKept: (String) -> Boolean = { host -> IsSiteFireproofUseCase.matches(host, keepSites) }
+        // An unreadable list must never read as empty: that would wipe every fireproof site.
+        val keepSites = runCatching { fireproofSites.observeAll().first().mapTo(HashSet()) { it.site } }
+            .onFailure { if (it is CancellationException) throw it }
+            .getOrNull()
 
         // Candidate hosts are read before anything that holds them is cleared.
         val collected = run(FireStep.CollectHosts, failed) { collectHosts() }
         val hosts = collected?.hosts.orEmpty()
 
         // Incognito ends first: its teardown restores the pre-incognito cookie jar.
-        run(FireStep.CloseIncognito, failed) { incognitoTabs.closeAll() }
+        val jarRestored = run(FireStep.CloseIncognito, failed) { incognitoTabs.closeAll() }
+        if (jarRestored != true) failed += FireStep.CloseIncognito
 
         // closeAllTabs leaves exactly one fresh Home tab.
         run(FireStep.CloseTabs, failed) {
@@ -72,6 +78,32 @@ class RunFireUseCase @Inject constructor(
 
         run(FireStep.History, failed) { clearHistory() }
 
+        val path = if (keepSites == null) {
+            failed += setOf(FireStep.CookiesAndSiteData, FireStep.SitePermissions, FireStep.Favicons)
+            clearWebCache(failed)
+            null
+        } else {
+            clearKeptSiteData(keepSites, hosts, collected, failed)
+        }
+
+        // In-memory session traces and upload photos, so nothing links visits before and after Fire.
+        run(FireStep.SessionTraces, failed) {
+            httpsFailures.clear()
+            scriptSession.regenerate()
+            captures.clear()
+        }
+
+        return FireResult(failedSteps = failed, siteDataPath = path)
+    }
+
+    private suspend fun clearKeptSiteData(
+        keepSites: Set<String>,
+        hosts: Set<String>,
+        collected: Collected?,
+        failed: MutableSet<FireStep>,
+    ): SiteDataPath? {
+        val isKept: (String) -> Boolean = { host -> IsSiteFireproofUseCase.matches(host, keepSites) }
+
         // Cookies, site data and the web page cache, keeping fireproof sites.
         val path = clearSiteData(keepSites, hosts, isKept, failed)
 
@@ -79,14 +111,7 @@ class RunFireUseCase @Inject constructor(
 
         // Site icons, except bookmarked hosts' and fireproof sites'.
         run(FireStep.Favicons, failed) { favicons.retainOnly(iconsToKeep(keepSites, hosts, isKept)) }
-
-        // In-memory session traces, so nothing links visits before and after Fire.
-        run(FireStep.SessionTraces, failed) {
-            httpsFailures.clear()
-            scriptSession.regenerate()
-        }
-
-        return FireResult(failedSteps = failed, siteDataPath = path)
+        return path
     }
 
     private class Collected(val hosts: Set<String>, val permissionOrigins: List<String>)
@@ -124,16 +149,19 @@ class RunFireUseCase @Inject constructor(
         }
         if (path == null) failed += FireStep.CookiesAndSiteData
         // The web page cache, unless the complete path already emptied it.
-        if (path != SiteDataPath.Complete) {
-            val cleared = run(FireStep.WebCache, failed) { webDataCleaner.clearWebCache() } == true
-            if (!cleared) failed += FireStep.WebCache
-        }
+        if (path != SiteDataPath.Complete) clearWebCache(failed)
         return path
+    }
+
+    private suspend fun clearWebCache(failed: MutableSet<FireStep>) {
+        val cleared = run(FireStep.WebCache, failed) { webDataCleaner.clearWebCache() } == true
+        if (!cleared) failed += FireStep.WebCache
     }
 
     private suspend fun clearPermissions(origins: List<String>, isKept: (String) -> Boolean) {
         val keep: (String) -> Boolean = { origin -> urlHostOrNull(origin)?.let(isKept) == true }
-        origins.filterNot(keep).forEach { origin -> sitePermissions.removeSite(origin) }
+        val removed = sitePermissions.removeSites(origins.filterNot(keep))
+        if (removed is Result.Error) throw removed.throwable
         withContext(dispatchers.main) { oneTimeGrants.retainOnly(keep) }
     }
 

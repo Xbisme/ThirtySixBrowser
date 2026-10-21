@@ -70,14 +70,11 @@ class TabRepositoryImpl @Inject constructor(
     }
 
     override suspend fun switchActiveTab(tabId: Long) {
-        val tab = tabDao.getById(tabId) ?: return
-        tabDao.update(tab.copy(lastActiveAt = System.currentTimeMillis()))
+        tabDao.setLastActiveAt(tabId, System.currentTimeMillis())
     }
 
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) {
-        val tab = tabDao.getById(tabId) ?: return
-        if (tab.url == url && tab.title == title) return
-        tabDao.update(tab.copy(url = url, title = title))
+        tabDao.setUrlAndTitle(tabId, url, title)
     }
 
     override suspend fun closeTab(tabId: Long) {
@@ -101,7 +98,7 @@ class TabRepositoryImpl @Inject constructor(
         val tabs = rows.mapNotNull { entity -> runCatching { entity.toDomain() }.getOrNull() }
         val heirId = TabOrder.heirOf(tabs, closed.id)?.id ?: return
         val heir = rows.first { it.id == heirId }
-        tabDao.update(heir.copy(lastActiveAt = maxOf(heir.lastActiveAt, closed.lastActiveAt)))
+        tabDao.setLastActiveAt(heirId, maxOf(heir.lastActiveAt, closed.lastActiveAt))
     }
 
     override suspend fun closeAllTabs() {

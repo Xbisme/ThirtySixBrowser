@@ -16,6 +16,8 @@ object BookmarkUrlValidator {
     // A typed scheme is checked before `https://` is prepended, so `ftp://x` is rejected, not wrapped.
     private val SCHEME_REGEX: Regex = Regex("^([a-zA-Z][a-zA-Z0-9+.-]*)://")
 
+    private val HOST_WITH_UNDERSCORE: Regex = Regex("[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*\\.?")
+
     @Suppress("ReturnCount") // Each return is a distinct validation failure.
     fun validate(input: String): Result<String> {
         val trimmed = input.trim()
@@ -56,7 +58,7 @@ object BookmarkUrlValidator {
             )
         }
 
-        val host = uri.host
+        val host = uri.host ?: underscoreHost(uri.rawAuthority)
         if (host.isNullOrBlank()) {
             return Result.Error(
                 BookmarkException.UrlValidation(BookmarkUrlValidationError.MissingHost),
@@ -65,4 +67,8 @@ object BookmarkUrlValidator {
 
         return Result.Success(candidate)
     }
+
+    // `URI` leaves the host null when a label has `_`, which real sites still use.
+    private fun underscoreHost(rawAuthority: String?): String? =
+        rawAuthority?.substringAfterLast('@')?.substringBefore(':')?.takeIf { HOST_WITH_UNDERSCORE.matches(it) }
 }

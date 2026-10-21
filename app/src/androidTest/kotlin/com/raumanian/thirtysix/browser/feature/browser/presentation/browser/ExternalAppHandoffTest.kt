@@ -22,6 +22,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.swipeUp
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.isInternal
@@ -81,14 +82,14 @@ class ExternalAppHandoffTest {
         server.close()
     }
 
-    private fun start(attempt: String, incognito: Boolean = false) {
+    private fun start(attempt: String, incognito: Boolean = false, page: String = PAGE) {
         val gate = SitePermissionGate(
             ResolveSitePermissionUseCase(InstrumentedNoopSitePermissionRepository),
             ApplySitePermissionChoiceUseCase(InstrumentedNoopSitePermissionRepository),
             OneTimeGrantStore(),
             context,
         )
-        val url = pageUrl(attempt)
+        val url = server.url("$page?$attempt")
         composeRule.setContent {
             val session = rememberPageSession(activeTabId = 1L, isIncognito = incognito, permissionGate = gate)
             Box(Modifier.fillMaxSize()) {
@@ -219,6 +220,21 @@ class ExternalAppHandoffTest {
         assertTrue("reported $reportedUrls", reportedUrls.none { it.startsWith(REDIRECTED_TARGET) })
     }
 
+    @Test
+    fun aSwipeWhoseEndRedirectsToAnotherApp_opensNothing_andOffersIt() {
+        start("swipe", page = SCROLL_REDIRECT_PAGE)
+        composeRule.waitUntil(TIMEOUT_MS) { READY in titles }
+        Thread.sleep(RENDER_MS)
+
+        onView(isAssignableFrom(WebView::class.java)).perform(swipeUp())
+        val target = Uri.parse(SWIPED_TARGET)
+        val swiped = { startedIntents().filter { it.action == Intent.ACTION_VIEW && it.data == target } }
+        composeRule.waitUntil(TIMEOUT_MS) { offerShown() || swiped().isNotEmpty() }
+
+        assertEquals("the swipe's end opened an app", emptyList<Intent>(), swiped())
+        assertTrue(offerShown())
+    }
+
     private fun dialogShown(): Boolean =
         composeRule.onAllNodes(hasText(context.getString(R.string.external_app_confirm_title)))
             .fetchSemanticsNodes()
@@ -233,6 +249,8 @@ class ExternalAppHandoffTest {
         const val READY = "ready"
         const val TAPPED_TARGET = "market://details?id=tapped"
         const val REDIRECTED_TARGET = "tel:123"
+        const val SCROLL_REDIRECT_PAGE = "scroll-redirect.html"
+        const val SWIPED_TARGET = "tel:1"
         const val TIMEOUT_MS = 15_000L
         const val SETTLE_MS = 3_000L
         const val RENDER_MS = 1_000L

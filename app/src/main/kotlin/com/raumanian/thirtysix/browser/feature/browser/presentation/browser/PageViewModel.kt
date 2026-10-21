@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -59,14 +60,12 @@ class PageViewModel @Inject constructor(
      */
     val loadProgress: StateFlow<Float> = _loadProgress.asStateFlow()
 
-    private val activeTabFlow: StateFlow<Tab?> = observeActiveTab()
+    val activeTab: StateFlow<Tab?> = observeActiveTab()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(SUBSCRIBE_TIMEOUT_MS),
             initialValue = null,
         )
-
-    val activeTab: StateFlow<Tab?> = activeTabFlow
 
     // Starts at 1: there is always at least one tab once the flow emits, so the badge never flashes empty.
     val tabCount: StateFlow<Int> = tabs.observeTabs()
@@ -88,8 +87,12 @@ class PageViewModel @Inject constructor(
 
     init {
         // A new tab starts without the previous tab's title; the store drops it on a switch.
-        activeTabFlow
+        activeTab
             .onEach { tab ->
+                // Another tab's page has not failed; a kept Failed would stop its saved history being restored.
+                if (tab?.id != pageStore.page.value.activeTab?.id) {
+                    _uiState.update { it.copy(loadingState = LoadingState.Idle) }
+                }
                 pageStore.setActiveTab(tab)
                 tab?.let { active -> pageStore.setUrl(active.url) }
             }
@@ -103,6 +106,7 @@ class PageViewModel @Inject constructor(
             is PageAction.LoadFinished -> onLoadFinished(action.url)
             is PageAction.LoadFailed -> onLoadFailed(action.reason)
             PageAction.LoadStopped -> onLoadStopped()
+            PageAction.Retry -> onRetry()
             is PageAction.UrlChanged -> onUrlChanged(action.url)
             is PageAction.TitleReceived -> onTitleReceived(action.title)
             is PageAction.IconReceived -> onIconReceived(action.url, action.icon, action.isIncognito)
@@ -112,8 +116,6 @@ class PageViewModel @Inject constructor(
         }
     }
 
-    // [onUrlChanged] owns the address; `url` is kept for symmetry with [onLoadFinished].
-    @Suppress("UNUSED_PARAMETER")
     private fun onLoadStarted(url: String) {
         pendingHistoryUrl = url
         // Drops the previous page's title so it can never attach to the new URL ([onTitleReceived]
@@ -189,6 +191,17 @@ class PageViewModel @Inject constructor(
         _uiState.update { it.copy(loadingState = LoadingState.Failed(reason)) }
     }
 
+    // A stalled server may not start the load for seconds; the indicator shows from the tap.
+    private fun onRetry() {
+        _uiState.update { current ->
+            if (current.loadingState is LoadingState.Failed) {
+                current.copy(loadingState = LoadingState.Loading)
+            } else {
+                current
+            }
+        }
+    }
+
     // The page settles wherever it had reached; the loading indicator hides at once.
     private fun onLoadStopped() {
         _loadProgress.value = 0f
@@ -208,6 +221,8 @@ class PageViewModel @Inject constructor(
     }
 
     private fun onTitleReceived(title: String) {
+        // The engine's error page reports its own title, which is not the page's.
+        if (_uiState.value.loadingState is LoadingState.Failed) return
         pageStore.setTitle(title)
         val page = pageStore.page.value
         // The title usually arrives after the load finished; patch it onto the row just written.
@@ -240,19 +255,24 @@ class PageViewModel @Inject constructor(
         // Incognito never writes previews to disk, where they could be recovered after the tab closed.
         if (isIncognito) return
         viewModelScope.launch {
+            // A preview taken just before its tab closed would outlive the tab on disk.
+            if (tabs.observeTabs().first().none { it.id == tabId }) return@launch
             screenshotCache.save(tabId, bitmap.webpWriter())
         }
     }
 
     private fun persistActiveTabState(url: String) {
         val page = pageStore.page.value
-        val activeId = page.activeTab?.id ?: return
+        val active = page.activeTab ?: return
         val incognito = page.isIncognito
+        // A failed reload cleared the page title; the tab keeps the one it had for this address.
+        val failedReload = _uiState.value.loadingState is LoadingState.Failed && active.url == url
+        val title = if (failedReload) active.title else page.title
         viewModelScope.launch {
             updateActiveTabUrlAndTitle(
-                tabId = activeId,
+                tabId = active.id,
                 url = url,
-                title = page.title,
+                title = title,
                 isIncognito = incognito,
             )
         }

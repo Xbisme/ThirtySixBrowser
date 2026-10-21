@@ -8,6 +8,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import com.raumanian.thirtysix.browser.core.presentation.util.LocalIoDispatcher
+import kotlinx.coroutines.withContext
 
 /**
  * The browser screen's page session: created once, told about every tab switch, and disposed with
@@ -24,6 +26,9 @@ fun rememberPageSession(
     val session = remember(permissionGate, popups) { PageSession(PageRequestQueue(), scope, permissionGate, popups) }
     LaunchedEffect(activeTabId, isIncognito) { session.onTabChanged(activeTabId, isIncognito) }
     val context = LocalContext.current
+    val ioDispatcher = LocalIoDispatcher.current
+    // Photos a killed process left behind.
+    LaunchedEffect(session) { withContext(ioDispatcher) { CaptureFiles.clear(context.applicationContext) } }
     DisposableEffect(session) {
         onDispose {
             session.queue.dispose()

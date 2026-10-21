@@ -3,6 +3,9 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser.pag
 import android.view.View
 import android.webkit.WebChromeClient.CustomViewCallback
 import android.webkit.WebView
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ExternalLinkPolicy
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.PopupDecision
 data class PageContext(val tabId: Long, val generation: Long, val isIncognito: Boolean)
 
@@ -35,6 +38,23 @@ interface PageRequestSink {
     fun onPopupBlocked(target: String?, generation: Long) = Unit
 
     fun onExternalAppOffered(url: String, generation: Long) = Unit
+
+    /** Runs [launch] as [ExternalLinkPolicy] decides: now, after an incognito confirmation, or never. */
+    fun handOff(
+        navigation: ExternalNavigation,
+        page: PageContext,
+        origin: () -> String,
+        launch: () -> Unit,
+        offer: () -> Unit,
+    ) {
+        when (ExternalLinkPolicy.decide(navigation)) {
+            ExternalLinkDecision.Drop -> Unit
+            ExternalLinkDecision.Offer -> offer()
+            ExternalLinkDecision.Confirm ->
+                enqueue(PageRequest.OpenExternalApp(page.tabId, page.generation, origin()) { launch() })
+            ExternalLinkDecision.Launch -> launch()
+        }
+    }
 
     fun onCloseWindow(window: WebView) = Unit
 

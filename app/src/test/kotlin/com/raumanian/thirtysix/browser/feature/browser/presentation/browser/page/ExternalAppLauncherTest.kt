@@ -104,6 +104,23 @@ class ExternalAppLauncherTest {
     }
 
     @Test
+    fun `an intent link to this app loads its address in the tab and starts nothing`() {
+        handler("https")
+        val url = "intent://x#Intent;scheme=https;package=${app.packageName};end"
+
+        assertEquals("https://x", ExternalAppLauncher.launch(app, url))
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
+    @Test
+    fun `an intent link with a web address loads it in the tab and starts nothing`() {
+        handler("https")
+
+        assertEquals("https://y", ExternalAppLauncher.launch(app, "intent://y#Intent;scheme=https;end"))
+        assertNull(shadowOf(app).nextStartedActivity)
+    }
+
+    @Test
     fun `a link no app takes, without a fallback, returns nothing`() {
         assertNull(ExternalAppLauncher.launch(app, "tel:1"))
     }

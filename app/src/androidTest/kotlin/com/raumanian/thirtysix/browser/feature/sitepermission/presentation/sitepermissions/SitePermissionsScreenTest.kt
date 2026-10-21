@@ -100,6 +100,11 @@ private class InMemorySitePermissions : SitePermissionRepository {
         return Result.Success(Unit)
     }
 
+    override suspend fun removeSites(origins: Collection<String>): Result<Unit> {
+        rows.update { list -> list.filterNot { it.origin in origins } }
+        return Result.Success(Unit)
+    }
+
     override suspend fun clearAll(): Result<Unit> {
         rows.value = emptyList()
         return Result.Success(Unit)

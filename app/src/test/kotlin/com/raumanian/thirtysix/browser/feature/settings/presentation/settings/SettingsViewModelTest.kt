@@ -1,5 +1,6 @@
 package com.raumanian.thirtysix.browser.feature.settings.presentation.settings
 
+import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.model.AppLanguage
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryRetention
 import com.raumanian.thirtysix.browser.core.domain.model.SearchEngine
@@ -16,6 +17,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -361,6 +363,28 @@ class SettingsViewModelTest {
         web.siteDataGate?.complete(Unit)
         advanceUntilIdle()
         assertNull(viewModel.uiState.value.dialog)
+    }
+
+    @Test
+    fun `a clear keeps running after the screen's view model is gone`() = runTest {
+        val log = mutableListOf<String>()
+        val web = FakeWebDataCleaner(log, siteDataOutcome = SiteDataClearOutcome.Partial).apply {
+            siteDataGate = CompletableDeferred()
+        }
+        // The factory's default app scope runs on the test's main dispatcher, apart from viewModelScope.
+        val viewModel = settingsViewModel(historyRepository = FakeHistoryRepository(log), webDataCleaner = web)
+        advanceUntilIdle()
+        viewModel.onAction(SettingsAction.ClearBrowsingDataRowClick)
+        viewModel.onAction(SettingsAction.ClearBrowsingDataConfirmed)
+        advanceUntilIdle()
+
+        viewModel.viewModelScope.cancel()
+        web.siteDataGate?.complete(Unit)
+        advanceUntilIdle()
+
+        assertTrue(FakeHistoryRepository.CALL_CLEAR_ALL in log)
+        assertTrue(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
+        assertTrue("the step after the cookie wipe still ran", FakeWebDataCleaner.CALL_CLEAR_WEB_CACHE in log)
     }
 
     @Test

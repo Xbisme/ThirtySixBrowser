@@ -48,5 +48,8 @@ class SitePermissionRepositoryImpl @Inject constructor(
     override suspend fun removeSite(origin: String): Result<Unit> =
         runIoCatching(dispatchers.io) { dao.deleteOrigin(origin) }
 
+    override suspend fun removeSites(origins: Collection<String>): Result<Unit> =
+        runIoCatching(dispatchers.io) { dao.deleteOrigins(origins.distinct()) }
+
     override suspend fun clearAll(): Result<Unit> = runIoCatching(dispatchers.io) { dao.deleteAll() }
 }

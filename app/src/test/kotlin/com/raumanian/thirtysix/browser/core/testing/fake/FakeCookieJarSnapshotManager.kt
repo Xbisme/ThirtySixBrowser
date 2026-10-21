@@ -19,6 +19,8 @@ class FakeCookieJarSnapshotManager(
     var lastCapturedOrigins: List<String> = emptyList()
         private set
 
+    var restoreResult: Boolean = true
+
     private var snapshotHeld: Boolean = false
 
     override suspend fun captureSnapshot(origins: List<String>) {
@@ -28,10 +30,11 @@ class FakeCookieJarSnapshotManager(
         snapshotHeld = true
     }
 
-    override suspend fun restoreSnapshot() {
+    override suspend fun restoreSnapshot(): Boolean {
         callLog += CALL_RESTORE
         restoreCount += 1
         snapshotHeld = false
+        return restoreResult
     }
 
     override fun hasSnapshot(): Boolean = snapshotHeld

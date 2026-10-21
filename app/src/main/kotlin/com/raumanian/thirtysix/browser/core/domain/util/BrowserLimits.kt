@@ -36,8 +36,9 @@ object BrowserLimits {
 
     const val LANGUAGE_APPLY_TIMEOUT_MS: Long = 600L
 
-    // The name comes from an untrusted Content-Disposition header; 255 is every Android filesystem's limit.
-    const val MAX_FILE_NAME_BYTES: Int = 255
+    // The name comes from an untrusted Content-Disposition header. Ten bytes under the filesystems'
+    // 255 leave room for the suffix, such as " (1)", the system adds when the name is taken.
+    const val MAX_FILE_NAME_BYTES: Int = 245
 
     // Progress must visibly advance once a second; polling runs only while something is in flight.
     const val DOWNLOAD_STATUS_POLL_INTERVAL_MS: Long = 1_000L
@@ -58,8 +59,6 @@ object BrowserLimits {
     const val DIALOG_SUPPRESS_FROM_COUNT: Int = 2
 
     const val BLOCKED_POPUP_ADDRESS_WAIT_MS: Long = 1_000L
-
-    const val EXTERNAL_TAP_WINDOW_MS: Long = 1_000L
 
     const val TEXT_SIZE_PERCENT_50: Int = 50
 

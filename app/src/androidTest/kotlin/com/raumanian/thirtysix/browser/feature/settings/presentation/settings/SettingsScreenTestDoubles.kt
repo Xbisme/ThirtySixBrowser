@@ -33,6 +33,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.NoopTabSessionRepositor
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedFakeHistoryRepository
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedImmediateDispatchers
 import com.raumanian.thirtysix.browser.feature.history.presentation.history.InstrumentedNoopFaviconCacheForHistory
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.HttpsUpgradeFailureStore
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ClearBrowsingDataUseCase
@@ -41,6 +42,9 @@ import java.io.IOException
 import java.io.OutputStream
 import java.util.Collections
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -157,7 +161,7 @@ internal object InstrumentedNoopFireproofSiteRepository : FireproofSiteRepositor
 
 internal object InstrumentedNoopCookieJarSnapshotManager : CookieJarSnapshotManager {
     override suspend fun captureSnapshot(origins: List<String>) = Unit
-    override suspend fun restoreSnapshot() = Unit
+    override suspend fun restoreSnapshot(): Boolean = true
     override fun hasSnapshot(): Boolean = false
     override suspend fun discardSetAsideCookies() = Unit
 }
@@ -190,12 +194,14 @@ internal fun settingsViewModel(
         protectionExceptions = InstrumentedNoopProtectionExceptionRepository,
         incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
         fireproofSites = InstrumentedNoopFireproofSiteRepository,
+        httpsUpgradeFailures = HttpsUpgradeFailureStore(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
     supportsDynamicColor: Boolean = true,
     appVersionName: String = INSTRUMENTED_APP_VERSION_NAME,
     defaultBrowser: DefaultBrowserController = DefaultBrowserController { false },
+    appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
 ): SettingsViewModel = SettingsViewModel(
     settings = settingsRepository,
     languages = appLanguageController,
@@ -205,6 +211,7 @@ internal fun settingsViewModel(
     defaultBrowser = defaultBrowser,
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
+    appScope = appScope,
 )
 
 internal const val INSTRUMENTED_APP_VERSION_NAME: String = "9.9.9-instrumented"
@@ -223,6 +230,8 @@ internal object InstrumentedNoopSitePermissionRepository : SitePermissionReposit
         Result.Success(Unit)
 
     override suspend fun removeSite(origin: String): Result<Unit> = Result.Success(Unit)
+
+    override suspend fun removeSites(origins: Collection<String>): Result<Unit> = Result.Success(Unit)
 
     override suspend fun clearAll(): Result<Unit> = Result.Success(Unit)
 }

@@ -12,9 +12,10 @@ interface CookieJarSnapshotManager {
 
     /**
      * Wipes the live jar, including incognito cookies, and writes the snapshot back.
-     * With no snapshot held it does nothing, and wipes nothing.
+     * With no snapshot held it does nothing, and wipes nothing. False when the wipe timed out or
+     * failed, so incognito cookies may remain in the jar.
      */
-    suspend fun restoreSnapshot()
+    suspend fun restoreSnapshot(): Boolean
 
     fun hasSnapshot(): Boolean
 

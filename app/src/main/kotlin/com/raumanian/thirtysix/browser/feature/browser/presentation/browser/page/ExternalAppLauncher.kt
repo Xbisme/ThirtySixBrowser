@@ -9,7 +9,8 @@ import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 
 /**
  * Hands an address to another app, only to activities that accept links from browsers and never to
- * a named component. Returns an `intent:` link's http(s) fallback to load when no app takes it.
+ * a named component. Returns an http(s) address to load in the tab instead: an `intent:` link's
+ * fallback when no app takes it, or its own address when it carries a web address or names this app.
  */
 object ExternalAppLauncher {
     private const val TAG = "ExternalAppLauncher"
@@ -18,10 +19,15 @@ object ExternalAppLauncher {
 
     fun launch(context: Context, url: String): String? {
         val intent = runCatching { safeIntent(url) }.getOrElse { return failed(it) }
-        return runCatching { context.startActivity(intent) }.fold(
-            onSuccess = { null },
-            onFailure = { if (it is ActivityNotFoundException) webFallback(intent) else failed(it) },
-        )
+        val inTab = webAddress(intent.dataString)
+        return if (inTab != null || intent.`package` == context.packageName) {
+            inTab ?: webFallback(intent)
+        } else {
+            runCatching { context.startActivity(intent) }.fold(
+                onSuccess = { null },
+                onFailure = { if (it is ActivityNotFoundException) webFallback(intent) else failed(it) },
+            )
+        }
     }
 
     private fun safeIntent(url: String): Intent {
@@ -39,10 +45,11 @@ object ExternalAppLauncher {
         }
     }
 
-    private fun webFallback(intent: Intent): String? {
-        val fallback = intent.getStringExtra(FALLBACK_URL_EXTRA) ?: return null
-        val scheme = fallback.toUri().scheme?.lowercase()
-        return fallback.takeIf { scheme == UrlConstants.SCHEME_HTTP || scheme == UrlConstants.SCHEME_HTTPS }
+    private fun webFallback(intent: Intent): String? = webAddress(intent.getStringExtra(FALLBACK_URL_EXTRA))
+
+    private fun webAddress(address: String?): String? {
+        val scheme = address?.toUri()?.scheme?.lowercase()
+        return address.takeIf { scheme == UrlConstants.SCHEME_HTTP || scheme == UrlConstants.SCHEME_HTTPS }
     }
 
     private fun failed(cause: Throwable): String? {

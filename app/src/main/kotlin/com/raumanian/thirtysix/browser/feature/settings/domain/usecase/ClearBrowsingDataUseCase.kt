@@ -4,6 +4,7 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoProtectionExceptions
 import com.raumanian.thirtysix.browser.core.domain.repository.ProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
@@ -34,6 +35,7 @@ class ClearBrowsingDataUseCase @Inject constructor(
     private val protectionExceptions: ProtectionExceptionRepository,
     private val incognitoProtectionExceptions: IncognitoProtectionExceptions,
     private val fireproofSites: FireproofSiteRepository,
+    private val httpsUpgradeFailures: HttpsUpgradeFailures,
 ) {
 
     /** @param categories non-empty; an empty set is a programming error. */
@@ -43,6 +45,8 @@ class ClearBrowsingDataUseCase @Inject constructor(
         var siteDataOutcome: SiteDataClearOutcome? = null
 
         if (ClearBrowsingDataCategory.History in categories) {
+            // The hosts that failed the https upgrade are a record of visits too.
+            httpsUpgradeFailures.clear()
             if (!step { clearHistory() }) failed += ClearBrowsingDataCategory.History
         }
 

@@ -6,7 +6,8 @@ import java.io.OutputStream
 
 /** Readers see the old file or the whole new one, never a partial write; a failed write leaves nothing. */
 internal inline fun File.writeAtomically(block: (OutputStream) -> Unit) {
-    val temp = File(parentFile, "$name.tmp")
+    // Unique per write: two saves of the same key must not share, or delete, one temp file.
+    val temp = File.createTempFile(name, ".tmp", parentFile)
     var renamed = false
     try {
         temp.outputStream().use(block)
