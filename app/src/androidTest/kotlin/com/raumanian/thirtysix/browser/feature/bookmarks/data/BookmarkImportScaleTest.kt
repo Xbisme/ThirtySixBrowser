@@ -29,7 +29,12 @@ class BookmarkImportScaleTest {
         val text = buildString(UNCLOSED_CHARS) {
             append("<!DOCTYPE NETSCAPE-Bookmark-file-1><DL>")
             var i = 0
-            while (length < UNCLOSED_CHARS) append("<DT><A HREF=\"https://s${i++}.example/\">t")
+            while (true) {
+                val entry = "<DT><A HREF=\"https://s${i++}.example/\">t"
+                // Growing past the capacity would double the buffer and run out of heap on API 29.
+                if (length + entry.length > UNCLOSED_CHARS) break
+                append(entry)
+            }
         }
         assertTrue(checkNotNull(parser.parse(text, UNTITLED)).linkCount > 0)
 
