@@ -53,8 +53,10 @@ class SanitizeDownloadFileNameUseCase @Inject constructor() {
             .filterNot { it.isISOControl() }
             .replace(RESERVED_CHARS, "_")
             .trim()
+        val visible = lastSegment.filterNot { it.category == CharCategory.FORMAT }.trim()
+        val named = if (visible.startsWith('.') && !lastSegment.startsWith('.')) FALLBACK_NAME + visible else visible
 
-        val withoutLeadingDots = lastSegment.trimStart('.')
+        val withoutLeadingDots = named.trimStart('.')
         val safe = if (withoutLeadingDots.isBlank()) FALLBACK_NAME else withoutLeadingDots
         return bound(safe)
     }

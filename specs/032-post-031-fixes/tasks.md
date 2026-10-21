@@ -120,23 +120,26 @@
 
 ## Phase 6: User Story 4 – Files are never lost, mixed or disguised (P1)
 
-- [ ] T031 [P] [US4] In `T/feature/downloads/data/datasource/local/AndroidDownloadManagerGatewayTest.kt`, add failing tests:
+- [X] T031 [P] [US4] In `T/feature/downloads/data/datasource/local/AndroidDownloadManagerGatewayTest.kt`, add failing tests:
   - when `remove` returns 0, an existing `Downloads/report.pdf` is not deleted;
   - with 1,200 handles where chunk 2's query throws, the result still has the statuses of chunks 1 and 3.
-- [ ] T032 [US4] In `M/feature/downloads/data/datasource/local/AndroidDownloadManagerGateway.kt`:
+- [X] T032 [US4] In `M/feature/downloads/data/datasource/local/AndroidDownloadManagerGateway.kt`:
   - `deleteFile` deletes by name only when `remove(handle) > 0`; otherwise it returns `true` with no file touched, so the row can be removed;
   - `queryStatuses` catches per chunk.
 
   Make T031 green.
-- [ ] T033 [P] [US4] Write `T/core/data/datasource/local/cache/AtomicFileTest.kt` first: 20 concurrent `writeAtomically` calls on the same file with different full payloads leave exactly one whole payload and no `.tmp` files.
-- [ ] T034 [US4] In `M/core/data/datasource/local/cache/AtomicFile.kt`, use `File.createTempFile(name, ".tmp", parentFile)`. Confirm that `DiskFaviconCache.retainOnly` and `clearAll`, and the screenshot equivalents, delete stray temp files; add one if not. Make T033 green.
-- [ ] T035 [P] [US4] In `T/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCaseTest.kt`, add failing tests:
+  Note: when the service has no download to remove (or is unavailable), `deleteFile` returns `true` without touching any file.
+- [X] T033 [P] [US4] Write `T/core/data/datasource/local/cache/AtomicFileTest.kt` first: 20 concurrent `writeAtomically` calls on the same file with different full payloads leave exactly one whole payload and no `.tmp` files.
+- [X] T034 [US4] In `M/core/data/datasource/local/cache/AtomicFile.kt`, use `File.createTempFile(name, ".tmp", parentFile)`. Confirm that `DiskFaviconCache.retainOnly` and `clearAll`, and the screenshot equivalents, delete stray temp files; add one if not. Make T033 green.
+  Note: the swept-temp check needed no change. Favicon `retainOnly` deletes every name that is not a kept `<key>.png`, and both caches' `clearAll` delete everything. The screenshot cache has no `retainOnly`. The race test repeats 10 rounds, because one round did not fail every time on the old code.
+- [X] T035 [P] [US4] In `T/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCaseTest.kt`, add failing tests:
   - `invoice‮fdp.apk` gives a name with no U+202E, ending in `.apk`;
   - a name of only format characters plus `.pdf` gives the default name with `.pdf`;
   - the cap is 245 bytes.
-- [ ] T036 [US4] In `M/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCase.kt`, drop `Character.getType(c) == Character.FORMAT`. Set `BrowserLimits.MAX_FILE_NAME_BYTES = 245` with a one-line reason (room for the system's " (1)" suffix). Make T035 green.
-- [ ] T037 [P] [US4] In `T/feature/downloads/data/datasource/local/AndroidExternalFileOpenerTest.kt`, add failing cases for `binary/octet-stream`, `application/force-download`, `application/x-download` and `application/download`. Then extend the generic set in `M/feature/downloads/data/datasource/local/AndroidExternalFileOpener.kt` as a named constant set.
-- [ ] T038 [US4] Run G1 and the downloads instrumented tests on `emulator-5554`. Commit `fix(downloads): confirmed deletes, unique temp files, honest names (032 US4)` (FR-018 – FR-023).
+- [X] T036 [US4] In `M/feature/browser/domain/usecase/SanitizeDownloadFileNameUseCase.kt`, drop `Character.getType(c) == Character.FORMAT`. Set `BrowserLimits.MAX_FILE_NAME_BYTES = 245` with a one-line reason (room for the system's " (1)" suffix). Make T035 green.
+  Note: the filter uses Kotlin's `CharCategory.FORMAT`, the same category. A base erased by that filter is replaced by `download` (`.hidden` still becomes `hidden`). The 245-byte cap is pinned by a constant check, and the existing four-byte-base test now uses a 239-character extension so it still fits.
+- [X] T037 [P] [US4] In `T/feature/downloads/data/datasource/local/AndroidExternalFileOpenerTest.kt`, add failing cases for `binary/octet-stream`, `application/force-download`, `application/x-download` and `application/download`. Then extend the generic set in `M/feature/downloads/data/datasource/local/AndroidExternalFileOpener.kt` as a named constant set.
+- [X] T038 [US4] Run G1 and the downloads instrumented tests on `emulator-5554`. Commit `fix(downloads): confirmed deletes, unique temp files, honest names (032 US4)` (FR-018 – FR-023).
 
 ## Phase 7: User Story 5 – Import and search stay quick and keep every bookmark (P2)
 

@@ -30,6 +30,7 @@ class AndroidDownloadManagerGatewayTest {
     @Before
     fun setUp() {
         querySizes.clear()
+        failingQuery = NO_FAILING_QUERY
     }
 
     @Test
@@ -45,11 +46,38 @@ class AndroidDownloadManagerGatewayTest {
         assertEquals(handles.toSet(), statuses.keys)
     }
 
+    @Test
+    fun `a download the service did not remove leaves a same-named file alone`() = runTest {
+        val file = DownloadedFileProbe.publicDownloadFile(FILE_NAME).apply {
+            parentFile?.mkdirs()
+            writeText("kept")
+        }
+
+        val deleted = AndroidDownloadManagerGateway(app).deleteFile(UNKNOWN_HANDLE, FILE_NAME)
+
+        assertTrue(deleted)
+        assertTrue(file.exists())
+    }
+
+    @Test
+    fun `one failing status query keeps the statuses of the other parts`() = runTest {
+        val manager = checkNotNull(app.getSystemService<DownloadManager>())
+        val handles = List(HANDLES) { manager.enqueue(DownloadManager.Request(Uri.parse("https://x.example/$it"))) }
+        querySizes.clear()
+        failingQuery = SECOND_QUERY
+
+        val statuses = AndroidDownloadManagerGateway(app).queryStatuses(handles)
+
+        val chunks = handles.chunked(DownloadLimits.STATUS_QUERY_CHUNK)
+        assertEquals((chunks[0] + chunks[2]).toSet(), statuses.keys)
+    }
+
     @Implements(DownloadManager::class)
     class CountingShadow : ShadowDownloadManager() {
         @Implementation
         override fun query(query: DownloadManager.Query): Cursor {
             querySizes += Shadow.extract<ShadowQuery>(query).ids.size
+            check(querySizes.size != failingQuery) { "query failed" }
             return super.query(query)
         }
     }
@@ -57,6 +85,11 @@ class AndroidDownloadManagerGatewayTest {
     private companion object {
         const val HANDLES = 1_200
         const val MIN_QUERIES = 3
+        const val NO_FAILING_QUERY = -1
+        const val SECOND_QUERY = 2
+        const val UNKNOWN_HANDLE = 9_999L
+        const val FILE_NAME = "report.pdf"
         val querySizes = mutableListOf<Int>()
+        var failingQuery = NO_FAILING_QUERY
     }
 }

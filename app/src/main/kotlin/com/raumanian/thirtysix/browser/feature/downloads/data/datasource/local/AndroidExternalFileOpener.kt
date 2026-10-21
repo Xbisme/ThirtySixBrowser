@@ -21,8 +21,7 @@ class AndroidExternalFileOpener @Inject constructor(
     override fun open(contentUri: String, mimeType: String, fileName: String): Boolean = runCatching {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(contentUri.toUri(), resolveType(mimeType, fileName))
-            // Launched from a non-Activity context, so a new task is required; the read
-            // grant is what lets the receiving app actually read the content URI.
+            // A non-Activity context needs a new task; the read grant lets the other app open the URI.
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         context.startActivity(intent)
@@ -30,13 +29,20 @@ class AndroidExternalFileOpener @Inject constructor(
     }.getOrDefault(false)
 
     private fun resolveType(mimeType: String, fileName: String): String =
-        mimeType.takeUnless { it.isBlank() || it == GENERIC_BINARY_TYPE }
+        mimeType.takeUnless { it.isBlank() || it.lowercase() in GENERIC_BINARY_TYPES }
             ?: MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileName.substringAfterLast('.', "").lowercase())
             ?: FALLBACK_MIME_TYPE
 
     private companion object {
         /** Lets the chooser offer anything when the server declared no usable type. */
         const val FALLBACK_MIME_TYPE = "*/*"
-        const val GENERIC_BINARY_TYPE = "application/octet-stream"
+
+        val GENERIC_BINARY_TYPES = setOf(
+            "application/octet-stream",
+            "binary/octet-stream",
+            "application/force-download",
+            "application/x-download",
+            "application/download",
+        )
     }
 }

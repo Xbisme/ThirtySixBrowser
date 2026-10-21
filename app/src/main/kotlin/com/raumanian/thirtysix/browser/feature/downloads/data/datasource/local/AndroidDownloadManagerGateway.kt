@@ -45,7 +45,10 @@ class AndroidDownloadManagerGateway @Inject constructor(
                     null -> emptyMap()
                     else -> buildMap<Long, DownloadStatus> {
                         transferHandles.chunked(DownloadLimits.STATUS_QUERY_CHUNK).forEach { chunk ->
-                            manager.query(buildQuery(chunk))?.use { putAll(DownloadStatusCursorMapper.readAll(it)) }
+                            // A failed part only loses its own statuses, not the parts already read.
+                            runCatching {
+                                manager.query(buildQuery(chunk))?.use { DownloadStatusCursorMapper.readAll(it) }
+                            }.getOrNull()?.let(::putAll)
                         }
                     }
                 }
@@ -75,9 +78,11 @@ class AndroidDownloadManagerGateway @Inject constructor(
     }.getOrNull()
 
     // `remove` is what deletes a managed file (a provider-row delete can leave it on disk), so verify.
+    // A download the service no longer knows may share its name with another file, which stays.
     override suspend fun deleteFile(transferHandle: Long, fileName: String): Boolean =
         runCatching {
-            downloadManager?.remove(transferHandle)
+            val removed = downloadManager?.remove(transferHandle) ?: 0
+            if (removed <= 0) return true
             val file = DownloadedFileProbe.publicDownloadFile(fileName)
             if (file.exists()) file.delete()
             !file.exists()
