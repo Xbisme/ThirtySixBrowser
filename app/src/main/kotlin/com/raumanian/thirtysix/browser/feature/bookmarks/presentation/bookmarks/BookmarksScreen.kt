@@ -42,6 +42,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.raumanian.thirtysix.browser.R
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkUrlValidationError
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.component.SectionHeader
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.AppIcons
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.Dimens
@@ -193,7 +194,8 @@ private fun BookmarksContent(
 ) {
     when {
         state.isSearchActive -> {
-            if (state.searchResults.isEmpty() && state.searchQuery.isNotBlank()) {
+            val queryCounts = state.searchQuery.trim().length >= BrowserLimits.SEARCH_MIN_CHARS
+            if (state.searchResults.isEmpty() && queryCounts) {
                 NoSearchMatchesState(query = state.searchQuery)
             } else {
                 LazyColumn(

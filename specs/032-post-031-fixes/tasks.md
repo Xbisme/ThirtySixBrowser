@@ -143,19 +143,23 @@
 
 ## Phase 7: User Story 5 – Import and search stay quick and keep every bookmark (P2)
 
-- [ ] T039 [P] [US5] In `T/feature/bookmarks/data/datasource/local/NetscapeBookmarkParserTest.kt`, add failing tests:
+- [X] T039 [P] [US5] In `T/feature/bookmarks/data/datasource/local/NetscapeBookmarkParserTest.kt`, add failing tests:
   - a generated flat file of 10,000 links parses in under 1,500 ms on the JVM (loose bound; it fails at about 8 s today);
   - a 2 MB `<A HREF=…>` stream with no `</A>` parses in under 2,000 ms;
   - `https://a.example/#x#y`, `https://a.example/p[1]`, `https://münchen.de/` and `https://my_site.example.com/` are all imported, and their stored URLs pass `BookmarkUrlValidator`.
-- [ ] T040 [US5] In `M/feature/bookmarks/data/datasource/local/NetscapeBookmarkParser.kt`:
+- [X] T040 [US5] In `M/feature/bookmarks/data/datasource/local/NetscapeBookmarkParser.kt`:
   - `textUntilClose` searches entry boundaries only between `pos` and `close`, with an index-bounded case-insensitive scan, not a substring copy;
   - it applies boundaries only for `h3` and `a`;
   - it caches "no `</tag` after offset X" per tag, so later calls do not rescan;
   - `encodeUnsafe` encodes every `#` after the first, `[` and `]` after the authority, and converts the host with `IDN.toASCII(host, IDN.ALLOW_UNASSIGNED)`, catching `IllegalArgumentException` and treating it as skipped.
-- [ ] T041 [US5] In `M/core/domain/util/BookmarkUrlValidator.kt`, accept a host with `_`: when `URI.host` is null, read the host from `rawAuthority` without userinfo or port, and validate it with the existing host rules plus `_`. Add a case to `T/core/domain/util/BookmarkUrlValidatorTest.kt`. Make T039 green.
-- [ ] T042 [P] [US5] Add `A/feature/bookmarks/data/BookmarkImportScaleTest.kt`. Parse the 10k file from `LargeBookmarkFile` and a generated 10 MB unclosed file on the emulator, assert under 2 s and under 5 s (SC-005), and record the medians in Gate Results.
-- [ ] T043 [US5] In `M/feature/bookmarks/presentation/bookmarks/BookmarksScreen.kt` (line 196), show `NoSearchMatchesState` only when `searchQuery.trim().length >= BrowserLimits.SEARCH_MIN_CHARS`. Add a Compose test in `A/feature/bookmarks/presentation/bookmarks/` (or extend an existing one): one character shows no "no match" text.
-- [ ] T044 [US5] Run G1, plus `BookmarkTransferTest`, `BookmarkSearchScaleTest` and T042 on `emulator-5554`. Commit `fix(bookmarks): linear import, more addresses kept, quiet one-letter search (032 US5)` (FR-024 – FR-026).
+
+  Note: before the fix the 10k test took 3.7 s on the JVM (not 8 s) and the 2 MB unclosed test ran over 10 minutes. With only the linear scan, the 10 MB unclosed file took 5.7 s on the emulator, so per-link work was also trimmed: one cached scanner per marker, the whitespace and inner-tag regexes run only when needed, and an address with nothing to encode is returned as is.
+- [X] T041 [US5] In `M/core/domain/util/BookmarkUrlValidator.kt`, accept a host with `_`: when `URI.host` is null, read the host from `rawAuthority` without userinfo or port, and validate it with the existing host rules plus `_`. Add a case to `T/core/domain/util/BookmarkUrlValidatorTest.kt`. Make T039 green.
+- [X] T042 [P] [US5] Add `A/feature/bookmarks/data/BookmarkImportScaleTest.kt`. Parse the 10k file from `LargeBookmarkFile` and a generated 10 MB unclosed file on the emulator, assert under 2 s and under 5 s (SC-005), and record the medians in Gate Results.
+- [X] T043 [US5] In `M/feature/bookmarks/presentation/bookmarks/BookmarksScreen.kt` (line 196), show `NoSearchMatchesState` only when `searchQuery.trim().length >= BrowserLimits.SEARCH_MIN_CHARS`. Add a Compose test in `A/feature/bookmarks/presentation/bookmarks/` (or extend an existing one): one character shows no "no match" text.
+
+  Note: no Compose test rendered `BookmarksScreen`, so `BookmarksScreenSearchTest` is new.
+- [X] T044 [US5] Run G1, plus `BookmarkTransferTest`, `BookmarkSearchScaleTest` and T042 on `emulator-5554`. Commit `fix(bookmarks): linear import, more addresses kept, quiet one-letter search (032 US5)` (FR-024 – FR-026).
 
 ## Phase 8: User Story 6 – Smaller fixes (P3)
 
@@ -195,4 +199,4 @@ The MVP is US1, because it is the security regression. Then US2 (leaks and crash
 | Release APK size | 3,860,303 B | |
 | `main` Kotlin lines | 31,763 | |
 | Quickstart Q1–Q8 | n/a | |
-| Import 10k / 10 MB unclosed | n/a | |
+| Import 10k / 10 MB unclosed | n/a | 228 ms / 3,899 ms medians of 5 on `TA016_API36_16K` (budgets 2 s / 5 s) |

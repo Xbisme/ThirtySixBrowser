@@ -3,6 +3,7 @@ package com.raumanian.thirtysix.browser.feature.bookmarks.data.datasource.local
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Folder
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Link
+import com.raumanian.thirtysix.browser.core.domain.util.BookmarkUrlValidator
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
@@ -10,6 +11,7 @@ import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.BookmarkTr
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.ParsedBookmarkFile
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.UpdateBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.fixture.BookmarkFiles
+import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -252,6 +254,52 @@ class NetscapeBookmarkParserTest {
     }
 
     @Test
+    fun `ten thousand links parse in time proportional to the file`() {
+        val text = buildString {
+            append("<!DOCTYPE NETSCAPE-Bookmark-file-1><DL><p>\n")
+            repeat(MANY_LINKS) { append("<DT><A HREF=\"https://site$it.example/\">t$it</A>\n") }
+            append("</DL>")
+        }
+
+        val elapsed = measureTimeMillis { assertEquals(MANY_LINKS, parse(text)!!.linkCount) }
+
+        assertTrue("took $elapsed ms", elapsed < FLAT_BUDGET_MS)
+    }
+
+    @Test
+    fun `a long stream of links without close tags parses in time proportional to the file`() {
+        val text = buildString {
+            append("<!DOCTYPE NETSCAPE-Bookmark-file-1><DL>")
+            var i = 0
+            while (length < UNCLOSED_CHARS) append("<DT><A HREF=\"https://s${i++}.example/\">t")
+        }
+
+        val elapsed = measureTimeMillis { assertTrue(parse(text)!!.linkCount > 0) }
+
+        assertTrue("took $elapsed ms", elapsed < UNCLOSED_BUDGET_MS)
+    }
+
+    @Test
+    fun `a second hash, brackets in the path, an international host and an underscore host are kept`() {
+        val file = parse(
+            "<DL><DT><A HREF=\"https://a.example/#x#y\">a</A><DT><A HREF=\"https://a.example/p[1]\">b</A>" +
+                "<DT><A HREF=\"https://münchen.de/\">c</A><DT><A HREF=\"https://my_site.example.com/\">d</A></DL>",
+        )!!
+
+        val urls = file.root.children.map { (it as Link).url }
+        assertEquals(
+            listOf(
+                "https://a.example/#x%23y",
+                "https://a.example/p%5B1%5D",
+                "https://xn--mnchen-3ya.de/",
+                "https://my_site.example.com/",
+            ),
+            urls,
+        )
+        urls.forEach { assertTrue(it, BookmarkUrlValidator.validate(it) is Result.Success) }
+    }
+
+    @Test
     fun `numeric and named entities decode, unknown ones stay`() {
         assertEquals(
             "a & b < c > \"d\" 'e'   é 😀 &bogus; &#xFFFFFFF;",
@@ -263,5 +311,9 @@ class NetscapeBookmarkParserTest {
 
     private companion object {
         const val UNTITLED = "Untitled folder"
+        const val MANY_LINKS = 10_000
+        const val FLAT_BUDGET_MS = 1_500L
+        const val UNCLOSED_CHARS = 2_000_000
+        const val UNCLOSED_BUDGET_MS = 2_000L
     }
 }

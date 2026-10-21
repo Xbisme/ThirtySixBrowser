@@ -68,6 +68,19 @@ class BookmarkUrlValidatorTest {
         assertEquals(Result.Success("https://example.com/path?q=test"), result)
     }
 
+    @Test
+    fun `a host with an underscore is accepted, with userinfo and port`() {
+        val plain = "https://my_site.example.com/"
+        val full = "http://u:p@a_b.example:8080/x"
+        assertEquals(Result.Success(plain), BookmarkUrlValidator.validate(plain))
+        assertEquals(Result.Success(full), BookmarkUrlValidator.validate(full))
+    }
+
+    @Test
+    fun `an authority that is not a host name is still rejected`() {
+        assertReason(BookmarkUrlValidator.validate("https://%20x/"), BookmarkUrlValidationError.MissingHost)
+    }
+
     private fun assertReason(result: Result<String>, expected: BookmarkUrlValidationError) {
         assertTrue("Expected Result.Error but got $result", result is Result.Error)
         val error = (result as Result.Error).throwable
