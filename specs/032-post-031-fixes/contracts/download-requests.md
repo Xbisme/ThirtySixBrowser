@@ -17,6 +17,8 @@ Evaluated in order:
 4. Same origin (scheme + host + port) → the page URL without its fragment.
 5. Otherwise → the page origin (`scheme://host[:port]/`).
 
+Long-press downloads use `DownloadReferrer.originOnly`: the same rules, but step 4 also gives the origin. Their URL is the link before any redirect, and the download service sends the same headers on every hop.
+
 ## Tap rule for hand-off (updates the Spec 031 contract)
 
 A navigation to another app counts as tapped when one of these holds:

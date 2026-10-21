@@ -93,7 +93,7 @@ All checks ran on `emulator-5554` (`TA016_API36_16K`, API 36).
 
 ## Open points for review
 
-- **Referrer on a redirect from the same origin.** The referrer is decided against the first download URL. A same-origin link that redirects to another site therefore sends the full page address to that site: Q3 logged `Referer='http://localhost:8711/q3'` at `127.0.0.1:8712`. This follows the FR-004 contract, which is per request. The download service cannot change headers between hops, so sending only the origin here would mean always sending the origin from long-press downloads.
+- **Long-press downloads send only the origin as referrer, even on the same site** (follow-up commit). Q3 showed that a same-site link redirecting to another site handed that site the full page address, because the download service sends the same headers on every hop. Page-started downloads keep the full same-origin rule, since the WebView has already followed the redirects.
 - Two flakes are left as they are. `TrackerBlockingTest` (code this spec does not touch) waits on the blocked host set, then asserts the count. The rotation test failed once on API 29. Both passed every rerun.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

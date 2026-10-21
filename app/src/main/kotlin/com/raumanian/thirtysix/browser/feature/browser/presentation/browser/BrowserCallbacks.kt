@@ -110,6 +110,6 @@ internal fun longPressDownloadRequest(
     userAgent = userAgent,
     contentDisposition = null,
     mimeType = null,
-    referer = DownloadReferrer.of(pageUrl, url, isIncognito),
+    referer = DownloadReferrer.originOnly(pageUrl, url, isIncognito),
     cookies = null,
 )

@@ -23,6 +23,10 @@ object DownloadReferrer {
         }
     }
 
+    /** Like [of], but never the full address: the download service may follow redirects to another site. */
+    fun originOnly(pageUrl: String?, downloadUrl: String, isIncognito: Boolean): String? =
+        of(pageUrl, downloadUrl, isIncognito)?.let { pageUrl?.let(::parse)?.let(::origin) }
+
     private fun parse(url: String): URI? = try {
         URI(url)
     } catch (_: URISyntaxException) {
