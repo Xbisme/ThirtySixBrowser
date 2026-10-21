@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 /** In-memory [SitePermissionRepository] with the same https-only rule. */
 class FakeSitePermissionRepository : SitePermissionRepository {
     val rows = MutableStateFlow<List<SitePermissionDecision>>(emptyList())
+    var removeSitesError: Throwable? = null
 
     override fun observeAll(): Flow<List<SitePermissionDecision>> = rows
 
@@ -30,6 +31,12 @@ class FakeSitePermissionRepository : SitePermissionRepository {
 
     override suspend fun removeSite(origin: String): Result<Unit> {
         rows.update { list -> list.filterNot { it.origin == origin } }
+        return Result.Success(Unit)
+    }
+
+    override suspend fun removeSites(origins: Collection<String>): Result<Unit> {
+        removeSitesError?.let { return Result.Error(it) }
+        rows.update { list -> list.filterNot { it.origin in origins } }
         return Result.Success(Unit)
     }
 

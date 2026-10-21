@@ -15,6 +15,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeScreenshotCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.HttpsUpgradeFailureStore
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.feature.settings.domain.model.ClearBrowsingDataCategory
 import java.io.IOException
@@ -43,6 +44,7 @@ class ClearBrowsingDataUseCaseTest {
     private val incognitoProtection = IncognitoProtectionExceptionStore()
     private val fireproof = FakeFireproofSiteRepository()
     private val tabSessions = FakeTabSessionRepository()
+    private val httpsFailures = HttpsUpgradeFailureStore()
     private val useCase = ClearBrowsingDataUseCase(
         ClearBrowsingHistoryUseCase(history, tabSessions),
         web,
@@ -54,7 +56,19 @@ class ClearBrowsingDataUseCaseTest {
         protectionExceptions,
         incognitoProtection,
         fireproof,
+        httpsFailures,
     )
+
+    @Test
+    fun `clearing history also forgets the hosts that failed the https upgrade`() = runTest {
+        httpsFailures.markFailed("plain.example")
+
+        useCase(setOf(ClearBrowsingDataCategory.CookiesAndSiteData))
+        assertEquals(setOf("plain.example"), httpsFailures.snapshot())
+
+        useCase(setOf(ClearBrowsingDataCategory.History))
+        assertTrue(httpsFailures.snapshot().isEmpty())
+    }
 
     @Test
     fun `sites without protection are cleared only when their category is selected`() = runTest {

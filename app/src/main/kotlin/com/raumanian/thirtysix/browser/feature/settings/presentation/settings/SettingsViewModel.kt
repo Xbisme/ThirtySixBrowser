@@ -12,6 +12,7 @@ import com.raumanian.thirtysix.browser.core.domain.repository.DefaultBrowserCont
 import com.raumanian.thirtysix.browser.core.domain.repository.SettingsRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.SetAppLanguageUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
+import com.raumanian.thirtysix.browser.core.domain.util.ApplicationScope
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.settings.domain.model.ClearBrowsingDataCategory
 import com.raumanian.thirtysix.browser.feature.settings.domain.model.HistoryRetentionChangeResult
@@ -20,6 +21,8 @@ import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ClearBrow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -48,6 +51,7 @@ class SettingsViewModel @Inject constructor(
     private val defaultBrowser: DefaultBrowserController,
     @Named(AppConstants.QUALIFIER_SUPPORTS_DYNAMIC_COLOR) supportsDynamicColor: Boolean,
     @Named(AppConstants.QUALIFIER_APP_VERSION_NAME) appVersionName: String,
+    @param:ApplicationScope private val appScope: CoroutineScope,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SettingsUiState> = MutableStateFlow(
@@ -186,12 +190,14 @@ class SettingsViewModel @Inject constructor(
     }
 
     // Runs the clear exactly once; the dialog stays open, in progress, until it finishes.
+    // The clear runs in the app scope so leaving Settings cannot stop it; only the result is dropped.
     private fun onClearBrowsingDataConfirmed() {
         val dialog = _uiState.value.dialog as? SettingsDialog.ClearBrowsingData
         if (dialog == null || dialog.inProgress || dialog.selection.isEmpty()) return
         _uiState.update { it.copy(dialog = dialog.copy(inProgress = true)) }
+        val clearing = appScope.async { clearBrowsingData(dialog.selection) }
         viewModelScope.launch {
-            val result = clearBrowsingData(dialog.selection)
+            val result = clearing.await()
             dismissDialog()
             _events.tryEmit(
                 if (result.failed.isEmpty()) {

@@ -23,8 +23,8 @@ interface IncognitoTabRepository {
     /** Closing the last incognito tab restores the cookie snapshot before this returns. */
     suspend fun closeTab(tabId: Long)
 
-    /** Restores the cookie snapshot exactly once. */
-    suspend fun closeAll()
+    /** Restores the cookie snapshot exactly once; false when the jar could not be wiped first. */
+    suspend fun closeAll(): Boolean
 }
 
 class MaxIncognitoTabsReachedException :

@@ -117,7 +117,7 @@ private object NoopIncognitoTabRepository : IncognitoTabRepository {
     override suspend fun switchActiveTab(tabId: Long) = Unit
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
     override suspend fun closeTab(tabId: Long) = Unit
-    override suspend fun closeAll() = Unit
+    override suspend fun closeAll(): Boolean = true
 }
 
 private object NoopFaviconCache : FaviconCache {

@@ -9,6 +9,7 @@ import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeCaptureCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
@@ -20,6 +21,7 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
 import com.raumanian.thirtysix.browser.feature.privacy.domain.repository.FireMarkerRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,10 +42,13 @@ class FireCoordinatorImplTest {
     private val markerDuringSteps = mutableListOf<Boolean>()
     private var gate: CompletableDeferred<Unit>? = null
     private var runs = 0
+    private var throwAt: FireStep? = null
 
     private val observer = object : FireStepObserver {
         override suspend fun beforeStep(step: FireStep) {
             markerDuringSteps += marker.value
+            // A stray CancellationException is the one throwable a run lets escape.
+            if (step == throwAt) throw CancellationException("stray")
             if (step == FireStep.CollectHosts) {
                 runs++
                 gate?.await()
@@ -109,6 +114,31 @@ class FireCoordinatorImplTest {
         assertEquals(FireState.Idle, coordinator.state.value)
     }
 
+    @Test
+    fun `a run that throws still finishes and clears the marker`() = runTest(StandardTestDispatcher()) {
+        val coordinator = coordinator(this)
+        throwAt = FireStep.History
+
+        coordinator.fire()
+        advanceUntilIdle()
+
+        assertFalse(marker.value)
+        val state = coordinator.state.value as FireState.Finished
+        assertTrue(FireStep.History in state.result.failedSteps)
+    }
+
+    @Test
+    fun `an interrupted run that throws at launch does not stop the app from opening`() =
+        runTest(StandardTestDispatcher()) {
+            val coordinator = coordinator(this)
+            marker.value = true
+            throwAt = FireStep.CollectHosts
+
+            coordinator.resumeIfInterrupted()
+
+            assertFalse(marker.value)
+        }
+
     private fun runFire() = RunFireUseCase(
         FakeFireproofSiteRepository(),
         FakeHistoryRepository(),
@@ -121,6 +151,7 @@ class FireCoordinatorImplTest {
         FakeCookieJarSnapshotManager(),
         FakeFaviconCache(),
         FakeScreenshotCache(),
+        FakeCaptureCache(),
         FakeBookmarkRepository(),
         object : HttpsUpgradeFailures {
             override fun markFailed(host: String) = Unit

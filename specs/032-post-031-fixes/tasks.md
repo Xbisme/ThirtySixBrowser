@@ -52,39 +52,39 @@
 
 **Goal**: no cookie leaks, minimal referrer, robust Fire, photos swept, clearing finishes. **Independent test**: quickstart Q3, plus the unit tests.
 
-- [ ] T011 [P] [US2] Write `T/feature/browser/domain/DownloadReferrerTest.kt` first. It covers each rule of the contract in order: incognito, a `data:` page, https → http, same origin with a `#frag` removed, cross origin giving the origin with a port kept.
-- [ ] T012 [US2] Create `M/feature/browser/domain/DownloadReferrer.kt`, an `object` with `fun of(pageUrl: String?, downloadUrl: String, isIncognito: Boolean): String?`, pure Kotlin with `java.net.URI`. Use it in `M/BR/BrowserWebView.kt` (download listener) and `M/BR/BrowserCallbacks.kt` (long press). Make T011 green.
-- [ ] T013 [US2] In `M/BR/BrowserCallbacks.kt` (long-press `onDownload`, around lines 93-102), pass `cookies = null` and drop the jar lookup. Add a one-line comment: the download service follows redirects with the same headers. Add a test, in the place that builds the long-press `DownloadRequestAction.Requested` (extract a pure builder if needed), that asserts `cookies == null`.
-- [ ] T014 [P] [US2] In `T/feature/privacy/domain/usecase/RunFireUseCaseTest.kt`, add failing tests:
+- [X] T011 [P] [US2] Write `T/feature/browser/domain/DownloadReferrerTest.kt` first. It covers each rule of the contract in order: incognito, a `data:` page, https → http, same origin with a `#frag` removed, cross origin giving the origin with a port kept.
+- [X] T012 [US2] Create `M/feature/browser/domain/DownloadReferrer.kt`, an `object` with `fun of(pageUrl: String?, downloadUrl: String, isIncognito: Boolean): String?`, pure Kotlin with `java.net.URI`. Use it in `M/BR/BrowserWebView.kt` (download listener) and `M/BR/BrowserCallbacks.kt` (long press). Make T011 green.
+- [X] T013 [US2] In `M/BR/BrowserCallbacks.kt` (long-press `onDownload`, around lines 93-102), pass `cookies = null` and drop the jar lookup. Add a one-line comment: the download service follows redirects with the same headers. Add a test, in the place that builds the long-press `DownloadRequestAction.Requested` (extract a pure builder if needed), that asserts `cookies == null`.
+- [X] T014 [P] [US2] In `T/feature/privacy/domain/usecase/RunFireUseCaseTest.kt`, add failing tests:
   - (a) when `FakeFireproofSiteRepository.observeAll()` throws, `invoke()` returns normally; `failed` contains `CookiesAndSiteData`, the favicon step and the site-permission step; history and tabs are still cleared;
   - (b) `restoreSnapshot()` returning `false` puts `CloseIncognito` in `failed`, and the cookie step calls `clearCookiesAndSiteData()` instead of keep-set clearing;
   - (c) `removeSites` returning `Result.Error` puts the site-permission step in `failed`.
-- [ ] T015 [US2] Make the domain changes:
+- [X] T015 [US2] Make the domain changes:
   - `M/core/domain/repository/CookieJarSnapshotManager.kt`: `restoreSnapshot(): Boolean`;
   - `M/feature/privacy/data/datasource/local/CookieJarSnapshotManagerImpl.kt`: return `false` when `removeAllCookiesAwait` times out or throws, and keep the write-back;
   - update `T/core/testing/fake/FakeCookieJarSnapshotManager.kt` and every caller;
   - `M/core/domain/repository/SitePermissionRepository.kt`: add `suspend fun removeSites(origins: Collection<String>): Result<Unit>`;
   - `M/core/data/datasource/local/SitePermissionDao.kt`: `@Query("DELETE FROM … WHERE origin IN (:origins)") suspend fun deleteOrigins(origins: List<String>): Int`, chunked by the existing 500 limit pattern if origins can exceed 999;
   - implement in `M/feature/sitepermission/data/repository/SitePermissionRepositoryImpl.kt`, and update its fake.
-- [ ] T016 [US2] In `M/feature/privacy/domain/usecase/RunFireUseCase.kt`:
+- [X] T016 [US2] In `M/feature/privacy/domain/usecase/RunFireUseCase.kt`:
   - read the keep set with `runCatching`;
   - on failure, add the three dependent steps to `failed` and skip them; never use an empty set;
   - use `restoreSnapshot()`'s result for `CloseIncognito` and force the full wipe in `clearSiteData` when it is false;
   - replace the per-origin `removeSite` loop with one `removeSites`, throwing inside `run` on `Result.Error`.
 
   In `FireCoordinatorImpl` (`M/feature/privacy/…/FireCoordinator*.kt`), wrap the run so any throwable becomes a failed result and the marker is cleared. Add a test that a throwing use case clears the marker. Make T014 green.
-- [ ] T017 [P] [US2] Add `T/core/data/datasource/local/SitePermissionDaoTest.kt` cases (in-memory Room): `deleteOrigins` removes exactly those origins.
-- [ ] T018 [US2] Sweep the upload photos:
+- [X] T017 [P] [US2] Add `T/core/data/datasource/local/SitePermissionDaoTest.kt` cases (in-memory Room): `deleteOrigins` removes exactly those origins.
+- [X] T018 [US2] Sweep the upload photos:
   - create `M/core/domain/repository/CaptureCache.kt` (`suspend fun clear()`) and `M/feature/browser/data/repository/CaptureCacheImpl.kt`, which calls `CaptureFiles.clear(context)` on the injected IO dispatcher;
   - bind it in `M/feature/browser/di/`;
   - inject it into `RunFireUseCase` and call it in its cleanup step, inside `run`;
   - in `M/BR/page/BrowserPageRequests.kt` `rememberPageSession`, call `CaptureFiles.clear(context)` once when the session is created, off the main thread.
 
   Add `T/feature/browser/data/repository/CaptureCacheImplTest.kt` (Robolectric).
-- [ ] T019 [P] [US2] In `T/feature/settings/presentation/settings/SettingsViewModelTest.kt`, add a failing test: start clearing, cancel `viewModelScope` (clear the VM), and check that every chosen category still ran on the fake use case.
-- [ ] T020 [US2] In `M/feature/settings/presentation/settings/SettingsViewModel.kt`, inject `@ApplicationScope CoroutineScope` and launch `clearBrowsingData` there. Deliver the result event through the existing channel, ignoring it if the VM is cleared. Make T019 green.
-- [ ] T021 [P] [US2] In `T/feature/settings/domain/usecase/ClearBrowsingDataUseCaseTest.kt`, add a failing test: the History category calls `HttpsUpgradeFailures.clear()`. Then inject `HttpsUpgradeFailures` into `M/feature/settings/domain/usecase/ClearBrowsingDataUseCase.kt` and call `clear()` in the History step.
-- [ ] T022 [US2] Run G1. Run `FireDataTest`, `CookieRestoreInstrumentedTest`, `IncognitoIsolationTest` and the settings clear-data instrumented tests on `emulator-5554`. Commit `fix(privacy): no leaked cookies or referrer, sturdier Fire, photos swept (032 US2)` (FR-003 – FR-010).
+- [X] T019 [P] [US2] In `T/feature/settings/presentation/settings/SettingsViewModelTest.kt`, add a failing test: start clearing, cancel `viewModelScope` (clear the VM), and check that every chosen category still ran on the fake use case.
+- [X] T020 [US2] In `M/feature/settings/presentation/settings/SettingsViewModel.kt`, inject `@ApplicationScope CoroutineScope` and launch `clearBrowsingData` there. Deliver the result event through the existing channel, ignoring it if the VM is cleared. Make T019 green.
+- [X] T021 [P] [US2] In `T/feature/settings/domain/usecase/ClearBrowsingDataUseCaseTest.kt`, add a failing test: the History category calls `HttpsUpgradeFailures.clear()`. Then inject `HttpsUpgradeFailures` into `M/feature/settings/domain/usecase/ClearBrowsingDataUseCase.kt` and call `clear()` in the History step.
+- [X] T022 [US2] Run G1. Run `FireDataTest`, `CookieRestoreInstrumentedTest`, `IncognitoIsolationTest` and the settings clear-data instrumented tests on `emulator-5554`. Commit `fix(privacy): no leaked cookies or referrer, sturdier Fire, photos swept (032 US2)` (FR-003 – FR-010).
 
 ## Phase 5: User Story 3 – Tabs and errors behave (P1)
 

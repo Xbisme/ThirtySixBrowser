@@ -16,6 +16,7 @@ import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryU
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
 import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeCaptureCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeCookieJarSnapshotManager
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFaviconCache
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
@@ -59,9 +60,11 @@ class RunFireUseCaseTest {
         emit(listOf(tab(-1L, "https://secret.test/", incognito = true)))
     }
     private val incognito: IncognitoTabRepository = object : IncognitoTabRepository by incognitoFake {
-        override suspend fun closeAll() {
+        // As in the real repository, closing the last incognito tab restores the cookie jar.
+        override suspend fun closeAll(): Boolean {
             log += CALL_CLOSE_INCOGNITO
             incognitoFake.closeAll()
+            return cookies.restoreSnapshot()
         }
     }
     private val permissions = FakeSitePermissionRepository()
@@ -71,6 +74,7 @@ class RunFireUseCaseTest {
     private val favicons = FakeFaviconCache(log)
     private val screenshots = FakeScreenshotCache(log)
     private val bookmarks = FakeBookmarkRepository()
+    private val captures = FakeCaptureCache()
     private val failures = FakeFailures()
     private val session = FakeSession()
     private val observer = object : FireStepObserver {
@@ -87,7 +91,7 @@ class RunFireUseCaseTest {
     private val useCase = RunFireUseCase(
         fireproof, history, ClearBrowsingHistoryUseCase(history, tabSessions),
         tabs, incognito, permissions, grants, web, cookies,
-        favicons, screenshots, bookmarks, failures, session, observer, TestDispatchers,
+        favicons, screenshots, captures, bookmarks, failures, session, observer, TestDispatchers,
     )
 
     @Test
@@ -261,6 +265,53 @@ class RunFireUseCaseTest {
 
         assertTrue(second.failedSteps.isEmpty())
         assertEquals(listOf(HOME), tabsFake.observeTabs().first().map { it.url })
+    }
+
+    @Test
+    fun `an unreadable fireproof list skips the steps that need it and never treats it as empty`() = runTest {
+        fireproof.observeAllError = IOException("disk")
+        history.recordVisit("https://news.test/a", "", 1L)
+        permissions.save("https://camera.test", SiteCapability.Camera, SiteDecision.Allow)
+
+        val result = useCase()
+
+        val skipped = setOf(FireStep.CookiesAndSiteData, FireStep.Favicons, FireStep.SitePermissions)
+        assertTrue(result.failedSteps.containsAll(skipped))
+        assertFalse(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
+        assertEquals(null, web.lastClearExcept)
+        assertFalse(FakeFaviconCache.CALL_RETAIN_ONLY in log)
+        assertEquals(1, permissions.rows.value.size)
+        assertTrue(history.recorded.isEmpty())
+        assertEquals(listOf(HOME), tabsFake.observeTabs().first().map { it.url })
+    }
+
+    @Test
+    fun `a failed cookie restore marks close-incognito failed and wipes every cookie`() = runTest {
+        fireproof.add("example.com")
+        cookies.restoreResult = false
+
+        val result = useCase()
+
+        assertTrue(FireStep.CloseIncognito in result.failedSteps)
+        assertTrue(FakeWebDataCleaner.CALL_CLEAR_SITE_DATA in log)
+        assertEquals(null, web.lastClearExcept)
+    }
+
+    @Test
+    fun `a failed permission removal is reported`() = runTest {
+        permissions.save("https://camera.test", SiteCapability.Camera, SiteDecision.Allow)
+        permissions.removeSitesError = IOException("disk")
+
+        val result = useCase()
+
+        assertTrue(FireStep.SitePermissions in result.failedSteps)
+    }
+
+    @Test
+    fun `upload photos are swept`() = runTest {
+        useCase()
+
+        assertEquals(1, captures.clearCount)
     }
 
     private class FakeFailures : HttpsUpgradeFailures {

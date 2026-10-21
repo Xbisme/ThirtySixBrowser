@@ -119,10 +119,10 @@ class IncognitoTabRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun closeAll() =
+    override suspend fun closeAll(): Boolean =
         withContext(dispatchers.io) {
             mutex.withLock {
-                if (state.value.isEmpty()) return@withLock
+                if (state.value.isEmpty()) return@withLock true
                 state.value = emptyList()
                 endSession()
             }
@@ -148,10 +148,16 @@ class IncognitoTabRepositoryImpl @Inject constructor(
     }
 
     /** `1 → 0`: the session's cookies and storage go; normal browsing keeps its own. */
-    private suspend fun endSession() {
-        if (isolatedSession) incognitoProfile.endSession() else cookieJarSnapshotManager.restoreSnapshot()
+    private suspend fun endSession(): Boolean {
+        val restored = if (isolatedSession) {
+            incognitoProfile.endSession()
+            true
+        } else {
+            cookieJarSnapshotManager.restoreSnapshot()
+        }
         isolatedSession = false
         // Incognito protection choices end with the session.
         incognitoProtectionExceptions.clear()
+        return restored
     }
 }

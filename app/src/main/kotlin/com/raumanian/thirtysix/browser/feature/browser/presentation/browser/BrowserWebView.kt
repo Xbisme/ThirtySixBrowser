@@ -44,6 +44,7 @@ import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.BuildLongPressMenuUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.DownloadReferrer
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ExternalLinkPolicy
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.ExternalAppLauncher
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequest
@@ -203,8 +204,9 @@ private fun buildConfiguredWebView(
     // Incognito downloads are recorded like any other; the flag only picks the jar the cookies come from.
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
         val cookies = WebViewProfiles.cookieManagerFor(state.isIncognito, incognitoProfile)?.getCookie(url)
+        val referer = DownloadReferrer.of(wv.url, url, state.isIncognito)
         callbacks.onDownloadRequested(
-            DownloadRequestAction.Requested(url, userAgent, contentDisposition, mimeType, wv.url, cookies),
+            DownloadRequestAction.Requested(url, userAgent, contentDisposition, mimeType, referer, cookies),
         )
     }
     wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }

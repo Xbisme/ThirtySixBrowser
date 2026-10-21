@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.DownloadReferrer
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.component.AddressBarCallbacks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.LongPressHooks
 import com.raumanian.thirtysix.browser.feature.browser.presentation.home.HomeCallbacks
@@ -91,18 +92,24 @@ internal fun rememberLongPressHooks(
             snackbarHostState = hosts.snackbarHostState,
             isIncognito = { currentIncognito },
             onDownload = { url ->
-                val jar = WebViewProfiles.cookieManagerFor(currentIncognito, context.incognitoWebProfile())
-                longPressDownload(
-                    DownloadRequestAction.Requested(
-                        url = url,
-                        userAgent = WebSettings.getDefaultUserAgent(context),
-                        contentDisposition = null,
-                        mimeType = null,
-                        referer = currentPageUrl,
-                        cookies = jar?.getCookie(url),
-                    ),
-                )
+                val userAgent = WebSettings.getDefaultUserAgent(context)
+                longPressDownload(longPressDownloadRequest(url, userAgent, currentPageUrl, currentIncognito))
             },
         )
     }
 }
+
+// No cookies: the download service follows redirects with the same headers, so they would reach any host.
+internal fun longPressDownloadRequest(
+    url: String,
+    userAgent: String,
+    pageUrl: String?,
+    isIncognito: Boolean,
+): DownloadRequestAction.Requested = DownloadRequestAction.Requested(
+    url = url,
+    userAgent = userAgent,
+    contentDisposition = null,
+    mimeType = null,
+    referer = DownloadReferrer.of(pageUrl, url, isIncognito),
+    cookies = null,
+)

@@ -124,7 +124,7 @@ internal object InstrumentedNoopIncognitoRepository : IncognitoTabRepository {
     override suspend fun switchActiveTab(tabId: Long) = Unit
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
     override suspend fun closeTab(tabId: Long) = Unit
-    override suspend fun closeAll() = Unit
+    override suspend fun closeAll(): Boolean = true
 }
 
 /** Records what "Copy URL" put on the clipboard without touching the platform service. */

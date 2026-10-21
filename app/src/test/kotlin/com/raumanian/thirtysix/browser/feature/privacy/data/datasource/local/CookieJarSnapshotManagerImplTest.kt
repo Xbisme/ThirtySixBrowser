@@ -51,7 +51,7 @@ class CookieJarSnapshotManagerImplTest {
         // Wipe the live jar then restore — this proves the snapshot held the
         // cookies (the public API does not expose the snapshot map directly).
         suspendRemoveAllCookies(cookieManager)
-        manager.restoreSnapshot()
+        assertTrue("a completed wipe reports success", manager.restoreSnapshot())
 
         val restoredA = cookieManager.getCookie(ORIGIN_A).orEmpty()
         val restoredB = cookieManager.getCookie(ORIGIN_B).orEmpty()
@@ -169,13 +169,13 @@ class CookieJarSnapshotManagerImplTest {
     }
 
     @Test
-    fun `a removal that never answers gives up after the time limit and later calls proceed`() = runTest {
+    fun `a removal that never answers times out, reports failure, and later calls proceed`() = runTest {
         val stuck = CookieJarSnapshotManagerImpl(VirtualTimeDispatchers(StandardTestDispatcher(testScheduler))) {
             FakeCookieManager()
         }
         stuck.captureSnapshot(listOf(ORIGIN_A))
 
-        stuck.restoreSnapshot()
+        assertFalse(stuck.restoreSnapshot())
         stuck.captureSnapshot(listOf(ORIGIN_A))
 
         assertTrue(testScheduler.currentTime <= BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS)

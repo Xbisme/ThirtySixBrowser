@@ -15,11 +15,14 @@ import com.raumanian.thirtysix.browser.core.testing.fake.FakeSettingsRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeTabSessionRepository
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeWebDataCleaner
+import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.HttpsUpgradeFailureStore
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ChangeHistoryRetentionUseCase
 import com.raumanian.thirtysix.browser.feature.settings.domain.usecase.ClearBrowsingDataUseCase
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /** Every parameter defaults to a fake, so a new constructor parameter changes no existing test. */
 @Suppress("LongParameterList")
@@ -40,12 +43,14 @@ internal fun settingsViewModel(
         protectionExceptions = FakeProtectionExceptionRepository(),
         incognitoProtectionExceptions = IncognitoProtectionExceptionStore(),
         fireproofSites = com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository(),
+        httpsUpgradeFailures = HttpsUpgradeFailureStore(),
     ),
     changeHistoryRetention: ChangeHistoryRetentionUseCase =
         ChangeHistoryRetentionUseCase(settingsRepository, historyRepository),
     supportsDynamicColor: Boolean = true,
     appVersionName: String = TEST_APP_VERSION_NAME,
     defaultBrowser: DefaultBrowserController = DefaultBrowserController { false },
+    appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
 ): SettingsViewModel = SettingsViewModel(
     settings = settingsRepository,
     languages = appLanguageController,
@@ -55,6 +60,7 @@ internal fun settingsViewModel(
     defaultBrowser = defaultBrowser,
     supportsDynamicColor = supportsDynamicColor,
     appVersionName = appVersionName,
+    appScope = appScope,
 )
 
 internal const val TEST_APP_VERSION_NAME: String = "9.9.9-test"

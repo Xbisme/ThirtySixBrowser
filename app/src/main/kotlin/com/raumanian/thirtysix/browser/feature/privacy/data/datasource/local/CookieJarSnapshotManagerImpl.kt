@@ -61,18 +61,18 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
             }
         }
 
-    override suspend fun restoreSnapshot() =
+    override suspend fun restoreSnapshot(): Boolean =
         withContext(dispatchers.io) {
             mutex.withLock {
-                val held = snapshot ?: return@withLock
+                val held = snapshot ?: return@withLock true
                 val cookieManager = runCatching { cookieManagers.get() }
                     .getOrNull()
                 if (cookieManager == null) {
                     snapshot = null
-                    return@withLock
+                    return@withLock false
                 }
                 // Wipe the live jar, including everything set during the incognito session.
-                runCatching { removeAllCookiesAwait(cookieManager) }
+                val wiped = runCatching { removeAllCookiesAwait(cookieManager) }.getOrDefault(false)
                 runCatching { cookieManager.flush() }
                 // Write back; attributes are lost in the round-trip (see CookieJarSnapshot).
                 held.entries.forEach { (origin, header) ->
@@ -87,6 +87,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
                 }
                 runCatching { cookieManager.flush() }
                 snapshot = null
+                wiped
             }
         }
 
@@ -104,7 +105,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
 
     // The callback form of removeAllCookies throws on a thread without a Looper (API 29, older
     // WebView), and the IO dispatcher has none, so the call hops to Main.
-    private suspend fun removeAllCookiesAwait(cookieManager: CookieManager) {
+    private suspend fun removeAllCookiesAwait(cookieManager: CookieManager): Boolean =
         withTimeoutOrNull(BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS) {
             withContext(Dispatchers.Main.immediate) {
                 suspendCancellableCoroutine<Unit> { continuation ->
@@ -113,8 +114,7 @@ class CookieJarSnapshotManagerImpl @Inject constructor(
                     }
                 }
             }
-        }
-    }
+        } != null
 
     private companion object {
         const val LOG_TAG: String = "CookieSnapshot"

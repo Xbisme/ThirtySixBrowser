@@ -60,7 +60,8 @@ class FakeIncognitoTabRepository : IncognitoTabRepository {
         state.update { it.filterNot { tab -> tab.id == tabId } }
     }
 
-    override suspend fun closeAll() {
+    override suspend fun closeAll(): Boolean {
         state.update { emptyList() }
+        return true
     }
 }
