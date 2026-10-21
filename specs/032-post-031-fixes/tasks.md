@@ -171,10 +171,10 @@
 
 ## Phase 9: Polish
 
-- [ ] T048 Run the full gates from [quickstart.md](quickstart.md): `connectedDebugAndroidTest` on `TA016_API36_16K` and `TA016_API29_CI`, assembleRelease with the 16 KB script, and the compose report.
-- [ ] T049 Run quickstart Q1–Q8 on `emulator-5554` and record each result.
-- [ ] T050 Run `python3 scripts/comment-check.py` on every changed `.kt` file. Grep the added source lines for `FR-`, task IDs, `Spec 03` and `ADR`, and expect none.
-- [ ] T051 Fill in Gate Results and write `specs/032-post-031-fixes/pr-description.md`: one line per audit item → FR → commit, the Q results, the gates and any deviations, ending with the attribution line. Push and open the PR only after the user confirms.
+- [X] T048 Run the full gates from [quickstart.md](quickstart.md): `connectedDebugAndroidTest` on `TA016_API36_16K` and `TA016_API29_CI`, assembleRelease with the 16 KB script, and the compose report.
+- [X] T049 Run quickstart Q1–Q8 on `emulator-5554` and record each result.
+- [X] T050 Run `python3 scripts/comment-check.py` on every changed `.kt` file. Grep the added source lines for `FR-`, task IDs, `Spec 03` and `ADR`, and expect none.
+- [X] T051 Fill in Gate Results and write `specs/032-post-031-fixes/pr-description.md`: one line per audit item → FR → commit, the Q results, the gates and any deviations, ending with the attribution line. Push and open the PR only after the user confirms.
 
 ## Dependencies
 
@@ -196,9 +196,10 @@ The MVP is US1, because it is the security regression. Then US2 (leaks and crash
 
 | Gate | Baseline (T001) | Final (T048–T049) |
 |---|---|---|
-| Unit tests | 1147, 0 failures | |
-| Instrumented tests | 225 `@Test` | |
-| Release APK size | 3,860,303 B | |
-| `main` Kotlin lines | 31,763 | |
-| Quickstart Q1–Q8 | n/a | |
-| Import 10k / 10 MB unclosed | n/a | 228 ms / 3,899 ms medians of 5 on `TA016_API36_16K` (budgets 2 s / 5 s) |
+| Unit tests | 1147, 0 failures | 1193, 0 failures; detekt, ktlintCheck, lintDebug green |
+| Instrumented tests | 225 `@Test` | 233 `@Test`. `TA016_API36_16K`: 233 run, 1 failure, a flake (`TrackerBlockingTest` count read before it settled; passed 3 of 3 reruns; no 032 change there). `TA016_API29_CI`: 241 run, 2 failures: `BookmarkImportScaleTest` 10 MB ran out of heap (fixed in `c9e1304`, then passed on both), `BrowserScreenInstrumentedTest.rotation_…` Espresso-Web timeout (passed 4 of 4 reruns) |
+| Release APK size | 3,860,303 B | 3,860,303 B (±0: alignment padding absorbs it). Compressed entries 3,715,040 → 3,720,591 B (+5,551); `classes.dex` +11,284 B raw. 16 KB check passes. Compose report: 0 restartable-but-not-skippable |
+| `main` Kotlin lines | 31,763 | 32,116 (+353) |
+| Quickstart Q1–Q8 | n/a | All pass on `emulator-5554` (Q1, Q1b, Q4, Q5, Q7, Q8 by instrumented tests; Q2, Q3, Q6 by hand) |
+| Import 10k / 10 MB unclosed | n/a | 228 ms / 3,899 ms medians of 5 on `TA016_API36_16K` (budgets 2 s / 5 s); rerun at T048: 248 ms / 3,860 ms; `TA016_API29_CI`: 124 ms / 2,626 ms |
+| Comment policy | n/a | `comment-check.py --base 97ec72d` on 82 changed `.kt` files: no forbidden, long-block or dense finding; no `FR-`, task ID, `Spec 03` or `ADR` in added source lines |
