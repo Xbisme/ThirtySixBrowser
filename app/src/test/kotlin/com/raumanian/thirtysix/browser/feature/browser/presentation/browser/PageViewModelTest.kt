@@ -476,6 +476,26 @@ class PageViewModelTest {
     }
 
     @Test
+    fun `a reload that fails keeps the tab's title`() = runTest(testDispatcher) {
+        val repo = FakeTabRepository()
+        val vm = newViewModel(tabRepository = repo)
+        advanceUntilIdle()
+        vm.onAction(PageAction.UrlChanged("https://example.com"))
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFinished("https://example.com"))
+        vm.onAction(PageAction.TitleReceived("Example"))
+        advanceUntilIdle()
+
+        vm.onAction(PageAction.UrlChanged("https://example.com"))
+        vm.onAction(PageAction.LoadStarted("https://example.com"))
+        vm.onAction(PageAction.LoadFailed(ErrorReason.NetworkUnavailable))
+        vm.onAction(PageAction.LoadFinished("https://example.com"))
+        advanceUntilIdle()
+
+        assertEquals("Example", repo.observeTabs().first().single().title)
+    }
+
+    @Test
     fun `Retry while Failed shows Loading at once`() = runTest {
         val vm = newViewModel()
         vm.onAction(PageAction.LoadStarted("https://example.com"))

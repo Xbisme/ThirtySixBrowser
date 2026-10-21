@@ -104,6 +104,8 @@
   - inline the pass-through `activeTab` property.
 
   Make T023 green.
+
+  Follow-up: a reload that fails no longer blanks the tab's title. While `Failed`, `persistActiveTabState` keeps the tab's own title when the address is unchanged (test `a reload that fails keeps the tab's title`).
 - [X] T025 [US3] In `M/BR/BrowserWebView.kt`:
   - in `shouldOverrideUrlLoading`'s web-scheme branch, when `request.isForMainFrame` and the protection override returns false, set `mainFrameUrl = request.url.toString()`, redirects included;
   - remove the assignment in `onPageStarted`, and keep the one in `shouldInterceptRequest`.

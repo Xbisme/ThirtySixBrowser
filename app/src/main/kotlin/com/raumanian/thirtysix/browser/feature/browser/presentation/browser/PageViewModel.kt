@@ -263,13 +263,16 @@ class PageViewModel @Inject constructor(
 
     private fun persistActiveTabState(url: String) {
         val page = pageStore.page.value
-        val activeId = page.activeTab?.id ?: return
+        val active = page.activeTab ?: return
         val incognito = page.isIncognito
+        // A failed reload cleared the page title; the tab keeps the one it had for this address.
+        val failedReload = _uiState.value.loadingState is LoadingState.Failed && active.url == url
+        val title = if (failedReload) active.title else page.title
         viewModelScope.launch {
             updateActiveTabUrlAndTitle(
-                tabId = activeId,
+                tabId = active.id,
                 url = url,
-                title = page.title,
+                title = title,
                 isIncognito = incognito,
             )
         }
