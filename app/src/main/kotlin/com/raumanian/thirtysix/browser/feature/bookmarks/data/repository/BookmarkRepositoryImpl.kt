@@ -45,8 +45,8 @@ class BookmarkRepositoryImpl @Inject constructor(
     override fun observeRecentBookmarks(limit: Int): Flow<List<Bookmark>> =
         bookmarkDao.observeRecent(limit).map { list -> list.map(BookmarkMapper::toDomain) }
 
-    override fun searchBookmarks(query: String): Flow<List<Bookmark>> =
-        bookmarkDao.searchByTitleOrUrl(query).map { list -> list.map(BookmarkMapper::toDomain) }
+    override fun searchBookmarks(query: String, limit: Int): Flow<List<Bookmark>> =
+        bookmarkDao.searchByTitleOrUrl(query, limit).map { list -> list.map(BookmarkMapper::toDomain) }
 
     override suspend fun getAllBookmarks(): List<Bookmark> =
         withContext(dispatchers.io) { bookmarkDao.getAllNewestFirst().map(BookmarkMapper::toDomain) }
@@ -97,9 +97,6 @@ class BookmarkRepositoryImpl @Inject constructor(
 
     override fun observeAllFolders(): Flow<List<BookmarkFolder>> =
         folderDao.observeAll().map { list -> list.map(BookmarkFolderMapper::toDomain) }
-
-    override suspend fun getFolder(id: Long): BookmarkFolder? =
-        withContext(dispatchers.io) { folderDao.getById(id)?.let(BookmarkFolderMapper::toDomain) }
 
     override suspend fun getAncestorChain(folderId: Long): List<BookmarkFolder> =
         withContext(dispatchers.io) {

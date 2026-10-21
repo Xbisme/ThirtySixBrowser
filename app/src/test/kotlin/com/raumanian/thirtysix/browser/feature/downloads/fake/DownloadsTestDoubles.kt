@@ -71,8 +71,6 @@ internal open class RecordingGateway(
         deletedFiles += fileName
         return deleteSucceeds
     }
-
-    override suspend fun isAvailable(): Boolean = true
 }
 
 /** In-memory [DownloadsRepository] backed by a list, so deletes are observable. */
@@ -105,15 +103,13 @@ internal class InMemoryDownloadsRepository(
         records.value = records.value.filterNot { it.id == id }
         return records.value.size < before
     }
-
-    override suspend fun count(): Int = records.value.size
 }
 
 /** Records what was handed to an external app, and whether anything could handle it. */
 internal class RecordingFileOpener(private val succeeds: Boolean = true) : ExternalFileOpener {
     val opened = mutableListOf<Pair<String, String>>()
 
-    override fun open(contentUri: String, mimeType: String): Boolean {
+    override fun open(contentUri: String, mimeType: String, fileName: String): Boolean {
         opened += contentUri to mimeType
         return succeeds
     }

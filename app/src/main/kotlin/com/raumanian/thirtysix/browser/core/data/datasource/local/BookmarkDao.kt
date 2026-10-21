@@ -88,9 +88,10 @@ interface BookmarkDao {
          WHERE LOWER(${BookmarkEntity.COL_TITLE}) LIKE '%' || LOWER(:query) || '%'
             OR LOWER(${BookmarkEntity.COL_URL})   LIKE '%' || LOWER(:query) || '%'
          ORDER BY ${BookmarkEntity.COL_CREATED_AT} DESC, ${BookmarkEntity.COL_ID} DESC
+         LIMIT :limit
         """,
     )
-    fun searchByTitleOrUrl(query: String): Flow<List<BookmarkEntity>>
+    fun searchByTitleOrUrl(query: String, limit: Int): Flow<List<BookmarkEntity>>
 
     @Query("SELECT COUNT(*) FROM ${BookmarkEntity.TABLE_NAME} WHERE ${BookmarkEntity.COL_PARENT_FOLDER_ID} = :folderId")
     suspend fun countByFolder(folderId: Long): Int

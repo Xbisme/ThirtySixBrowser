@@ -9,7 +9,6 @@ object NoopTabSessionRepository : TabSessionRepository {
     override val clears: StateFlow<Long> = MutableStateFlow(0L)
     override suspend fun get(tabId: Long): TabSession? = null
     override suspend fun save(session: TabSession) = Unit
-    override suspend fun delete(tabId: Long) = Unit
     override suspend fun retainOnly(tabIds: Set<Long>) = Unit
     override suspend fun clearAll() = Unit
 }

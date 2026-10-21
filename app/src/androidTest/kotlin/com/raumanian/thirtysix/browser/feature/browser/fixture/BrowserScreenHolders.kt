@@ -16,7 +16,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.SearchEngineRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -55,7 +54,6 @@ class BrowserScreenHolders(startUrl: String) {
     val page = PageViewModel(
         observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
         tabs = NoopTabRepository,
-        observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
         updateActiveTabUrlAndTitle = updateActiveTab,
         faviconCache = NoopFaviconCache,
         screenshotCache = NoopScreenshotCache,
@@ -109,7 +107,6 @@ private object NoopTabRepository : TabRepository {
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
     override suspend fun closeTab(tabId: Long) = Unit
     override suspend fun closeAllTabs() = Unit
-    override suspend fun getTabCount(): Int = 0
 }
 
 private object NoopIncognitoTabRepository : IncognitoTabRepository {
@@ -121,7 +118,6 @@ private object NoopIncognitoTabRepository : IncognitoTabRepository {
     override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = Unit
     override suspend fun closeTab(tabId: Long) = Unit
     override suspend fun closeAll() = Unit
-    override suspend fun getCount(): Int = 0
 }
 
 private object NoopFaviconCache : FaviconCache {
@@ -152,7 +148,7 @@ private object NoopBookmarkRepository :
         flowOf(emptyList<Bookmark>())
     override suspend fun getAllBookmarks() = emptyList<Bookmark>()
 
-    override fun searchBookmarks(query: String) =
+    override fun searchBookmarks(query: String, limit: Int) =
         flowOf(emptyList<Bookmark>())
     override suspend fun getBookmark(id: Long) = null
     override suspend fun countBookmarksByUrl(url: String) = 0
@@ -165,7 +161,6 @@ private object NoopBookmarkRepository :
         flowOf(emptyList<BookmarkFolder>())
     override fun observeAllFolders() =
         flowOf(emptyList<BookmarkFolder>())
-    override suspend fun getFolder(id: Long) = null
     override suspend fun getAncestorChain(folderId: Long) = emptyList<BookmarkFolder>()
     override suspend fun countDescendants(folderId: Long) =
         BookmarkDescendantCount(0, 0)

@@ -9,7 +9,6 @@ import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.MaxTabsReachedException
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
@@ -44,7 +43,6 @@ class HistoryViewModel @Inject constructor(
     private val history: HistoryRepository,
     private val clearHistory: ClearBrowsingHistoryUseCase,
     observeActiveTab: ObserveActiveTabUseCase,
-    observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
     private val updateActiveTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase,
     private val tabs: TabRepository,
     private val clipboardWriter: ClipboardWriter,
@@ -75,8 +73,6 @@ class HistoryViewModel @Inject constructor(
 
     private var activeTabId: Long = 0L
 
-    private var lastKnownIsIncognito: Boolean = false
-
     init {
         // Re-derives on every repository emission and keystroke, so new matches appear under an active query.
         combine(history.observeAll(), searchQueryFlow) { entries, query -> entries to query }
@@ -93,10 +89,6 @@ class HistoryViewModel @Inject constructor(
 
         observeActiveTab()
             .onEach { tab -> activeTabId = tab?.id ?: 0L }
-            .launchIn(viewModelScope)
-
-        observeActiveTabIsIncognito()
-            .onEach { lastKnownIsIncognito = it }
             .launchIn(viewModelScope)
     }
 
@@ -118,12 +110,12 @@ class HistoryViewModel @Inject constructor(
 
     private fun onEntryTap(entry: HistoryEntry) {
         viewModelScope.launch {
-            if (activeTabId > 0L) {
+            if (activeTabId != 0L) {
                 updateActiveTabUrlAndTitle(
                     tabId = activeTabId,
                     url = entry.url,
                     title = entry.title,
-                    isIncognito = lastKnownIsIncognito,
+                    isIncognito = activeTabId < 0L,
                 )
             }
             openUrls.trySend(entry.url)

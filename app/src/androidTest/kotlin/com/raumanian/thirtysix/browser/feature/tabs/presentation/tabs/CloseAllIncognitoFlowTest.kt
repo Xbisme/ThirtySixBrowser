@@ -32,7 +32,7 @@ class CloseAllIncognitoFlowTest {
     @Before
     fun setup() = runBlocking {
         hiltRule.inject()
-        if (incognitoRepository.getCount() > 0) incognitoRepository.closeAll()
+        if (incognitoRepository.observeTabs().first().size > 0) incognitoRepository.closeAll()
     }
 
     @Test(timeout = TEST_TIMEOUT_MS)
@@ -42,14 +42,14 @@ class CloseAllIncognitoFlowTest {
             val result = incognitoRepository.createTab("https://incognito$i.example/")
             assertTrue("createTab #$i should succeed", result is Result.Success)
         }
-        assertEquals(EXPECTED_TAB_COUNT, incognitoRepository.getCount())
+        assertEquals(EXPECTED_TAB_COUNT, incognitoRepository.observeTabs().first().size)
 
         incognitoRepository.closeAll()
 
         assertEquals(
             "incognitoTabCount MUST be 0 after closeAll",
             0,
-            incognitoRepository.getCount(),
+            incognitoRepository.observeTabs().first().size,
         )
         assertEquals(emptyList<Any>(), incognitoRepository.observeTabs().first())
     }

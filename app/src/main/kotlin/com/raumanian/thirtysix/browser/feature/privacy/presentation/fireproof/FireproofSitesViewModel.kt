@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.privacy.presentation.fireproof
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveFireproofSitesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +16,7 @@ import kotlinx.coroutines.launch
 /** Incognito never fireproofs a site, so only normal-browsing choices appear here. */
 @HiltViewModel
 class FireproofSitesViewModel @Inject constructor(
-    sites: FireproofSiteRepository,
-    private val removeSites: RemoveFireproofSitesUseCase,
+    private val sites: FireproofSiteRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FireproofSitesUiState())
     val uiState: StateFlow<FireproofSitesUiState> = _uiState.asStateFlow()
@@ -39,14 +37,14 @@ class FireproofSitesViewModel @Inject constructor(
     }
 
     private fun onRemove(site: String) {
-        viewModelScope.launch { removeSites(site) }
+        viewModelScope.launch { sites.remove(site) }
     }
 
     private fun onRemoveAllClick() = _uiState.update { it.copy(isConfirmingRemoveAll = true) }
 
     private fun onRemoveAllConfirmed() {
         _uiState.update { it.copy(isConfirmingRemoveAll = false) }
-        viewModelScope.launch { removeSites(null) }
+        viewModelScope.launch { sites.clearAll() }
     }
 
     private fun onRemoveAllDismissed() = _uiState.update { it.copy(isConfirmingRemoveAll = false) }

@@ -17,8 +17,6 @@ interface TabSessionRepository {
     /** A state over the size bound is not kept. */
     suspend fun save(session: TabSession)
 
-    suspend fun delete(tabId: Long)
-
     suspend fun retainOnly(tabIds: Set<Long>)
 
     suspend fun clearAll()

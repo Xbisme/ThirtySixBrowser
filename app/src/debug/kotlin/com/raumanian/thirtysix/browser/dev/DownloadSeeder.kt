@@ -69,17 +69,16 @@ class DownloadSeeder : BroadcastReceiver() {
                     yield()
                 }
             }
-            Log.i(TAG, "done — ${repository.count()} record(s) now in the database")
+            Log.i(TAG, "done — ${repository.observeAll().first().size} record(s) now in the database")
         }
     }
 
     private fun clear() {
         CoroutineScope(dispatchers.io).launch {
-            val before = repository.count()
             // One at a time: the repository has no clear-all, and a debug tool should not add one.
             val ids = repository.observeAll().first().map { it.id }
             val removed = ids.count { repository.deleteById(it) }
-            Log.i(TAG, "cleared $removed of $before record(s)")
+            Log.i(TAG, "cleared $removed of ${ids.size} record(s)")
         }
     }
 

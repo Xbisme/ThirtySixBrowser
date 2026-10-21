@@ -75,7 +75,7 @@ class FindInPageInstrumentedTest {
                             onProgressChanged = {},
                             onLoadFinished = { loaded = true },
                             onLoadFailed = {},
-                            onDownloadRequested = { _, _, _, _ -> },
+                            onDownloadRequested = {},
                             onFindResult = { ordinal, total ->
                                 find.update { state ->
                                     if (state.query.isEmpty() || total <= 0) {

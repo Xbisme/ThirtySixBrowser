@@ -58,18 +58,6 @@ class HistoryDaoTest {
     }
 
     @Test
-    fun `getRecent orders newest-first paginated`() = runTest {
-        historyDao.insert(HistoryEntryEntity(url = "https://1.com", title = "1", visitedAt = 100L))
-        historyDao.insert(HistoryEntryEntity(url = "https://2.com", title = "2", visitedAt = 200L))
-        historyDao.insert(HistoryEntryEntity(url = "https://3.com", title = "3", visitedAt = 300L))
-
-        val page = historyDao.getRecent(limit = 2, offset = 0)
-        assertEquals(2, page.size)
-        assertEquals(300L, page[0].visitedAt)
-        assertEquals(200L, page[1].visitedAt)
-    }
-
-    @Test
     fun `observeAll Flow emits fresh snapshot on insert`() = runTest {
         historyDao.observeAll().test {
             assertEquals(0, awaitItem().size)

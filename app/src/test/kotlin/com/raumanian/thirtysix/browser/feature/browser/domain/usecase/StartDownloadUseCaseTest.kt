@@ -139,6 +139,34 @@ class StartDownloadUseCaseTest {
         assertEquals("https://example.com/page", gateway.lastRequest?.referer)
     }
 
+    @Test
+    fun `addresses the download service cannot fetch are unsupported and never enqueued`() = runTest {
+        listOf("blob:https://x/1", "data:text/plain,hi").forEach { url ->
+            val gateway = FakeGateway(handle = 1L)
+
+            assertEquals(url, StartDownloadResult.Unsupported, useCase(gateway)(url, null, null, "UA"))
+            assertTrue("<$url> reached the gateway", gateway.callLog.isEmpty())
+        }
+        assertTrue(repository.inserted.isEmpty())
+    }
+
+    @Test
+    fun `cookies and referer reach the platform request unchanged`() = runTest {
+        val gateway = FakeGateway(handle = 2L)
+
+        useCase(gateway)(
+            url = "https://example.com/a.bin",
+            contentDisposition = null,
+            mimeType = null,
+            userAgent = "UA",
+            referer = "https://example.com/page",
+            cookies = "session=abc; theme=dark",
+        )
+
+        assertEquals("session=abc; theme=dark", gateway.lastRequest?.cookies)
+        assertEquals("https://example.com/page", gateway.lastRequest?.referer)
+    }
+
     // ---- doubles -----------------------------------------------------------------
 
     private class FakeGateway(private val handle: Long?) : DownloadManagerGateway {
@@ -157,7 +185,6 @@ class StartDownloadUseCaseTest {
         override suspend fun fileExists(localUri: String?, fileName: String) = false
         override suspend fun resolvedFileNameFor(transferHandle: Long): String? = null
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
-        override suspend fun isAvailable() = handle != null
     }
 
     private class FakeDownloadsRepository : DownloadsRepository {
@@ -174,6 +201,5 @@ class StartDownloadUseCaseTest {
         override suspend fun getById(id: Long): DownloadRecord? = inserted.firstOrNull { it.id == id }
         override suspend fun updateCompletionMetadata(id: Long, localUri: String, fileName: String) = Unit
         override suspend fun deleteById(id: Long) = false
-        override suspend fun count(): Int = inserted.size
     }
 }

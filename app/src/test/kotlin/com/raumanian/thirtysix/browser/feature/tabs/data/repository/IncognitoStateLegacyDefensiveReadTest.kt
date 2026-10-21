@@ -43,7 +43,7 @@ class IncognitoStateLegacyDefensiveReadTest {
         )
         val first = repository.observeTabs().first()
         assertEquals("singleton constructed → empty state", emptyList<Tab>(), first)
-        assertEquals(0, repository.getCount())
+        assertEquals(0, repository.observeTabs().first().size)
     }
 
     @Test
@@ -68,7 +68,7 @@ class IncognitoStateLegacyDefensiveReadTest {
 
         assertTrue("createTab should succeed despite poisoned TabRepository", result is Result.Success)
         val tab = (result as Result.Success).data
-        assertEquals(1, repository.getCount())
+        assertEquals(1, repository.observeTabs().first().size)
         assertNotNull(tab)
         assertTrue("incognito ids must be negative", tab.id < 0L)
     }
@@ -89,7 +89,7 @@ class IncognitoStateLegacyDefensiveReadTest {
 
         // Should NOT throw; state stays empty.
         repository.closeAll()
-        assertEquals(0, repository.getCount())
+        assertEquals(0, repository.observeTabs().first().size)
     }
 
     private class ThrowingTabRepository : TabRepository {
@@ -99,7 +99,6 @@ class IncognitoStateLegacyDefensiveReadTest {
         override suspend fun updateTabUrlAndTitle(tabId: Long, url: String, title: String) = error("not used")
         override suspend fun closeTab(tabId: Long) = error("not used")
         override suspend fun closeAllTabs() = error("not used")
-        override suspend fun getTabCount(): Int = error("not used")
     }
 
     private class TestDispatcherProvider : DispatcherProvider {

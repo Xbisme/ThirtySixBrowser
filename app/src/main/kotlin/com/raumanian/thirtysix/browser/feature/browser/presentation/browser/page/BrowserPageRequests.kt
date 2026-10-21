@@ -27,6 +27,7 @@ fun rememberPageSession(
     DisposableEffect(session) {
         onDispose {
             session.queue.dispose()
+            popups?.releaseWaiting()
             session.fullscreen.exit()
             CaptureFiles.clear(context)
         }
@@ -74,6 +75,10 @@ private fun rememberPageRequestRenderers(
                 }
                 is PageRequest.HttpAuth -> {
                     HttpAuthDialog(request, done = done)
+                    true
+                }
+                is PageRequest.OpenExternalApp -> {
+                    ExternalAppDialog(request, done)
                     true
                 }
                 is PageRequest.LongPress -> longPress?.let {

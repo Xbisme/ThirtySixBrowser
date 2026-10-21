@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import android.content.Context
 import android.util.Log
+import android.webkit.CookieManager
 import android.webkit.WebView
 import androidx.webkit.ProfileStore
 import androidx.webkit.WebViewCompat
@@ -36,6 +37,23 @@ internal object WebViewProfiles {
             if (profiles.isSessionProfile(name)) WebViewCompat.setProfile(webView, name)
         }.onFailure { e -> Log.w(TAG, "could not match the opener's profile", e) }
         return webView
+    }
+
+    /**
+     * The jar a tab browses with. Without profiles the default jar holds the swapped-in incognito
+     * cookies while incognito is open. Null when the incognito profile is gone. Main thread.
+     */
+    fun cookieManagerFor(
+        incognito: Boolean,
+        profiles: IncognitoWebProfile,
+        profileCookies: (String) -> CookieManager? = ::profileCookieManager,
+        defaultCookies: () -> CookieManager = CookieManager::getInstance,
+    ): CookieManager? =
+        if (incognito && profiles.isIsolated()) profileCookies(profiles.sessionProfileName()) else defaultCookies()
+
+    private fun profileCookieManager(name: String): CookieManager? {
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) return null
+        return runCatching { ProfileStore.getInstance().getProfile(name)?.cookieManager }.getOrNull()
     }
 
     private fun attach(webView: WebView, name: String) {

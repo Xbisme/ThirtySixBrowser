@@ -24,6 +24,9 @@ object UrlConstants {
 
     const val SCHEME_HTTPS: String = "https"
 
+    // Typed input with any other scheme is searched, so the address bar never runs script.
+    val ADDRESS_BAR_SCHEMES: Set<String> = setOf(SCHEME_HTTP, SCHEME_HTTPS, "about")
+
     // Global Privacy Control: "do not sell or share".
     const val GPC_HEADER_NAME: String = "Sec-GPC"
 

@@ -13,6 +13,9 @@ sealed class StartDownloadResult {
 
     /** The download service is unavailable; no record was created, and the caller must say so. */
     data object ServiceUnavailable : StartDownloadResult()
+
+    /** The download service fetches only http(s); `blob:` and `data:` live inside the page. */
+    data object Unsupported : StartDownloadResult()
 }
 
 /**
@@ -26,37 +29,43 @@ class StartDownloadUseCase @Inject constructor(
     private val sanitizeFileName: SanitizeDownloadFileNameUseCase,
 ) {
 
+    @Suppress("LongParameterList")
     suspend operator fun invoke(
         url: String,
         contentDisposition: String?,
         mimeType: String?,
         userAgent: String,
         referer: String? = null,
+        cookies: String? = null,
     ): StartDownloadResult {
-        val fileName = sanitizeFileName(contentDisposition, url)
-        val resolvedMimeType = mimeType.orEmpty()
-
-        val request = DownloadOrder(
+        if (!url.isFetchable()) return StartDownloadResult.Unsupported
+        val order = DownloadOrder(
             sourceUrl = url,
-            fileName = fileName,
-            mimeType = resolvedMimeType,
+            fileName = sanitizeFileName(contentDisposition, url),
+            mimeType = mimeType.orEmpty(),
             userAgent = userAgent,
             referer = referer,
+            cookies = cookies,
         )
+        return enqueueAndRecord(order)
+    }
 
-        val handle = gateway.enqueue(request) ?: return StartDownloadResult.ServiceUnavailable
-
+    private suspend fun enqueueAndRecord(order: DownloadOrder): StartDownloadResult {
+        val handle = gateway.enqueue(order) ?: return StartDownloadResult.ServiceUnavailable
         repository.insert(
             DownloadRecord(
                 id = 0L,
-                sourceUrl = url,
-                fileName = fileName,
-                mimeType = resolvedMimeType,
+                sourceUrl = order.sourceUrl,
+                fileName = order.fileName,
+                mimeType = order.mimeType,
                 createdAt = System.currentTimeMillis(),
                 transferHandle = handle,
                 localUri = null,
             ),
         )
-        return StartDownloadResult.Started(fileName)
+        return StartDownloadResult.Started(order.fileName)
     }
+
+    private fun String.isFetchable(): Boolean =
+        startsWith("http://", ignoreCase = true) || startsWith("https://", ignoreCase = true)
 }

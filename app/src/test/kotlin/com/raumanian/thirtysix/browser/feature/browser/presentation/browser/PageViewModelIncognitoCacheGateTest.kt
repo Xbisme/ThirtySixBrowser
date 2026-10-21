@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -26,6 +25,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,7 +85,6 @@ class PageViewModelIncognitoCacheGateTest {
         return PageViewModel(
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepository,
-            observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
@@ -110,7 +109,7 @@ class PageViewModelIncognitoCacheGateTest {
         assertEquals("incognito flag should propagate to UiState", true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(PageAction.IconReceived("https://incognito.example.com", bmp))
+        vm.onAction(PageAction.IconReceived("https://incognito.example.com", bmp, isIncognito = true))
         advanceUntilIdle()
 
         assertEquals(
@@ -131,7 +130,7 @@ class PageViewModelIncognitoCacheGateTest {
         assertEquals(true, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(PageAction.ScreenshotReady(bmp))
+        vm.onAction(PageAction.ScreenshotReady(bmp, tabId = -1L, isIncognito = true))
         advanceUntilIdle()
 
         assertEquals(
@@ -152,7 +151,7 @@ class PageViewModelIncognitoCacheGateTest {
         assertEquals(false, vm.screenState().isIncognito)
 
         val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        vm.onAction(PageAction.IconReceived("https://example.com", bmp))
+        vm.onAction(PageAction.IconReceived("https://example.com", bmp, isIncognito = false))
         advanceUntilIdle()
 
         assertEquals(
@@ -161,6 +160,39 @@ class PageViewModelIncognitoCacheGateTest {
             recordingFavicon.saveCallCount,
         )
     }
+
+    @Test
+    fun `a preview arriving after a tab switch is saved under the tab it came from`() = runTest(testDispatcher) {
+        val recordingScreenshot = RecordingScreenshotCache()
+        val vm = newNormalActiveViewModel(faviconCache = NoopFaviconCache, screenshotCache = recordingScreenshot)
+        advanceUntilIdle()
+        val active = vm.currentPage.value.activeTab?.id
+
+        val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        vm.onAction(PageAction.ScreenshotReady(bmp, tabId = PREVIOUS_TAB_ID, isIncognito = false))
+        advanceUntilIdle()
+
+        assertEquals(listOf(PREVIOUS_TAB_ID), recordingScreenshot.savedIds)
+        assertNotEquals(PREVIOUS_TAB_ID, active)
+    }
+
+    @Test
+    fun `a preview or icon taken from an incognito tab is never saved, even after a switch to a normal tab`() =
+        runTest(testDispatcher) {
+            val recordingFavicon = RecordingFaviconCache()
+            val recordingScreenshot = RecordingScreenshotCache()
+            val vm = newNormalActiveViewModel(faviconCache = recordingFavicon, screenshotCache = recordingScreenshot)
+            advanceUntilIdle()
+            assertEquals(false, vm.screenState().isIncognito)
+
+            val bmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            vm.onAction(PageAction.ScreenshotReady(bmp, tabId = -1L, isIncognito = true))
+            vm.onAction(PageAction.IconReceived("https://incognito.example.com", bmp, isIncognito = true))
+            advanceUntilIdle()
+
+            assertEquals(0, recordingScreenshot.saveCallCount)
+            assertEquals(0, recordingFavicon.saveCallCount)
+        }
 
     private object NoopFaviconCache : FaviconCache {
         private val state = MutableStateFlow(0L)
@@ -196,13 +228,17 @@ class PageViewModelIncognitoCacheGateTest {
     private class RecordingScreenshotCache : ScreenshotCache {
         private val state = MutableStateFlow(0L)
         override val version: StateFlow<Long> = state.asStateFlow()
-        var saveCallCount: Int = 0
-            private set
+        val savedIds = mutableListOf<Long>()
+        val saveCallCount: Int get() = savedIds.size
         override suspend fun save(tabId: Long, writeImage: (OutputStream) -> Unit) {
-            saveCallCount += 1
+            savedIds += tabId
         }
         override fun fileFor(tabId: Long): File? = null
         override suspend fun delete(tabId: Long) = Unit
         override suspend fun clearAll() = Unit
+    }
+
+    private companion object {
+        const val PREVIOUS_TAB_ID = 42L
     }
 }

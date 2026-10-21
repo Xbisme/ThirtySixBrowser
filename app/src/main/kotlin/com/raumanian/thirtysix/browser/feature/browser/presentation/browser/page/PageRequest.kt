@@ -139,6 +139,18 @@ sealed class PageRequest(val tabId: Long, val generation: Long, val origin: Stri
 
         override fun cancel() = settle {}
     }
+
+    /** Asks before an incognito page hands its address to another app; cancelling opens nothing. */
+    class OpenExternalApp(
+        tabId: Long,
+        generation: Long,
+        origin: String,
+        private val onOpen: () -> Unit,
+    ) : PageRequest(tabId, generation, origin) {
+        fun open() = settle(onOpen)
+
+        override fun cancel() = settle {}
+    }
 }
 
 /** The kind of JavaScript dialog a page showed. */

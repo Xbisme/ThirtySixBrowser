@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -56,6 +58,15 @@ class PopupTabs @Inject constructor(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
     val events: SharedFlow<PopupEvent> = _events.asSharedFlow()
+
+    init {
+        var openIds = emptySet<Long>()
+        tabs.onEach { list ->
+            val ids = list.mapTo(HashSet(), Tab::id)
+            (openIds - ids).forEach(registry::forgetTab)
+            openIds = ids
+        }.launchIn(viewModelScope)
+    }
 
     /** Decides a window request from [opener]'s page; for a new tab, the tab is created here. */
     fun decide(isUserGesture: Boolean, opener: PageContext): PopupDecision {
@@ -100,6 +111,8 @@ class PopupTabs @Inject constructor(
     }
 
     fun take(tabUrl: String): WebView? = registry.take(tabUrl)
+
+    fun releaseWaiting() = registry.clear()
 
     /** `window.close()`: only a page-opened tab closes, and its opener becomes active. */
     fun onCloseWindow(window: WebView) {

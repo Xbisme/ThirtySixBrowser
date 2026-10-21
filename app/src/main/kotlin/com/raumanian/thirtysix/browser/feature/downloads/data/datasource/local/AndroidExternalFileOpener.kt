@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.feature.downloads.data.datasource.local
 
 import android.content.Context
 import android.content.Intent
+import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.core.domain.repository.ExternalFileOpener
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,9 +18,9 @@ class AndroidExternalFileOpener @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ExternalFileOpener {
 
-    override fun open(contentUri: String, mimeType: String): Boolean = runCatching {
+    override fun open(contentUri: String, mimeType: String, fileName: String): Boolean = runCatching {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(contentUri.toUri(), mimeType.ifEmpty { FALLBACK_MIME_TYPE })
+            setDataAndType(contentUri.toUri(), resolveType(mimeType, fileName))
             // Launched from a non-Activity context, so a new task is required; the read
             // grant is what lets the receiving app actually read the content URI.
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -28,8 +29,14 @@ class AndroidExternalFileOpener @Inject constructor(
         true
     }.getOrDefault(false)
 
+    private fun resolveType(mimeType: String, fileName: String): String =
+        mimeType.takeUnless { it.isBlank() || it == GENERIC_BINARY_TYPE }
+            ?: MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileName.substringAfterLast('.', "").lowercase())
+            ?: FALLBACK_MIME_TYPE
+
     private companion object {
         /** Lets the chooser offer anything when the server declared no usable type. */
         const val FALLBACK_MIME_TYPE = "*/*"
+        const val GENERIC_BINARY_TYPE = "application/octet-stream"
     }
 }

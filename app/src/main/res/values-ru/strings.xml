@@ -124,6 +124,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Загрузка %1$s</string>
     <string name="downloads_service_unavailable">Загрузки недоступны на этом устройстве.</string>
+    <string name="downloads_unsupported_snackbar">Такой тип загрузки не поддерживается</string>
     <string name="downloads_storage_permission_denied">Для сохранения загрузок нужен доступ к хранилищу.</string>
     <string name="downloads_storage_permission_denied_permanently">Доступ к хранилищу заблокирован. Включите его в настройках, чтобы сохранять загрузки.</string>
     <string name="downloads_storage_permission_rationale_title">Разрешить доступ к хранилищу?</string>
@@ -344,6 +345,9 @@
     <string name="long_press_copied">Скопировано</string>
     <string name="popup_blocked">Всплывающее окно заблокировано</string>
     <string name="popup_open">Открыть</string>
+    <string name="external_app_offer">Эта страница хочет открыть другое приложение</string>
+    <string name="external_app_confirm_title">Открыть в другом приложении?</string>
+    <string name="external_app_confirm_body">Приложение увидит эту ссылку.</string>
     <string name="settings_site_permissions">Разрешения сайтов</string>
     <string name="settings_site_permissions_summary">Камера, микрофон и геоданные для каждого сайта</string>
     <string name="site_permissions_title">Разрешения сайтов</string>

@@ -3,7 +3,6 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -50,11 +49,9 @@ class PageViewModelTest {
         val incognitoRepo = FakeIncognitoTabRepository()
         val observeAllTabs = ObserveAllTabsUseCase(tabRepository, incognitoRepo)
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
-        val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
         return PageViewModel(
             observeActiveTab = observeActiveTab,
             tabs = tabRepository,
-            observeActiveTabIsIncognito = observeActiveTabIsIncognito,
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepository, incognitoRepo),
             faviconCache = faviconCache,
             screenshotCache = screenshotCache,
@@ -185,6 +182,26 @@ class PageViewModelTest {
         assertTrue(state.loadingState is LoadingState.Loading)
         assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
     }
+
+    @Test
+    fun `engine error page progress and finish keep Failed and record no history`() =
+        runTest(testDispatcher) {
+            val historyRepo = FakeHistoryRepository()
+            val vm = newViewModel(historyRepository = historyRepo)
+            advanceUntilIdle()
+            vm.onAction(PageAction.LoadStarted("https://nowhere.invalid"))
+            vm.onAction(PageAction.LoadFailed(ErrorReason.DnsFailure))
+            vm.onAction(PageAction.ProgressChanged(MID_PROGRESS))
+            vm.onAction(PageAction.ProgressChanged(MAX_PROGRESS))
+            vm.onAction(PageAction.LoadFinished("https://nowhere.invalid"))
+            advanceUntilIdle()
+            assertEquals(LoadingState.Failed(ErrorReason.DnsFailure), vm.screenState().loadingState)
+            assertEquals(0f, vm.loadProgress.value, FLOAT_TOLERANCE)
+            assertTrue(historyRepo.recorded.isEmpty())
+
+            vm.onAction(PageAction.LoadStarted("https://example.com"))
+            assertEquals(LoadingState.Loading, vm.screenState().loadingState)
+        }
 
     @Test
     fun `progress integer maps to expected Float in 0_to_1f range`() = runTest {

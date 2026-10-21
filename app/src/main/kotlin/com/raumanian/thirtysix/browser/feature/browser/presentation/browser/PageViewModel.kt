@@ -7,7 +7,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
 import com.raumanian.thirtysix.browser.core.presentation.util.pngWriter
@@ -37,7 +36,6 @@ import kotlinx.coroutines.launch
 class PageViewModel @Inject constructor(
     observeActiveTab: ObserveActiveTabUseCase,
     private val tabs: TabRepository,
-    observeActiveTabIsIncognito: ObserveActiveTabIsIncognitoUseCase,
     private val updateActiveTabUrlAndTitle: UpdateActiveTabUrlAndTitleUseCase,
     private val faviconCache: FaviconCache,
     private val screenshotCache: ScreenshotCache,
@@ -96,10 +94,6 @@ class PageViewModel @Inject constructor(
                 tab?.let { active -> pageStore.setUrl(active.url) }
             }
             .launchIn(viewModelScope)
-
-        observeActiveTabIsIncognito()
-            .onEach { incognito -> pageStore.setIncognito(incognito) }
-            .launchIn(viewModelScope)
     }
 
     fun onAction(action: PageAction) {
@@ -111,8 +105,8 @@ class PageViewModel @Inject constructor(
             PageAction.LoadStopped -> onLoadStopped()
             is PageAction.UrlChanged -> onUrlChanged(action.url)
             is PageAction.TitleReceived -> onTitleReceived(action.title)
-            is PageAction.IconReceived -> onIconReceived(action.url, action.icon)
-            is PageAction.ScreenshotReady -> onScreenshotReady(action.bitmap)
+            is PageAction.IconReceived -> onIconReceived(action.url, action.icon, action.isIncognito)
+            is PageAction.ScreenshotReady -> onScreenshotReady(action.bitmap, action.tabId, action.isIncognito)
             is PageAction.CanGoBackChanged -> _uiState.update { it.copy(canGoBack = action.canGoBack) }
             is PageAction.CanGoForwardChanged -> _uiState.update { it.copy(canGoForward = action.canGoForward) }
         }
@@ -133,6 +127,11 @@ class PageViewModel @Inject constructor(
 
     // Progress goes to [loadProgress]; [uiState] changes only when the loading state itself changes.
     private fun onProgressChanged(newProgress: Int) {
+        // The engine's own error page reports progress too; the error screen stays until a new load.
+        if (_uiState.value.loadingState is LoadingState.Failed) {
+            _loadProgress.value = 0f
+            return
+        }
         val clamped = newProgress.coerceIn(0, MAX_PROGRESS)
         if (clamped >= MAX_PROGRESS) {
             _loadProgress.value = 0f
@@ -161,6 +160,11 @@ class PageViewModel @Inject constructor(
         val shouldRecord = pendingHistoryUrl != null
         pendingHistoryUrl = null
         _loadProgress.value = 0f
+        if (_uiState.value.loadingState is LoadingState.Failed) {
+            pageStore.setUrl(url)
+            persistActiveTabState(url)
+            return
+        }
         if (_uiState.value.loadingState !is LoadingState.Loaded || pageStore.page.value.url != url) {
             pageStore.setUrl(url)
             _uiState.update { it.copy(loadingState = LoadingState.Loaded) }
@@ -223,20 +227,18 @@ class PageViewModel @Inject constructor(
         }
     }
 
-    private fun onIconReceived(url: String, icon: Bitmap) {
+    private fun onIconReceived(url: String, icon: Bitmap, isIncognito: Boolean) {
         // Incognito never writes favicons: the cache is keyed by host and would leak browsing into normal tabs.
-        if (pageStore.page.value.isIncognito) return
+        if (isIncognito) return
         viewModelScope.launch {
             faviconCache.save(url, icon.pngWriter())
         }
     }
 
-    /** Stores the tab preview by tab id; dropped when there is no active tab yet. */
-    private fun onScreenshotReady(bitmap: Bitmap) {
+    /** Stores the preview under the tab it was taken from, which may no longer be the active one. */
+    private fun onScreenshotReady(bitmap: Bitmap, tabId: Long, isIncognito: Boolean) {
         // Incognito never writes previews to disk, where they could be recovered after the tab closed.
-        val page = pageStore.page.value
-        if (page.isIncognito) return
-        val tabId = page.activeTab?.id ?: return
+        if (isIncognito) return
         viewModelScope.launch {
             screenshotCache.save(tabId, bitmap.webpWriter())
         }

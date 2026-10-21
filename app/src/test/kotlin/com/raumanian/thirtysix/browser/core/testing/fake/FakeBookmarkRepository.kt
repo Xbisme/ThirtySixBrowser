@@ -57,12 +57,13 @@ open class FakeBookmarkRepository : BookmarkRepository {
     override suspend fun getAllBookmarks(): List<Bookmark> =
         bookmarksFlow.value.values.sortedWith(compareByDescending<Bookmark> { it.createdAt }.thenByDescending { it.id })
 
-    override fun searchBookmarks(query: String): Flow<List<Bookmark>> =
+    override fun searchBookmarks(query: String, limit: Int): Flow<List<Bookmark>> =
         bookmarksFlow.asStateFlow().map { map ->
             val q = query.lowercase()
             map.values
                 .filter { it.title.lowercase().contains(q) || it.url.lowercase().contains(q) }
                 .sortedByDescending { it.createdAt }
+                .take(limit)
         }
 
     override suspend fun getBookmark(id: Long): Bookmark? = bookmarksFlow.value[id]
@@ -116,8 +117,6 @@ open class FakeBookmarkRepository : BookmarkRepository {
 
     override fun observeAllFolders(): Flow<List<BookmarkFolder>> =
         foldersFlow.asStateFlow().map { map -> map.values.toList() }
-
-    override suspend fun getFolder(id: Long): BookmarkFolder? = foldersFlow.value[id]
 
     override suspend fun getAncestorChain(folderId: Long): List<BookmarkFolder> {
         val chain = ArrayDeque<BookmarkFolder>()

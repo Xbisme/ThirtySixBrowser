@@ -120,6 +120,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">%1$s wird heruntergeladen</string>
     <string name="downloads_service_unavailable">Downloads sind auf diesem Gerät nicht verfügbar.</string>
+    <string name="downloads_unsupported_snackbar">Diese Art von Download wird nicht unterstützt</string>
     <string name="downloads_storage_permission_denied">Für Downloads wird Speicherzugriff benötigt.</string>
     <string name="downloads_storage_permission_denied_permanently">Der Speicherzugriff ist blockiert. Aktiviere ihn in den Einstellungen, um Downloads zu speichern.</string>
     <string name="downloads_storage_permission_rationale_title">Speicherzugriff erlauben?</string>
@@ -336,6 +337,9 @@
     <string name="long_press_copied">Kopiert</string>
     <string name="popup_blocked">Pop-up blockiert</string>
     <string name="popup_open">Öffnen</string>
+    <string name="external_app_offer">Diese Seite möchte eine andere App öffnen</string>
+    <string name="external_app_confirm_title">In einer anderen App öffnen?</string>
+    <string name="external_app_confirm_body">Die App sieht diesen Link.</string>
     <string name="settings_site_permissions">Website-Berechtigungen</string>
     <string name="settings_site_permissions_summary">Kamera, Mikrofon und Standort pro Website</string>
     <string name="site_permissions_title">Website-Berechtigungen</string>

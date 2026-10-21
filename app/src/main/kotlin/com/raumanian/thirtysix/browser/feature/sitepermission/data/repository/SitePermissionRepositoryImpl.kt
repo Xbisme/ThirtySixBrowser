@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.feature.sitepermission.data.repository
 
 import com.raumanian.thirtysix.browser.core.data.datasource.local.SitePermissionDao
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.SitePermissionEntity
+import com.raumanian.thirtysix.browser.core.data.util.runIoCatching
 import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
@@ -32,7 +33,7 @@ class SitePermissionRepositoryImpl @Inject constructor(
         if (!SiteOrigin.isSecure(origin)) {
             return Result.Error(IllegalArgumentException("Only secure origins are stored"))
         }
-        return runIo {
+        return runIoCatching(dispatchers.io) {
             dao.upsert(
                 SitePermissionEntity(
                     origin = origin,
@@ -44,19 +45,8 @@ class SitePermissionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeSite(origin: String): Result<Unit> = runIo { dao.deleteOrigin(origin) }
+    override suspend fun removeSite(origin: String): Result<Unit> =
+        runIoCatching(dispatchers.io) { dao.deleteOrigin(origin) }
 
-    override suspend fun clearAll(): Result<Unit> = runIo { dao.deleteAll() }
-
-    @Suppress("TooGenericExceptionCaught") // A failed write is reported, never thrown into the UI.
-    private suspend fun runIo(block: suspend () -> Unit): Result<Unit> = withContext(dispatchers.io) {
-        try {
-            block()
-            Result.Success(Unit)
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
+    override suspend fun clearAll(): Result<Unit> = runIoCatching(dispatchers.io) { dao.deleteAll() }
 }

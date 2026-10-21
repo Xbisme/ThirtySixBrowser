@@ -6,7 +6,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.domain.model.SitePermissionDecision
 import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
-import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.RemoveSitePermissionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +19,6 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SitePermissionsViewModel @Inject constructor(
     private val repository: SitePermissionRepository,
-    private val removeSitePermissions: RemoveSitePermissionsUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SitePermissionsUiState())
     val uiState: StateFlow<SitePermissionsUiState> = _uiState.asStateFlow()
@@ -57,14 +55,14 @@ class SitePermissionsViewModel @Inject constructor(
     private fun onEditDismissed() = _uiState.update { it.copy(editing = null) }
 
     private fun onRemoveSite(origin: String) {
-        viewModelScope.launch { removeSitePermissions(origin) }
+        viewModelScope.launch { repository.removeSite(origin) }
     }
 
     private fun onRemoveAllClick() = _uiState.update { it.copy(isConfirmingRemoveAll = true) }
 
     private fun onRemoveAllConfirmed() {
         _uiState.update { it.copy(isConfirmingRemoveAll = false) }
-        viewModelScope.launch { removeSitePermissions(null) }
+        viewModelScope.launch { repository.clearAll() }
     }
 
     private fun onRemoveAllDismissed() = _uiState.update { it.copy(isConfirmingRemoveAll = false) }

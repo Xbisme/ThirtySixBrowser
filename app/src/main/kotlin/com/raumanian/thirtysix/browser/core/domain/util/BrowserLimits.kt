@@ -18,6 +18,8 @@ object BrowserLimits {
 
     const val SEARCH_MIN_CHARS: Int = 2
 
+    const val BOOKMARK_SEARCH_MAX_RESULTS: Int = 50
+
     const val MAX_HISTORY_QUERY_LENGTH: Int = 200
 
     // No "keep forever": the history list loads the whole table (~300 B/row), so its size must stay bounded.
@@ -35,7 +37,7 @@ object BrowserLimits {
     const val LANGUAGE_APPLY_TIMEOUT_MS: Long = 600L
 
     // The name comes from an untrusted Content-Disposition header; 255 is every Android filesystem's limit.
-    const val MAX_DOWNLOAD_FILENAME_LENGTH: Int = 255
+    const val MAX_FILE_NAME_BYTES: Int = 255
 
     // Progress must visibly advance once a second; polling runs only while something is in flight.
     const val DOWNLOAD_STATUS_POLL_INTERVAL_MS: Long = 1_000L
@@ -56,6 +58,8 @@ object BrowserLimits {
     const val DIALOG_SUPPRESS_FROM_COUNT: Int = 2
 
     const val BLOCKED_POPUP_ADDRESS_WAIT_MS: Long = 1_000L
+
+    const val EXTERNAL_TAP_WINDOW_MS: Long = 1_000L
 
     const val TEXT_SIZE_PERCENT_50: Int = 50
 

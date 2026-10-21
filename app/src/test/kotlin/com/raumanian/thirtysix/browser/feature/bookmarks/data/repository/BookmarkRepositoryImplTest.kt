@@ -103,7 +103,7 @@ class BookmarkRepositoryImplTest {
     fun `createFolder under valid parent succeeds`() = runTest {
         val rootId = (repo.createFolder("Work", null) as Result.Success).data
         val childId = (repo.createFolder("Project", rootId) as Result.Success).data
-        assertNotNull(repo.getFolder(childId))
+        assertNotNull(repo.observeAllFolders().first().find { it.id == childId })
     }
 
     @Test
@@ -131,7 +131,7 @@ class BookmarkRepositoryImplTest {
         val b = (repo.createFolder("B", null) as Result.Success).data
         val result = repo.moveFolder(a, b)
         assertTrue(result is Result.Success)
-        assertEquals(b, repo.getFolder(a)?.parentId)
+        assertEquals(b, repo.observeAllFolders().first().find { it.id == a }?.parentId)
     }
 
     @Test
@@ -172,9 +172,9 @@ class BookmarkRepositoryImplTest {
         assertEquals(7, count.bookmarks)
         assertEquals(2, count.folders)
 
-        assertNull(repo.getFolder(a))
-        assertNull(repo.getFolder(b))
-        assertNull(repo.getFolder(c))
+        assertNull(repo.observeAllFolders().first().find { it.id == a })
+        assertNull(repo.observeAllFolders().first().find { it.id == b })
+        assertNull(repo.observeAllFolders().first().find { it.id == c })
         assertNotNull(repo.getBookmark(survivorId))
     }
 

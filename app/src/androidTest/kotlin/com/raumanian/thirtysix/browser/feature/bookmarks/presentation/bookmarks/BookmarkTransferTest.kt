@@ -32,6 +32,7 @@ import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.ImportBo
 import com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks.component.TEST_TAG_BOOKMARK_IMPORT_SUMMARY
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -123,7 +124,7 @@ class BookmarkTransferTest {
         }
         composeRule.onNodeWithText(context.getString(R.string.bookmarks_import_open_folder)).performClick()
         composeRule.waitUntil(TIMEOUT_MS) { openedFolders.isNotEmpty() }
-        val folder = runBlocking { bookmarks.getFolder(openedFolders.single()) }!!
+        val folder = runBlocking { bookmarks.observeAllFolders().first().find { it.id == openedFolders.single() } }!!
         assertTrue(folder.name.isNotBlank())
         assertEquals(2, runBlocking { bookmarks.countBookmarks() })
     }

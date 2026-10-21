@@ -4,7 +4,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.SiteCapability
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDecision
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeSitePermissionRepository
-import com.raumanian.thirtysix.browser.feature.sitepermission.domain.usecase.RemoveSitePermissionsUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -22,10 +21,7 @@ class SitePermissionsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private fun viewModel() = SitePermissionsViewModel(
-        repository,
-        RemoveSitePermissionsUseCase(repository),
-    )
+    private fun viewModel() = SitePermissionsViewModel(repository)
 
     @Test
     fun `decisions are grouped by site in capability order`() = runTest {

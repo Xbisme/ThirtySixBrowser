@@ -12,4 +12,6 @@ data class DownloadOrder(
     /** The web engine's, so the transfer uses the same identity as the request. */
     val userAgent: String,
     val referer: String?,
+    /** Never logged or stored. */
+    val cookies: String?,
 )

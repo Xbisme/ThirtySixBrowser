@@ -2,10 +2,14 @@ package com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local
 
 import android.webkit.CookieManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeCookieManager
 import kotlin.coroutines.resume
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -25,7 +29,7 @@ class CookieJarSnapshotManagerImplTest {
 
     @Before
     fun setup() = runTest {
-        manager = CookieJarSnapshotManagerImpl(TestDispatcherProvider())
+        manager = CookieJarSnapshotManagerImpl(TestDispatcherProvider()) { CookieManager.getInstance() }
         wipeCookieStore()
     }
 
@@ -164,6 +168,20 @@ class CookieJarSnapshotManagerImplTest {
         assertFalse(manager.hasSnapshot())
     }
 
+    @Test
+    fun `a removal that never answers gives up after the time limit and later calls proceed`() = runTest {
+        val stuck = CookieJarSnapshotManagerImpl(VirtualTimeDispatchers(StandardTestDispatcher(testScheduler))) {
+            FakeCookieManager()
+        }
+        stuck.captureSnapshot(listOf(ORIGIN_A))
+
+        stuck.restoreSnapshot()
+        stuck.captureSnapshot(listOf(ORIGIN_A))
+
+        assertTrue(testScheduler.currentTime <= BrowserLimits.WEB_DATA_CLEAR_TIMEOUT_MS)
+        assertTrue(stuck.hasSnapshot())
+    }
+
     private suspend fun wipeCookieStore() {
         val cookieManager = runCatching { CookieManager.getInstance() }.getOrNull()
         if (cookieManager != null) {
@@ -181,6 +199,13 @@ class CookieJarSnapshotManagerImplTest {
     private companion object {
         const val ORIGIN_A: String = "https://a.example.com"
         const val ORIGIN_B: String = "https://b.example.com"
+    }
+
+    private class VirtualTimeDispatchers(private val d: CoroutineDispatcher) : DispatcherProvider {
+        override val main: CoroutineDispatcher get() = d
+        override val io: CoroutineDispatcher get() = d
+        override val default: CoroutineDispatcher get() = d
+        override val unconfined: CoroutineDispatcher get() = d
     }
 
     private class TestDispatcherProvider : DispatcherProvider {

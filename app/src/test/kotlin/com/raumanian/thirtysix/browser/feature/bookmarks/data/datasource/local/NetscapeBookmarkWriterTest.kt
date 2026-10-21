@@ -64,7 +64,7 @@ class NetscapeBookmarkWriterTest {
         )
         var n = 0
         fun links(count: Int) = List(count) {
-            Link("${words[n % words.size]} ${n++}", "https://site$n.example/p?q=$n&r=\"x\"", null)
+            Link("${words[n % words.size]} ${n++}", "https://site$n.example/p?q=$n&r=%22x%22'", null)
         }
         val tree = Folder(
             "",

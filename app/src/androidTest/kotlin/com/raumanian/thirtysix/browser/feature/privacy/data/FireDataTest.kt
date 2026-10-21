@@ -12,17 +12,34 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.webkit.CookieManagerCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.raumanian.thirtysix.browser.core.data.datasource.local.FireproofSiteDao
 import com.raumanian.thirtysix.browser.core.data.util.IncognitoProfiles
 import com.raumanian.thirtysix.browser.core.di.SettingsDataStoreProviderModule
 import com.raumanian.thirtysix.browser.core.domain.model.FireState
+import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.CookieJarSnapshotManager
+import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.HttpsUpgradeFailures
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoTabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.PrivacyScriptSession
+import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
+import com.raumanian.thirtysix.browser.core.domain.repository.SitePermissionRepository
 import com.raumanian.thirtysix.browser.core.domain.repository.TabRepository
+import com.raumanian.thirtysix.browser.core.domain.repository.WebDataCleaner
+import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
+import com.raumanian.thirtysix.browser.core.domain.util.DispatcherProvider
+import com.raumanian.thirtysix.browser.core.domain.util.OneTimeGrantStore
 import com.raumanian.thirtysix.browser.core.testing.AssetPageServer
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.WebViewProfiles
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.protection.TestProtection
+import com.raumanian.thirtysix.browser.feature.privacy.data.repository.FireproofSiteRepositoryImpl
+import com.raumanian.thirtysix.browser.feature.privacy.domain.repository.FireMarkerRepository
 import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.FireCoordinator
+import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.FireCoordinatorImpl
+import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.FireStepObserver
+import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RunFireUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,6 +51,9 @@ import dagger.hilt.components.SingletonComponent
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -82,6 +102,34 @@ class FireDataTest {
     @Inject lateinit var tabs: TabRepository
 
     @Inject lateinit var incognitoTabs: IncognitoTabRepository
+
+    @Inject lateinit var fireproofDao: FireproofSiteDao
+
+    @Inject lateinit var marker: FireMarkerRepository
+
+    @Inject lateinit var clearHistory: ClearBrowsingHistoryUseCase
+
+    @Inject lateinit var sitePermissions: SitePermissionRepository
+
+    @Inject lateinit var grants: OneTimeGrantStore
+
+    @Inject lateinit var webDataCleaner: WebDataCleaner
+
+    @Inject lateinit var cookieJar: CookieJarSnapshotManager
+
+    @Inject lateinit var favicons: FaviconCache
+
+    @Inject lateinit var screenshots: ScreenshotCache
+
+    @Inject lateinit var bookmarks: BookmarkRepository
+
+    @Inject lateinit var httpsFailures: HttpsUpgradeFailures
+
+    @Inject lateinit var scriptSession: PrivacyScriptSession
+
+    @Inject lateinit var stepObserver: FireStepObserver
+
+    @Inject lateinit var dispatchers: DispatcherProvider
 
     private val server = AssetPageServer()
     private val protection = TestProtection(blockResolvableTracker = false)
@@ -210,7 +258,42 @@ class FireDataTest {
         assertTrue("fireproof cookie lost: $cookies", cookies.any { it.startsWith(PERSISTENT) })
     }
 
+    @Test
+    fun aResumedFireKeepsFireproofCookiesBeforeTheInMemoryListHasLoaded() {
+        runBlocking { fireproof.add(FIREPROOF_HOST) }
+        val manager = composeRule.runOnUiThread {
+            CookieManager.getInstance().apply {
+                setCookie("https://$FIREPROOF_HOST/", "$PERSISTENT=1; Max-Age=31536000; Path=/")
+                setCookie("https://$OTHER_HOST/", "$PERSISTENT=1; Max-Age=31536000; Path=/")
+            }
+        }
+        // A cancelled scope never runs the cache load, like a cold start that has not reached it yet.
+        val neverLoads = CoroutineScope(Job()).apply { cancel() }
+        val coldRepository = FireproofSiteRepositoryImpl(fireproofDao, dispatchers, neverLoads)
+        val coldFire = FireCoordinatorImpl(
+            RunFireUseCase(
+                coldRepository, history, clearHistory, tabs, incognitoTabs, sitePermissions, grants,
+                webDataCleaner, cookieJar, favicons, screenshots, bookmarks, httpsFailures, scriptSession,
+                stepObserver, dispatchers,
+            ),
+            marker,
+            CoroutineScope(Job()),
+        )
+
+        runBlocking {
+            marker.setFireInProgress(true)
+            coldFire.resumeIfInterrupted()
+        }
+
+        val kept = composeRule.runOnUiThread { manager.getCookie("https://$FIREPROOF_HOST/").orEmpty() }
+        val other = composeRule.runOnUiThread { manager.getCookie("https://$OTHER_HOST/").orEmpty() }
+        assertTrue("fireproof cookie lost: $kept", kept.contains(PERSISTENT))
+        assertFalse("other site's cookie kept: $other", other.contains(PERSISTENT))
+    }
+
     private companion object {
+        const val FIREPROOF_HOST = "example.com"
+        const val OTHER_HOST = "other.example"
         const val STORAGE = "fixtures024/storage.html"
         const val CHECK = "check:"
         const val NOTHING = "check:js=0,ls=0,idb=0,cache=0,sw=0"

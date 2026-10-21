@@ -77,7 +77,7 @@ class DownloadStartIntegrationTest {
         val result = useCase("https://example.com/a.pdf", null, "application/pdf", "UA")
 
         assertEquals(StartDownloadResult.ServiceUnavailable, result)
-        assertEquals("a handle-less row must never exist", 0, db.downloadRecordDao().count())
+        assertEquals("a handle-less row must never exist", 0, db.downloadRecordDao().observeAll().first().size)
     }
 
     @Test
@@ -86,7 +86,7 @@ class DownloadStartIntegrationTest {
             startDownload("https://example.com/report.pdf", null, "application/pdf", "UA")
         }
 
-        assertEquals(2, db.downloadRecordDao().count())
+        assertEquals(2, db.downloadRecordDao().observeAll().first().size)
     }
 
     @Test
@@ -108,7 +108,6 @@ class DownloadStartIntegrationTest {
         override suspend fun fileExists(localUri: String?, fileName: String) = false
         override suspend fun resolvedFileNameFor(transferHandle: Long): String? = null
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
-        override suspend fun isAvailable() = handle != null
     }
 
     private object UnconfinedDispatchers : DispatcherProvider {

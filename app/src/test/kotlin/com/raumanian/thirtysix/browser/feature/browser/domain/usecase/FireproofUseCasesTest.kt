@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.usecase.IsSiteFireproofUseCase
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeFireproofSiteRepository
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveFireproofSitesUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -57,21 +56,16 @@ class FireproofUseCasesTest {
     }
 
     @Test
-    fun `turning fireproofing off and removing all empty the list`() = runTest {
+    fun `turning fireproofing off removes the site`() = runTest {
         val set = SetSiteFireproofUseCase(repository)
         set("a.example", true)
         set("b.example", true)
-        set("c.example", true)
 
         set("a.example", false)
-        assertEquals(setOf("b.example", "c.example"), repository.currentSites())
 
-        RemoveFireproofSitesUseCase(repository)("b.example")
-        assertEquals(listOf("c.example"), repository.observeAll().first().map { it.site })
-
-        RemoveFireproofSitesUseCase(repository)(null)
-        assertTrue(repository.currentSites().isEmpty())
-        assertFalse(isFireproof("c.example"))
+        assertEquals(setOf("b.example"), repository.currentSites())
+        assertEquals(listOf("b.example"), repository.observeAll().first().map { it.site })
+        assertFalse(isFireproof("a.example"))
     }
 
     @Test

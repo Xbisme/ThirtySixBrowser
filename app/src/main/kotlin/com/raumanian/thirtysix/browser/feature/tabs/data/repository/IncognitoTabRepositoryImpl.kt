@@ -128,8 +128,6 @@ class IncognitoTabRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun getCount(): Int = state.value.size
-
     /** As for normal tabs: the heir inherits the closed tab's stamp. Caller holds [mutex]. */
     private fun handActiveMark(before: List<Tab>, closed: Tab) {
         val heirId = TabOrder.heirOf(before, closed.id)?.id ?: return

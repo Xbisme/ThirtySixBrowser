@@ -81,8 +81,6 @@ class FakeTabRepository(
         sortAndEmit()
     }
 
-    override suspend fun getTabCount(): Int = state.value.size
-
     /** Test-only direct seeding helper. */
     fun emit(tabs: List<Tab>) {
         state.value = tabs.sortedWith(

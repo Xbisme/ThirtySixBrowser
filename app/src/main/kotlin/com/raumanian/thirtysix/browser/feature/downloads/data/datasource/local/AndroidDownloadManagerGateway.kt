@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadOrder
 import com.raumanian.thirtysix.browser.core.domain.model.DownloadStatus
 import com.raumanian.thirtysix.browser.core.domain.repository.DownloadManagerGateway
+import com.raumanian.thirtysix.browser.feature.downloads.domain.model.DownloadLimits
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,6 +29,7 @@ class AndroidDownloadManagerGateway @Inject constructor(
             if (request.mimeType.isNotEmpty()) setMimeType(request.mimeType)
             if (request.userAgent.isNotEmpty()) addRequestHeader(HEADER_USER_AGENT, request.userAgent)
             request.referer?.takeIf { it.isNotEmpty() }?.let { addRequestHeader(HEADER_REFERER, it) }
+            request.cookies?.takeIf { it.isNotEmpty() }?.let { addRequestHeader(HEADER_COOKIE, it) }
             // The platform renders progress and completion notifications; the app composes none.
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         }
@@ -41,9 +43,11 @@ class AndroidDownloadManagerGateway @Inject constructor(
                 val manager = downloadManager
                 when (manager) {
                     null -> emptyMap()
-                    else -> manager.query(buildQuery(transferHandles))
-                        ?.use(DownloadStatusCursorMapper::readAll)
-                        .orEmpty()
+                    else -> buildMap<Long, DownloadStatus> {
+                        transferHandles.chunked(DownloadLimits.STATUS_QUERY_CHUNK).forEach { chunk ->
+                            manager.query(buildQuery(chunk))?.use { putAll(DownloadStatusCursorMapper.readAll(it)) }
+                        }
+                    }
                 }
             }.getOrDefault(emptyMap())
         }
@@ -79,26 +83,14 @@ class AndroidDownloadManagerGateway @Inject constructor(
             !file.exists()
         }.getOrDefault(false)
 
-    override suspend fun isAvailable(): Boolean = runCatching {
-        downloadManager != null && !isDownloadProviderDisabled()
-    }.getOrDefault(false)
-
     // `setFilterById` is vararg-only, so the spread copy is forced.
     @Suppress("SpreadOperator")
     private fun buildQuery(transferHandles: List<Long>): DownloadManager.Query =
         DownloadManager.Query().setFilterById(*transferHandles.toLongArray())
 
-    private fun isDownloadProviderDisabled(): Boolean = runCatching {
-        context.packageManager.getApplicationEnabledSetting(DOWNLOAD_PROVIDER_PACKAGE) in DISABLED_STATES
-    }.getOrDefault(false)
-
     private companion object {
         const val HEADER_USER_AGENT = "User-Agent"
         const val HEADER_REFERER = "Referer"
-        const val DOWNLOAD_PROVIDER_PACKAGE = "com.android.providers.downloads"
-        val DISABLED_STATES = setOf(
-            android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER,
-        )
+        const val HEADER_COOKIE = "Cookie"
     }
 }

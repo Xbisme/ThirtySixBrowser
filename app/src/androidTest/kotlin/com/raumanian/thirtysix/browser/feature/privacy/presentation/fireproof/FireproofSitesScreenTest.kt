@@ -11,7 +11,6 @@ import com.raumanian.thirtysix.browser.core.domain.model.FireproofSite
 import com.raumanian.thirtysix.browser.core.domain.repository.FireproofSiteRepository
 import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.core.presentation.designsystem.theme.ThirtySixTheme
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveFireproofSitesUseCase
 import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,10 +30,7 @@ class FireproofSitesScreenTest {
     private val repository = InMemoryFireproof(listOf("new.example", "old.example"))
 
     private fun show() {
-        val viewModel = FireproofSitesViewModel(
-            repository,
-            RemoveFireproofSitesUseCase(repository),
-        )
+        val viewModel = FireproofSitesViewModel(repository)
         composeRule.setContent { ThirtySixTheme { FireproofSitesRoute(viewModel = viewModel) } }
     }
 

@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.feature.privacy.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.domain.model.FireResult
 import com.raumanian.thirtysix.browser.core.domain.model.FireStep
+import com.raumanian.thirtysix.browser.core.domain.model.FireproofSites
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataClearOutcome
 import com.raumanian.thirtysix.browser.core.domain.model.SiteDataPath
 import com.raumanian.thirtysix.browser.core.domain.repository.BookmarkRepository
@@ -53,7 +54,7 @@ class RunFireUseCase @Inject constructor(
 
     suspend operator fun invoke(): FireResult {
         val failed = mutableSetOf<FireStep>()
-        val keepSites = fireproofSites.currentSites()
+        val keepSites = fireproofSites.observeAll().first().mapTo(HashSet()) { it.site }
         val isKept: (String) -> Boolean = { host -> IsSiteFireproofUseCase.matches(host, keepSites) }
 
         // Candidate hosts are read before anything that holds them is cleared.
@@ -140,10 +141,7 @@ class RunFireUseCase @Inject constructor(
         buildSet {
             bookmarks.getAllBookmarks().mapNotNullTo(this) { urlHostOrNull(it.url) }
             hosts.filterTo(this, isKept)
-            keepSites.forEach { site ->
-                add(site)
-                add(WWW_PREFIX + site)
-            }
+            keepSites.flatMapTo(this, FireproofSites::originsFor)
         }
 
     /** One step in its own failure boundary; `null` (and [step] in [failed]) when it threw. */
@@ -155,8 +153,4 @@ class RunFireUseCase @Inject constructor(
             if (error is CancellationException) throw error
             failed += step
         }.getOrNull()
-
-    private companion object {
-        const val WWW_PREFIX = "www."
-    }
 }

@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.privacy.presentation.protectione
 
 import com.raumanian.thirtysix.browser.core.testing.MainDispatcherRule
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -23,10 +22,7 @@ class ProtectionExceptionsViewModelTest {
 
     @Before
     fun setUp() {
-        viewModel = ProtectionExceptionsViewModel(
-            repository,
-            RemoveProtectionExceptionsUseCase(repository),
-        )
+        viewModel = ProtectionExceptionsViewModel(repository)
     }
 
     @Test

@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -58,7 +57,7 @@ class AppDatabaseMigrationTest {
         assertEquals("bookmarks lost", 1, db.countOf("bookmarks"))
         assertEquals("history entries lost", 2, db.countOf("history_entries"))
         assertEquals("tabs lost", 2, db.countOf("tabs"))
-        assertEquals("download_records should start empty", 0, db.downloadRecordDao().count())
+        assertEquals("download_records should start empty", 0, db.countOf("download_records"))
 
         // Values, not just row counts: a migration that recreated and re-seeded the tables passes a count.
         db.openHelper.readableDatabase.query("SELECT title, url FROM bookmarks").use { c ->
@@ -67,8 +66,10 @@ class AppDatabaseMigrationTest {
             assertEquals("https://example.com", c.getString(1))
         }
         assertEquals(2, db.historyDao().count())
-        assertNotNull(db.historyDao().getById(2L))
-        assertEquals("https://kotlinlang.org", db.historyDao().getById(2L)?.url)
+        db.openHelper.readableDatabase.query("SELECT url FROM history_entries WHERE id = 2").use { c ->
+            assertTrue(c.moveToFirst())
+            assertEquals("https://kotlinlang.org", c.getString(0))
+        }
     }
 
     @Test
@@ -210,7 +211,7 @@ class AppDatabaseMigrationTest {
         )
 
         assertTrue(id > 0)
-        assertEquals(1, db.downloadRecordDao().count())
+        assertEquals(1, db.countOf("download_records"))
     }
 
     /**

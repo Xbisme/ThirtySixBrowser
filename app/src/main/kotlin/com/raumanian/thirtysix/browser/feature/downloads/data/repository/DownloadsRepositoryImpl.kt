@@ -31,7 +31,4 @@ class DownloadsRepositoryImpl @Inject constructor(
 
     override suspend fun deleteById(id: Long): Boolean =
         withContext(dispatchers.io) { dao.deleteById(id) > 0 }
-
-    override suspend fun count(): Int =
-        withContext(dispatchers.io) { dao.count() }
 }

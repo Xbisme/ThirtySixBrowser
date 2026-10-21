@@ -26,8 +26,6 @@ interface TabRepository {
 
     /** Leaves exactly one fresh home tab. */
     suspend fun closeAllTabs()
-
-    suspend fun getTabCount(): Int
 }
 
 /** A sentinel inside `Result.Error`, because `Result` has a single type parameter. */

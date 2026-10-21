@@ -25,8 +25,6 @@ interface IncognitoTabRepository {
 
     /** Restores the cookie snapshot exactly once. */
     suspend fun closeAll()
-
-    suspend fun getCount(): Int
 }
 
 class MaxIncognitoTabsReachedException :

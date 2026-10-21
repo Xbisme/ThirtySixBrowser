@@ -8,14 +8,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
-/** In-memory [FireproofSiteRepository]; [writes] counts every write. */
+/**
+ * In-memory [FireproofSiteRepository]; [writes] counts every write. With [cacheLoaded] false,
+ * [currentSites] answers empty, like the real cache before its first Room read.
+ */
 class FakeFireproofSiteRepository(initial: Set<String> = emptySet()) : FireproofSiteRepository {
     private val state = MutableStateFlow(initial.map { FireproofSite(it, Instant.EPOCH) })
     var writes: Int = 0
         private set
+    var cacheLoaded: Boolean = true
 
     override fun observeAll(): Flow<List<FireproofSite>> = state.map { it.reversed() }
-    override fun currentSites(): Set<String> = state.value.mapTo(HashSet()) { it.site }
+    override fun currentSites(): Set<String> =
+        if (cacheLoaded) state.value.mapTo(HashSet()) { it.site } else emptySet()
 
     override suspend fun add(site: String): Result<Unit> {
         writes++

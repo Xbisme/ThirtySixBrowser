@@ -8,6 +8,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.print.PrintManager
 import android.view.PixelCopy
 import android.view.ViewGroup
@@ -34,14 +35,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
+import androidx.core.net.toUri
 import com.raumanian.thirtysix.browser.core.domain.model.SiteOrigin
 import com.raumanian.thirtysix.browser.core.domain.repository.IncognitoWebProfile
 import com.raumanian.thirtysix.browser.core.domain.util.AppConstants
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
 import com.raumanian.thirtysix.browser.core.domain.util.UrlConstants
 import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalLinkDecision
+import com.raumanian.thirtysix.browser.feature.browser.domain.model.ExternalNavigation
 import com.raumanian.thirtysix.browser.feature.browser.domain.model.LongPressHit
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.BuildLongPressMenuUseCase
+import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.ExternalLinkPolicy
+import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.ExternalAppLauncher
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequest
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PageRequestSink
 import com.raumanian.thirtysix.browser.feature.browser.presentation.browser.page.PendingPopupWebViewClient
@@ -195,9 +201,12 @@ private fun buildConfiguredWebView(
         onHistoryCommitted = { session?.saveSoon(wv) },
         onPageVisible = callbacks.onPageVisible,
     )
-    // Incognito downloads are recorded like any other, so the incognito flag is deliberately not consulted.
+    // Incognito downloads are recorded like any other; the flag only picks the jar the cookies come from.
     wv.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
-        callbacks.onDownloadRequested(url, userAgent, contentDisposition, mimeType)
+        val cookies = WebViewProfiles.cookieManagerFor(state.isIncognito, incognitoProfile)?.getCookie(url)
+        callbacks.onDownloadRequested(
+            DownloadRequestAction.Requested(url, userAgent, contentDisposition, mimeType, wv.url, cookies),
+        )
     }
     wv.setFindListener { activeOrdinal, total, _ -> callbacks.onFindResult(activeOrdinal, total) }
     // `clearHistory` reports no history change, so Back and Forward are switched off here.
@@ -346,16 +355,21 @@ private class BrowserWebViewClient(
     private val onPageVisible: () -> Unit,
 ) : WebViewClient() {
 
+    // Set when the request goes out: a main page's certificate error arrives before onPageStarted.
+    @Volatile
+    private var mainFrameUrl: String? = null
+
     /**
      * Runs on a WebView IO thread. Main-frame requests are never blocked; listed third-party
      * requests get an empty response.
      */
-    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? =
-        request?.let { protection?.intercept(it) }
+    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+        if (request?.isForMainFrame == true) mainFrameUrl = request.url.toString()
+        return request?.let { protection?.intercept(it) }
+    }
 
-    /** Non-web schemes go to other apps; a malformed URI or missing handler is swallowed instead of crashing. */
-    @Suppress("TooGenericExceptionCaught", "ReturnCount")
-    // Generic catch: any platform call here may throw on a misbehaving handler app or malformed URI.
+    /** Non-web schemes may go to other apps, as [ExternalLinkPolicy] decides. */
+    @Suppress("ReturnCount")
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val uri = request?.url ?: return false
         val scheme = uri.scheme?.lowercase() ?: return false
@@ -363,21 +377,38 @@ private class BrowserWebViewClient(
             // A page's own http(s) navigation may be upgraded or cleaned.
             return view != null && protection?.overrideNavigation(view, request) == true
         }
-        val context = view?.context ?: return false
-        try {
-            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        val page = pageRequests.context()
+        if (view == null || page == null) return true
+        val url = uri.toString()
+        val sinceTap = (view as? BrowserPageView)?.lastTapUptimeMs?.let { SystemClock.uptimeMillis() - it }
+        val tapped = ExternalLinkPolicy.isTapped(request.hasGesture(), request.isRedirect, sinceTap)
+        val navigation = ExternalNavigation(url, scheme, request.isForMainFrame, tapped, page.isIncognito)
+        when (ExternalLinkPolicy.decide(navigation)) {
+            ExternalLinkDecision.Drop -> Unit
+            // A page that redirects from its first script gets here before its own onPageStarted,
+            // which is already queued: posting behind it ties the offer to that page.
+            ExternalLinkDecision.Offer -> view.post {
+                val current = pageRequests.context()?.takeIf { it.tabId == page.tabId }
+                current?.let { pageRequests.onExternalAppOffered(url, it.generation) }
             }
-            context.startActivity(intent)
-        } catch (t: Throwable) {
-            // The address is not logged.
-            android.util.Log.w("BrowserWebView", "External intent dispatch failed", t)
+            ExternalLinkDecision.Confirm -> {
+                val origin = view.url?.let(SiteOrigin::of).orEmpty()
+                pageRequests.enqueue(
+                    PageRequest.OpenExternalApp(page.tabId, page.generation, origin) { handOff(view, url) },
+                )
+            }
+            ExternalLinkDecision.Launch -> handOff(view, url)
         }
         return true
     }
 
+    private fun handOff(view: WebView, url: String) {
+        ExternalAppLauncher.launch(view.context, url)?.let { view.loadProtected(it, protection) }
+    }
+
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         pageRequests.onNavigationStarted()
+        mainFrameUrl = url
         url?.let { protection?.monitor?.onPageStarted(it) }
         url?.let {
             // URL first, so the address bar mirrors the (redirected) URL on the tick the load starts.
@@ -391,8 +422,10 @@ private class BrowserWebViewClient(
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
+        // A redirect overridden above still finishes here with the other app's address; the page never left.
+        val handedOff = url != null && url.toUri().scheme?.lowercase() !in WEB_NATIVE_SCHEMES
         // A failed HTTPS attempt's error page is not a visit: the http:// page replacing it reports its own events.
-        if (view != null && protection?.onPageFinished(view, url) == true) return
+        if (handedOff || (view != null && protection?.onPageFinished(view, url) == true)) return
         url?.let(onLoadFinished)
         onHistoryCommitted()
         // Capture the tab preview once the page has had time to paint.
@@ -458,6 +491,7 @@ private class BrowserWebViewClient(
         onHistoryCommitted()
     }
 
+    // HTTP 4xx and 5xx responses are not errors here: the site's own error page is shown, as other browsers do.
     override fun onReceivedError(
         view: WebView?,
         request: WebResourceRequest?,
@@ -474,17 +508,6 @@ private class BrowserWebViewClient(
         onLoadFailed(reason)
     }
 
-    override fun onReceivedHttpError(
-        view: WebView?,
-        request: WebResourceRequest?,
-        errorResponse: WebResourceResponse?,
-    ) {
-        // Sub-resource errors (including blocked responses) never reach the error UI; an HTTP error is
-        // the site's answer, never a reason to fall back to http://.
-        if (request?.isForMainFrame != true || errorResponse == null) return
-        onLoadFailed(ErrorReason.HttpError(errorResponse.statusCode))
-    }
-
     override fun onReceivedSslError(
         view: WebView?,
         handler: SslErrorHandler?,
@@ -493,7 +516,7 @@ private class BrowserWebViewClient(
         handler?.cancel()
         // A certificate failure on an HTTPS upgrade falls back to http://.
         if (protection?.fallBackIfUpgrade(error?.url) == true) return
-        onLoadFailed(ErrorReason.SslError)
+        if (isMainFrameSslError(error?.url, mainFrameUrl)) onLoadFailed(ErrorReason.SslError)
     }
 
     /** Basic/digest sign-in: credentials go to this one request only and are never stored. */
@@ -608,8 +631,8 @@ private const val FOCUS_NODE_HREF_URL: String = "url"
 
 private const val BLANK_PAGE: String = "about:blank"
 
-/** Schemes the WebView loads itself; anything else is handed to another app. */
-private val WEB_NATIVE_SCHEMES: Set<String> = setOf("http", "https", "about", "data")
+/** Schemes the WebView loads itself; anything else goes to the hand-off policy. */
+private val WEB_NATIVE_SCHEMES: Set<String> = setOf("http", "https", "about", "data", "blob")
 
 // Gives the page time to paint (fade-ins, progressive images) before the preview is captured.
 private const val SCREENSHOT_DELAY_MS: Long = 200L

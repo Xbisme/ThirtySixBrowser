@@ -24,6 +24,4 @@ interface DownloadsRepository {
 
     /** Leaves the file untouched and cancels nothing; callers offer removal only for finished entries. */
     suspend fun deleteById(id: Long): Boolean
-
-    suspend fun count(): Int
 }

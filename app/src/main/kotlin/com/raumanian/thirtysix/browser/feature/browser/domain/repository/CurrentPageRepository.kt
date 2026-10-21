@@ -15,8 +15,6 @@ interface CurrentPageRepository {
     /** A different tab id starts a new page: the generation moves on and the title is cleared. */
     fun setActiveTab(tab: Tab?)
 
-    fun setIncognito(incognito: Boolean)
-
     /** A load started: the generation moves on and the previous page's title is dropped. */
     fun startNewPage()
 }

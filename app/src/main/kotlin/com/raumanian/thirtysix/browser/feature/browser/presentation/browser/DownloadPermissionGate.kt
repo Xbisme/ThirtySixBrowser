@@ -25,13 +25,13 @@ import com.raumanian.thirtysix.browser.core.presentation.util.findActivity
  */
 @Composable
 internal fun rememberDownloadRequestHandler(
-    onGrant: (url: String, userAgent: String, contentDisposition: String?, mimeType: String?) -> Unit,
+    onGrant: (DownloadRequestAction.Requested) -> Unit,
     onDeny: (permanently: Boolean) -> Unit,
-): (String, String, String?, String?) -> Unit {
+): (DownloadRequestAction.Requested) -> Unit {
     val context = LocalContext.current
 
     // Held across the permission round trip so the download the person asked for starts once granted.
-    val pending = remember { mutableStateOf<PendingDownload?>(null) }
+    val pending = remember { mutableStateOf<DownloadRequestAction.Requested?>(null) }
 
     // Shown before re-requesting: the person already said no once and needs to know why we ask again.
     val showRationale = remember { mutableStateOf(false) }
@@ -42,8 +42,7 @@ internal fun rememberDownloadRequestHandler(
         val request = pending.value
         pending.value = null
         when {
-            granted && request != null ->
-                onGrant(request.url, request.userAgent, request.contentDisposition, request.mimeType)
+            granted && request != null -> onGrant(request)
             // No rationale after a denial means the platform will not ask again: point at system settings.
             else -> onDeny(!context.shouldShowStorageRationale())
         }
@@ -64,18 +63,18 @@ internal fun rememberDownloadRequestHandler(
     }
 
     return remember(onGrant, onDeny) {
-        { url, userAgent, contentDisposition, mimeType ->
+        { request ->
             when {
                 !isLegacyStoragePermissionRequired() || context.hasLegacyStoragePermission() ->
-                    onGrant(url, userAgent, contentDisposition, mimeType)
+                    onGrant(request)
 
                 context.shouldShowStorageRationale() -> {
-                    pending.value = PendingDownload(url, userAgent, contentDisposition, mimeType)
+                    pending.value = request
                     showRationale.value = true
                 }
 
                 else -> {
-                    pending.value = PendingDownload(url, userAgent, contentDisposition, mimeType)
+                    pending.value = request
                     launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
             }
@@ -101,13 +100,6 @@ private fun StoragePermissionRationaleDialog(onConfirm: () -> Unit, onDismiss: (
         },
     )
 }
-
-private data class PendingDownload(
-    val url: String,
-    val userAgent: String,
-    val contentDisposition: String?,
-    val mimeType: String?,
-)
 
 // From API 29 Downloads is writable without permission, and the manifest caps the declaration there.
 private fun isLegacyStoragePermissionRequired(): Boolean =

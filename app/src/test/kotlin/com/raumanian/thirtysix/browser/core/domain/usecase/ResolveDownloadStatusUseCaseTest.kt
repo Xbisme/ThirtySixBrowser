@@ -71,14 +71,15 @@ class ResolveDownloadStatusUseCaseTest {
             )
         }
 
+    /** A same-named file on disk may belong to another download, so a name alone proves nothing. */
     @Test
-    fun `a forgotten handle with no recorded URI still resolves by file name`() = runTest {
+    fun `a forgotten handle with no recorded URI is Missing even when the name exists`() = runTest {
         val useCase = ResolveDownloadStatusUseCase(
             FakeGateway(statuses = emptyMap(), existingFiles = setOf("a.pdf")),
             InMemoryDownloadsRepository(),
         )
 
-        assertEquals(DownloadStatus.Complete(), useCase(listOf(record(localUri = null))).single().status)
+        assertEquals(DownloadStatus.Missing, useCase(listOf(record(localUri = null))).single().status)
     }
 
     /**
@@ -245,6 +246,5 @@ class ResolveDownloadStatusUseCaseTest {
         override suspend fun contentUriFor(transferHandle: Long): String? = contentUri
         override suspend fun resolvedFileNameFor(transferHandle: Long): String? = resolvedName
         override suspend fun deleteFile(transferHandle: Long, fileName: String) = false
-        override suspend fun isAvailable() = true
     }
 }

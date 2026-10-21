@@ -2,6 +2,7 @@ package com.raumanian.thirtysix.browser.core.testing
 
 import androidx.test.platform.app.InstrumentationRegistry
 import java.net.ServerSocket
+import java.net.URLDecoder
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.thread
 
@@ -70,7 +71,10 @@ class AssetPageServer : AutoCloseable {
                     requests += name to userAgent
                     fullRequests += path to headers
                     val body = runCatching { assets.open(name).use { input -> input.readBytes() } }.getOrNull()
-                    val head = if (body != null) {
+                    val redirect = redirectTarget(path)
+                    val head = if (redirect != null) {
+                        "HTTP/1.1 302 Found\r\nLocation: $redirect\r\nContent-Length: 0\r\n"
+                    } else if (body != null) {
                         "HTTP/1.1 200 OK\r\nContent-Type: ${contentTypeOf(name)}\r\nContent-Length: ${body.size}\r\n" +
                             extraHeadersFor(path)
                     } else {
@@ -82,6 +86,12 @@ class AssetPageServer : AutoCloseable {
             }
         }
     }
+
+    /** `redirect?to=<encoded address>` answers 302 to that address. */
+    private fun redirectTarget(path: String): String? =
+        path.takeIf { it.trimStart('/').startsWith(REDIRECT_PREFIX) }
+            ?.substringAfter(REDIRECT_PREFIX)
+            ?.let { URLDecoder.decode(it, Charsets.UTF_8.name()) }
 
     /** A service worker must be served as JavaScript, or registration fails. */
     private fun contentTypeOf(name: String): String =
@@ -97,6 +107,7 @@ class AssetPageServer : AutoCloseable {
 
     private companion object {
         const val USER_AGENT_HEADER = "User-Agent:"
+        const val REDIRECT_PREFIX = "redirect?to="
         const val STORAGE_FIXTURE = "storage.html"
         const val PERSISTENT_COOKIE = "fp_persist=1; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax"
     }

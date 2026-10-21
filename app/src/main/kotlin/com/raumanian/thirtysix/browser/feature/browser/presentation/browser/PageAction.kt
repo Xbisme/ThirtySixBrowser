@@ -18,9 +18,9 @@ sealed interface PageAction {
 
     data class TitleReceived(val title: String) : PageAction
 
-    data class IconReceived(val url: String, val icon: Bitmap) : PageAction
+    data class IconReceived(val url: String, val icon: Bitmap, val isIncognito: Boolean) : PageAction
 
-    data class ScreenshotReady(val bitmap: Bitmap) : PageAction
+    data class ScreenshotReady(val bitmap: Bitmap, val tabId: Long, val isIncognito: Boolean) : PageAction
 
     data class CanGoBackChanged(val canGoBack: Boolean) : PageAction
 

@@ -3,8 +3,8 @@ package com.raumanian.thirtysix.browser.feature.bookmarks.presentation.bookmarks
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkFolder
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.usecase.AddBookmarkUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -133,12 +134,49 @@ class BookmarksViewModelTest {
         assertEquals(PendingBookmarkDialog.CreateFolder(parentId = null), pending)
     }
 
-    private fun newViewModel(repo: FakeBookmarkRepository): BookmarksViewModel {
-        val tabRepo = FakeTabRepository(homeUrl = "https://home.example.com")
+    @Test
+    fun `bookmark tap from an incognito tab loads it in that tab`() = runTest {
+        val repo = FakeBookmarkRepository()
+        val bookmarkId = repo.seedBookmark(Bookmark(0, "X", "https://x.com", null, 100L, 100L))
+        val tabRepo = FakeTabRepository(homeUrl = HOME_URL)
         val incognitoRepo = FakeIncognitoTabRepository()
+        val later = System.currentTimeMillis() + LATER_MS
+        incognitoRepo.emit(listOf(Tab(INCOGNITO_TAB_ID, HOME_URL, "", 0, later, later, isIncognito = true)))
+        val vm = newViewModel(repo, tabRepo, incognitoRepo)
+        advanceUntilIdle()
+
+        vm.onAction(BookmarksAction.BookmarkTap(repo.getBookmark(bookmarkId)!!))
+        advanceUntilIdle()
+
+        assertEquals("https://x.com", incognitoRepo.snapshot().single().url)
+        assertEquals(HOME_URL, tabRepo.observeTabs().first().single().url)
+    }
+
+    @Test
+    fun `bookmark tap with no active tab updates no tab`() = runTest {
+        val repo = FakeBookmarkRepository()
+        val bookmarkId = repo.seedBookmark(Bookmark(0, "X", "https://x.com", null, 100L, 100L))
+        val tabRepo = FakeTabRepository(homeUrl = HOME_URL)
+        val incognitoRepo = FakeIncognitoTabRepository()
+        val vm = newViewModel(repo, tabRepo, incognitoRepo)
+        advanceUntilIdle()
+        tabRepo.emit(emptyList())
+        advanceUntilIdle()
+
+        vm.onAction(BookmarksAction.BookmarkTap(repo.getBookmark(bookmarkId)!!))
+        advanceUntilIdle()
+
+        assertTrue(incognitoRepo.snapshot().isEmpty())
+        assertEquals(BookmarksEvent.OpenUrl("https://x.com"), vm.events.first())
+    }
+
+    private fun newViewModel(
+        repo: FakeBookmarkRepository,
+        tabRepo: FakeTabRepository = FakeTabRepository(homeUrl = HOME_URL),
+        incognitoRepo: FakeIncognitoTabRepository = FakeIncognitoTabRepository(),
+    ): BookmarksViewModel {
         val observeAllTabs = ObserveAllTabsUseCase(tabRepo, incognitoRepo)
         val observeActiveTab = ObserveActiveTabUseCase(observeAllTabs)
-        val observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs)
         return BookmarksViewModel(
             observeBookmarksByFolder = ObserveBookmarksByFolderUseCase(repo),
             observeFolderPath = ObserveFolderPathUseCase(repo),
@@ -148,9 +186,14 @@ class BookmarksViewModelTest {
             updateBookmark = UpdateBookmarkUseCase(repo),
             addBookmark = AddBookmarkUseCase(repo),
             searchBookmarks = SearchBookmarksUseCase(repo),
-            observeActiveTabIsIncognito = observeActiveTabIsIncognito,
             observeActiveTab = observeActiveTab,
             bookmarks = repo,
         )
+    }
+
+    private companion object {
+        const val HOME_URL = "https://home.example.com"
+        const val INCOGNITO_TAB_ID = -3L
+        const val LATER_MS = 60_000L
     }
 }

@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.browser.domain.usecase
 
 import com.raumanian.thirtysix.browser.core.testing.fake.FakeProtectionExceptionRepository
 import com.raumanian.thirtysix.browser.feature.privacy.data.datasource.local.IncognitoProtectionExceptionStore
-import com.raumanian.thirtysix.browser.feature.privacy.domain.usecase.RemoveProtectionExceptionsUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -16,7 +15,6 @@ class SiteProtectionUseCasesTest {
     private val incognito = IncognitoProtectionExceptionStore()
     private val isProtected = IsSiteProtectedUseCase(repository, incognito)
     private val setProtection = SetSiteProtectionUseCase(repository, incognito)
-    private val remove = RemoveProtectionExceptionsUseCase(repository)
 
     @Test
     fun `every site is protected by default`() {
@@ -46,17 +44,5 @@ class SiteProtectionUseCasesTest {
 
         setProtection("shop.example", on = true, isIncognito = true)
         assertTrue(isProtected("shop.example", isIncognito = true))
-    }
-
-    @Test
-    fun `remove one and remove all`() = runTest {
-        setProtection("a.example", on = false, isIncognito = false)
-        setProtection("b.example", on = false, isIncognito = false)
-
-        remove("a.example")
-        assertEquals(listOf("b.example"), repository.observeAll().first().map { it.site })
-
-        remove(null)
-        assertTrue(repository.observeAll().first().isEmpty())
     }
 }

@@ -2,11 +2,11 @@ package com.raumanian.thirtysix.browser.feature.history.presentation.history
 
 import app.cash.turbine.test
 import com.raumanian.thirtysix.browser.core.domain.model.HistoryEntry
+import com.raumanian.thirtysix.browser.core.domain.model.Tab
 import com.raumanian.thirtysix.browser.core.domain.repository.ClipboardWriter
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.HistoryRepository
 import com.raumanian.thirtysix.browser.core.domain.usecase.ClearBrowsingHistoryUseCase
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -102,6 +102,47 @@ class HistoryViewModelTest {
         assertEquals("https://example.com", vm.events.filterIsInstance<HistoryEvent.OpenUrl>().first().url)
         val activeTab = tabRepo.observeTabs().first().maxByOrNull { it.lastActiveAt }
         assertEquals("https://example.com", activeTab?.url)
+    }
+
+    @Test
+    fun `entry tap from an incognito tab loads it in that tab and writes no history`() = runTest {
+        val repo = FakeHistoryRepository()
+        repo.recordVisit("https://example.com", "Example", now)
+        val tabRepo = FakeTabRepository(homeUrl = HOME_URL)
+        val incognitoRepo = FakeIncognitoTabRepository()
+        incognitoRepo.emit(listOf(incognitoTab(INCOGNITO_TAB_ID)))
+        val vm = newViewModel(repo, tabRepo, incognitoRepo)
+        advanceUntilIdle()
+
+        vm.onAction(HistoryAction.EntryTap(vm.uiState.first { it.entries.isNotEmpty() }.entries.single()))
+        advanceUntilIdle()
+
+        assertEquals("https://example.com", incognitoRepo.snapshot().single().url)
+        assertEquals(HOME_URL, tabRepo.observeTabs().first().single().url)
+        assertEquals(1, repo.observeAll().first().size)
+    }
+
+    @Test
+    fun `entry tap with no active tab updates no tab`() = runTest {
+        val repo = FakeHistoryRepository()
+        repo.recordVisit("https://example.com", "Example", now)
+        val tabRepo = FakeTabRepository(homeUrl = HOME_URL)
+        val incognitoRepo = FakeIncognitoTabRepository()
+        val vm = newViewModel(repo, tabRepo, incognitoRepo)
+        advanceUntilIdle()
+        tabRepo.emit(emptyList())
+        advanceUntilIdle()
+
+        vm.onAction(HistoryAction.EntryTap(vm.uiState.first { it.entries.isNotEmpty() }.entries.single()))
+        advanceUntilIdle()
+
+        assertTrue(incognitoRepo.snapshot().isEmpty())
+        assertEquals("https://example.com", vm.events.filterIsInstance<HistoryEvent.OpenUrl>().first().url)
+    }
+
+    private fun incognitoTab(id: Long): Tab {
+        val activeLater = now + oneDay
+        return Tab(id, HOME_URL, "", 0, activeLater, activeLater, isIncognito = true)
     }
 
     @Test
@@ -472,7 +513,6 @@ class HistoryViewModelTest {
             history = historyRepository,
             clearHistory = ClearBrowsingHistoryUseCase(historyRepository, FakeTabSessionRepository()),
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
-            observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepo, incognitoRepo),
             tabs = tabRepo,
             clipboardWriter = clipboardWriter,
@@ -535,6 +575,7 @@ class HistoryViewModelTest {
 
     private companion object {
         const val HOME_URL = "https://home.example.com"
+        const val INCOGNITO_TAB_ID = -3L
         const val THREE_SEEDED = 3
     }
 }

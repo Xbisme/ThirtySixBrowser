@@ -63,6 +63,4 @@ class FakeIncognitoTabRepository : IncognitoTabRepository {
     override suspend fun closeAll() {
         state.update { emptyList() }
     }
-
-    override suspend fun getCount(): Int = state.value.size
 }

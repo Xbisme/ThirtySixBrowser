@@ -118,6 +118,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">%1$s をダウンロード中</string>
     <string name="downloads_service_unavailable">この端末ではダウンロードを利用できません。</string>
+    <string name="downloads_unsupported_snackbar">この種類のダウンロードはサポートされていません</string>
     <string name="downloads_storage_permission_denied">ダウンロードを保存するにはストレージへのアクセスが必要です。</string>
     <string name="downloads_storage_permission_denied_permanently">ストレージへのアクセスがブロックされています。設定で有効にすると保存できます。</string>
     <string name="downloads_storage_permission_rationale_title">ストレージへのアクセスを許可しますか？</string>
@@ -332,6 +333,9 @@
     <string name="long_press_copied">コピーしました</string>
     <string name="popup_blocked">ポップアップをブロックしました</string>
     <string name="popup_open">開く</string>
+    <string name="external_app_offer">このページが別のアプリを開こうとしています</string>
+    <string name="external_app_confirm_title">別のアプリで開きますか？</string>
+    <string name="external_app_confirm_body">そのアプリにこのリンクが渡されます。</string>
     <string name="settings_site_permissions">サイトの権限</string>
     <string name="settings_site_permissions_summary">サイトごとのカメラ、マイク、位置情報</string>
     <string name="site_permissions_title">サイトの権限</string>

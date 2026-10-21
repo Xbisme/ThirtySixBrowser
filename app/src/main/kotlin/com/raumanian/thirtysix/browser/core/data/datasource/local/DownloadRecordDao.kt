@@ -35,7 +35,4 @@ interface DownloadRecordDao {
     /** Removes the record only; the downloaded file stays. */
     @Query("DELETE FROM ${DownloadRecordEntity.TABLE_NAME} WHERE ${DownloadRecordEntity.COL_ID} = :id")
     suspend fun deleteById(id: Long): Int
-
-    @Query("SELECT COUNT(*) FROM ${DownloadRecordEntity.TABLE_NAME}")
-    suspend fun count(): Int
 }

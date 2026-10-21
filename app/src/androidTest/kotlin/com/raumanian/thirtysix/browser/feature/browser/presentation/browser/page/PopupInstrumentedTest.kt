@@ -98,9 +98,11 @@ class PopupInstrumentedTest {
             .setClass(context, MainActivity::class.java),
     )
 
+    private suspend fun tabCount(): Int = tabRepository.observeTabs().first().size
+
     private suspend fun awaitTabCount(expected: Int): Int {
-        withTimeoutOrNull(WAIT_MS) { while (tabRepository.getTabCount() != expected) delay(POLL_MS) }
-        return tabRepository.getTabCount()
+        withTimeoutOrNull(WAIT_MS) { while (tabCount() != expected) delay(POLL_MS) }
+        return tabCount()
     }
 
     private suspend fun awaitRequest(path: String): Boolean =
@@ -113,7 +115,7 @@ class PopupInstrumentedTest {
 
     @Test(timeout = TEST_TIMEOUT_MS)
     fun aTappedTargetBlankLink_opensOneNewTab() = runBlocking {
-        val before = tabRepository.getTabCount()
+        val before = tabCount()
         open("/link").use {
             assertEquals(before + 1, awaitTabCount(before + 1))
             assertTrue(awaitRequest("/link"))
@@ -127,21 +129,21 @@ class PopupInstrumentedTest {
 
     @Test(timeout = TEST_TIMEOUT_MS)
     fun aWindowOpenedOnLoad_isBlocked_andNeverLoaded() = runBlocking {
-        val before = tabRepository.getTabCount()
+        val before = tabCount()
         open("/auto").use {
             assertEquals(before + 1, awaitTabCount(before + 1))
             assertTrue(awaitRequest("/auto"))
 
             delay(SETTLE_MS)
 
-            assertEquals("no tab for a pop-up the page opened itself", before + 1, tabRepository.getTabCount())
+            assertEquals("no tab for a pop-up the page opened itself", before + 1, tabCount())
             assertTrue("the blocked address is never loaded", requested.none { it == "/child" })
         }
     }
 
     @Test(timeout = TEST_TIMEOUT_MS)
     fun aPageOpenedTab_closingItself_returnsToItsOpener() = runBlocking {
-        val before = tabRepository.getTabCount()
+        val before = tabCount()
         open("/opener").use {
             assertEquals(before + 1, awaitTabCount(before + 1))
             assertTrue(awaitRequest("/opener"))

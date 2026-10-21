@@ -122,6 +122,7 @@
     <!-- downloads (US1) -->
     <string name="downloads_started_snackbar">Téléchargement de %1$s</string>
     <string name="downloads_service_unavailable">Les téléchargements ne sont pas disponibles sur cet appareil.</string>
+    <string name="downloads_unsupported_snackbar">Ce type de téléchargement n\'est pas pris en charge</string>
     <string name="downloads_storage_permission_denied">L\'accès au stockage est nécessaire pour enregistrer les téléchargements.</string>
     <string name="downloads_storage_permission_denied_permanently">L\'accès au stockage est bloqué. Activez-le dans les Paramètres pour enregistrer les téléchargements.</string>
     <string name="downloads_storage_permission_rationale_title">Autoriser l\'accès au stockage ?</string>
@@ -340,6 +341,9 @@
     <string name="long_press_copied">Copié</string>
     <string name="popup_blocked">Pop-up bloquée</string>
     <string name="popup_open">Ouvrir</string>
+    <string name="external_app_offer">Cette page veut ouvrir une autre appli</string>
+    <string name="external_app_confirm_title">Ouvrir dans une autre appli ?</string>
+    <string name="external_app_confirm_body">L\'appli verra ce lien.</string>
     <string name="settings_site_permissions">Autorisations des sites</string>
     <string name="settings_site_permissions_summary">Caméra, micro et position pour chaque site</string>
     <string name="site_permissions_title">Autorisations des sites</string>

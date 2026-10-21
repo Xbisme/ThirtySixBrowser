@@ -2,7 +2,6 @@ package com.raumanian.thirtysix.browser.feature.browser.presentation.browser
 
 import com.raumanian.thirtysix.browser.core.domain.repository.FaviconCache
 import com.raumanian.thirtysix.browser.core.domain.repository.ScreenshotCache
-import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabIsIncognitoUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveActiveTabUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.ObserveAllTabsUseCase
 import com.raumanian.thirtysix.browser.core.domain.usecase.UpdateActiveTabUrlAndTitleUseCase
@@ -153,7 +152,6 @@ class PageViewModelHistoryRecordSequenceTest {
         return PageViewModel(
             observeActiveTab = ObserveActiveTabUseCase(observeAllTabs),
             tabs = tabRepo,
-            observeActiveTabIsIncognito = ObserveActiveTabIsIncognitoUseCase(observeAllTabs),
             updateActiveTabUrlAndTitle = UpdateActiveTabUrlAndTitleUseCase(tabRepo, incognitoRepo),
             faviconCache = NoopFaviconCache,
             screenshotCache = NoopScreenshotCache,

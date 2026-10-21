@@ -1,7 +1,9 @@
 package com.raumanian.thirtysix.browser.feature.bookmarks.data.datasource.local
 
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode
+import com.raumanian.thirtysix.browser.core.domain.util.BookmarkUrlValidator
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.Result
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.BookmarkTransferLimits
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.ParsedBookmarkFile
 import javax.inject.Inject
@@ -107,10 +109,11 @@ class NetscapeBookmarkParser @Inject constructor() {
         private fun addLink(rawHref: String?, rawTitle: String) {
             sawLink = sawLink || rawHref != null
             pendingFolder = null
-            val url = rawHref?.let(::decodeEntities)?.trim().orEmpty()
+            val encoded = encodeUnsafe(rawHref?.let(::decodeEntities)?.trim().orEmpty())
+            val url = (BookmarkUrlValidator.validate(encoded) as? Result.Success)?.data.takeIf { isSupported(encoded) }
             val level = stack.last()
             when {
-                !isSupported(url) -> unsupported++
+                url == null -> unsupported++
                 !level.urls.add(url) -> duplicates++
                 else -> {
                     val title = clean(rawTitle, BrowserLimits.MAX_BOOKMARK_TITLE_LENGTH)
@@ -123,6 +126,15 @@ class NetscapeBookmarkParser @Inject constructor() {
 
         private fun clean(raw: String, maxLength: Int): String =
             decodeEntities(raw).replace(WHITESPACE, " ").trim().take(maxLength)
+
+        // Browsers export some characters a URI forbids; encoding them keeps the link editable later.
+        private fun encodeUnsafe(url: String): String = buildString(url.length) {
+            url.forEachIndexed { i, c ->
+                val loneEscape =
+                    c == '%' && !HEX_PAIR.matches(url.substring(i + 1, minOf(i + HEX_PAIR_END, url.length)))
+                if (c in UNSAFE_CHARS || loneEscape) append(PERCENT_FORMAT.format(c.code)) else append(c)
+            }
+        }
 
         private fun isSupported(url: String): Boolean =
             url.length <= BrowserLimits.MAX_BOOKMARK_URL_LENGTH &&
@@ -154,11 +166,16 @@ class NetscapeBookmarkParser @Inject constructor() {
             }
         }
 
-        /** The text up to `</tag>`, or to the end of a truncated file, with any tags inside dropped. */
+        /**
+         * The text up to `</tag>`, or up to the next entry or list when the close tag is missing, with any
+         * tags inside dropped. A missing close tag leaves the following tag to be read next.
+         */
         fun textUntilClose(tag: String): String {
             val close = s.indexOf("</$tag", pos, ignoreCase = true).let { if (it < 0) s.length else it }
-            val text = s.substring(pos, close)
-            pos = indexOrEnd(s.indexOf('>', close), 1)
+            val end = ENTRY_BOUNDARIES.map { s.indexOf(it, pos, ignoreCase = true) }.filter { it >= 0 }
+                .fold(close, ::minOf)
+            val text = s.substring(pos, end)
+            pos = if (end == close) indexOrEnd(s.indexOf('>', close), 1) else end
             return text.replace(INNER_TAG, "")
         }
 
@@ -217,6 +234,11 @@ class NetscapeBookmarkParser @Inject constructor() {
         private const val ATTR_HREF = "href"
         private val SKIPPED_CONTENT = setOf("script", "style")
         private val SUPPORTED_SCHEMES = listOf("http://", "https://")
+        private val ENTRY_BOUNDARIES = listOf("<dt", "<dl")
+        private const val UNSAFE_CHARS = " \"|{}^`<>\\"
+        private const val PERCENT_FORMAT = "%%%02X"
+        private const val HEX_PAIR_END = 3
+        private val HEX_PAIR = Regex("[0-9A-Fa-f]{2}")
         private val INNER_TAG = Regex("<[^>]*>")
         private val WHITESPACE = Regex("\\s+")
         private val ENTITY = Regex("&(#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[a-zA-Z]{2,6});")

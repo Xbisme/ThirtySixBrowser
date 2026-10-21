@@ -13,7 +13,6 @@ class CloseTabUseCase @Inject constructor(
     private val screenshotCache: ScreenshotCache,
 ) {
     suspend operator fun invoke(tabId: Long) {
-        // Screenshot first, so a tab re-created with the same id never shows the closed tab's image.
         screenshotCache.delete(tabId)
         repository.closeTab(tabId)
     }

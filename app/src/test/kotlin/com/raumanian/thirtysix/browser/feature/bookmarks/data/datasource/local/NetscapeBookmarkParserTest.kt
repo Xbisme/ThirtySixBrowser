@@ -1,14 +1,20 @@
 package com.raumanian.thirtysix.browser.feature.bookmarks.data.datasource.local
 
+import com.raumanian.thirtysix.browser.core.domain.model.Bookmark
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Folder
 import com.raumanian.thirtysix.browser.core.domain.model.BookmarkTreeNode.Link
 import com.raumanian.thirtysix.browser.core.domain.util.BrowserLimits
+import com.raumanian.thirtysix.browser.core.domain.util.Result
+import com.raumanian.thirtysix.browser.core.testing.fake.FakeBookmarkRepository
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.BookmarkTransferLimits
 import com.raumanian.thirtysix.browser.feature.bookmarks.domain.model.ParsedBookmarkFile
+import com.raumanian.thirtysix.browser.feature.bookmarks.domain.usecase.UpdateBookmarkUseCase
 import com.raumanian.thirtysix.browser.feature.bookmarks.fixture.BookmarkFiles
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NetscapeBookmarkParserTest {
@@ -53,7 +59,7 @@ class NetscapeBookmarkParserTest {
         assertEquals("https://www.google.com/search?q=a&b=1&copy=2", search.url)
         assertEquals("Search & <more>", search.title)
         val quoted = bar.folder("Tin tức").children.map { it as Link }.last()
-        assertEquals("https://example.com/say?q=\"hi\"", quoted.url)
+        assertEquals("https://example.com/say?q=%22hi%22", quoted.url)
         assertEquals(listOf("Mobile item"), file.root.folder("From other bookmarks").titles())
     }
 
@@ -210,6 +216,39 @@ class NetscapeBookmarkParserTest {
         assertEquals(BrowserLimits.MAX_BOOKMARK_TITLE_LENGTH, folder.titles()[1].length)
         assertEquals("upper", folder.titles()[2])
         assertEquals(2, file.unsupportedSkipped)
+    }
+
+    @Test
+    fun `a folder name without its close tag ends at the next list`() {
+        val file = parse("<DT><H3>Work<DL><p><DT><A HREF=\"https://a.example\">a</A></DL>")!!
+
+        assertEquals(listOf("a"), file.root.folder("Work").titles())
+    }
+
+    @Test
+    fun `a link title without its close tag ends at the next entry`() {
+        val file = parse("<DL><DT><A HREF=\"https://1.example\">t1<DT><A HREF=\"https://2.example\">t2</A></DL>")!!
+
+        assertEquals(listOf("t1", "t2"), file.root.titles())
+    }
+
+    @Test
+    fun `characters illegal in an address are encoded, and the result passes an edit`() = runTest {
+        val file = parse("<DL><DT><A HREF=\"https://maps.example/a b|c?q=%41{x}^`<y>\\\">m</A></DL>")!!
+
+        val url = (file.root.children.single() as Link).url
+        assertEquals("https://maps.example/a%20b%7Cc?q=%41%7Bx%7D%5E%60%3Cy%3E%5C", url)
+        val repo = FakeBookmarkRepository()
+        val id = repo.seedBookmark(Bookmark(0, "m", url, null, 1L, 1L))
+        assertTrue(UpdateBookmarkUseCase(repo)(id, "m", url, null) is Result.Success)
+    }
+
+    @Test
+    fun `an address the bookmark validator rejects is skipped`() {
+        val file = parse("<DL><DT><A HREF=\"https:// x\">bad</A><DT><A HREF=\"https://ok.example\">ok</A></DL>")!!
+
+        assertEquals(listOf("ok"), file.root.titles())
+        assertEquals(1, file.unsupportedSkipped)
     }
 
     @Test

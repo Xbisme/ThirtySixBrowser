@@ -1,7 +1,6 @@
 package com.raumanian.thirtysix.browser.core.data.datasource.local
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -14,21 +13,6 @@ interface HistoryDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(entry: HistoryEntryEntity): Long
-
-    @Delete
-    suspend fun delete(entry: HistoryEntryEntity)
-
-    @Query("SELECT * FROM ${HistoryEntryEntity.TABLE_NAME} WHERE ${HistoryEntryEntity.COL_ID} = :id")
-    suspend fun getById(id: Long): HistoryEntryEntity?
-
-    @Query(
-        """
-        SELECT * FROM ${HistoryEntryEntity.TABLE_NAME}
-        ORDER BY ${HistoryEntryEntity.COL_VISITED_AT} DESC, ${HistoryEntryEntity.COL_ID} DESC
-        LIMIT :limit OFFSET :offset
-        """,
-    )
-    suspend fun getRecent(limit: Int, offset: Int): List<HistoryEntryEntity>
 
     @Query(
         """

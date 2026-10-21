@@ -18,7 +18,7 @@ interface BookmarkRepository {
 
     fun observeRecentBookmarks(limit: Int): Flow<List<Bookmark>>
 
-    fun searchBookmarks(query: String): Flow<List<Bookmark>>
+    fun searchBookmarks(query: String, limit: Int): Flow<List<Bookmark>>
 
     suspend fun getAllBookmarks(): List<Bookmark>
 
@@ -40,8 +40,6 @@ interface BookmarkRepository {
     fun observeFoldersByParent(parentId: Long?): Flow<List<BookmarkFolder>>
 
     fun observeAllFolders(): Flow<List<BookmarkFolder>>
-
-    suspend fun getFolder(id: Long): BookmarkFolder?
 
     /** Ancestors root → leaf; empty when the folder is missing or at the root. */
     suspend fun getAncestorChain(folderId: Long): List<BookmarkFolder>

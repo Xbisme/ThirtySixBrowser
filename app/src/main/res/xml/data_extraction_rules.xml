@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Cloud backup and device transfer, Android 12+. The database (bookmarks, history, tabs) and its
-   WAL files stay on the device. Settings are backed up through the default; adding any <include>
-   would switch to exclude-by-default.
+   Cloud backup and device transfer, Android 12+. The database (bookmarks, history, tabs) with its
+   WAL files and the web data (cookies, site storage, WebView's visited-site prefs) stay on the
+   device. Settings are backed up through the default; adding any <include> would switch to
+   exclude-by-default.
 -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="database" path="thirtysix_browser.db"/>
         <exclude domain="database" path="thirtysix_browser.db-wal"/>
         <exclude domain="database" path="thirtysix_browser.db-shm"/>
+        <exclude domain="root" path="app_webview/"/>
+        <exclude domain="sharedpref" path="AwOriginVisitLoggerPrefs.xml"/>
+        <exclude domain="sharedpref" path="WebViewChromiumPrefs.xml"/>
     </cloud-backup>
     <device-transfer>
         <exclude domain="database" path="thirtysix_browser.db"/>
         <exclude domain="database" path="thirtysix_browser.db-wal"/>
         <exclude domain="database" path="thirtysix_browser.db-shm"/>
+        <exclude domain="root" path="app_webview/"/>
+        <exclude domain="sharedpref" path="AwOriginVisitLoggerPrefs.xml"/>
+        <exclude domain="sharedpref" path="WebViewChromiumPrefs.xml"/>
     </device-transfer>
 </data-extraction-rules>

@@ -6,7 +6,13 @@ import android.webkit.WebView
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.PopupDecision
 import com.raumanian.thirtysix.browser.feature.browser.domain.usecase.SitePermissionOutcome
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+/** A page's untapped attempt to open another app, offered to the person with Open. */
+data class ExternalAppOffer(val url: String, val generation: Long)
 
 /**
  * The page on screen and its generation, which moves on every main-frame navigation and tab
@@ -25,6 +31,11 @@ class PageSession(
 
     /** The current page's dialog flood control. */
     val dialogs = DialogSuppression()
+
+    private val _externalAppOffer = MutableStateFlow<ExternalAppOffer?>(null)
+
+    /** The current page's latest offer; null once the page is replaced. */
+    val externalAppOffer: StateFlow<ExternalAppOffer?> = _externalAppOffer.asStateFlow()
 
     private var tabId: Long? = null
     private var isIncognito: Boolean = false
@@ -100,6 +111,10 @@ class PageSession(
         context()?.takeIf { it.generation == generation }?.let { popups?.onBlocked(target, it) }
     }
 
+    override fun onExternalAppOffered(url: String, generation: Long) {
+        if (context()?.generation == generation) _externalAppOffer.value = ExternalAppOffer(url, generation)
+    }
+
     override fun onCloseWindow(window: WebView) {
         popups?.onCloseWindow(window)
     }
@@ -108,6 +123,7 @@ class PageSession(
 
     private fun advance(previous: PageContext?) {
         generation += 1
+        _externalAppOffer.value = null
         queue.dropStale(tabId, generation)
         previous?.let { permissionGate?.onPageChanged(it.tabId) }
     }

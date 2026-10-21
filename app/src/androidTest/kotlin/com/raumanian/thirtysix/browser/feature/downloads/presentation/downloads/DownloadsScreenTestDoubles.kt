@@ -69,8 +69,6 @@ internal class InstrumentedDownloadsRepository(initial: List<DownloadRecord>) : 
         records.value = records.value.filterNot { it.id == id }
         return records.value.size < before
     }
-
-    override suspend fun count(): Int = records.value.size
 }
 
 internal class InstrumentedGateway(
@@ -95,11 +93,10 @@ internal class InstrumentedGateway(
     override suspend fun fileExists(localUri: String?, fileName: String): Boolean =
         fileName in existingFiles || localUri in existingFiles
     override suspend fun deleteFile(transferHandle: Long, fileName: String): Boolean = true
-    override suspend fun isAvailable(): Boolean = true
 }
 
 private object InstrumentedNoopOpener : ExternalFileOpener {
-    override fun open(contentUri: String, mimeType: String): Boolean = true
+    override fun open(contentUri: String, mimeType: String, fileName: String): Boolean = true
 }
 
 private object InstrumentedNoopClipboard : ClipboardWriter {
