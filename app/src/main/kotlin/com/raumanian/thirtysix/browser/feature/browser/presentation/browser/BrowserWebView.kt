@@ -363,7 +363,7 @@ private class BrowserWebViewClient(
     private val onPageVisible: () -> Unit,
 ) : WebViewClient() {
 
-    // Set when the request goes out: a main page's certificate error arrives before onPageStarted.
+    // Set when the request or its redirect goes out: a certificate error arrives before onPageStarted.
     @Volatile
     private var mainFrameUrl: String? = null
 
@@ -398,7 +398,9 @@ private class BrowserWebViewClient(
         if (request.isForMainFrame && !request.isRedirect) navigationTapped = request.hasGesture()
         if (scheme in WEB_NATIVE_SCHEMES) {
             // A page's own http(s) navigation may be upgraded or cleaned.
-            return view != null && protection?.overrideNavigation(view, request) == true
+            val overridden = view != null && protection?.overrideNavigation(view, request) == true
+            if (request.isForMainFrame && !overridden) mainFrameUrl = uri.toString()
+            return overridden
         }
         val page = pageRequests.context()
         if (view == null || page == null) return true
@@ -431,7 +433,6 @@ private class BrowserWebViewClient(
         // A navigation that never reached shouldOverrideUrlLoading, such as a form post, must not
         // inherit the previous page's tap.
         forgetTap()
-        mainFrameUrl = url
         url?.let { protection?.monitor?.onPageStarted(it) }
         url?.let {
             // URL first, so the address bar mirrors the (redirected) URL on the tick the load starts.

@@ -59,7 +59,7 @@ class TabSessionRepositoryImpl @Inject constructor(
         val open = tabIds.filterTo(HashSet()) { it < 0L }
         // A new incognito session: the last one's late saves have long landed, so its refusals can go.
         if (lastOpenIncognito.isEmpty() && open.isNotEmpty()) closedIncognito.clear()
-        closedIncognito += (lastOpenIncognito + incognito.keys) - open
+        closedIncognito += lastOpenIncognito - open
         lastOpenIncognito = open
         incognito.keys.retainAll(tabIds)
         withContext(dispatchers.io) { readOrNull { dao.deleteNotIn(normalIds) } }

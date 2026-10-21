@@ -14,6 +14,9 @@ sealed interface PageAction {
 
     data object LoadStopped : PageAction
 
+    /** The person asked to load the failed page again. */
+    data object Retry : PageAction
+
     data class UrlChanged(val url: String) : PageAction
 
     data class TitleReceived(val title: String) : PageAction

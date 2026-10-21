@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.raumanian.thirtysix.browser.core.data.datasource.local.entity.TabEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -15,14 +14,23 @@ interface TabDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(tab: TabEntity): Long
 
-    @Update
-    suspend fun update(tab: TabEntity)
-
     @Delete
     suspend fun delete(tab: TabEntity)
 
     @Query("SELECT * FROM ${TabEntity.TABLE_NAME} WHERE ${TabEntity.COL_ID} = :id")
     suspend fun getById(id: Long): TabEntity?
+
+    @Query("UPDATE ${TabEntity.TABLE_NAME} SET ${TabEntity.COL_LAST_ACTIVE_AT} = :at WHERE ${TabEntity.COL_ID} = :id")
+    suspend fun setLastActiveAt(id: Long, at: Long)
+
+    // An unchanged row is not written, so observers are not woken for nothing.
+    @Query(
+        """
+        UPDATE ${TabEntity.TABLE_NAME} SET ${TabEntity.COL_URL} = :url, ${TabEntity.COL_TITLE} = :title
+        WHERE ${TabEntity.COL_ID} = :id AND (${TabEntity.COL_URL} != :url OR ${TabEntity.COL_TITLE} != :title)
+        """,
+    )
+    suspend fun setUrlAndTitle(id: Long, url: String, title: String)
 
     @Query(
         """

@@ -90,12 +90,12 @@
 
 **Goal**: history kept across a tab switch after an error, redirect certificate errors shown, titles frozen while failed, Retry shows loading, no lost updates. **Independent test**: quickstart Q4–Q7.
 
-- [ ] T023 [P] [US3] In `T/BR/PageViewModelTest.kt`, add failing tests:
+- [X] T023 [P] [US3] In `T/BR/PageViewModelTest.kt`, add failing tests:
   - (a) the state is `Failed` and the active tab changes to another id, so `loadingState` becomes `Idle`;
   - (b) while `Failed`, `TitleReceived` changes neither the page title nor calls the history title update;
   - (c) while `Failed`, the Retry action gives `Loading` at once;
   - (d) `ScreenshotReady` for a tab id not among the open tabs is not saved.
-- [ ] T024 [US3] Make the `M/BR/PageViewModel.kt` changes:
+- [X] T024 [US3] Make the `M/BR/PageViewModel.kt` changes:
   - reset `loadingState` to `Idle` when the active tab id changes (lines 89-97);
   - in `onTitleReceived`, return when `Failed`;
   - add or extend the Retry/Reload action to set `Loading` before calling the WebView reload, wiring it where the error screen's Retry button calls reload (`M/BR/BrowserContent.kt` / `BrowserErrorState`);
@@ -104,17 +104,17 @@
   - inline the pass-through `activeTab` property.
 
   Make T023 green.
-- [ ] T025 [US3] In `M/BR/BrowserWebView.kt`:
+- [X] T025 [US3] In `M/BR/BrowserWebView.kt`:
   - in `shouldOverrideUrlLoading`'s web-scheme branch, when `request.isForMainFrame` and the protection override returns false, set `mainFrameUrl = request.url.toString()`, redirects included;
   - remove the assignment in `onPageStarted`, and keep the one in `shouldInterceptRequest`.
-- [ ] T026 [US3] Instrumented checks:
+- [X] T026 [US3] Instrumented checks:
   - in `A/BR/BrowserScreenOfflineErrorTest.kt`, or a new `A/BR/ErrorRecoveryTest.kt`, cover tab A with two pages, tab B failing, a switch to A and Back, which shows A's first page (Q5);
   - Retry on a stalled server shows the progress indicator within 1 s (Q7);
   - a redirect to a local self-signed HTTPS server shows the error screen (Q4). Reuse the self-signed approach from Spec 031's T047 check, and if it cannot run in androidTest, record a manual run in Gate Results.
-- [ ] T027 [P] [US3] In `T/feature/tabs/data/repository/TabRepositoryImplTest.kt` (in-memory Room), add a failing test: run `switchActiveTab(b)` and `updateTabUrlAndTitle(b, …)` concurrently 50 times; B is active and has the new title every time.
-- [ ] T028 [US3] Add `setLastActiveAt(id, at)` and `setUrlAndTitle(id, url, title, updatedAt)` `@Query UPDATE` methods to `M/core/data/datasource/local/TabDao.kt`. Use them in `M/feature/tabs/data/repository/TabRepositoryImpl.kt` `switchActiveTab`, `updateTabUrlAndTitle` and `handActiveMark`. Make T027 green.
-- [ ] T029 [P] [US3] In `T/feature/tabs/data/repository/TabSessionRepositoryImplTest.kt`, add a failing test: a `retainOnly` with a stale list does not mark an incognito tab that saved after the previous retain as closed. Then, in `M/feature/tabs/data/repository/TabSessionRepositoryImpl.kt`, add only `lastOpenIncognito - open` to `closedIncognito`.
-- [ ] T030 [US3] Run G1, plus the T026 instrumented tests and `BrowserTabSwipeTest` on `emulator-5554`. Commit `fix(browser): keep tab history after an error, redirect certificate errors, frozen titles (032 US3)` (FR-011 – FR-017, FR-029).
+- [X] T027 [P] [US3] In `T/feature/tabs/data/repository/TabRepositoryImplTest.kt` (in-memory Room), add a failing test: run `switchActiveTab(b)` and `updateTabUrlAndTitle(b, …)` concurrently 50 times; B is active and has the new title every time.
+- [X] T028 [US3] Add `setLastActiveAt(id, at)` and `setUrlAndTitle(id, url, title, updatedAt)` `@Query UPDATE` methods to `M/core/data/datasource/local/TabDao.kt`. Use them in `M/feature/tabs/data/repository/TabRepositoryImpl.kt` `switchActiveTab`, `updateTabUrlAndTitle` and `handActiveMark`. Make T027 green.
+- [X] T029 [P] [US3] In `T/feature/tabs/data/repository/TabSessionRepositoryImplTest.kt`, add a failing test: a `retainOnly` with a stale list does not mark an incognito tab that saved after the previous retain as closed. Then, in `M/feature/tabs/data/repository/TabSessionRepositoryImpl.kt`, add only `lastOpenIncognito - open` to `closedIncognito`.
+- [X] T030 [US3] Run G1, plus the T026 instrumented tests and `BrowserTabSwipeTest` on `emulator-5554`. Commit `fix(browser): keep tab history after an error, redirect certificate errors, frozen titles (032 US3)` (FR-011 – FR-017, FR-029).
 
 ## Phase 6: User Story 4 – Files are never lost, mixed or disguised (P1)
 

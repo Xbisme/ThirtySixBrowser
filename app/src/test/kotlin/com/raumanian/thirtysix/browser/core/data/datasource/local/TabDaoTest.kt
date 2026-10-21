@@ -60,13 +60,27 @@ class TabDaoTest {
     }
 
     @Test
-    fun `update mutates lastActiveAt`() = runTest {
+    fun `setLastActiveAt changes only lastActiveAt`() = runTest {
         val id = tabDao.insert(
             TabEntity(url = "https://a.com", title = "A", position = 0, createdAt = 0L, lastActiveAt = 0L),
         )
-        val original = tabDao.getById(id)!!
-        tabDao.update(original.copy(lastActiveAt = 999L))
-        assertEquals(999L, tabDao.getById(id)!!.lastActiveAt)
+        tabDao.setLastActiveAt(id, 999L)
+        assertEquals(
+            TabEntity(id = id, url = "https://a.com", title = "A", position = 0, createdAt = 0L, lastActiveAt = 999L),
+            tabDao.getById(id),
+        )
+    }
+
+    @Test
+    fun `setUrlAndTitle changes only the address and title`() = runTest {
+        val id = tabDao.insert(
+            TabEntity(url = "https://a.com", title = "A", position = 0, createdAt = 0L, lastActiveAt = 5L),
+        )
+        tabDao.setUrlAndTitle(id, "https://b.com", "B")
+        assertEquals(
+            TabEntity(id = id, url = "https://b.com", title = "B", position = 0, createdAt = 0L, lastActiveAt = 5L),
+            tabDao.getById(id),
+        )
     }
 
     @Test

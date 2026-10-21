@@ -128,6 +128,18 @@ class TabSessionRepositoryImplTest {
     }
 
     @Test
+    fun `a stale keep-set does not refuse an incognito tab that opened after it`() = runTest {
+        val normal = newTab()
+        repository.retainOnly(setOf(normal, -1L))
+        repository.save(TabSession(-2L, byteArrayOf(1), 1L))
+
+        repository.retainOnly(setOf(normal, -1L))
+        repository.save(TabSession(-2L, byteArrayOf(2), 2L))
+
+        assertArrayEquals(byteArrayOf(2), repository.get(-2L)?.state)
+    }
+
+    @Test
     fun `an empty normal keep-set deletes nothing`() = runTest {
         val id = newTab()
         repository.save(TabSession(id, byteArrayOf(1), 1L))

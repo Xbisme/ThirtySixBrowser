@@ -233,6 +233,28 @@ class TabRepositoryImplTest {
         assertEquals(rows.size, rows.map { it.position }.distinct().size)
     }
 
+    @Test
+    fun `a switch and a title update at the same time both land`() = runBlocking {
+        val a = tabDao.insert(entity(url = "https://a.com"))
+        val b = tabDao.insert(entity(url = "https://b.com"))
+
+        repeat(RACE_ROUNDS) { round ->
+            tabDao.setLastActiveAt(a, 1L)
+            tabDao.setLastActiveAt(b, 0L)
+
+            withContext(Dispatchers.Default) {
+                listOf(
+                    async { repository.switchActiveTab(b) },
+                    async { repository.updateTabUrlAndTitle(b, "https://b.com/$round", "B $round") },
+                ).awaitAll()
+            }
+
+            val row = requireNotNull(tabDao.getById(b))
+            assertTrue("round $round lost the switch", row.lastActiveAt > 1L)
+            assertEquals("round $round lost the title", "B $round", row.title)
+        }
+    }
+
     private fun entity(
         url: String,
         title: String = "",
@@ -251,6 +273,7 @@ class TabRepositoryImplTest {
         const val HOME_URL: String = "https://www.google.com/"
         const val MISSING_ID: Long = 9_999L
         const val LATEST_ACTIVE: Long = 1_000L
+        const val RACE_ROUNDS: Int = 50
     }
 
     private class TestDispatcherProvider : DispatcherProvider {

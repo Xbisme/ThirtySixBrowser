@@ -160,6 +160,7 @@ private fun BoxScope.BrowserTopChrome(
                         hosts.webViewActions.stopLoading()
                         actions.onPageAction(PageAction.LoadStopped)
                     } else {
+                        actions.onPageAction(PageAction.Retry)
                         hosts.webViewActions.reload()
                     }
                 },
